@@ -11,7 +11,6 @@ import Animated, {
   useSharedValue,
   withDelay,
   withRepeat,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -114,11 +113,12 @@ function Ring({ size, index }: { size: number; index: number }) {
 }
 
 function BigNumber({ value }: { value: number }) {
-  const scale = useSharedValue(0.85);
+  // Never animate text above 100%: iOS rasterizes glyphs, so any overshoot looks soft.
+  const scale = useSharedValue(0.9);
   const opacity = useSharedValue(0);
   useEffect(() => {
     opacity.set(withTiming(1, { duration: 300 }));
-    scale.set(withSpring(1, { damping: 12, stiffness: 140 }));
+    scale.set(withTiming(1, { duration: 450, easing: Easing.out(Easing.cubic) }));
   }, [opacity, scale]);
   const style = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
   return (
@@ -128,10 +128,12 @@ function BigNumber({ value }: { value: number }) {
         {
           color: c.accent,
           fontSize: 160,
-          lineHeight: 168,
           fontWeight: '900',
-          letterSpacing: -8,
-          fontVariant: ['tabular-nums'],
+          // No letterSpacing (iOS applies it after the last glyph, shifting a single digit off-center),
+          // no tabular figures (they give "1" a wide box), and the font's natural line height so the
+          // digits sit at the optical center of the rings.
+          textAlign: 'center',
+          includeFontPadding: false,
         },
       ]}
     >

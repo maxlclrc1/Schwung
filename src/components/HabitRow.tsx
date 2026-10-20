@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
 import { memo, useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
+  Extrapolation,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
@@ -63,7 +63,7 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
   }));
   const checkStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.4, 1]) }],
+    transform: [{ scale: interpolate(progress.value, [0, 1], [0.4, 1], Extrapolation.CLAMP) }],
   }));
   const textStyle = useAnimatedStyle(() => ({ opacity: interpolate(progress.value, [0, 1], [1, 0.55]) }));
 
@@ -86,8 +86,11 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
     >
       <Animated.View style={[styles.row, rowStyle]}>
         <Animated.View style={[styles.box, boxStyle]}>
-          <Animated.View style={checkStyle}>
-            <Ionicons name="checkmark" size={20} color={c.onAccent} />
+          <Animated.View style={[styles.check, checkStyle]}>
+            {/* Drawn from two solid bars, not an icon-font glyph: iOS rasterizes text, so a
+                glyph blurs while the box pops above 100%; plain views stay sharp at any scale. */}
+            <View style={[styles.checkShort, { backgroundColor: c.onAccent }]} />
+            <View style={[styles.checkLong, { backgroundColor: c.onAccent }]} />
           </Animated.View>
         </Animated.View>
         <Animated.View style={[styles.text, textStyle]}>
@@ -128,4 +131,24 @@ const styles = StyleSheet.create({
   },
   text: { flex: 1, gap: 2 },
   badge: { width: 18, alignItems: 'flex-end' },
+  // Checkmark through (1.5,8) → (6,12.5) → (14.5,4) in a 16×16 box, 3pt strokes.
+  check: { width: 16, height: 16 },
+  checkShort: {
+    position: 'absolute',
+    left: 2.25,
+    top: 6.3,
+    width: 3,
+    height: 7.9,
+    borderRadius: 1.5,
+    transform: [{ rotate: '-45deg' }],
+  },
+  checkLong: {
+    position: 'absolute',
+    left: 8.75,
+    top: 1.5,
+    width: 3,
+    height: 13.5,
+    borderRadius: 1.5,
+    transform: [{ rotate: '45deg' }],
+  },
 });
