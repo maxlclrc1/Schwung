@@ -1,15 +1,16 @@
-export type Sleep = '<6h' | '6-7h' | '8h+';
-export type Screen = '<3h' | '3-6h' | '6h+';
-export type Frequency = 'never' | 'sometimes' | 'regularly';
-export type Water = '<1L' | '1-2L' | '2L+';
-export type Goal = 'energy' | 'focus' | 'discipline' | 'confidence';
+export type Sleep = '<5h' | '5-6h' | '6-7h' | '7-8h' | '8h+';
+export type Screen = '<2h' | '2-4h' | '4-6h' | '6-8h' | '8h+';
+export type Exercise = 'never' | 'rarely' | '1-2x' | '3-4x' | '5x+'; // per week
+export type Water = '<0.5L' | '0.5-1L' | '1-2L' | '2-3L' | '3L+';
+export type Mind = 'never' | 'rarely' | 'weekly' | 'most-days' | 'daily';
+export type Goal = 'energy' | 'focus' | 'discipline' | 'confidence' | 'calm' | 'fitness';
 
 export type Answers = {
   sleep: Sleep;
   screen: Screen;
-  exercise: Frequency;
+  exercise: Exercise;
   water: Water;
-  mind: Frequency;
+  mind: Mind;
   goal: Goal;
 };
 
@@ -21,6 +22,8 @@ export type LibraryHabit = {
   id: string;
   category: Category;
   title: string;
+  /** Ionicons glyph name. */
+  icon: string;
   levels: Record<Level, string>;
   why: string;
 };

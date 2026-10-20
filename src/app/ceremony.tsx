@@ -11,13 +11,13 @@ import Animated, {
   useSharedValue,
   withDelay,
   withRepeat,
-  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import { StatusBar } from 'expo-status-bar';
+import { Confetti } from '../components/Art';
 import { FinaleStats, ShareCard } from '../components/ShareCard';
 import { T } from '../components/ui';
 import { PROGRAM_DAYS } from '../core/dates';
@@ -114,11 +114,11 @@ function Ring({ size, index }: { size: number; index: number }) {
 }
 
 function BigNumber({ value }: { value: number }) {
-  const scale = useSharedValue(0.4);
+  const scale = useSharedValue(0.85);
   const opacity = useSharedValue(0);
   useEffect(() => {
     opacity.set(withTiming(1, { duration: 300 }));
-    scale.set(withSequence(withSpring(1.08, { damping: 9, stiffness: 120 }), withSpring(1, { damping: 14 })));
+    scale.set(withSpring(1, { damping: 12, stiffness: 140 }));
   }, [opacity, scale]);
   const style = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
   return (
@@ -132,14 +132,22 @@ function BigNumber({ value }: { value: number }) {
           fontWeight: '900',
           letterSpacing: -8,
           fontVariant: ['tabular-nums'],
-          textShadowColor: 'rgba(184,164,255,0.5)',
-          textShadowRadius: 40,
         },
       ]}
     >
       {value}
     </Animated.Text>
   );
+}
+
+/** Fires as the number lands. */
+function DelayedConfetti() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setOn(true), 350);
+    return () => clearTimeout(t);
+  }, []);
+  return on ? <Confetti spread={190} colors={[c.accent, '#E4DBFF', c.warm, '#FFFFFF']} /> : null;
 }
 
 function Milestone({ milestone }: { milestone: number }) {
@@ -150,6 +158,7 @@ function Milestone({ milestone }: { milestone: number }) {
       <View style={[styles.fill, styles.center]}>
         <Rings size={Math.min(width * 0.8, 340)} />
         <BigNumber value={milestone} />
+        <DelayedConfetti />
       </View>
       <View style={styles.bottom}>
         <Animated.View entering={FadeInDown.delay(500).duration(500)}>
@@ -281,6 +290,7 @@ function Finale() {
         <View style={[styles.center, { height: 220 }]}>
           <Rings size={220} />
           <BigNumber value={PROGRAM_DAYS} />
+          <DelayedConfetti />
         </View>
         <Animated.View entering={FadeInDown.delay(500).duration(500)} style={{ gap: space.sm }}>
           <T v="overline" color={c.accent}>

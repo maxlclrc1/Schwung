@@ -3,7 +3,8 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { Confetti } from '../components/Art';
 import { HabitRow } from '../components/HabitRow';
 import { Notices } from '../components/Notices';
 import { Button, ProgressBar, Screen, T } from '../components/ui';
@@ -254,10 +255,11 @@ export default function Today() {
         ) : null}
       </ScrollView>
 
+      {celebrate ? <Confetti spread={200} /> : null}
       {celebrate ? (
         <View pointerEvents="none" style={[styles.celebrateWrap, { bottom: insets.bottom + space.xl }]}>
           <Animated.View
-            entering={ZoomIn.springify().damping(14)}
+            entering={FadeInDown.springify().damping(16)}
             exiting={FadeOut.duration(250)}
             style={[styles.celebrate, { backgroundColor: c.accent }]}
           >

@@ -1,10 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { IconOrb } from '../../components/Art';
 import { Field } from '../../components/Field';
 import { SheetHeader } from '../../components/SheetHeader';
 import { Button, Card, LEVEL_LABEL, Screen, T } from '../../components/ui';
-import { getHabit, habitTitle, LEVELS } from '../../core/habits';
+import { getHabit, habitIcon, habitTitle, LEVELS } from '../../core/habits';
 import { MIN_HABITS } from '../../core/plan';
 import { completionRun } from '../../core/progression';
 import { haptic } from '../../lib/haptics';
@@ -53,6 +55,9 @@ export default function HabitDetail() {
       <SheetHeader title={habitTitle(habit)} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <View style={{ alignItems: 'center' }}>
+            <IconOrb icon={habitIcon(habit) as keyof typeof Ionicons.glyphMap} size={72} />
+          </View>
           {habit.custom ? (
             <View style={{ gap: space.lg }}>
               <Field label="Habit" value={title} onChangeText={setTitle} maxLength={60} returnKeyType="next" />
