@@ -14,6 +14,6 @@ Ideas that came up while building v1 (not built):
   you can't tap a day to see what was checked.
 - Per-habit history and stats on the habit detail screen beyond "current run".
 - A custom font. v1 uses SF Pro (system) in heavy weights, which already looks good and adds no assets or load time.
-- Final app name, icon, and accent color review. The current icon is a generated placeholder (lime "66" on near-black).
+- Icon polish. The current icon is a generated placeholder: a lavender "S" on charcoal.
 - A data **import** to go with export, for moving to a new phone until iCloud sync exists.
 - A widget-friendly shared data store (App Group) so v1.1 widgets can read state.

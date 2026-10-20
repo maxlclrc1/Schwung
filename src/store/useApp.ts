@@ -210,7 +210,7 @@ export const useApp = create<AppState>()(
       };
     },
     {
-      name: 'reset66-state',
+      name: 'schwung-state',
       version: 1,
       storage: createJSONStorage(() => debouncedStorage),
       partialize: (s): AppData => ({

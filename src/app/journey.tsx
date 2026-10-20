@@ -46,7 +46,7 @@ export default function Journey() {
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Your 66 days" />
+      <SheetHeader title="Your journey" />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Card style={styles.stats}>
           {stats.map((s) => (

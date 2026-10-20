@@ -32,7 +32,7 @@ const COPY: Record<number, Copy> = {
   1: {
     overline: 'Day 1',
     title: 'Your reset begins.',
-    body: '66 days. A few small habits, every day, leveling up as you do. Today, just start.',
+    body: 'A few small habits, every day, leveling up as you do. Today, just start.',
     cta: 'Let’s go',
   },
   7: {
@@ -259,7 +259,7 @@ function Finale() {
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(250).duration(500)}>
             <T color={c.textDim}>
-              New 66-day programs are on the way. Until then, keep the habits you built. Same checklist, no countdown.
+              New programs are on the way. Until then, keep the habits you built. Same checklist, no countdown.
             </T>
           </Animated.View>
         </View>
@@ -289,7 +289,7 @@ function Finale() {
           <T v="display" color={c.text}>
             You did it.
           </T>
-          <T color={c.textDim}>66 days ago you decided to start. Look what showing up built.</T>
+          <T color={c.textDim}>The whole program, done. Look what showing up built.</T>
         </Animated.View>
 
         <View style={{ gap: space.sm }}>

@@ -2,9 +2,10 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, T } from '../components/ui';
+import { APP_NAME } from '../lib/constants';
 import { space, useTheme } from '../theme';
 
-const POINTS = ['6 quick questions', 'A daily plan made for you', 'Small habits that level up over 66 days'];
+const POINTS = ['6 quick questions', 'A daily plan made for you', 'Small habits that level up as you do'];
 
 export default function Welcome() {
   const { c } = useTheme();
@@ -14,11 +15,11 @@ export default function Welcome() {
         <View style={styles.top}>
           <Animated.View entering={FadeInDown.duration(500)}>
             <T style={styles.big} color={c.accentInk}>
-              66
+              {APP_NAME}
             </T>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(120).duration(500)}>
-            <T v="display">Reset your life in 66 days.</T>
+            <T v="display">Get your momentum back.</T>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(220).duration(500)} style={styles.pill}>
             <T v="bodyStrong" color={c.text}>
@@ -48,7 +49,7 @@ export default function Welcome() {
 const styles = StyleSheet.create({
   wrap: { flex: 1, padding: space.xl, justifyContent: 'space-between' },
   top: { flex: 1, justifyContent: 'center', gap: space.lg },
-  big: { fontSize: 120, lineHeight: 124, fontWeight: '900', letterSpacing: -6 },
+  big: { fontSize: 22, lineHeight: 28, fontWeight: '900', letterSpacing: 4, textTransform: 'uppercase' },
   pill: { alignSelf: 'flex-start' },
   points: { gap: space.sm, marginTop: space.md },
   point: { flexDirection: 'row', alignItems: 'center', gap: space.md },

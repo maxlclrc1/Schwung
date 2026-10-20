@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "APPNAME",
-    "slug": "reset66",
-    "scheme": "reset66",
+    "name": "Schwung",
+    "slug": "schwung",
+    "scheme": "schwung",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,13 +10,13 @@
     "backgroundColor": "#141417",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.example.reset66",
+      "bundleIdentifier": "com.example.schwung",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.example.reset66",
+      "package": "com.example.schwung",
       "adaptiveIcon": {
         "backgroundColor": "#141417",
         "foregroundImage": "./assets/android-icon-foreground.png",
