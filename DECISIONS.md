@@ -37,3 +37,9 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     66-day framing is the competitor's identity. The program is still 66 days long internally ("Day 12 / 66").
 15. **Placeholders to replace before launch**: `CONTACT_EMAIL` and `PRIVACY_URL` in `src/lib/constants.ts`, and
     the `com.example.schwung` bundle identifier in `app.json` (use a reverse domain you own).
+16. **Quiz has finer answers than the original spec** (5 options per question, 6 goals). They map onto
+    habits like this. Sleep: <6h → earlier bedtime, 6–7h → phone-free wind-down, 7–8h → steady wake-up.
+    Screen: 2–4h → phone-free morning, 4–6h → social-free mornings, 6h+ → screen time cap. Exercise:
+    never → walk, a few times a month → steps, 1–2×/week → workout. Mind: never → journal, rarely → breathe,
+    weekly → read. Goals: "less stress" → breathe (or journal), "get in shape" → workout (or steps).
+    Answers above those levels add no habit for that area, the same as the original spec.

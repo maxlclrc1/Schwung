@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SheetHeader } from '../../components/SheetHeader';
@@ -48,10 +49,15 @@ export default function Swap() {
             accessibilityRole="button"
             style={({ pressed }) => [styles.item, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}
           >
-            <T v="bodyStrong">{h.levels[level]}</T>
-            <T v="caption" color={c.textDim}>
-              {h.why}
-            </T>
+            <View style={[styles.icon, { backgroundColor: c.accentSoft }]}>
+              <Ionicons name={h.icon as keyof typeof Ionicons.glyphMap} size={20} color={c.accentInk} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <T v="bodyStrong">{h.levels[level]}</T>
+              <T v="caption" color={c.textDim}>
+                {h.why}
+              </T>
+            </View>
           </Pressable>
         ))}
       </View>
@@ -70,5 +76,6 @@ export default function Swap() {
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
-  item: { padding: space.lg, borderRadius: radius.md, gap: 2 },
+  item: { padding: space.lg, borderRadius: radius.md, flexDirection: 'row', gap: space.md, alignItems: 'center' },
+  icon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });

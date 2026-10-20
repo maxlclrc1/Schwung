@@ -5,6 +5,7 @@ export const LEVELS: Level[] = ['easy', 'medium', 'hard'];
 export const HABITS: LibraryHabit[] = [
   {
     id: 'sleep_bedtime',
+    icon: 'moon',
     category: 'sleep',
     title: 'Earlier bedtime',
     levels: { easy: 'In bed by 00:00', medium: 'In bed by 23:30', hard: 'In bed by 23:00' },
@@ -12,6 +13,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'sleep_no_phone_bed',
+    icon: 'eye-off',
     category: 'sleep',
     title: 'Phone-free wind-down',
     levels: {
@@ -23,6 +25,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'sleep_wake',
+    icon: 'alarm',
     category: 'sleep',
     title: 'Steady wake-up',
     levels: {
@@ -34,6 +37,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'screen_morning',
+    icon: 'sunny',
     category: 'screen',
     title: 'Phone-free morning',
     levels: {
@@ -45,6 +49,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'screen_limit',
+    icon: 'phone-portrait',
     category: 'screen',
     title: 'Screen time cap',
     levels: { easy: 'Under 5h screen time', medium: 'Under 4h screen time', hard: 'Under 2.5h screen time' },
@@ -52,6 +57,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'screen_social',
+    icon: 'time',
     category: 'screen',
     title: 'Social-free mornings',
     levels: {
@@ -63,6 +69,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'move_walk',
+    icon: 'walk',
     category: 'exercise',
     title: 'Daily walk',
     levels: { easy: '15 min walk', medium: '30 min walk', hard: '45 min walk' },
@@ -70,6 +77,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'move_workout',
+    icon: 'barbell',
     category: 'exercise',
     title: 'Workout',
     levels: { easy: '10 push-ups + 20 squats', medium: '20 min workout', hard: '40 min workout' },
@@ -77,6 +85,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'move_steps',
+    icon: 'footsteps',
     category: 'exercise',
     title: 'Step count',
     levels: { easy: '5,000 steps', medium: '7,500 steps', hard: '10,000 steps' },
@@ -84,6 +93,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'water',
+    icon: 'water',
     category: 'water',
     title: 'Hydrate',
     levels: { easy: 'Drink 1.5L of water', medium: 'Drink 2L of water', hard: 'Drink 2.5L of water' },
@@ -91,6 +101,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'mind_read',
+    icon: 'book',
     category: 'mind',
     title: 'Read',
     levels: { easy: 'Read 5 pages', medium: 'Read 10 pages', hard: 'Read 20 pages' },
@@ -98,6 +109,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'mind_meditate',
+    icon: 'leaf',
     category: 'mind',
     title: 'Breathe',
     levels: { easy: '3 min of slow breathing', medium: '10 min meditation', hard: '20 min meditation' },
@@ -105,6 +117,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'mind_journal',
+    icon: 'create',
     category: 'mind',
     title: 'Journal',
     levels: {
@@ -116,6 +129,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'focus_deepwork',
+    icon: 'flash',
     category: 'focus',
     title: 'Deep work',
     levels: {
@@ -127,6 +141,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'focus_top3',
+    icon: 'list',
     category: 'focus',
     title: 'Top priorities',
     levels: {
@@ -138,6 +153,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'discipline_cold',
+    icon: 'snow',
     category: 'discipline',
     title: 'Cold finish',
     levels: {
@@ -149,6 +165,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'discipline_bed',
+    icon: 'bed',
     category: 'discipline',
     title: 'Clean start',
     levels: {
@@ -160,6 +177,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'confidence_talk',
+    icon: 'chatbubbles',
     category: 'confidence',
     title: 'Start a conversation',
     levels: {
@@ -171,6 +189,7 @@ export const HABITS: LibraryHabit[] = [
   },
   {
     id: 'confidence_compliment',
+    icon: 'heart',
     category: 'confidence',
     title: 'Genuine compliment',
     levels: {
@@ -200,6 +219,10 @@ export function habitTitle(h: PlanHabit): string {
 export function habitTask(h: PlanHabit): string | undefined {
   if (h.custom) return h.custom.description;
   return getHabit(h.habitId)?.levels[h.level];
+}
+
+export function habitIcon(h: PlanHabit): string {
+  return h.custom ? 'star' : (getHabit(h.habitId)?.icon ?? 'star');
 }
 
 export function habitCategory(h: PlanHabit): Category | 'custom' {

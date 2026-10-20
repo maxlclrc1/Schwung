@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -39,9 +40,7 @@ export default function Reveal() {
               style={[styles.item, { backgroundColor: c.surface }]}
             >
               <View style={[styles.num, { backgroundColor: c.accentSoft }]}>
-                <T v="caption" color={c.accentInk} style={{ fontWeight: '800' }}>
-                  {i + 1}
-                </T>
+                <Ionicons name={h.icon as keyof typeof Ionicons.glyphMap} size={20} color={c.accentInk} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <T v="bodyStrong">{h.levels.easy}</T>
@@ -64,6 +63,6 @@ const styles = StyleSheet.create({
   scroll: { padding: space.xl, gap: space.xl },
   list: { gap: space.md },
   item: { flexDirection: 'row', gap: space.lg, padding: space.lg, borderRadius: radius.lg, alignItems: 'flex-start' },
-  num: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  num: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   footer: { paddingHorizontal: space.xl, paddingBottom: space.md, paddingTop: space.sm },
 });
