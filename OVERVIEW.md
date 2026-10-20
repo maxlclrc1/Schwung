@@ -77,8 +77,12 @@ for example 4 glasses of water for someone drinking under 2, or a 7h screen cap 
 
 ## Design
 
-- **Dark mode:** charcoal backgrounds, soft white text, lavender accent (#B8A4FF).
-- **Light mode:** off-white backgrounds, dark text, deeper violet accent (#6B4BDE).
+- **Dark mode:** violet-black background (#111116), surfaces #1C1B25, lavender accent (#A78BFA), text #F5F3FF / #A5A3B5.
+- **Light mode:** soft violet-white background (#F7F6FB), white surfaces, deeper violet accent (#7451C8), text #191621 / #696575.
+- **Theme choice:** a sun/moon button on the welcome screen and the Today header switches between light and dark;
+  Settings → Appearance offers System / Light / Dark. The choice is saved on the device. Ceremonies and the
+  share card stay dark by design.
+- Gold (#F2B84B) is reserved for milestone ceremonies, never an everyday accent.
 - Large, bold system typography, generous spacing, and one accent color per screen.
 - Fast, subtle motion (150–250 ms) with a spring on check-off. Bolder, cinematic ceremonies.
 - All illustrations are drawn in code (glowing icon orbs, orbit animation, confetti), so there are no image files.

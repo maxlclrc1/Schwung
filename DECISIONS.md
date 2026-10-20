@@ -56,3 +56,11 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     Screen cap: under 7h / 5h / 3h (was 5h / 4h / 2.5h). Earlier bedtime: "30 minutes earlier than usual",
     then 7h and 8h in bed before your alarm (was fixed clock times). Saved plans show the new text at their
     current level. No data changes.
+18. **Theme preference** (`themePreference: 'system' | 'light' | 'dark'` in the saved store, default `system`).
+    The sun/moon button switches directly to the opposite of what's on screen, which saves an explicit choice.
+    Settings → Appearance also offers "System" to go back to following the phone. Data saved before this
+    existed loads as `system`, which was the existing behavior, so no migration is needed. Restarting the
+    program keeps the choice. The native appearance (`Appearance.setColorScheme`) is set to match where the
+    platform supports it, so iOS alerts, the keyboard and the time picker agree. Ceremonies and the share card
+    stay dark regardless (see `ceremonyColors`).
+

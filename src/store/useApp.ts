@@ -4,7 +4,7 @@ import { buildPlan, MIN_HABITS, toPlan } from '../core/plan';
 import { getHabit, levelUp } from '../core/habits';
 import { dateForDay, dayNumber, toDateKey } from '../core/dates';
 import { MILESTONES, phaseLevel, phaseOf, reconcile } from '../core/progression';
-import type { Answers, DayLog, Level, Notice, PlanHabit } from '../core/types';
+import type { Answers, DayLog, Level, Notice, PlanHabit, ThemePreference } from '../core/types';
 import { debouncedStorage } from './storage';
 
 export type AppData = {
@@ -17,6 +17,8 @@ export type AppData = {
   seenCeremonies: number[];
   appliedPhase: number;
   notices: Notice[];
+  /** Appearance. Older saved data has no value and gets the default ('system') when it loads. */
+  themePreference: ThemePreference;
   /** Dev-only time travel, in days. Always 0 in release builds. */
   devDayOffset: number;
 };
@@ -36,6 +38,7 @@ type Actions = {
   dismissNotice: (id: string) => void;
   markCeremonySeen: (milestone: number) => void;
   setReminder: (time: string, enabled: boolean) => void;
+  setThemePreference: (preference: ThemePreference) => void;
   restart: () => void;
   setDevDayOffset: (n: number) => void;
 };
@@ -49,6 +52,7 @@ const initial: AppData = {
   logs: {},
   reminderTime: '20:00',
   notificationsEnabled: false,
+  themePreference: 'system',
   seenCeremonies: [],
   appliedPhase: 1,
   notices: [],
@@ -201,9 +205,12 @@ export const useApp = create<AppState>()(
 
         setReminder: (reminderTime, notificationsEnabled) => set({ reminderTime, notificationsEnabled }),
 
+        // Touches nothing else: theme changes never affect the program or progress.
+        setThemePreference: (themePreference) => set({ themePreference }),
+
         restart: () => {
-          const { reminderTime, notificationsEnabled } = get();
-          set({ ...initial, reminderTime, notificationsEnabled });
+          const { reminderTime, notificationsEnabled, themePreference } = get();
+          set({ ...initial, reminderTime, notificationsEnabled, themePreference });
         },
 
         setDevDayOffset: (devDayOffset) => set({ devDayOffset: __DEV__ ? devDayOffset : 0 }),
@@ -220,6 +227,7 @@ export const useApp = create<AppState>()(
         logs: s.logs,
         reminderTime: s.reminderTime,
         notificationsEnabled: s.notificationsEnabled,
+        themePreference: s.themePreference,
         seenCeremonies: s.seenCeremonies,
         appliedPhase: s.appliedPhase,
         notices: s.notices,
@@ -230,8 +238,18 @@ export const useApp = create<AppState>()(
 );
 
 export function exportData(): AppData {
-  const { startedAt, answers, plan, logs, reminderTime, notificationsEnabled, seenCeremonies, appliedPhase, notices } =
-    useApp.getState();
+  const {
+    startedAt,
+    answers,
+    plan,
+    logs,
+    reminderTime,
+    notificationsEnabled,
+    themePreference,
+    seenCeremonies,
+    appliedPhase,
+    notices,
+  } = useApp.getState();
   return {
     startedAt,
     answers,
@@ -239,6 +257,7 @@ export function exportData(): AppData {
     logs,
     reminderTime,
     notificationsEnabled,
+    themePreference,
     seenCeremonies,
     appliedPhase,
     notices,

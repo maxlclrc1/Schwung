@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { MomentumHero } from '../components/Art';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { Button, Screen, T } from '../components/ui';
 import { APP_NAME } from '../lib/constants';
 import { space, useTheme } from '../theme';
@@ -12,10 +13,13 @@ export default function Welcome() {
   const { c } = useTheme();
   const { height } = useWindowDimensions();
   // Smaller art on short phones (SE) so everything fits without scrolling.
-  const heroSize = height < 740 ? 130 : 200;
+  const heroSize = height < 740 ? 100 : 200;
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.wrap} bounces={false} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <ThemeToggle />
+        </View>
         <View style={styles.top}>
           <Animated.View entering={FadeIn.duration(800)} style={styles.hero}>
             <MomentumHero size={heroSize} />
@@ -57,6 +61,7 @@ const styles = StyleSheet.create({
   wrap: { flexGrow: 1, padding: space.xl, gap: space.xl, justifyContent: 'space-between' },
   top: { flex: 1, justifyContent: 'center', gap: space.md },
   big: { fontSize: 22, lineHeight: 28, fontWeight: '900', letterSpacing: 4, textTransform: 'uppercase' },
+  header: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: -space.md },
   hero: { alignItems: 'center', marginBottom: space.sm },
   pill: { alignSelf: 'flex-start' },
   points: { gap: space.sm, marginTop: space.md },

@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#141417",
+    "backgroundColor": "#111116",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.example.schwung",
@@ -18,7 +18,7 @@
     "android": {
       "package": "com.example.schwung",
       "adaptiveIcon": {
-        "backgroundColor": "#141417",
+        "backgroundColor": "#111116",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -38,14 +38,14 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#141417"
+          "backgroundColor": "#111116"
         }
       ],
       "@react-native-community/datetimepicker",
       [
         "expo-notifications",
         {
-          "color": "#B8A4FF"
+          "color": "#A78BFA"
         }
       ],
       "expo-status-bar"

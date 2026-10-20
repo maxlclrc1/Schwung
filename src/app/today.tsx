@@ -7,6 +7,7 @@ import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-n
 import { Confetti } from '../components/Art';
 import { HabitRow } from '../components/HabitRow';
 import { Notices } from '../components/Notices';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { Button, ProgressBar, Screen, T } from '../components/ui';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { getHabit, habitTitle, levelUp } from '../core/habits';
@@ -126,6 +127,7 @@ export default function Today() {
             </T>
           </Pressable>
           <View style={styles.headerIcons}>
+            <ThemeToggle />
             <IconButton name="grid-outline" label="Journey" onPress={() => router.push('/journey')} />
             <IconButton name="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
           </View>
@@ -133,7 +135,7 @@ export default function Today() {
 
         <View style={[styles.stats, { backgroundColor: c.surface }]}>
           <View style={styles.stat}>
-            <Ionicons name="flame" size={20} color={streak > 0 ? c.warm : c.textFaint} />
+            <Ionicons name="flame" size={20} color={streak > 0 ? c.accentInk : c.textFaint} />
             <T v="heading" style={styles.tabular}>
               {streak}
             </T>
