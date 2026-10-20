@@ -47,7 +47,8 @@
         {
           "color": "#B8A4FF"
         }
-      ]
+      ],
+      "expo-status-bar"
     ]
   }
 }

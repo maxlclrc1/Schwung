@@ -3,7 +3,7 @@
 Schwung ("momentum" in German) is a free, offline 66-day reset program for iOS: a 6-question quiz, a personalized daily habit plan,
 and a checklist that levels up over 66 days. There's no account, no backend, and no paywall.
 
-Built with Expo SDK 58, Expo Router, TypeScript, Zustand, AsyncStorage, Reanimated 4, and local notifications.
+Built with Expo SDK 57 (the version the App Store Expo Go supports), Expo Router, TypeScript, Zustand, AsyncStorage, Reanimated 4, and local notifications.
 Every dependency is included in Expo Go, so no dev build is needed.
 
 ## Run it
