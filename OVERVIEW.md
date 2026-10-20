@@ -70,6 +70,10 @@ and the plan is fully editable.
 | Confidence | start a conversation, genuine compliment |
 
 The quiz answers map to habits deterministically. "Make your bed" is always included as an easy first win.
+Each area where the answers show room to improve gets one habit, the stated goal always gets a habit, and
+nothing the user already does regularly is assigned. Each habit on the plan reveal says why it was picked
+(quoting the answer, or naming the goal). Starting targets are set to be reachable from the answer given,
+for example 4 glasses of water for someone drinking under 2, or a 7h screen cap for 8h+ users.
 
 ## Design
 

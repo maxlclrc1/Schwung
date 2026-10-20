@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, T } from '../components/ui';
-import { generatePlan } from '../core/plan';
+import { buildPlan } from '../core/plan';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
@@ -13,7 +13,7 @@ export default function Reveal() {
   const { c } = useTheme();
   const answers = useApp((s) => s.answers);
   const startProgram = useApp((s) => s.startProgram);
-  const habits = useMemo(() => (answers ? generatePlan(answers) : []), [answers]);
+  const picks = useMemo(() => (answers ? buildPlan(answers) : []), [answers]);
 
   const begin = () => {
     startProgram();
@@ -28,12 +28,12 @@ export default function Reveal() {
           <T v="overline" color={c.accentInk}>
             Your plan
           </T>
-          <T v="title">{habits.length} habits. Starting easy.</T>
+          <T v="title">{picks.length} habits. Starting where you are.</T>
           <T color={c.textDim}>Each one levels up as you do. You can swap, edit, or add your own anytime.</T>
         </Animated.View>
 
         <View style={styles.list}>
-          {habits.map((h, i) => (
+          {picks.map(({ habit: h, level, reason }, i) => (
             <Animated.View
               key={h.id}
               entering={FadeInDown.delay(150 + i * 90).duration(400)}
@@ -43,9 +43,9 @@ export default function Reveal() {
                 <Ionicons name={h.icon as keyof typeof Ionicons.glyphMap} size={20} color={c.accentInk} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
-                <T v="bodyStrong">{h.levels.easy}</T>
+                <T v="bodyStrong">{h.levels[level]}</T>
                 <T v="caption" color={c.textDim}>
-                  {h.why}
+                  {reason}
                 </T>
               </View>
             </Animated.View>
@@ -53,7 +53,7 @@ export default function Reveal() {
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        <Button label="Begin Day 1" onPress={begin} disabled={!habits.length} />
+        <Button label="Begin Day 1" onPress={begin} disabled={!picks.length} />
       </View>
     </Screen>
   );

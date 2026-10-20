@@ -1,9 +1,19 @@
-export type Sleep = '<5h' | '5-6h' | '6-7h' | '7-8h' | '8h+';
-export type Screen = '<2h' | '2-4h' | '4-6h' | '6-8h' | '8h+';
-export type Exercise = 'never' | 'rarely' | '1-2x' | '3-4x' | '5x+'; // per week
-export type Water = '<0.5L' | '0.5-1L' | '1-2L' | '2-3L' | '3L+';
-export type Mind = 'never' | 'rarely' | 'weekly' | 'most-days' | 'daily';
-export type Goal = 'energy' | 'focus' | 'discipline' | 'confidence' | 'calm' | 'fitness';
+/** Every value each quiz answer can take. The answer types below are derived from these lists. */
+export const ANSWER_VALUES = {
+  sleep: ['<5h', '5-6h', '6-7h', '7-8h', '8h+'],
+  screen: ['<2h', '2-4h', '4-6h', '6-8h', '8h+'],
+  exercise: ['never', 'rarely', '1-2x', '3-4x', '5x+'], // per week
+  water: ['<0.5L', '0.5-1L', '1-2L', '2-3L', '3L+'],
+  mind: ['never', 'rarely', 'weekly', 'most-days', 'daily'],
+  goal: ['energy', 'focus', 'discipline', 'confidence', 'calm', 'fitness'],
+} as const;
+
+export type Sleep = (typeof ANSWER_VALUES.sleep)[number];
+export type Screen = (typeof ANSWER_VALUES.screen)[number];
+export type Exercise = (typeof ANSWER_VALUES.exercise)[number];
+export type Water = (typeof ANSWER_VALUES.water)[number];
+export type Mind = (typeof ANSWER_VALUES.mind)[number];
+export type Goal = (typeof ANSWER_VALUES.goal)[number];
 
 export type Answers = {
   sleep: Sleep;

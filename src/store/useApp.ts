@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { generatePlan, MIN_HABITS, toPlan } from '../core/plan';
+import { buildPlan, MIN_HABITS, toPlan } from '../core/plan';
 import { getHabit, levelUp } from '../core/habits';
 import { dateForDay, dayNumber, toDateKey } from '../core/dates';
 import { MILESTONES, phaseLevel, phaseOf, reconcile } from '../core/progression';
@@ -99,7 +99,7 @@ export const useApp = create<AppState>()(
           if (!answers) return;
           set({
             startedAt: toDateKey(appNow()),
-            plan: toPlan(generatePlan(answers)),
+            plan: toPlan(buildPlan(answers)),
             logs: {},
             seenCeremonies: [],
             appliedPhase: 1,

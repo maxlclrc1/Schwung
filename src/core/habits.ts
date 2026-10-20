@@ -8,7 +8,11 @@ export const HABITS: LibraryHabit[] = [
     icon: 'moon',
     category: 'sleep',
     title: 'Earlier bedtime',
-    levels: { easy: 'In bed by 00:00', medium: 'In bed by 23:30', hard: 'In bed by 23:00' },
+    levels: {
+      easy: 'In bed 30 minutes earlier than usual',
+      medium: 'In bed 7 hours before your alarm',
+      hard: 'In bed 8 hours before your alarm',
+    },
     why: 'More sleep is the cheapest energy upgrade there is.',
   },
   {
@@ -52,7 +56,7 @@ export const HABITS: LibraryHabit[] = [
     icon: 'phone-portrait',
     category: 'screen',
     title: 'Screen time cap',
-    levels: { easy: 'Under 5h screen time', medium: 'Under 4h screen time', hard: 'Under 2.5h screen time' },
+    levels: { easy: 'Under 7h screen time', medium: 'Under 5h screen time', hard: 'Under 3h screen time' },
     why: 'Every hour you take back is an hour for the life you actually want.',
   },
   {
@@ -96,7 +100,11 @@ export const HABITS: LibraryHabit[] = [
     icon: 'water',
     category: 'water',
     title: 'Hydrate',
-    levels: { easy: 'Drink 1.5L of water', medium: 'Drink 2L of water', hard: 'Drink 2.5L of water' },
+    levels: {
+      easy: 'Drink 4 glasses of water (1L)',
+      medium: 'Drink 6 glasses of water (1.5L)',
+      hard: 'Drink 8 glasses of water (2L)',
+    },
     why: 'Even mild dehydration drains focus and mood.',
   },
   {
