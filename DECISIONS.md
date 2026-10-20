@@ -61,6 +61,9 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     Settings → Appearance also offers "System" to go back to following the phone. Data saved before this
     existed loads as `system`, which was the existing behavior, so no migration is needed. Restarting the
     program keeps the choice. The native appearance (`Appearance.setColorScheme`) is set to match where the
-    platform supports it, so iOS alerts, the keyboard and the time picker agree. Ceremonies and the share card
-    stay dark regardless (see `ceremonyColors`).
+    platform supports it, so iOS alerts, the keyboard and the time picker agree.
+19. **Ceremonies stay dark in every theme** (owner decision). Days 1, 7, 21, 44 and 66 should feel like special
+    events, and the contrast with everyday use is the point. They use `ceremonyColors` and a light status bar
+    whatever the app theme. The share card is dark too, so it looks the same in every feed. Everything else
+    follows the selected theme.
 
