@@ -1,12 +1,12 @@
+import { Ionicons } from '@expo/vector-icons';
 import { memo, useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
-  Extrapolation,
+  Easing,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
-  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -26,11 +26,17 @@ type Props = {
 
 const SPRING = { damping: 14, stiffness: 420, mass: 0.6 };
 
+/*
+ * Nothing that contains the checkmark (or any text) is ever scaled. iOS draws text and icons into a
+ * bitmap and stretches that bitmap while a layer is scaled, which reads as "pixelated, then sharp".
+ * Feedback comes from color, a ripple ring behind the circle (a separate view), and haptics instead.
+ */
+
 function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
   const { c } = useTheme();
   const progress = useSharedValue(done ? 1 : 0);
-  const pop = useSharedValue(1);
-  const press = useSharedValue(1);
+  const ripple = useSharedValue(1);
+  const pressed = useSharedValue(0);
 
   // Source of truth is the store; this keeps the animation in sync with it
   // (e.g. after a re-hydrate) without fighting the optimistic start in onPress.
@@ -44,7 +50,8 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
     // Start the animation on the UI thread before React even re-renders.
     progress.set(withSpring(next ? 1 : 0, SPRING));
     if (next) {
-      pop.set(withSequence(withTiming(1.22, { duration: 90 }), withSpring(1, SPRING)));
+      ripple.set(0);
+      ripple.set(withTiming(1, { duration: 450, easing: Easing.out(Easing.cubic) }));
       haptic.check();
     } else {
       haptic.uncheck();
@@ -53,18 +60,19 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
   };
 
   const rowStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: press.value }],
     backgroundColor: interpolateColor(progress.value, [0, 1], [c.surface, c.accentSoft]),
+    opacity: 1 - pressed.value * 0.15,
   }));
   const boxStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pop.value }],
     backgroundColor: interpolateColor(progress.value, [0, 1], ['transparent', c.accent]),
     borderColor: interpolateColor(progress.value, [0, 1], [c.textFaint, c.accent]),
   }));
-  const checkStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.4, 1], Extrapolation.CLAMP) }],
+  // A plain ring with no content, so scaling it is safe.
+  const rippleStyle = useAnimatedStyle(() => ({
+    opacity: ripple.value >= 1 ? 0 : 0.7 * (1 - ripple.value),
+    transform: [{ scale: 1 + ripple.value * 0.9 }],
   }));
+  const checkStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, Math.max(0, progress.value)) }));
   const textStyle = useAnimatedStyle(() => ({ opacity: interpolate(progress.value, [0, 1], [1, 0.55]) }));
 
   const task = habitTask(habit);
@@ -73,8 +81,8 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
   return (
     <Pressable
       onPress={handlePress}
-      onPressIn={() => !readOnly && press.set(withTiming(0.98, { duration: 80 }))}
-      onPressOut={() => press.set(withSpring(1, SPRING))}
+      onPressIn={() => !readOnly && pressed.set(withTiming(1, { duration: 80 }))}
+      onPressOut={() => pressed.set(withTiming(0, { duration: 150 }))}
       onLongPress={onLongPress ? () => (haptic.heavy(), onLongPress(habit.habitId)) : undefined}
       delayLongPress={380}
       role="checkbox"
@@ -85,14 +93,14 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
       hitSlop={4}
     >
       <Animated.View style={[styles.row, rowStyle]}>
-        <Animated.View style={[styles.box, boxStyle]}>
-          <Animated.View style={[styles.check, checkStyle]}>
-            {/* Drawn from two solid bars, not an icon-font glyph: iOS rasterizes text, so a
-                glyph blurs while the box pops above 100%; plain views stay sharp at any scale. */}
-            <View style={[styles.checkShort, { backgroundColor: c.onAccent }]} />
-            <View style={[styles.checkLong, { backgroundColor: c.onAccent }]} />
+        <View style={styles.boxWrap}>
+          <Animated.View pointerEvents="none" style={[styles.ripple, { borderColor: c.accent }, rippleStyle]} />
+          <Animated.View style={[styles.box, boxStyle]}>
+            <Animated.View style={checkStyle}>
+              <Ionicons name="checkmark" size={20} color={c.onAccent} />
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
+        </View>
         <Animated.View style={[styles.text, textStyle]}>
           <T v="bodyStrong" numberOfLines={1}>
             {title}
@@ -121,6 +129,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     minHeight: 76,
   },
+  boxWrap: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
+  ripple: { position: 'absolute', width: 30, height: 30, borderRadius: 15, borderWidth: 2 },
   box: {
     width: 30,
     height: 30,
@@ -131,24 +141,4 @@ const styles = StyleSheet.create({
   },
   text: { flex: 1, gap: 2 },
   badge: { width: 18, alignItems: 'flex-end' },
-  // Checkmark through (1.5,8) → (6,12.5) → (14.5,4) in a 16×16 box, 3pt strokes.
-  check: { width: 16, height: 16 },
-  checkShort: {
-    position: 'absolute',
-    left: 2.25,
-    top: 6.3,
-    width: 3,
-    height: 7.9,
-    borderRadius: 1.5,
-    transform: [{ rotate: '-45deg' }],
-  },
-  checkLong: {
-    position: 'absolute',
-    left: 8.75,
-    top: 1.5,
-    width: 3,
-    height: 13.5,
-    borderRadius: 1.5,
-    transform: [{ rotate: '45deg' }],
-  },
 });

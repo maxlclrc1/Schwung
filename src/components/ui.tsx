@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, TextProps, View, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { haptic } from '../lib/haptics';
 import { radius, space, type, useTheme } from '../theme';
@@ -40,8 +40,9 @@ type ButtonProps = {
 
 export function Button({ label, onPress, kind = 'primary', disabled, style, icon }: ButtonProps) {
   const { c } = useTheme();
-  const scale = useSharedValue(1);
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  // Press feedback by dimming, not scaling: scaled text is drawn from a stretched bitmap on iOS.
+  const pressed = useSharedValue(0);
+  const anim = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.25 }));
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
   const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? '#FF5A4F' : kind === 'ghost' ? c.textDim : c.text;
 
@@ -50,8 +51,8 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
-      onPressIn={() => scale.set(withSpring(0.96, { damping: 20, stiffness: 500 }))}
-      onPressOut={() => scale.set(withSpring(1, { damping: 14, stiffness: 400 }))}
+      onPressIn={() => pressed.set(withTiming(1, { duration: 80 }))}
+      onPressOut={() => pressed.set(withTiming(0, { duration: 150 }))}
       onPress={() => {
         haptic.tap();
         onPress();

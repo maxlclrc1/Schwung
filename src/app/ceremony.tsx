@@ -113,14 +113,14 @@ function Ring({ size, index }: { size: number; index: number }) {
 }
 
 function BigNumber({ value }: { value: number }) {
-  // Never animate text above 100%: iOS rasterizes glyphs, so any overshoot looks soft.
-  const scale = useSharedValue(0.9);
+  // Rise and fade in, never scale: iOS draws scaled text from a stretched bitmap, which looks soft.
+  const rise = useSharedValue(24);
   const opacity = useSharedValue(0);
   useEffect(() => {
     opacity.set(withTiming(1, { duration: 300 }));
-    scale.set(withTiming(1, { duration: 450, easing: Easing.out(Easing.cubic) }));
-  }, [opacity, scale]);
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
+    rise.set(withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) }));
+  }, [opacity, rise]);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ translateY: rise.value }] }));
   return (
     <Animated.Text
       style={[
@@ -205,7 +205,7 @@ function CeremonyButton({
       style={({ pressed }) => [
         styles.button,
         primary && { backgroundColor: c.accent },
-        { transform: [{ scale: pressed ? 0.97 : 1 }] },
+        { opacity: pressed ? 0.75 : 1 },
       ]}
     >
       <T v="bodyStrong" color={primary ? c.onAccent : c.textDim}>
