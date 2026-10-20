@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentRef, Ref } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { APP_NAME } from '../lib/constants';
-import { ceremonyColors as c } from '../theme';
+import { ceremonyColors as c, shareCardColors as card } from '../theme';
 
 export type FinaleStats = { daysCompleted: number; bestStreak: number; mastered: number; checks: number };
 
@@ -28,9 +28,9 @@ export function ShareCard({
   return (
     // Rounded on screen, square in the exported image (the ref'd view has no radius).
     <View style={{ borderRadius: 24 * s, overflow: 'hidden' }}>
-      <View ref={ref} collapsable={false} style={{ width, height: width * 1.25, backgroundColor: '#0F0E13' }}>
+      <View ref={ref} collapsable={false} style={{ width, height: width * 1.25, backgroundColor: card.base }}>
         <LinearGradient
-          colors={['#2A2145', '#16141C', '#0F0E13']}
+          colors={card.gradient}
           start={{ x: 0.1, y: 0 }}
           end={{ x: 0.9, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -77,6 +77,6 @@ export function ShareCard({
 }
 
 const styles = StyleSheet.create({
-  glow: { position: 'absolute', backgroundColor: 'rgba(184,164,255,0.12)' },
-  stat: { flex: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
+  glow: { position: 'absolute', backgroundColor: card.glow },
+  stat: { flex: 1, backgroundColor: card.tile },
 });

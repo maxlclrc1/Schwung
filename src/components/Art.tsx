@@ -219,7 +219,8 @@ function Particle({
 /** One-shot burst. Re-mount (change `key`) to fire again. */
 export function Confetti({ colors, spread = 160 }: { colors?: string[]; spread?: number }) {
   const { c } = useTheme();
-  const palette = colors ?? [c.accent, c.accentInk, c.warm, c.text];
+  // Everyday celebrations stay on-brand; gold is passed in only for milestones.
+  const palette = colors ?? [c.accent, c.accentInk, c.accentLight, c.text];
   const parts = Array.from({ length: PARTICLES }, (_, i) => ({
     angle: (i / PARTICLES) * Math.PI * 2 + noise(i, 1) * 0.4,
     distance: spread * (0.55 + noise(i, 2) * 0.6),

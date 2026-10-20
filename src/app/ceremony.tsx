@@ -149,7 +149,7 @@ function DelayedConfetti() {
     const t = setTimeout(() => setOn(true), 350);
     return () => clearTimeout(t);
   }, []);
-  return on ? <Confetti spread={190} colors={[c.accent, '#E4DBFF', c.warm, '#FFFFFF']} /> : null;
+  return on ? <Confetti spread={190} colors={[c.accent, c.accentLight, c.gold, c.text]} /> : null;
 }
 
 function Milestone({ milestone }: { milestone: number }) {

@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useSyncExternalStore } from 'react';
-import { AppState } from 'react-native';
+import { Appearance, AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { rescheduleReminders } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
@@ -42,11 +42,19 @@ function Housekeeping() {
 
 export default function RootLayout() {
   const hydrated = useHydrated();
-  const { c, isDark } = useTheme();
+  const { c, isDark, preference } = useTheme();
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(c.bg).catch(() => {});
   }, [c.bg]);
+
+  // Native UI (alerts, keyboard, date picker) follows the app's choice too; 'unspecified' hands
+  // control back to the phone's setting.
+  useEffect(() => {
+    // Not every platform implements it (react-native-web doesn't), and it's only a nicety.
+    if (typeof Appearance.setColorScheme !== 'function') return;
+    Appearance.setColorScheme(preference === 'system' ? 'unspecified' : preference);
+  }, [preference]);
 
   useEffect(() => {
     if (hydrated) void SplashScreen.hideAsync().catch(() => {});

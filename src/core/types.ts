@@ -26,6 +26,9 @@ export type Answers = {
 
 export type Level = 'easy' | 'medium' | 'hard';
 
+/** App appearance: follow the phone, or an explicit choice. */
+export type ThemePreference = 'system' | 'light' | 'dark';
+
 export type Category = 'sleep' | 'screen' | 'exercise' | 'water' | 'mind' | 'focus' | 'discipline' | 'confidence';
 
 export type LibraryHabit = {

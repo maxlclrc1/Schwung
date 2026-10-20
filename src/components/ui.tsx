@@ -44,7 +44,7 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
   const pressed = useSharedValue(0);
   const anim = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.25 }));
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
-  const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? '#FF5A4F' : kind === 'ghost' ? c.textDim : c.text;
+  const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? c.danger : kind === 'ghost' ? c.textDim : c.text;
 
   return (
     <Pressable

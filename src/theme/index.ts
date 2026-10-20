@@ -1,40 +1,67 @@
 import { useColorScheme } from 'react-native';
 import type { TextStyle } from 'react-native';
+import type { ThemePreference } from '../core/types';
+import { useApp } from '../store/useApp';
 
+/*
+ * Two intentional palettes, not an inversion of each other: dark leans on a deep violet-black with a
+ * luminous lavender accent; light uses a soft violet-white with a deeper, higher-contrast violet.
+ * All text pairs meet WCAG AA (4.5:1) on their backgrounds.
+ */
 const dark = {
-  bg: '#141417', // charcoal
-  surface: '#1E1E23', // cards
-  surfaceHigh: '#2A2A31',
-  border: '#33333B',
-  text: '#F3F1F8', // soft white
-  textDim: '#ABA8B8',
-  textFaint: '#706D7C',
-  accent: '#B8A4FF', // lavender — fills: buttons, checks, progress
-  onAccent: '#17122E',
-  accentInk: '#B8A4FF', // accent used as text/icons on the background
-  accentSoft: 'rgba(184,164,255,0.14)',
-  warm: '#FFB547', // streak flame only
+  bg: '#111116',
+  surface: '#1C1B25', // cards
+  surfaceHigh: '#272533', // pressed/selected surfaces, tracks
+  border: '#302E3D',
+  text: '#F5F3FF',
+  textDim: '#A5A3B5', // secondary text
+  textFaint: '#75728A', // hints and metadata
+  accent: '#A78BFA', // fills: buttons, checks, progress
+  onAccent: '#16112B', // text and icons on accent fills
+  accentInk: '#A78BFA', // accent used as text/icons on the background
+  accentSoft: 'rgba(167,139,250,0.14)', // tinted surfaces
+  accentLight: '#DDD3FE', // highlights in celebrations
+  gold: '#F2B84B', // milestones only (ceremonies, finale): never an everyday accent
+  danger: '#FF7A7A', // destructive actions
 };
 
 const light: typeof dark = {
-  bg: '#F6F5F9', // soft off-white
+  bg: '#F7F6FB',
   surface: '#FFFFFF',
-  surfaceHigh: '#ECEAF2',
-  border: '#E0DDE8',
-  text: '#1B1926', // dark, readable
-  textDim: '#5A5769',
-  textFaint: '#8F8C9D',
-  accent: '#6B4BDE', // deeper violet for contrast on light surfaces
+  surfaceHigh: '#EEECF5',
+  border: '#E3E0EC',
+  text: '#191621',
+  textDim: '#696575',
+  textFaint: '#76728A',
+  accent: '#7451C8',
   onAccent: '#FFFFFF',
-  accentInk: '#5A3CCB',
-  accentSoft: 'rgba(107,75,222,0.10)',
-  warm: '#D97A00',
+  accentInk: '#7451C8',
+  accentSoft: 'rgba(116,81,200,0.10)',
+  accentLight: '#C9B8F5',
+  gold: '#A76A00',
+  danger: '#C93B3B',
 };
 
 export type Colors = typeof dark;
+export type { ThemePreference };
+export type Scheme = 'light' | 'dark';
 
-/** Ceremonies are always dark and cinematic, regardless of system appearance. */
+/** Ceremonies are always dark and cinematic, whatever the app theme. */
 export const ceremonyColors = dark;
+
+/** The share image is always dark so it looks the same in every feed. */
+export const shareCardColors = {
+  gradient: ['#2B2147', '#17151F', '#0E0D12'] as const,
+  base: '#0E0D12',
+  glow: 'rgba(167,139,250,0.14)',
+  tile: 'rgba(255,255,255,0.06)',
+};
+
+/** An explicit choice wins; "system" follows the phone. Unknown system values count as dark. */
+export function resolveScheme(preference: ThemePreference, system: string | null | undefined): Scheme {
+  if (preference !== 'system') return preference;
+  return system === 'light' ? 'light' : 'dark';
+}
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
 export const radius = { sm: 10, md: 16, lg: 22, pill: 999 } as const;
@@ -51,7 +78,8 @@ export const type = {
 } satisfies Record<string, TextStyle>;
 
 export function useTheme() {
-  const scheme = useColorScheme();
-  const isDark = scheme !== 'light';
-  return { c: isDark ? dark : light, isDark };
+  const system = useColorScheme();
+  const preference = useApp((st) => st.themePreference);
+  const scheme = resolveScheme(preference, system);
+  return { c: scheme === 'dark' ? dark : light, isDark: scheme === 'dark', scheme, preference };
 }

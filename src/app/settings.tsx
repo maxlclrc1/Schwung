@@ -13,6 +13,7 @@ import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { currentDay, exportData, useApp } from '../store/useApp';
+import type { ThemePreference } from '../core/types';
 import { radius, space, useTheme } from '../theme';
 
 export default function Settings() {
@@ -79,6 +80,10 @@ export default function Settings() {
     <Screen edges={['bottom']}>
       <SheetHeader title="Settings" />
       <ScrollView contentContainerStyle={styles.scroll}>
+        <Section title="Appearance">
+          <AppearancePicker />
+        </Section>
+
         <Section title="Reminder">
           <Row label="Daily reminder">
             <Switch
@@ -155,6 +160,42 @@ function DevTools() {
   );
 }
 
+const APPEARANCE: { value: ThemePreference; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'system', label: 'System', icon: 'phone-portrait-outline' },
+  { value: 'light', label: 'Light', icon: 'sunny-outline' },
+  { value: 'dark', label: 'Dark', icon: 'moon-outline' },
+];
+
+function AppearancePicker() {
+  const { c, preference } = useTheme();
+  const setThemePreference = useApp((s) => s.setThemePreference);
+  return (
+    <View style={styles.segment} accessibilityRole="radiogroup">
+      {APPEARANCE.map((o) => {
+        const selected = preference === o.value;
+        return (
+          <Pressable
+            key={o.value}
+            onPress={() => {
+              haptic.tap();
+              setThemePreference(o.value);
+            }}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            accessibilityLabel={o.value === 'system' ? 'Match phone setting' : `${o.label} mode`}
+            style={[styles.segmentItem, selected && { backgroundColor: c.accentSoft }]}
+          >
+            <Ionicons name={o.icon} size={18} color={selected ? c.accentInk : c.textDim} />
+            <T v="caption" color={selected ? c.accentInk : c.textDim} style={{ fontWeight: '700' }}>
+              {o.label}
+            </T>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function DevButton({ label, onPress }: { label: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
@@ -190,7 +231,7 @@ function Row({
   children?: ReactNode;
 }) {
   const { c } = useTheme();
-  const color = destructive ? '#FF5A4F' : c.text;
+  const color = destructive ? c.danger : c.text;
   return (
     <Pressable
       onPress={
@@ -215,6 +256,15 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
   section: { borderRadius: radius.lg, paddingHorizontal: space.lg },
   row: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  segment: { flexDirection: 'row', gap: space.xs, paddingVertical: space.sm },
+  segmentItem: {
+    flex: 1,
+    minHeight: 64,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.xs,
+  },
   devRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingVertical: space.sm },
   devButton: { paddingHorizontal: space.md, paddingVertical: space.sm, borderRadius: radius.sm },
 });
