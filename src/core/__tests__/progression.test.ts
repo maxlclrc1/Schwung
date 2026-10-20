@@ -4,6 +4,7 @@ import {
   bestStreak,
   currentStreak,
   dayQualifies,
+  isFullDay,
   levelUpOffers,
   Logs,
   pendingCeremony,
@@ -212,5 +213,82 @@ describe('ceremonies', () => {
     expect(pendingCeremony([1], 30, false)).toBe(21);
     expect(pendingCeremony([1, 7, 21, 44], 70, false)).toBe(66);
     expect(pendingCeremony([1, 7, 21, 44, 66], 70, false)).toBeNull();
+  });
+});
+
+describe('day 66 finale threshold', () => {
+  const DAY = 66;
+  const SEEN_BEFORE = [1, 7, 21, 44];
+
+  /** A day-66 log with `done` of `total` planned habits completed, plus optional stale ids. */
+  function finaleLog(total: number, done: number, stale: string[] = []) {
+    const planned = Array.from({ length: total }, (_, i) => `h${i}`);
+    return { day: DAY, date: dateForDay(START, DAY), planned, completed: [...planned.slice(0, done), ...stale] };
+  }
+
+  /** What Today passes in: the real completion helpers applied to day 66's own log. */
+  function finale(total: number, done: number, stale: string[] = [], seen = SEEN_BEFORE) {
+    const log = finaleLog(total, done, stale);
+    return pendingCeremony(seen, DAY, isFullDay(log), dayQualifies(log));
+  }
+
+  it('plays at 100%', () => {
+    expect(finale(5, 5)).toBe(66);
+  });
+
+  it('plays at exactly 80% (4 of 5)', () => {
+    expect(finale(5, 4)).toBe(66);
+  });
+
+  it('does not play below 80% (3 of 5)', () => {
+    expect(finale(5, 3)).toBeNull();
+  });
+
+  it('applies the same 80% rule to the minimum 3-habit plan (2 of 3 is 67%)', () => {
+    expect(finale(3, 3)).toBe(66);
+    expect(finale(3, 2)).toBeNull();
+  });
+
+  it('applies the same rule to every plan size the app supports', () => {
+    // Minimum needed = ceil(0.8 × planned). Plans can exceed 6 with custom habits.
+    const minimum: Record<number, number> = { 3: 3, 4: 4, 5: 4, 6: 5, 7: 6, 8: 7, 10: 8 };
+    for (const [total, need] of Object.entries(minimum).map(([t, n]) => [Number(t), n])) {
+      expect(finale(total, need)).toBe(66);
+      expect(finale(total, need - 1)).toBeNull();
+    }
+  });
+
+  it('ignores completed ids that are not in day 66’s planned habits', () => {
+    // 3 real + 2 stale = 5 ids, but only 3 of 5 planned are done (60%).
+    expect(finale(5, 3, ['removed_habit', 'custom_old'])).toBeNull();
+  });
+
+  it('plays only once', () => {
+    expect(finale(5, 5, [], [...SEEN_BEFORE, 66])).toBeNull();
+    expect(finale(5, 4, [], [1, 7, 21, 44, 66])).toBeNull();
+  });
+
+  it('still plays on a later open if day 66 was missed, and not before day 66', () => {
+    expect(pendingCeremony(SEEN_BEFORE, 67, false, false)).toBe(66);
+    const log = finaleLog(5, 5);
+    expect(pendingCeremony(SEEN_BEFORE, 65, isFullDay(log), dayQualifies(log))).toBeNull();
+  });
+
+  it('keeps the latest-unseen ordering: at 80% on day 66 with 44 unseen, the finale wins', () => {
+    const log = finaleLog(5, 4);
+    expect(pendingCeremony([1, 7, 21], DAY, isFullDay(log), dayQualifies(log))).toBe(66);
+  });
+
+  it('does not change the other milestones: day 7, 21 and 44 still need a full day', () => {
+    for (const m of [7, 21, 44]) {
+      const seen = [1, 7, 21, 44].filter((x) => x < m);
+      expect(pendingCeremony(seen, m, false, true)).toBeNull();
+      expect(pendingCeremony(seen, m, true, true)).toBe(m);
+    }
+  });
+
+  it('without the extra argument behaves exactly as before (finale needs a full day)', () => {
+    expect(pendingCeremony(SEEN_BEFORE, DAY, false)).toBeNull();
+    expect(pendingCeremony(SEEN_BEFORE, DAY, true)).toBe(66);
   });
 });
