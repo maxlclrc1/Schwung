@@ -63,7 +63,7 @@ const QUESTIONS: Question[] = [
   },
   {
     key: 'goal',
-    title: 'What do you want most from the next 66 days?',
+    title: 'What do you want most right now?',
     options: [
       { value: 'energy', label: 'More energy' },
       { value: 'focus', label: 'Better focus' },

@@ -48,19 +48,16 @@ export function ShareCard({
           <View>
             <Text
               style={{
-                color: c.accent,
-                fontSize: 132 * s,
-                lineHeight: 136 * s,
+                color: c.text,
+                fontSize: 44 * s,
+                lineHeight: 48 * s,
                 fontWeight: '900',
-                letterSpacing: -7 * s,
+                letterSpacing: -1.5 * s,
               }}
             >
-              66
-            </Text>
-            <Text
-              style={{ color: c.text, fontSize: 34 * s, lineHeight: 38 * s, fontWeight: '800', letterSpacing: -1 * s }}
-            >
-              I reset my life{'\n'}in 66 days.
+              I got my{'\n'}
+              <Text style={{ color: c.accent }}>momentum</Text>
+              {'\n'}back.
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 10 * s }}>

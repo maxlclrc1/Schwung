@@ -28,7 +28,7 @@ export async function requestPermission(): Promise<boolean> {
 
 function message(day: number): { title: string; body: string } {
   if (day > PROGRAM_DAYS) return { title: 'Keep it going', body: 'Your habits are waiting. Two minutes to check in.' };
-  if (day === PROGRAM_DAYS) return { title: 'Final day', body: 'Day 66. Finish your reset.' };
+  if (day === PROGRAM_DAYS) return { title: 'Final day', body: 'Last day of the program. Finish strong.' };
   if (day === 1) return { title: 'Day 1', body: 'Your reset starts today. One small win at a time.' };
   if (day === 7) return { title: 'Day 7', body: 'One week in. Today makes it official.' };
   if (day === 22) return { title: 'Phase 2', body: 'Your habits leveled up. Day 22 is waiting.' };

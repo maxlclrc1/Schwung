@@ -33,5 +33,7 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     category: `sleep_wake`, `screen_social`, `move_steps`, `focus_top3`, `confidence_compliment`.
     `discipline_bed` is titled "Clean start" so its title doesn't repeat its easy task ("Make your bed").
 13. **iPad**: `supportsTablet: false` for v1 (iPhone only), which avoids iPad screenshot and review requirements.
-14. **Placeholders to replace before launch**: `APP_NAME`, `CONTACT_EMAIL`, and `PRIVACY_URL` in
-    `src/lib/constants.ts`; `name` and `ios.bundleIdentifier` in `app.json`; the app icon and splash in `assets/`.
+14. **Name: Schwung.** "66" is kept out of the branding (name, icon, welcome screen, share card) because the
+    66-day framing is the competitor's identity. The program is still 66 days long internally ("Day 12 / 66").
+15. **Placeholders to replace before launch**: `CONTACT_EMAIL` and `PRIVACY_URL` in `src/lib/constants.ts`, and
+    the `com.example.schwung` bundle identifier in `app.json` (use a reverse domain you own).

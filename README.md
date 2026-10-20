@@ -1,6 +1,6 @@
-# APPNAME: 66-day reset (v1)
+# Schwung (v1)
 
-A free, offline 66-day "life reset" for iOS: a 6-question quiz, a personalized daily habit plan,
+Schwung ("momentum" in German) is a free, offline 66-day reset program for iOS: a 6-question quiz, a personalized daily habit plan,
 and a checklist that levels up over 66 days. There's no account, no backend, and no paywall.
 
 Built with Expo SDK 58, Expo Router, TypeScript, Zustand, AsyncStorage, Reanimated 4, and local notifications.
