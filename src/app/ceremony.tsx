@@ -132,7 +132,7 @@ function BigNumber({ value }: { value: number }) {
           fontWeight: '900',
           letterSpacing: -8,
           fontVariant: ['tabular-nums'],
-          textShadowColor: 'rgba(198,255,61,0.45)',
+          textShadowColor: 'rgba(184,164,255,0.5)',
           textShadowRadius: 40,
         },
       ]}

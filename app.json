@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#09090A",
+    "backgroundColor": "#141417",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.example.reset66",
@@ -18,7 +18,7 @@
     "android": {
       "package": "com.example.reset66",
       "adaptiveIcon": {
-        "backgroundColor": "#09090A",
+        "backgroundColor": "#141417",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -38,14 +38,14 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#09090A"
+          "backgroundColor": "#141417"
         }
       ],
       "@react-native-community/datetimepicker",
       [
         "expo-notifications",
         {
-          "color": "#C6FF3D"
+          "color": "#B8A4FF"
         }
       ]
     ]
