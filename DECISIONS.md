@@ -2,12 +2,8 @@
 
 Places where the handoff was ambiguous or silent, what was chosen, and why. Each one is easy to change.
 
-1. **Plan rule 9 ("drop from the bottom, discipline/confidence extras first")**: when a plan has 7 habits, the
-   first ones dropped are `discipline_cold`, then `confidence_talk`. If neither is in the plan, the last habit
-   in the list goes. For a **focus** goal with every other answer triggering a habit, that last habit is
-   `focus_deepwork`, so that user loses their goal habit. This follows the literal rule. If you'd rather always
-   keep the goal habit, change `DROP_FIRST` in `src/core/plan.ts` and update the test
-   "drops from the bottom of the list when there is no extra to drop".
+1. **Plan rule 9** (drop from the bottom when over 6) was replaced (owner-approved): the goal habit is never
+   dropped. The area habit with the mildest answer goes instead. See item 16.
 2. **Ceremony timing**: milestone N (7, 21, 44, 66) plays when day N is fully completed. If the user doesn't
    finish day N, it plays the next time they open the app on a later day. Day 21 and day 44 are framed as
    "Phase 1/2 complete, next phase unlocks tomorrow", because the actual level-up happens at the start of
@@ -37,9 +33,24 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     66-day framing is the competitor's identity. The program is still 66 days long internally ("Day 12 / 66").
 15. **Placeholders to replace before launch**: `CONTACT_EMAIL` and `PRIVACY_URL` in `src/lib/constants.ts`, and
     the `com.example.schwung` bundle identifier in `app.json` (use a reverse domain you own).
-16. **Quiz has finer answers than the original spec** (5 options per question, 6 goals). They map onto
-    habits like this. Sleep: <6h → earlier bedtime, 6–7h → phone-free wind-down, 7–8h → steady wake-up.
-    Screen: 2–4h → phone-free morning, 4–6h → social-free mornings, 6h+ → screen time cap. Exercise:
-    never → walk, a few times a month → steps, 1–2×/week → workout. Mind: never → journal, rarely → breathe,
-    weekly → read. Goals: "less stress" → breathe (or journal), "get in shape" → workout (or steps).
-    Answers above those levels add no habit for that area, the same as the original spec.
+16. **Plan generation** (`src/core/plan.ts`, `buildPlan`) replaces the spec's §8 rules. Each habit comes
+    with a source and a reason shown on the plan reveal.
+    - *Foundation*: "Make your bed" is always first.
+    - *Areas*: one habit per area where the answer shows room to improve. Sleep: <5h/5–6h → earlier
+      bedtime, 6–7h → phone-free wind-down. Screen: 2–4h → phone-free morning, 4–6h → social-free mornings,
+      6h+ → screen cap. Exercise: never → walk, a few times a month → steps, 1–2×/week → workout. Water: up
+      to 2L → water. Mind: never → journal, rarely → breathe, weekly → read. Healthy answers add nothing.
+    - *Goal*: always represented. If a habit already in a full plan serves the goal, it carries the goal
+      (its reason says so). Otherwise a goal habit is added, and if that makes 7, the area habit with the
+      mildest answer is dropped (ties: mind, then screen, water, exercise, sleep). The goal habit is never dropped.
+    - *Fillers* (only to reach 5): more habits for the goal, then habits the quiz doesn't cover
+      (top priorities, compliment, cold finish, deep work, conversation).
+    - *Never assigned*: anything the answers say the user already does. Regular exercise means no walk or
+      workout; 2L+ water means no water habit; reading/meditating/journaling most days means no mind habits;
+      7h+ sleep means no bedtime habit; under 2h of screen time means no screen habits.
+    - *Starting level*: easy, except water at 4–8 glasses, which starts at medium (6 glasses), because many
+      people in that range already drink 4.
+17. **Starting targets rewritten** so "easy" is reachable. Water: 4 / 6 / 8 glasses (was 1.5 / 2 / 2.5L).
+    Screen cap: under 7h / 5h / 3h (was 5h / 4h / 2.5h). Earlier bedtime: "30 minutes earlier than usual",
+    then 7h and 8h in bed before your alarm (was fixed clock times). Saved plans show the new text at their
+    current level. No data changes.

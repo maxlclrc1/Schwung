@@ -17,3 +17,9 @@ Ideas that came up while building v1 (not built):
 - Icon polish. The current icon is a generated placeholder: a lavender "S" on charcoal.
 - A data **import** to go with export, for moving to a new phone until iCloud sync exists.
 - A widget-friendly shared data store (App Group) so v1.1 widgets can read state.
+- **Nutrition habits** (deliberately not in v1, which has no food category): e.g. protein with breakfast,
+  a vegetable with lunch and dinner, no sugary drinks, a cut-off time for eating, cooking at home N times
+  a week. It would need its own quiz question so recommendations stay grounded in answers.
+- **Finer quiz baselines** for more precise starting targets, e.g. current bedtime and wake time (so sleep
+  targets can use real clock times), exact daily screen time, and which of reading/meditating/journaling
+  someone already does (the quiz currently asks about all three together).
