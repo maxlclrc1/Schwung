@@ -12,6 +12,7 @@ import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { getHabit, habitTitle, levelUp } from '../core/habits';
 import {
   currentStreak,
+  dayQualifies,
   isFullDay,
   levelProgress,
   levelUpOffers,
@@ -49,6 +50,7 @@ export default function Today() {
   const log = logs[dateForDay(start, viewDay)];
   const todayLog = logs[dateForDay(start, today)];
   const todayFull = isFullDay(todayLog) && plan.every((p) => todayLog?.completed.includes(p.habitId));
+  const todayQualifies = dayQualifies(todayLog);
   const doneCount = plan.filter((p) => log?.completed.includes(p.habitId)).length;
 
   const xp = useMemo(() => totalXp(logs), [logs]);
@@ -79,14 +81,15 @@ export default function Today() {
     wasFull.current = todayFull;
   }, [todayFull]);
 
-  // Ceremonies: day 1 right away, milestones once that day is fully done (or later, if missed).
+  // Ceremonies: day 1 right away, milestones once that day is done (or later, if missed).
   useEffect(() => {
     if (!startedAt) return;
-    const m = pendingCeremony(seen, today, todayFull);
+    const m = pendingCeremony(seen, today, todayFull, todayQualifies);
     if (m === null) return;
-    const t = setTimeout(() => router.push(`/ceremony?m=${m}`), todayFull && m === today ? 900 : 350);
+    // A milestone reached by a check-off waits a beat so the check animation and haptic land first.
+    const t = setTimeout(() => router.push(`/ceremony?m=${m}`), m === today && m !== 1 ? 900 : 350);
     return () => clearTimeout(t);
-  }, [startedAt, seen, today, todayFull]);
+  }, [startedAt, seen, today, todayFull, todayQualifies]);
 
   if (!startedAt) return null;
 

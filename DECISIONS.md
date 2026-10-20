@@ -4,8 +4,10 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
 
 1. **Plan rule 9** (drop from the bottom when over 6) was replaced (owner-approved): the goal habit is never
    dropped. The area habit with the mildest answer goes instead. See item 16.
-2. **Ceremony timing**: milestone N (7, 21, 44, 66) plays when day N is fully completed. If the user doesn't
-   finish day N, it plays the next time they open the app on a later day. Day 21 and day 44 are framed as
+2. **Ceremony timing**: milestones 7, 21 and 44 play when that day is fully completed. The day-66 finale
+   plays once day 66 is a successful day by the streak rule: at least 80% of that day's planned habits
+   (`dayQualifies`; the minimum is ceil(0.8 × planned), so 3 of 3, 4 of 4, 4 of 5, 5 of 6). If the user
+   doesn't get there on the day, it plays the next time they open the app on a later day. Day 21 and day 44 are framed as
    "Phase 1/2 complete, next phase unlocks tomorrow", because the actual level-up happens at the start of
    days 22 and 45 (with an in-app "Phase 2 unlocked" note). Day 1 plays right after onboarding.
 3. **Step-down timing**: a day counts as missed only once it's final. Yesterday stays open until noon because it

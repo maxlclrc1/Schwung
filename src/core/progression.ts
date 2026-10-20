@@ -179,14 +179,22 @@ export function reconcile(input: ReconcileInput): ReconcileResult {
 }
 
 /**
- * The ceremony to show now, if any. Milestone N plays once day N is fully done,
- * or on any later open if it was missed. Day 1 plays as soon as the program starts.
+ * The ceremony to show now, if any. Day 1 plays as soon as the program starts. Milestones 7, 21 and 44
+ * play once that day is fully done. The finale (day 66) plays once that day is a successful day by the
+ * streak rule (`dayQualifies`, 80%+ of that day's planned habits), so the last day doesn't demand
+ * perfection. Any milestone missed on its day plays on a later open; only the latest unseen one is returned.
  */
-export function pendingCeremony(seen: number[], today: number, todayFull: boolean): number | null {
+export function pendingCeremony(
+  seen: number[],
+  today: number,
+  todayFull: boolean,
+  todayQualifies: boolean = todayFull,
+): number | null {
   let pending: number | null = null;
   for (const m of MILESTONES) {
     if (seen.includes(m)) continue;
-    if (m === 1 ? today >= 1 : m < today || (m === today && todayFull)) pending = m;
+    const doneEnough = m === PROGRAM_DAYS ? todayQualifies : todayFull;
+    if (m === 1 ? today >= 1 : m < today || (m === today && doneEnough)) pending = m;
   }
   return pending;
 }
