@@ -2,32 +2,32 @@ import { useColorScheme } from 'react-native';
 import type { TextStyle } from 'react-native';
 
 const dark = {
-  bg: '#09090A',
-  surface: '#141416',
-  surfaceHigh: '#1D1D20',
-  border: '#27272B',
-  text: '#F4F4F5',
-  textDim: '#A3A3AB',
-  textFaint: '#66666E',
-  accent: '#C6FF3D', // fills: buttons, checks, progress
-  onAccent: '#0B0F00',
-  accentInk: '#C6FF3D', // accent used as text/icons on the background
-  accentSoft: 'rgba(198,255,61,0.12)',
+  bg: '#141417', // charcoal
+  surface: '#1E1E23', // cards
+  surfaceHigh: '#2A2A31',
+  border: '#33333B',
+  text: '#F3F1F8', // soft white
+  textDim: '#ABA8B8',
+  textFaint: '#706D7C',
+  accent: '#B8A4FF', // lavender — fills: buttons, checks, progress
+  onAccent: '#17122E',
+  accentInk: '#B8A4FF', // accent used as text/icons on the background
+  accentSoft: 'rgba(184,164,255,0.14)',
   warm: '#FFB547', // streak flame only
 };
 
 const light: typeof dark = {
-  bg: '#F5F5F1',
+  bg: '#F6F5F9', // soft off-white
   surface: '#FFFFFF',
-  surfaceHigh: '#ECECE6',
-  border: '#E2E2DB',
-  text: '#0B0B0C',
-  textDim: '#55555C',
-  textFaint: '#8D8D94',
-  accent: '#C6FF3D',
-  onAccent: '#0B0F00',
-  accentInk: '#3E7200',
-  accentSoft: 'rgba(98,160,0,0.12)',
+  surfaceHigh: '#ECEAF2',
+  border: '#E0DDE8',
+  text: '#1B1926', // dark, readable
+  textDim: '#5A5769',
+  textFaint: '#8F8C9D',
+  accent: '#6B4BDE', // deeper violet for contrast on light surfaces
+  onAccent: '#FFFFFF',
+  accentInk: '#5A3CCB',
+  accentSoft: 'rgba(107,75,222,0.10)',
   warm: '#D97A00',
 };
 
