@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, T } from '../components/ui';
-import { buildPlan } from '../core/plan';
+import { buildPlan, GOAL_LABEL } from '../core/plan';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
@@ -27,7 +27,7 @@ export default function Reveal() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: space.sm }}>
           <T v="overline" color={c.accentInk}>
-            Your plan
+            {answers ? `Your plan · Built for ${GOAL_LABEL[answers.goal]}` : 'Your plan'}
           </T>
           <T v="title">{picks.length} habits. Starting where you are.</T>
           <T color={c.textDim}>Each one levels up as you do. You can swap, edit, or add your own anytime.</T>

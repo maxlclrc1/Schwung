@@ -36,22 +36,34 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
 15. **Placeholders to replace before launch**: `CONTACT_EMAIL` and `PRIVACY_URL` in `src/lib/constants.ts`, and
     the `com.example.schwung` bundle identifier in `app.json` (use a reverse domain you own).
 16. **Plan generation** (`src/core/plan.ts`, `buildPlan`) replaces the spec's §8 rules. Each habit comes
-    with a source and a reason shown on the plan reveal.
+    with a source, a reason shown on the plan reveal, and a `forGoal` flag. Deterministic, on-device.
     - *Foundation*: "Make your bed" is always first.
-    - *Areas*: one habit per area where the answer shows room to improve. Sleep: <5h/5–6h → earlier
-      bedtime, 6–7h → phone-free wind-down. Screen: 2–4h → phone-free morning, 4–6h → social-free mornings,
-      6h+ → screen cap. Exercise: never → walk, a few times a month → steps, 1–2×/week → workout. Water: up
-      to 2L → water. Mind: never → journal, rarely → breathe, weekly → read. Healthy answers add nothing.
-    - *Goal*: always represented. If a habit already in a full plan serves the goal, it carries the goal
-      (its reason says so). Otherwise a goal habit is added, and if that makes 7, the area habit with the
-      mildest answer is dropped (ties: mind, then screen, water, exercise, sleep). The goal habit is never dropped.
-    - *Fillers* (only to reach 5): more habits for the goal, then habits the quiz doesn't cover
-      (top priorities, compliment, cold finish, deep work, conversation).
+    - *Areas*: one habit per area where the answer shows room to improve. The goal picks between
+      equally valid variants, so the same answers lead to different plans for different goals:
+      - Sleep: <5h/5–6h → earlier bedtime. 6–7h → earlier bedtime for energy or fitness (or when a screen
+        habit is already on the plan), otherwise a phone-free wind-down.
+      - Screen: 2–4h → phone-free morning, 4–6h → social-free mornings, 6h+ → screen cap.
+      - Exercise: never → walk (workout if the goal is getting in shape); a few times a month → steps
+        (workout for getting in shape); 1–2×/week → workout (steps for energy).
+      - Water: up to 2L → water.
+      - Mind: less stress → breathe, focus → read, confidence → journal; otherwise never → journal,
+        rarely → breathe, weekly → read.
+      - Healthy answers add nothing.
+    - *Goal*: always represented by a core habit for that goal (e.g. deep work for focus, workout or steps
+      for fitness). If an area habit already is one, its reason ties it to the goal. Otherwise a goal habit is
+      added, and if that makes 7, the area habit with the mildest answer is dropped (ties: mind, then screen,
+      water, exercise, sleep). Core goal habits are never dropped.
+    - *Coherence*: no near-duplicates (walk + steps, two morning phone rules), at most 2 phone rules.
+    - *Fillers* (only to reach 5): more habits for the goal, then other habits, preferring new categories.
+    - *Order*: foundation, then habits for the goal, then the rest.
+    - *Reasons*: quote the answer or name the goal in plain words; every reason in a plan is distinct.
     - *Never assigned*: anything the answers say the user already does. Regular exercise means no walk or
       workout; 2L+ water means no water habit; reading/meditating/journaling most days means no mind habits;
       7h+ sleep means no bedtime habit; under 2h of screen time means no screen habits.
     - *Starting level*: easy, except water at 4–8 glasses, which starts at medium (6 glasses), because many
       people in that range already drink 4.
+    - *Saved plans* are untouched: these rules only run when a new plan is built. Habit IDs and level texts
+      are unchanged.
 17. **Starting targets rewritten** so "easy" is reachable. Water: 4 / 6 / 8 glasses (was 1.5 / 2 / 2.5L).
     Screen cap: under 7h / 5h / 3h (was 5h / 4h / 2.5h). Earlier bedtime: "30 minutes earlier than usual",
     then 7h and 8h in bed before your alarm (was fixed clock times). Saved plans show the new text at their
