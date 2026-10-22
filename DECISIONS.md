@@ -77,4 +77,24 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     - Tapping a marker selects it (outline ring plus a caption under the art). The caption opens the existing
       Journey grid with that day outlined (`/journey?day=N`). There's no separate history view.
     - Today's ring breathes slowly unless Reduce Motion is on.
+21. **Ascent artwork v2** (`scripts/generate-ascent-art.py`).
+    - Restrained, desaturated blue-violet greys with one quiet warm note at the horizon, instead of
+      saturated purple.
+    - Three distant ranges with natural concave slopes, atmospheric perspective and mist between layers.
+    - A gradient-lit main mountain with a soft shaded face, a pool of light on the west face, a rim light
+      on the ridge and a thin frost line at the top.
+    - Same composition, size (1500×1000) and paths, and the main ridgeline is unchanged, so the trail and
+      markers line up exactly as before.
+22. **Theme transitions** (`src/theme/transition.tsx`, pure helpers in `src/theme/fade.ts`).
+    - One Reanimated shared value eases between dark (0) and light (1) over 220 ms whenever the resolved
+      theme changes (toggle, Settings, or the phone's appearance under System). With Reduce Motion it
+      switches at once. The preference is still saved immediately.
+    - `T`, `Screen`, `Card`, `Button`, `ProgressBar`, `ThemedView`, the habit rows and the Ascent blend
+      palette colors by mapping each color back to its token. The two landscapes crossfade. Nothing
+      remounts and nothing is overlaid.
+    - Icons and the overlays drawn on the art switch at the start of the fade; they're small and sit over
+      the crossfading image.
+    - Ceremonies use `PinnedDark`, so they never follow a theme change, even mid-ceremony.
+    - Light `onAccent` is `#FEFEFF` rather than pure white, so it can't be confused with light `surface`
+      when colors are mapped back to tokens. A test enforces that no two tokens collide.
 

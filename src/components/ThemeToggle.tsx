@@ -3,6 +3,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 /**
  * Sun/moon button that flips between Light and Dark and remembers the choice.
@@ -22,9 +23,11 @@ export function ThemeToggle() {
       hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.button, { backgroundColor: c.surface, opacity: pressed ? 0.6 : 1 }]}
+      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
     >
-      <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={c.text} />
+      <ThemedView style={[styles.button, { backgroundColor: c.surface }]}>
+        <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={c.text} />
+      </ThemedView>
     </Pressable>
   );
 }

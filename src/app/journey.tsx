@@ -16,6 +16,7 @@ import {
 } from '../core/progression';
 import { currentDay, useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 const COLS = 7;
 const PHASES = [
@@ -82,7 +83,7 @@ export default function Journey() {
                 const bg = future ? 'transparent' : full ? c.accent : ok ? c.accentSoft : c.surface;
                 const fg = full ? c.onAccent : future ? c.textFaint : ok ? c.accentInk : c.textDim;
                 return (
-                  <View
+                  <ThemedView
                     key={day}
                     accessibilityLabel={`Day ${day}${future ? '' : `, ${Math.round(ratio * 100)}% done`}${isPicked ? ', selected' : ''}`}
                     style={[
@@ -102,7 +103,7 @@ export default function Journey() {
                     {!future && !ok && ratio > 0 ? (
                       <View style={[styles.partial, { backgroundColor: c.accentInk, width: `${ratio * 70}%` }]} />
                     ) : null}
-                  </View>
+                  </ThemedView>
                 );
               })}
             </View>

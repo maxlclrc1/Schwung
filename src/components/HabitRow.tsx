@@ -14,6 +14,7 @@ import { habitTask, habitTitle, isCustom } from '../core/habits';
 import type { PlanHabit } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
+import { blendToken, useThemeProgress } from '../theme/transition';
 import { LevelPips, T } from './ui';
 
 type Props = {
@@ -36,6 +37,7 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
   const { c } = useTheme();
   const progress = useSharedValue(done ? 1 : 0);
   const ripple = useSharedValue(1);
+  const theme = useThemeProgress();
   const pressed = useSharedValue(0);
 
   // Source of truth is the store; this keeps the animation in sync with it
@@ -59,14 +61,26 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
     onToggle(habit.habitId);
   };
 
-  const rowStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], [c.surface, c.accentSoft]),
-    opacity: 1 - pressed.value * 0.15,
-  }));
-  const boxStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], ['transparent', c.accent]),
-    borderColor: interpolateColor(progress.value, [0, 1], [c.textFaint, c.accent]),
-  }));
+  // Two blends at once: checked/unchecked (progress) and dark/light (theme), so a theme switch fades too.
+  const rowStyle = useAnimatedStyle(() => {
+    const t = theme.value;
+    return {
+      backgroundColor: interpolateColor(
+        progress.value,
+        [0, 1],
+        [blendToken(t, 'surface'), blendToken(t, 'accentSoft')],
+      ),
+      opacity: 1 - pressed.value * 0.15,
+    };
+  });
+  const boxStyle = useAnimatedStyle(() => {
+    const t = theme.value;
+    const accent = blendToken(t, 'accent');
+    return {
+      backgroundColor: interpolateColor(progress.value, [0, 1], ['rgba(0,0,0,0)', accent]),
+      borderColor: interpolateColor(progress.value, [0, 1], [blendToken(t, 'textFaint'), accent]),
+    };
+  });
   // A plain ring with no content, so scaling it is safe.
   const rippleStyle = useAnimatedStyle(() => ({
     opacity: ripple.value >= 1 ? 0 : 0.7 * (1 - ripple.value),

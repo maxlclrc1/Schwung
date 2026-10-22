@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 
 /** Header for modal sheets: grabber + title + Done. */
@@ -8,7 +9,7 @@ export function SheetHeader({ title, action = 'Done' }: { title: string; action?
   const { c } = useTheme();
   return (
     <View style={styles.wrap}>
-      <View style={[styles.grabber, { backgroundColor: c.border }]} />
+      <ThemedView style={[styles.grabber, { backgroundColor: c.border }]} />
       <View style={styles.row}>
         <T v="heading" numberOfLines={1} style={{ flex: 1 }}>
           {title}

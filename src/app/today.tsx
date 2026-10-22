@@ -30,6 +30,7 @@ import { rescheduleSoon } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
 import { appNow, currentDay, useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 export default function Today() {
   const { c } = useTheme();
@@ -143,7 +144,7 @@ export default function Today() {
         />
 
         {canFixYesterday ? (
-          <Animated.View entering={FadeIn} style={[styles.segment, { backgroundColor: c.surface }]}>
+          <ThemedView entering={FadeIn} style={[styles.segment, { backgroundColor: c.surface }]}>
             {(['yesterday', 'today'] as const).map((v) => (
               <Pressable
                 key={v}
@@ -160,7 +161,7 @@ export default function Today() {
                 </T>
               </Pressable>
             ))}
-          </Animated.View>
+          </ThemedView>
         ) : null}
 
         {viewing === 'today' ? <Notices /> : null}
@@ -170,7 +171,7 @@ export default function Today() {
               const h = plan.find((p) => p.habitId === id)!;
               const next = getHabit(id)!.levels[levelUp(h.level)];
               return (
-                <Animated.View
+                <ThemedView
                   key={id}
                   entering={FadeInDown}
                   exiting={FadeOut}
@@ -200,7 +201,7 @@ export default function Today() {
                       onPress={() => useApp.getState().declineLevelUp(id)}
                     />
                   </View>
-                </Animated.View>
+                </ThemedView>
               );
             })
           : null}
@@ -228,15 +229,13 @@ export default function Today() {
 
         {viewing === 'today' ? (
           <View style={styles.footer}>
-            <Pressable
-              onPress={() => router.push('/add')}
-              accessibilityRole="button"
-              style={[styles.addButton, { borderColor: c.border }]}
-            >
-              <Ionicons name="add" size={20} color={c.textDim} />
-              <T v="bodyStrong" color={c.textDim}>
-                Add a habit
-              </T>
+            <Pressable onPress={() => router.push('/add')} accessibilityRole="button">
+              <ThemedView style={[styles.addButton, { borderColor: c.border }]}>
+                <Ionicons name="add" size={20} color={c.textDim} />
+                <T v="bodyStrong" color={c.textDim}>
+                  Add a habit
+                </T>
+              </ThemedView>
             </Pressable>
             <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
               Long-press a habit to edit, swap, or remove it.
@@ -248,7 +247,7 @@ export default function Today() {
       {celebrate ? <Confetti spread={200} /> : null}
       {celebrate ? (
         <View pointerEvents="none" style={[styles.celebrateWrap, { bottom: insets.bottom + space.xl }]}>
-          <Animated.View
+          <ThemedView
             entering={FadeInDown.springify().damping(16)}
             exiting={FadeOut.duration(250)}
             style={[styles.celebrate, { backgroundColor: c.accent }]}
@@ -257,7 +256,7 @@ export default function Today() {
             <T v="bodyStrong" color={c.onAccent}>
               Day complete · +{XP_FULL_DAY_BONUS} XP bonus
             </T>
-          </Animated.View>
+          </ThemedView>
         </View>
       ) : null}
     </Screen>
@@ -310,7 +309,7 @@ function Mission({
   const date = appNow().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <View style={[styles.mission, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.mission, { backgroundColor: c.surface }]}>
       <T v="overline" color={c.textDim} maxFontSizeMultiplier={1.3}>
         {date}
       </T>
@@ -324,7 +323,7 @@ function Mission({
       >
         <View style={styles.segments}>
           {Array.from({ length: planned }, (_, i) => (
-            <View key={i} style={[styles.segmentBar, { backgroundColor: i < done ? c.accent : c.surfaceHigh }]} />
+            <ThemedView key={i} style={[styles.segmentBar, { backgroundColor: i < done ? c.accent : c.surfaceHigh }]} />
           ))}
         </View>
         <T v="caption" color={full ? c.accentInk : c.textDim} style={styles.tabular} maxFontSizeMultiplier={1.4}>
@@ -334,7 +333,7 @@ function Mission({
       <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4}>
         {message}
       </T>
-      <View style={[styles.missionStats, { borderTopColor: c.border }]}>
+      <ThemedView style={[styles.missionStats, { borderTopColor: c.border }]}>
         <View
           style={styles.statItem}
           accessible
@@ -360,8 +359,8 @@ function Mission({
             {xp} XP
           </T>
         </View>
-      </View>
-    </View>
+      </ThemedView>
+    </ThemedView>
   );
 }
 
@@ -384,9 +383,11 @@ function IconButton({
       hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.iconButton, { backgroundColor: c.surface, opacity: pressed ? 0.6 : 1 }]}
+      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
     >
-      <Ionicons name={name} size={20} color={c.text} />
+      <ThemedView style={[styles.iconButton, { backgroundColor: c.surface }]}>
+        <Ionicons name={name} size={20} color={c.text} />
+      </ThemedView>
     </Pressable>
   );
 }

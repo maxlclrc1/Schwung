@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { getHabit, habitTitle } from '../core/habits';
 import type { Notice } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 
 function copy(n: Notice, title: (id: string) => string | undefined) {
@@ -47,7 +48,7 @@ export function Notices() {
       {notices.map((n) => {
         const { icon, head, body } = copy(n, title);
         return (
-          <Animated.View
+          <ThemedView
             key={n.id}
             entering={FadeInDown}
             exiting={FadeOut}
@@ -72,7 +73,7 @@ export function Notices() {
             >
               <Ionicons name="close" size={20} color={c.textFaint} />
             </Pressable>
-          </Animated.View>
+          </ThemedView>
         );
       })}
     </View>

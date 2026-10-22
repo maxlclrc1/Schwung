@@ -24,6 +24,7 @@ import { bestStreak, daysCompleted } from '../core/progression';
 import { haptic } from '../lib/haptics';
 import { currentDay, useApp } from '../store/useApp';
 import { ceremonyColors as c, radius, space } from '../theme';
+import { PinnedDark } from '../theme/transition';
 
 type Copy = { overline: string; title: string; body: string; cta: string };
 
@@ -66,10 +67,13 @@ export default function Ceremony() {
   }, [milestone]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <StatusBar style="light" />
-      {milestone === PROGRAM_DAYS ? <Finale /> : <Milestone milestone={milestone} />}
-    </View>
+    // Ceremonies are always dark and never follow a theme change, even mid-ceremony.
+    <PinnedDark>
+      <View style={{ flex: 1, backgroundColor: c.bg }}>
+        <StatusBar style="light" />
+        {milestone === PROGRAM_DAYS ? <Finale /> : <Milestone milestone={milestone} />}
+      </View>
+    </PinnedDark>
   );
 }
 

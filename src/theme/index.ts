@@ -34,7 +34,7 @@ const light: typeof dark = {
   textDim: '#696575',
   textFaint: '#76728A',
   accent: '#7451C8',
-  onAccent: '#FFFFFF',
+  onAccent: '#FEFEFF', // not pure white: must differ from surface so theme fades map colors unambiguously
   accentInk: '#7451C8',
   accentSoft: 'rgba(116,81,200,0.10)',
   accentLight: '#C9B8F5',
@@ -43,6 +43,9 @@ const light: typeof dark = {
 };
 
 export type Colors = typeof dark;
+
+/** Both palettes, for blending during theme transitions (see ./transition). */
+export const palettes = { dark, light } as const;
 export type { ThemePreference };
 export type Scheme = 'light' | 'dark';
 

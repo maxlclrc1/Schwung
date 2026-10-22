@@ -88,6 +88,7 @@ for example 4 glasses of water for someone drinking under 2, or a 7h screen cap 
 - **Theme choice:** a sun/moon button on the welcome screen and the Today header switches between light and dark;
   Settings → Appearance offers System / Light / Dark. The choice is saved on the device. Ceremonies and the
   share card stay dark by design.
+- Switching themes fades colors smoothly over about 220 ms (instant with Reduce Motion).
 - Gold (#F2B84B) is reserved for milestone ceremonies, never an everyday accent.
 - Large, bold system typography, generous spacing, and one accent color per screen.
 - Fast, subtle motion (150–250 ms) with a spring on check-off. Bolder, cinematic ceremonies.

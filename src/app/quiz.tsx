@@ -9,6 +9,7 @@ import type { Answers } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -135,7 +136,7 @@ export default function Quiz() {
 
   return (
     <Screen>
-      <View style={[styles.header, { backgroundColor: c.bg }]}>
+      <ThemedView style={[styles.header, { backgroundColor: c.bg }]}>
         <Pressable onPress={back} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back" style={styles.back}>
           <Ionicons name="chevron-back" size={26} color={c.text} />
         </Pressable>
@@ -145,7 +146,7 @@ export default function Quiz() {
         <T v="caption" color={c.textDim} style={styles.count}>
           {step + 1}/{QUESTIONS.length}
         </T>
-      </View>
+      </ThemedView>
 
       <ScrollView style={styles.clip} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* The first question appears with the screen itself; only later ones animate in. */}
@@ -172,26 +173,29 @@ export default function Quiz() {
                     onPress={() => choose(o.value)}
                     accessibilityRole="radio"
                     accessibilityState={{ selected }}
-                    style={({ pressed }) => [
-                      styles.option,
-                      {
-                        backgroundColor: selected ? c.accentSoft : c.surface,
-                        borderColor: selected ? c.accentInk : 'transparent',
-                        opacity: pressed ? 0.75 : 1,
-                      },
-                    ]}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
                   >
-                    {o.icon ? <Ionicons name={o.icon} size={22} color={selected ? c.accentInk : c.textDim} /> : null}
-                    <T v="bodyStrong" style={{ flex: 1 }}>
-                      {o.label}
-                    </T>
-                    {selected ? (
-                      <Animated.View entering={FadeIn.duration(120)}>
-                        <Ionicons name="checkmark-circle" size={24} color={c.accentInk} />
-                      </Animated.View>
-                    ) : (
-                      <View style={[styles.radio, { borderColor: c.border }]} />
-                    )}
+                    <ThemedView
+                      style={[
+                        styles.option,
+                        {
+                          backgroundColor: selected ? c.accentSoft : c.surface,
+                          borderColor: selected ? c.accentInk : 'transparent',
+                        },
+                      ]}
+                    >
+                      {o.icon ? <Ionicons name={o.icon} size={22} color={selected ? c.accentInk : c.textDim} /> : null}
+                      <T v="bodyStrong" style={{ flex: 1 }}>
+                        {o.label}
+                      </T>
+                      {selected ? (
+                        <Animated.View entering={FadeIn.duration(120)}>
+                          <Ionicons name="checkmark-circle" size={24} color={c.accentInk} />
+                        </Animated.View>
+                      ) : (
+                        <ThemedView style={[styles.radio, { borderColor: c.border }]} />
+                      )}
+                    </ThemedView>
                   </Pressable>
                 );
               })}
