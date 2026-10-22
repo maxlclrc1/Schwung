@@ -5,7 +5,9 @@ Assembles the One Continuous Ascent canvas (1536 x 5120):
                   colour-matched to the painting's edge), with its soft mist band stretched taller
   then            a fade into the exact app background, which fills the rest
 
-    python3 design/canvas/assemble_canvas.py <world.jpg> <continuation> <out.png> [dark|light]
+    python3 design/canvas/assemble_canvas.py <world.jpg> <continuation> <out.png> [dark|light] [stretch]
+
+stretch (default 1 = off) lengthens the continuation's rows 300-800; only for soft mist, never for detail.
 """
 
 import sys
@@ -18,7 +20,7 @@ theme = sys.argv[4] if len(sys.argv) > 4 else 'dark'
 W, H = 1536, 5120
 PAINT_END = 1824  # last row of the painting inside the world image
 OVERLAP = 80  # rows of crossfade, below the lowest trail markers (painting rows 944-1024)
-STRETCH = (300, 800, 1.8)  # continuation rows a..b (soft mist) stretched by this factor
+STRETCH = (300, 800, float(sys.argv[5]) if len(sys.argv) > 5 else 1.0)  # rows a..b (soft mist only) x factor
 BG = np.array([17, 17, 22] if theme == 'dark' else [247, 246, 251], np.float32)
 MIST_MAX = 0.20 if theme == 'dark' else 0.86  # brightest the mist may be (dark) / darkest (light)
 rng = np.random.default_rng(5)
@@ -41,8 +43,9 @@ cont = cont + offset * ease
 
 # 2. Stretch the soft mist band (no detail there, so the stretch can't show).
 a, b, f = STRETCH
-mid = Image.fromarray(cont[a:b].clip(0, 255).astype(np.uint8)).resize((W, round((b - a) * f)), Image.BICUBIC)
-cont = np.concatenate([cont[:a], np.asarray(mid).astype(np.float32), cont[b:]])
+if f != 1.0:
+    mid = Image.fromarray(cont[a:b].clip(0, 255).astype(np.uint8)).resize((W, round((b - a) * f)), Image.BICUBIC)
+    cont = np.concatenate([cont[:a], np.asarray(mid).astype(np.float32), cont[b:]])
 
 # 3. Keep text over the mist readable: cap how bright (dark theme) or dark (light theme) the mist gets.
 L = lum(cont)
