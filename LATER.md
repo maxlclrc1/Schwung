@@ -26,5 +26,4 @@ Ideas that came up while building v1 (not built):
 - **Ascent polish:**
   - per-day history detail when a marker is selected (today it opens the Journey grid)
   - optionally `react-native-svg` for a continuous lit trail line instead of dots
-  - a hand-painted landscape to replace the generated art
 

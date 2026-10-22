@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, T } from '../components/ui';
+import { OnboardingBackdrop } from '../components/World';
 import { ANSWER_LABEL, GOAL_DETAIL } from '../core/answers';
 import { AREA_ICON, startingPoint } from '../core/onboarding';
 import { buildPlan, GOAL_LABEL } from '../core/plan';
@@ -27,7 +28,7 @@ export default function Start() {
   const enter = (i: number) => FadeInDown.delay(80 + i * 110).duration(420);
 
   return (
-    <Screen>
+    <Screen backdrop={<OnboardingBackdrop />}>
       <View style={styles.header}>
         <Pressable
           onPress={() => {

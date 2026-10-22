@@ -1,34 +1,50 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { TrailHero } from '../components/TrailHero';
 import { Button, Screen, T } from '../components/ui';
+import { WorldBackdrop } from '../components/World';
+import { worldFrame } from '../core/world';
 import { APP_NAME } from '../lib/constants';
 import { useApp } from '../store/useApp';
 import { space, useTheme } from '../theme';
 
 export default function Welcome() {
   const { c } = useTheme();
-  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   // Answers saved but no program yet: they left during onboarding, so offer to pick it back up.
   const resumable = useApp((s) => s.answers !== null && s.startedAt === null);
-  // Shorter art on short phones (SE) so everything fits without scrolling.
-  const heroWidth = Math.min(width - space.xl * 2, height < 620 ? 190 : height < 740 ? 270 : 420);
+  // The world scrolls with the page here (short phones may scroll), so the trailhead and painting never drift.
+  const [zoneTop, setZoneTop] = useState(insets.top + space.sm);
+  const { zoneHeight } = worldFrame(width, zoneTop);
 
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={styles.wrap} bounces={false} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <T v="overline" color={c.accentInk} style={styles.brand}>
-            {APP_NAME}
-          </T>
-          <ThemeToggle />
-        </View>
-        <View style={styles.top}>
-          <Animated.View entering={FadeIn.duration(700)} style={styles.hero}>
-            <TrailHero width={heroWidth} />
+    <Screen edges={['bottom']}>
+      <ScrollView
+        contentContainerStyle={[styles.wrap, { paddingTop: insets.top + space.sm }]}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeIn.duration(700)} style={StyleSheet.absoluteFill}>
+          <WorldBackdrop zoneTop={zoneTop} />
+        </Animated.View>
+        {/* The mountain, full width, with the brand and theme toggle over its calm sky. */}
+        <View onLayout={(e) => setZoneTop(e.nativeEvent.layout.y)} style={[styles.zone, { width, height: zoneHeight }]}>
+          <Animated.View entering={FadeIn.delay(300).duration(700)}>
+            <TrailHero width={width} />
           </Animated.View>
+          <View style={styles.header}>
+            <T v="overline" color={c.accentInk} style={styles.brand}>
+              {APP_NAME}
+            </T>
+            <ThemeToggle />
+          </View>
+        </View>
+        <View style={styles.text}>
           <Animated.View entering={FadeInDown.delay(150).duration(500)} style={{ gap: space.sm }}>
             <T v="display" accessibilityRole="header">
               Get your momentum back.
@@ -54,9 +70,19 @@ export default function Welcome() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flexGrow: 1, padding: space.xl, gap: space.xl, justifyContent: 'space-between' },
-  top: { flex: 1, justifyContent: 'center', gap: space.lg },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: -space.md },
+  wrap: { flexGrow: 1, paddingHorizontal: space.xl, paddingBottom: space.xl, gap: space.lg },
+  // Full-bleed: the page has side padding, the mountain doesn't.
+  zone: { marginHorizontal: -space.xl },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: space.xl,
+    right: space.xl,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   brand: { letterSpacing: 3 },
-  hero: { alignItems: 'center' },
+  // Pushes the CTA to the bottom; the fog shows between the mountain and the words.
+  text: { flex: 1, justifyContent: 'flex-end', gap: space.lg },
 });

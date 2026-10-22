@@ -20,14 +20,18 @@ export function Screen({
   children,
   edges = ['top', 'bottom'],
   style,
+  backdrop,
 }: {
   children: ReactNode;
   edges?: Edge[];
   style?: StyleProp<ViewStyle>;
+  /** Drawn behind everything, edge to edge (under the status bar too), e.g. the world. */
+  backdrop?: ReactNode;
 }) {
   const { c } = useTheme();
   return (
     <ThemedView style={{ flex: 1, backgroundColor: c.bg }}>
+      {backdrop}
       <SafeAreaView edges={edges} style={[{ flex: 1 }, style]}>
         {children}
       </SafeAreaView>

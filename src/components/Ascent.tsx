@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useMemo } from 'react';
-import { GestureResponderEvent, Image, Pressable, StyleSheet, View } from 'react-native';
+import { GestureResponderEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -10,26 +9,11 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import {
-  ASCENT_ASPECT,
-  ASCENT_PHASES,
-  AscentDay,
-  describeDay,
-  LANDMARKS,
-  nearestDay,
-  phaseFor,
-  trailDots,
-} from '../core/ascent';
+import { ASCENT_ASPECT, ASCENT_PHASES, AscentDay, describeDay, LANDMARKS, phaseFor, trailDots } from '../core/ascent';
 import { PROGRAM_DAYS } from '../core/dates';
-import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
-import { ThemedView, useThemeProgress } from '../theme/transition';
+import { ThemedView } from '../theme/transition';
 import { T } from './ui';
-
-const ART = {
-  dark: require('../../assets/ascent-dark.jpg'),
-  light: require('../../assets/ascent-light.jpg'),
-};
 
 const DOTS = trailDots(3);
 
@@ -40,31 +24,29 @@ const PHASE_LABEL_AT: Record<1 | 2 | 3, { x: number; y: number }> = {
   3: { x: 0.03, y: 0.36 },
 };
 
-type Props = {
+type SceneProps = {
   days: AscentDay[];
   today: number;
+  /** Full screen width: the painting behind (WorldBackdrop) spans it at 3:2. */
   width: number;
   /** A past or future day picked on the trail, or null. */
   selected: number | null;
-  onSelect: (day: number | null) => void;
-  onOpenJourney: (day?: number) => void;
   /** True once today counts as a successful day: the last trail segment lights up. */
   todayDone: boolean;
 };
 
 /*
- * Everything drawn here is a plain view or an icon at its natural size: nothing containing text or
- * icons is ever scaled (iOS stretches a bitmap while scaling, which looks pixelated).
- * All overlays ignore touches; the root Pressable maps a tap to the nearest day marker.
+ * Everything drawn on the mountain: the trail, day markers, today's orb, landmarks, phase names and the
+ * current day. The painting itself is the WorldBackdrop behind, placed so its 3:2 painting matches this
+ * view exactly. Every element is a plain view or an icon at its natural size: nothing containing text or
+ * icons is ever scaled (iOS stretches a bitmap while scaling, which looks pixelated). Ignores touches;
+ * the screen maps taps to days with `nearestDay`.
  */
-function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, todayDone }: Props) {
+function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps) {
   const { c, isDark } = useTheme();
   const reduceMotion = useReducedMotion();
   const height = Math.round(width / ASCENT_ASPECT);
-  const theme = useThemeProgress();
-  const lightArt = useAnimatedStyle(() => ({ opacity: theme.value }));
   const maintenance = today > PROGRAM_DAYS;
-  const done = days.filter((d) => d.status === 'done').length;
   const phase = phaseFor(Math.min(today, PROGRAM_DAYS));
 
   const tone = useMemo(
@@ -75,9 +57,6 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
       halo: isDark ? 'rgba(167,139,250,0.22)' : 'rgba(116,81,200,0.16)',
       pill: isDark ? 'rgba(17,17,22,0.62)' : 'rgba(255,255,255,0.78)',
       badge: isDark ? 'rgba(28,27,37,0.92)' : 'rgba(255,255,255,0.94)',
-      scrim: isDark
-        ? (['rgba(17,17,22,0.6)', 'rgba(17,17,22,0)'] as const)
-        : (['rgba(247,246,251,0.8)', 'rgba(247,246,251,0)'] as const),
     }),
     [c.accent, isDark],
   );
@@ -85,246 +64,220 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
   const status = (day: number) => days[day - 1]?.status;
   const px = (x: number) => x * width;
   const py = (y: number) => y * height;
-
-  const onPress = (e: GestureResponderEvent) => {
-    const day = nearestDay(tapPoint(e), width, height, 16);
-    if (day === null || day === selected) {
-      onSelect(null);
-      return;
-    }
-    haptic.tap();
-    onSelect(day === today ? null : day);
-  };
-
   const selectedDay = selected ? days[selected - 1] : null;
-  const label = maintenance
-    ? `The Schwung Ascent. Summit reached. ${done} of ${PROGRAM_DAYS} days completed.`
-    : `The Schwung Ascent. Day ${today} of ${PROGRAM_DAYS}, ${phase.name} phase. ${done} days completed so far.`;
 
   return (
-    <View style={{ width, gap: space.sm }}>
-      <ThemedView style={[styles.frame, { width, height, backgroundColor: c.surface }]}>
-        <Pressable
-          onPress={onPress}
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel={label}
-          accessibilityHint="Opens your journey"
-          accessibilityActions={[{ name: 'activate', label: 'Open journey' }]}
-          onAccessibilityAction={() => onOpenJourney()}
-          style={StyleSheet.absoluteFill}
-        >
-          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-            {/* Explicit size: some platforms size an Image from its file, not from absoluteFill. */}
-            {/* Both landscapes stay mounted; light crossfades over dark with the theme, no flash. */}
-            <Image
-              source={ART.dark}
-              style={{ position: 'absolute', left: 0, top: 0, width, height }}
-              resizeMode="cover"
-            />
-            <Animated.Image
-              source={ART.light}
-              style={[{ position: 'absolute', left: 0, top: 0, width, height }, lightArt]}
-              resizeMode="cover"
-            />
-            <LinearGradient
-              colors={tone.scrim}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0.45, y: 0.4 }}
-              style={StyleSheet.absoluteFill}
-            />
+    <View pointerEvents="none" style={{ width, height }}>
+      {/* No darkening gradient: the painting's top-left sky is calm enough for the day text in both themes. */}
+      {/* Trail: lit where the day it leads to was a successful day, dimmer where it was missed. */}
+      {DOTS.map((d, i) => {
+        const s = status(d.between);
+        const color =
+          s === 'done' || (s === 'today' && todayDone)
+            ? tone.lit
+            : s === 'missed' || s === 'today'
+              ? tone.walked
+              : tone.ahead;
+        return (
+          <View key={i} style={[styles.dot, { left: px(d.x) - 1.25, top: py(d.y) - 1.25, backgroundColor: color }]} />
+        );
+      })}
 
-            {/* Trail: lit where the day it leads to was a successful day, dimmer where it was missed. */}
-            {DOTS.map((d, i) => {
-              const s = status(d.between);
-              const color =
-                s === 'done' || (s === 'today' && todayDone)
-                  ? tone.lit
-                  : s === 'missed' || s === 'today'
-                    ? tone.walked
-                    : tone.ahead;
-              return (
-                <View
-                  key={i}
-                  style={[styles.dot, { left: px(d.x) - 1.25, top: py(d.y) - 1.25, backgroundColor: color }]}
-                />
-              );
-            })}
-
-            {/* Day markers. */}
-            {days.map((d) => {
-              if (d.landmark || d.status === 'today') return null;
-              const x = px(d.point.x);
-              const y = py(d.point.y);
-              if (d.status === 'done')
-                return (
-                  <View key={d.day} style={[styles.abs, { left: x - 6.5, top: y - 6.5 }]}>
-                    <View style={[styles.halo, { backgroundColor: tone.halo }]} />
-                    <View style={[styles.marker, { backgroundColor: tone.lit, left: 3, top: 3 }]} />
-                  </View>
-                );
-              if (d.status === 'missed')
-                return (
-                  <View
-                    key={d.day}
-                    style={[styles.marker, styles.hollow, { left: x - 3.5, top: y - 3.5, borderColor: tone.walked }]}
-                  />
-                );
-              return (
-                <View
-                  key={d.day}
-                  style={[styles.marker, styles.small, { left: x - 2.5, top: y - 2.5, backgroundColor: tone.ahead }]}
-                />
-              );
-            })}
-
-            {/* Today's orb sits under the landmark badges, so on a landmark day (like 66) the badge
-                stays visible inside today's rings and the summit still reads as the destination. */}
-            {!maintenance ? (
-              <TodayOrb
-                x={px(days[today - 1].point.x)}
-                y={py(days[today - 1].point.y)}
-                color={c.accent}
-                halo={tone.halo}
-                animate={!reduceMotion}
-                todayDone={todayDone}
-                landmark={days[today - 1].landmark}
-              />
-            ) : null}
-
-            {/* Landmarks at 7, 21, 44 and the summit. */}
-            {days
-              .filter((d) => d.landmark)
-              .map((d) => {
-                const summit = d.day === PROGRAM_DAYS;
-                const reached = d.status === 'done' || d.status === 'today';
-                const size = summit ? 26 : 20;
-                const color = summit ? c.gold : reached ? c.accent : c.textDim;
-                return (
-                  <View
-                    key={d.day}
-                    style={[
-                      styles.badge,
-                      {
-                        width: size,
-                        height: size,
-                        borderRadius: size / 2,
-                        left: px(d.point.x) - size / 2,
-                        top: py(d.point.y) - size / 2,
-                        backgroundColor: tone.badge,
-                        borderColor: summit ? c.gold : reached ? c.accent : tone.ahead,
-                      },
-                    ]}
-                  >
-                    <Ionicons name={LANDMARKS[d.day].icon} size={summit ? 14 : 11} color={color} />
-                  </View>
-                );
-              })}
-
-            {/* Phase names, the current one emphasized. */}
-            {ASCENT_PHASES.map((p) => {
-              const at = PHASE_LABEL_AT[p.n];
-              const current = !maintenance && p.n === phase.n;
-              return (
-                <View key={p.n} style={[styles.phase, { left: px(at.x), top: py(at.y), backgroundColor: tone.pill }]}>
-                  <T
-                    v="overline"
-                    maxFontSizeMultiplier={1.2}
-                    color={current ? c.accentInk : c.textDim}
-                    style={styles.phaseText}
-                  >
-                    {p.name}
-                  </T>
-                </View>
-              );
-            })}
-
-            {/* Selected day: an outline ring, clearly different from today's filled orb. */}
-            {selectedDay ? (
-              <ThemedView
-                style={[
-                  styles.selected,
-                  { left: px(selectedDay.point.x) - 10, top: py(selectedDay.point.y) - 10, borderColor: c.text },
-                ]}
-              />
-            ) : null}
-
-            {/* Where you are: kept to the top-left corner, clear of the upper switchbacks. */}
-            <View style={[styles.where, { maxWidth: width * 0.4 }]}>
-              <T v="overline" maxFontSizeMultiplier={1.15} color={c.accentInk} numberOfLines={1}>
-                {maintenance ? 'Summit reached' : `Phase ${phase.n} of 3`}
-              </T>
-              <View style={styles.dayLine}>
-                <T
-                  v="heading"
-                  maxFontSizeMultiplier={1.15}
-                  style={[styles.tabular, styles.dayText, maintenance && styles.dayTextSmall]}
-                  numberOfLines={1}
-                >
-                  {maintenance ? 'Maintenance' : `Day ${today}`}
-                </T>
-                {!maintenance ? (
-                  <T v="caption" maxFontSizeMultiplier={1.15} color={c.textDim} style={styles.tabular}>
-                    {' '}
-                    / {PROGRAM_DAYS}
-                  </T>
-                ) : null}
-              </View>
+      {/* Day markers. */}
+      {days.map((d) => {
+        if (d.landmark || d.status === 'today') return null;
+        const x = px(d.point.x);
+        const y = py(d.point.y);
+        if (d.status === 'done')
+          return (
+            <View key={d.day} style={[styles.abs, { left: x - 6.5, top: y - 6.5 }]}>
+              <View style={[styles.halo, { backgroundColor: tone.halo }]} />
+              <View style={[styles.marker, { backgroundColor: tone.lit, left: 3, top: 3 }]} />
             </View>
-          </View>
-        </Pressable>
-      </ThemedView>
+          );
+        if (d.status === 'missed')
+          return (
+            <View
+              key={d.day}
+              style={[styles.marker, styles.hollow, { left: x - 3.5, top: y - 3.5, borderColor: tone.walked }]}
+            />
+          );
+        return (
+          <View
+            key={d.day}
+            style={[styles.marker, styles.small, { left: x - 2.5, top: y - 2.5, backgroundColor: tone.ahead }]}
+          />
+        );
+      })}
 
-      {/* Below the art, so it never covers a marker: the selected day (or a hint) and the way into Journey. */}
-      <View style={styles.bottomRow}>
-        {selectedDay ? (
-          <Pressable
-            onPress={() => onOpenJourney(selectedDay.day)}
-            accessibilityRole="button"
-            accessibilityLabel={`${describeDay(selectedDay)}. Open in journey`}
-            style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
+      {/* Today's orb sits under the landmark badges, so on a landmark day (like 66) the badge
+                stays visible inside today's rings and the summit still reads as the destination. */}
+      {!maintenance ? (
+        <TodayOrb
+          x={px(days[today - 1].point.x)}
+          y={py(days[today - 1].point.y)}
+          color={c.accent}
+          halo={tone.halo}
+          animate={!reduceMotion}
+          todayDone={todayDone}
+          landmark={days[today - 1].landmark}
+        />
+      ) : null}
+
+      {/* Landmarks at 7, 21, 44 and the summit. */}
+      {days
+        .filter((d) => d.landmark)
+        .map((d) => {
+          const summit = d.day === PROGRAM_DAYS;
+          const reached = d.status === 'done' || d.status === 'today';
+          const size = summit ? 26 : 20;
+          const color = summit ? c.gold : reached ? c.accent : c.textDim;
+          return (
+            <View
+              key={d.day}
+              style={[
+                styles.badge,
+                {
+                  width: size,
+                  height: size,
+                  borderRadius: size / 2,
+                  left: px(d.point.x) - size / 2,
+                  top: py(d.point.y) - size / 2,
+                  backgroundColor: tone.badge,
+                  borderColor: summit ? c.gold : reached ? c.accent : tone.ahead,
+                },
+              ]}
+            >
+              <Ionicons name={LANDMARKS[d.day].icon} size={summit ? 14 : 11} color={color} />
+            </View>
+          );
+        })}
+
+      {/* Phase names, the current one emphasized. */}
+      {ASCENT_PHASES.map((p) => {
+        const at = PHASE_LABEL_AT[p.n];
+        const current = !maintenance && p.n === phase.n;
+        return (
+          <View key={p.n} style={[styles.phase, { left: px(at.x), top: py(at.y), backgroundColor: tone.pill }]}>
+            <T
+              v="overline"
+              maxFontSizeMultiplier={1.2}
+              color={current ? c.accentInk : c.textDim}
+              style={styles.phaseText}
+            >
+              {p.name}
+            </T>
+          </View>
+        );
+      })}
+
+      {/* Selected day: an outline ring, clearly different from today's filled orb. */}
+      {selectedDay ? (
+        <ThemedView
+          style={[
+            styles.selected,
+            { left: px(selectedDay.point.x) - 10, top: py(selectedDay.point.y) - 10, borderColor: c.text },
+          ]}
+        />
+      ) : null}
+
+      {/* Where you are: kept to the top-left corner, clear of the upper switchbacks. */}
+      <View style={[styles.where, { maxWidth: width * 0.4 }]}>
+        <T v="overline" maxFontSizeMultiplier={1.15} color={c.accentInk} numberOfLines={1}>
+          {maintenance ? 'Summit reached' : `Phase ${phase.n} of 3`}
+        </T>
+        <View style={styles.dayLine}>
+          <T
+            v="heading"
+            maxFontSizeMultiplier={1.15}
+            style={[styles.tabular, styles.dayText, maintenance && styles.dayTextSmall]}
+            numberOfLines={1}
           >
-            <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
-              <ThemedView style={[styles.captionDot, { borderColor: c.text }]} />
-              <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={1} style={{ flexShrink: 1, fontWeight: '600' }}>
-                {describeDay(selectedDay)}
-              </T>
-              <Ionicons name="chevron-forward" size={14} color={c.textDim} />
-            </ThemedView>
-          </Pressable>
-        ) : (
-          <T v="caption" maxFontSizeMultiplier={1.3} color={c.textFaint} numberOfLines={1} style={{ flexShrink: 1 }}>
-            {done} of {PROGRAM_DAYS} days climbed · tap a day
+            {maintenance ? 'Maintenance' : `Day ${today}`}
           </T>
-        )}
-        {/* While a day is selected, its caption is the way into Journey, so it gets the whole row. */}
-        {selectedDay ? null : (
-          <Pressable
-            onPress={() => onOpenJourney()}
-            accessibilityRole="button"
-            accessibilityLabel="Open your journey"
-            hitSlop={6}
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-          >
-            <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
-              <Ionicons name="map-outline" size={14} color={c.accentInk} />
-              <T v="caption" maxFontSizeMultiplier={1.3} color={c.accentInk} style={{ fontWeight: '700' }}>
-                Journey
-              </T>
-            </ThemedView>
-          </Pressable>
-        )}
+          {!maintenance ? (
+            <T v="caption" maxFontSizeMultiplier={1.15} color={c.textDim} style={styles.tabular}>
+              {' '}
+              / {PROGRAM_DAYS}
+            </T>
+          ) : null}
+        </View>
       </View>
     </View>
   );
 }
 
+export const AscentScene = memo(AscentSceneImpl);
+
+/** What VoiceOver reads for the trail (the screen's tap target over it). */
+export function ascentLabel(days: AscentDay[], today: number): string {
+  const done = days.filter((d) => d.status === 'done').length;
+  if (today > PROGRAM_DAYS) return `The Schwung Ascent. Summit reached. ${done} of ${PROGRAM_DAYS} days completed.`;
+  return `The Schwung Ascent. Day ${today} of ${PROGRAM_DAYS}, ${phaseFor(today).name} phase. ${done} days completed so far.`;
+}
+
+/** Below the mountain, so it never covers a marker: the selected day (or a hint) and the way into Journey. */
+export function AscentCaption({
+  days,
+  selected,
+  onOpenJourney,
+}: {
+  days: AscentDay[];
+  selected: number | null;
+  onOpenJourney: (day?: number) => void;
+}) {
+  const { c } = useTheme();
+  const done = days.filter((d) => d.status === 'done').length;
+  const selectedDay = selected ? days[selected - 1] : null;
+  return (
+    <View style={styles.bottomRow}>
+      {selectedDay ? (
+        <Pressable
+          onPress={() => onOpenJourney(selectedDay.day)}
+          accessibilityRole="button"
+          accessibilityLabel={`${describeDay(selectedDay)}. Open in journey`}
+          style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
+        >
+          <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
+            <ThemedView style={[styles.captionDot, { borderColor: c.text }]} />
+            <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={1} style={{ flexShrink: 1, fontWeight: '600' }}>
+              {describeDay(selectedDay)}
+            </T>
+            <Ionicons name="chevron-forward" size={14} color={c.textDim} />
+          </ThemedView>
+        </Pressable>
+      ) : (
+        <T v="caption" maxFontSizeMultiplier={1.3} color={c.textDim} numberOfLines={1} style={{ flexShrink: 1 }}>
+          {done} of {PROGRAM_DAYS} days climbed · tap a day
+        </T>
+      )}
+      {/* While a day is selected, its caption is the way into Journey, so it gets the whole row. */}
+      {selectedDay ? null : (
+        <Pressable
+          onPress={() => onOpenJourney()}
+          accessibilityRole="button"
+          accessibilityLabel="Open your journey"
+          hitSlop={6}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
+          <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
+            <Ionicons name="map-outline" size={14} color={c.accentInk} />
+            <T v="caption" maxFontSizeMultiplier={1.3} color={c.accentInk} style={{ fontWeight: '700' }}>
+              Journey
+            </T>
+          </ThemedView>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
 /**
- * Tap position inside the art. iOS/Android provide locationX/Y relative to the pressed view (all
+ * Tap position inside the pressed view. iOS/Android provide locationX/Y relative to the pressed view (all
  * overlays ignore touches, so that's the art itself); react-native-web passes the DOM event, whose
  * offsetX/Y are the equivalent.
  */
-function tapPoint(e: GestureResponderEvent): { x: number; y: number } {
+export function tapPoint(e: GestureResponderEvent): { x: number; y: number } {
   const ne = e.nativeEvent as GestureResponderEvent['nativeEvent'] & { offsetX?: number; offsetY?: number };
   const x = typeof ne.locationX === 'number' ? ne.locationX : (ne.offsetX ?? -1);
   const y = typeof ne.locationY === 'number' ? ne.locationY : (ne.offsetY ?? -1);
@@ -387,10 +340,7 @@ export function TodayOrb({
   );
 }
 
-export const Ascent = memo(AscentImpl);
-
 const styles = StyleSheet.create({
-  frame: { borderRadius: radius.lg, overflow: 'hidden' },
   abs: { position: 'absolute' },
   dot: { position: 'absolute', width: 2.5, height: 2.5, borderRadius: 1.25 },
   marker: { position: 'absolute', width: 7, height: 7, borderRadius: 3.5 },

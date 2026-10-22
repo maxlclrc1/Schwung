@@ -5,6 +5,7 @@ import { Linking, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { TimePicker } from '../components/TimePicker';
 import { Button, Screen, T } from '../components/ui';
+import { OnboardingBackdrop } from '../components/World';
 import { formatTime } from '../core/dates';
 import { permissionBlocked, requestPermission, rescheduleReminders } from '../lib/notifications';
 import { useApp } from '../store/useApp';
@@ -40,7 +41,7 @@ export default function Reminder() {
   };
 
   return (
-    <Screen>
+    <Screen backdrop={<OnboardingBackdrop />}>
       <View style={styles.wrap}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: space.md }}>
           <ThemedView style={[styles.icon, { backgroundColor: c.accentSoft }]}>

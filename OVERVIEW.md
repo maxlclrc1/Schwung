@@ -14,10 +14,11 @@ and the plan is fully editable.
 
 ## Screens and flow
 
-1. **Welcome**: the Ascent landscape with an empty trail and one glowing orb at the trailhead, the
+1. **Welcome**: the full-screen mountain with an empty trail and one glowing orb at the trailhead, the
    headline "Get your momentum back.", "Free. No account. No paywall.", and "Start my reset". If the quiz
    was finished but no program started, "Pick up where you left off" goes straight to the starting point.
-2. **Quiz**: 6 questions, one per screen, goal first. Progress is a row of trail markers.
+2. **Quiz**: 6 questions, one per screen, goal first. Progress is a row of trail markers. The quiz, starting
+   point, plan and reminder show the same mountain behind them, dimmed so the text stays easy to read.
    - Main goal: energy, focus, discipline, confidence, less stress, get in shape (each with a short line)
    - Sleep: <5h, 5–6h, 6–7h, 7–8h, 8h+
    - Screen time: <2h, 2–4h, 4–6h, 6–8h, 8h+
@@ -36,10 +37,12 @@ and the plan is fully editable.
 4. **Reminder** (optional): pick a daily reminder time. Notification permission is asked only here, after
    the plan. If notifications were denied before, it says so and offers the phone's Settings instead.
 5. **Day 1 ceremony**: opens straight from the reminder (Today doesn't flash first), with "Built for {goal}".
-6. **Today** (the core screen):
+6. **Today** (the core screen), set in the Schwung world: the painted mountain fills the screen behind
+   everything, and its fog settles into the background where the cards are. The mountain and its trail stay
+   still while the page scrolls over them.
    - **Header:** the Schwung wordmark and a time-of-day greeting, with theme and Settings buttons.
    - **Welcome back** (only after a pause): when the days before today have nothing checked, a quiet card
-     under the header says welcome back and offers one first step, the habit they've done most often, as a
+     under the mountain says welcome back and offers one first step, the habit they've done most often, as a
      one-tap check-off. No catching up. After the first check today it says "You're back." briefly and
      leaves. It never shows otherwise.
    - **The Schwung Ascent:** a winding trail of 66 day markers up a misty mountain, in three phases
@@ -107,7 +110,8 @@ for example 4 glasses of water for someone drinking under 2, or a 7h screen cap 
 - Gold (#F2B84B) is reserved for milestone ceremonies, never an everyday accent.
 - Large, bold system typography, generous spacing, and one accent color per screen.
 - Fast, subtle motion (150–250 ms) with a spring on check-off. Bolder, cinematic ceremonies.
-- Icons, orbs and confetti are drawn in code; the only artwork files are the two Ascent landscapes (light and dark), reused by the welcome screen.
+- Icons, orbs and confetti are drawn in code. The artwork is one painted mountain in a dark and a light version
+  (`assets/ascent-*.jpg`, 3:2), extended into full-screen backgrounds (`assets/world-*.jpg`).
 - The app icon is a lavender "S" on charcoal (a placeholder).
 
 ## Tech

@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeInRight, FadeOutLeft, LayoutAnimationConfig } fro
 import { IconOrb } from '../components/Art';
 import { TrailProgress } from '../components/TrailProgress';
 import { Button, Screen, T } from '../components/ui';
+import { OnboardingBackdrop } from '../components/World';
 import { ANSWER_LABEL, GOAL_DETAIL } from '../core/answers';
 import { ANSWER_VALUES, type Answers } from '../core/types';
 import { haptic } from '../lib/haptics';
@@ -136,8 +137,8 @@ export default function Quiz() {
   const answered = answers[q.key] !== undefined;
 
   return (
-    <Screen>
-      <ThemedView style={[styles.header, { backgroundColor: c.bg }]}>
+    <Screen backdrop={<OnboardingBackdrop />}>
+      <View style={styles.header}>
         <Pressable onPress={back} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back" style={styles.back}>
           <Ionicons name="chevron-back" size={26} color={c.text} />
         </Pressable>
@@ -145,7 +146,7 @@ export default function Quiz() {
           <TrailProgress step={step} total={QUESTIONS.length} />
         </View>
         <View style={styles.back} />
-      </ThemedView>
+      </View>
 
       <ScrollView style={styles.clip} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* The first question appears with the screen itself; only later ones animate in. */}

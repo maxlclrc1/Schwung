@@ -145,4 +145,21 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
       react-native-web always reports a screen reader, so the web build always shows Continue.
     - *Day 1 transition*: the reminder screen marks Day 1 seen and opens the ceremony over Today in one
       step, so Today never flashes first and the ceremony can't be queued twice.
+25. **The Schwung world: painted art, full screen** (owner decision; replaces the generated art of items 20–21).
+    - *Art*: one original painting per theme (`design/artwork-candidates/a1-dark-v2.png`, and
+      `a1-light-v1.png` with a haze pass from `soften_light.py` so the trail's faint dots stay readable).
+      Painted to the trail geometry with the guide pack in `design/artwork-guides/`; every candidate is checked
+      with `check_candidate.py`. The light version is a relight of the dark one, so the theme crossfade can't ghost.
+    - *Full screen*: `extend_tall.py` adds sky above and a fog bank below the untouched painting, ending in the
+      exact app background color (`assets/world-*.jpg`, 1536×2560, painting at rows 800–1824).
+      `src/core/world.ts` places it so the painting lines up with the trail at any screen width.
+    - *Today*: the world and the trail are fixed; the page scrolls over them. The trail area in the page is a
+      transparent placeholder: its measured position places the world, and taps on it are shifted by the
+      scroll distance to find the day under the finger. A copy of the same sky stays behind the status bar.
+      The comeback card now sits under the mountain (content above the trail would move it off the painting).
+    - *Welcome*: the world scrolls with the page, so the trailhead orb and the painting can't drift apart. The
+      brand and theme toggle sit over the sky.
+    - *Quiz, starting point, plan, reminder*: the same world, veiled at 80% with the background color.
+    - The Ascent's old top-left darkening gradient is gone: the painted sky is calm enough for the day text.
+    - Ceremonies, Journey, Settings and the sheets are unchanged. `scripts/generate-ascent-art.py` is legacy.
 

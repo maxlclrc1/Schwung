@@ -1,18 +1,29 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  GestureResponderEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { Confetti } from '../components/Art';
-import { Ascent } from '../components/Ascent';
+import { AscentCaption, ascentLabel, AscentScene, tapPoint } from '../components/Ascent';
 import { Comeback } from '../components/Comeback';
 import { HabitRow } from '../components/HabitRow';
 import { Notices } from '../components/Notices';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { Button, ProgressBar, Screen, T } from '../components/ui';
-import { ascentDays, phaseFor } from '../core/ascent';
+import { Button, ProgressBar, T } from '../components/ui';
+import { WorldBackdrop } from '../components/World';
+import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
 import { comebackFor } from '../core/comeback';
+import { trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { getHabit, habitTitle, levelUp } from '../core/habits';
 import {
@@ -63,8 +74,15 @@ export default function Today() {
   const streak = useMemo(() => currentStreak(logs, start, today), [logs, start, today]);
   const offers = useMemo(() => levelUpOffers(plan, logs, start, today), [plan, logs, start, today]);
   const { width } = useWindowDimensions();
-  const ascentWidth = Math.min(width - space.lg * 2, 600);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // The mountain and its trail stay still while the page scrolls over them. The trail area in the page is a
+  // transparent placeholder: its measured position places the world, and taps on it map back to the trail.
+  const [zoneTop, setZoneTop] = useState(insets.top + 96);
+  const { zoneHeight } = worldFrame(width, zoneTop);
+  const scrollY = useRef(0);
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    scrollY.current = e.nativeEvent.contentOffset.y;
+  }, []);
   const days = useMemo(() => ascentDays(logs, start, today), [logs, start, today]);
   const todayDone = plan.filter((p) => todayLog?.completed.includes(p.habitId)).length;
   const comeback = useMemo(
@@ -79,6 +97,18 @@ export default function Today() {
     [toggleHabit, today],
   );
   const onOpenJourney = useCallback((day?: number) => router.push(day ? `/journey?day=${day}` : '/journey'), []);
+  const onTrailPress = useCallback(
+    (e: GestureResponderEvent) => {
+      const day = nearestDay(trailPoint(tapPoint(e), scrollY.current), width, zoneHeight, 16);
+      if (day === null || day === selectedDay) {
+        setSelectedDay(null);
+        return;
+      }
+      haptic.tap();
+      setSelectedDay(day === today ? null : day);
+    },
+    [width, zoneHeight, selectedDay, today],
+  );
 
   const onToggle = useCallback(
     (habitId: string) => {
@@ -116,9 +146,18 @@ export default function Today() {
   if (!startedAt) return null;
 
   return (
-    <Screen edges={['top']}>
+    <View style={styles.root}>
+      <WorldBackdrop zoneTop={zoneTop} />
+      <View pointerEvents="none" style={[styles.scene, { top: zoneTop }]}>
+        <AscentScene days={days} today={today} width={width} selected={selectedDay} todayDone={todayQualifies} />
+      </View>
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + space.xxxl }]}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingTop: insets.top + space.sm, paddingBottom: insets.bottom + space.xxxl },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
@@ -136,17 +175,20 @@ export default function Today() {
           </View>
         </View>
 
-        {viewing === 'today' ? <Comeback comeback={comeback} plan={plan} onStart={onStartComeback} /> : null}
-
-        <Ascent
-          days={days}
-          today={today}
-          width={ascentWidth}
-          selected={selectedDay}
-          onSelect={setSelectedDay}
-          onOpenJourney={onOpenJourney}
-          todayDone={todayQualifies}
+        <Pressable
+          onLayout={(e) => setZoneTop(e.nativeEvent.layout.y)}
+          onPress={onTrailPress}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={ascentLabel(days, today)}
+          accessibilityHint="Opens your journey"
+          accessibilityActions={[{ name: 'activate', label: 'Open journey' }]}
+          onAccessibilityAction={() => onOpenJourney()}
+          style={[styles.zone, { width, height: zoneHeight }]}
         />
+        <AscentCaption days={days} selected={selectedDay} onOpenJourney={onOpenJourney} />
+
+        {viewing === 'today' ? <Comeback comeback={comeback} plan={plan} onStart={onStartComeback} /> : null}
 
         <Mission
           today={today}
@@ -258,6 +300,8 @@ export default function Today() {
           </View>
         ) : null}
       </ScrollView>
+      {/* The same sky, fixed behind the status bar, so the page scrolls under it rather than under the clock. */}
+      <WorldBackdrop zoneTop={zoneTop} clip={insets.top} />
 
       {celebrate ? <Confetti spread={200} /> : null}
       {celebrate ? (
@@ -274,7 +318,7 @@ export default function Today() {
           </ThemedView>
         </View>
       ) : null}
-    </Screen>
+    </View>
   );
 }
 
@@ -408,7 +452,11 @@ function IconButton({
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: space.lg, paddingTop: space.sm, gap: space.lg },
+  root: { flex: 1 },
+  scene: { position: 'absolute', left: 0 },
+  scroll: { paddingHorizontal: space.lg, gap: space.lg },
+  // Full-bleed: the page has side padding, the mountain doesn't.
+  zone: { marginHorizontal: -space.lg },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.md },
   tabular: { fontVariant: ['tabular-nums'] },
   headerIcons: { flexDirection: 'row', gap: space.sm },
