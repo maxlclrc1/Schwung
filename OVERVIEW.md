@@ -28,16 +28,22 @@ and the plan is fully editable.
 4. **Reminder**: pick a daily reminder time. Notification permission is asked only here, after the plan.
 5. **Day 1 ceremony**: a full-screen animated moment.
 6. **Today** (the core screen):
-   - Header shows "Day X / 66" and the phase. There's a streak counter (flame) and a player level with an XP bar.
-   - Tap a habit to check it, with an instant spring animation and haptic feedback. Tap again to uncheck.
-   - Long-press a habit to open its details.
+   - **Header:** the Schwung wordmark and a time-of-day greeting, with theme and Settings buttons.
+   - **The Schwung Ascent:** a winding trail of 66 day markers up a misty mountain, in three phases
+     (Foundation 1–21, Momentum 22–44, Mastery 45–66).
+     - Successful days are lit, missed days stay on the walked trail but dimmer, and future days are faint.
+     - Today is a glowing violet orb. Landmarks mark days 7, 21 and 44, and a gold star marks the summit (66).
+     - Tap a day to see it (for example "Day 12 · Foundation · 5 of 5 done"), then open it in Journey.
+   - **Daily mission:** date, phase line, a progress bar per habit, a gentle message (e.g. "2 more and today
+     counts"), the streak, and the level with an XP bar.
+   - **Habits:** tap to check with instant feedback and haptics; tap again to uncheck; long-press for details.
+     Before noon you can switch to yesterday and fix it. Level-up offers and kind step-down messages appear here.
    - Finishing every habit triggers a confetti burst, a success haptic, and "+20 XP bonus".
-   - Before noon, you can switch to yesterday and fix it.
-   - When you've earned a level-up, an inline card offers it. Kind messages appear when habits ease off a level.
 7. **Habit detail**: the "why", a level picker (Lv 1–3), the current run, plus swap and remove.
 8. **Swap**: choose another habit from the library, with similar habits listed first.
 9. **Add**: create a custom habit with a title and optional details.
 10. **Journey**: a 66-day grid colored by completion, plus days done, current streak and best streak.
+    A day picked on the Ascent is outlined.
 11. **Ceremonies**: full-screen moments with confetti on days 1, 7, 21, 44 and 66. Day 66 shows final stats
     and a shareable image card ("I got my momentum back.") through the iOS share sheet, followed by
     "Season 2 coming soon" and the option to keep going in maintenance mode.

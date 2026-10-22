@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SheetHeader } from '../components/SheetHeader';
@@ -31,6 +32,8 @@ export default function Journey() {
   const offset = useApp((s) => s.devDayOffset);
   const today = currentDay({ startedAt, devDayOffset: offset });
   const start = startedAt ?? '';
+  // Opened from a marker on the Ascent: outline that day.
+  const picked = Number(useLocalSearchParams<{ day?: string }>().day) || null;
 
   const stats = useMemo(
     () => [
@@ -72,6 +75,7 @@ export default function Journey() {
                 const log = logForDay(logs, start, day);
                 const future = day > today;
                 const isToday = day === today;
+                const isPicked = day === picked && !isToday;
                 const full = isFullDay(log);
                 const ok = dayQualifies(log);
                 const ratio = dayRatio(log);
@@ -80,15 +84,15 @@ export default function Journey() {
                 return (
                   <View
                     key={day}
-                    accessibilityLabel={`Day ${day}${future ? '' : `, ${Math.round(ratio * 100)}% done`}`}
+                    accessibilityLabel={`Day ${day}${future ? '' : `, ${Math.round(ratio * 100)}% done`}${isPicked ? ', selected' : ''}`}
                     style={[
                       styles.cell,
                       {
                         width: cell,
                         height: cell,
                         backgroundColor: bg,
-                        borderColor: isToday ? c.accentInk : future ? c.border : 'transparent',
-                        borderWidth: isToday ? 2 : 1,
+                        borderColor: isToday ? c.accentInk : isPicked ? c.text : future ? c.border : 'transparent',
+                        borderWidth: isToday || isPicked ? 2 : 1,
                       },
                     ]}
                   >

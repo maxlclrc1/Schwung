@@ -66,4 +66,15 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     events, and the contrast with everyday use is the point. They use `ceremonyColors` and a light status bar
     whatever the app theme. The share card is dark too, so it looks the same in every feed. Everything else
     follows the selected theme.
+20. **The Schwung Ascent** (Today's centerpiece; `src/core/ascent.ts` and `src/components/Ascent.tsx`).
+    - The landscape is two bundled images (`assets/ascent-dark.jpg`, `assets/ascent-light.jpg`, about 90 KB
+      each), generated procedurally by `scripts/generate-ascent-art.py`, so they're original and reproducible.
+    - The trail and the 66 day markers are drawn as plain views on top of the image (no SVG dependency).
+      They stay sharp at any size, and nothing containing text or icons is ever scaled.
+    - Marker states reuse existing rules only: *done* = `dayQualifies` (80%); *missed* = a past day that
+      didn't qualify, which stays on the walked trail; *today* = the current day; *future* = ahead.
+    - Landmarks at 7, 21, 44 and 66 are visual only, and gold is used only for the summit.
+    - Tapping a marker selects it (outline ring plus a caption under the art). The caption opens the existing
+      Journey grid with that day outlined (`/journey?day=N`). There's no separate history view.
+    - Today's ring breathes slowly unless Reduce Motion is on.
 

@@ -27,7 +27,7 @@ export function logForDay(logs: Logs, startKey: string, day: number): DayLog | u
   return logs[dateForDay(startKey, day)];
 }
 
-function doneCount(log: DayLog): number {
+export function doneCount(log: DayLog): number {
   return log.completed.filter((id) => log.planned.includes(id)).length;
 }
 
