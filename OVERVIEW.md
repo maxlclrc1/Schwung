@@ -23,7 +23,7 @@ and the plan is fully editable.
    - Water: <2 glasses up to 12+ glasses (5 options)
    - Read/meditate/journal: never, rarely, weekly, most days, daily
    - Main goal: energy, focus, discipline, confidence, less stress, get in shape
-3. **Plan reveal**: the 5–6 habits picked for you, each with an icon and a one-line "why".
+3. **Plan reveal**: the 5–6 habits picked for you, built for your goal, each with an icon and a one-line "why".
    Button: "Begin Day 1".
 4. **Reminder**: pick a daily reminder time. Notification permission is asked only here, after the plan.
 5. **Day 1 ceremony**: a full-screen animated moment.
@@ -76,8 +76,10 @@ and the plan is fully editable.
 | Confidence | start a conversation, genuine compliment |
 
 The quiz answers map to habits deterministically. "Make your bed" is always included as an easy first win.
-Each area where the answers show room to improve gets one habit, the stated goal always gets a habit, and
-nothing the user already does regularly is assigned. Each habit on the plan reveal says why it was picked
+Each area where the answers show room to improve gets one habit, and the goal decides which variant
+(for example, 6–7h of sleep becomes an earlier bedtime for energy but a phone-free wind-down for less
+stress). The stated goal always gets a core habit, listed first after the bed. Near-duplicates are
+avoided, and nothing the user already does regularly is assigned. Each habit on the plan reveal says why it was picked
 (quoting the answer, or naming the goal). Starting targets are set to be reachable from the answer given,
 for example 4 glasses of water for someone drinking under 2, or a 7h screen cap for 8h+ users.
 
