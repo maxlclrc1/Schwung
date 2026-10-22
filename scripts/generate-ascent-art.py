@@ -1,4 +1,7 @@
 """
+LEGACY (superseded by the painted art, DECISIONS.md item 25). Running this overwrites
+assets/ascent-dark.jpg and assets/ascent-light.jpg with the old generated mountains.
+
 Generates the Schwung Ascent landscapes: assets/ascent-dark.jpg and assets/ascent-light.jpg.
 
 Dev-only (not bundled). Procedural, so the art is original, small, and reproducible.

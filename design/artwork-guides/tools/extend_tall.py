@@ -15,7 +15,7 @@ from PIL import Image, ImageFilter
 
 src, dst = sys.argv[1], sys.argv[2]
 theme = sys.argv[3] if len(sys.argv) > 3 else 'dark'
-TOP, TOTAL = 600, 3328  # for 1536-wide art: painting occupies rows 600..1624
+TOP, TOTAL = 800, 2560  # for 1536-wide art: painting occupies rows 800..1824; the fog has fully become the app background by ~2504
 BG = np.array([17, 17, 22] if theme == 'dark' else [247, 246, 251], np.float32)
 TOP_TONE = np.array([14, 13, 24] if theme == 'dark' else [214, 216, 234], np.float32)
 MIST = np.array([88, 84, 118] if theme == 'dark' else [226, 224, 238], np.float32)
@@ -50,32 +50,48 @@ F = round(200 * scale)  # long feather: the painting's clouds dissolve into the 
 w = (np.arange(F) / F)[:, None, None] ** 1.3
 out[TOP:TOP + F] = art[:F] * w + edge[None] * (1 - w)
 
-# Below: the slopes reflected and progressively blurred, veiled by mist, then the app background.
-B = TOTAL - TOP - H0
+# Below: a fog bank rolls over the lowest slope (uneven top edge, just under the trail's last days),
+# thickens, then fades into the app background, where Today's cards scroll.
+S = TOP + H0
+B = TOTAL - S
+# Under the fog: the slope mirrored downward, so its texture carries on across the seam, starting sharp
+# and blurring progressively (no sudden change in sharpness), then darkening into the background.
+Rm = min(B, round(520 * scale))
+refl = art[::-1][:Rm]
+radii = [0, 4, 10, 22, 40]
+levels = [refl] + [blur(refl, r * scale) for r in radii[1:]]
+under = np.empty((B, W, 3), np.float32)
+for y in range(B):
+    if y < Rm:
+        k = y / Rm * (len(radii) - 1)
+        i = int(k)
+        f = k - i
+        row = levels[i][y] * (1 - f) + levels[min(len(radii) - 1, i + 1)][y] * f
+    else:
+        row = BG
+    fade = min(1.0, y / Rm) ** 1.2
+    under[y] = row * (1 - fade) + BG * fade
+out[S:] = under
+y0 = S - round(110 * scale)
+rows = TOTAL - y0
+edge_n = low_noise(1, W, 40, 60, 0)[0] / 60  # roughly -1..1 along x: the fog's rolling top edge
+tex = (low_noise(rows, W, 16, 40, 30) + 128) / 255
+yy = (np.arange(y0, TOTAL) - S)[:, None].astype(np.float32)
+top_edge = -60 * scale + edge_n[None] * 30 * scale
+a = np.clip((yy - top_edge) / (240 * scale), 0, 1)
+a = a * a * (3 - 2 * a) * (0.82 + 0.18 * tex)  # smoothstep, with some density variation
+mist_col = MIST * (1 - np.clip((yy - 160 * scale) / (520 * scale), 0, 1)[..., None]) + BG * np.clip((yy - 160 * scale) / (520 * scale), 0, 1)[..., None]
+out[y0:] = out[y0:] * (1 - a[..., None]) + mist_col * a[..., None]
 R = round(560 * scale)
-refl = art[::-1][:R]
-levels = [blur(refl, r) for r in (3, 8, 18, 36)]
-below = np.repeat(BG[None, None], B, 0).repeat(W, 1).astype(np.float32)
-for y in range(R):
-    k = y / R * 3
-    i = int(k)
-    f = k - i
-    row = levels[i][y] * (1 - f) + levels[min(3, i + 1)][y] * f
-    fade = (y / R) ** 1.1
-    below[y] = row * (1 - fade) * 0.8 + BG * fade
-yy = np.arange(B)[:, None]
-mist = (low_noise(B, W, 14, 40, 34) + 128) / 255
-alpha = np.exp(-((yy - 90 * scale) / (190 * scale)) ** 2) * 0.6 * (0.55 + 0.9 * mist)
-below = below * (1 - alpha[..., None]) + MIST * alpha[..., None]
-out[TOP + H0:] = below
-# Soften the painting's bottom edge into the mist.
-F2 = round(110 * scale)
-w2 = (np.arange(F2) / F2)[:, None, None] ** 1.5
-out[TOP + H0 - F2:TOP + H0] = art[H0 - F2:] * (1 - w2) + below[:1] * w2
+F2 = S - y0
 
 # Grain outside the untouched middle, so the extensions match the painting's texture.
 g = rng.normal(0, 2.6, (TOTAL, W, 1)).astype(np.float32)
 keep = np.ones((TOTAL, 1, 1), np.float32)
 keep[TOP + F:TOP + H0 - F2] = 0
+# No grain in the flat bottom, so the image's lower edge meets the app background invisibly.
+end = TOP + H0 + round(680 * scale)
+keep[end - round(200 * scale):end, 0, 0] = np.linspace(1, 0, round(200 * scale))
+keep[end:] = 0
 Image.fromarray((out + g * keep).clip(0, 255).astype(np.uint8)).save(dst)
 print(f'{dst}: {W}x{TOTAL}, painting at y={TOP}..{TOP + H0} (untouched rows {TOP + F}..{TOP + H0 - F2})')

@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, T } from '../components/ui';
+import { OnboardingBackdrop } from '../components/World';
 import { LANDMARKS } from '../core/ascent';
 import { GROWTH_NOTES, phasePreview } from '../core/onboarding';
 import { buildPlan, GOAL_LABEL } from '../core/plan';
@@ -32,7 +33,7 @@ export default function Reveal() {
   };
 
   return (
-    <Screen>
+    <Screen backdrop={<OnboardingBackdrop />}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: space.sm }}>
           <T v="overline" color={c.accentInk}>
