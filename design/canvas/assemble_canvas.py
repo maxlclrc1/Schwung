@@ -22,7 +22,7 @@ PAINT_END = 1824  # last row of the painting inside the world image
 OVERLAP = 80  # rows of crossfade, below the lowest trail markers (painting rows 944-1024)
 STRETCH = (300, 800, float(sys.argv[5]) if len(sys.argv) > 5 else 1.0)  # rows a..b (soft mist only) x factor
 BG = np.array([17, 17, 22] if theme == 'dark' else [247, 246, 251], np.float32)
-MIST_MAX = 0.20 if theme == 'dark' else 0.86  # brightest the mist may be (dark) / darkest (light)
+MIST_MAX = 0.20 if theme == 'dark' else 0.68  # brightest the mist may be (dark) / darkest it may be (light)
 rng = np.random.default_rng(5)
 
 
@@ -55,7 +55,7 @@ if theme == 'dark':
     scale = np.where(L > MIST_MAX, MIST_MAX / np.maximum(L, 1e-3), 1.0)
 else:
     scale = np.where(L < MIST_MAX, MIST_MAX / np.maximum(L, 1e-3), 1.0)
-scale = 1 + (np.clip(scale, 0.6, 1.4) - 1) * below_slopes
+scale = 1 + (np.clip(scale, 0.6, 1.25) - 1) * below_slopes
 cont = cont * scale[..., None]
 
 # 4. Fade the continuation's end into the exact background.
