@@ -20,6 +20,7 @@ import { Confetti } from '../components/Art';
 import { FinaleStats, ShareCard } from '../components/ShareCard';
 import { T } from '../components/ui';
 import { PROGRAM_DAYS } from '../core/dates';
+import { GOAL_LABEL } from '../core/plan';
 import { bestStreak, daysCompleted } from '../core/progression';
 import { haptic } from '../lib/haptics';
 import { currentDay, useApp } from '../store/useApp';
@@ -158,6 +159,7 @@ function DelayedConfetti() {
 
 function Milestone({ milestone }: { milestone: number }) {
   const copy = COPY[milestone] ?? COPY[1];
+  const goal = useApp((s) => s.answers?.goal);
   const { width } = useWindowDimensions();
   return (
     <SafeAreaView style={styles.fill}>
@@ -177,8 +179,13 @@ function Milestone({ milestone }: { milestone: number }) {
             {copy.title}
           </T>
         </Animated.View>
-        <Animated.View entering={FadeInDown.delay(800).duration(500)}>
+        <Animated.View entering={FadeInDown.delay(800).duration(500)} style={{ gap: space.sm }}>
           <T color={c.textDim}>{copy.body}</T>
+          {milestone === 1 && goal ? (
+            <T v="caption" color={c.accent}>
+              Built for {GOAL_LABEL[goal]}.
+            </T>
+          ) : null}
         </Animated.View>
         <Animated.View entering={FadeInUp.delay(1100).duration(400)} style={{ marginTop: space.lg }}>
           <CeremonyButton label={copy.cta} onPress={() => router.back()} />

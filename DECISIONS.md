@@ -125,3 +125,24 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
       back-filled, and the program, streak, XP, 80% rule, step-downs and phases are unchanged.
     - The multi-habit step-down notice now reads "Let's ease in." (was "Welcome back. Let's ease in."), so
       the greeting isn't said twice.
+24. **Onboarding redesign** (welcome → quiz → starting point → plan → reminder → Day 1).
+    - *Goal first*: every other answer is given with it in mind. The answer values and the `Answers` type
+      are unchanged, so saved answers and plan generation are unaffected.
+    - *No new questions*. The "biggest obstacle" is derived: the hardest answer (plan severity, ties in plan
+      area order) whose habit is actually in the plan, so the screen never points at something the plan
+      doesn't address. "Already working" is exactly the answers for which the plan calls for no habit.
+      Logic in `src/core/onboarding.ts`, answer wording shared in `src/core/answers.ts`.
+    - *Truthful copy*: phase lines and the two growth notes are built from the real constants
+      (`PHASE_START`, `LEVEL_UP_RUN`, `STEP_DOWN_MISSES`). Tests run the actual `reconcile` level-ups against
+      the example and check that every plan has a goal habit and starts below the top level.
+    - *Swapping before starting is deferred*: it would need a draft plan beside the store's plan and a second
+      mode for the swap screen. Swapping from Today already works.
+    - *Starting is idempotent*: `startProgram()` does nothing (returns false) while a program is running, so
+      navigating back into onboarding can never overwrite a plan or logs. Settings → Restart clears the
+      program first, so starting over on purpose still works. The quiz and starting point redirect to Today
+      while a program runs, and the reminder screen has no back gesture.
+    - *VoiceOver*: the quiz doesn't auto-advance when a screen reader is on; a Continue button appears.
+      react-native-web always reports a screen reader, so the web build always shows Continue.
+    - *Day 1 transition*: the reminder screen marks Day 1 seen and opens the ceremony over Today in one
+      step, so Today never flashes first and the ceremony can't be queued twice.
+

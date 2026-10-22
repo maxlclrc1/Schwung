@@ -332,7 +332,7 @@ function tapPoint(e: GestureResponderEvent): { x: number; y: number } {
 }
 
 /** Today's glowing orb. A slow breathing ring (off with Reduce Motion) and a ripple when today counts. */
-function TodayOrb({
+export function TodayOrb({
   x,
   y,
   color,

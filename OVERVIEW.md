@@ -14,19 +14,28 @@ and the plan is fully editable.
 
 ## Screens and flow
 
-1. **Welcome**: an animated "momentum" illustration (a glowing core with orbiting dots), the headline
-   "Get your momentum back.", "Free. No account. No paywall.", and a "Start my reset" button.
-2. **Quiz**: 6 questions, one per screen, each with an animated icon and a progress bar.
+1. **Welcome**: the Ascent landscape with an empty trail and one glowing orb at the trailhead, the
+   headline "Get your momentum back.", "Free. No account. No paywall.", and "Start my reset". If the quiz
+   was finished but no program started, "Pick up where you left off" goes straight to the starting point.
+2. **Quiz**: 6 questions, one per screen, goal first. Progress is a row of trail markers.
+   - Main goal: energy, focus, discipline, confidence, less stress, get in shape (each with a short line)
    - Sleep: <5h, 5–6h, 6–7h, 7–8h, 8h+
    - Screen time: <2h, 2–4h, 4–6h, 6–8h, 8h+
    - Exercise: never, a few times a month, 1–2/week, 3–4/week, 5+/week
    - Water: <2 glasses up to 12+ glasses (5 options)
    - Read/meditate/journal: never, rarely, weekly, most days, daily
-   - Main goal: energy, focus, discipline, confidence, less stress, get in shape
-3. **Plan reveal**: the 5–6 habits picked for you, built for your goal, each with an icon and a one-line "why".
-   Button: "Begin Day 1".
-4. **Reminder**: pick a daily reminder time. Notification permission is asked only here, after the plan.
-5. **Day 1 ceremony**: a full-screen animated moment.
+   - It moves on by itself after each answer, except with VoiceOver on, where a Continue button does.
+3. **Starting point, then plan reveal**:
+   - *Starting point*: the goal; "Most room to grow", the hardest answer that has a habit in the plan,
+     quoted with that habit's target ("Your basics are strong" if every answer is healthy); and
+     "Already working", the answers healthy enough that they call for no habit.
+   - *Plan*: the 5–6 habits picked, built for the goal, each with an icon, a one-line "why" and a
+     "For your goal" tag where it applies. "How it grows" follows one habit from the plan through the
+     three phases with its real targets, plus the early level-up and step-back rules. Button: "Begin with
+     this plan". This is exactly the plan that starts; swaps happen later, from Today.
+4. **Reminder** (optional): pick a daily reminder time. Notification permission is asked only here, after
+   the plan. If notifications were denied before, it says so and offers the phone's Settings instead.
+5. **Day 1 ceremony**: opens straight from the reminder (Today doesn't flash first), with "Built for {goal}".
 6. **Today** (the core screen):
    - **Header:** the Schwung wordmark and a time-of-day greeting, with theme and Settings buttons.
    - **Welcome back** (only after a pause): when the days before today have nothing checked, a quiet card
@@ -98,7 +107,7 @@ for example 4 glasses of water for someone drinking under 2, or a 7h screen cap 
 - Gold (#F2B84B) is reserved for milestone ceremonies, never an everyday accent.
 - Large, bold system typography, generous spacing, and one accent color per screen.
 - Fast, subtle motion (150–250 ms) with a spring on check-off. Bolder, cinematic ceremonies.
-- All illustrations are drawn in code (glowing icon orbs, orbit animation, confetti), so there are no image files.
+- Icons, orbs and confetti are drawn in code; the only artwork files are the two Ascent landscapes (light and dark), reused by the welcome screen.
 - The app icon is a lavender "S" on charcoal (a placeholder).
 
 ## Tech
