@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -47,10 +48,10 @@ export function IconOrb({ icon, size = 96, color }: { icon: IconName; size?: num
         ]}
       />
       <Animated.View style={[styles.center, floatStyle]}>
-        <View
+        <ThemedView
           style={[styles.center, { width: size, height: size, borderRadius: size / 2, backgroundColor: c.accentSoft }]}
         >
-          <View
+          <ThemedView
             style={[
               styles.center,
               {
@@ -66,8 +67,8 @@ export function IconOrb({ icon, size = 96, color }: { icon: IconName; size?: num
             ]}
           >
             <Ionicons name={icon} size={core * 0.5} color={c.onAccent} />
-          </View>
-        </View>
+          </ThemedView>
+        </ThemedView>
       </Animated.View>
     </View>
   );
@@ -141,7 +142,7 @@ export function MomentumHero({ size = 220 }: { size?: number }) {
       <Orbit size={size} duration={14000} dot={8} />
       <Orbit size={size * 0.72} duration={9000} dot={10} reverse delay={200} />
       <Orbit size={size * 0.46} duration={6000} dot={7} delay={400} />
-      <View
+      <ThemedView
         style={{
           width: core,
           height: core,
@@ -156,7 +157,7 @@ export function MomentumHero({ size = 220 }: { size?: number }) {
         }}
       >
         <Ionicons name="trending-up" size={core * 0.5} color={c.onAccent} />
-      </View>
+      </ThemedView>
     </View>
   );
 }

@@ -23,6 +23,7 @@ import {
 import { PROGRAM_DAYS } from '../core/dates';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView, useThemeProgress } from '../theme/transition';
 import { T } from './ui';
 
 const ART = {
@@ -60,6 +61,8 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
   const { c, isDark } = useTheme();
   const reduceMotion = useReducedMotion();
   const height = Math.round(width / ASCENT_ASPECT);
+  const theme = useThemeProgress();
+  const lightArt = useAnimatedStyle(() => ({ opacity: theme.value }));
   const maintenance = today > PROGRAM_DAYS;
   const done = days.filter((d) => d.status === 'done').length;
   const phase = phaseFor(Math.min(today, PROGRAM_DAYS));
@@ -100,7 +103,7 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
 
   return (
     <View style={{ width, gap: space.sm }}>
-      <View style={[styles.frame, { width, height, backgroundColor: c.surface }]}>
+      <ThemedView style={[styles.frame, { width, height, backgroundColor: c.surface }]}>
         <Pressable
           onPress={onPress}
           accessible
@@ -113,9 +116,15 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
         >
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             {/* Explicit size: some platforms size an Image from its file, not from absoluteFill. */}
+            {/* Both landscapes stay mounted; light crossfades over dark with the theme, no flash. */}
             <Image
-              source={isDark ? ART.dark : ART.light}
+              source={ART.dark}
               style={{ position: 'absolute', left: 0, top: 0, width, height }}
+              resizeMode="cover"
+            />
+            <Animated.Image
+              source={ART.light}
+              style={[{ position: 'absolute', left: 0, top: 0, width, height }, lightArt]}
               resizeMode="cover"
             />
             <LinearGradient
@@ -232,7 +241,7 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
 
             {/* Selected day: an outline ring, clearly different from today's filled orb. */}
             {selectedDay ? (
-              <View
+              <ThemedView
                 style={[
                   styles.selected,
                   { left: px(selectedDay.point.x) - 10, top: py(selectedDay.point.y) - 10, borderColor: c.text },
@@ -264,7 +273,7 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
             </View>
           </View>
         </Pressable>
-      </View>
+      </ThemedView>
 
       {/* Below the art, so it never covers a marker: the selected day (or a hint) and the way into Journey. */}
       <View style={styles.bottomRow}>
@@ -273,13 +282,15 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
             onPress={() => onOpenJourney(selectedDay.day)}
             accessibilityRole="button"
             accessibilityLabel={`${describeDay(selectedDay)}. Open in journey`}
-            style={({ pressed }) => [styles.caption, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
           >
-            <View style={[styles.captionDot, { borderColor: c.text }]} />
-            <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={1} style={{ flexShrink: 1, fontWeight: '600' }}>
-              {describeDay(selectedDay)}
-            </T>
-            <Ionicons name="chevron-forward" size={14} color={c.textDim} />
+            <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
+              <ThemedView style={[styles.captionDot, { borderColor: c.text }]} />
+              <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={1} style={{ flexShrink: 1, fontWeight: '600' }}>
+                {describeDay(selectedDay)}
+              </T>
+              <Ionicons name="chevron-forward" size={14} color={c.textDim} />
+            </ThemedView>
           </Pressable>
         ) : (
           <T v="caption" maxFontSizeMultiplier={1.3} color={c.textFaint} numberOfLines={1} style={{ flexShrink: 1 }}>
@@ -293,12 +304,14 @@ function AscentImpl({ days, today, width, selected, onSelect, onOpenJourney, tod
             accessibilityRole="button"
             accessibilityLabel="Open your journey"
             hitSlop={6}
-            style={({ pressed }) => [styles.caption, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <Ionicons name="map-outline" size={14} color={c.accentInk} />
-            <T v="caption" maxFontSizeMultiplier={1.3} color={c.accentInk} style={{ fontWeight: '700' }}>
-              Journey
-            </T>
+            <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
+              <Ionicons name="map-outline" size={14} color={c.accentInk} />
+              <T v="caption" maxFontSizeMultiplier={1.3} color={c.accentInk} style={{ fontWeight: '700' }}>
+                Journey
+              </T>
+            </ThemedView>
           </Pressable>
         )}
       </View>

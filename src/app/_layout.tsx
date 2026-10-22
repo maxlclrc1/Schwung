@@ -9,6 +9,7 @@ import { rescheduleReminders } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
 import { useApp } from '../store/useApp';
 import { useTheme } from '../theme';
+import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -64,32 +65,34 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Housekeeping />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: c.bg },
-          animation: 'fade',
-          animationDuration: 200,
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="welcome" />
-        <Stack.Screen name="quiz" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="reveal" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="reminder" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="today" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-        <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-        <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
-        <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
-        <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
-        <Stack.Screen
-          name="ceremony"
-          options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
-        />
-      </Stack>
+      <ThemeTransitionProvider>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <Housekeeping />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: c.bg },
+            animation: 'fade',
+            animationDuration: 200,
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="welcome" />
+          <Stack.Screen name="quiz" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="reveal" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="reminder" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="today" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen
+            name="ceremony"
+            options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+          />
+        </Stack>
+      </ThemeTransitionProvider>
     </SafeAreaProvider>
   );
 }

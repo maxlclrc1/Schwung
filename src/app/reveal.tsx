@@ -8,6 +8,7 @@ import { buildPlan } from '../core/plan';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 export default function Reveal() {
   const { c } = useTheme();
@@ -39,9 +40,9 @@ export default function Reveal() {
               entering={FadeInDown.delay(150 + i * 90).duration(400)}
               style={[styles.item, { backgroundColor: c.surface }]}
             >
-              <View style={[styles.num, { backgroundColor: c.accentSoft }]}>
+              <ThemedView style={[styles.num, { backgroundColor: c.accentSoft }]}>
                 <Ionicons name={h.icon as keyof typeof Ionicons.glyphMap} size={20} color={c.accentInk} />
-              </View>
+              </ThemedView>
               <View style={{ flex: 1, gap: 2 }}>
                 <T v="bodyStrong">{h.levels[level]}</T>
                 <T v="caption" color={c.textDim}>

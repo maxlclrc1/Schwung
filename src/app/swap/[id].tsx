@@ -8,6 +8,7 @@ import { phaseLevel, phaseOf } from '../../core/progression';
 import { haptic } from '../../lib/haptics';
 import { currentDay, useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
+import { ThemedView } from '../../theme/transition';
 
 export default function Swap() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,17 +48,19 @@ export default function Swap() {
             key={h.id}
             onPress={() => choose(h.id)}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.item, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
-            <View style={[styles.icon, { backgroundColor: c.accentSoft }]}>
-              <Ionicons name={h.icon as keyof typeof Ionicons.glyphMap} size={20} color={c.accentInk} />
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <T v="bodyStrong">{h.levels[level]}</T>
-              <T v="caption" color={c.textDim}>
-                {h.why}
-              </T>
-            </View>
+            <ThemedView style={[styles.item, { backgroundColor: c.surface }]}>
+              <ThemedView style={[styles.icon, { backgroundColor: c.accentSoft }]}>
+                <Ionicons name={h.icon as keyof typeof Ionicons.glyphMap} size={20} color={c.accentInk} />
+              </ThemedView>
+              <View style={{ flex: 1, gap: 2 }}>
+                <T v="bodyStrong">{h.levels[level]}</T>
+                <T v="caption" color={c.textDim}>
+                  {h.why}
+                </T>
+              </View>
+            </ThemedView>
           </Pressable>
         ))}
       </View>

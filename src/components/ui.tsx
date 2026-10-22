@@ -1,15 +1,19 @@
 import { ReactNode, useEffect } from 'react';
-import { Pressable, StyleProp, StyleSheet, Text, TextProps, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, TextProps, View, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { haptic } from '../lib/haptics';
 import { radius, space, type, useTheme } from '../theme';
+import { ThemedView, useThemedColors } from '../theme/transition';
 
 type Variant = keyof typeof type;
 
 export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Variant; color?: string }) {
   const { c } = useTheme();
-  return <Text {...rest} style={[type[v], { color: color ?? c.text }, style]} />;
+  const col = color ?? c.text;
+  // Palette colors fade with the theme; anything else (ceremony, overlays) is used as-is.
+  const fade = useThemedColors({ color: col });
+  return <Animated.Text {...rest} style={[type[v], { color: col }, style, fade]} />;
 }
 
 export function Screen({
@@ -23,9 +27,11 @@ export function Screen({
 }) {
   const { c } = useTheme();
   return (
-    <SafeAreaView edges={edges} style={[{ flex: 1, backgroundColor: c.bg }, style]}>
-      {children}
-    </SafeAreaView>
+    <ThemedView style={{ flex: 1, backgroundColor: c.bg }}>
+      <SafeAreaView edges={edges} style={[{ flex: 1 }, style]}>
+        {children}
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
@@ -45,6 +51,7 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
   const anim = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.25 }));
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
   const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? c.danger : kind === 'ghost' ? c.textDim : c.text;
+  const fade = useThemedColors({ backgroundColor: bg });
 
   return (
     <Pressable
@@ -65,6 +72,7 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
           { backgroundColor: bg, opacity: disabled ? 0.4 : 1 },
           kind === 'ghost' && { minHeight: 44 },
           anim,
+          fade,
         ]}
       >
         {icon}
@@ -83,17 +91,21 @@ export function ProgressBar({ value, height = 6, color }: { value: number; heigh
     progress.set(withTiming(Math.max(0, Math.min(1, value)), { duration: 250 }));
   }, [value, progress]);
   const anim = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
+  const fill = color ?? c.accent;
+  const fillFade = useThemedColors({ backgroundColor: fill });
   return (
-    <View style={{ height, borderRadius: height, backgroundColor: c.surfaceHigh, overflow: 'hidden' }}>
-      <Animated.View style={[{ height, borderRadius: height, backgroundColor: color ?? c.accent }, anim]} />
-    </View>
+    <ThemedView style={{ height, borderRadius: height, backgroundColor: c.surfaceHigh, overflow: 'hidden' }}>
+      <Animated.View style={[{ height, borderRadius: height, backgroundColor: fill }, anim, fillFade]} />
+    </ThemedView>
   );
 }
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c } = useTheme();
   return (
-    <View style={[{ backgroundColor: c.surface, borderRadius: radius.lg, padding: space.lg }, style]}>{children}</View>
+    <ThemedView style={[{ backgroundColor: c.surface, borderRadius: radius.lg, padding: space.lg }, style]}>
+      {children}
+    </ThemedView>
   );
 }
 
@@ -103,7 +115,10 @@ export function LevelPips({ level }: { level: 'easy' | 'medium' | 'hard' }) {
   return (
     <View style={styles.pips} accessibilityLabel={`Level ${level}`}>
       {[0, 1, 2].map((i) => (
-        <View key={i} style={[styles.pip, { height: 6 + i * 3, backgroundColor: i < n ? c.accentInk : c.border }]} />
+        <ThemedView
+          key={i}
+          style={[styles.pip, { height: 6 + i * 3, backgroundColor: i < n ? c.accentInk : c.border }]}
+        />
       ))}
     </View>
   );

@@ -15,6 +15,7 @@ import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { currentDay, exportData, useApp } from '../store/useApp';
 import type { ThemePreference } from '../core/types';
 import { radius, space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 export default function Settings() {
   const { c } = useTheme();
@@ -183,12 +184,14 @@ function AppearancePicker() {
             accessibilityRole="radio"
             accessibilityState={{ selected }}
             accessibilityLabel={o.value === 'system' ? 'Match phone setting' : `${o.label} mode`}
-            style={[styles.segmentItem, selected && { backgroundColor: c.accentSoft }]}
+            style={{ flex: 1 }}
           >
-            <Ionicons name={o.icon} size={18} color={selected ? c.accentInk : c.textDim} />
-            <T v="caption" color={selected ? c.accentInk : c.textDim} style={{ fontWeight: '700' }}>
-              {o.label}
-            </T>
+            <ThemedView style={[styles.segmentItem, { backgroundColor: selected ? c.accentSoft : c.surface }]}>
+              <Ionicons name={o.icon} size={18} color={selected ? c.accentInk : c.textDim} />
+              <T v="caption" color={selected ? c.accentInk : c.textDim} style={{ fontWeight: '700' }}>
+                {o.label}
+              </T>
+            </ThemedView>
           </Pressable>
         );
       })}
@@ -212,7 +215,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <T v="overline" color={c.textDim}>
         {title}
       </T>
-      <View style={[styles.section, { backgroundColor: c.surface }]}>{children}</View>
+      <ThemedView style={[styles.section, { backgroundColor: c.surface }]}>{children}</ThemedView>
     </View>
   );
 }

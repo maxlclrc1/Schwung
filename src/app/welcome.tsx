@@ -6,6 +6,7 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import { Button, Screen, T } from '../components/ui';
 import { APP_NAME } from '../lib/constants';
 import { space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 const POINTS = ['6 quick questions', 'A daily plan made for you', 'Small habits that level up as you do'];
 
@@ -40,7 +41,7 @@ export default function Welcome() {
           <Animated.View entering={FadeInDown.delay(320).duration(500)} style={styles.points}>
             {POINTS.map((p) => (
               <View key={p} style={styles.point}>
-                <View style={[styles.dot, { backgroundColor: c.accentInk }]} />
+                <ThemedView style={[styles.dot, { backgroundColor: c.accentInk }]} />
                 <T color={c.textDim}>{p}</T>
               </View>
             ))}

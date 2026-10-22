@@ -8,6 +8,7 @@ import { Button, Screen, T } from '../components/ui';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { useApp } from '../store/useApp';
 import { space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 
 export default function Reminder() {
   const { c } = useTheme();
@@ -29,9 +30,9 @@ export default function Reminder() {
     <Screen>
       <View style={styles.wrap}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: space.md }}>
-          <View style={[styles.icon, { backgroundColor: c.accentSoft }]}>
+          <ThemedView style={[styles.icon, { backgroundColor: c.accentSoft }]}>
             <Ionicons name="notifications" size={26} color={c.accentInk} />
-          </View>
+          </ThemedView>
           <T v="title">Remind me daily at…</T>
           <T color={c.textDim}>
             One quiet reminder a day, and none once you’ve finished. Change it anytime in Settings.
