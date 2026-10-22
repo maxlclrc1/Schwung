@@ -21,7 +21,7 @@ function copy(n: Notice, title: (id: string) => string | undefined) {
   if (names.length > 1) {
     return {
       icon: 'leaf-outline' as const,
-      head: 'Welcome back. Let’s ease in.',
+      head: 'Let’s ease in.',
       body: `${names.join(', ')} stepped down a level for now. Find your rhythm, then level them up again.`,
     };
   }
