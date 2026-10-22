@@ -79,8 +79,10 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="welcome" />
           <Stack.Screen name="quiz" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="start" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="reveal" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="reminder" options={{ animation: 'slide_from_right' }} />
+          {/* The program has started by now; there's no going back into onboarding. */}
+          <Stack.Screen name="reminder" options={{ animation: 'slide_from_right', gestureEnabled: false }} />
           <Stack.Screen name="today" options={{ gestureEnabled: false }} />
           <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />

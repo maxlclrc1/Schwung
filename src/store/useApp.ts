@@ -25,7 +25,8 @@ export type AppData = {
 
 type Actions = {
   setAnswers: (a: Answers) => void;
-  startProgram: () => void;
+  /** Starts a new program from the saved answers. Does nothing if one is already running (returns false). */
+  startProgram: () => boolean;
   toggleHabit: (day: number, habitId: string) => void;
   setLevel: (habitId: string, level: Level) => void;
   acceptLevelUp: (habitId: string) => void;
@@ -99,8 +100,10 @@ export const useApp = create<AppState>()(
         setAnswers: (answers) => set({ answers }),
 
         startProgram: () => {
-          const { answers } = get();
-          if (!answers) return;
+          const { answers, startedAt } = get();
+          // Never overwrite a running program (e.g. after navigating back into onboarding).
+          // Starting over is only ever explicit: Settings → Restart clears it first.
+          if (!answers || startedAt) return false;
           set({
             startedAt: toDateKey(appNow()),
             plan: toPlan(buildPlan(answers)),
@@ -109,6 +112,7 @@ export const useApp = create<AppState>()(
             appliedPhase: 1,
             notices: [],
           });
+          return true;
         },
 
         toggleHabit: (day, habitId) => {

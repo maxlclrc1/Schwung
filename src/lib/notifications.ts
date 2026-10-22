@@ -26,6 +26,13 @@ export async function requestPermission(): Promise<boolean> {
   return res.granted;
 }
 
+/** True when the system won't ask again (permission was denied before), so only Settings can turn it on. */
+export async function permissionBlocked(): Promise<boolean> {
+  if (Platform.OS === 'web') return false;
+  const current = await Notifications.getPermissionsAsync();
+  return !current.granted && !current.canAskAgain;
+}
+
 function message(day: number): { title: string; body: string } {
   if (day > PROGRAM_DAYS) return { title: 'Keep it going', body: 'Your habits are waiting. Two minutes to check in.' };
   if (day === PROGRAM_DAYS) return { title: 'Final day', body: 'Last day of the program. Finish strong.' };

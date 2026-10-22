@@ -27,16 +27,16 @@ export type PlanPick = {
   forGoal: boolean;
 };
 
-type Area = 'sleep' | 'exercise' | 'water' | 'screen' | 'mind';
+export type Area = 'sleep' | 'exercise' | 'water' | 'screen' | 'mind';
 
 /**
  * When a plan has more than 6 habits, the area habit with the lowest severity goes.
  * Ties go in this order, most foundational kept longest.
  */
-const AREA_PRIORITY: Area[] = ['sleep', 'exercise', 'water', 'screen', 'mind'];
+export const AREA_PRIORITY: Area[] = ['sleep', 'exercise', 'water', 'screen', 'mind'];
 
 // 0 = healthy, 4 = the hardest end of each scale.
-const SEVERITY = {
+export const SEVERITY = {
   sleep: { '8h+': 0, '7-8h': 1, '6-7h': 2, '5-6h': 3, '<5h': 4 },
   screen: { '<2h': 0, '2-4h': 1, '4-6h': 2, '6-8h': 3, '8h+': 4 },
   exercise: { '5x+': 0, '3-4x': 1, '1-2x': 2, rarely: 3, never: 4 },
@@ -221,6 +221,11 @@ function areaPick(area: Area, a: Answers): AreaPick | null {
       };
     }
   }
+}
+
+/** The habit an area's answer calls for, or null when that answer is already healthy. */
+export function areaHabit(area: Area, a: Answers): string | null {
+  return areaPick(area, a)?.id ?? null;
 }
 
 /**
