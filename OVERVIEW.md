@@ -29,6 +29,10 @@ and the plan is fully editable.
 5. **Day 1 ceremony**: a full-screen animated moment.
 6. **Today** (the core screen):
    - **Header:** the Schwung wordmark and a time-of-day greeting, with theme and Settings buttons.
+   - **Welcome back** (only after a pause): when the days before today have nothing checked, a quiet card
+     under the header says welcome back and offers one first step, the habit they've done most often, as a
+     one-tap check-off. No catching up. After the first check today it says "You're back." briefly and
+     leaves. It never shows otherwise.
    - **The Schwung Ascent:** a winding trail of 66 day markers up a misty mountain, in three phases
      (Foundation 1–21, Momentum 22–44, Mastery 45–66).
      - Successful days are lit, missed days stay on the walked trail but dimmer, and future days are faint.

@@ -109,4 +109,19 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     - Ceremonies use `PinnedDark`, so they never follow a theme change, even mid-ceremony.
     - Light `onAccent` is `#FEFEFF` rather than pure white, so it can't be confused with light `surface`
       when colors are mapped back to tokens. A test enforces that no two tokens collide.
-
+23. **The comeback** (`src/core/comeback.ts`, `src/components/Comeback.tsx`). Missing days should never feel
+    like failing, so returning users get a welcome instead of a wall of empty days.
+    - *When*: a past day with nothing checked (no log, or a log with zero planned habits done) is a pause.
+      The card shows when at least one such day is final and nothing has been checked since. Before noon a
+      blank yesterday alone doesn't count, because it can still be filled in from the Yesterday tab.
+      A partial day still counts as showing up.
+    - *What*: one card at the top of Today with copy that scales with the pause (1 day, a few, 7+), notes
+      that progress is still there when there is some, and never mentions misses, streaks or catching up.
+      It offers one step: the plan habit completed most often so far (plan order on ties), as a shortcut
+      to the same check-off as the list.
+    - *Leaving*: after the first check today, it shows "You're back." for about 2.6 s, then fades out.
+      Reopening later shows nothing. Unchecking brings it back. It can be dismissed for the session.
+    - *Nothing stored*: it's derived from logs on every render. No logs are created, edited or
+      back-filled, and the program, streak, XP, 80% rule, step-downs and phases are unchanged.
+    - The multi-habit step-down notice now reads "Let's ease in." (was "Welcome back. Let's ease in."), so
+      the greeting isn't said twice.

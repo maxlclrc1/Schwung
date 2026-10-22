@@ -6,11 +6,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { Confetti } from '../components/Art';
 import { Ascent } from '../components/Ascent';
+import { Comeback } from '../components/Comeback';
 import { HabitRow } from '../components/HabitRow';
 import { Notices } from '../components/Notices';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Button, ProgressBar, Screen, T } from '../components/ui';
 import { ascentDays, phaseFor } from '../core/ascent';
+import { comebackFor } from '../core/comeback';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { getHabit, habitTitle, levelUp } from '../core/habits';
 import {
@@ -65,6 +67,17 @@ export default function Today() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const days = useMemo(() => ascentDays(logs, start, today), [logs, start, today]);
   const todayDone = plan.filter((p) => todayLog?.completed.includes(p.habitId)).length;
+  const comeback = useMemo(
+    () => comebackFor({ plan, logs, startKey: start, today, yesterdayEditable }),
+    [plan, logs, start, today, yesterdayEditable],
+  );
+  const onStartComeback = useCallback(
+    (habitId: string) => {
+      toggleHabit(today, habitId);
+      rescheduleSoon();
+    },
+    [toggleHabit, today],
+  );
   const onOpenJourney = useCallback((day?: number) => router.push(day ? `/journey?day=${day}` : '/journey'), []);
 
   const onToggle = useCallback(
@@ -122,6 +135,8 @@ export default function Today() {
             <IconButton name="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
           </View>
         </View>
+
+        {viewing === 'today' ? <Comeback comeback={comeback} plan={plan} onStart={onStartComeback} /> : null}
 
         <Ascent
           days={days}
