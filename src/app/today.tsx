@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { Confetti } from '../components/Art';
-import { AscentCaption, ascentLabel, AscentScene, tapPoint } from '../components/Ascent';
+import { AscentCaption, ascentLabel, AscentLabels, AscentScene, tapPoint } from '../components/Ascent';
 import { Comeback } from '../components/Comeback';
 import { HabitRow } from '../components/HabitRow';
 import { Notices } from '../components/Notices';
@@ -185,7 +185,10 @@ export default function Today() {
           accessibilityActions={[{ name: 'activate', label: 'Open journey' }]}
           onAccessibilityAction={() => onOpenJourney()}
           style={[styles.zone, { width, height: zoneHeight }]}
-        />
+        >
+          {/* The words on the mountain scroll with the page; the mountain and trail behind stay still. */}
+          <AscentLabels today={today} width={width} />
+        </Pressable>
         <AscentCaption days={days} selected={selectedDay} onOpenJourney={onOpenJourney} />
 
         {viewing === 'today' ? <Comeback comeback={comeback} plan={plan} onStart={onStartComeback} /> : null}

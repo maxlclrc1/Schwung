@@ -47,7 +47,6 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
   const reduceMotion = useReducedMotion();
   const height = Math.round(width / ASCENT_ASPECT);
   const maintenance = today > PROGRAM_DAYS;
-  const phase = phaseFor(Math.min(today, PROGRAM_DAYS));
 
   const tone = useMemo(
     () => ({
@@ -55,7 +54,6 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
       walked: isDark ? 'rgba(167,139,250,0.38)' : 'rgba(116,81,200,0.32)',
       ahead: isDark ? 'rgba(245,243,255,0.22)' : 'rgba(25,22,33,0.18)',
       halo: isDark ? 'rgba(167,139,250,0.22)' : 'rgba(116,81,200,0.16)',
-      pill: isDark ? 'rgba(17,17,22,0.62)' : 'rgba(255,255,255,0.78)',
       badge: isDark ? 'rgba(28,27,37,0.92)' : 'rgba(255,255,255,0.94)',
     }),
     [c.accent, isDark],
@@ -153,12 +151,44 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
           );
         })}
 
+      {/* Selected day: an outline ring, clearly different from today's filled orb. */}
+      {selectedDay ? (
+        <ThemedView
+          style={[
+            styles.selected,
+            { left: px(selectedDay.point.x) - 10, top: py(selectedDay.point.y) - 10, borderColor: c.text },
+          ]}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+export const AscentScene = memo(AscentSceneImpl);
+
+/**
+ * The words on the mountain: phase names and "Phase n of 3 / Day n". They're part of the page, not the
+ * world, so on Today they scroll with the other text instead of staying on the still mountain (where the
+ * page's text would slide over them). Placed in the same 3:2 box as the scene, so at the top of the page
+ * they sit exactly where they always have. Ignores touches, so taps go through to the trail.
+ */
+function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
+  const { c, isDark } = useTheme();
+  const height = Math.round(width / ASCENT_ASPECT);
+  const maintenance = today > PROGRAM_DAYS;
+  const phase = phaseFor(Math.min(today, PROGRAM_DAYS));
+  const pill = isDark ? 'rgba(17,17,22,0.62)' : 'rgba(255,255,255,0.78)';
+  const px = (x: number) => x * width;
+  const py = (y: number) => y * height;
+
+  return (
+    <View pointerEvents="none" style={{ width, height }}>
       {/* Phase names, the current one emphasized. */}
       {ASCENT_PHASES.map((p) => {
         const at = PHASE_LABEL_AT[p.n];
         const current = !maintenance && p.n === phase.n;
         return (
-          <View key={p.n} style={[styles.phase, { left: px(at.x), top: py(at.y), backgroundColor: tone.pill }]}>
+          <View key={p.n} style={[styles.phase, { left: px(at.x), top: py(at.y), backgroundColor: pill }]}>
             <T
               v="overline"
               maxFontSizeMultiplier={1.2}
@@ -170,16 +200,6 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
           </View>
         );
       })}
-
-      {/* Selected day: an outline ring, clearly different from today's filled orb. */}
-      {selectedDay ? (
-        <ThemedView
-          style={[
-            styles.selected,
-            { left: px(selectedDay.point.x) - 10, top: py(selectedDay.point.y) - 10, borderColor: c.text },
-          ]}
-        />
-      ) : null}
 
       {/* Where you are: kept to the top-left corner, clear of the upper switchbacks. */}
       <View style={[styles.where, { maxWidth: width * 0.4 }]}>
@@ -207,7 +227,7 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
   );
 }
 
-export const AscentScene = memo(AscentSceneImpl);
+export const AscentLabels = memo(AscentLabelsImpl);
 
 /** What VoiceOver reads for the trail (the screen's tap target over it). */
 export function ascentLabel(days: AscentDay[], today: number): string {
