@@ -161,5 +161,8 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
       brand and theme toggle sit over the sky.
     - *Quiz, starting point, plan, reminder*: the same world, veiled at 80% with the background color.
     - The Ascent's old top-left darkening gradient is gone: the painted sky is calm enough for the day text.
+    - *Words scroll, the world stays*: the phase names and "Phase n of 3 / Day n" are part of the page (they
+      scroll with the greeting and cards); the mountain, trail, markers, landmarks and orb stay still. Pinned
+      words collided with the page's text while scrolling (owner report).
     - Ceremonies, Journey, Settings and the sheets are unchanged. `scripts/generate-ascent-art.py` is legacy.
 
