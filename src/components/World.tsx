@@ -1,4 +1,4 @@
-import { Image, StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { worldFrame } from '../core/world';
@@ -13,16 +13,18 @@ const ART = {
 /**
  * The Schwung world behind a screen: sky, the mountain, and fog that settles into the app background.
  * `zoneTop` is where the painting (the trail area) starts, measured from this view's top.
- * `dim` veils it with the background color for text-heavy screens. `clip` limits it to a top strip
- * (Today uses that to keep the sky behind the status bar while the page scrolls under it).
+ * `dim` veils it with the background color for text-heavy screens.
  * Decorative only: hidden from screen readers and ignores touches.
  */
-export function WorldBackdrop({ zoneTop, dim = 0, clip }: { zoneTop: number; dim?: number; clip?: number }) {
+export function WorldBackdrop({ zoneTop, dim = 0 }: { zoneTop: number; dim?: number }) {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
   const { imageTop, imageHeight } = worldFrame(width, zoneTop);
   const theme = useThemeProgress();
   const lightArt = useAnimatedStyle(() => ({ opacity: theme.value }));
+  // The dark art fades out as the light fades in (not left underneath), so the light image's softened bottom
+  // edge can't show a line of dark art through it.
+  const darkArt = useAnimatedStyle(() => ({ opacity: 1 - theme.value }));
   const image = { position: 'absolute' as const, left: 0, top: imageTop, width, height: imageHeight };
 
   return (
@@ -31,14 +33,10 @@ export function WorldBackdrop({ zoneTop, dim = 0, clip }: { zoneTop: number; dim
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[
-        styles.fill,
-        { backgroundColor: c.bg },
-        clip !== undefined && { bottom: undefined, height: clip, overflow: 'hidden' },
-      ]}
+      style={[styles.fill, { backgroundColor: c.bg }]}
     >
-      {/* Both themes stay mounted; light crossfades over dark with the theme, like the Ascent did. */}
-      <Image source={ART.dark} style={image} resizeMode="cover" />
+      {/* Both themes stay mounted and crossfade with the theme. */}
+      <Animated.Image source={ART.dark} style={[image, darkArt]} resizeMode="cover" />
       <Animated.Image source={ART.light} style={[image, lightArt]} resizeMode="cover" />
       {dim > 0 ? <ThemedView style={[styles.fill, { backgroundColor: c.bg, opacity: dim }]} /> : null}
     </ThemedView>
