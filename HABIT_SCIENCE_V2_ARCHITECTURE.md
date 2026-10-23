@@ -1,4 +1,4 @@
-# Schwung Habit Science 2.0 — Final Product Specification (revision 2)
+# Schwung Habit Science 2.0 — Final Product Specification (revision 3)
 
 **Status:** proposal for approval. No app code, habit library, quiz, saved data or program behavior has been
 changed.
@@ -14,6 +14,192 @@ changed.
 **Nothing in this document has been verified against a source.** No research results with citations have
 been supplied so far, so every evidence status below reads *unverified*. "Expected strength" is only a
 prioritization hint for research.
+
+---
+
+## R3. Final corrections (revision 3, approved direction, not implemented)
+**This section supersedes earlier sections wherever they conflict.** The affected rows in B.2 are marked
+"→ R3".
+
+### R3.1 Change log
+| # | Change | Supersedes |
+|---|---|---|
+| 1 | **Strength starter (#7) is no longer automatically assigned.** It becomes a voluntary, add-only "preparation routine". It never counts toward the fitness goal guarantee, and its copy says plainly that it is **not** equivalent to recommended strength sessions | B.2 #7, B.4, D.5 |
+| 2 | **Bedtime (#2) now starts from the user's actual bedtime** and moves 15 min earlier per rung, capped by an age-based ceiling. It's offered only when reported sleep is below the age band, and **never** with trouble 3+ nights, a diagnosed sleep condition, or (new) trouble 1–2 nights | B.2 #2, C.5, A.2 question W |
+| 3 | **Fruit and veg (#8) is a behavioral check-off, not a nutrition measure.** The portion definition is aligned with WHO, and the copy separates the habit from meeting dietary guidelines | B.2 #8, A.2 question 5a |
+| 4 | **Established routines:** never recommend the same behavior a user already does consistently (Make Your Bed excepted). A harder variation only if the spec declares it a **new behavior** | D.3 |
+| 5 | **Plan size:** aim for 5 suitable daily habits. With only 4, a short "choose one more" step offers eligible alternatives and explains the 80% implication | B.1, D.1 step 3, H3 |
+| 6 | **WHO and CDC population guidance added** (R3.3), kept separate from product-defined targets. No ladder is called clinically validated | G |
+| 7 | **Owner decisions applied** (R3.4) | H |
+
+### R3.2 Updated habit specifications (affected habits only)
+
+**#2 `sleep_bedtime`: Earlier bedtime** (spec 2, R3)
+- **Population guidance** (R3.3): CDC: teens 8–10 h, adults (18–60) 7 h or more.
+- **Product target:** small, stepwise moves from the user's own bedtime. Not a prescription to reach a number.
+- **Offered only if all of these hold:**
+  - reported sleep is below the age band (teen: under 8 h; adult: under 7 h)
+  - trouble sleeping is `rarely`
+  - no diagnosed sleep condition is reported
+  - precautions are not "unknown" (a skipped safety question is treated as unknown) [PROPOSED: offer with a
+    note instead? → R3.5 Q2]
+- **Inputs** (conditional screen W, extended): "What time do you usually get up on school or work days?" and,
+  **only when this habit is a candidate**, "What time do you usually fall asleep on those nights?" Both use
+  time pickers with no preset; "It changes a lot" and "I work shifts or nights" are options.
+- **Ladder** [PRODUCT]: "In bed by {usual bedtime − 15 / 30 / 45 / 60 min}".
+  - **Ceiling:** no rung may put time in bed above (wake − bedtime) = teen 10 h, adult 9 h [PRODUCT; VERIFY].
+    Rungs beyond the ceiling are removed. If fewer than 3 remain, the habit isn't offered.
+  - Varies/shift: "Lights out 15 / 30 / 45 / 60 min earlier than usual".
+- **Why** (claim-free until reviewed): "Getting to bed a little earlier than you do now."
+
+**#7 `move_strength_snack`: Strength preparation routine** (spec 2, R3)
+- **Assignment:** **never automatic.** It's available only through the 4-habit choice step (R3.1 #5),
+  through swaps, or through Add, and only when eligible.
+- **Eligibility:** ages 16+. Excluded with heart/BP or pregnancy. Gentle variant for joint/back, 65+, or
+  unknown precautions.
+- **Ladder** [PRODUCT]: 1 set of 1 move · 1 set of 2 moves · 1 set of 3 moves · 2 sets of 3 moves (squats or
+  sit-to-stands, wall or knee push-ups, glute bridges), stopping well before exhaustion.
+- **Mandatory copy:** "This is practice to build a strength routine. It isn't a full strength workout.
+  Health guidelines recommend muscle-strengthening activity for all major muscle groups on 2 or more days a
+  week." The WHO and CDC basis is in R3.3.
+- **Goal role:** support only. The fitness goal guarantee is met by Walk (#6) in V2.0, and by the scheduled
+  strength session (#22) once that's approved.
+- **Interim limitation:** V2.0 can't schedule strength sessions, so fitness plans in V2.0 don't include
+  guideline-level strength training. The plan reveal for the fitness goal states this:
+  - users not already training get: "Strength sessions a few times a week will come in a later update; you
+    can add a starter routine now."
+  - users already training twice a week or more get: "You're already training. Keep it up."
+
+**#8 `food_produce`: Fruit and veg** (spec 2, R3)
+- **Population guidance** (R3.3): WHO: at least 400 g of fruit and vegetables a day (about five portions),
+  not counting potatoes, sweet potatoes, cassava and other starchy roots.
+- **Quiz 5a, revised:** "On a typical day, how many portions of fruit and vegetables do you eat? A portion is
+  about a handful (roughly 80 g). Potatoes don't count." Options unchanged.
+- **Ladder** [PRODUCT]: "Add a portion of fruit or veg to 1 / 2 / 3 / 4 of today's meals or snacks". Start rung
+  = baseline + 1 (hardly any → 1; 1–2 → 2; 3–4 → 3). At 5+ the habit isn't offered.
+- **Mandatory copy:** "This builds the habit of adding fruit and veg. It doesn't measure whether your diet
+  meets nutrition guidelines." The app never says "you're eating enough".
+- Teens: allowed (additive only).
+
+**#9 `food_sugary_drinks`: Unsweetened drinks** (adults only; spec 2, R3; positively framed)
+- **Population guidance** (R3.3): WHO: keep free sugars under 10% of energy intake (further reduction to
+  under 5% is a conditional recommendation). Fruit juice counts as free sugars.
+- **Ladder** [PRODUCT]: "Choose water or an unsweetened drink instead of a sugary one, 1 time / 2 times
+  today" · "All your drinks today are unsweetened".
+- **Start:** sugary drinks `most` days → rung 0; `some` → rung 1; `rarely` → not offered.
+- **Never offered to under-18s.** No weight or calorie language.
+- **Why:** "Picking an unsweetened drink is an easy swap."
+
+**#10 `food_water_meals`: Water with meals** (add-only, unchanged)
+- Never automatic. No quantities beyond "a glass".
+- Excluded with a fluid limit.
+
+**#18 `focus_top3`** (routine rule, R3.1 #4)
+- If "Planning my day" is a routine, the writing rung is the same behavior, so it's skipped. The habit is
+  offered only from rung 1 ("…and work on it for 10 min first"), because acting on the top task is a new
+  behavior. The ladder window then starts at rung 1.
+
+**Routine map (D.3, revised)** [PROPOSED]
+| Routine | Effect |
+|---|---|
+| Reading 10+ min | `mind_read` excluded |
+| Breathing / meditation | `mind_breathe` excluded |
+| Journaling | `mind_journal` excluded |
+| Planning my day | `focus_top3` only from rung 1 (new behavior: starting the task) |
+| A 30+ minute walk | `move_walk` excluded (longer walks aren't a new behavior) |
+| Phone out of reach 30 min before sleep | `sleep_no_phone_bed` excluded |
+| Making my bed | Foundation stays [AGREED]; reason: "You already do this, so it's an easy first check" |
+
+Each spec declares `routineUpgradeFrom?: rung` only where a higher rung is a genuinely different behavior.
+Tests assert that no excluded routine behavior appears in any plan.
+
+**Plan size and the choice step** (D.1 step 3, revised) [PROPOSED]
+- The engine fills only with **suitable** habits (need ≥ 1, or a goal habit). Target: **5**. Six only when the
+  goal guarantee adds one.
+- **If only 4 are suitable** (foundation included), the plan screen shows **"Choose one more?"** with up to
+  3 *eligible* alternatives:
+  - they pass every age, safety, routine and duplicate filter, but weren't needed;
+  - #7 appears here when eligible;
+  - a "Keep 4 habits" option is also shown.
+- **80% implication** (mechanic unchanged; the copy explains it):
+
+  | Habits | A day counts at |
+  |---|---|
+  | 4 | all 4 (3 of 4 is 75%) |
+  | 5 | 4 of 5 |
+  | 6 | 5 of 6 |
+
+  Choice-step copy: *"With 4 habits, a day counts when all 4 are done. With 5, one can slip."*
+- **3 habits** remains the floor for manual removals [FACT]; the engine never proposes fewer than 4.
+
+### R3.3 Population guidance (WHO and CDC)
+**Retrieval note:**
+- Confirmed on 2026-10-23 through web search results that cite these official pages.
+- **This environment couldn't open who.int or cdc.gov directly** (network policy), so exact wording and
+  currency must be re-checked on the pages before any of it is quoted in the app.
+- These are population recommendations. **Schwung's ladders are product-defined habit steps.** None is
+  clinically validated, and none may be described as such.
+
+| Topic | Guidance | Source |
+|---|---|---|
+| Adult activity (18–64) | 150–300 min/week moderate aerobic activity, or 75–150 vigorous, or an equivalent mix; muscle-strengthening (major muscle groups) on 2+ days/week | WHO 2020 guidelines; [WHO physical activity](https://who.int/initiatives/behealthy/physical-activity) |
+| Adult activity (CDC) | 150 min/week moderate (or 75 vigorous); muscle-strengthening for all major muscle groups on at least 2 days/week; e.g. 30 min × 5 days; bodyweight exercises count | [CDC Adult Activity](https://www.cdc.gov/physical-activity-basics/guidelines/adults.html) |
+| Older adults (65+) | Same as adults, plus balance activities; those with poor mobility do balance-focused activity 3+ days/week | [WHO physical activity](https://who.int/initiatives/behealthy/physical-activity); [CDC Older Adults](https://www.cdc.gov/physical-activity-basics/guidelines/older-adults.html) |
+| Adolescents (5–17, so includes 16–17) | An average of 60 min/day moderate-to-vigorous, mostly aerobic, across the week; vigorous aerobic and muscle- and bone-strengthening on at least 3 days/week | [WHO Guidelines at a glance](https://iris.who.int/server/api/core/bitstreams/f3885485-e7eb-4504-8026-edd9bb53a6ee/content) |
+| Sleep | Teens 8–10 h (CDC lists 13–17 on one page, 13–18 on another; based on AASM); adults 18–60 at least 7 h | [CDC About Sleep](https://www.cdc.gov/sleep/about/index.html); [CDC Sleep and Health (schools)](https://www.cdc.gov/healthy-schools/sleep/index.html) |
+| Fruit and vegetables | At least 400 g/day (about five portions), excluding potatoes, sweet potatoes, cassava and other starchy roots | [WHO Healthy diet](https://www.who.int/news-room/fact-sheets/detail/healthy-diet) |
+| Free sugars | Under 10% of energy intake (strong); under 5% suggested (conditional); free sugars include fruit juices, honey and syrups | [WHO Healthy diet](https://www.who.int/news-room/fact-sheets/detail/healthy-diet) |
+
+**How Schwung uses this:**
+- **Product decisions informed by the guidance:**
+  - the age-band sleep thresholds (R3.2 #2)
+  - the strength copy (2+ days/week)
+  - the produce portion definition
+  - teen activity framing
+- **Product targets the guidance does not set:**
+  - 15-min bedtime steps
+  - walk rungs
+  - "add a portion to N meals"
+  - "swap 1–2 drinks"
+
+### R3.4 Owner decisions applied
+| Decision | Applied as |
+|---|---|
+| Under-16 stop screen | C.1, final. No data saved |
+| Conditional wake-time question | Screen W, shown only when needed, now also asking usual sleep time when Bedtime is a candidate |
+| Personalized baseline for V2 swaps | V2 swaps start at the user's baseline window (F.7); V1 swaps unchanged (legacy library, phase level) |
+| No cold exposure in V2 | `discipline_cold` is not in the V2 library at all (not in auto, swap or add); V1 plans keep it |
+| Hydration optional, add-only | #10 unchanged: never automatic, no quantities |
+| Adult sugary-drink habit, positively framed | #9 "Unsweetened drinks", adults only |
+| Scheduled strength: designed, not implemented | #22 and section E stay design-only; V2.0 is daily-only |
+| Voluntary upgrade deferred | No "Try the new plan" in V2.0; V1 users get V2 only by choosing Restart |
+
+**Still open:**
+- **H1:** the App Store age rating.
+- **H4:** release gate (may habits ship with claim-free explanations before their evidence is verified?).
+
+### R3.5 Unresolved safety questions
+1. **Skipped safety question and Bedtime:** with precautions unknown, should Bedtime be withheld (current R3
+   rule) or offered with a note? An undiagnosed sleep disorder can't be ruled out either way.
+2. **Insomnia symptoms 1–2 nights a week:** R3 withholds bedtime extension. Confirm with sleep-medicine
+   guidance (CBT-I principles), and settle the wording that suggests seeing a professional for frequent
+   sleep trouble or possible sleep apnea.
+3. **Sleep ceilings:** time-in-bed caps of teen 10 h and adult 9 h are product choices. Confirm they
+   don't encourage excessive time in bed.
+4. **Strength preparation routine:** confirm the gentle-variant moves are safe for 65+ and for joint/back
+   reports, and whether heart/BP should exclude it or allow it with clinician advice.
+5. **Pregnancy and postpartum:** walking-note wording; whether any movement habit needs a stronger referral
+   line.
+6. **Teen nutrition:** confirm the additive produce habit and its copy carry no risk for teens with
+   disordered-eating history; whether the food opt-out should be more prominent.
+7. **Sugary-drink habit for adults with diabetes or on glucose management:** neutral copy is fine, but should
+   the app add "follow your care plan"?
+8. **Activity notes for heart/BP** (walking): exact wording that avoids sounding like medical clearance.
+9. **Breathing:** confirm the slow-breathing doses carry no cautions (e.g. panic disorder, pregnancy) beyond
+   avoiding breath-holding.
+10. **Under-16 handling** versus the App Store age rating and regional consent rules.
+11. **Re-check every R3.3 figure** on the primary pages; confirm the CDC teen age band (13–17 or 13–18) and
+    that the WHO draft caveat about the 60-min threshold doesn't affect the final adolescent guidance.
 
 ---
 
@@ -105,14 +291,14 @@ Columns:
 | # | ID (stable) | Habit | Intended benefit [VERIFY] | Ages | Goals | Baseline → start rung | Ladder (rungs) [PRODUCT] | Freq | Evidence | Safety exclusions / adaptations | User-facing explanation (draft; ships only per G.0) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | `discipline_bed` (spec 2) | Make your bed | A quick, concrete first win; routine anchor | T, A | foundation (all) | Always rung 0 [AGREED: foundation rule] | Make your bed · Make your bed and clear one surface · Make your bed and a 2-min room reset | D | E3 (motivational) | — | "A small win to start the day." |
-| 2 | `sleep_bedtime` (spec 2) | Bedtime | More sleep opportunity for short sleepers | T (teen ladder), A | energy ★, fitness ·, focus · | First rung above reported sleep; not offered if reported sleep ≥ the top rung | **Adult:** in bed 7:00 / 7:30 / 8:00 h before wake. **Teen:** 8:00 / 8:30 / 9:00 / 9:30 h [VERIFY teen need]. Rendered "In bed by {wake − n}" | D | E1 (duration), E2 (habit form) | **Excluded:** trouble `most`, sleep condition. Wake `varies` / `shift` → variant "Lights out {15/30/45} min earlier than usual" | "Getting to bed a little earlier gives you more time to sleep." |
+| 2 → R3 | `sleep_bedtime` (spec 2) | Bedtime | More sleep opportunity for short sleepers | T (teen ladder), A | energy ★, fitness ·, focus · | First rung above reported sleep; not offered if reported sleep ≥ the top rung | **Adult:** in bed 7:00 / 7:30 / 8:00 h before wake. **Teen:** 8:00 / 8:30 / 9:00 / 9:30 h [VERIFY teen need]. Rendered "In bed by {wake − n}" | D | E1 (duration), E2 (habit form) | **Excluded:** trouble `most`, sleep condition. Wake `varies` / `shift` → variant "Lights out {15/30/45} min earlier than usual" | "Getting to bed a little earlier gives you more time to sleep." |
 | 3 | `sleep_wake` (spec 2) | Steady wake-up | Regular sleep timing | T, A | energy ★, focus ·, discipline ★ | Fixed start rung 0 (no consistency baseline) | Up within 60 / 45 / 30 / 15 min of {wake} | D | E2 | **Excluded:** wake `varies` / `shift`; not offered without a wake time | "Getting up at about the same time helps your days feel steadier." |
 | 4 | `sleep_no_phone_bed` (spec 2) | Phone-free wind-down | Less stimulation before sleep | T, A | calm ★, energy · | Routine "phone out of reach" → already doing; trouble `most` or `some` → rung 1; else rung 0 | Phone away 15 / 30 / 45 / 60 min before bed | D | E2 | — (phone rule) | "A screen-free last half hour makes it easier to switch off." |
 | 5 | `sleep_morning_light` (new) | Morning daylight | Body-clock and alertness support | T, A | energy ★, calm ·, focus · | Fixed rung 0 | Outside within an hour of waking for 5 / 10 / 15 / 20 min | D | E2 | Shift → "after your main sleep" | "Daylight early in the day helps you feel awake." |
 | 6 | `move_walk` (spec 2) | Walk | Aerobic activity, mood | T, A (65+ variant) | energy ★, calm ★, fitness · | Active days 0 → 5 min; 1–2 → 10; 3–4 → 20; 5+ → not offered unless energy or calm (then 20). Routine "30+ min walk" → already doing | 5 / 10 / 15 / 20 / 25 / 30 / 40 / 50 / 60 min, easy to brisk pace | D | E1 | Heart/BP, pregnancy, joint → note "Keep it comfortable; follow your clinician's advice" | "A daily walk is one of the simplest ways to move more." |
-| 7 | `move_strength_snack` (new) | Strength starter | Builds the habit of muscle-strengthening work. **Not a full program** (B.4) | T, A (50+ and 65+ variants) | fitness ★, confidence · | Strength `none` → rung 0; `1` → rung 2; `2p` → not offered (already training). Not shown to 50+ without the 4b answer | **Standard:** 1 set of 1 move · 1 set of 2 moves · 1 set of 3 moves · 2 sets of 3 moves (moves: squats or sit-to-stands, wall or knee push-ups, glute bridges; stop well before exhaustion). **Gentle** (65+, joint, unknown precautions): sit-to-stands from a chair · + wall push-ups · + heel raises holding support · 2 rounds | D (interim) | E1 (strength in general), E3 (daily micro-dose) | **Excluded:** heart/BP, pregnancy. **Gentle variant:** joint/back, 65+, unknown precautions. Never daily full workouts | "A few strength moves a day to build the habit." |
-| 8 | `food_produce` (new) | Fruit and veg | Diet quality | T, A | energy ·, fitness · | Servings `0` → rung 0; `1_2` → rung 1; `3_4` → rung 2; `5p` → already doing | Fruit or veg at 1 / 2 / 3 / 4 meals or snacks | D | E1 (diet pattern), E2 (this form) | **Excluded:** skipped food questions. **Additive only**: never "less" or "no" | "Adding fruit or veg to your meals is an easy upgrade." |
-| 9 | `food_sugary_drinks` (new) | Fewer sugary drinks | Less added sugar from drinks | **A only** | energy ·, fitness · | `most` → rung 0; `some` → rung 1; `rarely` → already doing | Sugary drinks today: at most 2 · at most 1 · none | D | E1 [VERIFY] | **Teens: never.** Excluded with skipped food questions | "Swapping a sugary drink for water or an unsweetened drink is a simple change." |
+| 7 → R3 | `move_strength_snack` (new) | Strength starter | Builds the habit of muscle-strengthening work. **Not a full program** (B.4) | T, A (50+ and 65+ variants) | fitness ★, confidence · | Strength `none` → rung 0; `1` → rung 2; `2p` → not offered (already training). Not shown to 50+ without the 4b answer | **Standard:** 1 set of 1 move · 1 set of 2 moves · 1 set of 3 moves · 2 sets of 3 moves (moves: squats or sit-to-stands, wall or knee push-ups, glute bridges; stop well before exhaustion). **Gentle** (65+, joint, unknown precautions): sit-to-stands from a chair · + wall push-ups · + heel raises holding support · 2 rounds | D (interim) | E1 (strength in general), E3 (daily micro-dose) | **Excluded:** heart/BP, pregnancy. **Gentle variant:** joint/back, 65+, unknown precautions. Never daily full workouts | "A few strength moves a day to build the habit." |
+| 8 → R3 | `food_produce` (new) | Fruit and veg | Diet quality | T, A | energy ·, fitness · | Servings `0` → rung 0; `1_2` → rung 1; `3_4` → rung 2; `5p` → already doing | Fruit or veg at 1 / 2 / 3 / 4 meals or snacks | D | E1 (diet pattern), E2 (this form) | **Excluded:** skipped food questions. **Additive only**: never "less" or "no" | "Adding fruit or veg to your meals is an easy upgrade." |
+| 9 → R3 | `food_sugary_drinks` (new) | Fewer sugary drinks | Less added sugar from drinks | **A only** | energy ·, fitness · | `most` → rung 0; `some` → rung 1; `rarely` → already doing | Sugary drinks today: at most 2 · at most 1 · none | D | E1 [VERIFY] | **Teens: never.** Excluded with skipped food questions | "Swapping a sugary drink for water or an unsweetened drink is a simple change." |
 | 10 | `food_water_meals` (new) | Water with meals | Hydration routine, **with no universal amount** | T, A | — (optional) | **Not auto-recommended**; add or swap only | A glass of water with 1 / 2 / 3 meals | D | E3 [VERIFY] | **Excluded:** fluid limit | "A glass of water with meals, if that suits you." |
 | 11 | `screen_morning` (spec 2) | Phone-free start | Calmer, self-directed mornings | T, A | energy ·, calm · | Phone 6+ h → rung 0; 2–6 h → rung 1; 1–2 h → rung 2; <1 h → not offered | No phone for the first 15 / 30 / 45 / 60 min after waking (an alarm doesn't count) | D | E2 | — (phone rule; overlap group `morning_phone`) | "Start the day on your own terms before your phone does." |
 | 12 | `screen_social` (spec 2) | Social-free start | Fewer reactive social-app hours | T, A | focus ★, calm · | 6b social only; phone 6+ h → rung 0; 4–6 h → rung 1; 2–4 h → rung 2 | No social apps for the first 1 / 2 / 3 / 4 h after waking (shift: "of your day") | D | E2 | — (phone rule; overlap group `morning_phone`) | "Keeping social apps out of your first hours protects your focus." |
@@ -121,7 +307,7 @@ Columns:
 | 15 | `mind_breathe` (new; replaces `mind_meditate` for V2) | Slow breathing | Short-term stress relief | T, A | calm ★, focus · | Routine "Breathing or meditation" → already doing; else rung 0 | 2 / 3 / 5 / 8 / 10 min of slow breathing | D | E2 | Pregnancy and heart/BP: no breath-holding variants (none are used) [VERIFY] | "A few slow breaths can take the edge off a busy day." |
 | 16 | `mind_journal` (spec 2) | Journal | Reflection, getting worries out of your head | T, A | calm ·, confidence ·, discipline · | Routine "Journaling" → already doing; else rung 0 | Write 1 / 2 / 3 / 5 sentences (prompt: "What went well? What's on your mind?") | D | E2 [VERIFY by type] | — | "One or two sentences a day to clear your head." |
 | 17 | `focus_deepwork` (spec 2) | Deep work | Uninterrupted focus | T (max 60), A | focus ★, discipline · | No baseline input → rung 1 (15 min) for everyone [PRODUCT] | 10 / 15 / 25 / 45 / 60 / 90 min, phone in another room (teen ladder ends at 60) | D | E2 | — | "One protected block of focus a day." |
-| 18 | `focus_top3` (spec 2) | First task | Starting on what matters | T, A | focus ★, discipline ★, calm · | Routine "Planning my day" → rung 1; else rung 0 | Write your #1 task · …and work on it for 10 min first · …25 min · …45 min | D | E2 | — | "Decide your most important task and start with it." |
+| 18 → R3 | `focus_top3` (spec 2) | First task | Starting on what matters | T, A | focus ★, discipline ★, calm · | Routine "Planning my day" → rung 1; else rung 0 | Write your #1 task · …and work on it for 10 min first · …25 min · …45 min | D | E2 | — | "Decide your most important task and start with it." |
 | 19 | `social_reach_out` (new) | Reach out | Social connection | T, A | calm ·, confidence ·, energy · | Fixed rung 0 | Message or call 1 / 2 / 3 people you care about | D | E1 (connection), E2 (this form) | — (always possible: a message counts) | "A quick message to someone you care about." |
 | 20 | `confidence_talk` (spec 2) | Start a conversation | Social confidence through small reps | T, A | confidence ★ | Fixed rung 0 | Start 1 / 2 / 3 conversations (in person or a call) | D | E2 [VERIFY exposure framing] | Opportunity-dependent (max 1 per plan) | "Small conversations make the next one easier." |
 | 21 | `confidence_compliment` (spec 2) | Genuine compliment | Positive social contact | T, A | confidence ★ | Fixed rung 0 | Give 1 / 2 / 3 genuine compliments (a message counts) | D | E3 | — | "Noticing what others do well." |
