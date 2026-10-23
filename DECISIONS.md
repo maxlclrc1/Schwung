@@ -164,5 +164,11 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
     - *Words scroll, the world stays*: the phase names and "Phase n of 3 / Day n" are part of the page (they
       scroll with the greeting and cards); the mountain, trail, markers, landmarks and orb stay still. Pinned
       words collided with the page's text while scrolling (owner report).
+    - *One Continuous Ascent* (in progress, `design/canvas/CANVAS_SPEC.md`): the world now continues below the
+      painting (slopes, treeline, pine forest; `assemble_canvas.py`, 1536×2816 per theme) and Today moves it
+      at 40% of the scroll speed (`PARALLAX`), with the trail and orb moving along so they stay aligned. Taps
+      subtract the scroll × (1 − PARALLAX). The light and dark art crossfade fully (the dark art fades out
+      rather than staying underneath), so an image's softened edge can't show the other theme through it.
+      Still to come: the valley piece below the forest, and the shared camera between screens.
     - Ceremonies, Journey, Settings and the sheets are unchanged. `scripts/generate-ascent-art.py` is legacy.
 

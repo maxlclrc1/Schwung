@@ -1,18 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  GestureResponderEvent,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { GestureResponderEvent, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { Confetti } from '../components/Art';
 import { AscentCaption, ascentLabel, AscentLabels, AscentScene, tapPoint } from '../components/Ascent';
 import { Comeback } from '../components/Comeback';
@@ -23,7 +22,7 @@ import { Button, ProgressBar, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
 import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
 import { comebackFor } from '../core/comeback';
-import { trailPoint, worldFrame } from '../core/world';
+import { PARALLAX, trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { getHabit, habitTitle, levelUp } from '../core/habits';
 import {
@@ -73,16 +72,21 @@ export default function Today() {
   const xp = useMemo(() => totalXp(logs), [logs]);
   const streak = useMemo(() => currentStreak(logs, start, today), [logs, start, today]);
   const offers = useMemo(() => levelUpOffers(plan, logs, start, today), [plan, logs, start, today]);
-  const { width } = useWindowDimensions();
+  const { width, height: screenHeight } = useWindowDimensions();
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   // The mountain and its trail stay still while the page scrolls over them. The trail area in the page is a
   // transparent placeholder: its measured position places the world, and taps on it map back to the trail.
   const [zoneTop, setZoneTop] = useState(insets.top + 96);
   const { zoneHeight } = worldFrame(width, zoneTop);
-  const scrollY = useRef(0);
-  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    scrollY.current = e.nativeEvent.contentOffset.y;
-  }, []);
+  // The world (and the trail on it) moves at PARALLAX of the page's speed, on the UI thread, so scrolling
+  // drifts down the mountain past the slopes and forest while the page's words and cards move at full speed.
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.set(e.contentOffset.y);
+  });
+  const parallax = useAnimatedStyle(() => ({ transform: [{ translateY: -PARALLAX * scrollY.get() }] }));
+  // Tall enough that the moving world still covers the screen at the bottom of a long page.
+  const worldLayer = { height: screenHeight * 2 };
   const days = useMemo(() => ascentDays(logs, start, today), [logs, start, today]);
   const todayDone = plan.filter((p) => todayLog?.completed.includes(p.habitId)).length;
   const comeback = useMemo(
@@ -99,7 +103,7 @@ export default function Today() {
   const onOpenJourney = useCallback((day?: number) => router.push(day ? `/journey?day=${day}` : '/journey'), []);
   const onTrailPress = useCallback(
     (e: GestureResponderEvent) => {
-      const day = nearestDay(trailPoint(tapPoint(e), scrollY.current), width, zoneHeight, 16);
+      const day = nearestDay(trailPoint(tapPoint(e), scrollY.get()), width, zoneHeight, 16);
       if (day === null || day === selectedDay) {
         setSelectedDay(null);
         return;
@@ -107,7 +111,7 @@ export default function Today() {
       haptic.tap();
       setSelectedDay(day === today ? null : day);
     },
-    [width, zoneHeight, selectedDay, today],
+    [width, zoneHeight, selectedDay, today, scrollY],
   );
 
   const onToggle = useCallback(
@@ -147,11 +151,13 @@ export default function Today() {
 
   return (
     <View style={styles.root}>
-      <WorldBackdrop zoneTop={zoneTop} />
-      <View pointerEvents="none" style={[styles.scene, { top: zoneTop }]}>
-        <AscentScene days={days} today={today} width={width} selected={selectedDay} todayDone={todayQualifies} />
-      </View>
-      <ScrollView
+      <Animated.View pointerEvents="none" style={[styles.world, worldLayer, parallax]}>
+        <WorldBackdrop zoneTop={zoneTop} />
+        <View style={[styles.scene, { top: zoneTop }]}>
+          <AscentScene days={days} today={today} width={width} selected={selectedDay} todayDone={todayQualifies} />
+        </View>
+      </Animated.View>
+      <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
         contentContainerStyle={[
@@ -302,9 +308,13 @@ export default function Today() {
             </T>
           </View>
         ) : null}
-      </ScrollView>
+      </Animated.ScrollView>
       {/* The same sky, fixed behind the status bar, so the page scrolls under it rather than under the clock. */}
-      <WorldBackdrop zoneTop={zoneTop} clip={insets.top} />
+      <View pointerEvents="none" style={[styles.statusSky, { height: insets.top }]}>
+        <Animated.View style={[styles.world, worldLayer, parallax]}>
+          <WorldBackdrop zoneTop={zoneTop} />
+        </Animated.View>
+      </View>
 
       {celebrate ? <Confetti spread={200} /> : null}
       {celebrate ? (
@@ -456,6 +466,8 @@ function IconButton({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  world: { position: 'absolute', left: 0, right: 0, top: 0 },
+  statusSky: { position: 'absolute', left: 0, right: 0, top: 0, overflow: 'hidden' },
   scene: { position: 'absolute', left: 0 },
   scroll: { paddingHorizontal: space.lg, gap: space.lg },
   // Full-bleed: the page has side padding, the mountain doesn't.

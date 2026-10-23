@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { ASCENT_ASPECT, DAY_POINTS, nearestDay } from '../ascent';
-import { trailPoint, WORLD, worldFrame } from '../world';
+import { PARALLAX, trailPoint, WORLD, worldFrame } from '../world';
 
 describe('world placement', () => {
   it('puts the painting exactly where the trail is drawn, on every phone width', () => {
@@ -24,15 +24,16 @@ describe('world placement', () => {
   });
 });
 
-describe('tapping the still trail while the page is scrolled', () => {
+describe('tapping the trail while the page is scrolled (parallax)', () => {
   it('maps a tap on the scrolled placeholder back to the day under the finger', () => {
     const width = 393;
     const height = width / ASCENT_ASPECT;
     for (const scrollY of [0, 40, 120]) {
       for (const day of [1, 7, 21, 30, 44, 66]) {
         const p = DAY_POINTS[day - 1];
-        // The marker is fixed on screen; the placeholder moved up by scrollY, so the tap lands lower in it.
-        const tap = { x: p.x * width, y: p.y * height + scrollY };
+        // The page (and the placeholder) moved up scrollY; the trail only PARALLAX * scrollY.
+        // So the finger on the marker lands (1 - PARALLAX) * scrollY lower in the placeholder.
+        const tap = { x: p.x * width, y: p.y * height + scrollY * (1 - PARALLAX) };
         expect(nearestDay(trailPoint(tap, scrollY), width, height, 16)).toBe(day);
       }
     }
@@ -42,6 +43,13 @@ describe('tapping the still trail while the page is scrolled', () => {
     const width = 393;
     const height = width / ASCENT_ASPECT;
     const p = DAY_POINTS[29];
-    expect(nearestDay({ x: p.x * width, y: p.y * height + 120 }, width, height, 16)).not.toBe(30);
+    expect(nearestDay({ x: p.x * width, y: p.y * height + 120 * (1 - PARALLAX) }, width, height, 16)).not.toBe(30);
+  });
+});
+
+describe('parallax', () => {
+  it('moves the world slower than the page, so scrolling reveals what lies below', () => {
+    expect(PARALLAX).toBeGreaterThan(0);
+    expect(PARALLAX).toBeLessThan(1);
   });
 });
