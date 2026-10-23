@@ -4,7 +4,10 @@ Every piece after the first is graded to the piece above it: its brightness dist
 lower half of the piece above, and its colours are taken from that piece's own palette (80%, keeping 20% of
 its original hue), then it is crossfaded in over OVERLAP rows.
 
-    python3 design/canvas/join_pieces.py <out.png> <piece1> <piece2> [...]
+    python3 design/canvas/join_pieces.py [--edge] <out.png> <piece1> <piece2> [...]
+
+--edge grades lightly instead: only the colour at the join is matched, easing off over 320 rows, so the rest
+of each piece stays as painted (for pieces that already match, like the light relights).
 """
 
 import sys
@@ -22,7 +25,7 @@ def load(p):
 
 
 def grade(piece, above):
-    ref = above[above.shape[0] // 2 * 0 + 400:]
+    ref = above[400:]
     lr, l2 = (ref @ W).ravel(), piece @ W
     q = np.linspace(0, 100, 257)
     dst = np.percentile(lr, q) + np.linspace(0, 1, 257) ** 3 * 12  # mist may stay a little brighter than trees
@@ -41,11 +44,21 @@ def grade(piece, above):
     return col * 0.8 + piece * (lm / np.maximum(l2, 1e-3))[..., None] * 0.2
 
 
-out = load(sys.argv[2])
-for p in sys.argv[3:]:
-    nxt = grade(load(p), out[-1024:])
+def edge_match(piece, above):
+    offset = above[-40:].reshape(-1, 3).mean(0) - piece[:40].reshape(-1, 3).mean(0)
+    ease = np.clip(1 - np.arange(piece.shape[0]) / 320, 0, 1)[:, None, None]
+    return piece + offset * ease
+
+
+args = sys.argv[1:]
+light = args[0] == '--edge'
+if light:
+    args = args[1:]
+out = load(args[1])
+for p in args[2:]:
+    nxt = (edge_match if light else grade)(load(p), out[-1024:])
     w = (np.arange(OVERLAP) / OVERLAP)[:, None, None]
     w = w * w * (3 - 2 * w)
     out = np.concatenate([out[:-OVERLAP], out[-OVERLAP:] * (1 - w) + nxt[:OVERLAP] * w, nxt[OVERLAP:]])
-Image.fromarray(out.clip(0, 255).astype(np.uint8)).save(sys.argv[1])
-print(f'{sys.argv[1]}: 1536x{out.shape[0]}')
+Image.fromarray(out.clip(0, 255).astype(np.uint8)).save(args[0])
+print(f'{args[0]}: 1536x{out.shape[0]}')
