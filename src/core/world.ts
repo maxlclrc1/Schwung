@@ -2,14 +2,14 @@ import { ASCENT_ASPECT } from './ascent';
 
 /*
  * The full-screen world: assets/world-*.jpg are the Ascent painting with sky above and the descent below it
- * (slopes, treeline, forest), fading into the app background (design/canvas/assemble_canvas.py).
+ * (slopes, treeline, forest, valley), fading into the app background (design/canvas/assemble_canvas.py).
  * The painting itself (where the trail is drawn) sits untouched at a fixed place inside the tall image,
  * so lining the trail up with it is just a matter of scale.
  */
 export const WORLD = {
   /** Source image size in px. */
   width: 1536,
-  height: 2816,
+  height: 3584,
   /** Where the 3:2 painting starts inside the tall image, in px. */
   paintingTop: 800,
 } as const;
