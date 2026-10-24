@@ -16,15 +16,33 @@ scheduled habits that can exist are synthetic **"Test session (dev)"** habits, a
 in development builds.
 
 ## Data and compatibility
-- `PlanHabit.schedule?: { days: Weekday[]; phaseLevelUps?: boolean }`: weekdays are Sunday = 0 … Saturday = 6;
-  2–3 days allowed.
+- `PlanHabit.schedule?: { days: Weekday[]; phaseLevelUps?: boolean; history?: ScheduleEra[] }`: weekdays are
+  Sunday = 0 … Saturday = 6; 2–3 days allowed.
+- **Schedule history** (`ScheduleEra = { days, until }`, oldest first): when the days change on program day *T*,
+  the previous days are stored as an era ending on day *T − 1*, and the new days apply from day *T*.
+  - A second change on the same day keeps the era already recorded.
+  - A habit added that day gets no era.
+  - `scheduleDaysOn(schedule, day)` returns the era covering the day, or the current days after the last era.
 - **No schedule = due every day.** Every existing V1 and V2 plan has none, so their behaviour is identical
   (tested: planned lists are the whole plan every day, and V1 plans and progression tests are unchanged).
-- **Saved data:** the field is optional, with no version bump. On load, a damaged schedule (wrong shape, 1 or 4+
-  days) is dropped and the habit becomes daily. Level, history and everything else are kept.
+- **Saved data:** both `schedule` and `schedule.history` are optional, so there is **no storage-version bump and
+  no migration step**.
+  - Saves from before history existed have none, which means "these days have always applied" (exactly the
+    previous behaviour).
+  - Logs are never rewritten.
+  - On load, damaged parts are dropped and valid days kept:
+    - invalid history (out of order, bad days, non-integer or negative `until`) → history dropped
+    - a bad phase flag → the flag dropped
+    - invalid days → the habit becomes daily
+  - Level, logs and everything else are kept.
 - **Weekdays** come from the program's local calendar date keys (`YYYY-MM-DD`), never from elapsed time.
-- **Pure logic** lives in `src/core/schedule.ts`: `isDueOn`, `dueOn`, `nextDueDay`, `nextSessionLabel`,
-  `validDays`, `coversEveryWeekday`.
+- **Pure logic** lives in `src/core/schedule.ts`: `isDueOn` (history-aware), `wasDueOn` (the day's log first),
+  `rescheduled`, `scheduleDaysOn`, `dueOn`, `nextDueDay`, `nextSessionLabel`, `validDays`, `validHistory`,
+  `coversEveryWeekday`.
+- **How a past day is judged** (runs, step-downs, Yesterday, a new log for yesterday):
+  1. its log's planned list, if the day was opened;
+  2. otherwise the schedule era in effect that day;
+  3. otherwise the current days (only for saves without history).
 
 ## Behaviour
 | Area | Rule |
@@ -77,7 +95,7 @@ Combine it with the Developer time travel (+1 day, Day 22…) to check rest days
 | **Damaged saved data** | ✅ Invalid days → the habit becomes daily (history and level kept). **Improved:** valid days with a damaged phase flag now keep the days and drop only the flag, so no automatic level-ups appear |
 | **Decision 5 (no fully scheduled plans)** | ✅ Every weekday must keep a due habit. Make your bed has no schedule and can't be given one. Removing it is still allowed if other daily habits cover every day (existing V1/V2 behaviour, unchanged) |
 | **Decision 6 (confirm days on add)** | Development: the test-session buttons now open the new habit straight away to confirm or change its days. Real scheduled habits will need this in their add flow when they're built |
-| **Known limitation** | A day with no log at all (app not opened) is judged by the current schedule, because schedule history isn't stored. This only matters if days are changed after missed, unlogged sessions |
+| **Schedule history (resolved after `3434790`)** | Previously a day with no log (app not opened) was judged by the *current* schedule. Changes now apply prospectively: unlogged past days use the schedule that was in effect then. Tested: changes after completed sessions with unlogged rest days in between (run and level kept), missed unlogged sessions (still missed, step-down still applies), skipped rest days (never misses), three changes in one program, same-day double edits, restart, damaged and older saved data |
 
 ## Native iPhone test: Expo Go
 **Not yet performed.** Nothing here has been tested on an iPhone.

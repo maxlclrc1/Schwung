@@ -1,5 +1,5 @@
 import { dateForDay } from './dates';
-import type { DayLog, PlanHabit, Schedule, Weekday } from './types';
+import type { DayLog, PlanHabit, Schedule, ScheduleEra, Weekday } from './types';
 
 /*
  * Scheduled habits: a habit due on chosen weekdays instead of every day (development-only foundation, see
@@ -45,15 +45,36 @@ export function isScheduled(h: PlanHabit): boolean {
   return h.schedule !== undefined;
 }
 
-/** Whether a habit is due on a program day. Daily habits are always due. */
+/** The weekdays a schedule had on a program day: the era covering it, or the current days after the last one. */
+export function scheduleDaysOn(s: Schedule, day: number): Weekday[] {
+  return s.history?.find((era) => day <= era.until)?.days ?? s.days;
+}
+
+/** Whether a habit is due on a program day, under the schedule in effect that day. Daily habits are always due. */
 export function isDueOn(h: PlanHabit, startKey: string, day: number): boolean {
-  return !h.schedule || h.schedule.days.includes(weekdayOfDay(startKey, day));
+  return !h.schedule || scheduleDaysOn(h.schedule, day).includes(weekdayOfDay(startKey, day));
+}
+
+/**
+ * The schedule after changing its days on program day `today`: the change applies from today on, and the days
+ * that applied until yesterday become an era. A second change on the same day keeps the era already recorded.
+ */
+export function rescheduled(s: Schedule, days: Weekday[], today: number, addedOnDay: number): Schedule {
+  const history = s.history ?? [];
+  const last = history[history.length - 1];
+  const until = today - 1;
+  const recorded = (last && last.until >= until) || until < addedOnDay;
+  return {
+    ...s,
+    days: [...days],
+    ...(recorded ? {} : { history: [...history, { days: [...s.days], until }] }),
+  };
 }
 
 /**
  * Whether a habit was due on a day, by that day's own record: a scheduled habit's past days are judged by what
- * was actually planned then (its log), not by today's schedule, so editing the days never rewrites past
- * sessions. Days without a log fall back to the current schedule. Daily habits are always due (unchanged).
+ * was actually planned then (its log). Days without a log use the schedule that was in effect that day (its
+ * history), so editing the days never rewrites past sessions. Daily habits are always due (unchanged).
  */
 export function wasDueOn(h: PlanHabit, logs: Record<string, DayLog>, startKey: string, day: number): boolean {
   if (!h.schedule) return true;
@@ -84,10 +105,28 @@ export function validDays(days: unknown): days is Weekday[] {
   );
 }
 
+/** Eras in order, each with valid days and a strictly increasing `until` day. */
+export function validHistory(h: unknown): h is ScheduleEra[] {
+  if (!Array.isArray(h)) return false;
+  let prev = -Infinity;
+  for (const era of h) {
+    if (!era || typeof era !== 'object') return false;
+    const { days, until } = era as Partial<ScheduleEra>;
+    if (!validDays(days) || typeof until !== 'number' || !Number.isInteger(until) || until < 0 || until <= prev)
+      return false;
+    prev = until;
+  }
+  return true;
+}
+
 export function validSchedule(s: unknown): s is Schedule {
   if (!s || typeof s !== 'object') return false;
   const x = s as Partial<Schedule>;
-  return validDays(x.days) && (x.phaseLevelUps === undefined || typeof x.phaseLevelUps === 'boolean');
+  return (
+    validDays(x.days) &&
+    (x.phaseLevelUps === undefined || typeof x.phaseLevelUps === 'boolean') &&
+    (x.history === undefined || validHistory(x.history))
+  );
 }
 
 /**

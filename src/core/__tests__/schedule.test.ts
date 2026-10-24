@@ -14,8 +14,11 @@ import {
   isDueOn,
   nextDueDay,
   nextSessionLabel,
+  rescheduled,
+  scheduleDaysOn,
   scheduleLabel,
   validDays,
+  validHistory,
   validSchedule,
   wasDueOn,
   weekdayOfDay,
@@ -233,5 +236,113 @@ describe('audit regressions (owner decisions of the scheduled-fitness review)', 
     // They still level up by accepting the 7-in-a-row offer.
     const logs = logsFor([p[1]], 7, () => true);
     expect(levelUpOffers([p[1]], logs, START, 7)).toEqual(['move_balance']);
+  });
+});
+
+describe('schedule history: changes apply prospectively', () => {
+  const MWF: Weekday[] = [1, 3, 5];
+  const TT: Weekday[] = [2, 4];
+  /** Logs only for the given (day → completed?) entries; every other day was never opened. */
+  function sparseLogs(h: PlanHabit, entries: Record<number, boolean>) {
+    const logs: Record<string, DayLog> = {};
+    for (const [d, done] of Object.entries(entries)) {
+      const day = Number(d);
+      const date = dateForDay(START, day);
+      logs[date] = {
+        day,
+        date,
+        planned: isDueOn(h, START, day) ? [h.habitId] : [],
+        completed: done ? [h.habitId] : [],
+      };
+    }
+    return logs;
+  }
+  const step = (p: PlanHabit[], logs: Record<string, DayLog>, today: number) =>
+    reconcile({ plan: p, appliedPhase: 1, startKey: START, logs, today, yesterdayEditable: false });
+
+  it('records the old days as an era ending yesterday; the new days apply from today', () => {
+    const s0 = { days: MWF };
+    const s1 = rescheduled(s0, TT, 13, 1);
+    expect(s1).toEqual({ days: TT, history: [{ days: MWF, until: 12 }] });
+    expect(scheduleDaysOn(s1, 12)).toEqual(MWF);
+    expect(scheduleDaysOn(s1, 13)).toEqual(TT);
+    // A second change the same day keeps the era already recorded.
+    expect(rescheduled(s1, [6, 0], 13, 1)).toEqual({ days: [6, 0], history: [{ days: MWF, until: 12 }] });
+    // A habit added today has no past to keep.
+    expect(rescheduled(s0, TT, 13, 13)).toEqual({ days: TT });
+    expect(validSchedule(s1)).toBe(true);
+  });
+
+  it('after completed sessions, unlogged rest days in between stay rest days (run and level kept)', () => {
+    const before = sched('s', MWF, { level: 'medium' });
+    // Sessions 1, 3, 5, 8, 10, 12 done; the rest days (2, 4, 6, 7, 9, 11) were never opened.
+    const logs = sparseLogs(before, { 1: true, 3: true, 5: true, 8: true, 10: true, 12: true });
+    const after = { ...before, schedule: rescheduled(before.schedule!, TT, 13, 1) };
+    expect(completionRun(after, logs, START, 13)).toBe(6);
+    const r = step([after], logs, 14);
+    expect(r.plan[0].level).toBe('medium');
+    expect(r.events).toEqual([]);
+    // Without the history, the unlogged Thursday (day 11) would read as a missed session: the run would be 1.
+    const noHistory = { ...before, schedule: { days: TT } };
+    expect(completionRun(noHistory, logs, START, 13)).toBe(1);
+  });
+
+  it('missed sessions that were never logged keep counting as missed after a change', () => {
+    const before = sched('s', MWF, { level: 'medium' });
+    // 1, 3, 5 done; then the app wasn't opened for the sessions on days 8, 10 and 12.
+    const logs = sparseLogs(before, { 1: true, 3: true, 5: true });
+    const after = { ...before, schedule: rescheduled(before.schedule!, TT, 13, 1) };
+    const r = step([after], logs, 13);
+    expect(r.plan[0].level).toBe('easy');
+    expect(r.events).toContainEqual(expect.objectContaining({ kind: 'stepDown', habitIds: ['s'] }));
+  });
+
+  it('skipped rest days never turn into misses, whichever schedule follows', () => {
+    const before = sched('s', MWF, { level: 'medium' });
+    const logs = sparseLogs(before, { 8: true, 10: true, 12: true });
+    const after = { ...before, schedule: rescheduled(before.schedule!, [0, 2, 4], 13, 1) };
+    for (const d of [2, 4, 6, 7, 9, 11]) expect(wasDueOn(after, logs, START, d)).toBe(false);
+    for (const d of [8, 10, 12]) expect(wasDueOn(after, logs, START, d)).toBe(true);
+    expect(step([after], logs, 13).plan[0].level).toBe('medium');
+  });
+
+  it('several changes in one program each keep their own days', () => {
+    let h = sched('s', MWF, { level: 'medium' });
+    h = { ...h, schedule: rescheduled(h.schedule!, TT, 8, 1) }; // Mon/Wed/Fri for days 1–7
+    h = { ...h, schedule: rescheduled(h.schedule!, [6, 0], 15, 1) }; // Tue/Thu for days 8–14
+    h = { ...h, schedule: rescheduled(h.schedule!, MWF, 22, 1) }; // Sat/Sun for days 15–21, Mon/Wed/Fri after
+    expect(h.schedule!.history).toEqual([
+      { days: MWF, until: 7 },
+      { days: TT, until: 14 },
+      { days: [6, 0], until: 21 },
+    ]);
+    const due = Array.from({ length: 28 }, (_, i) => i + 1).filter((d) => isDueOn(h, START, d));
+    expect(due).toEqual([1, 3, 5, 9, 11, 20, 21, 22, 24, 26]);
+    // Every one of those sessions done (with logs only on session days): 10 in a row, nothing missed.
+    const logs = sparseLogs(h, Object.fromEntries(due.map((d) => [d, true])));
+    expect(completionRun(h, logs, START, 27)).toBe(10);
+    // Day 22 passed (phase 2), but nothing stepped down.
+    expect(step([h], logs, 27).events.filter((e) => e.kind === 'stepDown')).toEqual([]);
+    expect(levelUpOffers([h], logs, START, 27)).toEqual(['s']);
+  });
+
+  it('validates history: ordered, valid days, whole non-negative days', () => {
+    expect(validHistory([])).toBe(true);
+    expect(
+      validHistory([
+        { days: MWF, until: 3 },
+        { days: TT, until: 9 },
+      ]),
+    ).toBe(true);
+    expect(
+      validHistory([
+        { days: MWF, until: 9 },
+        { days: TT, until: 3 },
+      ]),
+    ).toBe(false);
+    expect(validHistory([{ days: [1], until: 3 }])).toBe(false);
+    expect(validHistory([{ days: MWF, until: 2.5 }])).toBe(false);
+    expect(validHistory('yes')).toBe(false);
+    expect(validSchedule({ days: TT, history: [{ days: MWF, until: -1 }] })).toBe(false);
   });
 });
