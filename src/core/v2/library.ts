@@ -188,6 +188,8 @@ export const LIBRARY: HabitDef[] = [
     domain: 'nutrition',
     mode: 'auto',
     release: 'candidate',
+    // NHS advice treats low blood sugar with a sugary drink or juice, so that must always come first.
+    note: 'If you use a sugary drink or juice to treat low blood sugar, always do that. It never counts against this habit.',
     exclude: (p) =>
       !isAdult(p) ? 'not offered under 18' : p.produce === 'skip' ? 'you chose to skip food habits' : null,
     ladder: fixed([
@@ -440,7 +442,8 @@ export const GOALS: Record<GoalV2, { core: string[]; support: string[]; suggest:
   },
   fitness: {
     core: ['move_walk', 'move_balance'],
-    support: ['food_produce', 'food_unsweetened', 'sleep_bedtime', 'sleep_wake'],
+    // Sleep habits are not presented as fitness habits; they can still come from a sleep need.
+    support: ['food_produce', 'food_unsweetened'],
     suggest: ['move_strength_prep'],
   },
 };
