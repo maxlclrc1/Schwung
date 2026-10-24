@@ -9,7 +9,16 @@ import { Button, Screen, T } from '../../components/ui';
 import { OnboardingBackdrop } from '../../components/World';
 import { UNDER_16_MESSAGE } from '../../core/v2/engine';
 import { pendingTimeQuestion } from '../../core/v2/program';
-import { isAnswered, screensV2, toProfile, type Draft, type QuestionV2, type SingleQuestion } from '../../core/v2/quiz';
+import {
+  isAnswered,
+  screensV2,
+  toggledAnswer,
+  toProfile,
+  withAnswer,
+  type Draft,
+  type QuestionV2,
+  type SingleQuestion,
+} from '../../core/v2/quiz';
 import { v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useScreenReader } from '../../lib/useScreenReader';
@@ -102,9 +111,13 @@ export default function QuizV2() {
   const chooseSingle = (value: string, key: QuestionV2['key'] = q.key) => {
     if (advancing.current) return;
     haptic.tap();
-    const next = { ...draft, [key]: value } as Draft;
+    const next = withAnswer(draft, key, value);
+    if (paired) {
+      // Applied to the latest draft, so two quick taps on a shared screen both count.
+      setDraft((d) => withAnswer(d, key, value));
+      return;
+    }
     setDraft(next);
-    if (paired) return;
     if (value === 'u16') {
       // Nothing is kept for under-16s, including an earlier unfinished draft.
       useApp.getState().setProfile(null);
@@ -116,10 +129,9 @@ export default function QuizV2() {
   const toggleMulti = (value: string) => {
     if (q.kind !== 'multi') return;
     haptic.tap();
-    const current = draft[q.key];
-    const list = Array.isArray(current) ? (current as string[]) : [];
-    const next = list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-    setDraft({ ...draft, [q.key]: next } as Draft);
+    const key = q.key;
+    // Applied to the latest draft, so quick taps never undo each other.
+    setDraft((d) => toggledAnswer(d, key, value));
   };
 
   const back = () => {
