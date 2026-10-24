@@ -218,6 +218,21 @@ export function screensV2(d: Draft): QuestionV2[][] {
   return screens;
 }
 
+/** The draft with a single-choice answer set (choosing it again keeps it: a single choice is never emptied). */
+export function withAnswer(d: Draft, key: QuestionV2['key'], value: string): Draft {
+  return { ...d, [key]: value } as Draft;
+}
+
+/**
+ * The draft with one multi-choice option toggled: added if it wasn't chosen, removed if it was. A skipped
+ * question ('unknown') starts again from nothing chosen.
+ */
+export function toggledAnswer(d: Draft, key: QuestionV2['key'], value: string): Draft {
+  const current = d[key];
+  const list = Array.isArray(current) ? (current as string[]) : [];
+  return { ...d, [key]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value] } as Draft;
+}
+
 export function isAnswered(q: QuestionV2, d: Draft): boolean {
   return d[q.key] !== undefined;
 }

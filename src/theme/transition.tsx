@@ -9,10 +9,10 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { ColorProp, THEME_FADE_MS, themedPairs } from './fade';
+import { animatedColors, ColorProp, THEME_FADE_MS } from './fade';
 import { Colors, palettes, Scheme, useTheme } from './index';
 
-export { findToken, THEME_FADE_MS, themedPairs } from './fade';
+export { animatedColors, findToken, THEME_FADE_MS, themedPairs } from './fade';
 
 /*
  * Theme transitions. One shared value eases between dark (0) and light (1) whenever the resolved
@@ -59,11 +59,13 @@ export function useThemeProgress(): SharedValue<number> {
 export function useThemedColors(style: ViewStyle | TextStyle | undefined) {
   const { c } = useTheme();
   const progress = useThemeProgress();
-  const pairs = themedPairs((style ?? {}) as Partial<Record<ColorProp, unknown>>, c);
-  const deps = pairs.map((p) => p.join(':')).join('|');
+  const { fades, fixed } = animatedColors((style ?? {}) as Partial<Record<ColorProp, unknown>>, c);
+  const deps = [...fades, ...fixed].map((p) => p.join(':')).join('|');
   return useAnimatedStyle(() => {
     const out: Record<string, string> = {};
-    for (const [prop, d, l] of pairs) out[prop] = interpolateColor(progress.value, [0, 1], [d, l]);
+    for (const [prop, d, l] of fades) out[prop] = interpolateColor(progress.value, [0, 1], [d, l]);
+    // Written every time too, so a color that stops being a palette token replaces the last faded one.
+    for (const [prop, v] of fixed) out[prop] = v;
     return out;
   }, [deps, progress]);
 }
