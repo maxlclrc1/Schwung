@@ -171,6 +171,7 @@ function DevTools() {
               straight away so its weekdays can be confirmed or changed (owner decision 6). */}
           <DevButton label="+ Test session Mon/Wed/Fri" onPress={() => addTestSession([1, 3, 5])} />
           <DevButton label="+ Test session Tue/Thu" onPress={() => addTestSession([2, 4])} />
+          <DevButton label="Exercise preview" onPress={() => router.push('/dev/exercise')} />
         </View>
       ) : null}
       <View style={styles.devRow}>

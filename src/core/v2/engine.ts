@@ -8,6 +8,7 @@ import {
   sleepBelowBand,
   type HabitDef,
 } from './library';
+import { EXERCISE_CONTENT, EXERCISE_SAFETY, isExercise } from './exercise';
 import type { Alternative, ChoiceStep, NeedDomain, PickV2, PlanResultV2, ProfileV2, Targets } from './types';
 
 /**
@@ -43,8 +44,14 @@ export function needs(p: ProfileV2): Record<NeedDomain, number> {
 
 /** Why a habit can't be offered to this person (null = eligible), checking everything but plan fit. */
 export function exclusion(h: HabitDef, p: ProfileV2, gate?: Gate): string | null {
-  if (h.release !== 'candidate') return 'not released yet';
-  if (gate && !gate.has(h.id)) return 'still waiting for scientific review';
+  if (h.release === 'held') return 'not released yet';
+  // An exercise prototype is only usable where a gate names it explicitly (the development Exercise Preview); the
+  // full candidate pool never includes it. Its own safety rules still apply first, so their reasons show.
+  if (h.release === 'prototype') {
+    const reason = h.exclude(p);
+    if (reason) return reason;
+    if (!gate?.has(h.id)) return 'a development prototype, not available yet';
+  } else if (gate && !gate.has(h.id)) return 'still waiting for scientific review';
   const reason = h.exclude(p);
   if (reason) return reason;
   const start = h.start(p);
@@ -292,6 +299,9 @@ function choiceStep(p: ProfileV2, plan: HabitDef[], need: Record<NeedDomain, num
 export function habitNotes(h: HabitDef, p: ProfileV2): string[] {
   const notes: string[] = [];
   if (h.note) notes.push(h.note);
+  if (isExercise(h.id)) {
+    notes.push(EXERCISE_CONTENT[h.id].setup, ...EXERCISE_SAFETY, PROTOTYPE_NOTE);
+  }
   if (h.id === 'move_walk') {
     // Heart conditions and pregnancy never get Walk automatically (they need individual advice first).
     const careful = precautionsUnknown(p) || p.age === '65p' || hasPrecaution(p, 'joint');
@@ -310,15 +320,23 @@ export const ACTIVE_NOTE =
 export const PREVIEW_MOVEMENT_NOTE =
   'Development preview: the movement habits for this goal are still waiting for scientific review, so this plan doesn’t include one yet.';
 
+/** Shown with every exercise prototype. */
+export const PROTOTYPE_NOTE =
+  'Development prototype: these targets are provisional and haven’t been clinically reviewed.';
+
 function planNotes(p: ProfileV2, plan: HabitDef[], gate: Gate): string[] {
   const notes: string[] = [];
+  // An exercise prototype this person could choose (only ever true in the development Exercise Preview).
+  const offerable = (id: string) => !!gate?.has(id) && exclusion(BY_ID[id], p, gate) === null;
+  const strength = plan.some((h) => h.id === 'move_strength_prep');
+  const gentleOrSeated = offerable('move_strength_gentle') || offerable('move_seated') || offerable('move_balance');
   const fitnessCore = plan.some((h) => GOALS.fitness.core.includes(h.id));
   const active = p.activeDays === '3_4' || p.activeDays === '5p';
   // A precaution note already explains why movement habits are missing; don't stack generic fitness copy on it.
   const movementExplained =
     hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy') || hasPrecaution(p, 'walkingDifficult');
   if (p.goal === 'fitness' && !fitnessCore && active) notes.push(ACTIVE_NOTE);
-  else if (p.goal === 'fitness' && !movementExplained)
+  else if (p.goal === 'fitness' && !movementExplained && !strength && !gentleOrSeated)
     notes.push(p.activeDays === '0' ? FITNESS_NOTE : `${FITNESS_NOTE} If you train already, keep going.`);
   if (precautionsUnknown(p)) notes.push('If you have a health condition, check these with a professional.');
   if (p.sleepTrouble === 'most')
@@ -328,12 +346,18 @@ function planNotes(p: ProfileV2, plan: HabitDef[], gate: Gate): string[] {
       'Movement and breathing habits for heart conditions and pregnancy are waiting for expert review. Your clinician or midwife can advise what’s right for you.',
     );
   if (hasPrecaution(p, 'walkingDifficult'))
-    notes.push('Movement habits for limited mobility aren’t available yet. A professional can suggest safe options.');
+    notes.push(
+      offerable('move_seated')
+        ? 'Seated mobility is available as a choice, after a short safety check.'
+        : 'Movement habits for limited mobility aren’t available yet. A professional can suggest safe options.',
+    );
   if (p.goal === 'fitness' && p.age === '65p')
     notes.push(
-      'Guidelines also recommend balance and strength activities for older adults. Schwung’s versions are still being reviewed, so they aren’t included yet.',
+      offerable('move_balance') || offerable('move_strength_gentle')
+        ? 'Guidelines also recommend balance and strength activities for older adults. Both are available as choices, after a short safety check.'
+        : 'Guidelines also recommend balance and strength activities for older adults. Schwung’s versions are still being reviewed, so they aren’t included yet.',
     );
-  if (p.goal === 'fitness' && !fitnessCore && !active && !movementExplained) {
+  if (p.goal === 'fitness' && !fitnessCore && !active && !movementExplained && !gentleOrSeated) {
     const withheld = GOALS.fitness.core.some(
       (id) => exclusion(BY_ID[id], p) === null && exclusion(BY_ID[id], p, gate) !== null,
     );

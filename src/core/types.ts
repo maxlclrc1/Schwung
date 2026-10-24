@@ -89,6 +89,8 @@ export type DayLog = {
   completed: string[]; // habitIds
   /** Habit ids that were in the plan when this day was last edited. */
   planned: string[];
+  /** Exercise habits the person chose to rest that day: not planned, so never a miss. */
+  rested?: string[];
 };
 
 export type Notice =

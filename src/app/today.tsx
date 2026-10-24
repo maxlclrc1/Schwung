@@ -23,6 +23,10 @@ import { WorldBackdrop } from '../components/World';
 import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
 import { comebackFor } from '../core/comeback';
 import { dueOn, isDueOn, nextSessionLabel, wasDueOn } from '../core/schedule';
+import { isExercise } from '../core/v2/exercise';
+import { SelfCheckToggle } from '../components/Exercise';
+import type { DayLog } from '../core/types';
+
 import { PARALLAX, trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { habitTaskAt, habitTitle, levelUp } from '../core/habits';
@@ -44,6 +48,9 @@ import { useClock } from '../lib/useClock';
 import { appNow, currentDay, useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
+
+const todayLogRested = (logs: Record<string, DayLog>, start: string, day: number) =>
+  logs[dateForDay(start, day)]?.rested ?? [];
 
 export default function Today() {
   const { c } = useTheme();
@@ -67,10 +74,19 @@ export default function Today() {
   const log = logs[dateForDay(start, viewDay)];
   const todayLog = logs[dateForDay(start, today)];
   // Scheduled habits only appear on their days; every daily habit is always due, so daily plans are unchanged.
-  const dueToday = useMemo(() => dueOn(plan, start, today), [plan, start, today]);
+  // An exercise habit rested today isn't planned today (and never counts as missed).
+  const restedToday = useMemo(() => todayLogRested(logs, start, today), [logs, start, today]);
+  const dueToday = useMemo(
+    () => dueOn(plan, start, today).filter((h) => !restedToday.includes(h.habitId)),
+    [plan, start, today, restedToday],
+  );
   // Yesterday shows what was due yesterday by its own record, even if a schedule changed since.
-  const shown = useMemo(() => plan.filter((h) => wasDueOn(h, logs, start, viewDay)), [plan, logs, start, viewDay]);
+  const shown = useMemo(
+    () => (viewDay === today ? dueToday : plan.filter((h) => wasDueOn(h, logs, start, viewDay))),
+    [plan, logs, start, viewDay, today, dueToday],
+  );
   const resting = useMemo(() => plan.filter((h) => !isDueOn(h, start, today)), [plan, start, today]);
+  const [selfChecked, setSelfChecked] = useState<string | null>(null);
   const todayFull = isFullDay(todayLog) && dueToday.every((p) => todayLog?.completed.includes(p.habitId));
   const todayQualifies = dayQualifies(todayLog);
   const doneCount = shown.filter((p) => log?.completed.includes(p.habitId)).length;
@@ -252,19 +268,23 @@ export default function Today() {
                   style={[styles.offer, { borderColor: c.accentInk, backgroundColor: c.accentSoft }]}
                 >
                   <T v="overline" color={c.accentInk}>
-                    7 days straight
+                    {h.schedule ? '7 sessions in a row' : '7 days straight'}
                   </T>
                   <T v="bodyStrong">Level up {habitTitle(h)}?</T>
                   <T v="caption" color={c.textDim}>
                     Next: {next}
                   </T>
+                  {isExercise(id) ? (
+                    <SelfCheckToggle checked={selfChecked === id} onChange={(v) => setSelfChecked(v ? id : null)} />
+                  ) : null}
                   <View style={styles.offerButtons}>
                     <Button
                       label="Level up"
                       style={{ flex: 1 }}
+                      disabled={isExercise(id) && selfChecked !== id}
                       onPress={() => {
-                        haptic.success();
-                        useApp.getState().acceptLevelUp(id);
+                        if (useApp.getState().acceptLevelUp(id, selfChecked === id)) haptic.success();
+                        setSelfChecked(null);
                       }}
                     />
                     <Button
@@ -300,13 +320,20 @@ export default function Today() {
           ))}
         </Animated.View>
 
-        {viewing === 'today' && resting.length ? (
+        {viewing === 'today' && (resting.length || restedToday.length) ? (
           <View style={styles.resting} accessibilityRole="text">
             {resting.map((h) => (
               <T key={h.habitId} v="caption" color={c.textDim}>
                 Rest day for {habitTitle(h)} · next session {nextSessionLabel(h, start, today)}
               </T>
             ))}
+            {plan
+              .filter((h) => restedToday.includes(h.habitId))
+              .map((h) => (
+                <T key={h.habitId} v="caption" color={c.textDim}>
+                  Resting {habitTitle(h)} today · rest never counts as missed
+                </T>
+              ))}
           </View>
         ) : null}
 

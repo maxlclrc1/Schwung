@@ -1,7 +1,7 @@
 import { validDays, validHistory, validSchedule } from '../core/schedule';
 import { repairSpec } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
-import type { PlanHabit } from '../core/types';
+import type { DayLog, PlanHabit } from '../core/types';
 
 /** Saved-data version. 1 = V1 only (no program version); 2 = programVersion, profile and per-habit specs. */
 export const STORAGE_VERSION = 2;
@@ -53,6 +53,22 @@ export function sanitize(s: Saved): Saved {
       delete rest.schedule;
       return rest;
     });
+  }
+  // A damaged rest record is dropped (the day keeps its planned and completed lists, which decide everything).
+  if (out.logs && typeof out.logs === 'object') {
+    const logs = { ...(out.logs as Record<string, DayLog>) };
+    for (const [date, log] of Object.entries(logs)) {
+      if (
+        log &&
+        log.rested !== undefined &&
+        !(Array.isArray(log.rested) && log.rested.every((x) => typeof x === 'string'))
+      ) {
+        const fixed = { ...log };
+        delete fixed.rested;
+        logs[date] = fixed;
+      }
+    }
+    out.logs = logs;
   }
   return out;
 }

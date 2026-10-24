@@ -12,12 +12,13 @@ All scientific and safety claims remain **[VERIFY]**.
 - **[POP]** is WHO or CDC population guidance (section G). Population guidance is **not** evidence that any
   particular rung works or is universally safe.
 
-## Change log (revisions 6.1–6.3, owner-approved refinements)
+## Change log (revisions 6.1–6.4, owner-approved refinements)
 | Rev | Change |
 |---|---|
 | 6.1 | W1 only for habits actually in the plan (asked when such a choice is made); the two sleep questions share one screen; Unsweetened drinks ladder becomes swap 1 · up to 2 · up to 3, and a day with no sugary drinks counts |
 | 6.2 | Start a conversation (#21): one conversation a day at every level (genuine conversation beyond logistics → a follow-up question → start one yourself with someone you know). Still choice-only; no strangers needed. Public release still needs social-anxiety wording review |
 | 6.3 | #21 is displayed as **"Meaningful conversation"** (id unchanged; saved plans keep their frozen title). Scheduled-habit infrastructure added behind development only (section E) |
+| 6.4 | **Fitness exercise prototypes** (development-only, `release: 'prototype'`): Beginner strength preparation (#7, now 16–64), Gentle strength preparation, Supported balance practice (#23), Seated mobility. Usable only through the developer Exercise Preview gate; never in normal plans, choices, swaps or release builds. Shared safety check, accept-only progression with a self-check, rest days. See `SCHWUNG_V2_FITNESS_PROTOTYPES.md` |
 
 ## Change log (revision 5 → 6: evidence and safety review, 2026-10-24)
 Source access was search-level only; see `SCHWUNG_V2_EVIDENCE_REGISTER.md`.

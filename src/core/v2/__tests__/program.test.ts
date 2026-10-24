@@ -91,10 +91,14 @@ describe('release gate', () => {
       expect(DEV_CLEARED.has(id)).toBe(false);
     }
     for (const id of DEV_CLEARED) expect(BY_ID[id].release).toBe('candidate');
-    // Every candidate except Strength preparation is now cleared.
-    expect(LIBRARY.filter((h) => h.release === 'candidate' && !DEV_CLEARED.has(h.id)).map((h) => h.id)).toEqual([
-      'move_strength_prep',
-    ]);
+    // Every candidate is cleared; the four exercise prototypes and the strength session never are.
+    expect(LIBRARY.filter((h) => h.release === 'candidate' && !DEV_CLEARED.has(h.id))).toEqual([]);
+    expect(
+      LIBRARY.filter((h) => h.release === 'prototype')
+        .map((h) => h.id)
+        .sort(),
+    ).toEqual(['move_balance', 'move_seated', 'move_strength_gentle', 'move_strength_prep']);
+    for (const h of LIBRARY.filter((x) => x.release !== 'candidate')) expect(DEV_CLEARED.has(h.id)).toBe(false);
   });
 
   it('offers only cleared habits in plans, choices and swaps, across the answer space', () => {

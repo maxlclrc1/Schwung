@@ -9,7 +9,8 @@ import { assemblePlan, swappedHabit } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
 import { v2PreviewEnabled } from '../lib/flags';
 import { migrateSaved, sanitize, STORAGE_VERSION } from './migrate';
-import { coversEveryWeekday, dueOn, rescheduled, validDays } from '../core/schedule';
+import { coversEveryWeekday, isDueOn, plannedForDay, rescheduled, validDays } from '../core/schedule';
+import { canAcceptLevelUp, isExercise, validExerciseDays } from '../core/v2/exercise';
 import { debouncedStorage } from './storage';
 
 export type AppData = {
@@ -43,7 +44,10 @@ type Actions = {
   startProgram: () => boolean;
   toggleHabit: (day: number, habitId: string) => void;
   setLevel: (habitId: string, level: Level) => void;
-  acceptLevelUp: (habitId: string) => void;
+  /** Exercise habits need `selfCheck` (the level feels comfortable, controlled and manageable). */
+  acceptLevelUp: (habitId: string, selfCheck?: boolean) => boolean;
+  /** Exercise habits only: rest today (or undo it). A rested session is never a miss and never counts as done. */
+  restToday: (habitId: string, rest: boolean) => boolean;
   declineLevelUp: (habitId: string) => void;
   swapHabit: (oldId: string, newId: string) => void;
   addCustomHabit: (title: string, description?: string) => void;
@@ -99,15 +103,6 @@ export function currentDay(s: Pick<AppData, 'startedAt' | 'devDayOffset'> = useA
   return Math.max(1, dayNumber(s.startedAt, toDateKey(appNow(s.devDayOffset))));
 }
 
-/**
- * The habit ids planned for a day: those due that day, plus any already completed that day and still in the plan
- * (so changing a schedule never takes away a session already done). For daily plans this is the whole plan.
- */
-function plannedFor(plan: PlanHabit[], startKey: string, day: number, completed: string[] = []): string[] {
-  const due = new Set(dueOn(plan, startKey, day).map((h) => h.habitId));
-  return plan.filter((h) => due.has(h.habitId) || completed.includes(h.habitId)).map((h) => h.habitId);
-}
-
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
 export const useApp = create<AppState>()(
@@ -121,7 +116,7 @@ export const useApp = create<AppState>()(
         const date = dateForDay(startedAt, day);
         const log = logs[date];
         if (!log) return logs;
-        const planned = plannedFor(plan, startedAt, day, log.completed);
+        const planned = plannedForDay(plan, startedAt, day, log.completed, log.rested);
         return { ...logs, [date]: { ...log, planned, completed: log.completed.filter((id) => planned.includes(id)) } };
       };
 
@@ -181,8 +176,8 @@ export const useApp = create<AppState>()(
           const next = completed.includes(habitId) ? completed.filter((id) => id !== habitId) : [...completed, habitId];
           // Yesterday keeps the plan it had; only a brand-new log takes the habits due that day.
           const planned =
-            day === currentDay(get()) || !prev ? plannedFor(plan, startedAt, day, completed) : prev.planned;
-          set({ logs: { ...logs, [date]: { day, date, completed: next, planned } } });
+            day === currentDay(get()) || !prev ? plannedForDay(plan, startedAt, day, next, prev?.rested) : prev.planned;
+          set({ logs: { ...logs, [date]: { ...prev, day, date, completed: next, planned } } });
         },
 
         setLevel: (habitId, level) =>
@@ -190,12 +185,31 @@ export const useApp = create<AppState>()(
             plan.map((h) => (h.habitId === habitId ? { ...h, level, levelSince: currentDay(get()) } : h)),
           ),
 
-        acceptLevelUp: (habitId) =>
+        acceptLevelUp: (habitId, selfCheck = false) => {
+          // Exercise habits level up only when the person confirms the level feels comfortable and controlled.
+          if (!canAcceptLevelUp(habitId, selfCheck)) return false;
           updatePlan((plan) =>
             plan.map((h) =>
               h.habitId === habitId ? { ...h, level: levelUp(h.level), levelSince: currentDay(get()) } : h,
             ),
-          ),
+          );
+          return true;
+        },
+
+        restToday: (habitId, rest) => {
+          const { startedAt, plan, logs } = get();
+          const h = plan.find((x) => x.habitId === habitId);
+          if (!startedAt || !h || !isExercise(habitId)) return false;
+          const day = currentDay(get());
+          if (!isDueOn(h, startedAt, day)) return false;
+          const date = dateForDay(startedAt, day);
+          const prev = logs[date];
+          const completed = (prev?.completed ?? []).filter((id) => !(rest && id === habitId));
+          const rested = [...(prev?.rested ?? []).filter((id) => id !== habitId), ...(rest ? [habitId] : [])];
+          const planned = plannedForDay(plan, startedAt, day, completed, rested);
+          set({ logs: { ...logs, [date]: { day, date, completed, planned, ...(rested.length ? { rested } : {}) } } });
+          return true;
+        },
 
         declineLevelUp: (habitId) =>
           updatePlan((plan) => plan.map((h) => (h.habitId === habitId ? { ...h, levelSince: currentDay(get()) } : h))),
@@ -298,7 +312,7 @@ export const useApp = create<AppState>()(
         setSchedule: (habitId, days) => {
           const { plan } = get();
           const h = plan.find((x) => x.habitId === habitId);
-          if (!h?.schedule || !validDays(days)) return false;
+          if (!h?.schedule || !validDays(days) || !validExerciseDays(habitId, days)) return false;
           // Applies from today on; the earlier days are kept as history for the days before.
           const schedule = rescheduled(h.schedule, days, currentDay(get()), h.addedOnDay);
           const next = plan.map((x) => (x.habitId === habitId ? { ...x, schedule } : x));

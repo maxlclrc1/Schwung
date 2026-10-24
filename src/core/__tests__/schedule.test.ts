@@ -215,7 +215,13 @@ describe('audit regressions (owner decisions of the scheduled-fitness review)', 
   });
 
   it('strength and balance never rise at Day 22 or 45, daily or scheduled, even if a phase flag is set', () => {
-    expect([...ACCEPT_ONLY_LEVEL_UPS].sort()).toEqual(['move_balance', 'move_strength_prep', 'move_strength_session']);
+    expect([...ACCEPT_ONLY_LEVEL_UPS].sort()).toEqual([
+      'move_balance',
+      'move_seated',
+      'move_strength_gentle',
+      'move_strength_prep',
+      'move_strength_session',
+    ]);
     const p = [
       daily('a'),
       daily('move_balance'),
