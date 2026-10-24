@@ -375,3 +375,66 @@ questions can be held back by the release gate (H2).
 - **C:** Five habits, one food habit.
 - **E:** No produce filler.
 - **F:** The walk + wake-up plan stays weak until S1 is decided. That's the main remaining product gap.
+
+---
+
+# Revision 5 engine results (2026-10-24)
+
+The corrected spec (revision 5) is implemented as a pure engine in `src/core/v2/`, with no app wiring. The
+eight fixtures above are **fixed test fixtures** (`src/core/v2/__tests__/fixtures.ts`), unchanged except
+that the removed strength question isn't asked. Plans below are the engine's actual output.
+
+**Automated checks, every fixture plus 20,000 sampled profiles:**
+- foundation first
+- distinct habits, all eligible
+- Easy = the baseline rung
+- add-only and choice-only habits never chosen automatically
+- held habits never appear anywhere (plans, choices, swaps)
+- a core goal habit whenever one is eligible
+- at most 1 food habit, at most 2 phone rules, no irrelevant filler
+- a sixth habit only with a need of 4
+- teen rules
+- no bedtime extension with sleep trouble or unknown precautions
+- under 3 habits always means a required choice
+- deterministic
+- V1 `buildPlan` unchanged
+
+| Fixture | Plan (Easy → Hard) | Goal habits | Size and choice |
+|---|---|---|---|
+| **A · 16, focus** | Bed · **Social-free start** 30 min → 2 h · **Deep work** 15 → 45 min · Earlier bedtime: in bed by 00:00 → 23:30 · Walk 10 → 20 min | 2 of 4 | 5 |
+| **B · 19, confidence** | Bed · **Reach out** 1 → 3 people · **Compliment** 1 → 3 (a message counts) · Walk 10 → 20 min (with a care note) · Fruit and veg 2 → 4 portions | 2 of 4 | 5, plus an "unknown precautions" note |
+| **C · 28, energy** | Bed ("you already do this") · **Earlier bedtime** 00:15 → 23:45 · **Walk** 5 → 15 min · Fruit and veg 1 → 3 portions · App limit: videos 60 → 30 min | 4 of 4 | 5, one food habit |
+| **D · 35, calm** | Bed · **Wind-down** 30 → 60 min · **Walk** 10 → 20 min · Social-free start 30 min → 2 h · **Slow breathing** 2 → 5 min | 4 of 4 | 5, plus a professional note for sleep trouble |
+| **E · 45, discipline** | Bed · **First task** (write #1 → 25 min on it) · **Deep work** 15 → 45 min · **Journal** 1 → 3 sentences | 3 of 3 | 4. Optional choice: wind-down, morning daylight, strength preparation. "4 of 4" note |
+| **F · 67, fitness** | Bed ("you already do this") · **Walk** 5 → 15 min (comfort note) · Steady wake-up: within 60 → 30 min of 07:30 | 2 of 2 | 3. Optional choice: morning daylight, slow breathing, journal. "3 of 3" note. Fitness note |
+| **G1 · healthy, fitness** | Bed only | 0 (none eligible) | 1. **Required:** choose 2 of strength preparation, morning daylight, deep work, first task, reach out. Note: "None of our current fitness habits suit your answers yet" |
+| **G2 · organized, discipline** | Bed · **First task** (10 → 45 min on it; writing is skipped because planning is a routine) · **Deep work** 15 → 45 min | 2 of 2 | 3. Optional choice: strength preparation, morning daylight, slow breathing |
+
+**Fixed compared with revision 4:**
+- **A and B** now have 2 goal habits. **B** gets flexible social habits instead of daily conversations.
+- **C** has 5 habits with one food habit.
+- **E** has no below-baseline filler.
+- **F** no longer gets a wind-down (she's on her phone under an hour a day).
+- **G1 and G2** never fall silently under 3.
+
+## Remaining blockers before release (science and safety)
+1. **S1, older adults wanting fitness (F):** the plan is a 5-minute walk and a wake-up time. Balance practice
+   and the gentle strength variant are **held** until a reviewed target exists. *This is the largest
+   remaining product gap.*
+2. **S2, mobility:** "Walking or standing is difficult" now excludes all movement habits, with an honest
+   note. A reviewed seated or supported alternative is still needed.
+3. **Already-training users (G1):** Strength preparation is suggested to someone who may already train twice
+   a week or more, because the strength question was removed (L5). It's acceptable as a user choice, but the
+   alternative copy should say "if you don't already train".
+4. **Goal fit of support habits:** e.g. Steady wake-up as a fitness habit (F) is listed as support for
+   recovery [VERIFY].
+5. **Everything in spec H3:** sleep-referral wording, the 9 h / 10 h ceilings, teen bedtime and school start,
+   withholding bedtime at 1–2 bad nights, pregnancy and heart walking notes, teen nutrition and disordered
+   eating, unsweetened drinks and diabetes care plans, breathing cautions, under-16 and regional rules,
+   re-checking the WHO and CDC figures.
+6. **Release gate (H2):** every `candidate` habit still has unverified benefit claims. The reasons use
+   claim-free copy.
+
+## Not done (by design)
+- The live quiz isn't connected, onboarding screens aren't replaced, saved data isn't migrated, and V2 isn't
+  activated for anyone.
