@@ -38,8 +38,8 @@ function message(day: number): { title: string; body: string } {
   if (day === PROGRAM_DAYS) return { title: 'Final day', body: 'Last day of the program. Finish strong.' };
   if (day === 1) return { title: 'Day 1', body: 'Your reset starts today. One small win at a time.' };
   if (day === 7) return { title: 'Day 7', body: 'One week in. Today makes it official.' };
-  if (day === 22) return { title: 'Phase 2', body: 'Your habits leveled up. Day 22 is waiting.' };
-  if (day === 45) return { title: 'Phase 3', body: 'The final phase starts today. Day 45 is waiting.' };
+  if (day === 22) return { title: 'Momentum', body: 'Phase 2 starts today. Day 22 is waiting.' };
+  if (day === 45) return { title: 'Mastery', body: 'The final phase starts today. Day 45 is waiting.' };
   return { title: `Day ${day} of ${PROGRAM_DAYS}`, body: 'Your checklist is ready.' };
 }
 

@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SheetHeader } from '../../components/SheetHeader';
 import { Screen, T } from '../../components/ui';
-import { habitCategory, swapCandidates } from '../../core/habits';
+import { habitCategory, swapCandidates, shownText } from '../../core/habits';
 import { phaseLevel, phaseOf } from '../../core/progression';
 import { swapChoices } from '../../core/v2/program';
 import { BY_ID } from '../../core/v2/library';
@@ -37,7 +37,12 @@ export default function Swap() {
     // V2: age- and precaution-aware, gated to reviewed habits; a swapped-in habit starts at Easy.
     const options = profile ? swapChoices(profile, plan, current.habitId) : [];
     const domain = BY_ID[current.habitId]?.domain;
-    const item = (o: (typeof options)[number]): Item => ({ id: o.id, icon: o.icon, task: o.targets.easy, why: o.why });
+    const item = (o: (typeof options)[number]): Item => ({
+      id: o.id,
+      icon: o.icon,
+      task: shownText(o.targets.easy),
+      why: o.why,
+    });
     similar = options.filter((o) => o.domain === domain).map(item);
     other = options.filter((o) => o.domain !== domain).map(item);
   } else {

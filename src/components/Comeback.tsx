@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { Comeback as ComebackState, comebackCopy, RESUMED_COPY } from '../core/comeback';
-import { habitIcon, habitTask, habitTitle } from '../core/habits';
+import { habitIcon, habitTitle, shownTaskAt } from '../core/habits';
 import type { PlanHabit } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
@@ -95,7 +95,7 @@ export function Comeback({ comeback, plan, onStart }: Props) {
                 Start with
               </T>
               <T v="bodyStrong" numberOfLines={2}>
-                {habitTask(step) ?? habitTitle(step)}
+                {shownTaskAt(step) ?? habitTitle(step)}
               </T>
             </View>
             <ThemedView style={[styles.check, { borderColor: c.accentInk }]} />

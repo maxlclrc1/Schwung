@@ -124,6 +124,21 @@ export function completionRun(h: PlanHabit, logs: Logs, startKey: string, today:
   return run;
 }
 
+/**
+ * The day a habit is next planned to rise by phase (Day 22 or Day 45), or null when it won't rise automatically
+ * from here: custom habits, habits at Mastery, exercise and scheduled habits that only rise when an offer is
+ * accepted, and habits added on or after the phase's first day. The same rules as `reconcile`; a plan, not a promise
+ * (an earlier offer or a step-down can change the level before then).
+ */
+export function nextPhaseRise(h: PlanHabit, appliedPhase: number): number | null {
+  if (isCustom(h) || h.level === 'hard' || ACCEPT_ONLY_LEVEL_UPS.has(h.habitId)) return null;
+  if (h.schedule && h.schedule.phaseLevelUps !== true) return null;
+  for (const phase of [2, 3] as const) {
+    if (phase > appliedPhase && h.addedOnDay < PHASE_START[phase]) return PHASE_START[phase];
+  }
+  return null;
+}
+
 /** Habits that have earned an early "Level up now?" offer. */
 export function levelUpOffers(plan: PlanHabit[], logs: Logs, startKey: string, today: number): string[] {
   return plan

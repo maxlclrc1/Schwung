@@ -235,7 +235,7 @@ export const LIBRARY: HabitDef[] = [
   },
   {
     id: 'screen_morning',
-    title: 'Phone-free start',
+    title: 'Phone-free morning',
     domain: 'digital',
     mode: 'auto',
     release: 'candidate',
@@ -244,11 +244,11 @@ export const LIBRARY: HabitDef[] = [
     exclude: () => null,
     ladder: fixed([15, 30, 45, 60].map((m) => `No phone for the first ${m} min after waking (an alarm doesn’t count)`)),
     start: (p) => ({ '6p': 0, '4_6': 1, '2_4': 1, unknown: 1, '1_2': 2, lt1: null })[p.phone],
-    why: 'Start the day before your phone does.',
+    why: 'No phone at all for the first part of your day.',
   },
   {
     id: 'screen_social',
-    title: 'Social-free start',
+    title: 'Social media later',
     domain: 'digital',
     mode: 'auto',
     release: 'candidate',
@@ -257,11 +257,11 @@ export const LIBRARY: HabitDef[] = [
     exclude: (p) => (p.phonePull === 'social' ? null : 'social media isn’t what takes most of your phone time'),
     ladder: fixed(['30 min', '1 h', '2 h', '3 h', '4 h'].map((t) => `No social apps for the first ${t} after waking`)),
     start: (p) => ({ '6p': 0, '4_6': 1, '2_4': 2, unknown: 1, '1_2': null, lt1: null })[p.phone],
-    why: 'Keep social apps out of your first hours.',
+    why: 'Other apps are fine; social apps wait until later in the morning.',
   },
   {
     id: 'screen_app_limit',
-    title: 'App limit',
+    title: 'App time',
     domain: 'digital',
     mode: 'auto',
     release: 'candidate',
@@ -312,15 +312,13 @@ export const LIBRARY: HabitDef[] = [
     mode: 'auto',
     release: 'candidate',
     exclude: (p) => (has(p, 'journaling') ? 'you already journal most days' : null),
-    ladder: fixed(
-      [1, 2, 3, 5].map((n) => `Write ${n} ${n === 1 ? 'sentence' : 'sentences'}: what went well, what’s on your mind`),
-    ),
+    ladder: fixed([1, 2, 3, 5].map((n) => `Write ${n} ${n === 1 ? 'sentence' : 'sentences'} about your day`)),
     start: () => 0,
-    why: 'A sentence or two to clear your head.',
+    why: 'A few lines about your day to clear your head.',
   },
   {
     id: 'focus_deepwork',
-    title: 'Deep work',
+    title: 'Focused work',
     domain: 'focus',
     mode: 'auto',
     release: 'candidate',
@@ -334,7 +332,7 @@ export const LIBRARY: HabitDef[] = [
   },
   {
     id: 'focus_top3',
-    title: 'First task',
+    title: 'Most important task',
     domain: 'focus',
     mode: 'auto',
     release: 'candidate',
@@ -472,6 +470,15 @@ export function bedtimeRungs(p: ProfileV2): string[] {
 }
 
 export const BY_ID: Record<string, HabitDef> = Object.fromEntries(LIBRARY.map((h) => [h.id, h]));
+
+/** The habit's name for this person: the app-time habit is named after what takes most of their phone time. */
+export function titleFor(h: HabitDef, p: ProfileV2): string {
+  if (h.id === 'screen_app_limit') {
+    if (p.phonePull === 'video') return 'Video time';
+    if (p.phonePull === 'games') return 'Gaming time';
+  }
+  return h.title;
+}
 
 /** Goal lists in priority order (section B). ★ = core. */
 export const GOALS: Record<GoalV2, { core: string[]; support: string[]; suggest: string[] }> = {

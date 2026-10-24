@@ -45,13 +45,13 @@ const COPY: Record<number, Copy> = {
   21: {
     overline: 'Phase 1 complete',
     title: 'Phase 2 unlocks tomorrow.',
-    body: '21 days in. Tomorrow every habit levels up one step. You’ve built the base for it.',
+    body: '21 days in. Tomorrow Momentum begins, and the habits on your planned path step up a level. You’ve built the base for it.',
     cta: 'Bring it on',
   },
   44: {
     overline: 'Phase 2 complete',
     title: 'The final phase is next.',
-    body: 'Two thirds of the way. Tomorrow your habits reach their hardest level. This is where it sticks.',
+    body: 'Two thirds of the way. Tomorrow Mastery begins, and your habits take their next step toward their full version. Keep showing up.',
     cta: 'Let’s finish this',
   },
 };
