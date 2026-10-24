@@ -29,7 +29,7 @@ import type { DayLog } from '../core/types';
 
 import { PARALLAX, trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
-import { habitTaskAt, habitTitle, levelUp } from '../core/habits';
+import { habitTitle, LEVEL_NAME, levelUp, shownTaskAt } from '../core/habits';
 import {
   currentStreak,
   dayQualifies,
@@ -87,6 +87,13 @@ export default function Today() {
   );
   const resting = useMemo(() => plan.filter((h) => !isDueOn(h, start, today)), [plan, start, today]);
   const [selfChecked, setSelfChecked] = useState<string | null>(null);
+  // A short confirmation after accepting a level-up: the new level and today's new target.
+  const [steppedUp, setSteppedUp] = useState<{ id: string; text: string } | null>(null);
+  useEffect(() => {
+    if (!steppedUp) return;
+    const t = setTimeout(() => setSteppedUp(null), 4500);
+    return () => clearTimeout(t);
+  }, [steppedUp]);
   const todayFull = isFullDay(todayLog) && dueToday.every((p) => todayLog?.completed.includes(p.habitId));
   const todayQualifies = dayQualifies(todayLog);
   const doneCount = shown.filter((p) => log?.completed.includes(p.habitId)).length;
@@ -258,7 +265,8 @@ export default function Today() {
         {viewing === 'today'
           ? offers.slice(0, 1).map((id) => {
               const h = plan.find((p) => p.habitId === id)!;
-              const next = habitTaskAt(h, levelUp(h.level));
+              const nextLevel = levelUp(h.level);
+              const next = shownTaskAt(h, nextLevel);
               return (
                 <ThemedView
                   key={id}
@@ -270,9 +278,11 @@ export default function Today() {
                   <T v="overline" color={c.accentInk}>
                     {h.schedule ? '7 sessions in a row' : '7 days straight'}
                   </T>
-                  <T v="bodyStrong">Level up {habitTitle(h)}?</T>
+                  <T v="bodyStrong">
+                    {habitTitle(h)} is ready for {LEVEL_NAME[nextLevel]}
+                  </T>
                   <T v="caption" color={c.textDim}>
-                    Next: {next}
+                    Next target: {next}. Not yet is fine too: nothing is lost.
                   </T>
                   {isExercise(id) ? (
                     <SelfCheckToggle checked={selfChecked === id} onChange={(v) => setSelfChecked(v ? id : null)} />
@@ -283,7 +293,13 @@ export default function Today() {
                       style={{ flex: 1 }}
                       disabled={isExercise(id) && selfChecked !== id}
                       onPress={() => {
-                        if (useApp.getState().acceptLevelUp(id, selfChecked === id)) haptic.success();
+                        if (useApp.getState().acceptLevelUp(id, selfChecked === id)) {
+                          haptic.success();
+                          setSteppedUp({
+                            id,
+                            text: `${habitTitle(h)} is now at ${LEVEL_NAME[nextLevel]}. From today: ${next}.`,
+                          });
+                        }
                         setSelfChecked(null);
                       }}
                     />
@@ -298,6 +314,22 @@ export default function Today() {
               );
             })
           : null}
+
+        {viewing === 'today' && steppedUp ? (
+          <ThemedView
+            key={steppedUp.id}
+            entering={FadeInDown}
+            exiting={FadeOut}
+            layout={LinearTransition}
+            style={[styles.steppedUp, { backgroundColor: c.surface }]}
+            accessibilityLiveRegion="polite"
+          >
+            <Ionicons name="trending-up" size={22} color={c.accentInk} />
+            <T v="bodyStrong" style={{ flex: 1 }}>
+              {steppedUp.text}
+            </T>
+          </ThemedView>
+        ) : null}
 
         <View style={styles.listHeader}>
           <T v="overline" color={c.textDim}>
@@ -541,6 +573,7 @@ const styles = StyleSheet.create({
   segmentItem: { flex: 1, paddingVertical: space.sm, alignItems: 'center', borderRadius: radius.sm },
   offer: { borderWidth: 1, borderRadius: radius.lg, padding: space.lg, gap: 4 },
   offerButtons: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
+  steppedUp: { flexDirection: 'row', alignItems: 'center', gap: space.md, borderRadius: radius.lg, padding: space.lg },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: space.sm },
   list: { gap: space.sm },
   footer: { gap: space.md, marginTop: space.sm },

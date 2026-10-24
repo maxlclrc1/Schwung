@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { habitTask, habitTitle, isCustom, LEVELS } from '../core/habits';
+import { habitTitle, isCustom, LEVEL_NAME, LEVELS, shownTaskAt } from '../core/habits';
 import type { PlanHabit } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
@@ -91,9 +91,9 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
 
   const title = habitTitle(habit);
   // A target that only repeats the title ("Make your bed") isn't shown twice.
-  const target = habitTask(habit);
+  const target = shownTaskAt(habit);
   const task = target === title ? undefined : target;
-  const level = isCustom(habit) ? '' : `. Level ${LEVELS.indexOf(habit.level) + 1} of 3`;
+  const level = isCustom(habit) ? '' : `. ${LEVEL_NAME[habit.level]}, level ${LEVELS.indexOf(habit.level) + 1} of 3`;
 
   return (
     <Pressable

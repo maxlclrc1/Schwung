@@ -1,15 +1,17 @@
 import type { HabitSpec, PlanHabit } from '../types';
 import {
+  exclusion,
   fitsPlan,
   generatePlanV2,
   habitNotes,
   PREVIEW_MOVEMENT_NOTE,
   swapOptionsV2,
   targetsFor,
+  V2_LIMITS,
   WAKE_ANCHORED,
 } from './engine';
 import { DEV_CLEARED } from './gate';
-import { BY_ID } from './library';
+import { BY_ID, GOALS, LIBRARY, titleFor } from './library';
 import type { ChoiceStep, PickV2, ProfileV2, Targets } from './types';
 
 /*
@@ -78,7 +80,7 @@ function option(id: string, p: ProfileV2): Option {
   const h = BY_ID[id];
   return {
     id,
-    title: h.title,
+    title: titleFor(h, p),
     icon: iconFor(id),
     domain: h.domain,
     why: h.why,
@@ -142,23 +144,23 @@ export function canChoose(r: Extract<PreviewPlan, { status: 'ok' }>, chosen: str
   return chosen.length < limit && fitsPlan(id, [...r.picks.map((x) => x.id), ...chosen]);
 }
 
-function spec(id: string, targets: Targets, notes: string[]): HabitSpec {
+function spec(id: string, targets: Targets, notes: string[], p: ProfileV2): HabitSpec {
   const h = BY_ID[id];
-  return { title: h.title, icon: iconFor(id), why: h.why, targets, notes };
+  return { title: titleFor(h, p), icon: iconFor(id), why: h.why, targets, notes };
 }
 
 /**
  * The plan to start: the generated habits plus the choices, every one at Easy of its personal window.
  * Null when the choices don't satisfy the choice step (the screen never allows that).
  */
-export function assemblePlan(p: ProfileV2, chosen: string[], day = 1): PlanHabit[] | null {
+export function assemblePlan(p: ProfileV2, chosen: string[], day = 1, extras: string[] = []): PlanHabit[] | null {
   const r = previewPlan(p);
   if (r.status !== 'ok' || r.blocked) return null;
   const required = r.choice?.required ?? 0;
   if (required > 0 ? chosen.length !== required : chosen.length > (r.choice ? 1 : 0)) return null;
   // Earlier bedtime is only safe with the person's own wake and in-bed times (the time-in-bed ceiling).
   const timed = p.wake?.kind === 'time' && p.inBed !== undefined;
-  const all = [...r.picks.map((x) => x.id), ...chosen];
+  const all = [...r.picks.map((x) => x.id), ...chosen, ...extras];
   if (!timed && all.includes('sleep_bedtime')) return null;
   // Wake-anchored targets are only set once the wake time has been asked.
   if (!p.wake && all.some((id) => WAKE_ANCHORED.includes(id))) return null;
@@ -167,12 +169,19 @@ export function assemblePlan(p: ProfileV2, chosen: string[], day = 1): PlanHabit
     if (!canChoose(r, made, id)) return null;
     made.push(id);
   }
+  // Optional extras: each one must still be on offer next to everything before it, up to the plan maximum.
+  const added: Option[] = [];
+  for (const id of extras) {
+    const o = extraOptions(p, r, [...made, ...added.map((x) => x.id)]).find((x) => x.id === id);
+    if (!o || extraRoom(r, [...made, ...added.map((x) => x.id)]) < 1) return null;
+    added.push(o);
+  }
   const at = (id: string, targets: Targets, notes: string[]): PlanHabit => ({
     habitId: id,
     level: 'easy',
     addedOnDay: day,
     levelSince: day - 1,
-    spec: spec(id, targets, notes),
+    spec: spec(id, targets, notes, p),
   });
   return [
     ...r.picks.map((x) => at(x.id, x.targets, x.notes)),
@@ -180,7 +189,117 @@ export function assemblePlan(p: ProfileV2, chosen: string[], day = 1): PlanHabit
       const o = r.options.find((x) => x.id === id)!;
       return at(id, o.targets, o.notes);
     }),
+    ...added.map((o) => at(o.id, o.targets, o.notes)),
   ];
+}
+
+/** The most habits a plan holds: the generated plan never goes above it, and neither do additions. */
+export const PLAN_MAX = V2_LIMITS.PLAN_MAX;
+
+/** Simple groups for browsing the library. */
+export type Category = 'Energy' | 'Focus' | 'Calm' | 'Confidence' | 'Fitness';
+export const CATEGORIES: Category[] = ['Energy', 'Focus', 'Calm', 'Confidence', 'Fitness'];
+const CATEGORY: Record<string, Category> = {
+  sleep_bedtime: 'Energy',
+  sleep_wake: 'Energy',
+  sleep_morning_light: 'Energy',
+  food_produce: 'Energy',
+  food_unsweetened: 'Energy',
+  food_water_meals: 'Energy',
+  focus_deepwork: 'Focus',
+  focus_top3: 'Focus',
+  screen_morning: 'Focus',
+  screen_social: 'Focus',
+  screen_app_limit: 'Focus',
+  mind_read: 'Focus',
+  mind_breathe: 'Calm',
+  mind_journal: 'Calm',
+  sleep_no_phone_bed: 'Calm',
+  social_reach_out: 'Confidence',
+  confidence_compliment: 'Confidence',
+  confidence_talk: 'Confidence',
+  move_walk: 'Fitness',
+};
+export const categoryOf = (id: string): Category => CATEGORY[id] ?? 'Energy';
+
+export type LibraryOption = Option & {
+  category: Category;
+  /** One of the habits for the person's goal. */
+  forGoal: boolean;
+  /** The time answer this habit's targets need and the profile doesn't have yet, if any. */
+  needsTime: 'wake' | 'bed' | null;
+};
+
+function timeNeeded(p: ProfileV2, id: string): 'wake' | 'bed' | null {
+  if (!WAKE_ANCHORED.includes(id)) return null;
+  if (!p.wake) return 'wake';
+  if (id === 'sleep_bedtime' && p.wake.kind === 'time' && p.inBed === undefined) return 'bed';
+  return null;
+}
+
+/**
+ * Reviewed habits this person could add next to the habits in `planIds`: the same eligibility as the plan itself
+ * (age, health precautions, the release gate, so never a held or prototype exercise habit) and the same fit rules
+ * (no duplicates, no overlapping habits, no more than the plan allows per area). Goal habits come first, in the
+ * goal's own order; the rest follow in library order. This only lists; it never recommends anything new.
+ */
+export function libraryOptions(
+  p: ProfileV2,
+  planIds: string[],
+  gate: ReadonlySet<string> = DEV_CLEARED,
+): LibraryOption[] {
+  const goal = GOALS[p.goal];
+  const goalIds = [...goal.core, ...goal.support, ...goal.suggest];
+  const ids = planIds.filter((id) => BY_ID[id]);
+  const ok = LIBRARY.filter(
+    (h) => h.mode !== 'foundation' && !ids.includes(h.id) && exclusion(h, p, gate) === null && fitsPlan(h.id, ids),
+  );
+  const rank = (id: string) =>
+    goalIds.includes(id) ? goalIds.indexOf(id) : goalIds.length + LIBRARY.findIndex((h) => h.id === id);
+  return ok
+    .sort((a, b) => rank(a.id) - rank(b.id))
+    .map((h) => ({
+      ...option(h.id, p),
+      category: categoryOf(h.id),
+      forGoal: goalIds.includes(h.id),
+      needsTime: timeNeeded(p, h.id),
+    }));
+}
+
+/** What can be added to a running plan right now: room under the maximum, and only habits whose targets are set. */
+export function addableHabits(p: ProfileV2, plan: PlanHabit[]): LibraryOption[] {
+  if (plan.length >= PLAN_MAX) return [];
+  return libraryOptions(
+    p,
+    plan.filter((h) => !h.custom).map((h) => h.habitId),
+  ).filter((o) => o.needsTime === null);
+}
+
+/** The plan habit a library addition becomes: Easy of its personal window, from today, like a swap. */
+export function addedHabit(p: ProfileV2, plan: PlanHabit[], id: string, day: number): PlanHabit | null {
+  const o = addableHabits(p, plan).find((x) => x.id === id);
+  if (!o) return null;
+  return { habitId: id, level: 'easy', addedOnDay: day, levelSince: day - 1, spec: spec(id, o.targets, o.notes, p) };
+}
+
+/** How many optional extras still fit in a new plan: the generated habits and choices come first. */
+export function extraRoom(r: Extract<PreviewPlan, { status: 'ok' }>, chosen: string[]): number {
+  const base = r.picks.length + Math.max(r.choice?.required ?? 0, chosen.length);
+  return Math.max(0, PLAN_MAX - base);
+}
+
+/**
+ * Optional extras for a new plan, after the generated habits and the choices made (`chosen` may also hold extras
+ * already added). The choice step's own alternatives aren't repeated here. Never preselected by the app.
+ */
+export function extraOptions(
+  p: ProfileV2,
+  r: Extract<PreviewPlan, { status: 'ok' }>,
+  chosen: string[],
+): LibraryOption[] {
+  if (r.blocked) return [];
+  const choiceIds = r.options.map((o) => o.id);
+  return libraryOptions(p, [...r.picks.map((x) => x.id), ...chosen]).filter((o) => !choiceIds.includes(o.id));
 }
 
 /** D.6: what a V2 habit can be swapped for, age- and precaution-aware and gated. Each starts at Easy. */
@@ -199,7 +318,7 @@ export function swappedHabit(p: ProfileV2, plan: PlanHabit[], replacing: string,
     level: 'easy',
     addedOnDay: day,
     levelSince: day - 1,
-    spec: spec(id, o.targets, o.notes),
+    spec: spec(id, o.targets, o.notes, p),
   };
   return habit;
 }
@@ -209,5 +328,5 @@ export function repairSpec(p: ProfileV2 | null, h: PlanHabit): PlanHabit {
   if (h.spec || h.custom || !p || !BY_ID[h.habitId] || BY_ID[h.habitId].start(p) === null) return h;
   const def = BY_ID[h.habitId];
   if (def.ladder(p).length < def.start(p)! + 3) return h;
-  return { ...h, spec: spec(h.habitId, targetsFor(def, p), habitNotes(def, p)) };
+  return { ...h, spec: spec(h.habitId, targetsFor(def, p), habitNotes(def, p), p) };
 }

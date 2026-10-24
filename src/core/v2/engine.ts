@@ -6,6 +6,7 @@ import {
   LIBRARY,
   precautionsUnknown,
   sleepBelowBand,
+  titleFor,
   type HabitDef,
 } from './library';
 import { EXERCISE_CONTENT, EXERCISE_SAFETY, isExercise } from './exercise';
@@ -242,7 +243,7 @@ export function generatePlanV2(p: ProfileV2, gate?: Gate): PlanResultV2 {
     const reason = lead || answer || h.why;
     return {
       id: h.id,
-      title: h.title,
+      title: titleFor(h, p),
       source: m.source,
       forGoal,
       startRung: h.start(p)!,
@@ -288,7 +289,7 @@ function choiceStep(p: ProfileV2, plan: HabitDef[], need: Record<NeedDomain, num
   const required = Math.max(0, PLAN_MIN - n);
   const alternatives: Alternative[] = order
     .slice(0, required > 0 ? 5 : 3)
-    .map((id) => ({ id, title: BY_ID[id].title, targets: targetsFor(BY_ID[id], p) }));
+    .map((id) => ({ id, title: titleFor(BY_ID[id], p), targets: targetsFor(BY_ID[id], p) }));
   const ruleNote =
     required > 0
       ? `Plans need at least ${PLAN_MIN} habits, so choose ${required} more. ${RULE_NOTE(PLAN_MIN)}`

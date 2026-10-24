@@ -1,3 +1,4 @@
+import { formatTime } from './dates';
 import type { Category, Level, LibraryHabit, PlanHabit } from './types';
 
 export const LEVELS: Level[] = ['easy', 'medium', 'hard'];
@@ -263,4 +264,21 @@ export function swapCandidates(current: PlanHabit, plan: PlanHabit[]): LibraryHa
   const category = habitCategory(current);
   const free = HABITS.filter((h) => !inPlan.has(h.id));
   return [...free.filter((h) => h.category === category), ...free.filter((h) => h.category !== category)];
+}
+
+/** A habit's three levels, named after the phase each one is planned for. */
+export const LEVEL_NAME: Record<Level, string> = { easy: 'Foundation', medium: 'Momentum', hard: 'Mastery' };
+
+/**
+ * A target as shown on screen: clock times follow the phone's own 12- or 24-hour format. Saved targets keep
+ * their "07:00" form; only the display changes.
+ */
+export function shownText(text: string, format: (t: string) => string = formatTime): string {
+  return text.replace(/\b([01]\d|2[0-3]):([0-5]\d)\b/g, (m) => format(m));
+}
+
+/** `habitTaskAt` for display: a library habit's times in the phone's format (custom text is left as typed). */
+export function shownTaskAt(h: PlanHabit, level: Level = h.level): string | undefined {
+  const task = habitTaskAt(h, level);
+  return task && !h.custom ? shownText(task) : task;
 }

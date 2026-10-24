@@ -5,10 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { IconOrb } from '../../components/Art';
 import { Field } from '../../components/Field';
 import { SheetHeader } from '../../components/SheetHeader';
-import { Button, Card, LEVEL_LABEL, Screen, T } from '../../components/ui';
-import { habitIcon, habitTaskAt, habitTitle, habitWhy, LEVELS } from '../../core/habits';
+import { TargetPath } from '../../components/TargetPath';
+import { Button, Card, Screen, T } from '../../components/ui';
+import { habitIcon, habitTaskAt, habitTitle, habitWhy, LEVEL_NAME, shownText } from '../../core/habits';
 import { MIN_HABITS } from '../../core/plan';
-import { completionRun } from '../../core/progression';
+import { ACCEPT_ONLY_LEVEL_UPS, completionRun, LEVEL_UP_RUN, nextPhaseRise } from '../../core/progression';
 import {
   coversEveryWeekday,
   isDueOn,
@@ -33,6 +34,7 @@ export default function HabitDetail() {
   const plan = useApp((s) => s.plan);
   const logs = useApp((s) => s.logs);
   const startedAt = useApp((s) => s.startedAt);
+  const appliedPhase = useApp((s) => s.appliedPhase);
   const habit = plan.find((h) => h.habitId === id);
   const [title, setTitle] = useState(habit?.custom?.title ?? '');
   const [desc, setDesc] = useState(habit?.custom?.description ?? '');
@@ -103,48 +105,26 @@ export default function HabitDetail() {
                 <T>{why}</T>
                 {habit.spec?.notes.map((n) => (
                   <T key={n} v="caption" color={c.textDim}>
-                    {n}
+                    {shownText(n)}
                   </T>
                 ))}
               </Card>
 
               <View style={{ gap: space.sm }}>
                 <T v="overline" color={c.textDim}>
-                  Level
+                  Your path
                 </T>
-                {LEVELS.map((l) => {
-                  const active = habit.level === l;
-                  return (
-                    <Pressable
-                      key={l}
-                      onPress={() => {
-                        if (active) return;
-                        haptic.tap();
-                        useApp.getState().setLevel(habit.habitId, l);
-                      }}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected: active }}
-                      style={[
-                        styles.level,
-                        {
-                          backgroundColor: active ? c.accentSoft : c.surface,
-                          borderColor: active ? c.accentInk : 'transparent',
-                        },
-                      ]}
-                    >
-                      <T v="caption" color={active ? c.accentInk : c.textDim} style={styles.levelTag}>
-                        {LEVEL_LABEL[l]}
-                      </T>
-                      <T v="bodyStrong" style={{ flex: 1 }}>
-                        {habitTaskAt(habit, l)}
-                      </T>
-                    </Pressable>
-                  );
-                })}
+                <TargetPath
+                  targets={{
+                    easy: habitTaskAt(habit, 'easy') ?? '',
+                    medium: habitTaskAt(habit, 'medium') ?? '',
+                    hard: habitTaskAt(habit, 'hard') ?? '',
+                  }}
+                  current={habit.level}
+                  onPick={(l) => useApp.getState().setLevel(habit.habitId, l)}
+                />
                 <T v="caption" color={c.textFaint}>
-                  {habit.schedule && !habit.schedule.phaseLevelUps
-                    ? 'Levels rise when you accept an offer after 7 sessions in a row. Day 22 and Day 45 don’t raise this one automatically. Change it anytime if it doesn’t fit your life.'
-                    : 'Levels rise with each phase. Change it anytime if it doesn’t fit your life.'}
+                  {pathNote(habit, nextPhaseRise(habit, appliedPhase))}
                 </T>
               </View>
             </>
@@ -184,6 +164,23 @@ export default function HabitDetail() {
       </KeyboardAvoidingView>
     </Screen>
   );
+}
+
+/**
+ * What happens next on this habit's path, honestly: the planned phase step, an early offer, and that a level can
+ * always be changed here. Never a promise that it reaches Mastery on a given day.
+ */
+function pathNote(habit: PlanHabit, rise: number | null): string {
+  const change = 'Tap a level to change it anytime.';
+  if (habit.level === 'hard') return `You’re at ${LEVEL_NAME.hard}, the full version of this habit. ${change}`;
+  const offer = `${LEVEL_UP_RUN} ${habit.schedule ? 'sessions' : 'days'} in a row brings an offer to step up sooner.`;
+  if (rise !== null) {
+    return `Planned to step up on Day ${rise}. ${offer} ${change}`;
+  }
+  if (ACCEPT_ONLY_LEVEL_UPS.has(habit.habitId) || habit.schedule) {
+    return `This one steps up only when you accept an offer: ${offer} ${change}`;
+  }
+  return `${offer} ${change}`;
 }
 
 /** Why these days don't fit an exercise habit's rule, or null when they do. */
@@ -297,14 +294,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
-  level: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-    padding: space.lg,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-  },
-  levelTag: { width: 36, fontWeight: '800' },
   statRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });

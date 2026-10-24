@@ -13,8 +13,11 @@ function copy(n: Notice, title: (id: string) => string | undefined) {
   if (n.kind === 'phaseUp') {
     return {
       icon: 'trending-up' as const,
-      head: `Phase ${n.phase} unlocked`,
-      body: 'Every habit just leveled up one step. You’re ready for it.',
+      head: n.phase === 2 ? 'Momentum begins' : 'Mastery begins',
+      body:
+        n.phase === 2
+          ? 'Habits on the planned path stepped up one level today. Habits you added later or made yourself keep their own pace.'
+          : 'Habits on the planned path took their next step today, toward their full version. Habits you added later or made yourself keep their own pace.',
     };
   }
   const names = n.habitIds.map(title).filter(Boolean) as string[];
