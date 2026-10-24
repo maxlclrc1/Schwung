@@ -102,6 +102,18 @@ describe('fixed scenario fixtures', () => {
     expect(ids(r)).not.toContain('move_strength_prep');
     expect(ids(r)).not.toContain('move_balance');
     expect(r.planNotes.join(' ')).toMatch(/strength sessions/);
+    // Steady wake-up may answer her sleep need, but is never presented as a fitness habit.
+    const wake = r.picks.find((x) => x.id === 'sleep_wake');
+    if (wake) expect(wake.forGoal).toBe(false);
+  });
+
+  it('fitness plans never present sleep habits as fitness habits', () => {
+    expect([...GOALS.fitness.core, ...GOALS.fitness.support]).not.toContain('sleep_wake');
+    expect([...GOALS.fitness.core, ...GOALS.fitness.support]).not.toContain('sleep_bedtime');
+  });
+
+  it('Unsweetened drinks always carries the low-blood-sugar note', () => {
+    expect(BY_ID.food_unsweetened.note).toMatch(/low blood sugar/);
   });
 
   it('G1 and G2: small plans come with the choice step; under 3 makes it required', () => {
