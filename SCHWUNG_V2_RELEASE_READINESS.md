@@ -1,114 +1,70 @@
 # Schwung V2 — Release Readiness
 
-**State:**
-- The V2 engine (`src/core/v2/`) is implemented, tested and **disconnected**.
-- V1 behavior, the quiz, onboarding and saved data are unchanged.
-- Sources were checked 2026-10-23/24 **via web-search results only** (see the evidence register).
-
-**Engine changes in this phase (both verified or owner-directed):**
-1. A low-blood-sugar note on Unsweetened drinks (NHS hypo advice).
-2. Sleep habits removed from the fitness goal list.
-
-**Checks:** 154 tests pass across 11 suites; typecheck and lint are clean.
+**State (2026-10-24, after the evidence and safety review):**
+- V2 runs **only behind the `__DEV__` development flag** (`SCHWUNG_V2_DEV_INTEGRATION.md`); it is not
+  released. V1 behavior, data and progress are unchanged.
+- Sources were checked **via web-search results only**: primary sites, PubMed and journals are blocked in this
+  environment. See `SCHWUNG_V2_EVIDENCE_REGISTER.md`, which records the review level of every source.
+- **Development gate:** 20 habits are cleared, each with the restrictions below. Strength preparation is
+  pending review. Balance, seated mobility, gentle strength and strength sessions are held.
+- **Checks:** 221 tests across 13 suites pass; typecheck, lint and Prettier are clean.
 
 ---
 
-## Task 4 — Final safety review
+## Safety review
 
-### Resolved (direction decided and supported at search level)
-| Topic | Resolution | Basis |
+### Resolved for development testing (search-level evidence; re-check before release)
+| Topic | Decision now in the engine | Basis |
 |---|---|---|
-| Teen sleep duration | Teen band is 8–10 h; the engine scores teens under 8 h as a need | CDC-SLEEP |
-| Insomnia and bedtime | No bedtime extension with trouble 1–2+ nights a week, a sleep condition, or unknown precautions. Insomnia treatment (CBT-I, including sleep restriction) is clinician-guided, not an app habit | AASM-INS |
-| Sleep-referral wording | Trouble 3+ nights: "Trouble sleeping on most nights is worth mentioning to a doctor or another health professional." Consistent with NHS advice to see a GP if habit changes don't help or it lasts months | NHS-INS |
-| Diabetes and drinks | A mandatory note on Unsweetened drinks: treating low blood sugar always comes first | HYPO |
-| Teen nutrition | Food habits additive only; no weight, calorie or diet language; never the drink restriction; food opt-out available | AAP-ED (secondary) |
-| Strength and blood pressure | V2 excludes Strength preparation with heart/BP. If later allowed, the copy must say "breathe normally, don't hold your breath" | BP-STRENGTH |
-| Pregnancy | Movement allowed by guidance for those without contraindications, but **V2 keeps Strength preparation excluded** and shows a walk note | WHO-PA |
-| Under-16 | Stop screen, nothing saved. **Set the App Store age rating to 16+**, which Apple added in 2025 | APPLE-AGE (secondary; re-check in App Store Connect) |
+| Adult sleep band and ceiling | Earlier bedtime only when under 7 h; time in bed never above 9 h; not offered if fewer than 3 steps fit | AASM-ADULT (over 9 h appropriate only for some groups) |
+| Teen bedtime and early school starts | **No Earlier bedtime for 16–17** until sleep-expert review; teens with a sleep need get a phone-free wind-down or morning daylight instead | AAP-SST (circadian delay); PARENT-BED (observational only) |
+| Irregular schedules | No Earlier bedtime when the wake time varies or with shift work; never started without W1 and W2 | The ceiling needs both times |
+| Sleep difficulties | No Earlier bedtime with trouble 1–2+ nights a week, a sleep condition or unknown precautions. Trouble on most nights shows the professional-advice note. Wind-down starts one step up | AASM-INS, NHS-INS |
+| Walking with joint pain, 65+, unknown | Walk allowed with: "Keep it comfortable and stop if it hurts. Stop and get medical help if you have chest pain, feel faint, or are much more out of breath than usual." | NICE-OA (exercise is core for OA); HEART-SIGNS (non-guideline) |
+| Walking with heart/BP or pregnancy | **Not offered** (pending expert review), with a plan note pointing to the clinician or midwife | ACOG-804 (safe *without* complications, after evaluation); ACSM-SCREEN |
+| Breathwork | Gentle, no breath-holding, stop if dizzy or panicky (mandatory note). **Not offered with heart/BP or pregnancy** | BREATH, BREATH-AE (light-headedness in small trials), AHA-BP |
+| Teen nutrition | **No Fruit and veg for 16–17** (pending review); no drinks habit under 18; food opt-out; "if counting food ever feels stressful, swap this habit" | TRACK-ED, AAP-ED |
+| Diabetes and drinks | Low-blood-sugar treatment always comes first; "your care team's advice comes first" | HYPO, ADA-SOC |
+| Strength preparation | Not offered to people active 3+ days; not in the development gate at all | Owner instruction; ACSM-RT |
+| Under-16 | Stop screen, nothing saved. **The App Store age rating must be checked in App Store Connect** (not assumed in code) | — |
 
-### Unresolved (needs expert or primary-source review)
-1. **Sleep ceilings** (9 h adult, 10 h teen time in bed): product choices, not checked against any source.
-2. **Teen bedtime pacing and school start times:** unverified.
-3. **Whether trouble 1–2 nights a week should block bedtime** (possibly over-cautious): needs sleep-medicine
-   review.
-4. **Breathing cautions:** only low-quality sources found (stop if dizzy; care with panic, cardiovascular
-   disease, pregnancy). Needs a clinical source.
-5. **Pregnancy and heart/BP walking-note wording:** must not read as medical clearance. Needs review.
-6. **Teen disordered-eating safeguards:** the AAP primary paper wasn't seen. Does a portions habit carry
-   any risk for teens with an eating-disorder history? Should the food opt-out be more prominent? Expert
-   review needed.
-7. **Diabetes beyond hypos** (e.g. people on glucose-lowering medication changing drink habits): should
-   there be a diabetes precaution option? Needs review.
-8. **Re-check every figure** in WHO, CDC and NHS sources against the full documents (search-level only so
-   far).
-9. **Regional age and consent rules** beyond the App Store rating (e.g. data-protection age of consent):
-   not reviewed. The app stores data only on the device, but this needs confirming.
-
----
-
-## Task 5 — Release checklist
-
-### ✅ Safe to implement (and activate once wired, subject to the release-gate decision)
-These have practical, claim-free copy, low risk, and no unresolved safety issue:
-- **Engine mechanics:** goal-first selection, eligibility, the baseline window, the choice step and the
-  minimum of 3, swaps at Easy, determinism.
-- **Habits:**
-  - Make your bed
-  - Steady wake-up
-  - Morning daylight
-  - Phone-free start
-  - Social-free start
-  - App limit
-  - Read
-  - Deep work (teen cap)
-  - First task
-  - Reach out
-  - Genuine compliment
-  - Journal
-- **Notes and screens:** under-16 stop screen; unknown-precautions note; sleep-trouble referral note;
-  fitness note.
-
-### 🟡 Safe to implement but not activate (needs review first)
-- **Walk:** low risk, but the precaution-note wording (#5) must be reviewed.
-- **Earlier bedtime:** ceilings and teen pacing (#1–3).
-- **Phone-free wind-down:** fine to ship claim-free. It's listed here only because its sleep claim is
-  unsupported, so it ships with no claim.
-- **Fruit and veg:** teen safeguard review (#6).
-- **Unsweetened drinks (18+):** diabetes review beyond hypos (#7).
-- **Slow breathing:** caution wording (#4).
-- **Strength preparation** (choice or add, standard variant): blood-pressure breathing copy; "if you don't
-  already train" copy.
-- **Water with meals (add-only):** low risk; claim-free.
-- **Start a conversation (choice only):** social-anxiety framing.
-- **Wiring:** quiz V2 screens, the V2 program flag, swaps UI, and migration fields. Build them behind a flag;
-  activate only on a fresh start or Restart, after approval.
-
-### ⏸ Held pending scientific or physiotherapy review
-- Supported Balance Practice (`move_balance`)
-- Seated Mobility (`move_seated`, not yet in the engine)
-- the gentle Strength preparation variant (65+, joint, unknown precautions)
-- Scheduled habits and Strength session (`move_strength_session`): a mechanics change, which also needs
-  owner approval
-
-### ❌ Not suitable for Schwung
-- Cold exposure
-- Calorie counting, weight-loss targets, BMI, fasting challenges, restrictive diets (for anyone; especially
-  under 18s)
-- Universal water quantities
-- Clinical insomnia treatment (sleep restriction, stimulus control) as self-guided habits
-- Any habit for under-16s
-- Outcome claims the evidence doesn't support: "improves sleep", "improves well-being", "live longer",
-  "10,000 steps", "66 days makes a habit"
+### Still unresolved (blocks public release)
+1. **P1 — Full-text verification:** every source, figure and quoted line is search-level only.
+2. **Sleep expert:** the 9 h ceiling (a product choice); teen bedtimes; whether trouble 1–2 nights a week
+   should block Earlier bedtime.
+3. **Clinician (cardiology or sports medicine) and midwife:** whether Walk and Slow breathing can be offered
+   with heart/BP conditions or in pregnancy, and with what copy. The warning-sign wording comes from
+   non-guideline sources.
+4. **Physiotherapist:** "stop if it hurts" for joint pain (NICE says pain may rise at first); Strength
+   preparation redesign; all accessible-movement designs.
+5. **Psychologist:** panic and breath-focused anxiety (Slow breathing); social-anxiety framing (Start a
+   conversation).
+6. **Eating-disorder-informed dietitian:** Fruit and veg for 16–17; whether adults need an opt-out prompt.
+7. **Diabetes educator:** whether Unsweetened drinks needs more than the current note.
+8. **Regional age and consent rules**, and the App Store 16+ rating.
 
 ---
 
-## Remaining decisions for the owner
-Decided on 2026-10-24 (see `SCHWUNG_V2_DEV_INTEGRATION.md`): the 12 ✅ habits are cleared for **development
-testing only**; the audience is 16+ with the stop screen kept; the "already training" copy is applied; V2 is
-wired behind a development flag that is off by default.
+## Habit status
+| Habit | Status | Restrictions in the engine |
+|---|---|---|
+| Make your bed, Steady wake-up, Morning daylight, Phone-free start, Social-free start, App limit, Read, Journal, Deep work, First task, Reach out, Genuine compliment | READY FOR DEV TESTING | As before (teen deep work ≤ 60 min) |
+| Walk | READY FOR DEV TESTING | Not with heart/BP, pregnancy, walking difficulty; safety note for joint, 65+, unknown |
+| Earlier bedtime | READY FOR DEV TESTING (18+) · PENDING EXPERT REVIEW (16–17) | Adult band, 9 h ceiling, regular wake time, both times answered, no sleep trouble or condition, known precautions |
+| Phone-free wind-down | READY FOR DEV TESTING | Phone 1 h+; claim-free |
+| Slow breathing | READY FOR DEV TESTING | Not with heart/BP or pregnancy; mandatory safety note |
+| Fruit and veg | READY FOR DEV TESTING (18+) · PENDING EXPERT REVIEW (16–17) | Food opt-out; stress note |
+| Unsweetened drinks | READY FOR DEV TESTING (18+) | Hypo and care-team note |
+| Water with meals | READY FOR DEV TESTING | Add-only (swaps); not with a fluid limit |
+| Start a conversation | READY FOR DEV TESTING | Choice-only; gentle note |
+| Strength preparation | PENDING EXPERT REVIEW | Out of the gate |
+| Supported Balance Practice, Seated Mobility, Gentle Strength, Strength sessions | HELD | Never selectable |
+| Cold exposure, water quantities, step counts, calorie or weight habits | RETIRED | Not in V2 |
 
-Still open:
-1. **Release gate:** public activation of any V2 habit.
-2. **App Store age rating:** verify 16+ in App Store Connect before release (not assumed anywhere in code).
-3. **Expert reviewers** (sleep, physio, dietitian) for the 🟡 and ⏸ items: who, and when?
+## What still prevents public release
+- the items in "Still unresolved" above (expert reviews and full-text checks)
+- the owner's release-gate decision and App Store age-rating verification
+- real-device testing of the full V2 flow with VoiceOver
+- held accessible-movement habits, which means the fitness goal is still thin for older adults and people with
+  limited mobility (they get Walk or an honest note)
+- removing the `__DEV__` restriction, which needs explicit owner approval

@@ -127,3 +127,67 @@ Release requirements are the same as for A, plus a review of which moves are saf
   answers yet".
 - Strength preparation is no longer offered (plan, choice step or swap) to anyone active 3+ days a week.
 - Everything else above reflects the current engine.
+
+---
+
+## D. Evidence update and improved designs (2026-10-24)
+**Review level:** search results only (abstract excerpts and secondary summaries); see the evidence register.
+**Status:** all four habits stay **HELD**. None is activated, and none is claimed to be safe for all older
+adults.
+
+### What the evidence supports, and doesn't
+- **Falls (FALLS-CR, Cochrane 2019, high certainty):** balance and functional exercise lowers the fall rate by
+  about 24%, and adding strength gives about 34%. Effects are **larger when a health professional (usually a
+  physiotherapist) delivers the programme**. An unsupervised app habit can't assume the same effect.
+- **WHO 2020 (secondary):** older adults should do multicomponent activity emphasising balance and strength
+  on **3+ days a week**, at moderate or greater intensity.
+- **Otago (OTAGO):** a physiotherapist-prescribed home programme reduced falls (IRR 0.68). **Adherence was
+  only about 37% at 12 months.**
+- **Chair-based exercise (CHAIR-EX):** better grip, arm-curl and chair-stand performance in people aged 50+.
+  Mobility and balance outcomes not confirmed.
+- **Progressive resistance training in older adults (PRT-OLD, Cochrane):** large strength gains and small gains
+  in physical ability. **Adverse events were poorly reported**, and the authors urge caution for clinical
+  populations.
+
+### Changes to the designs (for physiotherapist review)
+**A. Supported Balance Practice**
+- Keep the screening question and the exclusions (falls, dizziness, recent surgery or fracture, walking
+  difficulty, unknown precautions).
+- Add a **3+ days a week** framing in copy: "Most days is ideal; at least 3 days a week."
+- Daily remains the habit default, consistent with the 66-day mechanics.
+- **New question for the reviewer:** should balance be offered only together with a referral suggestion
+  ("Ask your GP about a local strength and balance class")? Supervised programmes show the larger effect.
+
+**B. Seated Mobility**
+- Keep it choice-only. Add one seated strength move (a sit-to-stand from a high chair with arms, only if the
+  person can already stand up unaided), so the routine covers strength as well as mobility.
+- The reviewer must confirm which moves suit wheelchair users.
+
+**C. Gentle Strength Preparation** (for 65+, joint pain, unknown precautions)
+
+| Level | Target [PRODUCT, VERIFY] |
+|---|---|
+| Easy | 1 move, 5 slow reps, holding a support |
+| Medium | 2 moves, 5–8 reps each |
+| Hard | 3 moves, 8–10 reps each |
+
+- **Moves:** sit-to-stand from a chair, wall push-up, heel raises at a support (NHS-trust sheets).
+- **Copy:** "Breathe normally. Stop if anything hurts." Excluded with heart/BP and pregnancy.
+- **Reviewer:** joint-pain progressions, and whether daily practice needs built-in rest days.
+
+**D. Scheduled Strength Sessions** (`move_strength_session`)
+- Evidence supports **2–3 days a week** for beginners (ACSM-RT 2009; the 2026 update wasn't seen) rather than
+  daily.
+- The scheduled-habit design (spec section E) is unchanged and **needs owner approval** before any build,
+  because it changes level-up and step-down counting.
+
+### Fitness positioning now in the engine
+- **Older beginner (65+), fitness goal:** Walk (5 min start) with the safety note, plus "Guidelines also
+  recommend balance and strength activities for older adults. Schwung's versions are still being reviewed, so
+  they aren't included yet."
+- **Heart/BP or pregnancy:** no Walk or Slow breathing, plus "Movement and breathing habits for heart
+  conditions and pregnancy are waiting for expert review. Your clinician or midwife can advise what's right
+  for you."
+- **Already active 3+ days with no fitness habit:** "You already have a strong activity routine. Let's focus on
+  the other changes that matter to you."
+- **Walking difficult:** no movement habit, and the limited-mobility note.

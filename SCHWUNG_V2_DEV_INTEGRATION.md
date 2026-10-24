@@ -15,7 +15,7 @@ release.
   Restart (Settings) is the only way to start over, as before.
 
 ## Release gate
-- `src/core/v2/gate.ts` lists the 12 habits cleared for development testing. Every plan, choice-step option
+- `src/core/v2/gate.ts` lists the 20 habits cleared for development testing (updated 2026-10-24; see the evidence register). Every plan, choice-step option
   and swap goes through `src/core/v2/program.ts`, which always applies the gate.
 - A test checks that no screen or store file calls the engine directly.
 - Pending-review and held habits are never shown and never substituted in to fill a plan.
@@ -49,8 +49,8 @@ release.
    - precautions (multi-select; "Skip" saves as unknown)
 2. **Under 16** → stop screen; nothing is saved; "I chose the wrong age" goes back.
 3. **W1 (wake time)** at `/v2/time`, only when a wake-anchored habit is in the plan or among the choices. The
-   options are a time, "It changes a lot", or shifts. **W2 (bedtime)** is never reached in the preview,
-   because Earlier bedtime is pending review. Unit tests cover it with the full candidate pool.
+   options are a time, "It changes a lot", or shifts. **W2 (bedtime)** follows a W1 time when Earlier
+   bedtime is in the plan or the choices (adults only).
 4. `/v2/plan` shows:
    - picks with personal Easy targets, reasons and notes
    - the development limitation, if any
@@ -64,10 +64,7 @@ release.
 
 ## Known limits of the preview
 - On iPhone, the sleep hours and sleep trouble questions are separate steps rather than one screen.
-- Plans for some goals are thin, because their core habits are pending review:
-  - Fitness: Walk is withheld, so plans need choices.
-  - Calm: Slow breathing and Phone-free wind-down are withheld.
-  - Energy: Earlier bedtime and Walk are withheld.
-
-  The screen says so; nothing is substituted.
+- Some plans are still thin: fitness for heart/BP, pregnancy, walking difficulty or very active people;
+  16–17-year-olds with sleep or food needs. Strength preparation is not in the gate. The screen says so;
+  nothing is substituted.
 - Export includes `programVersion` and `profile`.

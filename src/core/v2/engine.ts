@@ -301,13 +301,12 @@ export function habitNotes(h: HabitDef, p: ProfileV2): string[] {
   const notes: string[] = [];
   if (h.note) notes.push(h.note);
   if (h.id === 'move_walk') {
-    const careful =
-      precautionsUnknown(p) ||
-      p.age === '65p' ||
-      hasPrecaution(p, 'joint') ||
-      hasPrecaution(p, 'heart') ||
-      hasPrecaution(p, 'pregnancy');
-    if (careful) notes.push('Keep it comfortable and stop if it hurts. Follow any advice from your clinician.');
+    // Heart conditions and pregnancy never get Walk automatically (they need individual advice first).
+    const careful = precautionsUnknown(p) || p.age === '65p' || hasPrecaution(p, 'joint');
+    if (careful)
+      notes.push(
+        'Keep it comfortable and stop if it hurts. Stop and get medical help if you have chest pain, feel faint, or are much more out of breath than usual.',
+      );
   }
   return notes;
 }
@@ -327,8 +326,16 @@ function planNotes(p: ProfileV2, plan: HabitDef[], gate: Gate): string[] {
   if (precautionsUnknown(p)) notes.push('If you have a health condition, check these with a professional.');
   if (p.sleepTrouble === 'most')
     notes.push('Trouble sleeping on most nights is worth mentioning to a doctor or another health professional.');
+  if (hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy'))
+    notes.push(
+      'Movement and breathing habits for heart conditions and pregnancy are waiting for expert review. Your clinician or midwife can advise what’s right for you.',
+    );
   if (hasPrecaution(p, 'walkingDifficult'))
     notes.push('Movement habits for limited mobility aren’t available yet. A professional can suggest safe options.');
+  if (p.goal === 'fitness' && p.age === '65p')
+    notes.push(
+      'Guidelines also recommend balance and strength activities for older adults. Schwung’s versions are still being reviewed, so they aren’t included yet.',
+    );
   if (p.goal === 'fitness' && !fitnessCore && !active) {
     const withheld = GOALS.fitness.core.some(
       (id) => exclusion(BY_ID[id], p) === null && exclusion(BY_ID[id], p, gate) !== null,

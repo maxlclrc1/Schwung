@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { buildPlan } from '../../plan';
 import { ANSWER_VALUES, type Answers } from '../../types';
-import { exclusion, generatePlanV2, needs, swapOptionsV2, V2_LIMITS } from '../engine';
+import { exclusion, generatePlanV2, habitNotes, needs, swapOptionsV2, V2_LIMITS } from '../engine';
 import { BY_ID, GOALS, LIBRARY } from '../library';
 import type { PlanResultV2, ProfileV2 } from '../types';
 import { FIXTURES } from './fixtures';
@@ -69,14 +69,12 @@ describe('fixed scenario fixtures', () => {
     it(name, () => checkPlan(p, ok(p)));
   }
 
-  it('A (16, focus): two focus habits, teen-safe, no drink habit', () => {
+  it('A (16, focus): two focus habits, teen-safe: no drinks, no earlier bedtime, no food habit', () => {
     const r = ok(FIXTURES['A · 16, focus']);
-    expect(ids(r)).toEqual(['discipline_bed', 'screen_social', 'focus_deepwork', 'sleep_bedtime', 'move_walk']);
-    expect(r.picks.find((x) => x.id === 'sleep_bedtime')!.targets).toEqual({
-      easy: 'In bed by 00:00',
-      medium: 'In bed by 23:45',
-      hard: 'In bed by 23:30',
-    });
+    // Earlier bedtime for 16–17 waits for sleep-expert review (evidence review 2026-10-24), so the sleep need
+    // is answered by a phone-free wind-down instead.
+    expect(ids(r)).toEqual(['discipline_bed', 'screen_social', 'focus_deepwork', 'sleep_no_phone_bed', 'move_walk']);
+    expect(ids(r)).not.toContain('food_produce');
   });
 
   it('B (19, confidence): flexible social habits, no automatic conversations', () => {
@@ -115,6 +113,7 @@ describe('fixed scenario fixtures', () => {
 
   it('Unsweetened drinks always carries the low-blood-sugar note', () => {
     expect(BY_ID.food_unsweetened.note).toMatch(/low blood sugar/);
+    expect(BY_ID.food_unsweetened.note).toMatch(/care team/);
   });
 
   it('G1 and G2: small plans come with the choice step; under 3 makes it required', () => {
@@ -132,6 +131,50 @@ describe('fixed scenario fixtures', () => {
 
 describe('rules', () => {
   const base = FIXTURES['C · 28, energy'];
+
+  it('evidence review restrictions (2026-10-24)', () => {
+    const teen: ProfileV2 = { ...base, age: '16_17', sugary: undefined };
+    expect(exclusion(BY_ID.sleep_bedtime, teen)).toMatch(/sleep-expert review/);
+    expect(exclusion(BY_ID.food_produce, teen)).toMatch(/expert review/);
+    for (const c of ['heart', 'pregnancy'] as const) {
+      expect(exclusion(BY_ID.move_walk, { ...base, precautions: [c] })).toMatch(/clinician or midwife/);
+      expect(exclusion(BY_ID.mind_breathe, { ...base, precautions: [c] })).toMatch(/expert review/);
+      const r = ok({ ...base, precautions: [c] });
+      expect(r.planNotes.join(' ')).toMatch(/heart conditions and pregnancy are waiting for expert review/);
+    }
+    // Joint pain, 65+ and unknown precautions keep Walk, with the comfort and warning-sign note.
+    for (const p of [
+      { ...base, precautions: ['joint'] as ProfileV2['precautions'] },
+      { ...base, age: '65p' as const },
+      { ...base, precautions: 'unknown' as const },
+    ]) {
+      expect(exclusion(BY_ID.move_walk, p)).toBeNull();
+      expect(habitNotes(BY_ID.move_walk, p).join(' ')).toMatch(/chest pain/);
+    }
+    expect(habitNotes(BY_ID.move_walk, base)).toEqual([]);
+    // A changing wake time means no safe time-in-bed ceiling, so no earlier bedtime.
+    expect(exclusion(BY_ID.sleep_bedtime, { ...base, wake: { kind: 'varies' } })).not.toBeNull();
+    expect(exclusion(BY_ID.sleep_bedtime, { ...base, wake: { kind: 'shift' } })).not.toBeNull();
+    expect(BY_ID.mind_breathe.note).toMatch(/without holding your breath/);
+    expect(BY_ID.sleep_bedtime.note).toMatch(/feel sleepy/);
+  });
+
+  it('never gives a teen an earlier bedtime or a food habit, or anyone with heart or pregnancy precautions a walk or breathing habit', () => {
+    for (const p of sample(5000)) {
+      const r = generatePlanV2(p);
+      if (r.status !== 'ok') continue;
+      const offered = [...ids(r), ...(r.choice?.alternatives.map((a) => a.id) ?? [])];
+      if (p.age === '16_17') {
+        expect(offered).not.toContain('sleep_bedtime');
+        expect(offered).not.toContain('food_produce');
+        expect(offered).not.toContain('food_unsweetened');
+      }
+      if (p.precautions !== 'unknown' && (p.precautions.includes('heart') || p.precautions.includes('pregnancy'))) {
+        expect(offered).not.toContain('move_walk');
+        expect(offered).not.toContain('mind_breathe');
+      }
+    }
+  });
 
   it('stops under-16s without a plan', () => {
     expect(generatePlanV2({ ...base, age: 'u16' }).status).toBe('not_eligible');
