@@ -220,17 +220,27 @@ export function isCustom(h: PlanHabit): boolean {
 }
 
 export function habitTitle(h: PlanHabit): string {
-  return h.custom?.title ?? getHabit(h.habitId)?.title ?? h.habitId;
+  return h.custom?.title ?? h.spec?.title ?? getHabit(h.habitId)?.title ?? h.habitId;
 }
 
 /** The concrete target for today, e.g. "Read 10 pages". */
 export function habitTask(h: PlanHabit): string | undefined {
   if (h.custom) return h.custom.description;
-  return getHabit(h.habitId)?.levels[h.level];
+  return habitTaskAt(h, h.level);
+}
+
+/** The target at any level: the personal V2 window when the habit has one, else the V1 library's. */
+export function habitTaskAt(h: PlanHabit, level: Level): string | undefined {
+  if (h.custom) return h.custom.description;
+  return h.spec?.targets[level] ?? getHabit(h.habitId)?.levels[level];
+}
+
+export function habitWhy(h: PlanHabit): string | undefined {
+  return h.spec?.why ?? getHabit(h.habitId)?.why;
 }
 
 export function habitIcon(h: PlanHabit): string {
-  return h.custom ? 'star' : (getHabit(h.habitId)?.icon ?? 'star');
+  return h.custom ? 'star' : (h.spec?.icon ?? getHabit(h.habitId)?.icon ?? 'star');
 }
 
 export function habitCategory(h: PlanHabit): Category | 'custom' {

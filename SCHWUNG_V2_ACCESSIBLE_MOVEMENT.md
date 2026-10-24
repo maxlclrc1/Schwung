@@ -120,7 +120,10 @@ Release requirements are the same as for A, plus a review of which moves are saf
 | **Joint discomfort** | Walk with a comfort note; strength preparation excluded (gentle variant held) | "Keep it comfortable; stop if it hurts" | After review: gentle strength variant; seated mobility as a choice |
 | **Difficulty standing or walking** | No movement habit at all, plus an honest note | "Movement habits for limited mobility aren't available yet. A professional can suggest safe options." | Seated Mobility (B) as a **choice** after review; never automatic |
 
-**Engine status for C:**
-- The "already training" copy change is a recommended next step. It's copy-only, but it isn't done yet, to
-  keep this phase review-only except for the verified fixes.
+**Engine status for C (updated with the development integration):**
+- Applied, with the owner's approved wording: when the goal is fitness, activity is 3+ days and no fitness
+  habit is in the plan, the plan shows "You already have a strong activity routine. Let's focus on the other
+  changes that matter to you." instead of the fitness note or "None of our current fitness habits suit your
+  answers yet".
+- Strength preparation is no longer offered (plan, choice step or swap) to anyone active 3+ days a week.
 - Everything else above reflects the current engine.

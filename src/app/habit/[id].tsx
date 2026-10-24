@@ -6,7 +6,7 @@ import { IconOrb } from '../../components/Art';
 import { Field } from '../../components/Field';
 import { SheetHeader } from '../../components/SheetHeader';
 import { Button, Card, LEVEL_LABEL, Screen, T } from '../../components/ui';
-import { getHabit, habitIcon, habitTitle, LEVELS } from '../../core/habits';
+import { habitIcon, habitTaskAt, habitTitle, habitWhy, LEVELS } from '../../core/habits';
 import { MIN_HABITS } from '../../core/plan';
 import { completionRun } from '../../core/progression';
 import { haptic } from '../../lib/haptics';
@@ -20,7 +20,6 @@ export default function HabitDetail() {
   const logs = useApp((s) => s.logs);
   const startedAt = useApp((s) => s.startedAt);
   const habit = plan.find((h) => h.habitId === id);
-  const lib = getHabit(id);
   const [title, setTitle] = useState(habit?.custom?.title ?? '');
   const [desc, setDesc] = useState(habit?.custom?.description ?? '');
 
@@ -32,6 +31,7 @@ export default function HabitDetail() {
     );
   }
 
+  const why = habitWhy(habit);
   const run = completionRun({ ...habit, levelSince: 0 }, logs, startedAt, currentDay());
   const canRemove = plan.length > MIN_HABITS;
 
@@ -77,13 +77,18 @@ export default function HabitDetail() {
                 }}
               />
             </View>
-          ) : lib ? (
+          ) : why ? (
             <>
               <Card style={{ gap: space.sm }}>
                 <T v="overline" color={c.textDim}>
                   Why
                 </T>
-                <T>{lib.why}</T>
+                <T>{why}</T>
+                {habit.spec?.notes.map((n) => (
+                  <T key={n} v="caption" color={c.textDim}>
+                    {n}
+                  </T>
+                ))}
               </Card>
 
               <View style={{ gap: space.sm }}>
@@ -114,7 +119,7 @@ export default function HabitDetail() {
                         {LEVEL_LABEL[l]}
                       </T>
                       <T v="bodyStrong" style={{ flex: 1 }}>
-                        {lib.levels[l]}
+                        {habitTaskAt(habit, l)}
                       </T>
                     </Pressable>
                   );

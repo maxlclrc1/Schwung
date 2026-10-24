@@ -5,6 +5,10 @@ import { getHabit, levelUp } from '../core/habits';
 import { dateForDay, dayNumber, toDateKey } from '../core/dates';
 import { MILESTONES, phaseLevel, phaseOf, reconcile } from '../core/progression';
 import type { Answers, DayLog, Level, Notice, PlanHabit, ThemePreference } from '../core/types';
+import { assemblePlan, swappedHabit } from '../core/v2/program';
+import type { ProfileV2 } from '../core/v2/types';
+import { v2PreviewEnabled } from '../lib/flags';
+import { migrateSaved, sanitize, STORAGE_VERSION } from './migrate';
 import { debouncedStorage } from './storage';
 
 export type AppData = {
@@ -21,6 +25,15 @@ export type AppData = {
   themePreference: ThemePreference;
   /** Dev-only time travel, in days. Always 0 in release builds. */
   devDayOffset: number;
+  /**
+   * Which plan engine the running program uses. Older saved data has none and loads as 1 (V1). Set only
+   * when a program starts; nothing ever converts a running program.
+   */
+  programVersion: 1 | 2;
+  /** V2 answers: the onboarding draft, then the profile the V2 program was built from. Null for V1. */
+  profile: ProfileV2 | null;
+  /** Dev-only switch for the V2 preview (see lib/flags). Always false in release builds. */
+  devV2Preview: boolean;
 };
 
 type Actions = {
@@ -42,6 +55,12 @@ type Actions = {
   setThemePreference: (preference: ThemePreference) => void;
   restart: () => void;
   setDevDayOffset: (n: number) => void;
+  /** V2 onboarding draft (nothing is kept for under-16s: pass null). */
+  setProfile: (p: ProfileV2 | null) => void;
+  /** Starts a V2 program from the saved profile and the choice-step picks. False if not allowed. */
+  startProgramV2: (chosen: string[]) => boolean;
+  swapHabitV2: (oldId: string, newId: string) => boolean;
+  setDevV2Preview: (on: boolean) => void;
 };
 
 export type AppState = AppData & Actions;
@@ -58,6 +77,9 @@ const initial: AppData = {
   appliedPhase: 1,
   notices: [],
   devDayOffset: 0,
+  programVersion: 1,
+  profile: null,
+  devV2Preview: false,
 };
 
 /** "Now", honoring the dev time-travel offset. */
@@ -111,6 +133,27 @@ export const useApp = create<AppState>()(
             seenCeremonies: [],
             appliedPhase: 1,
             notices: [],
+            programVersion: 1,
+            profile: null,
+          });
+          return true;
+        },
+
+        startProgramV2: (chosen) => {
+          const s = get();
+          // Same rule as V1: never over a running program. And only while the preview flag is on.
+          if (s.startedAt || !s.profile || !v2PreviewEnabled(s.devV2Preview)) return false;
+          const plan = assemblePlan(s.profile, chosen);
+          if (!plan) return false;
+          set({
+            startedAt: toDateKey(appNow()),
+            plan,
+            logs: {},
+            seenCeremonies: [],
+            appliedPhase: 1,
+            notices: [],
+            programVersion: 2,
+            answers: null,
           });
           return true;
         },
@@ -143,6 +186,8 @@ export const useApp = create<AppState>()(
           updatePlan((plan) => plan.map((h) => (h.habitId === habitId ? { ...h, levelSince: currentDay(get()) } : h))),
 
         swapHabit: (oldId, newId) => {
+          // V2 programs swap within the V2 library (swapHabitV2); V1 swaps stay legacy.
+          if (get().programVersion === 2) return;
           if (!getHabit(newId) || get().plan.some((h) => h.habitId === newId)) return;
           const day = currentDay(get());
           updatePlan((plan) =>
@@ -152,6 +197,16 @@ export const useApp = create<AppState>()(
                 : h,
             ),
           );
+        },
+
+        swapHabitV2: (oldId, newId) => {
+          const { programVersion, profile, plan } = get();
+          if (programVersion !== 2 || !profile || !plan.some((h) => h.habitId === oldId)) return false;
+          const day = currentDay(get());
+          const habit = swappedHabit(profile, plan, oldId, newId, day);
+          if (!habit) return false;
+          updatePlan((p) => p.map((h) => (h.habitId === oldId ? habit : h)));
+          return true;
         },
 
         addCustomHabit: (title, description) => {
@@ -213,17 +268,24 @@ export const useApp = create<AppState>()(
         setThemePreference: (themePreference) => set({ themePreference }),
 
         restart: () => {
-          const { reminderTime, notificationsEnabled, themePreference } = get();
-          set({ ...initial, reminderTime, notificationsEnabled, themePreference });
+          const { reminderTime, notificationsEnabled, themePreference, devV2Preview } = get();
+          set({ ...initial, reminderTime, notificationsEnabled, themePreference, devV2Preview });
         },
 
         setDevDayOffset: (devDayOffset) => set({ devDayOffset: __DEV__ ? devDayOffset : 0 }),
+
+        setProfile: (profile) => set({ profile: profile?.age === 'u16' ? null : profile }),
+
+        setDevV2Preview: (on) => set({ devV2Preview: __DEV__ ? on : false }),
       };
     },
     {
       name: 'schwung-state',
-      version: 1,
+      version: STORAGE_VERSION,
       storage: createJSONStorage(() => debouncedStorage),
+      migrate: (persisted, version) => migrateSaved(persisted, version) as unknown as AppState,
+      // Every load, whatever its version, gets the same safe fallbacks.
+      merge: (persisted, current) => ({ ...current, ...sanitize((persisted ?? {}) as Record<string, unknown>) }),
       partialize: (s): AppData => ({
         startedAt: s.startedAt,
         answers: s.answers,
@@ -236,6 +298,9 @@ export const useApp = create<AppState>()(
         appliedPhase: s.appliedPhase,
         notices: s.notices,
         devDayOffset: __DEV__ ? s.devDayOffset : 0,
+        programVersion: s.programVersion,
+        profile: s.profile,
+        devV2Preview: __DEV__ ? s.devV2Preview : false,
       }),
     },
   ),
@@ -253,6 +318,8 @@ export function exportData(): AppData {
     seenCeremonies,
     appliedPhase,
     notices,
+    programVersion,
+    profile,
   } = useApp.getState();
   return {
     startedAt,
@@ -266,5 +333,8 @@ export function exportData(): AppData {
     appliedPhase,
     notices,
     devDayOffset: 0,
+    programVersion,
+    profile,
+    devV2Preview: false,
   };
 }

@@ -159,6 +159,8 @@ export const LIBRARY: HabitDef[] = [
       // These would need the gentle variant, which is held until reviewed.
       if (p.age === '65p' || hasPrecaution(p, 'joint') || precautionsUnknown(p))
         return 'the gentle variant needed here is not reviewed yet';
+      // Never recommend preparation to people who are already active most days (they may already train).
+      if (p.activeDays === '3_4' || p.activeDays === '5p') return 'you are already active most days';
       return null;
     },
     ladder: fixed([
