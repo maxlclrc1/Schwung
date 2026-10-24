@@ -9,7 +9,7 @@ import { Button, Screen, T } from '../../components/ui';
 import { OnboardingBackdrop } from '../../components/World';
 import { UNDER_16_MESSAGE } from '../../core/v2/engine';
 import { pendingTimeQuestion } from '../../core/v2/program';
-import { isAnswered, toProfile, visibleQuestions, type Draft, type QuestionV2 } from '../../core/v2/quiz';
+import { isAnswered, screensV2, toProfile, type Draft, type QuestionV2, type SingleQuestion } from '../../core/v2/quiz';
 import { v2PreviewEnabled } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useScreenReader } from '../../lib/useScreenReader';
@@ -28,8 +28,11 @@ export default function QuizV2() {
   const [draft, setDraft] = useState<Draft>(() => useApp.getState().profile ?? {});
   const [step, setStep] = useState(0);
   const advancing = useRef(false);
-  const questions = visibleQuestions(draft);
-  const q = questions[Math.min(step, questions.length - 1)];
+  const screens = screensV2(draft);
+  const screen = screens[Math.min(step, screens.length - 1)];
+  const q = screen[0];
+  // A shared screen (the two sleep questions): every answer is chosen, then Continue.
+  const paired = screen.length > 1;
 
   if (started) return <Redirect href="/today" />;
   if (!enabled) return <Redirect href="/welcome" />;
@@ -79,8 +82,8 @@ export default function QuizV2() {
   };
 
   const advance = (d: Draft) => {
-    const next = visibleQuestions(d);
-    const at = next.findIndex((x) => x.key === q.key);
+    const next = screensV2(d);
+    const at = next.findIndex((x) => x[0].key === q.key);
     if (d.age === 'u16') return; // the stop screen takes over
     if (at < next.length - 1) setStep(at + 1);
     else finish(d);
@@ -96,11 +99,12 @@ export default function QuizV2() {
     }, 220);
   };
 
-  const chooseSingle = (value: string) => {
+  const chooseSingle = (value: string, key: QuestionV2['key'] = q.key) => {
     if (advancing.current) return;
     haptic.tap();
-    const next = { ...draft, [q.key]: value } as Draft;
+    const next = { ...draft, [key]: value } as Draft;
     setDraft(next);
+    if (paired) return;
     if (value === 'u16') {
       // Nothing is kept for under-16s, including an earlier unfinished draft.
       useApp.getState().setProfile(null);
@@ -131,7 +135,7 @@ export default function QuizV2() {
           <Ionicons name="chevron-back" size={26} color={c.text} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <TrailProgress step={step} total={questions.length} />
+          <TrailProgress step={step} total={screens.length} />
         </View>
         <View style={styles.back} />
       </View>
@@ -144,19 +148,28 @@ export default function QuizV2() {
             exiting={FadeOutLeft.duration(140)}
             style={styles.body}
           >
-            <View style={styles.art}>
-              <IconOrb icon={q.icon as IconName} size={76} />
+            <View style={[styles.art, paired && styles.artSmall]}>
+              <IconOrb icon={q.icon as IconName} size={paired ? 60 : 76} />
             </View>
             <View style={{ gap: space.sm }}>
               <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
                 {q.section}
               </T>
               <T v="title" accessibilityRole="header">
-                {q.title}
+                {paired && q.kind === 'single' ? (q.screenTitle ?? q.title) : q.title}
               </T>
               {q.hint ? <T color={c.textDim}>{q.hint}</T> : null}
             </View>
-            {q.kind === 'single' ? (
+            {paired ? (
+              screen.map((sq) => (
+                <ChipGroup
+                  key={sq.key}
+                  q={sq as SingleQuestion}
+                  value={draft[sq.key] as string | undefined}
+                  onPick={(v) => chooseSingle(v, sq.key)}
+                />
+              ))
+            ) : q.kind === 'single' ? (
               <View style={styles.options} accessibilityRole="radiogroup">
                 {q.options.map((o) => (
                   <Option
@@ -177,15 +190,57 @@ export default function QuizV2() {
       </ScrollView>
       <Footer
         q={q}
+        screen={screen}
         draft={draft}
         screenReader={screenReader}
-        last={step >= questions.length - 1}
+        last={step >= screens.length - 1}
         onContinue={(d) => {
           setDraft(d);
           advance(d);
         }}
       />
     </Screen>
+  );
+}
+
+/** One question on a shared screen: its own wording, and compact choices that fit smaller iPhones. */
+function ChipGroup({ q, value, onPick }: { q: SingleQuestion; value?: string; onPick: (v: string) => void }) {
+  const { c } = useTheme();
+  return (
+    <View style={{ gap: space.sm }}>
+      <T v="bodyStrong" accessibilityRole="header">
+        {q.title}
+      </T>
+      <View style={styles.chips} accessibilityRole="radiogroup" accessibilityLabel={q.title}>
+        {q.options.map((o) => {
+          const selected = value === o.value;
+          return (
+            <Pressable
+              key={o.value}
+              onPress={() => onPick(o.value)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected }}
+              accessibilityLabel={o.label}
+              style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+            >
+              <ThemedView
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? c.accentSoft : c.surface,
+                    borderColor: selected ? c.accentInk : 'transparent',
+                  },
+                ]}
+              >
+                <T v="bodyStrong" color={selected ? c.accentInk : c.text}>
+                  {o.label}
+                </T>
+              </ThemedView>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -205,12 +260,14 @@ function MultiOptions({ q, draft, toggle }: { q: QuestionV2; draft: Draft; toggl
 /** Continue for multi-select questions (and every question with a screen reader on). */
 function Footer({
   q,
+  screen,
   draft,
   screenReader,
   last,
   onContinue,
 }: {
   q: QuestionV2;
+  screen: QuestionV2[];
   draft: Draft;
   screenReader: boolean;
   last: boolean;
@@ -218,12 +275,12 @@ function Footer({
 }) {
   const { c } = useTheme();
   if (q.kind === 'single') {
-    if (!screenReader) return null;
+    if (!screenReader && screen.length === 1) return null;
     return (
       <View style={styles.footer}>
         <Button
           label="Continue"
-          disabled={!isAnswered(q, draft) || draft.age === 'u16'}
+          disabled={!screen.every((x) => isAnswered(x, draft)) || draft.age === 'u16'}
           onPress={() => onContinue(draft)}
         />
       </View>
@@ -315,6 +372,15 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.xl, paddingTop: space.md, paddingBottom: space.xxl },
   body: { gap: space.xl },
   art: { alignItems: 'flex-start', marginLeft: -space.lg, marginBottom: -space.md },
+  artSmall: { marginBottom: -space.lg },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  chip: {
+    minHeight: 48,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    paddingHorizontal: space.lg,
+    justifyContent: 'center',
+  },
   options: { gap: space.sm },
   optionText: { flex: 1, gap: 2, paddingVertical: space.sm },
   footer: { paddingHorizontal: space.xl, paddingBottom: space.md, paddingTop: space.sm },

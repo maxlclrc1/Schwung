@@ -174,7 +174,8 @@ results.
 - **Evidence:**
   - Behaviour: WHO free-sugar limits; ADA puts water first (ADA-SOC); observational swap data (SSB-DM).
   - Habit: unverified.
-  - Targets: product (swap once, twice, all drinks).
+  - Targets: product (swap 1, up to 2, up to 3; a day with no sugary drinks counts, so nobody needs to have
+    one to complete it; owner-approved 2026-10-24).
 - **Offered only when** sugary drinks are "most days" (others have no room above their baseline).
 - **Diabetes:** mandatory note: "If you use a sugary drink or juice to treat low blood sugar, always do that. It
   never counts against this habit. If you have diabetes, your care team's advice comes first." (HYPO, ADA-SOC.)

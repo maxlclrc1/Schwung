@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Redirect, router } from 'expo-router';
-import { useState } from 'react';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { TimePicker } from '../../components/TimePicker';
 import { Button, Screen, T } from '../../components/ui';
 import { OnboardingBackdrop } from '../../components/World';
 import { formatTime } from '../../core/dates';
+import { DEV_CLEARED } from '../../core/v2/gate';
 import { pendingTimeQuestion } from '../../core/v2/program';
 import type { ProfileV2 } from '../../core/v2/types';
 import { v2PreviewEnabled } from '../../lib/flags';
@@ -21,19 +22,29 @@ export default function TimeV2() {
   const profile = useApp((s) => s.profile);
   const started = useApp((s) => s.startedAt !== null);
   const enabled = useApp((s) => v2PreviewEnabled(s.devV2Preview));
-  const question = profile ? pendingTimeQuestion(profile) : null;
+  // Opened from the plan's choice step: the choices (including the one that needs a time) come along.
+  const params = useLocalSearchParams<{ with?: string }>();
+  const extra = params.with ? params.with.split(',').filter(Boolean) : [];
+  const fromChoice = extra.length > 0;
+  const question = profile ? pendingTimeQuestion(profile, DEV_CLEARED, extra) : null;
   const [time, setTime] = useState(question === 'bed' ? '23:00' : '07:00');
+
+  useEffect(() => {
+    // Nothing (left) to ask for a choice: go back to the plan underneath, which adds it.
+    if (fromChoice && profile && !question && router.canGoBack()) router.back();
+  }, [fromChoice, profile, question]);
 
   if (started) return <Redirect href="/today" />;
   if (!enabled || !profile) return <Redirect href="/welcome" />;
-  if (!question) return <Redirect href="/v2/plan" />;
+  if (!question) return fromChoice ? null : <Redirect href="/v2/plan" />;
 
   const answer = (next: ProfileV2) => {
     haptic.tap();
     useApp.getState().setProfile(next);
-    const then = pendingTimeQuestion(next);
+    const then = pendingTimeQuestion(next, DEV_CLEARED, extra);
     if (then === 'bed') setTime('23:00');
-    else router.replace('/v2/plan');
+    // From a choice, the effect above returns to the plan once nothing is left to ask.
+    else if (!fromChoice) router.replace('/v2/plan');
   };
 
   const wake = question === 'wake';

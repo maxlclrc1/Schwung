@@ -220,6 +220,14 @@ describe('66-day mechanics on a V2 plan (unchanged)', () => {
     expect(s().notices.filter((n) => n.kind === 'phaseUp')).toHaveLength(2);
   });
 
+  it('day 22 renders the person’s own bedtime Medium (regression for the review discrepancy)', () => {
+    startV2(C); // in bed 00:30, up 07:00
+    s().setDevDayOffset(21);
+    s().reconcileNow(false);
+    const bed = s().plan.find((h) => h.habitId === 'sleep_bedtime')!;
+    expect(habitTask(bed)).toBe('In bed by 00:00');
+  });
+
   it('early level-up offers, XP and step-down work exactly as in V1', () => {
     startV2(C);
     completeDays(1, LEVEL_UP_RUN);

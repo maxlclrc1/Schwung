@@ -68,16 +68,11 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
         haptic.tap();
         onPress();
       }}
-      style={style}
+      // The disabled dim sits on the Pressable: on the animated view it was overridden by the press opacity.
+      style={[style, disabled && styles.disabled]}
     >
       <Animated.View
-        style={[
-          styles.button,
-          { backgroundColor: bg, opacity: disabled ? 0.4 : 1 },
-          kind === 'ghost' && { minHeight: 44 },
-          anim,
-          fade,
-        ]}
+        style={[styles.button, { backgroundColor: bg }, kind === 'ghost' && { minHeight: 44 }, anim, fade]}
       >
         {icon}
         <T v="bodyStrong" color={fg}>
@@ -131,6 +126,7 @@ export function LevelPips({ level }: { level: 'easy' | 'medium' | 'hard' }) {
 export const LEVEL_LABEL = { easy: 'Lv 1', medium: 'Lv 2', hard: 'Lv 3' } as const;
 
 const styles = StyleSheet.create({
+  disabled: { opacity: 0.4 },
   button: {
     minHeight: 56,
     borderRadius: radius.md,

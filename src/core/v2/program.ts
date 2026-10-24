@@ -111,14 +111,22 @@ export function previewPlan(p: ProfileV2, gate: ReadonlySet<string> | null = DEV
   };
 }
 
+/** True when choosing this alternative needs a time answer first (W1, or W2 for Earlier bedtime). */
+export function choiceNeedsTime(p: ProfileV2, chosen: string[], id: string): boolean {
+  return pendingTimeQuestion(p, DEV_CLEARED, [...chosen, id]) !== null;
+}
+
 /** The conditional time question these answers still need (W1, then W2), or null when there's none. */
 export function pendingTimeQuestion(
   p: ProfileV2,
   gate: ReadonlySet<string> | null = DEV_CLEARED,
+  chosen: string[] = [],
 ): 'wake' | 'bed' | null {
   const r = previewPlan(p, gate);
   if (r.status !== 'ok') return null;
-  const ids = [...r.picks.map((x) => x.id), ...r.options.map((o) => o.id)];
+  // Only the habits actually in the plan: the generated ones plus any the person has chosen. An optional
+  // alternative that needs a time asks for it when it's chosen, not before.
+  const ids = [...r.picks.map((x) => x.id), ...chosen];
   if (!p.wake && ids.some((id) => WAKE_ANCHORED.includes(id))) return 'wake';
   if (p.wake?.kind === 'time' && p.inBed === undefined && ids.includes('sleep_bedtime')) return 'bed';
   return null;
@@ -147,7 +155,10 @@ export function assemblePlan(p: ProfileV2, chosen: string[], day = 1): PlanHabit
   if (required > 0 ? chosen.length !== required : chosen.length > (r.choice ? 1 : 0)) return null;
   // Earlier bedtime is only safe with the person's own wake and in-bed times (the time-in-bed ceiling).
   const timed = p.wake?.kind === 'time' && p.inBed !== undefined;
-  if (!timed && [...r.picks.map((x) => x.id), ...chosen].includes('sleep_bedtime')) return null;
+  const all = [...r.picks.map((x) => x.id), ...chosen];
+  if (!timed && all.includes('sleep_bedtime')) return null;
+  // Wake-anchored targets are only set once the wake time has been asked.
+  if (!p.wake && all.some((id) => WAKE_ANCHORED.includes(id))) return null;
   const made: string[] = [];
   for (const id of chosen) {
     if (!canChoose(r, made, id)) return null;
