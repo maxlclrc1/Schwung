@@ -1,7 +1,8 @@
-# Schwung Habit Science 2.0 — Authoritative Specification (revision 5)
+# Schwung Habit Science 2.0 — Authoritative Specification (revision 6)
 
-**Status:** approved direction. The engine is implemented as pure TypeScript in `src/core/v2/`. **It is not
-connected to the quiz, onboarding, saved data or any user** until separately approved.
+**Status:** approved direction. The engine is implemented as pure TypeScript in `src/core/v2/`. It is connected
+to the app **only behind the development flag** (`SCHWUNG_V2_DEV_INTEGRATION.md`), through the release gate in
+`src/core/v2/gate.ts`. It is not released to users.
 
 All scientific and safety claims remain **[VERIFY]**.
 - **[AGREED]** is an owner decision.
@@ -10,6 +11,21 @@ All scientific and safety claims remain **[VERIFY]**.
 - **[PRODUCT]** is a product-chosen number.
 - **[POP]** is WHO or CDC population guidance (section G). Population guidance is **not** evidence that any
   particular rung works or is universally safe.
+
+## Change log (revision 5 → 6: evidence and safety review, 2026-10-24)
+Source access was search-level only; see `SCHWUNG_V2_EVIDENCE_REGISTER.md`.
+
+| # | Change | Why |
+|---|---|---|
+| 1 | **Earlier bedtime (#2): not for 16–17** (pending sleep-expert review); not when W1 is "varies" or "shift"; never started without W1 and W2 times. Mandatory note: "Go to bed when you feel sleepy. If you lie awake for a long time, it's fine to keep your usual bedtime." | Teen circadian delay and early school starts (AAP 2014); the time-in-bed ceiling needs both times; sleep-hygiene advice to go to bed when sleepy |
+| 2 | **Walk (#6): not offered with heart/BP or pregnancy** (needs individual advice; pending expert review). Joint, 65+ and unknown keep it, with the note: "Keep it comfortable and stop if it hurts. Stop and get medical help if you have chest pain, feel faint, or are much more out of breath than usual." | ACOG 804 (safe *without* complications, after clinical evaluation); heart-condition limits are individual |
+| 3 | **Slow breathing (#15): not offered with heart/BP or pregnancy** (pending expert review). Mandatory note: "Breathe gently and comfortably, without holding your breath. If you feel dizzy, light-headed or panicky, stop and breathe normally." | No systematic adverse-event data; light-headedness is reported in small trials |
+| 4 | **Fruit and veg (#8): not for 16–17** (pending expert review). The note adds: "If counting food ever feels stressful, swap this habit." | Food tracking is associated with disordered eating (cross-sectional) |
+| 5 | **Unsweetened drinks (#9):** the note adds "If you have diabetes, your care team's advice comes first." | ADA puts water first for drinks, but individual regimens vary |
+| 6 | **Start a conversation (#21):** note "Any short chat counts, even a quick 'how's your day?'. If it feels like too much, swap it for something else." | Voluntary; avoid pressure for socially anxious users |
+| 7 | **Plan notes:** heart/BP or pregnancy → "Movement and breathing habits for heart conditions and pregnancy are waiting for expert review. Your clinician or midwife can advise what's right for you." Fitness and 65+ → "Guidelines also recommend balance and strength activities for older adults. Schwung's versions are still being reviewed, so they aren't included yet." Fitness, active 3+ days, no fitness habit → the approved "strong activity routine" copy | Honest gaps, no invented habits |
+| 8 | **Strength preparation (#7): not offered to people active 3+ days a week** | Owner instruction: no unnecessary strength preparation |
+| 9 | **Development gate:** #2, #4, #6, #8, #9, #10, #15 and #21 join the 12 habits already cleared. #7 stays out (pending expert review). #22, #23 and seated mobility stay held | Evidence register statuses |
 
 ## Change log (revision 4 → 5)
 | # | Change | Why |
@@ -75,20 +91,20 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 | # | ID | Habit | Mode | Release | Ages | Goal roles | r0 (baseline) | Rungs | Not offered / variants |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | `discipline_bed` | Make your bed | foundation | candidate | 16+ | — | 0 | Make your bed · + clear one surface · + 2-min room reset | — |
-| 2 | `sleep_bedtime` | Earlier bedtime | auto | candidate | 16+ | energy ★, fitness · | 0 | In bed by (usual in-bed − 15/30/45/60); ceiling: time in bed ≤ 9 h adult, 10 h teen | Only if sleep is below the band (adult <7 h, teen <8 h), trouble is rarely, no sleep condition, and precautions are known. Varies/shift → "In bed N min earlier than usual" |
+| 2 | `sleep_bedtime` | Earlier bedtime | auto | candidate | **18+** (16–17 pending review) | energy ★ | 0 | In bed by (usual in-bed − 15/30/45/60); ceiling: time in bed ≤ 9 h [PRODUCT] | Only if sleep is below the band (adult <7 h), trouble is rarely, no sleep condition, precautions are known, and W1 is a time. Started only with W1 and W2 answered. Note: go to bed when sleepy |
 | 3 | `sleep_wake` | Steady wake-up | auto | candidate | 16+ | energy ★, discipline ★, focus · | 0 | Up within 60/45/30/15 min of W1 | Not offered: W1 varies/shift; the routine "same wake time" |
 | 4 | `sleep_no_phone_bed` | Phone-free wind-down | auto | candidate | 16+ | calm ★, energy · | trouble → 1, else 0 | 15/30/45/60 min before bed | Only if phone ≥ 1–2 h or Not sure; not with the routine "phone out of reach" |
 | 5 | `sleep_morning_light` | Morning daylight | auto | candidate | 16+ | energy ★, calm ·, focus · | 0 | Outside within an hour of waking for 5/10/15/20 min | Shift → "after your main sleep" |
-| 6 | `move_walk` | Walk | auto | candidate | 16+ | energy ★, calm ★, fitness ★ | days 0 → 5 min; 1–2 → 10; 3–4 → 20; 5+ → 20, only for energy/calm | 5/10/15/20/25/30/40/50/60 min | Not with the routine "30+ min walk" or the precaution "walking is difficult". Note for joint, heart/BP, pregnancy, unknown, 65+ |
-| 7 | `move_strength_prep` | Strength preparation | choice / add | standard: candidate · **gentle: held** | 16+ | none (suggested for fitness and confidence in the choice step) | 0 (conservative) | 1 set of 1 move · 1 of 2 · 1 of 3 · 2 sets of 3 | Excluded: heart/BP, pregnancy, walking difficult. Joint, 65+ or unknown would need the **gentle** variant, which is **held** → not offered. Copy: "Practice for a strength routine, not a full strength workout. Guidelines recommend strength work on 2+ days a week." |
-| 8 | `food_produce` | Fruit and veg | auto | candidate | 16+ | energy ·, fitness · | hardly any → 1 portion; 1–2 → 2; 3–4 → **not offered** (no room); 5+ → not offered | 1/2/3/4/5 portions today | Food skipped. Copy: "Builds the habit; doesn't measure whether your diet meets guidelines." |
+| 6 | `move_walk` | Walk | auto | candidate | 16+ | energy ★, calm ★, fitness ★ | days 0 → 5 min; 1–2 → 10; 3–4 → 20; 5+ → 20, only for energy/calm | 5/10/15/20/25/30/40/50/60 min | Not with the routine "30+ min walk", the precaution "walking is difficult", **heart/BP or pregnancy** (pending review). Comfort and warning-sign note for joint, unknown, 65+ |
+| 7 | `move_strength_prep` | Strength preparation | choice / add | standard: candidate, **not in the development gate (pending expert review)** · **gentle: held** | 16+ | none (suggested for fitness and confidence in the choice step) | 0 (conservative) | 1 set of 1 move · 1 of 2 · 1 of 3 · 2 sets of 3 | Excluded: heart/BP, pregnancy, walking difficult, **active 3+ days a week**. Joint, 65+ or unknown would need the **gentle** variant, which is **held** → not offered. Copy: "Practice for a strength routine, not a full strength workout. Guidelines recommend strength work on 2+ days a week." |
+| 8 | `food_produce` | Fruit and veg | auto | candidate | **18+** (16–17 pending review) | energy ·, fitness · | hardly any → 1 portion; 1–2 → 2; 3–4 → **not offered** (no room); 5+ → not offered | 1/2/3/4/5 portions today | Food skipped. Copy: "Builds the habit; doesn't measure whether your diet meets guidelines. If counting food ever feels stressful, swap this habit." |
 | 9 | `food_unsweetened` | Unsweetened drinks | auto | candidate | **18+** | energy ·, fitness · | most → 0; a few times → not offered (no room); rarely → not offered | Swap once · Swap twice · All drinks unsweetened today | Never under 18; food skipped |
 | 10 | `food_water_meals` | Water with meals | add | candidate | 16+ | — | 0 | Water with 1/2/3 meals | Fluid limit |
 | 11 | `screen_morning` | Phone-free start | auto | candidate | 16+ | energy ·, calm · | 6 h+ → 0; 2–6 h or Not sure → 1; 1–2 h → not offered (no room); <1 h → not offered | First 15/30/45/60 min after waking | Overlap group `morning_phone`; phone rule |
 | 12 | `screen_social` | Social-free start | auto | candidate | 16+ | focus ★, calm · | 6 h+ → 0; 4–6 h → 1; 2–4 h → 2 | First 30 min / 1 / 2 / 3 / 4 h after waking without social apps | 6b = social only. Overlap `morning_phone`; phone rule |
 | 13 | `screen_app_limit` | App limit | auto | candidate | 16+ | focus ·, calm ·, energy · | 6 h+ → 0; 4–6 h → 1; 2–4 h → 2 | Under 120/90/60/45/30 min | 6b = videos, games or a mix; phone rule |
 | 14 | `mind_read` | Read | auto | candidate | 16+ | focus ★, calm · | 0 (focus: 1) | 5/10/15/20/30 min | Routine reading |
-| 15 | `mind_breathe` | Slow breathing | auto | candidate | 16+ | calm ★, focus · | 0 | 2/3/5/8/10 min | Routine breathing |
+| 15 | `mind_breathe` | Slow breathing | auto | candidate | 16+ | calm ★, focus · | 0 | 2/3/5/8/10 min | Routine breathing; **heart/BP or pregnancy** (pending review). Note: gently, no breath-holding, stop if dizzy |
 | 16 | `mind_journal` | Journal | auto | candidate | 16+ | discipline ·, confidence ·, calm · | 0 | 1/2/3/5 sentences | Routine journaling |
 | 17 | `focus_deepwork` | Deep work | auto | candidate | 16+ | focus ★, discipline · | 1 | 10/15/25/45/60/90 min (teen: up to 60) | — |
 | 18 | `focus_top3` | First task | auto | candidate | 16+ | focus ★, discipline ★, calm · | planning routine → 1; else 0 | Write your #1 task · + 10 min on it first · + 25 · + 45 | — |
@@ -106,20 +122,21 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 - **confidence:** reach out★, compliment★, then journal
 - **calm:** breathe★, wind-down★, walk★, then journal, phone-free start, social-free, app limit, reach out, first
   task, light
-- **fitness:** walk★, (balance★ once released), then produce, unsweetened, bedtime, wake
+- **fitness:** walk★, (balance★ once released), then produce, unsweetened. Sleep habits are not fitness habits
+  (they can still come from a sleep need)
 
 **Fitness note** (every fitness plan): "This first version only has daily habits, so it doesn't include the
 strength sessions guidelines recommend on 2+ days a week. If you train already, keep going."
 
 ## C. Age and safety [PROPOSED; VERIFY]
 1. **Under 16:** stop screen. Nothing is saved.
-2. **16–17:** teen sleep band (8+ h); never #9; food additive only; deep work ≤ 60 min. A plan keeps its band
-   until Restart.
+2. **16–17:** teen sleep band (8+ h); never #9; **no #2 or #8 until expert review**; deep work ≤ 60 min. A plan
+   keeps its band until Restart.
 3. **Precautions:**
    - joint, 65+, unknown → #7 gentle (held) → #7 not offered; walk note
    - walking difficult → no #6, #7 or #23 until reviewed; plan note: "Movement habits for limited mobility
      aren't available yet. A professional can suggest safe options."
-   - heart/BP, pregnancy → no #7; walk note
+   - heart/BP, pregnancy → no #6, #7 or #15 until expert review; plan note
    - fluid limit → no #10
    - sleep condition → no #2
    - food skipped → no #8–10

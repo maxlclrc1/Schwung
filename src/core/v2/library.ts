@@ -63,11 +63,16 @@ export const LIBRARY: HabitDef[] = [
     domain: 'sleep',
     mode: 'auto',
     release: 'candidate',
+    // Teens' body clocks run later (AAP 2014); with early school starts an earlier bedtime can mean lying awake.
+    note: 'Go to bed when you feel sleepy. If you lie awake for a long time, it’s fine to keep your usual bedtime.',
     exclude: (p) => {
       if (!sleepBelowBand(p)) return 'your sleep is already in the recommended range for your age';
+      if (isTeen(p)) return 'earlier bedtimes for 16–17-year-olds are waiting for sleep-expert review';
       if (p.sleepTrouble !== 'rarely') return 'you have trouble sleeping, and more time in bed can make that worse';
       if (hasPrecaution(p, 'sleepCondition')) return 'you have a diagnosed sleep condition';
       if (precautionsUnknown(p)) return 'precautions are unknown';
+      // The time-in-bed ceiling needs a regular wake time.
+      if (p.wake && p.wake.kind !== 'time') return 'your wake time changes, so a safe bedtime target can’t be set';
       if (p.wake?.kind === 'time' && p.inBed && bedtimeRungs(p).length < 3)
         return 'no room under the time-in-bed ceiling';
       return null;
@@ -139,9 +144,11 @@ export const LIBRARY: HabitDef[] = [
         ? 'you already walk 30+ minutes most days'
         : hasPrecaution(p, 'walkingDifficult')
           ? 'walking or standing for long is difficult for you (no reviewed alternative yet)'
-          : p.activeDays === '5p' && p.goal !== 'energy' && p.goal !== 'calm'
-            ? 'you are already active 5+ days a week'
-            : null,
+          : hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy')
+            ? 'needs individual advice from your clinician or midwife (waiting for expert review)'
+            : p.activeDays === '5p' && p.goal !== 'energy' && p.goal !== 'calm'
+              ? 'you are already active 5+ days a week'
+              : null,
     ladder: fixed([5, 10, 15, 20, 25, 30, 40, 50, 60].map((m) => `${m} min walk at a comfortable pace`)),
     start: (p) => ({ '0': 0, '1_2': 1, '3_4': 3, '5p': 3 })[p.activeDays],
     why: 'A daily walk at a comfortable pace.',
@@ -178,8 +185,14 @@ export const LIBRARY: HabitDef[] = [
     domain: 'nutrition',
     mode: 'auto',
     release: 'candidate',
-    note: 'This builds the habit. It doesn’t measure whether your diet meets guidelines.',
-    exclude: (p) => (p.produce === 'skip' ? 'you chose to skip food habits' : null),
+    note: 'This builds the habit. It doesn’t measure whether your diet meets guidelines. If counting food ever feels stressful, swap this habit.',
+    // Food habits for 16–17 wait for eating-disorder-informed review (food tracking is linked with disordered eating).
+    exclude: (p) =>
+      p.produce === 'skip'
+        ? 'you chose to skip food habits'
+        : isTeen(p)
+          ? 'food habits for 16–17-year-olds are waiting for expert review'
+          : null,
     ladder: fixed([1, 2, 3, 4, 5].map((n) => `Eat ${n} ${n === 1 ? 'portion' : 'portions'} of fruit or veg today`)),
     start: (p) => ({ '0': 0, '1_2': 1, '3_4': 3, '5p': null, skip: null })[p.produce],
     why: 'Adding fruit and veg to your day.',
@@ -191,7 +204,7 @@ export const LIBRARY: HabitDef[] = [
     mode: 'auto',
     release: 'candidate',
     // NHS advice treats low blood sugar with a sugary drink or juice, so that must always come first.
-    note: 'If you use a sugary drink or juice to treat low blood sugar, always do that. It never counts against this habit.',
+    note: 'If you use a sugary drink or juice to treat low blood sugar, always do that. It never counts against this habit. If you have diabetes, your care team’s advice comes first.',
     exclude: (p) =>
       !isAdult(p) ? 'not offered under 18' : p.produce === 'skip' ? 'you chose to skip food habits' : null,
     ladder: fixed([
@@ -279,7 +292,13 @@ export const LIBRARY: HabitDef[] = [
     domain: 'mind',
     mode: 'auto',
     release: 'candidate',
-    exclude: (p) => (has(p, 'breathing') ? 'you already breathe or meditate most days' : null),
+    note: 'Breathe gently and comfortably, without holding your breath. If you feel dizzy, light-headed or panicky, stop and breathe normally.',
+    exclude: (p) =>
+      has(p, 'breathing')
+        ? 'you already breathe or meditate most days'
+        : hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy')
+          ? 'breathing exercises with your condition are waiting for expert review'
+          : null,
     ladder: fixed([2, 3, 5, 8, 10].map((m) => `${m} min of slow breathing`)),
     start: () => 0,
     why: 'A few slow minutes to take the edge off.',
@@ -359,6 +378,7 @@ export const LIBRARY: HabitDef[] = [
     mode: 'choice',
     release: 'candidate',
     opportunityDependent: true,
+    note: 'Any short chat counts, even a quick “how’s your day?”. If it feels like too much, swap it for something else.',
     exclude: () => null,
     ladder: fixed(
       [1, 2, 3].map((n) => `Start ${n} ${n === 1 ? 'conversation' : 'conversations'} (in person or a call)`),

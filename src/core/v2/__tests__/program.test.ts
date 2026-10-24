@@ -35,7 +35,7 @@ const ok = (p: ProfileV2): Ok => {
 };
 const ids = (r: Ok) => r.picks.map((x) => x.id);
 
-/** The 12 habits the owner cleared for development testing, and nothing else. */
+/** The habits cleared for development testing: the first 12, plus the 8 unlocked by the 2026-10-24 review. */
 const CLEARED = [
   'discipline_bed',
   'sleep_wake',
@@ -49,6 +49,14 @@ const CLEARED = [
   'social_reach_out',
   'confidence_compliment',
   'mind_journal',
+  'move_walk',
+  'sleep_bedtime',
+  'sleep_no_phone_bed',
+  'mind_breathe',
+  'food_produce',
+  'food_unsweetened',
+  'food_water_meals',
+  'confidence_talk',
 ];
 
 /** Picks the first n choices that fit together, as a person tapping down the list would. */
@@ -59,27 +67,19 @@ function choose(r: Ok, n: number): string[] {
 }
 
 describe('release gate', () => {
-  it('clears exactly the 12 approved habits', () => {
+  it('clears exactly the reviewed habits', () => {
     expect([...DEV_CLEARED].sort()).toEqual([...CLEARED].sort());
   });
 
-  it('never clears a held habit or one pending review', () => {
+  it('never clears a held habit or one still pending expert review', () => {
     for (const id of ['move_balance', 'move_strength_session', 'move_seated', 'move_strength_prep']) {
       expect(DEV_CLEARED.has(id)).toBe(false);
     }
-    for (const id of [
-      'move_walk',
-      'sleep_bedtime',
-      'sleep_no_phone_bed',
-      'food_produce',
-      'food_unsweetened',
-      'food_water_meals',
-      'mind_breathe',
-      'confidence_talk',
-    ]) {
-      expect(DEV_CLEARED.has(id)).toBe(false);
-    }
     for (const id of DEV_CLEARED) expect(BY_ID[id].release).toBe('candidate');
+    // Every candidate except Strength preparation is now cleared.
+    expect(LIBRARY.filter((h) => h.release === 'candidate' && !DEV_CLEARED.has(h.id)).map((h) => h.id)).toEqual([
+      'move_strength_prep',
+    ]);
   });
 
   it('offers only cleared habits in plans, choices and swaps, across the answer space', () => {
@@ -136,20 +136,22 @@ describe('the eight established profiles through the development preview', () =>
     });
   }
 
-  it('A (16, focus): teen deep-work cap, no drinks habit, limitation names what was withheld', () => {
+  it('A (16, focus): teen deep-work cap, no drinks, no earlier bedtime, no food habit', () => {
     const r = ok(FIXTURES['A · 16, focus']);
     expect(ids(r)).toContain('focus_deepwork');
     expect(r.picks.find((x) => x.id === 'focus_deepwork')!.targets.hard).not.toMatch(/90 min/);
-    expect(ids(r)).not.toContain('food_unsweetened');
-    expect(r.limitation).toMatch(/Development preview: .*Walk.*waiting for scientific review/);
+    for (const id of ['food_unsweetened', 'food_produce', 'sleep_bedtime']) expect(ids(r)).not.toContain(id);
+    expect(r.limitation).toBeNull();
   });
 
-  it('F (67, fitness): no movement habit is invented; the plan needs a choice and says why', () => {
+  it('F (67, fitness, joint pain): a gentle walk with its safety note; strength and balance stay held', () => {
     const r = ok(FIXTURES['F · 67, fitness']);
-    expect(ids(r).some((id) => BY_ID[id].domain === 'activity')).toBe(false);
-    expect(r.choice?.required).toBeGreaterThan(0);
-    expect(r.limitation).toMatch(/Walk would suit your answers/);
-    expect(r.options.some((o) => BY_ID[o.id].domain === 'activity')).toBe(false);
+    const walk = r.picks.find((x) => x.id === 'move_walk')!;
+    expect(walk.targets.easy).toBe('5 min walk at a comfortable pace');
+    expect(walk.notes.join(' ')).toMatch(/stop if it hurts/);
+    expect(walk.forGoal).toBe(true);
+    for (const id of ['move_strength_prep', 'move_balance']) expect(ids(r)).not.toContain(id);
+    expect(r.planNotes.join(' ')).toMatch(/balance and strength activities for older adults/);
   });
 
   it('G1 (healthy, fitness, active 5+ days): the already-training copy, no strength preparation', () => {
@@ -262,15 +264,31 @@ describe('personal targets', () => {
     }
   });
 
-  it('adapts to the person: wake time, phone pull, focus reading start', () => {
+  it('adapts to the person: in-bed time, activity baseline, phone pull', () => {
     const c = FIXTURES['C · 28, energy'];
     const r = ok(c);
-    expect(r.picks.find((x) => x.id === 'sleep_wake')!.targets.easy).toBe('Up within 60 min of 07:00');
+    // In bed at 00:30, up at 07:00: earlier in 15-minute steps, all under the 9-hour time-in-bed ceiling.
+    expect(r.picks.find((x) => x.id === 'sleep_bedtime')!.targets).toEqual({
+      easy: 'In bed by 00:15',
+      medium: 'In bed by 00:00',
+      hard: 'In bed by 23:45',
+    });
+    expect(r.picks.find((x) => x.id === 'move_walk')!.targets.easy).toBe('5 min walk at a comfortable pace');
     expect(r.picks.find((x) => x.id === 'screen_app_limit')!.targets).toEqual({
       easy: 'Videos under 60 min today',
       medium: 'Videos under 45 min today',
       hard: 'Videos under 30 min today',
     });
+    const d = ok(FIXTURES['D · 35, calm']);
+    // Sleep trouble: the wind-down starts one step up.
+    expect(d.picks.find((x) => x.id === 'sleep_no_phone_bed')!.targets.easy).toBe('Phone away 30 min before bed');
+  });
+
+  it('never starts an earlier bedtime without the person’s own wake and in-bed times', () => {
+    const c = FIXTURES['C · 28, energy'];
+    expect(assemblePlan(c, [])!.some((h) => h.habitId === 'sleep_bedtime')).toBe(true);
+    expect(assemblePlan({ ...c, inBed: undefined }, [])).toBeNull();
+    expect(pendingTimeQuestion({ ...c, inBed: undefined })).toBe('bed');
   });
 
   it('teens get the teen deep-work ladder; adults the adult one', () => {
@@ -397,15 +415,16 @@ describe('V2 quiz', () => {
     expect(pendingTimeQuestion({ ...p, wake: { kind: 'varies' } })).toBeNull();
   });
 
-  it('asks W2 only after a W1 time, and only when Earlier bedtime is offered (never in the gated preview)', () => {
+  it('asks W2 only after a W1 time, and only when Earlier bedtime is offered', () => {
     const c = { ...FIXTURES['C · 28, energy'], inBed: undefined };
     // Full candidate pool: bedtime is in the plan, so W2 follows a W1 time.
     expect(pendingTimeQuestion({ ...c, wake: undefined }, null)).toBe('wake');
     expect(pendingTimeQuestion(c, null)).toBe('bed');
     expect(pendingTimeQuestion({ ...c, inBed: '23:30' }, null)).toBeNull();
     expect(pendingTimeQuestion({ ...c, wake: { kind: 'shift' } }, null)).toBeNull();
-    // Development preview: Earlier bedtime is pending review, so W2 is never needed.
-    expect(pendingTimeQuestion(c)).toBeNull();
+    // Now that Earlier bedtime is cleared, the development preview asks W2 too; teens never get it.
+    expect(pendingTimeQuestion(c)).toBe('bed');
+    expect(pendingTimeQuestion({ ...c, age: '16_17', sugary: undefined })).toBeNull();
   });
 
   it('a varies or shift answer removes wake-anchored rules from the plan', () => {

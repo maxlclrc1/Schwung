@@ -145,6 +145,9 @@ export function assemblePlan(p: ProfileV2, chosen: string[], day = 1): PlanHabit
   if (r.status !== 'ok' || r.blocked) return null;
   const required = r.choice?.required ?? 0;
   if (required > 0 ? chosen.length !== required : chosen.length > (r.choice ? 1 : 0)) return null;
+  // Earlier bedtime is only safe with the person's own wake and in-bed times (the time-in-bed ceiling).
+  const timed = p.wake?.kind === 'time' && p.inBed !== undefined;
+  if (!timed && [...r.picks.map((x) => x.id), ...chosen].includes('sleep_bedtime')) return null;
   const made: string[] = [];
   for (const id of chosen) {
     if (!canChoose(r, made, id)) return null;
