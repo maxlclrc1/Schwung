@@ -376,6 +376,42 @@ describe('swaps', () => {
   });
 });
 
+describe('Start a conversation ladder (revision 6.2)', () => {
+  const talk = BY_ID.confidence_talk;
+  const p = FIXTURES['B · 19, confidence'];
+
+  it('is one conversation a day at every level, deeper rather than more', () => {
+    expect(talk.ladder(p)).toEqual([
+      'Have one genuine conversation today, beyond basic logistics',
+      'In one conversation today, ask a follow-up question about something the other person said',
+      'Start one conversation yourself today with someone you know',
+    ]);
+    for (const rung of talk.ladder(p)) {
+      expect(rung).toMatch(/\bone\b.*conversation/);
+      expect(rung).not.toMatch(/stranger|\b[23]\b|two|three/i);
+    }
+    expect(talk.note).toMatch(/family, friends or colleagues/);
+    expect(talk.note).toMatch(/No strangers needed/);
+    expect(talk.note).toMatch(/swap it for something else/);
+  });
+
+  it('stays voluntary: choice-only, never automatic, at most one per plan', () => {
+    expect(talk.mode).toBe('choice');
+    expect(talk.opportunityDependent).toBe(true);
+    for (const x of sample(4000)) {
+      const r = previewPlan(x);
+      if (r.status !== 'ok') continue;
+      expect(ids(r)).not.toContain('confidence_talk');
+    }
+    // Offered as a choice where the plan has room, starting at Easy.
+    const confident: ProfileV2 = { ...FIXTURES['G2 · organized, discipline'], goal: 'confidence' };
+    const r = ok(confident);
+    const o = r.options.find((x) => x.id === 'confidence_talk');
+    if (o) expect(o.targets.easy).toBe('Have one genuine conversation today, beyond basic logistics');
+    expect(swapChoices(p, assemblePlan(p, [])!, 'confidence_compliment').map((x) => x.id)).toContain('confidence_talk');
+  });
+});
+
 describe('unsweetened drinks ladder', () => {
   it('never requires a sugary drink: "up to" targets, and a day with none counts', () => {
     const c = FIXTURES['C · 28, energy'];

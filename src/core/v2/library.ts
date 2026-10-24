@@ -380,11 +380,14 @@ export const LIBRARY: HabitDef[] = [
     mode: 'choice',
     release: 'candidate',
     opportunityDependent: true,
-    note: 'Any short chat counts, even a quick “how’s your day?”. If it feels like too much, swap it for something else.',
+    note: 'Everyday conversations count: family, friends or colleagues, in person or on a call. No strangers needed. If it feels like too much, swap it for something else.',
     exclude: () => null,
-    ladder: fixed(
-      [1, 2, 3].map((n) => `Start ${n} ${n === 1 ? 'conversation' : 'conversations'} (in person or a call)`),
-    ),
+    // One conversation a day at every level: it grows deeper, not more frequent (owner-approved ladder).
+    ladder: fixed([
+      'Have one genuine conversation today, beyond basic logistics',
+      'In one conversation today, ask a follow-up question about something the other person said',
+      'Start one conversation yourself today with someone you know',
+    ]),
     start: () => 0,
     why: 'Small conversations make the next one easier.',
   },

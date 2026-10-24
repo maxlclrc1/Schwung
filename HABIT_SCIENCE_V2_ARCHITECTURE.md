@@ -12,6 +12,12 @@ All scientific and safety claims remain **[VERIFY]**.
 - **[POP]** is WHO or CDC population guidance (section G). Population guidance is **not** evidence that any
   particular rung works or is universally safe.
 
+## Change log (revisions 6.1 and 6.2, owner-approved refinements)
+| Rev | Change |
+|---|---|
+| 6.1 | W1 only for habits actually in the plan (asked when such a choice is made); the two sleep questions share one screen; Unsweetened drinks ladder becomes swap 1 · up to 2 · up to 3, and a day with no sugary drinks counts |
+| 6.2 | Start a conversation (#21): one conversation a day at every level (genuine conversation beyond logistics → a follow-up question → start one yourself with someone you know). Still choice-only; no strangers needed. Public release still needs social-anxiety wording review |
+
 ## Change log (revision 5 → 6: evidence and safety review, 2026-10-24)
 Source access was search-level only; see `SCHWUNG_V2_EVIDENCE_REGISTER.md`.
 
@@ -22,7 +28,7 @@ Source access was search-level only; see `SCHWUNG_V2_EVIDENCE_REGISTER.md`.
 | 3 | **Slow breathing (#15): not offered with heart/BP or pregnancy** (pending expert review). Mandatory note: "Breathe gently and comfortably, without holding your breath. If you feel dizzy, light-headed or panicky, stop and breathe normally." | No systematic adverse-event data; light-headedness is reported in small trials |
 | 4 | **Fruit and veg (#8): not for 16–17** (pending expert review). The note adds: "If counting food ever feels stressful, swap this habit." | Food tracking is associated with disordered eating (cross-sectional) |
 | 5 | **Unsweetened drinks (#9):** the note adds "If you have diabetes, your care team's advice comes first." | ADA puts water first for drinks, but individual regimens vary |
-| 6 | **Start a conversation (#21):** note "Any short chat counts, even a quick 'how's your day?'. If it feels like too much, swap it for something else." | Voluntary; avoid pressure for socially anxious users |
+| 6 | **Start a conversation (#21):** gentle opt-out note (revision 6.2 wording: "Everyday conversations count: family, friends or colleagues, in person or on a call. No strangers needed. If it feels like too much, swap it for something else.") | Voluntary; avoid pressure for socially anxious users |
 | 7 | **Plan notes:** heart/BP or pregnancy → "Movement and breathing habits for heart conditions and pregnancy are waiting for expert review. Your clinician or midwife can advise what's right for you." Fitness and 65+ → "Guidelines also recommend balance and strength activities for older adults. Schwung's versions are still being reviewed, so they aren't included yet." Fitness, active 3+ days, no fitness habit → the approved "strong activity routine" copy | Honest gaps, no invented habits |
 | 8 | **Strength preparation (#7): not offered to people active 3+ days a week** | Owner instruction: no unnecessary strength preparation |
 | 9 | **Development gate:** #2, #4, #6, #8, #9, #10, #15 and #21 join the 12 habits already cleared. #7 stays out (pending expert review). #22, #23 and seated mobility stay held | Evidence register statuses |
@@ -110,7 +116,7 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 | 18 | `focus_top3` | First task | auto | candidate | 16+ | focus ★, discipline ★, calm · | planning routine → 1; else 0 | Write your #1 task · + 10 min on it first · + 25 · + 45 | — |
 | 19 | `social_reach_out` | Reach out | auto | candidate | 16+ | **confidence ★**, calm ·, energy · | 0 | Message or call 1/2/3 people | — |
 | 20 | `confidence_compliment` | Genuine compliment | auto | candidate | 16+ | confidence ★ | 0 | 1/2/3 genuine compliments (a message counts) | — |
-| 21 | `confidence_talk` | Start a conversation | **choice / add** | candidate | 16+ | none | 0 | 1/2/3 conversations | Opportunity-dependent (max 1 per plan) |
+| 21 | `confidence_talk` | Start a conversation | **choice / add** | candidate | 16+ | none | 0 | One conversation a day at every level: a genuine conversation beyond logistics · ask a follow-up question in one · start one yourself with someone you know (revision 6.2) | Opportunity-dependent (max 1 per plan). Note: everyday conversations with family, friends or colleagues count; no strangers needed; swap if it feels like too much. Public release needs social-anxiety wording review |
 | 22 | `move_strength_session` | Strength session | — | held | — | — | — | 2 sessions/week | Scheduled; design only (E) |
 | 23 | `move_balance` | Balance practice | auto (when released) | **held** | 50+ or walking difficulty | fitness ★ (65+), calm · | — | Product draft only, e.g. supported single-leg stands. **No target is released until reviewed** | Held |
 
