@@ -106,6 +106,34 @@ describe('fixed scenario fixtures', () => {
     if (wake) expect(wake.forGoal).toBe(false);
   });
 
+  it('reasons are one honest sentence: the person’s own answer, or what the habit is', () => {
+    for (const p of [...Object.values(FIXTURES), ...sample(500)]) {
+      const r = generatePlanV2(p);
+      if (r.status !== 'ok') continue;
+      for (const x of r.picks) {
+        expect(x.reason).not.toMatch(/Picked for/);
+        expect(x.reason.length).toBeGreaterThan(0);
+        // At most two sentences (a need line can carry a "Screen Time" hint).
+        expect(x.reason.split(/(?<=\.)\s/).length).toBeLessThanOrEqual(2);
+      }
+    }
+    const c = ok(FIXTURES['C · 28, energy']);
+    expect(c.picks.find((x) => x.id === 'food_produce')!.reason).toBe('You eat hardly any fruit and veg.');
+    expect(c.picks.find((x) => x.id === 'move_walk')!.reason).toBe('You’re not active on most days yet.');
+  });
+
+  it('fitness notes never stack generic copy on a precaution that already explains the gap', () => {
+    const fit: ProfileV2 = { ...FIXTURES['C · 28, energy'], goal: 'fitness' };
+    for (const c of ['heart', 'pregnancy', 'walkingDifficult'] as const) {
+      const r = ok({ ...fit, precautions: [c] });
+      expect(r.planNotes).toHaveLength(1);
+      expect(r.planNotes.join(' ')).not.toMatch(/None of our current fitness habits|strength sessions/);
+    }
+    // Inactive people aren't told "if you train already"; people active 1–2 days are.
+    expect(ok({ ...fit, activeDays: '0' }).planNotes.join(' ')).not.toMatch(/train already/);
+    expect(ok({ ...fit, activeDays: '1_2' }).planNotes.join(' ')).toMatch(/train already/);
+  });
+
   it('fitness plans never present sleep habits as fitness habits', () => {
     expect([...GOALS.fitness.core, ...GOALS.fitness.support]).not.toContain('sleep_wake');
     expect([...GOALS.fitness.core, ...GOALS.fitness.support]).not.toContain('sleep_bedtime');

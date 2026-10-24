@@ -140,15 +140,6 @@ const NEED_WORDS: Record<NeedDomain, (p: ProfileV2) => string> = {
         }.`,
 };
 
-const GOAL_TIE: Record<ProfileV2['goal'], string> = {
-  energy: 'Picked for more energy.',
-  focus: 'Picked for better focus.',
-  discipline: 'Picked for more discipline.',
-  confidence: 'Picked for more confidence.',
-  calm: 'Picked for less stress.',
-  fitness: 'Picked for getting in shape.',
-};
-
 export const UNDER_16_MESSAGE = 'Schwung is made for people 16 and older. We hope you’ll come back when you’re 16.';
 
 const RULE_NOTE = (n: number) => `With ${n} habits, a day counts when all ${n} are done. With 5, one can slip.`;
@@ -240,7 +231,8 @@ export function generatePlanV2(p: ProfileV2, gate?: Gate): PlanResultV2 {
         ? 'You already do this, so it’s an easy first check.'
         : '';
     const answer = d && need[d] >= 2 ? NEED_WORDS[d](p) : '';
-    const reason = [lead || answer, lead ? '' : h.why, forGoal ? GOAL_TIE[p.goal] : ''].filter(Boolean).join(' ');
+    // One sentence: what the person told us, or else what the habit is. The plan screen tags goal habits itself.
+    const reason = lead || answer || h.why;
     return {
       id: h.id,
       title: h.title,
@@ -322,7 +314,12 @@ function planNotes(p: ProfileV2, plan: HabitDef[], gate: Gate): string[] {
   const notes: string[] = [];
   const fitnessCore = plan.some((h) => GOALS.fitness.core.includes(h.id));
   const active = p.activeDays === '3_4' || p.activeDays === '5p';
-  if (p.goal === 'fitness') notes.push(!fitnessCore && active ? ACTIVE_NOTE : FITNESS_NOTE);
+  // A precaution note already explains why movement habits are missing; don't stack generic fitness copy on it.
+  const movementExplained =
+    hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy') || hasPrecaution(p, 'walkingDifficult');
+  if (p.goal === 'fitness' && !fitnessCore && active) notes.push(ACTIVE_NOTE);
+  else if (p.goal === 'fitness' && !movementExplained)
+    notes.push(p.activeDays === '0' ? FITNESS_NOTE : `${FITNESS_NOTE} If you train already, keep going.`);
   if (precautionsUnknown(p)) notes.push('If you have a health condition, check these with a professional.');
   if (p.sleepTrouble === 'most')
     notes.push('Trouble sleeping on most nights is worth mentioning to a doctor or another health professional.');
@@ -336,7 +333,7 @@ function planNotes(p: ProfileV2, plan: HabitDef[], gate: Gate): string[] {
     notes.push(
       'Guidelines also recommend balance and strength activities for older adults. Schwung’s versions are still being reviewed, so they aren’t included yet.',
     );
-  if (p.goal === 'fitness' && !fitnessCore && !active) {
+  if (p.goal === 'fitness' && !fitnessCore && !active && !movementExplained) {
     const withheld = GOALS.fitness.core.some(
       (id) => exclusion(BY_ID[id], p) === null && exclusion(BY_ID[id], p, gate) !== null,
     );

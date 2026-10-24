@@ -41,8 +41,12 @@ export default function PlanV2() {
   const { picks, choice, options, planNotes, limitation, blocked } = plan;
   const required = choice?.required ?? 0;
   const total = picks.length + chosen.length;
+  // The plan as it will start: a required choice counts toward it from the start.
+  const planned = picks.length + Math.max(required, chosen.length);
   const ready = !blocked && (required === 0 || chosen.length === required);
-  const example = picks.find((p) => p.source !== 'foundation') ?? picks[0];
+  // Prefer a habit the person will actually grow into; a plan of only the foundation shows their first choice.
+  const firstChoice = options.find((o) => o.id === chosen[0]);
+  const example = picks.find((p) => p.source !== 'foundation') ?? firstChoice ?? picks[0];
 
   const toggle = (id: string) => {
     haptic.tap();
@@ -71,7 +75,7 @@ export default function PlanV2() {
             Development preview · Built for {GOAL_LABEL[profile.goal]}
           </T>
           <T v="title" accessibilityRole="header">
-            {picks.length} {picks.length === 1 ? 'habit' : 'habits'}. Starting where you are.
+            {planned} habits. Starting where you are.
           </T>
           <T color={c.textDim}>
             Each one starts at the easy end of what you do now and grows with you. Swap, edit, or add habits anytime
