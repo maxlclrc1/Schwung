@@ -1,4 +1,9 @@
+import { CHECK_BLOCKED_MESSAGE as CHECK_BLOCKED, checkOutcome, EXERCISE_LADDERS, exerciseAges } from './exercise';
 import type { GoalV2, HabitSpecV2, ProfileV2 } from './types';
+
+/** Why an exercise prototype isn't offered when health answers mean unsupervised exercise needs individual advice. */
+const CANT_INDIVIDUALISE =
+  'Schwung can’t tailor exercises safely with these health answers; a health professional can suggest what suits you';
 
 /*
  * Library V2 (HABIT_SCIENCE_V2_ARCHITECTURE.md, revision 5, section B).
@@ -154,30 +159,25 @@ export const LIBRARY: HabitDef[] = [
     why: 'A daily walk at a comfortable pace.',
   },
   {
+    // Exercise prototype A (development-only, see exercise.ts): never in normal plans, choices or swaps.
     id: 'move_strength_prep',
-    title: 'Strength preparation',
+    title: 'Beginner strength preparation',
     domain: 'activity',
-    mode: 'choice',
-    release: 'candidate',
-    note: 'Practice for a strength routine, not a full strength workout. Guidelines recommend strength work on 2+ days a week.',
+    mode: 'auto',
+    release: 'prototype',
     exclude: (p) => {
+      if (precautionsUnknown(p)) return CANT_INDIVIDUALISE;
       if (hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy') || hasPrecaution(p, 'walkingDifficult'))
-        return 'not suitable with your precautions';
-      // These would need the gentle variant, which is held until reviewed.
-      if (p.age === '65p' || hasPrecaution(p, 'joint') || precautionsUnknown(p))
-        return 'the gentle variant needed here is not reviewed yet';
-      // Never recommend preparation to people who are already active most days (they may already train).
+        return CANT_INDIVIDUALISE;
+      if (!exerciseAges.beginner(p)) return 'for 65 and over, the gentle version is the one designed for you';
+      if (hasPrecaution(p, 'joint')) return 'with joint discomfort, the gentle version is the one designed for you';
+      // Never trivial beginner exercises for people who already train most days.
       if (p.activeDays === '3_4' || p.activeDays === '5p') return 'you are already active most days';
       return null;
     },
-    ladder: fixed([
-      '1 set of 1 strength move',
-      '1 set of 2 strength moves',
-      '1 set of 3 strength moves',
-      '2 sets of 3 strength moves',
-    ]),
+    ladder: () => [...EXERCISE_LADDERS.move_strength_prep],
     start: () => 0,
-    why: 'A first step toward a strength routine.',
+    why: 'Three simple strength moves, two days a week, at your own pace.',
   },
   {
     id: 'food_produce',
@@ -404,15 +404,58 @@ export const LIBRARY: HabitDef[] = [
     why: '',
   },
   {
+    // Exercise prototype C (development-only): needs the safety check before it's added.
     id: 'move_balance',
-    title: 'Balance practice',
+    title: 'Supported balance practice',
     domain: 'activity',
-    mode: 'auto',
-    release: 'held', // no target is released until reviewed
-    exclude: () => 'balance targets aren’t reviewed yet',
-    ladder: fixed([]),
-    start: () => null,
-    why: '',
+    mode: 'choice',
+    release: 'prototype',
+    exclude: (p) => {
+      if (precautionsUnknown(p) || hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy'))
+        return CANT_INDIVIDUALISE;
+      if (hasPrecaution(p, 'walkingDifficult')) return CANT_INDIVIDUALISE;
+      if (!exerciseAges.older(p)) return 'designed for older adults';
+      return checkOutcome('move_balance', p.exerciseCheck) === 'blocked' ? CHECK_BLOCKED : null;
+    },
+    ladder: () => [...EXERCISE_LADDERS.move_balance],
+    start: () => 0,
+    why: 'Steady, supported standing practice, three days a week.',
+  },
+  {
+    // Exercise prototype B (development-only): needs the safety check before it's added.
+    id: 'move_strength_gentle',
+    title: 'Gentle strength preparation',
+    domain: 'activity',
+    mode: 'choice',
+    release: 'prototype',
+    exclude: (p) => {
+      if (precautionsUnknown(p) || hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy'))
+        return CANT_INDIVIDUALISE;
+      if (hasPrecaution(p, 'walkingDifficult')) return CANT_INDIVIDUALISE;
+      if (!exerciseAges.older(p) && !hasPrecaution(p, 'joint')) return 'designed for older adults or joint discomfort';
+      if (p.activeDays === '3_4' || p.activeDays === '5p') return 'you are already active most days';
+      return checkOutcome('move_strength_gentle', p.exerciseCheck) === 'blocked' ? CHECK_BLOCKED : null;
+    },
+    ladder: () => [...EXERCISE_LADDERS.move_strength_gentle],
+    start: () => 0,
+    why: 'Three supported strength moves, two days a week, kept comfortable.',
+  },
+  {
+    // Exercise prototype D (development-only): daily, with rest whenever needed; needs the safety check.
+    id: 'move_seated',
+    title: 'Seated mobility',
+    domain: 'activity',
+    mode: 'choice',
+    release: 'prototype',
+    exclude: (p) => {
+      if (precautionsUnknown(p) || hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy'))
+        return CANT_INDIVIDUALISE;
+      if (!hasPrecaution(p, 'walkingDifficult')) return 'designed for people who find walking or standing difficult';
+      return checkOutcome('move_seated', p.exerciseCheck) === 'blocked' ? CHECK_BLOCKED : null;
+    },
+    ladder: () => [...EXERCISE_LADDERS.move_seated],
+    start: () => 0,
+    why: 'Gentle movements sitting down, at your own pace.',
   },
 ];
 
@@ -469,10 +512,10 @@ export const GOALS: Record<GoalV2, { core: string[]; support: string[]; suggest:
     suggest: [],
   },
   fitness: {
-    core: ['move_walk', 'move_balance'],
+    core: ['move_walk', 'move_strength_prep', 'move_balance'],
     // Sleep habits are not presented as fitness habits; they can still come from a sleep need.
     support: ['food_produce', 'food_unsweetened'],
-    suggest: ['move_strength_prep'],
+    suggest: ['move_strength_gentle', 'move_seated'],
   },
 };
 

@@ -77,9 +77,28 @@ export function rescheduled(s: Schedule, days: Weekday[], today: number, addedOn
  * history), so editing the days never rewrites past sessions. Daily habits are always due (unchanged).
  */
 export function wasDueOn(h: PlanHabit, logs: Record<string, DayLog>, startKey: string, day: number): boolean {
-  if (!h.schedule) return true;
   const log = logs[dateForDay(startKey, day)];
+  // A rested exercise session (daily or scheduled) was never due: not a miss, and it doesn't break a run.
+  if (log?.rested?.includes(h.habitId)) return false;
+  if (!h.schedule) return true;
   return log ? log.planned.includes(h.habitId) : isDueOn(h, startKey, day);
+}
+
+/**
+ * The habit ids planned for a day: those due that day and not rested, plus any already completed that day and
+ * still in the plan (so changing a schedule never takes away a session already done). For daily plans with no
+ * rest this is the whole plan.
+ */
+export function plannedForDay(
+  plan: PlanHabit[],
+  startKey: string,
+  day: number,
+  completed: string[] = [],
+  rested: string[] = [],
+): string[] {
+  return plan
+    .filter((h) => completed.includes(h.habitId) || (isDueOn(h, startKey, day) && !rested.includes(h.habitId)))
+    .map((h) => h.habitId);
 }
 
 /** The habits due on a program day, in plan order. */

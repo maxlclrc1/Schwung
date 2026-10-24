@@ -11,6 +11,7 @@ import { MIN_HABITS } from '../../core/plan';
 import { completionRun } from '../../core/progression';
 import {
   coversEveryWeekday,
+  isDueOn,
   nextSessionLabel,
   SESSIONS_PER_WEEK,
   validDays,
@@ -19,6 +20,9 @@ import {
   WEEKDAYS,
 } from '../../core/schedule';
 import type { PlanHabit, Weekday } from '../../core/types';
+import { dateForDay } from '../../core/dates';
+import { isExercise, validExerciseDays, type ExerciseId } from '../../core/v2/exercise';
+import { ExerciseGuide } from '../../components/Exercise';
 import { haptic } from '../../lib/haptics';
 import { currentDay, useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
@@ -148,6 +152,8 @@ export default function HabitDetail() {
 
           {habit.schedule ? <ScheduleEditor habit={habit} startKey={startedAt} /> : null}
 
+          {isExercise(habit.habitId) ? <ExerciseExtras habitId={habit.habitId} /> : null}
+
           <Card style={styles.statRow}>
             <T color={c.textDim}>Current run</T>
             <T v="bodyStrong">
@@ -180,6 +186,45 @@ export default function HabitDetail() {
   );
 }
 
+/** Why these days don't fit an exercise habit's rule, or null when they do. */
+function exerciseDayRule(habitId: string, days: Weekday[]): string | null {
+  if (validExerciseDays(habitId, days)) return null;
+  if (habitId === 'move_balance') return 'Choose 3 days for balance practice.';
+  return 'Choose 2 days that aren’t next to each other, so there’s a rest day between sessions.';
+}
+
+/** For exercise habits: how to do it, the safety lines, and resting today without it counting as missed. */
+function ExerciseExtras({ habitId }: { habitId: ExerciseId }) {
+  const { c } = useTheme();
+  const startedAt = useApp((s) => s.startedAt);
+  const logs = useApp((s) => s.logs);
+  const plan = useApp((s) => s.plan);
+  const day = currentDay();
+  const h = plan.find((x) => x.habitId === habitId);
+  const rested = !!startedAt && !!logs[dateForDay(startedAt, day)]?.rested?.includes(habitId);
+  const dueToday = !!startedAt && !!h && isDueOn(h, startedAt, day);
+  return (
+    <View style={{ gap: space.md }}>
+      <ExerciseGuide id={habitId} />
+      {dueToday ? (
+        <View style={{ gap: space.xs }}>
+          <Button
+            label={rested ? 'Do it today after all' : 'Rest today'}
+            kind="secondary"
+            onPress={() => {
+              haptic.tap();
+              useApp.getState().restToday(habitId, !rested);
+            }}
+          />
+          <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
+            Feeling sore, tired or unwell? Resting is fine and never counts as missed.
+          </T>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 /** Which weekdays a scheduled habit is due (2–3), and when the next session is. */
 function ScheduleEditor({ habit, startKey }: { habit: PlanHabit; startKey: string }) {
   const { c } = useTheme();
@@ -195,6 +240,11 @@ function ScheduleEditor({ habit, startKey }: { habit: PlanHabit; startKey: strin
     setDraft(days);
     if (!validDays(days)) {
       setMessage(`Choose ${SESSIONS_PER_WEEK.min} or ${SESSIONS_PER_WEEK.max} days.`);
+      return;
+    }
+    const rule = exerciseDayRule(habit.habitId, days);
+    if (rule) {
+      setMessage(rule);
       return;
     }
     if (useApp.getState().setSchedule(habit.habitId, days)) setMessage(null);

@@ -17,8 +17,10 @@ export const MILESTONES = [1, 7, 21, 44, 66] as const;
  */
 export const ACCEPT_ONLY_LEVEL_UPS: ReadonlySet<string> = new Set([
   'move_strength_prep',
+  'move_strength_gentle',
   'move_strength_session',
   'move_balance',
+  'move_seated',
 ]);
 
 export type Logs = Record<string, DayLog>;

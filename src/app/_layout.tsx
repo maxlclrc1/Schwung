@@ -93,6 +93,8 @@ export default function RootLayout() {
           <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
+          {/* Development builds only (the screen redirects away in release builds). */}
+          <Stack.Screen name="dev/exercise" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen
             name="ceremony"
             options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}

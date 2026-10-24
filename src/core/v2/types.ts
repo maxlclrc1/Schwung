@@ -16,6 +16,11 @@ export type Routine = 'reading' | 'breathing' | 'journaling' | 'planning' | 'wal
 export type Precaution = 'joint' | 'walkingDifficult' | 'heart' | 'pregnancy' | 'fluidLimit' | 'sleepCondition';
 export type Wake = { kind: 'time'; time: string } | { kind: 'varies' } | { kind: 'shift' };
 
+/** Answers to the short exercise safety check (asked before an exercise prototype, never in the main quiz). */
+export type CheckAnswer = 'yes' | 'no' | 'unsure';
+export type ExerciseCheckKey = 'standUnaided' | 'fallsOrUnsteady' | 'dizziness' | 'recentSurgery' | 'clinicianLimit';
+export type ExerciseCheck = Partial<Record<ExerciseCheckKey, CheckAnswer>>;
+
 export type ProfileV2 = {
   age: AgeBand;
   goal: GoalV2;
@@ -35,12 +40,18 @@ export type ProfileV2 = {
   wake?: Wake;
   /** W2 (HH:MM, getting into bed), when asked. */
   inBed?: string;
+  /** The exercise safety check, once answered (development prototypes only). */
+  exerciseCheck?: ExerciseCheck;
 };
 
 export type Domain = 'foundation' | 'sleep' | 'activity' | 'nutrition' | 'digital' | 'focus' | 'mind' | 'social';
 export type NeedDomain = 'sleep' | 'activity' | 'nutrition' | 'digital';
 export type Mode = 'foundation' | 'auto' | 'choice' | 'add';
-export type Release = 'candidate' | 'held';
+/**
+ * candidate: may be used (subject to the release gate); held: never used; prototype: a development-only exercise
+ * habit, usable only when a gate names it explicitly (the Exercise Preview), never in normal plans or swaps.
+ */
+export type Release = 'candidate' | 'held' | 'prototype';
 
 export type HabitSpecV2 = {
   id: string;
