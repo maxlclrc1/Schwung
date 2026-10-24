@@ -471,4 +471,4 @@ export const GOALS: Record<GoalV2, { core: string[]; support: string[]; suggest:
 };
 
 export const FITNESS_NOTE =
-  'This first version only has daily habits, so it doesn’t include the strength sessions guidelines recommend on 2+ days a week. If you train already, keep going.';
+  'This first version only has daily habits, so it doesn’t include the strength sessions guidelines recommend on 2+ days a week.';

@@ -125,8 +125,13 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 - **fitness:** walk★, (balance★ once released), then produce, unsweetened. Sleep habits are not fitness habits
   (they can still come from a sleep need)
 
-**Fitness note** (every fitness plan): "This first version only has daily habits, so it doesn't include the
-strength sessions guidelines recommend on 2+ days a week. If you train already, keep going."
+**Fitness note** (fitness plans, unless a heart, pregnancy or mobility note already explains the gap, or the
+person is active 3+ days with no fitness habit, who get the "strong activity routine" copy instead): "This first
+version only has daily habits, so it doesn't include the strength sessions guidelines recommend on 2+ days a
+week." People active 1+ days also see "If you train already, keep going."
+
+**Reasons** (plan screen): one sentence, either the person's own answer for a need of 2 or more, or what the
+habit is. Goal habits are tagged "For your goal" by the screen.
 
 ## C. Age and safety [PROPOSED; VERIFY]
 1. **Under 16:** stop screen. Nothing is saved.

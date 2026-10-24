@@ -283,6 +283,21 @@ describe('V2 swaps', () => {
   });
 });
 
+describe('removing habits', () => {
+  it('stops at the three-habit minimum and keeps history', () => {
+    startV2(C);
+    s().toggleHabit(1, s().plan[4].habitId);
+    const logs = JSON.parse(JSON.stringify(s().logs));
+    expect(s().removeHabit(s().plan[4].habitId)).toBe(true);
+    expect(s().removeHabit(s().plan[3].habitId)).toBe(true);
+    expect(s().plan).toHaveLength(3);
+    expect(s().removeHabit(s().plan[2].habitId)).toBe(false);
+    expect(s().plan).toHaveLength(3);
+    // The day's log drops the removed habit from today's plan, nothing else.
+    expect(Object.keys(s().logs)).toEqual(Object.keys(logs));
+  });
+});
+
 describe('persistence', () => {
   it('a V2 program survives an app restart exactly', async () => {
     startV2(C);
