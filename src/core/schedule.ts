@@ -1,5 +1,5 @@
 import { dateForDay } from './dates';
-import type { PlanHabit, Schedule, Weekday } from './types';
+import type { DayLog, PlanHabit, Schedule, Weekday } from './types';
 
 /*
  * Scheduled habits: a habit due on chosen weekdays instead of every day (development-only foundation, see
@@ -48,6 +48,17 @@ export function isScheduled(h: PlanHabit): boolean {
 /** Whether a habit is due on a program day. Daily habits are always due. */
 export function isDueOn(h: PlanHabit, startKey: string, day: number): boolean {
   return !h.schedule || h.schedule.days.includes(weekdayOfDay(startKey, day));
+}
+
+/**
+ * Whether a habit was due on a day, by that day's own record: a scheduled habit's past days are judged by what
+ * was actually planned then (its log), not by today's schedule, so editing the days never rewrites past
+ * sessions. Days without a log fall back to the current schedule. Daily habits are always due (unchanged).
+ */
+export function wasDueOn(h: PlanHabit, logs: Record<string, DayLog>, startKey: string, day: number): boolean {
+  if (!h.schedule) return true;
+  const log = logs[dateForDay(startKey, day)];
+  return log ? log.planned.includes(h.habitId) : isDueOn(h, startKey, day);
 }
 
 /** The habits due on a program day, in plan order. */

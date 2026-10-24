@@ -1,6 +1,6 @@
 import { isCustom, levelDown, levelUp } from './habits';
 import { dateForDay, PROGRAM_DAYS } from './dates';
-import { isDueOn } from './schedule';
+import { wasDueOn } from './schedule';
 import type { DayLog, Level, PlanHabit } from './types';
 
 export const XP_PER_HABIT = 10;
@@ -11,6 +11,15 @@ export const LEVEL_UP_RUN = 7;
 export const STEP_DOWN_MISSES = 3;
 export const PHASE_START = { 2: 22, 3: 45 } as const;
 export const MILESTONES = [1, 7, 21, 44, 66] as const;
+/**
+ * Habits whose level rises only when the person accepts an early level-up offer, never at Day 22 or Day 45,
+ * whether they're scheduled or daily (owner decision for strength and balance). None is active yet.
+ */
+export const ACCEPT_ONLY_LEVEL_UPS: ReadonlySet<string> = new Set([
+  'move_strength_prep',
+  'move_strength_session',
+  'move_balance',
+]);
 
 export type Logs = Record<string, DayLog>;
 
@@ -106,7 +115,7 @@ export function completionRun(h: PlanHabit, logs: Logs, startKey: string, today:
   let d = completedOn(logs, startKey, h.habitId, today) ? today : today - 1;
   let run = 0;
   for (; d > h.levelSince && d >= h.addedOnDay && d >= 1; d--) {
-    if (!isDueOn(h, startKey, d)) continue;
+    if (!wasDueOn(h, logs, startKey, d)) continue;
     if (!completedOn(logs, startKey, h.habitId, d)) break;
     run++;
   }
@@ -157,8 +166,12 @@ export function reconcile(input: ReconcileInput): ReconcileResult {
     const phase = appliedPhase as 2 | 3;
     const start = PHASE_START[phase];
     plan = plan.map((h) =>
-      // A scheduled habit only rises with the phase when that was explicitly approved for it.
-      isCustom(h) || h.addedOnDay >= start || (h.schedule && h.schedule.phaseLevelUps !== true)
+      // Strength and balance never rise with the phase (owner decision); a scheduled habit only does when that
+      // was explicitly approved for it.
+      isCustom(h) ||
+      h.addedOnDay >= start ||
+      ACCEPT_ONLY_LEVEL_UPS.has(h.habitId) ||
+      (h.schedule && h.schedule.phaseLevelUps !== true)
         ? h
         : { ...h, level: levelUp(h.level), levelSince: Math.max(h.levelSince, start - 1) },
     );
@@ -171,7 +184,7 @@ export function reconcile(input: ReconcileInput): ReconcileResult {
     if (isCustom(h) || h.level === 'easy') return h;
     let misses = 0;
     for (let d = lastFinal; d > h.levelSince && d >= h.addedOnDay && d >= 1; d--) {
-      if (!isDueOn(h, startKey, d)) continue; // a rest day is never a miss
+      if (!wasDueOn(h, logs, startKey, d)) continue; // a rest day is never a miss
       if (completedOn(logs, startKey, h.habitId, d)) break;
       misses++;
     }

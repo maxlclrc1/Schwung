@@ -1,4 +1,4 @@
-import { validSchedule } from '../core/schedule';
+import { validDays, validSchedule } from '../core/schedule';
 import { repairSpec } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
 import type { PlanHabit } from '../core/types';
@@ -31,10 +31,13 @@ export function sanitize(s: Saved): Saved {
   if (out.programVersion === 2 && Array.isArray(out.plan)) {
     out.plan = (out.plan as PlanHabit[]).map((h) => repairSpec(profile, h));
   }
-  // A damaged schedule falls back to daily (always due), which never hides a habit or loses history.
+  // A damaged schedule: valid days are kept (a bad phase flag is dropped, which means no automatic Day 22/45
+  // level-up); otherwise it falls back to daily (always due), which never hides a habit or loses history.
   if (Array.isArray(out.plan)) {
     out.plan = (out.plan as PlanHabit[]).map((h) => {
       if (h.schedule === undefined || validSchedule(h.schedule)) return h;
+      const days = (h.schedule as { days?: unknown }).days;
+      if (validDays(days)) return { ...h, schedule: { days } };
       const rest = { ...h };
       delete rest.schedule;
       return rest;

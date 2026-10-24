@@ -14,7 +14,7 @@ import { haptic } from '../lib/haptics';
 import { v2PreviewEnabled, V2_PREVIEW_FROM_ENV } from '../lib/flags';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { currentDay, exportData, useApp } from '../store/useApp';
-import type { ThemePreference } from '../core/types';
+import type { ThemePreference, Weekday } from '../core/types';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 
@@ -141,6 +141,10 @@ function DevTools() {
   const programVersion = useApp((s) => s.programVersion);
   const v2 = v2PreviewEnabled(v2Switch);
   const jumpTo = (target: number) => setOffset(offset + (target - day));
+  const addTestSession = (days: Weekday[]) => {
+    const id = useApp.getState().addDevScheduledHabit(days);
+    if (id) router.push(`/habit/${id}`);
+  };
   const shift = (n: number) => setOffset(offset + n);
 
   return (
@@ -163,12 +167,10 @@ function DevTools() {
       </View>
       {startedAt ? (
         <View style={styles.devRow}>
-          {/* Synthetic scheduled habits for testing the scheduler: not recommendations, not exercises. */}
-          <DevButton
-            label="+ Test session Mon/Wed/Fri"
-            onPress={() => useApp.getState().addDevScheduledHabit([1, 3, 5])}
-          />
-          <DevButton label="+ Test session Tue/Thu" onPress={() => useApp.getState().addDevScheduledHabit([2, 4])} />
+          {/* Synthetic scheduled habits for testing the scheduler: not recommendations, not exercises. Each opens
+              straight away so its weekdays can be confirmed or changed (owner decision 6). */}
+          <DevButton label="+ Test session Mon/Wed/Fri" onPress={() => addTestSession([1, 3, 5])} />
+          <DevButton label="+ Test session Tue/Thu" onPress={() => addTestSession([2, 4])} />
         </View>
       ) : null}
       <View style={styles.devRow}>

@@ -297,6 +297,31 @@ describe('persistence and compatibility', () => {
     expect(out[2].level).toBe('medium');
   });
 
+  it('a damaged phase flag keeps the valid days and never turns on automatic level-ups', () => {
+    const base: PlanHabit = { habitId: 'devsched_y', level: 'easy', addedOnDay: 1, levelSince: 0 };
+    const out = migrateSaved({ plan: [{ ...base, schedule: { days: [2, 4], phaseLevelUps: 'yes' } }] }, 2)
+      .plan as PlanHabit[];
+    expect(out[0].schedule).toEqual({ days: [2, 4] });
+  });
+
+  it('editing a schedule mid-program keeps the run, the level and every past log', () => {
+    const id = setup();
+    s().setLevel(id, 'medium');
+    let d = 1;
+    for (; d <= 12; d++) {
+      at(d);
+      if (isDueOn(sched(id), s().startedAt!, d)) s().toggleHabit(d, id);
+    }
+    const history = JSON.parse(JSON.stringify(s().logs));
+    const others = ([0, 1, 2, 3, 4, 5, 6] as Weekday[]).filter((w) => !sched(id).schedule!.days.includes(w));
+    expect(s().setSchedule(id, [others[0], others[1]])).toBe(true);
+    at(13);
+    s().reconcileNow(false);
+    expect(sched(id).level).toBe('medium');
+    expect(s().notices.some((n) => n.kind === 'stepDown')).toBe(false);
+    for (const [date, entry] of Object.entries(history)) expect(s().logs[date]).toEqual(entry);
+  });
+
   it('the conversation habit is called Meaningful conversation for new plans and swaps', () => {
     s().setDevV2Preview(true);
     s().setProfile(FIXTURES['B · 19, confidence']);
