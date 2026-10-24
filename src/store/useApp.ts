@@ -4,11 +4,12 @@ import { buildPlan, MIN_HABITS, toPlan } from '../core/plan';
 import { getHabit, levelUp } from '../core/habits';
 import { dateForDay, dayNumber, toDateKey } from '../core/dates';
 import { MILESTONES, phaseLevel, phaseOf, reconcile } from '../core/progression';
-import type { Answers, DayLog, Level, Notice, PlanHabit, ThemePreference } from '../core/types';
+import type { Answers, DayLog, Level, Notice, PlanHabit, ThemePreference, Weekday } from '../core/types';
 import { assemblePlan, swappedHabit } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
 import { v2PreviewEnabled } from '../lib/flags';
 import { migrateSaved, sanitize, STORAGE_VERSION } from './migrate';
+import { coversEveryWeekday, dueOn, validDays } from '../core/schedule';
 import { debouncedStorage } from './storage';
 
 export type AppData = {
@@ -61,6 +62,10 @@ type Actions = {
   startProgramV2: (chosen: string[]) => boolean;
   swapHabitV2: (oldId: string, newId: string) => boolean;
   setDevV2Preview: (on: boolean) => void;
+  /** Changes the weekdays a scheduled habit is due (2–3 days; every weekday must keep a due habit). */
+  setSchedule: (habitId: string, days: Weekday[]) => boolean;
+  /** Development builds only: adds a synthetic scheduled habit to test the scheduler. Never a recommendation. */
+  addDevScheduledHabit: (days: Weekday[], phaseLevelUps?: boolean) => string | null;
 };
 
 export type AppState = AppData & Actions;
@@ -94,6 +99,15 @@ export function currentDay(s: Pick<AppData, 'startedAt' | 'devDayOffset'> = useA
   return Math.max(1, dayNumber(s.startedAt, toDateKey(appNow(s.devDayOffset))));
 }
 
+/**
+ * The habit ids planned for a day: those due that day, plus any already completed that day and still in the plan
+ * (so changing a schedule never takes away a session already done). For daily plans this is the whole plan.
+ */
+function plannedFor(plan: PlanHabit[], startKey: string, day: number, completed: string[] = []): string[] {
+  const due = new Set(dueOn(plan, startKey, day).map((h) => h.habitId));
+  return plan.filter((h) => due.has(h.habitId) || completed.includes(h.habitId)).map((h) => h.habitId);
+}
+
 const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
 export const useApp = create<AppState>()(
@@ -107,7 +121,7 @@ export const useApp = create<AppState>()(
         const date = dateForDay(startedAt, day);
         const log = logs[date];
         if (!log) return logs;
-        const planned = plan.map((p) => p.habitId);
+        const planned = plannedFor(plan, startedAt, day, log.completed);
         return { ...logs, [date]: { ...log, planned, completed: log.completed.filter((id) => planned.includes(id)) } };
       };
 
@@ -165,8 +179,9 @@ export const useApp = create<AppState>()(
           const prev = logs[date];
           const completed = prev?.completed ?? [];
           const next = completed.includes(habitId) ? completed.filter((id) => id !== habitId) : [...completed, habitId];
-          // Yesterday keeps the plan it had; only a brand-new log takes today's plan.
-          const planned = day === currentDay(get()) || !prev ? plan.map((p) => p.habitId) : prev.planned;
+          // Yesterday keeps the plan it had; only a brand-new log takes the habits due that day.
+          const planned =
+            day === currentDay(get()) || !prev ? plannedFor(plan, startedAt, day, completed) : prev.planned;
           set({ logs: { ...logs, [date]: { day, date, completed: next, planned } } });
         },
 
@@ -234,6 +249,8 @@ export const useApp = create<AppState>()(
 
         removeHabit: (habitId) => {
           if (get().plan.length <= MIN_HABITS) return false;
+          // Never leave a weekday with nothing due (see coversEveryWeekday).
+          if (!coversEveryWeekday(get().plan.filter((h) => h.habitId !== habitId))) return false;
           updatePlan((plan) => plan.filter((h) => h.habitId !== habitId));
           return true;
         },
@@ -277,6 +294,47 @@ export const useApp = create<AppState>()(
         setProfile: (profile) => set({ profile: profile?.age === 'u16' ? null : profile }),
 
         setDevV2Preview: (on) => set({ devV2Preview: __DEV__ ? on : false }),
+
+        setSchedule: (habitId, days) => {
+          const { plan } = get();
+          const h = plan.find((x) => x.habitId === habitId);
+          if (!h?.schedule || !validDays(days)) return false;
+          const next = plan.map((x) =>
+            x.habitId === habitId ? { ...x, schedule: { ...x.schedule!, days: [...days] } } : x,
+          );
+          if (!coversEveryWeekday(next)) return false;
+          // Past logs keep the lists they had; today's is re-synced (a session already done today stays counted).
+          updatePlan(() => next);
+          return true;
+        },
+
+        addDevScheduledHabit: (days, phaseLevelUps) => {
+          if (!__DEV__ || !get().startedAt || !validDays(days)) return null;
+          const day = currentDay(get());
+          const habitId = `devsched_${uid()}`;
+          updatePlan((plan) => [
+            ...plan,
+            {
+              habitId,
+              level: 'easy',
+              addedOnDay: day,
+              levelSince: day - 1,
+              spec: {
+                title: 'Test session (dev)',
+                icon: 'flask',
+                why: 'A synthetic habit for testing scheduled days. Not a recommendation, and not an exercise.',
+                targets: {
+                  easy: 'Test session · level 1',
+                  medium: 'Test session · level 2',
+                  hard: 'Test session · level 3',
+                },
+                notes: ['Development test only.'],
+              },
+              schedule: { days: [...days], ...(phaseLevelUps ? { phaseLevelUps: true } : {}) },
+            },
+          ]);
+          return habitId;
+        },
       };
     },
     {

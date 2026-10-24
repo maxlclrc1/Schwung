@@ -9,6 +9,16 @@ import { Button, Card, LEVEL_LABEL, Screen, T } from '../../components/ui';
 import { habitIcon, habitTaskAt, habitTitle, habitWhy, LEVELS } from '../../core/habits';
 import { MIN_HABITS } from '../../core/plan';
 import { completionRun } from '../../core/progression';
+import {
+  coversEveryWeekday,
+  nextSessionLabel,
+  SESSIONS_PER_WEEK,
+  validDays,
+  WEEKDAY_LONG,
+  WEEKDAY_SHORT,
+  WEEKDAYS,
+} from '../../core/schedule';
+import type { PlanHabit, Weekday } from '../../core/types';
 import { haptic } from '../../lib/haptics';
 import { currentDay, useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
@@ -33,7 +43,10 @@ export default function HabitDetail() {
 
   const why = habitWhy(habit);
   const run = completionRun({ ...habit, levelSince: 0 }, logs, startedAt, currentDay());
-  const canRemove = plan.length > MIN_HABITS;
+  const atMinimum = plan.length <= MIN_HABITS;
+  // Removing must never leave a weekday with nothing due.
+  const leavesEmptyDay = !coversEveryWeekday(plan.filter((h) => h.habitId !== habit.habitId));
+  const canRemove = !atMinimum && !leavesEmptyDay;
 
   const remove = () =>
     Alert.alert('Remove this habit?', 'Your past check-offs stay in your history.', [
@@ -125,16 +138,20 @@ export default function HabitDetail() {
                   );
                 })}
                 <T v="caption" color={c.textFaint}>
-                  Levels rise with each phase. Change it anytime if it doesn’t fit your life.
+                  {habit.schedule && !habit.schedule.phaseLevelUps
+                    ? 'Levels rise when you accept an offer after 7 sessions in a row. Day 22 and Day 45 don’t raise this one automatically. Change it anytime if it doesn’t fit your life.'
+                    : 'Levels rise with each phase. Change it anytime if it doesn’t fit your life.'}
                 </T>
               </View>
             </>
           ) : null}
 
+          {habit.schedule ? <ScheduleEditor habit={habit} startKey={startedAt} /> : null}
+
           <Card style={styles.statRow}>
             <T color={c.textDim}>Current run</T>
             <T v="bodyStrong">
-              {run} {run === 1 ? 'day' : 'days'}
+              {run} {habit.schedule ? (run === 1 ? 'session' : 'sessions') : run === 1 ? 'day' : 'days'}
             </T>
           </Card>
 
@@ -147,9 +164,13 @@ export default function HabitDetail() {
               />
             ) : null}
             <Button label="Remove habit" kind="danger" disabled={!canRemove} onPress={remove} />
-            {!canRemove ? (
+            {atMinimum ? (
               <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
                 Keep at least {MIN_HABITS} habits. Swap this one instead.
+              </T>
+            ) : leavesEmptyDay ? (
+              <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
+                Every day needs at least one habit, and this is the only one due on some days. Swap it instead.
               </T>
             ) : null}
           </View>
@@ -159,7 +180,72 @@ export default function HabitDetail() {
   );
 }
 
+/** Which weekdays a scheduled habit is due (2–3), and when the next session is. */
+function ScheduleEditor({ habit, startKey }: { habit: PlanHabit; startKey: string }) {
+  const { c } = useTheme();
+  const saved = habit.schedule!.days;
+  // A draft so a day can be swapped (untick one, tick another) without passing through an invalid schedule.
+  const [draft, setDraft] = useState<Weekday[]>(saved);
+  const [message, setMessage] = useState<string | null>(null);
+  const next = nextSessionLabel(habit, startKey, currentDay());
+
+  const toggle = (w: Weekday) => {
+    haptic.tap();
+    const days = draft.includes(w) ? draft.filter((d) => d !== w) : [...draft, w];
+    setDraft(days);
+    if (!validDays(days)) {
+      setMessage(`Choose ${SESSIONS_PER_WEEK.min} or ${SESSIONS_PER_WEEK.max} days.`);
+      return;
+    }
+    if (useApp.getState().setSchedule(habit.habitId, days)) setMessage(null);
+    else setMessage('Every day needs at least one habit due, so this schedule can’t be saved.');
+  };
+
+  return (
+    <View style={{ gap: space.sm }}>
+      <T v="overline" color={c.textDim}>
+        Schedule
+      </T>
+      <View style={styles.days} accessibilityRole="none">
+        {WEEKDAYS.map((w) => {
+          const on = draft.includes(w);
+          return (
+            <Pressable
+              key={w}
+              onPress={() => toggle(w)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: on }}
+              accessibilityLabel={WEEKDAY_LONG[w]}
+              style={[
+                styles.day,
+                { backgroundColor: on ? c.accentSoft : c.surface, borderColor: on ? c.accentInk : 'transparent' },
+              ]}
+            >
+              <T v="caption" color={on ? c.accentInk : c.textDim} style={{ fontWeight: '700' }}>
+                {WEEKDAY_SHORT[w]}
+              </T>
+            </Pressable>
+          );
+        })}
+      </View>
+      <T v="caption" color={message ? c.accentInk : c.textFaint} accessibilityLiveRegion="polite">
+        {message ??
+          `Due on ${saved.length} days a week. Next session: ${next}. Other days are rest days and never count as missed.`}
+      </T>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  days: { flexDirection: 'row', gap: space.xs },
+  day: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: radius.sm,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
   level: {
     flexDirection: 'row',

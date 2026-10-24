@@ -1,5 +1,6 @@
 import { isCustom, levelDown, levelUp } from './habits';
 import { dateForDay, PROGRAM_DAYS } from './dates';
+import { isDueOn } from './schedule';
 import type { DayLog, Level, PlanHabit } from './types';
 
 export const XP_PER_HABIT = 10;
@@ -97,11 +98,15 @@ function completedOn(logs: Logs, startKey: string, habitId: string, day: number)
   return logForDay(logs, startKey, day)?.completed.includes(habitId) ?? false;
 }
 
-/** Consecutive completions of one habit ending today (or yesterday if today isn't done yet). */
+/**
+ * Consecutive completions of one habit ending today (or yesterday if today isn't done yet). For a scheduled
+ * habit only its due days count: rest days are skipped, so this is consecutive *sessions*.
+ */
 export function completionRun(h: PlanHabit, logs: Logs, startKey: string, today: number): number {
   let d = completedOn(logs, startKey, h.habitId, today) ? today : today - 1;
   let run = 0;
   for (; d > h.levelSince && d >= h.addedOnDay && d >= 1; d--) {
+    if (!isDueOn(h, startKey, d)) continue;
     if (!completedOn(logs, startKey, h.habitId, d)) break;
     run++;
   }
@@ -152,7 +157,8 @@ export function reconcile(input: ReconcileInput): ReconcileResult {
     const phase = appliedPhase as 2 | 3;
     const start = PHASE_START[phase];
     plan = plan.map((h) =>
-      isCustom(h) || h.addedOnDay >= start
+      // A scheduled habit only rises with the phase when that was explicitly approved for it.
+      isCustom(h) || h.addedOnDay >= start || (h.schedule && h.schedule.phaseLevelUps !== true)
         ? h
         : { ...h, level: levelUp(h.level), levelSince: Math.max(h.levelSince, start - 1) },
     );
@@ -165,6 +171,7 @@ export function reconcile(input: ReconcileInput): ReconcileResult {
     if (isCustom(h) || h.level === 'easy') return h;
     let misses = 0;
     for (let d = lastFinal; d > h.levelSince && d >= h.addedOnDay && d >= 1; d--) {
+      if (!isDueOn(h, startKey, d)) continue; // a rest day is never a miss
       if (completedOn(logs, startKey, h.habitId, d)) break;
       misses++;
     }

@@ -375,7 +375,8 @@ export const LIBRARY: HabitDef[] = [
   },
   {
     id: 'confidence_talk',
-    title: 'Start a conversation',
+    // Renamed from "Start a conversation" (revision 6.3); the id is unchanged, saved plans keep their frozen title.
+    title: 'Meaningful conversation',
     domain: 'social',
     mode: 'choice',
     release: 'candidate',
