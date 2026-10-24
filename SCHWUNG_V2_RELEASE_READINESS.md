@@ -104,9 +104,11 @@ These have practical, claim-free copy, low risk, and no unresolved safety issue:
 ---
 
 ## Remaining decisions for the owner
-1. **Release gate:** ship the ✅ habits with claim-free copy now, or wait for full primary-source review of
-   everything?
-2. **App Store rating 16+:** confirm.
+Decided on 2026-10-24 (see `SCHWUNG_V2_DEV_INTEGRATION.md`): the 12 ✅ habits are cleared for **development
+testing only**; the audience is 16+ with the stop screen kept; the "already training" copy is applied; V2 is
+wired behind a development flag that is off by default.
+
+Still open:
+1. **Release gate:** public activation of any V2 habit.
+2. **App Store age rating:** verify 16+ in App Store Connect before release (not assumed anywhere in code).
 3. **Expert reviewers** (sleep, physio, dietitian) for the 🟡 and ⏸ items: who, and when?
-4. **Apply the "already training" fitness copy** (accessible-movement doc, C): a copy-only engine change.
-5. **Wiring V2 behind a flag:** approve when ready.

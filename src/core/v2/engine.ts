@@ -10,6 +10,12 @@ import {
 } from './library';
 import type { Alternative, ChoiceStep, NeedDomain, PickV2, PlanResultV2, ProfileV2, Targets } from './types';
 
+/**
+ * Which candidate habits may be offered at all. Without a gate the full candidate pool of the spec is used
+ * (the model the validation tests check); the app always passes its release gate (see gate.ts).
+ */
+export type Gate = ReadonlySet<string> | undefined;
+
 /*
  * Habit Science 2.0 plan generation (HABIT_SCIENCE_V2_ARCHITECTURE.md, revision 5, section D).
  * Pure and deterministic: the same profile always gives the same plan. Not connected to the app.
@@ -36,8 +42,9 @@ export function needs(p: ProfileV2): Record<NeedDomain, number> {
 }
 
 /** Why a habit can't be offered to this person (null = eligible), checking everything but plan fit. */
-export function exclusion(h: HabitDef, p: ProfileV2): string | null {
+export function exclusion(h: HabitDef, p: ProfileV2, gate?: Gate): string | null {
   if (h.release !== 'candidate') return 'not released yet';
+  if (gate && !gate.has(h.id)) return 'still waiting for scientific review';
   const reason = h.exclude(p);
   if (reason) return reason;
   const start = h.start(p);
@@ -55,6 +62,17 @@ export function targetsFor(h: HabitDef, p: ProfileV2): Targets {
 
 const needDomain = (h: HabitDef): NeedDomain | null =>
   (NEED_ORDER as string[]).includes(h.domain) ? (h.domain as NeedDomain) : null;
+
+/** Habits whose targets refer to the wake time, so the plan needs W1 when one is in it. */
+export const WAKE_ANCHORED = ['sleep_bedtime', 'sleep_wake', 'screen_morning', 'screen_social', 'sleep_morning_light'];
+
+/** Whether a habit can join a plan made of these habit ids (D.4), e.g. a second choice after the first. */
+export function fitsPlan(id: string, planIds: string[]): boolean {
+  return fits(
+    BY_ID[id],
+    planIds.filter((x) => BY_ID[x]).map((x) => BY_ID[x]),
+  );
+}
 
 /** D.4 constraints that depend on what's already in the plan. */
 function fits(h: HabitDef, plan: HabitDef[]): boolean {
@@ -131,19 +149,18 @@ const GOAL_TIE: Record<ProfileV2['goal'], string> = {
   fitness: 'Picked for getting in shape.',
 };
 
+export const UNDER_16_MESSAGE = 'Schwung is made for people 16 and older. We hope you’ll come back when you’re 16.';
+
 const RULE_NOTE = (n: number) => `With ${n} habits, a day counts when all ${n} are done. With 5, one can slip.`;
 
-export function generatePlanV2(p: ProfileV2): PlanResultV2 {
+export function generatePlanV2(p: ProfileV2, gate?: Gate): PlanResultV2 {
   if (p.age === 'u16') {
-    return {
-      status: 'not_eligible',
-      message: 'Schwung is made for people 16 and older. We hope you’ll come back when you’re 16.',
-    };
+    return { status: 'not_eligible', message: UNDER_16_MESSAGE };
   }
   const need = needs(p);
   const goal = GOALS[p.goal];
   const goalIds = [...goal.core, ...goal.support];
-  const eligible = (id: string) => exclusion(BY_ID[id], p) === null;
+  const eligible = (id: string) => exclusion(BY_ID[id], p, gate) === null;
   const plan: HabitDef[] = [BY_ID.discipline_bed];
   const meta = new Map<string, { source: PickV2['source']; domainNeed?: NeedDomain }>([
     ['discipline_bed', { source: 'foundation' }],
@@ -244,22 +261,20 @@ export function generatePlanV2(p: ProfileV2): PlanResultV2 {
   return {
     status: 'ok',
     picks: ordered,
-    choice: choiceStep(p, plan, need),
-    planNotes: planNotes(p, plan),
-    needsWake: plan.some((h) =>
-      ['sleep_bedtime', 'sleep_wake', 'screen_morning', 'screen_social', 'sleep_morning_light'].includes(h.id),
-    ),
+    choice: choiceStep(p, plan, need, gate),
+    planNotes: planNotes(p, plan, gate),
+    needsWake: plan.some((h) => WAKE_ANCHORED.includes(h.id)),
     needsBedtime: plan.some((h) => h.id === 'sleep_bedtime'),
   };
 }
 
 /** D.5: alternatives in a fixed order; required when the plan is under the minimum of 3. */
-function choiceStep(p: ProfileV2, plan: HabitDef[], need: Record<NeedDomain, number>): ChoiceStep {
+function choiceStep(p: ProfileV2, plan: HabitDef[], need: Record<NeedDomain, number>, gate: Gate): ChoiceStep {
   const n = plan.length;
   if (n >= PLAN_TARGET) return null;
   const goal = GOALS[p.goal];
   const choosable = (h: HabitDef) =>
-    (h.mode === 'auto' || h.mode === 'choice') && exclusion(h, p) === null && fits(h, plan);
+    (h.mode === 'auto' || h.mode === 'choice') && exclusion(h, p, gate) === null && fits(h, plan);
   const order: string[] = [];
   const push = (id: string) => {
     if (!order.includes(id) && choosable(BY_ID[id])) order.push(id);
@@ -282,7 +297,7 @@ function choiceStep(p: ProfileV2, plan: HabitDef[], need: Record<NeedDomain, num
   return { required, optional: required === 0, alternatives, ruleNote };
 }
 
-function habitNotes(h: HabitDef, p: ProfileV2): string[] {
+export function habitNotes(h: HabitDef, p: ProfileV2): string[] {
   const notes: string[] = [];
   if (h.note) notes.push(h.note);
   if (h.id === 'move_walk') {
@@ -297,16 +312,29 @@ function habitNotes(h: HabitDef, p: ProfileV2): string[] {
   return notes;
 }
 
-function planNotes(p: ProfileV2, plan: HabitDef[]): string[] {
+/** Fitness goal, already active most days, and no fitness habit in the plan: say so instead of inventing one. */
+export const ACTIVE_NOTE =
+  'You already have a strong activity routine. Let’s focus on the other changes that matter to you.';
+/** The development preview withheld the movement habits this person would otherwise get. */
+export const PREVIEW_MOVEMENT_NOTE =
+  'Development preview: the movement habits for this goal are still waiting for scientific review, so this plan doesn’t include one yet.';
+
+function planNotes(p: ProfileV2, plan: HabitDef[], gate: Gate): string[] {
   const notes: string[] = [];
-  if (p.goal === 'fitness') notes.push(FITNESS_NOTE);
+  const fitnessCore = plan.some((h) => GOALS.fitness.core.includes(h.id));
+  const active = p.activeDays === '3_4' || p.activeDays === '5p';
+  if (p.goal === 'fitness') notes.push(!fitnessCore && active ? ACTIVE_NOTE : FITNESS_NOTE);
   if (precautionsUnknown(p)) notes.push('If you have a health condition, check these with a professional.');
   if (p.sleepTrouble === 'most')
     notes.push('Trouble sleeping on most nights is worth mentioning to a doctor or another health professional.');
   if (hasPrecaution(p, 'walkingDifficult'))
     notes.push('Movement habits for limited mobility aren’t available yet. A professional can suggest safe options.');
-  if (p.goal === 'fitness' && !plan.some((h) => GOALS.fitness.core.includes(h.id)))
-    notes.push('None of our current fitness habits suit your answers yet.');
+  if (p.goal === 'fitness' && !fitnessCore && !active) {
+    const withheld = GOALS.fitness.core.some(
+      (id) => exclusion(BY_ID[id], p) === null && exclusion(BY_ID[id], p, gate) !== null,
+    );
+    notes.push(withheld ? PREVIEW_MOVEMENT_NOTE : 'None of our current fitness habits suit your answers yet.');
+  }
   return notes;
 }
 
@@ -315,11 +343,12 @@ export function swapOptionsV2(
   p: ProfileV2,
   planIds: string[],
   replacing: string,
+  gate?: Gate,
 ): { id: string; level: 'easy'; targets: Targets }[] {
   const rest = planIds.filter((id) => id !== replacing).map((id) => BY_ID[id]);
   const replaced = BY_ID[replacing];
   const candidates = LIBRARY.filter(
-    (h) => h.mode !== 'foundation' && h.id !== replacing && exclusion(h, p) === null && fits(h, rest),
+    (h) => h.mode !== 'foundation' && h.id !== replacing && exclusion(h, p, gate) === null && fits(h, rest),
   );
   const sameDomain = candidates.filter((h) => h.domain === replaced.domain);
   const other = candidates.filter((h) => h.domain !== replaced.domain);
@@ -327,9 +356,9 @@ export function swapOptionsV2(
 }
 
 /** Every habit that can't be offered to this person, with the reason (for review screens and tests). */
-export function exclusionsV2(p: ProfileV2): { id: string; reason: string }[] {
+export function exclusionsV2(p: ProfileV2, gate?: Gate): { id: string; reason: string }[] {
   return LIBRARY.filter((h) => h.mode !== 'foundation')
-    .map((h) => ({ id: h.id, reason: exclusion(h, p) }))
+    .map((h) => ({ id: h.id, reason: exclusion(h, p, gate) }))
     .filter((x): x is { id: string; reason: string } => x.reason !== null);
 }
 

@@ -11,6 +11,7 @@ import { Screen, T } from '../components/ui';
 import { formatTime, PROGRAM_DAYS } from '../core/dates';
 import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
+import { v2PreviewEnabled, V2_PREVIEW_FROM_ENV } from '../lib/flags';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { currentDay, exportData, useApp } from '../store/useApp';
 import type { ThemePreference } from '../core/types';
@@ -136,6 +137,9 @@ function DevTools() {
   const setOffset = useApp((s) => s.setDevDayOffset);
   const startedAt = useApp((s) => s.startedAt);
   const day = currentDay({ startedAt, devDayOffset: offset });
+  const v2Switch = useApp((s) => s.devV2Preview);
+  const programVersion = useApp((s) => s.programVersion);
+  const v2 = v2PreviewEnabled(v2Switch);
   const jumpTo = (target: number) => setOffset(offset + (target - day));
   const shift = (n: number) => setOffset(offset + n);
 
@@ -156,6 +160,15 @@ function DevTools() {
       <View style={styles.devRow}>
         <DevButton label="Reset clock" onPress={() => setOffset(0)} />
         <DevButton label="Replay ceremonies" onPress={() => useApp.setState({ seenCeremonies: [] })} />
+      </View>
+      <View style={styles.devRow}>
+        <DevButton
+          label={`V2 preview: ${v2 ? 'on' : 'off'}${V2_PREVIEW_FROM_ENV ? ' (env)' : ''}`}
+          onPress={() => useApp.getState().setDevV2Preview(!v2Switch)}
+        />
+        <T v="caption" style={{ alignSelf: 'center' }}>
+          This program: V{programVersion}. The preview applies to new programs only.
+        </T>
       </View>
     </Section>
   );

@@ -159,7 +159,7 @@ function DelayedConfetti() {
 
 function Milestone({ milestone }: { milestone: number }) {
   const copy = COPY[milestone] ?? COPY[1];
-  const goal = useApp((s) => s.answers?.goal);
+  const goal = useApp((s) => s.answers?.goal ?? s.profile?.goal);
   const { width } = useWindowDimensions();
   return (
     <SafeAreaView style={styles.fill}>

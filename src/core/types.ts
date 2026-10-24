@@ -41,9 +41,26 @@ export type LibraryHabit = {
   why: string;
 };
 
+/**
+ * A V2 habit as it was generated for this person, saved with the plan when the habit joined it, so the
+ * targets never shift under a running program. V1 habits have none and read from the V1 library.
+ */
+export type HabitSpec = {
+  title: string;
+  /** Ionicons glyph name. */
+  icon: string;
+  why: string;
+  /** The personal Easy/Medium/Hard window. */
+  targets: Record<Level, string>;
+  /** Mandatory explanatory or safety copy shown with the habit. */
+  notes: string[];
+};
+
 export type PlanHabit = {
   habitId: string;
   custom?: { title: string; description?: string };
+  /** V2 programs only. */
+  spec?: HabitSpec;
   level: Level;
   addedOnDay: number;
   /** Consecutive-day counters (level-up offers, step-downs) only look at days after this one. */

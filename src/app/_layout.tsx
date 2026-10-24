@@ -81,6 +81,10 @@ export default function RootLayout() {
           <Stack.Screen name="quiz" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="start" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="reveal" options={{ animation: 'slide_from_right' }} />
+          {/* Habit Science V2 onboarding: development preview only (lib/flags). */}
+          <Stack.Screen name="v2/quiz" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="v2/time" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="v2/plan" options={{ animation: 'slide_from_right' }} />
           {/* The program has started by now; there's no going back into onboarding. */}
           <Stack.Screen name="reminder" options={{ animation: 'slide_from_right', gestureEnabled: false }} />
           <Stack.Screen name="today" options={{ gestureEnabled: false }} />

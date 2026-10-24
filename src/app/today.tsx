@@ -24,7 +24,7 @@ import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
 import { comebackFor } from '../core/comeback';
 import { PARALLAX, trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
-import { getHabit, habitTitle, levelUp } from '../core/habits';
+import { habitTaskAt, habitTitle, levelUp } from '../core/habits';
 import {
   currentStreak,
   dayQualifies,
@@ -235,7 +235,7 @@ export default function Today() {
         {viewing === 'today'
           ? offers.slice(0, 1).map((id) => {
               const h = plan.find((p) => p.habitId === id)!;
-              const next = getHabit(id)!.levels[levelUp(h.level)];
+              const next = habitTaskAt(h, levelUp(h.level));
               return (
                 <ThemedView
                   key={id}
