@@ -208,8 +208,11 @@ results.
 - **Use:** never automatic; at most one opportunity-dependent habit per plan.
 - **Evidence:** brief conversations are rated more positively than people expect (STRANGERS, secondary;
   one-off). No evidence that a daily target builds confidence.
-- **Copy:** "Any short chat counts, even a quick 'how's your day?'. If it feels like too much, swap it for
-  something else."
+- **Targets (owner-approved, revision 6.2; product, not evidence):** one conversation a day at every level:
+  a genuine conversation beyond logistics → ask a follow-up question in one → start one yourself with someone
+  you know.
+- **Copy:** "Everyday conversations count: family, friends or colleagues, in person or on a call. No strangers
+  needed. If it feels like too much, swap it for something else."
 - **Open before release:** a psychologist should review the framing for social anxiety.
 
 ## Other habits (statuses re-confirmed; details unchanged from the previous register)

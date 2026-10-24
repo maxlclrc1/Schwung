@@ -291,6 +291,33 @@ describe('V2 swaps', () => {
   });
 });
 
+describe('saved plans keep the targets they started with', () => {
+  it('a conversation habit saved with the old ladder keeps its text (specs are frozen per plan)', async () => {
+    startV2(C);
+    const old = {
+      habitId: 'confidence_talk',
+      level: 'medium',
+      addedOnDay: 1,
+      levelSince: 0,
+      spec: {
+        title: 'Start a conversation',
+        icon: 'chatbubbles',
+        why: 'Small conversations make the next one easier.',
+        targets: {
+          easy: 'Start 1 conversation (in person or a call)',
+          medium: 'Start 2 conversations (in person or a call)',
+          hard: 'Start 3 conversations (in person or a call)',
+        },
+        notes: [],
+      },
+    };
+    const plan = [...s().plan.slice(0, 4), old];
+    await loadSaved({ state: { ...JSON.parse(JSON.stringify(s())), plan }, version: 2 });
+    const h = s().plan.find((x) => x.habitId === 'confidence_talk')!;
+    expect(habitTask(h)).toBe('Start 2 conversations (in person or a call)');
+  });
+});
+
 describe('removing habits', () => {
   it('stops at the three-habit minimum and keeps history', () => {
     startV2(C);
