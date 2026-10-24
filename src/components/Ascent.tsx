@@ -277,7 +277,7 @@ export function AscentCaption({
           onPress={() => onOpenJourney()}
           accessibilityRole="button"
           accessibilityLabel="Open your journey"
-          hitSlop={6}
+          hitSlop={8}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>

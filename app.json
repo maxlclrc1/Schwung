@@ -17,6 +17,11 @@
     },
     "android": {
       "package": "com.example.schwung",
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#111116",
         "foregroundImage": "./assets/android-icon-foreground.png",
