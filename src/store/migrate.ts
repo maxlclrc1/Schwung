@@ -1,7 +1,10 @@
+import { addDays, dayNumber } from '../core/dates';
+import { MILESTONES, phaseOf } from '../core/progression';
 import { validDays, validHistory, validSchedule } from '../core/schedule';
+import { isExercise } from '../core/v2/exercise';
 import { repairSpec } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
-import type { DayLog, PlanHabit } from '../core/types';
+import type { DayLog, Level, PlanHabit } from '../core/types';
 
 /** Saved-data version. 1 = V1 only (no program version); 2 = programVersion, profile and per-habit specs. */
 export const STORAGE_VERSION = 2;
@@ -22,9 +25,17 @@ export function migrateSaved(persisted: unknown, version: number): Saved {
   return sanitize(s);
 }
 
-/** Safe fallbacks for damaged or partial saves. Never drops logs, XP, streaks or plan habits. */
-export function sanitize(s: Saved): Saved {
-  const out = { ...s };
+/**
+ * Safe fallbacks for damaged or partial saves. Never drops logs, XP or streaks, nor any plan habit except the
+ * development-only ones in a release build.
+ */
+export function sanitize(s: Saved, release = !__DEV__): Saved {
+  const out = repairShapes(s);
+  // Development-only habits never reach a release build, even from a development build's save on the same
+  // device: the synthetic scheduler test habit and the exercise prototypes leave the plan (their past days stay).
+  if (release) {
+    out.plan = (out.plan as PlanHabit[]).filter((h) => !h.habitId.startsWith('devsched_') && !isExercise(h.habitId));
+  }
   if (out.programVersion !== 2) out.programVersion = 1;
   const profile = isProfile(out.profile) ? (out.profile as ProfileV2) : null;
   out.profile = profile;
@@ -70,6 +81,100 @@ export function sanitize(s: Saved): Saved {
     }
     out.logs = logs;
   }
+  return out;
+}
+
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
+const LEVELS: Level[] = ['easy', 'medium', 'hard'];
+const isObject = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
+const isDay = (x: unknown): x is number => typeof x === 'number' && Number.isInteger(x) && x >= 1;
+const strings = (x: unknown): string[] => (Array.isArray(x) ? x.filter((v): v is string => typeof v === 'string') : []);
+
+/**
+ * The basic shapes every screen relies on. A field with the wrong type falls back to its default (it is
+ * deleted, so the store's initial value applies); damaged entries are repaired from what is left rather than
+ * dropped wherever that is possible, so a damaged save never blanks the app and never costs a valid day.
+ */
+function repairShapes(s: Saved): Saved {
+  const out = { ...s };
+  for (const [k, ok] of [
+    ['reminderTime', (v: unknown) => typeof v === 'string' && /^\d{2}:\d{2}$/.test(v)],
+    ['notificationsEnabled', (v: unknown) => typeof v === 'boolean'],
+    ['themePreference', (v: unknown) => v === 'system' || v === 'light' || v === 'dark'],
+    ['devDayOffset', (v: unknown) => typeof v === 'number' && Number.isInteger(v)],
+    ['devV2Preview', (v: unknown) => typeof v === 'boolean'],
+    ['answers', (v: unknown) => v === null || isObject(v)],
+  ] as const) {
+    if (k in out && !ok(out[k])) delete out[k];
+  }
+
+  // Logs: each day keeps the lists it has; its day number and date come from its key.
+  const rawLogs = isObject(out.logs) ? out.logs : {};
+  const logs: Record<string, DayLog> = {};
+  for (const [date, l] of Object.entries(rawLogs)) {
+    if (!isObject(l)) continue;
+    const rested = l.rested;
+    logs[date] = {
+      ...(l as Partial<DayLog>),
+      day: isDay(l.day) ? l.day : 0,
+      date: DATE_KEY.test(date) || typeof l.date !== 'string' ? date : l.date,
+      completed: strings(l.completed),
+      planned: strings(l.planned),
+      ...(rested === undefined ? {} : { rested: rested as string[] }),
+    };
+  }
+  // A damaged start date is recovered from any day that recorded its number.
+  if (out.startedAt !== null && !(typeof out.startedAt === 'string' && DATE_KEY.test(out.startedAt))) {
+    const known = Object.values(logs).find((l) => l.day >= 1 && DATE_KEY.test(l.date));
+    out.startedAt = known ? addDays(known.date, 1 - known.day) : null;
+  }
+  const start = typeof out.startedAt === 'string' ? out.startedAt : null;
+  for (const l of Object.values(logs)) {
+    if (l.day < 1) l.day = start && DATE_KEY.test(l.date) ? Math.max(1, dayNumber(start, l.date)) : 1;
+  }
+  out.logs = logs;
+  const lastDay = Math.max(0, ...Object.values(logs).map((l) => l.day));
+
+  // Plan: entries without an id are dropped (nothing can be shown for them); the rest are repaired. A plan that
+  // is missing altogether is rebuilt, at Easy, from the most recent day's list.
+  let plan: unknown[] = Array.isArray(out.plan) ? out.plan : [];
+  if (!Array.isArray(out.plan) && start) {
+    const latest = Object.values(logs).sort((a, b) => b.day - a.day)[0];
+    plan = (latest?.planned ?? []).map((habitId) => ({ habitId }));
+  }
+  const ids = new Set<string>();
+  out.plan = plan.flatMap((h) => {
+    if (!isObject(h) || typeof h.habitId !== 'string' || ids.has(h.habitId)) return [];
+    ids.add(h.habitId);
+    const addedOnDay = isDay(h.addedOnDay) ? h.addedOnDay : 1;
+    const fixed = {
+      ...h,
+      level: LEVELS.includes(h.level as Level) ? h.level : 'easy',
+      addedOnDay,
+      levelSince: typeof h.levelSince === 'number' && Number.isInteger(h.levelSince) ? h.levelSince : addedOnDay - 1,
+    } as PlanHabit & Record<string, unknown>;
+    if (h.custom !== undefined && !(isObject(h.custom) && typeof h.custom.title === 'string')) {
+      fixed.custom = { title: 'Your habit' };
+    }
+    return [fixed];
+  });
+
+  // Ceremonies already reached aren't replayed; a damaged phase is the one the logged days had reached, so no
+  // level-up is applied twice.
+  if (!(Array.isArray(out.seenCeremonies) && out.seenCeremonies.every((m) => typeof m === 'number'))) {
+    out.seenCeremonies = MILESTONES.filter((m) => m <= lastDay);
+  }
+  if (out.appliedPhase !== 1 && out.appliedPhase !== 2 && out.appliedPhase !== 3) {
+    out.appliedPhase = lastDay ? phaseOf(lastDay) : 1;
+  }
+  out.notices = (Array.isArray(out.notices) ? out.notices : []).filter(
+    (n) =>
+      isObject(n) &&
+      typeof n.id === 'string' &&
+      typeof n.day === 'number' &&
+      ((n.kind === 'stepDown' && Array.isArray(n.habitIds) && n.habitIds.every((x) => typeof x === 'string')) ||
+        (n.kind === 'phaseUp' && (n.phase === 2 || n.phase === 3))),
+  );
   return out;
 }
 

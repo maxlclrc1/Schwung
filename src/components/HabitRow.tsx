@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { habitTask, habitTitle, isCustom } from '../core/habits';
+import { habitTask, habitTitle, isCustom, LEVELS } from '../core/habits';
 import type { PlanHabit } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
@@ -89,8 +89,11 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
   const checkStyle = useAnimatedStyle(() => ({ opacity: Math.min(1, Math.max(0, progress.value)) }));
   const textStyle = useAnimatedStyle(() => ({ opacity: interpolate(progress.value, [0, 1], [1, 0.55]) }));
 
-  const task = habitTask(habit);
   const title = habitTitle(habit);
+  // A target that only repeats the title ("Make your bed") isn't shown twice.
+  const target = habitTask(habit);
+  const task = target === title ? undefined : target;
+  const level = isCustom(habit) ? '' : `. Level ${LEVELS.indexOf(habit.level) + 1} of 3`;
 
   return (
     <Pressable
@@ -102,8 +105,21 @@ function HabitRowImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) {
       role="checkbox"
       aria-checked={done}
       aria-disabled={readOnly}
-      accessibilityLabel={`${title}${task ? `. ${task}` : ''}`}
+      accessibilityLabel={`${title}${task ? `. ${task}` : ''}${level}`}
       accessibilityHint={onLongPress ? 'Long press for details' : undefined}
+      // VoiceOver and TalkBack reach the same details from the actions menu, without the long-press gesture.
+      accessibilityActions={
+        onLongPress ? [{ name: 'longpress' }, { name: 'details', label: 'Edit, swap or remove' }] : undefined
+      }
+      onAccessibilityAction={
+        onLongPress
+          ? (e) => {
+              if (e.nativeEvent.actionName === 'longpress' || e.nativeEvent.actionName === 'details') {
+                onLongPress(habit.habitId);
+              }
+            }
+          : undefined
+      }
       hitSlop={4}
     >
       <Animated.View style={[styles.row, rowStyle]}>

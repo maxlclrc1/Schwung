@@ -3,11 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dateForDay } from '../../core/dates';
 import { buildPlan, toPlan } from '../../core/plan';
 import { dayQualifies } from '../../core/progression';
-import { weekdayOfDay } from '../../core/schedule';
+import { isDueOn, weekdayOfDay } from '../../core/schedule';
 import type { Answers, PlanHabit, Weekday } from '../../core/types';
 import { FIXTURES } from '../../core/v2/__tests__/fixtures';
 import { startSim, PERSONAS } from '../../core/v2/exercisePreview';
-import { migrateSaved } from '../migrate';
+import { getHabit } from '../../core/habits';
+import { EXERCISE_IDS } from '../../core/v2/exercise';
+import { migrateSaved, sanitize } from '../migrate';
 import { useApp } from '../useApp';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -171,5 +173,35 @@ describe('development-only access', () => {
       const usesPreview = /EXERCISE_PREVIEW_GATE|exercisePreview'/.test(src);
       expect([f, usesPreview]).toEqual([f, f.endsWith('app/dev/exercise.tsx')]);
     }
+  });
+
+  it('V1 has no exercise habit to plan or swap to', () => {
+    for (const id of EXERCISE_IDS) expect(getHabit(id)).toBeUndefined();
+    s().setAnswers({ goal: 'fitness', sleep: '6-7h', screen: '2-4h', exercise: 'never', water: '1-2L', mind: 'never' });
+    s().startProgram();
+    const before = s().plan;
+    s().swapHabit(before[0].habitId, 'move_strength_prep');
+    expect(s().plan).toEqual(before);
+  });
+
+  it('a release build drops development-only habits from a save, keeping every past day', () => {
+    const h = withExercise('move_seated');
+    expect(s().addDevScheduledHabit([1, 3])).not.toBeNull();
+    s()
+      .plan.filter((x) => isDueOn(x, s().startedAt!, 1))
+      .forEach((x) => s().toggleHabit(1, x.habitId));
+    const saved = JSON.parse(JSON.stringify({ plan: s().plan, logs: s().logs, programVersion: 2, profile: C }));
+    const release = sanitize(saved, true);
+    const ids = (release.plan as PlanHabit[]).map((x) => x.habitId);
+    expect(ids).not.toContain(h.habitId);
+    expect(ids.some((id) => id.startsWith('devsched_'))).toBe(false);
+    expect(ids).toEqual(
+      saved.plan
+        .map((x: PlanHabit) => x.habitId)
+        .filter((id: string) => id !== h.habitId && !id.startsWith('devsched_')),
+    );
+    expect(release.logs).toEqual(saved.logs);
+    // Development builds keep them.
+    expect((sanitize(saved, false).plan as PlanHabit[]).length).toBe(saved.plan.length);
   });
 });
