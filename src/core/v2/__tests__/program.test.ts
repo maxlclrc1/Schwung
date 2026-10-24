@@ -268,7 +268,8 @@ describe('choice step', () => {
     const r = previewPlan(p, tiny);
     if (r.status !== 'ok') throw new Error();
     expect(r.blocked).toBe(true);
-    expect(r.limitation).toMatch(/aren’t enough reviewed habits/);
+    expect(r.limitation).toMatch(/aren’t enough suitable habits/);
+    expect(r.limitation).not.toMatch(/preview|development/i);
   });
 });
 

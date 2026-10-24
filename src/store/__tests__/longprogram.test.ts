@@ -69,7 +69,6 @@ function startV1() {
   expect(s().startProgram()).toBe(true);
 }
 function startV2() {
-  s().setDevV2Preview(true);
   s().setProfile(C);
   const r = previewPlan(C);
   if (r.status !== 'ok') throw new Error('expected a plan');
@@ -78,7 +77,6 @@ function startV2() {
 
 beforeEach(() => {
   s().restart();
-  s().setDevV2Preview(false);
   s().setDevDayOffset(0);
 });
 

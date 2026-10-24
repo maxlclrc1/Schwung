@@ -10,7 +10,7 @@ import { formatTime } from '../../core/dates';
 import { DEV_CLEARED } from '../../core/v2/gate';
 import { pendingTimeQuestion } from '../../core/v2/program';
 import type { ProfileV2 } from '../../core/v2/types';
-import { v2PreviewEnabled } from '../../lib/flags';
+import { v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useApp } from '../../store/useApp';
 import { space, useTheme } from '../../theme';
@@ -21,7 +21,7 @@ export default function TimeV2() {
   const { c } = useTheme();
   const profile = useApp((s) => s.profile);
   const started = useApp((s) => s.startedAt !== null);
-  const enabled = useApp((s) => v2PreviewEnabled(s.devV2Preview));
+  const enabled = v2ForNewPrograms();
   // Opened from the plan's choice step: the choices (including the one that needs a time) come along.
   const params = useLocalSearchParams<{ with?: string }>();
   const extra = params.with ? params.with.split(',').filter(Boolean) : [];

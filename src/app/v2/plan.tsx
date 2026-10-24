@@ -10,7 +10,7 @@ import { GROWTH_NOTES } from '../../core/onboarding';
 import { GOAL_LABEL } from '../../core/plan';
 import { canChoose, choiceNeedsTime, iconFor, pendingTimeQuestion, previewPlan } from '../../core/v2/program';
 import type { Targets } from '../../core/v2/types';
-import { v2PreviewEnabled } from '../../lib/flags';
+import { v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
@@ -24,12 +24,12 @@ const PHASE_ABOUT = [
   'Each habit reaches its full version.',
 ];
 
-/** V2 plan reveal with the choice step (development preview only). */
+/** The V2 plan reveal with the choice step (channels that offer V2 to new programs, see lib/flags). */
 export default function PlanV2() {
   const { c } = useTheme();
   const profile = useApp((s) => s.profile);
   const started = useApp((s) => s.startedAt !== null);
-  const enabled = useApp((s) => v2PreviewEnabled(s.devV2Preview));
+  const enabled = v2ForNewPrograms();
   const plan = useMemo(() => (profile ? previewPlan(profile) : null), [profile]);
   const [chosen, setChosen] = useState<string[]>([]);
   // A choice waiting for the wake (or bed) time it needs; added when the person comes back with an answer.
@@ -110,7 +110,7 @@ export default function PlanV2() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: space.sm }}>
           <T v="overline" color={c.accentInk}>
-            Development preview · Built for {GOAL_LABEL[profile.goal]}
+            Your plan · Built for {GOAL_LABEL[profile.goal]}
           </T>
           <T v="title" accessibilityRole="header">
             {planned} habits. Starting where you are.

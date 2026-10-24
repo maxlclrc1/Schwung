@@ -1,5 +1,6 @@
 import { addDays, dayNumber } from '../core/dates';
 import { MILESTONES, phaseOf } from '../core/progression';
+import { devTools } from '../lib/flags';
 import { validDays, validHistory, validSchedule } from '../core/schedule';
 import { isExercise } from '../core/v2/exercise';
 import { repairSpec } from '../core/v2/program';
@@ -27,12 +28,13 @@ export function migrateSaved(persisted: unknown, version: number): Saved {
 
 /**
  * Safe fallbacks for damaged or partial saves. Never drops logs, XP or streaks, nor any plan habit except the
- * development-only ones in a release build.
+ * development-only ones in a build without developer tools.
  */
-export function sanitize(s: Saved, release = !__DEV__): Saved {
+export function sanitize(s: Saved, release = !devTools()): Saved {
   const out = repairShapes(s);
-  // Development-only habits never reach a release build, even from a development build's save on the same
-  // device: the synthetic scheduler test habit and the exercise prototypes leave the plan (their past days stay).
+  // Development-only habits never reach a build without developer tools, even from a development build's save on
+  // the same device: the synthetic scheduler test habit and the exercise prototypes leave the plan (their past
+  // days stay).
   if (release) {
     out.plan = (out.plan as PlanHabit[]).filter((h) => !h.habitId.startsWith('devsched_') && !isExercise(h.habitId));
   }
@@ -97,12 +99,13 @@ const strings = (x: unknown): string[] => (Array.isArray(x) ? x.filter((v): v is
  */
 function repairShapes(s: Saved): Saved {
   const out = { ...s };
+  // The old developer switch for the V2 preview; the build channel decides that now (lib/flags).
+  delete out.devV2Preview;
   for (const [k, ok] of [
     ['reminderTime', (v: unknown) => typeof v === 'string' && /^\d{2}:\d{2}$/.test(v)],
     ['notificationsEnabled', (v: unknown) => typeof v === 'boolean'],
     ['themePreference', (v: unknown) => v === 'system' || v === 'light' || v === 'dark'],
     ['devDayOffset', (v: unknown) => typeof v === 'number' && Number.isInteger(v)],
-    ['devV2Preview', (v: unknown) => typeof v === 'boolean'],
     ['answers', (v: unknown) => v === null || isObject(v)],
   ] as const) {
     if (k in out && !ok(out[k])) delete out[k];

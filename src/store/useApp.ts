@@ -7,7 +7,7 @@ import { MILESTONES, phaseLevel, phaseOf, reconcile } from '../core/progression'
 import type { Answers, DayLog, Level, Notice, PlanHabit, ThemePreference, Weekday } from '../core/types';
 import { assemblePlan, swappedHabit } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
-import { v2PreviewEnabled } from '../lib/flags';
+import { devTools, storageKey, v2ForNewPrograms } from '../lib/flags';
 import { migrateSaved, sanitize, STORAGE_VERSION } from './migrate';
 import { coversEveryWeekday, isDueOn, plannedForDay, rescheduled, validDays } from '../core/schedule';
 import { canAcceptLevelUp, isExercise, validExerciseDays } from '../core/v2/exercise';
@@ -34,8 +34,6 @@ export type AppData = {
   programVersion: 1 | 2;
   /** V2 answers: the onboarding draft, then the profile the V2 program was built from. Null for V1. */
   profile: ProfileV2 | null;
-  /** Dev-only switch for the V2 preview (see lib/flags). Always false in release builds. */
-  devV2Preview: boolean;
 };
 
 type Actions = {
@@ -65,7 +63,6 @@ type Actions = {
   /** Starts a V2 program from the saved profile and the choice-step picks. False if not allowed. */
   startProgramV2: (chosen: string[]) => boolean;
   swapHabitV2: (oldId: string, newId: string) => boolean;
-  setDevV2Preview: (on: boolean) => void;
   /** Changes the weekdays a scheduled habit is due (2–3 days; every weekday must keep a due habit). */
   setSchedule: (habitId: string, days: Weekday[]) => boolean;
   /** Development builds only: adds a synthetic scheduled habit to test the scheduler. Never a recommendation. */
@@ -88,13 +85,12 @@ const initial: AppData = {
   devDayOffset: 0,
   programVersion: 1,
   profile: null,
-  devV2Preview: false,
 };
 
 /** "Now", honoring the dev time-travel offset. */
 export function appNow(offset = useApp.getState().devDayOffset): Date {
   const d = new Date();
-  if (__DEV__ && offset) d.setDate(d.getDate() + offset);
+  if (devTools() && offset) d.setDate(d.getDate() + offset);
   return d;
 }
 
@@ -150,8 +146,8 @@ export const useApp = create<AppState>()(
 
         startProgramV2: (chosen) => {
           const s = get();
-          // Same rule as V1: never over a running program. And only while the preview flag is on.
-          if (s.startedAt || !s.profile || !v2PreviewEnabled(s.devV2Preview)) return false;
+          // Same rule as V1: never over a running program. And only in a channel that offers V2 to new programs.
+          if (s.startedAt || !s.profile || !v2ForNewPrograms()) return false;
           const plan = assemblePlan(s.profile, chosen);
           if (!plan) return false;
           set({
@@ -299,15 +295,13 @@ export const useApp = create<AppState>()(
         setThemePreference: (themePreference) => set({ themePreference }),
 
         restart: () => {
-          const { reminderTime, notificationsEnabled, themePreference, devV2Preview } = get();
-          set({ ...initial, reminderTime, notificationsEnabled, themePreference, devV2Preview });
+          const { reminderTime, notificationsEnabled, themePreference } = get();
+          set({ ...initial, reminderTime, notificationsEnabled, themePreference });
         },
 
-        setDevDayOffset: (devDayOffset) => set({ devDayOffset: __DEV__ ? devDayOffset : 0 }),
+        setDevDayOffset: (devDayOffset) => set({ devDayOffset: devTools() ? devDayOffset : 0 }),
 
         setProfile: (profile) => set({ profile: profile?.age === 'u16' ? null : profile }),
-
-        setDevV2Preview: (on) => set({ devV2Preview: __DEV__ ? on : false }),
 
         setSchedule: (habitId, days) => {
           const { plan } = get();
@@ -323,7 +317,7 @@ export const useApp = create<AppState>()(
         },
 
         addDevScheduledHabit: (days, phaseLevelUps) => {
-          if (!__DEV__ || !get().startedAt || !validDays(days)) return null;
+          if (!__DEV__ || !devTools() || !get().startedAt || !validDays(days)) return null;
           const day = currentDay(get());
           const habitId = `devsched_${uid()}`;
           updatePlan((plan) => [
@@ -352,7 +346,7 @@ export const useApp = create<AppState>()(
       };
     },
     {
-      name: 'schwung-state',
+      name: storageKey(),
       version: STORAGE_VERSION,
       storage: createJSONStorage(() => debouncedStorage),
       migrate: (persisted, version) => migrateSaved(persisted, version) as unknown as AppState,
@@ -369,10 +363,9 @@ export const useApp = create<AppState>()(
         seenCeremonies: s.seenCeremonies,
         appliedPhase: s.appliedPhase,
         notices: s.notices,
-        devDayOffset: __DEV__ ? s.devDayOffset : 0,
+        devDayOffset: devTools() ? s.devDayOffset : 0,
         programVersion: s.programVersion,
         profile: s.profile,
-        devV2Preview: __DEV__ ? s.devV2Preview : false,
       }),
     },
   ),
@@ -407,6 +400,5 @@ export function exportData(): AppData {
     devDayOffset: 0,
     programVersion,
     profile,
-    devV2Preview: false,
   };
 }

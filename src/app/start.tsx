@@ -9,6 +9,7 @@ import { ANSWER_LABEL, GOAL_DETAIL } from '../core/answers';
 import { AREA_ICON, startingPoint } from '../core/onboarding';
 import { buildPlan, GOAL_LABEL } from '../core/plan';
 import { haptic } from '../lib/haptics';
+import { v2ForNewPrograms } from '../lib/flags';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
@@ -23,6 +24,8 @@ export default function Start() {
   const point = useMemo(() => (answers ? startingPoint(answers, buildPlan(answers)) : null), [answers]);
 
   if (started) return <Redirect href="/today" />;
+  // A channel that starts new programs on V2 never shows the V1 onboarding (lib/flags).
+  if (v2ForNewPrograms()) return <Redirect href="/v2/quiz" />;
   if (!answers || !point) return <Redirect href="/quiz" />;
   const { lever, working } = point;
   const enter = (i: number) => FadeInDown.delay(80 + i * 110).duration(420);

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -8,6 +8,7 @@ import { OnboardingBackdrop } from '../components/World';
 import { LANDMARKS } from '../core/ascent';
 import { GROWTH_NOTES, phasePreview } from '../core/onboarding';
 import { buildPlan, GOAL_LABEL } from '../core/plan';
+import { v2ForNewPrograms } from '../lib/flags';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
@@ -20,6 +21,11 @@ export default function Reveal() {
   // Exactly the plan startProgram creates: both come from buildPlan on the same saved answers.
   const picks = useMemo(() => (answers ? buildPlan(answers) : []), [answers]);
   const growth = useMemo(() => (picks.length ? phasePreview(picks) : null), [picks]);
+  const started = useApp((s) => s.startedAt !== null);
+
+  if (started) return <Redirect href="/today" />;
+  // A channel that starts new programs on V2 never shows the V1 onboarding (lib/flags).
+  if (v2ForNewPrograms()) return <Redirect href="/v2/quiz" />;
 
   const begin = () => {
     // A program that's already running is never replaced from here; just carry on to it.

@@ -11,6 +11,7 @@ import { ANSWER_LABEL, GOAL_DETAIL } from '../core/answers';
 import { ANSWER_VALUES, type Answers } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { useScreenReader } from '../lib/useScreenReader';
+import { v2ForNewPrograms } from '../lib/flags';
 import { useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
@@ -103,6 +104,8 @@ export default function Quiz() {
 
   // A running program is never re-onboarded (e.g. by navigating back); Settings → Restart is the way.
   if (started) return <Redirect href="/today" />;
+  // A channel that starts new programs on V2 never shows the V1 onboarding (lib/flags).
+  if (v2ForNewPrograms()) return <Redirect href="/v2/quiz" />;
 
   const advance = (next: Partial<Answers>) => {
     if (step < QUESTIONS.length - 1) setStep(step + 1);
