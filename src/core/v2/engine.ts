@@ -316,9 +316,9 @@ export function habitNotes(h: HabitDef, p: ProfileV2): string[] {
 /** Fitness goal, already active most days, and no fitness habit in the plan: say so instead of inventing one. */
 export const ACTIVE_NOTE =
   'You already have a strong activity routine. Let’s focus on the other changes that matter to you.';
-/** The development preview withheld the movement habits this person would otherwise get. */
+/** The release gate withheld the movement habits this person would otherwise get. */
 export const PREVIEW_MOVEMENT_NOTE =
-  'Development preview: the movement habits for this goal are still waiting for scientific review, so this plan doesn’t include one yet.';
+  'The movement habits for this goal are still being reviewed, so this plan doesn’t include one yet.';
 
 /** Shown with every exercise prototype. */
 export const PROTOTYPE_NOTE =

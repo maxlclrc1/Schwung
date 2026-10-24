@@ -2,14 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dateForDay, toDateKey } from '../../core/dates';
 import { habitTask, habitTaskAt, habitTitle } from '../../core/habits';
-import { buildPlan, toPlan } from '../../core/plan';
 import { dayQualifies, levelUpOffers, LEVEL_UP_RUN, totalXp } from '../../core/progression';
 import type { Answers, PlanHabit } from '../../core/types';
 import { FIXTURES } from '../../core/v2/__tests__/fixtures';
 import { DEV_CLEARED } from '../../core/v2/gate';
 import { previewPlan, swapChoices } from '../../core/v2/program';
 import type { ProfileV2 } from '../../core/v2/types';
-import { v2PreviewEnabled } from '../../lib/flags';
 import { migrateSaved } from '../migrate';
 import { currentDay, useApp } from '../useApp';
 
@@ -35,7 +33,6 @@ const s = () => useApp.getState();
 
 /** Starts a V2 program the way the plan screen does, choosing the first options that fit. */
 function startV2(p: ProfileV2) {
-  s().setDevV2Preview(true);
   s().setProfile(p);
   const r = previewPlan(p);
   if (r.status !== 'ok') throw new Error('expected a plan');
@@ -69,7 +66,6 @@ async function loadSaved(saved: unknown) {
 
 beforeEach(() => {
   s().restart();
-  s().setDevV2Preview(false);
   s().setDevDayOffset(0);
 });
 
@@ -77,37 +73,8 @@ afterEach(() => {
   s().setDevDayOffset(0);
 });
 
-describe('feature flag', () => {
-  it('is off by default', () => {
-    expect(s().devV2Preview).toBe(false);
-    expect(v2PreviewEnabled(s().devV2Preview)).toBe(false);
-  });
-
-  it('can never be on in a release build', () => {
-    const g = globalThis as { __DEV__?: boolean };
-    const before = g.__DEV__;
-    g.__DEV__ = false;
-    try {
-      expect(v2PreviewEnabled(true)).toBe(false);
-      s().setDevV2Preview(true);
-      expect(s().devV2Preview).toBe(false);
-    } finally {
-      g.__DEV__ = before;
-    }
-  });
-
-  it('flag off: V1 stays the default and a V2 start is refused', () => {
-    s().setProfile(C);
-    expect(s().startProgramV2([])).toBe(false);
-    expect(s().startedAt).toBeNull();
-    s().setAnswers(ANSWERS);
-    expect(s().startProgram()).toBe(true);
-    expect(s().programVersion).toBe(1);
-    expect(s().plan).toEqual(toPlan(buildPlan(ANSWERS)));
-    expect(s().plan.every((h) => h.spec === undefined)).toBe(true);
-  });
-
-  it('flag on: starts a V2 program with personal targets', () => {
+describe('starting a program (channels themselves: channel.test.ts)', () => {
+  it('starts a V2 program with personal targets', () => {
     const { r, ok } = startV2(C);
     expect(ok).toBe(true);
     expect(s().programVersion).toBe(2);
@@ -121,22 +88,13 @@ describe('feature flag', () => {
     expect(habitTitle(s().plan[0])).toBe('Make your bed');
   });
 
-  it('turning the flag on never converts a running V1 program', () => {
+  it('a V2 start never converts a running V1 program', () => {
     s().setAnswers(ANSWERS);
     s().startProgram();
     const before = JSON.parse(JSON.stringify(s().plan));
-    s().setDevV2Preview(true);
     s().setProfile(C);
     expect(s().startProgramV2([])).toBe(false);
     expect(s().programVersion).toBe(1);
-    expect(s().plan).toEqual(before);
-  });
-
-  it('turning the flag off keeps a running V2 program as it is', () => {
-    startV2(C);
-    const before = JSON.parse(JSON.stringify(s().plan));
-    s().setDevV2Preview(false);
-    expect(s().programVersion).toBe(2);
     expect(s().plan).toEqual(before);
   });
 
@@ -154,7 +112,6 @@ describe('feature flag', () => {
 
 describe('V2 onboarding paths', () => {
   it('under 16: nothing is saved', () => {
-    s().setDevV2Preview(true);
     s().setProfile(C);
     s().setProfile({ ...C, age: 'u16' });
     expect(s().profile).toBeNull();
@@ -173,7 +130,6 @@ describe('V2 onboarding paths', () => {
   });
 
   it('mandatory choice: refuses to start without the required picks', () => {
-    s().setDevV2Preview(true);
     s().setProfile(G1);
     expect(s().startProgramV2([])).toBe(false);
     const r = previewPlan(G1);
@@ -185,7 +141,6 @@ describe('V2 onboarding paths', () => {
 
   it('four habits: keeping four starts a four-habit plan, and a day counts at 4 of 4', () => {
     const e: ProfileV2 = { ...FIXTURES['E · 45, discipline'], wake: { kind: 'time', time: '07:00' } };
-    s().setDevV2Preview(true);
     s().setProfile(e);
     expect(s().startProgramV2([])).toBe(true);
     expect(s().plan).toHaveLength(4);
@@ -359,14 +314,13 @@ describe('persistence', () => {
   });
 
   it('an unfinished V2 onboarding draft is kept for "Pick up where you left off"', async () => {
-    s().setDevV2Preview(true);
     s().setProfile(C);
     await coldStart();
     expect(s().profile).toEqual(C);
     expect(s().startedAt).toBeNull();
   });
 
-  it('Restart clears a V2 program back to V1 defaults but keeps device preferences and the dev switch', () => {
+  it('Restart clears a V2 program back to the defaults but keeps device preferences', () => {
     startV2(C);
     s().setThemePreference('dark');
     s().restart();
@@ -374,7 +328,6 @@ describe('persistence', () => {
     expect(s().profile).toBeNull();
     expect(s().plan).toEqual([]);
     expect(s().themePreference).toBe('dark');
-    expect(s().devV2Preview).toBe(true);
   });
 });
 
@@ -410,7 +363,7 @@ describe('legacy saves', () => {
     expect(totalXp(s().logs)).toBe(30);
   });
 
-  it('are never converted, even with the preview switched on', async () => {
+  it('are never converted, even with the old preview switch saved on', async () => {
     await loadSaved({ ...legacy, state: { ...legacy.state, devV2Preview: true } });
     expect(s().programVersion).toBe(1);
     s().setProfile(C);

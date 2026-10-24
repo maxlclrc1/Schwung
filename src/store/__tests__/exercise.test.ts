@@ -43,7 +43,6 @@ const C = FIXTURES['C · 28, energy'];
  * do this today: these tests check the safeguards hold if it ever happens.
  */
 function withExercise(id: 'move_strength_prep' | 'move_seated', days?: Weekday[]): PlanHabit {
-  s().setDevV2Preview(true);
   s().setProfile(C);
   expect(s().startProgramV2([])).toBe(true);
   const sim = startSim(
@@ -60,7 +59,6 @@ function withExercise(id: 'move_strength_prep' | 'move_seated', days?: Weekday[]
 
 beforeEach(() => {
   s().restart();
-  s().setDevV2Preview(false);
   s().setDevDayOffset(0);
 });
 
@@ -161,10 +159,12 @@ describe('saved data', () => {
 });
 
 describe('development-only access', () => {
-  it('the Exercise Preview screen redirects away in release builds', () => {
+  it('the Exercise Preview screen and the Developer tools need the development channel', () => {
     const src = fs.readFileSync(`${SRC}/app/dev/exercise.tsx`, 'utf8');
-    expect(src).toMatch(/if \(!__DEV__\) return <Redirect href="\/" \/>;/);
-    expect(fs.readFileSync(`${SRC}/app/settings.tsx`, 'utf8')).toMatch(/\{__DEV__ \? <DevTools \/> : null\}/);
+    expect(src).toMatch(/if \(!__DEV__ \|\| !devTools\(\)\) return <Redirect href="\/" \/>;/);
+    expect(fs.readFileSync(`${SRC}/app/settings.tsx`, 'utf8')).toMatch(
+      /\{__DEV__ && devTools\(\) \? <DevTools \/> : null\}/,
+    );
   });
 
   it('only the development screen reaches the preview gate or the mock program', () => {

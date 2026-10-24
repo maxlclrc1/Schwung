@@ -43,7 +43,6 @@ const wd = (day: number) => weekdayOfDay(s().startedAt!, day);
 
 /** A V2 program (5 daily habits) plus a synthetic scheduled habit due on the weekdays of days 1, 3 and 5. */
 function setup(): string {
-  s().setDevV2Preview(true);
   s().setProfile(C);
   expect(s().startProgramV2([])).toBe(true);
   const id = s().addDevScheduledHabit([wd(1), wd(3), wd(5)])!;
@@ -54,7 +53,6 @@ const sched = (id: string) => s().plan.find((h) => h.habitId === id)!;
 
 beforeEach(() => {
   s().restart();
-  s().setDevV2Preview(false);
   s().setDevDayOffset(0);
 });
 
@@ -221,7 +219,6 @@ describe('yesterday edits, schedule changes, swaps and removals', () => {
   });
 
   it('never removes the last habit due on some weekday', () => {
-    s().setDevV2Preview(true);
     s().setProfile(FIXTURES['G2 · organized, discipline']);
     expect(s().startProgramV2([])).toBe(true);
     // Make every habit scheduled except one daily habit, then try to remove that one.
@@ -268,7 +265,6 @@ describe('persistence and compatibility', () => {
       expect(log(d).planned).toEqual(v1);
     }
     s().restart();
-    s().setDevV2Preview(true);
     s().setProfile(C);
     s().startProgramV2([]);
     const v2 = s().plan.map((h) => h.habitId);
@@ -375,7 +371,6 @@ describe('persistence and compatibility', () => {
   });
 
   it('the conversation habit is called Meaningful conversation for new plans and swaps', () => {
-    s().setDevV2Preview(true);
     s().setProfile(FIXTURES['B · 19, confidence']);
     s().startProgramV2([]);
     at(1);

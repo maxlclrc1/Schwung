@@ -10,7 +10,7 @@ import { OnboardingBackdrop } from '../../components/World';
 import { UNDER_16_MESSAGE } from '../../core/v2/engine';
 import { pendingTimeQuestion } from '../../core/v2/program';
 import { isAnswered, screensV2, toProfile, type Draft, type QuestionV2, type SingleQuestion } from '../../core/v2/quiz';
-import { v2PreviewEnabled } from '../../lib/flags';
+import { v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useScreenReader } from '../../lib/useScreenReader';
 import { useApp } from '../../store/useApp';
@@ -19,11 +19,11 @@ import { ThemedView } from '../../theme/transition';
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-/** Habit Science V2 quiz (development preview only). Same look as the V1 quiz. */
+/** The V2 quiz (channels that offer V2 to new programs, see lib/flags). Same look as the V1 quiz. */
 export default function QuizV2() {
   const { c } = useTheme();
   const started = useApp((s) => s.startedAt !== null);
-  const enabled = useApp((s) => v2PreviewEnabled(s.devV2Preview));
+  const enabled = v2ForNewPrograms();
   const screenReader = useScreenReader();
   const [draft, setDraft] = useState<Draft>(() => useApp.getState().profile ?? {});
   const [step, setStep] = useState(0);

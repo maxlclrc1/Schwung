@@ -18,11 +18,29 @@ npm run lint
 
 `npm run web` also works. It's handy for a quick visual check, but iOS is the target.
 
+### Build channels
+
+One setting, `EXPO_PUBLIC_SCHWUNG_CHANNEL`, decides what a build offers to **new** programs (`src/lib/flags.ts`).
+A running program always keeps its own version (V1 or V2), whatever the channel.
+
+| Channel | How to run it | New programs | Developer tools |
+|---|---|---|---|
+| `development` (default for `npx expo start`) | `npx expo start --clear` | V2 | Settings → Developer |
+| `internal` (testers) | `EXPO_PUBLIC_SCHWUNG_CHANNEL=internal npx expo start --clear`, or `eas build --profile internal` | V2 | none |
+| `production` (default for every release build) | `eas build --profile production` | V1 (unchanged) | none |
+
+- Use `--clear` whenever you switch channels: the value is built into the bundle, and a cached bundle keeps the old one.
+- In Expo Go, the `internal` channel keeps a separate save (`schwung-state-internal`). Trying it never touches the
+  progress saved under `development`, and switching back finds that progress as it was.
+- An internal release build (`eas.json` profile `internal`) gets its own app identifier (`app.config.ts`:
+  `….internal`), so it installs next to the public app and never shares its saved progress.
+
 ### Testing the 66 days without waiting 66 days
 
-In a dev build, go to **Settings → Developer** to jump the clock (+1/+3/+7 days, day 7/22/66/67) and to
+On the `development` channel, go to **Settings → Developer** to jump the clock (+1/+3/+7 days, day 7/22/66/67) and to
 replay ceremonies. Everything else (day number, reconciliation, reminders) runs on that shifted clock.
-The developer section and the offset are removed from release builds (`__DEV__`).
+The developer section and the offset exist only on the `development` channel of a development build, never on
+`internal` or in a release build.
 
 ## Structure
 

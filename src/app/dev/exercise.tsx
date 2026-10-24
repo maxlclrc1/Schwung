@@ -36,6 +36,7 @@ import {
 } from '../../core/v2/exercisePreview';
 import type { CheckAnswer, ExerciseCheck, ExerciseCheckKey } from '../../core/v2/types';
 import { BY_ID } from '../../core/v2/library';
+import { devTools } from '../../lib/flags';
 import { radius, space, useTheme } from '../../theme';
 
 /**
@@ -44,7 +45,8 @@ import { radius, space, useTheme } from '../../theme';
  * and the preview gate only lifts the prototype hold: every eligibility rule and safety check still applies.
  */
 export default function ExercisePreview() {
-  if (!__DEV__) return <Redirect href="/" />;
+  // The literal __DEV__ lets release bundles drop this screen's contents entirely.
+  if (!__DEV__ || !devTools()) return <Redirect href="/" />;
   return <Preview />;
 }
 

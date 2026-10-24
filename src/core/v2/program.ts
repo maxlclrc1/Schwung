@@ -87,7 +87,7 @@ function option(id: string, p: ProfileV2): Option {
   };
 }
 
-/** The plan the development preview offers for these answers (gate null = the full candidate pool, for tests). */
+/** The plan offered for these answers under the release gate (gate null = the full candidate pool, for tests). */
 export function previewPlan(p: ProfileV2, gate: ReadonlySet<string> | null = DEV_CLEARED): PreviewPlan {
   const r = generatePlanV2(p, gate ?? undefined);
   if (r.status !== 'ok') return r;
@@ -96,11 +96,11 @@ export function previewPlan(p: ProfileV2, gate: ReadonlySet<string> | null = DEV
   const withheld = full.status === 'ok' && gate ? full.picks.filter((x) => !gate.has(x.id)).map((x) => x.title) : [];
   const blocked = !!r.choice && r.choice.required > r.choice.alternatives.length;
   const limitation = blocked
-    ? 'Development preview: there aren’t enough reviewed habits for your answers to make a plan of 3 yet.'
+    ? 'There aren’t enough suitable habits for your answers to make a plan of 3 yet.'
     : withheld.length
-      ? `Development preview: ${titles(withheld)} would suit your answers, but ${
+      ? `${titles(withheld)} would suit your answers, but ${
           withheld.length === 1 ? 'it is' : 'they are'
-        } still waiting for scientific review, so ${withheld.length === 1 ? 'it isn’t' : 'they aren’t'} offered yet.`
+        } still being reviewed, so ${withheld.length === 1 ? 'it isn’t' : 'they aren’t'} offered yet.`
       : null;
   return {
     status: 'ok',
