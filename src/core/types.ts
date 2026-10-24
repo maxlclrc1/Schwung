@@ -56,11 +56,22 @@ export type HabitSpec = {
   notes: string[];
 };
 
+/** Sunday = 0 … Saturday = 6. */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/**
+ * A scheduled habit is due only on these weekdays (development-only foundation). Rest days are never misses.
+ * `phaseLevelUps` must be explicitly true for Day 22/45 to raise its level automatically.
+ */
+export type Schedule = { days: Weekday[]; phaseLevelUps?: boolean };
+
 export type PlanHabit = {
   habitId: string;
   custom?: { title: string; description?: string };
   /** V2 programs only. */
   spec?: HabitSpec;
+  /** Due only on these weekdays; absent = every day (all existing habits). */
+  schedule?: Schedule;
   level: Level;
   addedOnDay: number;
   /** Consecutive-day counters (level-up offers, step-downs) only look at days after this one. */

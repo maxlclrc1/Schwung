@@ -22,6 +22,7 @@ import { Button, ProgressBar, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
 import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
 import { comebackFor } from '../core/comeback';
+import { dueOn, isDueOn, nextSessionLabel } from '../core/schedule';
 import { PARALLAX, trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { habitTaskAt, habitTitle, levelUp } from '../core/habits';
@@ -65,9 +66,13 @@ export default function Today() {
   const start = startedAt ?? todayKey;
   const log = logs[dateForDay(start, viewDay)];
   const todayLog = logs[dateForDay(start, today)];
-  const todayFull = isFullDay(todayLog) && plan.every((p) => todayLog?.completed.includes(p.habitId));
+  // Scheduled habits only appear on their days; every daily habit is always due, so daily plans are unchanged.
+  const dueToday = useMemo(() => dueOn(plan, start, today), [plan, start, today]);
+  const shown = useMemo(() => dueOn(plan, start, viewDay), [plan, start, viewDay]);
+  const resting = useMemo(() => plan.filter((h) => !isDueOn(h, start, today)), [plan, start, today]);
+  const todayFull = isFullDay(todayLog) && dueToday.every((p) => todayLog?.completed.includes(p.habitId));
   const todayQualifies = dayQualifies(todayLog);
-  const doneCount = plan.filter((p) => log?.completed.includes(p.habitId)).length;
+  const doneCount = shown.filter((p) => log?.completed.includes(p.habitId)).length;
 
   const xp = useMemo(() => totalXp(logs), [logs]);
   const streak = useMemo(() => currentStreak(logs, start, today), [logs, start, today]);
@@ -88,10 +93,11 @@ export default function Today() {
   // Tall enough that the moving world still covers the screen at the bottom of a long page.
   const worldLayer = { height: screenHeight * 2 };
   const days = useMemo(() => ascentDays(logs, start, today), [logs, start, today]);
-  const todayDone = plan.filter((p) => todayLog?.completed.includes(p.habitId)).length;
+  const todayDone = dueToday.filter((p) => todayLog?.completed.includes(p.habitId)).length;
+  // The comeback's first step is always something due today.
   const comeback = useMemo(
-    () => comebackFor({ plan, logs, startKey: start, today, yesterdayEditable }),
-    [plan, logs, start, today, yesterdayEditable],
+    () => comebackFor({ plan: dueToday, logs, startKey: start, today, yesterdayEditable }),
+    [dueToday, logs, start, today, yesterdayEditable],
   );
   const onStartComeback = useCallback(
     (habitId: string) => {
@@ -201,7 +207,7 @@ export default function Today() {
 
         <Mission
           today={today}
-          planned={plan.length}
+          planned={dueToday.length}
           done={todayDone}
           qualifies={todayQualifies}
           full={todayFull}
@@ -276,13 +282,13 @@ export default function Today() {
           <T v="overline" color={c.textDim}>
             {viewing === 'today' ? 'Today’s habits' : 'Yesterday · editable until noon'}
           </T>
-          <T v="caption" color={doneCount === plan.length ? c.accentInk : c.textDim} style={styles.tabular}>
-            {doneCount} of {plan.length} done
+          <T v="caption" color={doneCount === shown.length ? c.accentInk : c.textDim} style={styles.tabular}>
+            {doneCount} of {shown.length} done
           </T>
         </View>
 
         <Animated.View layout={LinearTransition.duration(200)} style={styles.list}>
-          {plan.map((h) => (
+          {shown.map((h) => (
             <HabitRow
               key={h.habitId}
               habit={h}
@@ -292,6 +298,16 @@ export default function Today() {
             />
           ))}
         </Animated.View>
+
+        {viewing === 'today' && resting.length ? (
+          <View style={styles.resting} accessibilityRole="text">
+            {resting.map((h) => (
+              <T key={h.habitId} v="caption" color={c.textDim}>
+                Rest day for {habitTitle(h)} · next session {nextSessionLabel(h, start, today)}
+              </T>
+            ))}
+          </View>
+        ) : null}
 
         {viewing === 'today' ? (
           <View style={styles.footer}>
@@ -500,6 +516,7 @@ const styles = StyleSheet.create({
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: space.sm },
   list: { gap: space.sm },
   footer: { gap: space.md, marginTop: space.sm },
+  resting: { gap: space.xs, paddingHorizontal: space.xs },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',

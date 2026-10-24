@@ -161,6 +161,16 @@ function DevTools() {
         <DevButton label="Reset clock" onPress={() => setOffset(0)} />
         <DevButton label="Replay ceremonies" onPress={() => useApp.setState({ seenCeremonies: [] })} />
       </View>
+      {startedAt ? (
+        <View style={styles.devRow}>
+          {/* Synthetic scheduled habits for testing the scheduler: not recommendations, not exercises. */}
+          <DevButton
+            label="+ Test session Mon/Wed/Fri"
+            onPress={() => useApp.getState().addDevScheduledHabit([1, 3, 5])}
+          />
+          <DevButton label="+ Test session Tue/Thu" onPress={() => useApp.getState().addDevScheduledHabit([2, 4])} />
+        </View>
+      ) : null}
       <View style={styles.devRow}>
         <DevButton
           label={`V2 preview: ${v2 ? 'on' : 'off'}${V2_PREVIEW_FROM_ENV ? ' (env)' : ''}`}

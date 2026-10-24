@@ -12,11 +12,12 @@ All scientific and safety claims remain **[VERIFY]**.
 - **[POP]** is WHO or CDC population guidance (section G). Population guidance is **not** evidence that any
   particular rung works or is universally safe.
 
-## Change log (revisions 6.1 and 6.2, owner-approved refinements)
+## Change log (revisions 6.1–6.3, owner-approved refinements)
 | Rev | Change |
 |---|---|
 | 6.1 | W1 only for habits actually in the plan (asked when such a choice is made); the two sleep questions share one screen; Unsweetened drinks ladder becomes swap 1 · up to 2 · up to 3, and a day with no sugary drinks counts |
 | 6.2 | Start a conversation (#21): one conversation a day at every level (genuine conversation beyond logistics → a follow-up question → start one yourself with someone you know). Still choice-only; no strangers needed. Public release still needs social-anxiety wording review |
+| 6.3 | #21 is displayed as **"Meaningful conversation"** (id unchanged; saved plans keep their frozen title). Scheduled-habit infrastructure added behind development only (section E) |
 
 ## Change log (revision 5 → 6: evidence and safety review, 2026-10-24)
 Source access was search-level only; see `SCHWUNG_V2_EVIDENCE_REGISTER.md`.
@@ -116,7 +117,7 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 | 18 | `focus_top3` | First task | auto | candidate | 16+ | focus ★, discipline ★, calm · | planning routine → 1; else 0 | Write your #1 task · + 10 min on it first · + 25 · + 45 | — |
 | 19 | `social_reach_out` | Reach out | auto | candidate | 16+ | **confidence ★**, calm ·, energy · | 0 | Message or call 1/2/3 people | — |
 | 20 | `confidence_compliment` | Genuine compliment | auto | candidate | 16+ | confidence ★ | 0 | 1/2/3 genuine compliments (a message counts) | — |
-| 21 | `confidence_talk` | Start a conversation | **choice / add** | candidate | 16+ | none | 0 | One conversation a day at every level: a genuine conversation beyond logistics · ask a follow-up question in one · start one yourself with someone you know (revision 6.2) | Opportunity-dependent (max 1 per plan). Note: everyday conversations with family, friends or colleagues count; no strangers needed; swap if it feels like too much. Public release needs social-anxiety wording review |
+| 21 | `confidence_talk` | Meaningful conversation | **choice / add** | candidate | 16+ | none | 0 | One conversation a day at every level: a genuine conversation beyond logistics · ask a follow-up question in one · start one yourself with someone you know (revision 6.2) | Opportunity-dependent (max 1 per plan). Note: everyday conversations with family, friends or colleagues count; no strangers needed; swap if it feels like too much. Public release needs social-anxiety wording review |
 | 22 | `move_strength_session` | Strength session | — | held | — | — | — | 2 sessions/week | Scheduled; design only (E) |
 | 23 | `move_balance` | Balance practice | auto (when released) | **held** | 50+ or walking difficulty | fitness ★ (65+), calm · | — | Product draft only, e.g. supported single-leg stands. **No target is released until reviewed** | Held |
 
@@ -251,14 +252,19 @@ A habit is eligible when it is:
 - **Revision 6.1:** questions 3a and 3b share one screen ("Your sleep"), both answered before Continue.
 - Varies or shift → recompute without wake-anchored rules.
 
-## E. Scheduled habits: design only, not approved
-- **What it is:** a habit planned on chosen weekdays.
-- **Today screen:** shows only today's planned habits.
-- **What stays the same:** the 80% rule and XP (both use each day's planned list [FACT]), streaks, phase
-  level-ups, yesterday edits, and Journey.
-- **What would change (⚠ mechanics):** early level-up and step-down would count scheduled sessions.
-- **Moving a session:** "Do it today" once, within the same week, while the original day is still editable.
-- **Rest days:** unscheduled days.
+## E. Scheduled habits: development-only foundation (revision 6.3)
+The infrastructure is built and tested; **no scheduled habit is offered to users**. Strength sessions and balance
+stay held. Behaviour, edge cases and open decisions: `SCHWUNG_V2_SCHEDULED_HABITS.md`.
+
+- A habit may carry `schedule: { days, phaseLevelUps? }`, with 2–3 weekdays. Without it, a habit is due every
+  day, so all existing plans are unchanged.
+- Today and the 80% rule use only the habits due that day. Rest days are never misses. XP and streaks are
+  unchanged (they already use each day's planned list).
+- Early level-up counts 7 consecutive *sessions*; step-down needs 3 consecutive missed *sessions*.
+- Day 22 and Day 45 never raise a scheduled habit unless `phaseLevelUps` is explicitly true for it.
+- A plan always has something due on every weekday (removals and schedule changes that would break this are
+  refused).
+- Moving a single session is **not built** (product decision pending).
 
 ## F. Compatibility
 1. **V1 is untouched:** `src/core/plan.ts`, `src/core/habits.ts` and the store [FACT]. The V2 engine is a
