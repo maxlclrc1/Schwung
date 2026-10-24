@@ -63,7 +63,6 @@ release.
 6. "Pick up where you left off" on Welcome resumes an unfinished V2 draft.
 
 ## Known limits of the preview
-- On iPhone, the sleep hours and sleep trouble questions are separate steps rather than one screen.
 - Some plans are still thin: fitness for heart/BP, pregnancy, walking difficulty or very active people;
   16–17-year-olds with sleep or food needs. Strength preparation is not in the gate. The screen says so;
   nothing is substituted.

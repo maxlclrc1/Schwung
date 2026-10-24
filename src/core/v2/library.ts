@@ -204,13 +204,15 @@ export const LIBRARY: HabitDef[] = [
     mode: 'auto',
     release: 'candidate',
     // NHS advice treats low blood sugar with a sugary drink or juice, so that must always come first.
-    note: 'If you use a sugary drink or juice to treat low blood sugar, always do that. It never counts against this habit. If you have diabetes, your care team’s advice comes first.',
+    // A day with no sugary drinks always counts: nobody should need to have one to complete a swap.
+    note: 'A day with no sugary drinks counts too: you never need to have one. If you use a sugary drink or juice to treat low blood sugar, always do that. It never counts against this habit. If you have diabetes, your care team’s advice comes first.',
     exclude: (p) =>
       !isAdult(p) ? 'not offered under 18' : p.produce === 'skip' ? 'you chose to skip food habits' : null,
+    // "Up to": swapping every sugary drink you'd have had completes it, however few that is.
     ladder: fixed([
-      'Choose water or an unsweetened drink instead of a sugary one, once today',
-      'Choose water or an unsweetened drink instead of a sugary one, twice today',
-      'All your drinks today are unsweetened',
+      'Swap a sugary drink for water or an unsweetened one',
+      'Swap up to 2 sugary drinks for water or unsweetened ones',
+      'Swap up to 3 sugary drinks for water or unsweetened ones',
     ]),
     start: (p) => (p.sugary === 'most' ? 0 : p.sugary === 'some' ? 1 : null),
     why: 'An easy swap for a sugary drink.',

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Redirect, router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { Redirect, router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, T } from '../../components/ui';
@@ -8,7 +8,7 @@ import { OnboardingBackdrop } from '../../components/World';
 import { LANDMARKS, ASCENT_PHASES } from '../../core/ascent';
 import { GROWTH_NOTES } from '../../core/onboarding';
 import { GOAL_LABEL } from '../../core/plan';
-import { canChoose, iconFor, pendingTimeQuestion, previewPlan } from '../../core/v2/program';
+import { canChoose, choiceNeedsTime, iconFor, pendingTimeQuestion, previewPlan } from '../../core/v2/program';
 import type { Targets } from '../../core/v2/types';
 import { v2PreviewEnabled } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
@@ -32,6 +32,37 @@ export default function PlanV2() {
   const enabled = useApp((s) => v2PreviewEnabled(s.devV2Preview));
   const plan = useMemo(() => (profile ? previewPlan(profile) : null), [profile]);
   const [chosen, setChosen] = useState<string[]>([]);
+  // A choice waiting for the wake (or bed) time it needs; added when the person comes back with an answer.
+  // Refs, so setting it doesn't re-run the focus effect before the time screen opens.
+  const pending = useRef<string | null>(null);
+  const chosenRef = useRef(chosen);
+  useEffect(() => {
+    chosenRef.current = chosen;
+  }, [chosen]);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!profile || !plan || plan.status !== 'ok') return;
+      // Answers can change what fits (e.g. a changing wake time rules out Steady wake-up): keep every choice
+      // that still fits, in order, so nothing else is lost.
+      const list = chosenRef.current;
+      const kept = list.reduce<string[]>((acc, id) => (canChoose(plan, acc, id) ? [...acc, id] : acc), []);
+      const id = pending.current;
+      pending.current = null;
+      let next = kept;
+      if (id && !choiceNeedsTime(profile, kept, id)) {
+        if (canChoose(plan, kept, id)) {
+          next = [...kept, id];
+          setNotice(null);
+        } else {
+          const title = plan.options.find((o) => o.id === id)?.title ?? 'That habit';
+          setNotice(`${title} doesn’t fit your schedule, so it wasn’t added.`);
+        }
+      }
+      if (next.join() !== list.join()) setChosen(next);
+    }, [profile, plan]),
+  );
 
   if (started) return <Redirect href="/today" />;
   if (!enabled || !profile) return <Redirect href="/welcome" />;
@@ -50,6 +81,13 @@ export default function PlanV2() {
 
   const toggle = (id: string) => {
     haptic.tap();
+    setNotice(null);
+    if (!chosen.includes(id) && canChoose(plan, chosen, id) && choiceNeedsTime(profile, chosen, id)) {
+      // This habit's targets need the wake time: ask now, then add it on the way back.
+      pending.current = id;
+      router.push({ pathname: '/v2/time', params: { with: [...chosen, id].join(',') } });
+      return;
+    }
     setChosen((list) =>
       list.includes(id) ? list.filter((x) => x !== id) : canChoose(plan, list, id) ? [...list, id] : list,
     );
@@ -148,6 +186,11 @@ export default function PlanV2() {
               <T v="caption" color={c.textDim}>
                 {choice.ruleNote}
               </T>
+              {notice ? (
+                <T v="caption" color={c.accentInk} accessibilityLiveRegion="polite">
+                  {notice}
+                </T>
+              ) : null}
             </View>
             {options.map((o) => {
               const selected = chosen.includes(o.id);

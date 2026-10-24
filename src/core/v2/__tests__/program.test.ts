@@ -5,6 +5,7 @@ import { BY_ID, LIBRARY } from '../library';
 import {
   assemblePlan,
   canChoose,
+  choiceNeedsTime,
   pendingTimeQuestion,
   previewPlan,
   repairSpec,
@@ -12,7 +13,7 @@ import {
   swappedHabit,
   type PreviewPlan,
 } from '../program';
-import { QUESTIONS_V2, toProfile, visibleQuestions, type Draft } from '../quiz';
+import { QUESTIONS_V2, screensV2, toProfile, visibleQuestions, type Draft } from '../quiz';
 import type { ProfileV2 } from '../types';
 import { FIXTURES } from './fixtures';
 import { sample } from './sample';
@@ -66,6 +67,20 @@ function choose(r: Ok, n: number): string[] {
   return chosen;
 }
 
+/** What the screens do: choose, then answer any time question the plan now needs (07:00 up, 23:00 in bed). */
+function startable(p: ProfileV2): { profile: ProfileV2; chosen: string[] } {
+  let profile = p;
+  for (let i = 0; i < 4; i++) {
+    const r = ok(profile);
+    const chosen = choose(r, r.choice?.required ?? 0);
+    const q = pendingTimeQuestion(profile, DEV_CLEARED, chosen);
+    if (q === 'wake') profile = { ...profile, wake: { kind: 'time', time: '07:00' } };
+    else if (q === 'bed') profile = { ...profile, inBed: '23:00' };
+    else return { profile, chosen };
+  }
+  throw new Error('time questions never settled');
+}
+
 describe('release gate', () => {
   it('clears exactly the reviewed habits', () => {
     expect([...DEV_CLEARED].sort()).toEqual([...CLEARED].sort());
@@ -91,9 +106,10 @@ describe('release gate', () => {
       const offered = [...ids(r), ...r.options.map((o) => o.id)];
       for (const id of offered) expect(DEV_CLEARED.has(id)).toBe(true);
       for (const id of ids(r).slice(1)) {
-        const plan = assemblePlan(p, choose(r, r.choice?.required ?? 0));
+        const { profile, chosen } = startable(p);
+        const plan = assemblePlan(profile, chosen);
         if (!plan) continue;
-        for (const s of swapChoices(p, plan, id)) expect(DEV_CLEARED.has(s.id)).toBe(true);
+        for (const s of swapChoices(profile, plan, id)) expect(DEV_CLEARED.has(s.id)).toBe(true);
       }
     }
   });
@@ -126,7 +142,8 @@ describe('the eight established profiles through the development preview', () =>
       expect(ids(r)[0]).toBe('discipline_bed');
       for (const id of ids(r)) expect(DEV_CLEARED.has(id)).toBe(true);
       expect(r.blocked).toBe(false);
-      const plan = assemblePlan(p, choose(r, r.choice?.required ?? 0));
+      const { profile, chosen } = startable(p);
+      const plan = assemblePlan(profile, chosen);
       expect(plan).not.toBeNull();
       expect(plan!.length).toBeGreaterThanOrEqual(3);
       for (const h of plan!) {
@@ -284,6 +301,25 @@ describe('personal targets', () => {
     expect(d.picks.find((x) => x.id === 'sleep_no_phone_bed')!.targets.easy).toBe('Phone away 30 min before bed');
   });
 
+  it('bedtime targets follow the person’s own in-bed time (review discrepancy: 00:30 vs the 23:00 default)', () => {
+    const c = FIXTURES['C · 28, energy'];
+    // Fixture: in bed at 00:30, up at 07:00.
+    expect(ok(c).picks.find((x) => x.id === 'sleep_bedtime')!.targets).toEqual({
+      easy: 'In bed by 00:15',
+      medium: 'In bed by 00:00',
+      hard: 'In bed by 23:45',
+    });
+    // The browser run could only keep the time pickers' defaults (in bed 23:00): Day 22's 22:30 is that
+    // window's Medium, not a rendering error.
+    expect(ok({ ...c, inBed: '23:00' }).picks.find((x) => x.id === 'sleep_bedtime')!.targets).toEqual({
+      easy: 'In bed by 22:45',
+      medium: 'In bed by 22:30',
+      hard: 'In bed by 22:15',
+    });
+    // Already 9 h in bed: no step fits under the ceiling, so it isn't offered.
+    expect(ids(ok({ ...c, inBed: '22:00' }))).not.toContain('sleep_bedtime');
+  });
+
   it('never starts an earlier bedtime without the person’s own wake and in-bed times', () => {
     const c = FIXTURES['C · 28, energy'];
     expect(assemblePlan(c, [])!.some((h) => h.habitId === 'sleep_bedtime')).toBe(true);
@@ -340,6 +376,36 @@ describe('swaps', () => {
   });
 });
 
+describe('unsweetened drinks ladder', () => {
+  it('never requires a sugary drink: "up to" targets, and a day with none counts', () => {
+    const c = FIXTURES['C · 28, energy'];
+    const t = ok(c).picks.find((x) => x.id === 'food_unsweetened');
+    const targets = t?.targets ?? BY_ID.food_unsweetened.ladder(c).slice(0, 3);
+    expect(targets).toEqual(
+      t
+        ? {
+            easy: 'Swap a sugary drink for water or an unsweetened one',
+            medium: 'Swap up to 2 sugary drinks for water or unsweetened ones',
+            hard: 'Swap up to 3 sugary drinks for water or unsweetened ones',
+          }
+        : [
+            'Swap a sugary drink for water or an unsweetened one',
+            'Swap up to 2 sugary drinks for water or unsweetened ones',
+            'Swap up to 3 sugary drinks for water or unsweetened ones',
+          ],
+    );
+    for (const rung of BY_ID.food_unsweetened.ladder(c)) expect(rung).not.toMatch(/\ball\b/i);
+    const note = BY_ID.food_unsweetened.note!;
+    expect(note).toMatch(/no sugary drinks counts too/);
+    expect(note).toMatch(/low blood sugar, always do that/);
+    expect(note).toMatch(/care team/);
+    // Still adults only, and only for "most days" (the 3-rung ladder leaves no room above "a few times a week").
+    expect(exclusion(BY_ID.food_unsweetened, { ...c, age: '16_17' })).not.toBeNull();
+    expect(exclusion(BY_ID.food_unsweetened, { ...c, sugary: 'some' })).not.toBeNull();
+    expect(exclusion(BY_ID.food_unsweetened, { ...c, sugary: 'most' })).toBeNull();
+  });
+});
+
 describe('V2 quiz', () => {
   const answered: Draft = {
     age: '30_49',
@@ -373,6 +439,17 @@ describe('V2 quiz', () => {
     ]);
   });
 
+  it('puts both sleep questions on one screen, keeping both questions and all their options', () => {
+    const screens = screensV2(answered);
+    const sleep = screens.find((x) => x[0].key === 'sleepHours')!;
+    expect(sleep.map((x) => x.key)).toEqual(['sleepHours', 'sleepTrouble']);
+    expect(sleep.map((x) => (x.kind === 'single' ? x.options.length : 0))).toEqual([5, 3]);
+    expect(screens.flat().map((x) => x.key)).toEqual(visibleQuestions(answered).map((x) => x.key));
+    expect(screens).toHaveLength(visibleQuestions(answered).length - 1);
+    // Nothing is preselected: a fresh draft has neither answer.
+    expect(toProfile({ ...answered, sleepTrouble: undefined })).toBeNull();
+  });
+
   it('asks about sugary drinks only for adults who did not skip food questions', () => {
     expect(keys({ ...answered })).toContain('sugary');
     expect(keys({ ...answered, age: '16_17' })).not.toContain('sugary');
@@ -404,15 +481,60 @@ describe('V2 quiz', () => {
     expect(previewPlan({ ...(toProfile(answered) as ProfileV2), age: 'u16' }).status).toBe('not_eligible');
   });
 
-  it('asks W1 only when a wake-anchored habit is in the plan or the choices, and only once', () => {
+  it('asks W1 only when a wake-anchored habit is in the plan, and only once', () => {
     const p = toProfile(answered)!;
     const r = ok(p);
-    const anchored = [...ids(r), ...r.options.map((o) => o.id)].some((id) =>
+    const anchored = ids(r).some((id) =>
       ['sleep_wake', 'screen_morning', 'screen_social', 'sleep_morning_light', 'sleep_bedtime'].includes(id),
     );
     expect(pendingTimeQuestion(p)).toBe(anchored ? 'wake' : null);
     expect(pendingTimeQuestion({ ...p, wake: { kind: 'time', time: '07:00' } })).toBeNull();
     expect(pendingTimeQuestion({ ...p, wake: { kind: 'varies' } })).toBeNull();
+  });
+
+  describe('W1 waits for an optional or required choice that needs it (E, G1, G2)', () => {
+    for (const name of ['E · 45, discipline', 'G1 · healthy, fitness', 'G2 · organized, discipline']) {
+      const p = FIXTURES[name];
+      it(name, () => {
+        expect(p.wake).toBeUndefined();
+        const r = ok(p);
+        // Nothing in the generated plan needs a wake time, so the quiz goes straight to the plan.
+        expect(pendingTimeQuestion(p)).toBeNull();
+        // Choosing an alternative that needs it asks W1 at that moment; one that doesn't, never does.
+        const light = r.options.find((o) => o.id === 'sleep_morning_light')!;
+        const plain = r.options.find((o) => !['sleep_morning_light', 'sleep_wake', 'sleep_bedtime'].includes(o.id))!;
+        expect(choiceNeedsTime(p, [], light.id)).toBe(true);
+        expect(choiceNeedsTime(p, [], plain.id)).toBe(false);
+        expect(pendingTimeQuestion(p, DEV_CLEARED, [light.id])).toBe('wake');
+        // Without the answer the choice can't be started; with it, it can, and nothing else is lost.
+        const extra = r.choice!.required > 1 ? [plain.id] : [];
+        const picked = [...extra, light.id].slice(-Math.max(1, r.choice!.required));
+        expect(assemblePlan(p, picked)).toBeNull();
+        for (const wake of [{ kind: 'time', time: '06:30' }, { kind: 'varies' }, { kind: 'shift' }] as const) {
+          const answered2: ProfileV2 = { ...p, wake };
+          const r2 = ok(answered2);
+          // The generated plan doesn't change because of the answer.
+          expect(ids(r2)).toEqual(ids(r));
+          const plan = assemblePlan(answered2, picked);
+          expect(plan).not.toBeNull();
+          const lightHabit = plan!.find((h) => h.habitId === 'sleep_morning_light')!;
+          expect(lightHabit.spec!.targets.easy).toBe(
+            wake.kind === 'shift'
+              ? 'Outside for 5 min soon after your main sleep'
+              : 'Outside within an hour of waking for 5 min',
+          );
+          for (const id of extra) expect(plan!.some((h) => h.habitId === id)).toBe(true);
+        }
+      });
+    }
+  });
+
+  it('a changing schedule removes Steady wake-up from the choices once W1 is answered', () => {
+    const g1 = FIXTURES['G1 · healthy, fitness'];
+    const withWake = ok({ ...g1, routines: g1.routines.filter((x) => x !== 'sameWake') });
+    expect(withWake.options.map((o) => o.id)).toContain('sleep_wake');
+    const varies = ok({ ...g1, routines: g1.routines.filter((x) => x !== 'sameWake'), wake: { kind: 'varies' } });
+    expect(varies.options.map((o) => o.id)).not.toContain('sleep_wake');
   });
 
   it('asks W2 only after a W1 time, and only when Earlier bedtime is offered', () => {

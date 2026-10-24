@@ -71,7 +71,7 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 | 6b | What takes most of that time? | Social media · Videos · Games · Messages and news · A mix | 6a ≥ 2–4 h or Not sure |
 | 7 | Which of these are already part of most of your days (5+ days a week)? | Reading 10+ min · Breathing or meditation · Journaling · Planning my day · A 30+ minute walk · Phone out of reach 30 min before sleep · Waking up at about the same time every day · Making my bed · None of these | Always |
 | 8 | Anything we should keep in mind? (optional, stays on your phone) | Joint, back or injury pain · Walking or standing for long is difficult for me · Heart or blood-pressure condition · Pregnant or recently gave birth · A clinician told me to limit fluids · Diagnosed sleep condition · None of these · Skip | Always |
-| W1 | What time do you usually get up on school or work days? | Time · It changes a lot · I work shifts or nights | The provisional plan has a wake-anchored or bedtime habit |
+| W1 | What time do you usually get up on school or work days? | Time · It changes a lot · I work shifts or nights | The generated plan has a wake-anchored or bedtime habit, or the person chooses one (asked at that moment) |
 | W2 | What time do you usually get into bed on those nights? | Time | Earlier bedtime is in the provisional plan and W1 is a time |
 
 ## B. Library [PROPOSED; targets PRODUCT; benefits VERIFY]
@@ -98,7 +98,7 @@ No answer is pre-selected. Skipping precautions means **unknown**, never "none".
 | 6 | `move_walk` | Walk | auto | candidate | 16+ | energy ★, calm ★, fitness ★ | days 0 → 5 min; 1–2 → 10; 3–4 → 20; 5+ → 20, only for energy/calm | 5/10/15/20/25/30/40/50/60 min | Not with the routine "30+ min walk", the precaution "walking is difficult", **heart/BP or pregnancy** (pending review). Comfort and warning-sign note for joint, unknown, 65+ |
 | 7 | `move_strength_prep` | Strength preparation | choice / add | standard: candidate, **not in the development gate (pending expert review)** · **gentle: held** | 16+ | none (suggested for fitness and confidence in the choice step) | 0 (conservative) | 1 set of 1 move · 1 of 2 · 1 of 3 · 2 sets of 3 | Excluded: heart/BP, pregnancy, walking difficult, **active 3+ days a week**. Joint, 65+ or unknown would need the **gentle** variant, which is **held** → not offered. Copy: "Practice for a strength routine, not a full strength workout. Guidelines recommend strength work on 2+ days a week." |
 | 8 | `food_produce` | Fruit and veg | auto | candidate | **18+** (16–17 pending review) | energy ·, fitness · | hardly any → 1 portion; 1–2 → 2; 3–4 → **not offered** (no room); 5+ → not offered | 1/2/3/4/5 portions today | Food skipped. Copy: "Builds the habit; doesn't measure whether your diet meets guidelines. If counting food ever feels stressful, swap this habit." |
-| 9 | `food_unsweetened` | Unsweetened drinks | auto | candidate | **18+** | energy ·, fitness · | most → 0; a few times → not offered (no room); rarely → not offered | Swap once · Swap twice · All drinks unsweetened today | Never under 18; food skipped |
+| 9 | `food_unsweetened` | Unsweetened drinks | auto | candidate | **18+** | energy ·, fitness · | most → 0; a few times → not offered (no room); rarely → not offered | Swap a sugary drink · Swap up to 2 · Swap up to 3 (a day with no sugary drinks counts; revision 6.1) | Never under 18; food skipped |
 | 10 | `food_water_meals` | Water with meals | add | candidate | 16+ | — | 0 | Water with 1/2/3 meals | Fluid limit |
 | 11 | `screen_morning` | Phone-free start | auto | candidate | 16+ | energy ·, calm · | 6 h+ → 0; 2–6 h or Not sure → 1; 1–2 h → not offered (no room); <1 h → not offered | First 15/30/45/60 min after waking | Overlap group `morning_phone`; phone rule |
 | 12 | `screen_social` | Social-free start | auto | candidate | 16+ | focus ★, calm · | 6 h+ → 0; 4–6 h → 1; 2–4 h → 2 | First 30 min / 1 / 2 / 3 / 4 h after waking without social apps | 6b = social only. Overlap `morning_phone`; phone rule |
@@ -239,6 +239,10 @@ A habit is eligible when it is:
 ### D.7 W questions
 - Computed with W1 assumed to be a time.
 - Ask W1 once if needed, and W2 if bedtime is in the plan.
+- **Revision 6.1 (owner-approved):** only habits actually in the plan count: the generated ones, plus a choice
+  at the moment it's chosen. Optional alternatives never trigger W1 by themselves. Earlier choices are kept;
+  one that no longer fits after the answer is dropped with a short message.
+- **Revision 6.1:** questions 3a and 3b share one screen ("Your sleep"), both answered before Continue.
 - Varies or shift → recompute without wake-anchored rules.
 
 ## E. Scheduled habits: design only, not approved

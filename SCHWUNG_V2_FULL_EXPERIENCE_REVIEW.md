@@ -96,7 +96,7 @@ starts with **Make your bed**, so it's left out below.
 | Phone-free wind-down | 60 min at Hard for heavy users with sleep trouble is ambitious but stepwise |
 | Slow breathing | Gentle (2 → 5 min) |
 | Fruit and veg | +2 portions over 66 days. Practical |
-| Unsweetened drinks | **The step from "twice today" to "all drinks unsweetened" is large** (see 6.3) |
+| Unsweetened drinks | ~~The step from "twice today" to "all drinks unsweetened" is large~~ **Resolved:** swap 1 → up to 2 → up to 3 |
 | Water with meals | Practical |
 | Start a conversation | **3 conversations a day at Hard may be unrealistic** for the people who choose it (see 6.4) |
 

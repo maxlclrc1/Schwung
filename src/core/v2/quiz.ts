@@ -19,6 +19,10 @@ export type SingleQuestion = {
   hint?: string;
   options: { value: string; label: string; sub?: string; icon?: string }[];
   shown?: (d: Draft) => boolean;
+  /** Shown on the same screen as the question before it (both answered, then Continue). */
+  withPrevious?: boolean;
+  /** Title of a shared screen, when this question starts one. */
+  screenTitle?: string;
 };
 
 export type MultiQuestion = {
@@ -77,6 +81,7 @@ export const QUESTIONS_V2: QuestionV2[] = [
     key: 'sleepHours',
     icon: 'moon',
     section: NOW,
+    screenTitle: 'Your sleep',
     title: 'How many hours do you usually sleep on a school or work night?',
     options: [
       opt('lt6', 'Less than 6'),
@@ -91,6 +96,7 @@ export const QUESTIONS_V2: QuestionV2[] = [
     key: 'sleepTrouble',
     icon: 'cloudy-night',
     section: NOW,
+    withPrevious: true,
     title: 'How often do you have trouble falling asleep, staying asleep, or waking too early?',
     options: [opt('rarely', 'Rarely'), opt('some', '1–2 nights a week'), opt('most', '3+ nights a week')],
   },
@@ -200,6 +206,16 @@ export const QUESTIONS_V2: QuestionV2[] = [
 /** The questions this draft gets, in order (conditional ones depend on earlier answers). */
 export function visibleQuestions(d: Draft): QuestionV2[] {
   return QUESTIONS_V2.filter((q) => q.kind === 'multi' || !q.shown || q.shown(d));
+}
+
+/** The quiz screens for this draft: usually one question each; the two sleep questions share one. */
+export function screensV2(d: Draft): QuestionV2[][] {
+  const screens: QuestionV2[][] = [];
+  for (const q of visibleQuestions(d)) {
+    if (q.kind === 'single' && q.withPrevious && screens.length) screens[screens.length - 1].push(q);
+    else screens.push([q]);
+  }
+  return screens;
 }
 
 export function isAnswered(q: QuestionV2, d: Draft): boolean {
