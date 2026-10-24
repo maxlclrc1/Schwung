@@ -22,7 +22,7 @@ import { Button, ProgressBar, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
 import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
 import { comebackFor } from '../core/comeback';
-import { dueOn, isDueOn, nextSessionLabel } from '../core/schedule';
+import { dueOn, isDueOn, nextSessionLabel, wasDueOn } from '../core/schedule';
 import { PARALLAX, trailPoint, worldFrame } from '../core/world';
 import { dateForDay, PROGRAM_DAYS } from '../core/dates';
 import { habitTaskAt, habitTitle, levelUp } from '../core/habits';
@@ -68,7 +68,8 @@ export default function Today() {
   const todayLog = logs[dateForDay(start, today)];
   // Scheduled habits only appear on their days; every daily habit is always due, so daily plans are unchanged.
   const dueToday = useMemo(() => dueOn(plan, start, today), [plan, start, today]);
-  const shown = useMemo(() => dueOn(plan, start, viewDay), [plan, start, viewDay]);
+  // Yesterday shows what was due yesterday by its own record, even if a schedule changed since.
+  const shown = useMemo(() => plan.filter((h) => wasDueOn(h, logs, start, viewDay)), [plan, logs, start, viewDay]);
   const resting = useMemo(() => plan.filter((h) => !isDueOn(h, start, today)), [plan, start, today]);
   const todayFull = isFullDay(todayLog) && dueToday.every((p) => todayLog?.completed.includes(p.habitId));
   const todayQualifies = dayQualifies(todayLog);

@@ -1,6 +1,13 @@
 import { describe, expect, it } from '@jest/globals';
 import { addDays, dateForDay } from '../dates';
-import { completionRun, levelUpOffers, reconcile, LEVEL_UP_RUN, STEP_DOWN_MISSES } from '../progression';
+import {
+  ACCEPT_ONLY_LEVEL_UPS,
+  completionRun,
+  levelUpOffers,
+  reconcile,
+  LEVEL_UP_RUN,
+  STEP_DOWN_MISSES,
+} from '../progression';
 import {
   coversEveryWeekday,
   dueOn,
@@ -10,6 +17,7 @@ import {
   scheduleLabel,
   validDays,
   validSchedule,
+  wasDueOn,
   weekdayOfDay,
   weekdayOfKey,
 } from '../schedule';
@@ -175,5 +183,55 @@ describe('progression with scheduled habits', () => {
       yesterdayEditable: false,
     });
     expect(r45.plan.map((h) => h.level)).toEqual(['hard', 'easy', 'hard']);
+  });
+});
+
+describe('audit regressions (owner decisions of the scheduled-fitness review)', () => {
+  it('editing the weekdays never rewrites past sessions: the run is kept and nothing steps down', () => {
+    const before = sched('s', [1, 3, 5], { level: 'medium' });
+    const logs = logsFor([before], 12, () => true); // sessions on days 1, 3, 5, 8, 10, 12 all done
+    const after = { ...before, schedule: { days: [2, 4] as Weekday[] } }; // edited on day 13
+    expect(completionRun(before, logs, START, 13)).toBe(6);
+    expect(completionRun(after, logs, START, 13)).toBe(6);
+    const r = reconcile({ plan: [after], appliedPhase: 1, startKey: START, logs, today: 13, yesterdayEditable: false });
+    expect(r.plan[0].level).toBe('medium');
+    expect(r.events).toEqual([]);
+    // Past days follow their own records; days without a log follow the current schedule.
+    expect(wasDueOn(after, logs, START, 1)).toBe(true); // a Monday session under the old days
+    expect(wasDueOn(after, logs, START, 2)).toBe(false); // a Tuesday rest day then
+    expect(wasDueOn(after, logs, START, 16)).toBe(true); // no log yet: Tuesday under the new days
+    expect(wasDueOn(daily('d'), {}, START, 3)).toBe(true);
+  });
+
+  it('a missed session under the old days still counts as missed after an edit', () => {
+    const before = sched('s', [1, 3, 5], { level: 'medium' });
+    const logs = logsFor([before], 12, (d) => d <= 5); // 8, 10, 12 missed
+    const after = { ...before, schedule: { days: [2, 4] as Weekday[] } };
+    const r = reconcile({ plan: [after], appliedPhase: 1, startKey: START, logs, today: 13, yesterdayEditable: false });
+    expect(r.plan[0].level).toBe('easy');
+  });
+
+  it('strength and balance never rise at Day 22 or 45, daily or scheduled, even if a phase flag is set', () => {
+    expect([...ACCEPT_ONLY_LEVEL_UPS].sort()).toEqual(['move_balance', 'move_strength_prep', 'move_strength_session']);
+    const p = [
+      daily('a'),
+      daily('move_balance'),
+      sched('move_strength_session', [1, 4], { schedule: { days: [1, 4], phaseLevelUps: true } }),
+      daily('move_strength_prep'),
+    ];
+    const r22 = reconcile({ plan: p, appliedPhase: 1, startKey: START, logs: {}, today: 22, yesterdayEditable: false });
+    const r45 = reconcile({
+      plan: r22.plan,
+      appliedPhase: 2,
+      startKey: START,
+      logs: {},
+      today: 45,
+      yesterdayEditable: false,
+    });
+    expect(r22.plan.map((h) => h.level)).toEqual(['medium', 'easy', 'easy', 'easy']);
+    expect(r45.plan.map((h) => h.level)).toEqual(['hard', 'easy', 'easy', 'easy']);
+    // They still level up by accepting the 7-in-a-row offer.
+    const logs = logsFor([p[1]], 7, () => true);
+    expect(levelUpOffers([p[1]], logs, START, 7)).toEqual(['move_balance']);
   });
 });
