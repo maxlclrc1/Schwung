@@ -59,11 +59,16 @@ export type HabitSpec = {
 /** Sunday = 0 … Saturday = 6. */
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/** Weekdays that applied up to and including program day `until` (a schedule's earlier versions). */
+export type ScheduleEra = { days: Weekday[]; until: number };
+
 /**
  * A scheduled habit is due only on these weekdays (development-only foundation). Rest days are never misses.
  * `phaseLevelUps` must be explicitly true for Day 22/45 to raise its level automatically.
+ * `history` keeps earlier weekdays, oldest first, so a change applies only from the day it's made: `days` is in
+ * effect after the last era's `until`. Absent = these days have always applied (all older saved data).
  */
-export type Schedule = { days: Weekday[]; phaseLevelUps?: boolean };
+export type Schedule = { days: Weekday[]; phaseLevelUps?: boolean; history?: ScheduleEra[] };
 
 export type PlanHabit = {
   habitId: string;

@@ -9,7 +9,7 @@ import { assemblePlan, swappedHabit } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
 import { v2PreviewEnabled } from '../lib/flags';
 import { migrateSaved, sanitize, STORAGE_VERSION } from './migrate';
-import { coversEveryWeekday, dueOn, validDays } from '../core/schedule';
+import { coversEveryWeekday, dueOn, rescheduled, validDays } from '../core/schedule';
 import { debouncedStorage } from './storage';
 
 export type AppData = {
@@ -299,9 +299,9 @@ export const useApp = create<AppState>()(
           const { plan } = get();
           const h = plan.find((x) => x.habitId === habitId);
           if (!h?.schedule || !validDays(days)) return false;
-          const next = plan.map((x) =>
-            x.habitId === habitId ? { ...x, schedule: { ...x.schedule!, days: [...days] } } : x,
-          );
+          // Applies from today on; the earlier days are kept as history for the days before.
+          const schedule = rescheduled(h.schedule, days, currentDay(get()), h.addedOnDay);
+          const next = plan.map((x) => (x.habitId === habitId ? { ...x, schedule } : x));
           if (!coversEveryWeekday(next)) return false;
           // Past logs keep the lists they had; today's is re-synced (a session already done today stays counted).
           updatePlan(() => next);

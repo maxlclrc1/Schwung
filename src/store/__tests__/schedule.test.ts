@@ -322,6 +322,58 @@ describe('persistence and compatibility', () => {
     for (const [date, entry] of Object.entries(history)) expect(s().logs[date]).toEqual(entry);
   });
 
+  it('a schedule change records history; yesterday (never opened) keeps its original meaning', () => {
+    const id = setup(); // due on the weekdays of days 1, 3, 5
+    at(4);
+    const others = ([0, 1, 2, 3, 4, 5, 6] as Weekday[]).filter((w) => !sched(id).schedule!.days.includes(w));
+    expect(s().setSchedule(id, [others[0], others[1]])).toBe(true);
+    expect(sched(id).schedule!.history).toEqual([{ days: [wd(1), wd(3), wd(5)], until: 3 }]);
+    // Day 3 was a session under the old days and was never opened: ticking it yesterday (before noon) uses
+    // the old days, not today's.
+    at(4);
+    expect(isDueOn(sched(id), s().startedAt!, 3)).toBe(true);
+    expect(isDueOn(sched(id), s().startedAt!, 4)).toBe(sched(id).schedule!.days.includes(wd(4)));
+    s().toggleHabit(3, id);
+    expect(log(3).planned).toContain(id);
+  });
+
+  it('schedule history survives a restart, and damaged history loads safely', async () => {
+    const id = setup();
+    at(4);
+    const others = ([0, 1, 2, 3, 4, 5, 6] as Weekday[]).filter((w) => !sched(id).schedule!.days.includes(w));
+    s().setSchedule(id, [others[0], others[1]]);
+    await wait(400);
+    const disk = await AsyncStorage.getItem(KEY);
+    const before = JSON.parse(JSON.stringify(sched(id)));
+    useApp.setState({ plan: [] });
+    await wait(400);
+    await AsyncStorage.setItem(KEY, disk!);
+    await useApp.persist.rehydrate();
+    expect(sched(id)).toEqual(before);
+
+    const base: PlanHabit = { habitId: 'devsched_z', level: 'easy', addedOnDay: 1, levelSince: 0 };
+    const out = migrateSaved(
+      {
+        plan: [
+          {
+            ...base,
+            schedule: {
+              days: [2, 4],
+              history: [
+                { days: [1, 3], until: 9 },
+                { days: [5], until: 4 },
+              ],
+            },
+          },
+          { ...base, habitId: 'old', schedule: { days: [2, 4] } }, // saved before history existed
+        ],
+      },
+      2,
+    ).plan as PlanHabit[];
+    expect(out[0].schedule).toEqual({ days: [2, 4] });
+    expect(out[1].schedule).toEqual({ days: [2, 4] });
+  });
+
   it('the conversation habit is called Meaningful conversation for new plans and swaps', () => {
     s().setDevV2Preview(true);
     s().setProfile(FIXTURES['B · 19, confidence']);

@@ -1,4 +1,4 @@
-import { validDays, validSchedule } from '../core/schedule';
+import { validDays, validHistory, validSchedule } from '../core/schedule';
 import { repairSpec } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
 import type { PlanHabit } from '../core/types';
@@ -31,13 +31,24 @@ export function sanitize(s: Saved): Saved {
   if (out.programVersion === 2 && Array.isArray(out.plan)) {
     out.plan = (out.plan as PlanHabit[]).map((h) => repairSpec(profile, h));
   }
-  // A damaged schedule: valid days are kept (a bad phase flag is dropped, which means no automatic Day 22/45
-  // level-up); otherwise it falls back to daily (always due), which never hides a habit or loses history.
+  // A damaged schedule: valid days are kept, and only the damaged parts are dropped. A bad phase flag means no
+  // automatic Day 22/45 level-up; bad history means the current days apply to every past day without a log, as
+  // in saves from before schedule history existed. Invalid days fall back to daily (always due), which never
+  // hides a habit or loses history.
   if (Array.isArray(out.plan)) {
     out.plan = (out.plan as PlanHabit[]).map((h) => {
       if (h.schedule === undefined || validSchedule(h.schedule)) return h;
-      const days = (h.schedule as { days?: unknown }).days;
-      if (validDays(days)) return { ...h, schedule: { days } };
+      const raw = h.schedule as { days?: unknown; phaseLevelUps?: unknown; history?: unknown };
+      if (validDays(raw.days)) {
+        return {
+          ...h,
+          schedule: {
+            days: raw.days,
+            ...(typeof raw.phaseLevelUps === 'boolean' ? { phaseLevelUps: raw.phaseLevelUps } : {}),
+            ...(validHistory(raw.history) ? { history: raw.history } : {}),
+          },
+        };
+      }
       const rest = { ...h };
       delete rest.schedule;
       return rest;
