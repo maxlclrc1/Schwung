@@ -10,6 +10,7 @@ import { WorldBackdrop } from '../components/World';
 import { worldFrame } from '../core/world';
 import { APP_NAME } from '../lib/constants';
 import { v2ForNewPrograms } from '../lib/flags';
+import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
 import { useApp } from '../store/useApp';
 import { space, useTheme } from '../theme';
 
@@ -74,6 +75,18 @@ export default function Welcome() {
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
             About two minutes. Everything stays on your phone.
           </T>
+          {/* Testing builds only: the 14-day Field Notes experience, as a separate choice. */}
+          {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') && fieldNotesAvailable() ? (
+            <Button
+              label="Or try Field Notes · 14 days"
+              kind="secondary"
+              style={{ marginTop: space.sm }}
+              onPress={() => {
+                useFieldNotes.getState().setActive(true);
+                router.push('/fieldnotes/setup');
+              }}
+            />
+          ) : null}
         </Animated.View>
       </ScrollView>
     </Screen>

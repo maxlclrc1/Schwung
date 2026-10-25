@@ -13,6 +13,7 @@ import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
 import { channel, devTools } from '../lib/flags';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
+import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
 import { currentDay, exportData, useApp } from '../store/useApp';
 import type { ThemePreference, Weekday } from '../core/types';
 import { radius, space, useTheme } from '../theme';
@@ -47,7 +48,9 @@ export default function Settings() {
   const exportJson = async () => {
     try {
       const file = new File(Paths.cache, `${APP_NAME.toLowerCase()}-export.json`);
-      await file.write(JSON.stringify({ exportedAt: new Date().toISOString(), ...exportData() }, null, 2));
+      // In testing builds, the study's local log of app opens comes along (it never leaves the phone otherwise).
+      const study = fieldNotesAvailable() ? { studyOpens: useFieldNotes.getState().opens } : {};
+      await file.write(JSON.stringify({ exportedAt: new Date().toISOString(), ...exportData(), ...study }, null, 2));
       await Sharing.shareAsync(file.uri, {
         mimeType: 'application/json',
         UTI: 'public.json',
@@ -114,6 +117,22 @@ export default function Settings() {
           <Row label="Export my data" icon="share-outline" onPress={exportJson} />
           <Row label="Restart program" icon="refresh" destructive onPress={restart} />
         </Section>
+
+        {/* Testing builds only: switch to the separate 14-day Field Notes experience. */}
+        {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') && fieldNotesAvailable() ? (
+          <Section title="Field Notes">
+            <Row
+              label="Try Field Notes · 14 days"
+              icon="compass-outline"
+              onPress={() => {
+                useFieldNotes.getState().setActive(true);
+                void rescheduleReminders().catch(() => {});
+                if (router.canDismiss()) router.dismissAll();
+                router.replace('/fieldnotes');
+              }}
+            />
+          </Section>
+        ) : null}
 
         <Section title="About">
           <Row label="Privacy policy" icon="open-outline" onPress={() => void Linking.openURL(PRIVACY_URL)} />

@@ -7,14 +7,23 @@ import { Appearance, AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { rescheduleReminders } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
+import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
 import { useApp } from '../store/useApp';
 import { useTheme } from '../theme';
 import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const subscribeHydration = (cb: () => void) => useApp.persist.onFinishHydration(cb);
-const isHydrated = () => useApp.persist.hasHydrated();
+// Both saves (Schwung's and Field Notes') are loaded before anything is shown.
+const subscribeHydration = (cb: () => void) => {
+  const a = useApp.persist.onFinishHydration(cb);
+  const b = useFieldNotes.persist.onFinishHydration(cb);
+  return () => {
+    a();
+    b();
+  };
+};
+const isHydrated = () => useApp.persist.hasHydrated() && useFieldNotes.persist.hasHydrated();
 
 function useHydrated() {
   return useSyncExternalStore(subscribeHydration, isHydrated);
@@ -24,16 +33,25 @@ function useHydrated() {
 function Housekeeping() {
   const { todayKey, yesterdayEditable } = useClock();
   const startedAt = useApp((s) => s.startedAt);
+  const fieldNotes = useFieldNotes((s) => fieldNotesAvailable() && s.active);
+  const fieldNotesRun = useFieldNotes((s) => s.run?.startedAt ?? null);
 
   useEffect(() => {
-    if (!startedAt) return;
-    useApp.getState().reconcileNow(yesterdayEditable);
-    void rescheduleReminders().catch(() => {});
-  }, [startedAt, todayKey, yesterdayEditable]);
+    if (startedAt) useApp.getState().reconcileNow(yesterdayEditable);
+    if (startedAt || fieldNotes) void rescheduleReminders().catch(() => {});
+  }, [startedAt, todayKey, yesterdayEditable, fieldNotes, fieldNotesRun]);
 
+  // The study's local log of app opens (development and internal-testing builds only; never leaves the phone).
   useEffect(() => {
+    const log = () => {
+      if (!fieldNotesAvailable()) return;
+      useFieldNotes.getState().noteOpen(useFieldNotes.getState().active ? 'fieldnotes' : 'schwung');
+    };
+    log();
     const sub = AppState.addEventListener('change', (s) => {
-      if (s === 'active') void rescheduleReminders().catch(() => {});
+      if (s !== 'active') return;
+      log();
+      void rescheduleReminders().catch(() => {});
     });
     return () => sub.remove();
   }, []);
@@ -93,6 +111,11 @@ export default function RootLayout() {
           <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
+          {/* Field Notes: development and internal-testing builds only (each screen redirects away otherwise). */}
+          <Stack.Screen name="fieldnotes/index" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="fieldnotes/setup" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="fieldnotes/note" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="fieldnotes/history" options={{ presentation: 'modal', animation: 'default' }} />
           {/* Development builds only (the screen redirects away in release builds). */}
           <Stack.Screen name="dev/exercise" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen
