@@ -12,7 +12,7 @@ import {
 } from './engine';
 import { DEV_CLEARED } from './gate';
 import { BY_ID, GOALS, LIBRARY, titleFor } from './library';
-import type { ChoiceStep, PickV2, ProfileV2, Targets } from './types';
+import type { ChoiceStep, PickV2, ProfileV2, Targets, Wake } from './types';
 
 /*
  * The only V2 module the app talks to. It always applies the development release gate, and turns engine
@@ -266,20 +266,68 @@ export function libraryOptions(
     }));
 }
 
-/** What can be added to a running plan right now: room under the maximum, and only habits whose targets are set. */
+/**
+ * What can be added to a running plan: room under the maximum, and eligible habits that fit. A habit whose targets
+ * need a time the plan never asked for is listed with `needsTime`; adding it asks that first (`prepareAdd`).
+ */
 export function addableHabits(p: ProfileV2, plan: PlanHabit[]): LibraryOption[] {
   if (plan.length >= PLAN_MAX) return [];
   return libraryOptions(
     p,
     plan.filter((h) => !h.custom).map((h) => h.habitId),
-  ).filter((o) => o.needsTime === null);
+  );
 }
 
 /** The plan habit a library addition becomes: Easy of its personal window, from today, like a swap. */
 export function addedHabit(p: ProfileV2, plan: PlanHabit[], id: string, day: number): PlanHabit | null {
   const o = addableHabits(p, plan).find((x) => x.id === id);
-  if (!o) return null;
+  if (!o || o.needsTime !== null) return null;
   return { habitId: id, level: 'easy', addedOnDay: day, levelSince: day - 1, spec: spec(id, o.targets, o.notes, p) };
+}
+
+/** Time answers collected while adding a habit. */
+export type TimeAnswers = { wake?: Wake; inBed?: string };
+
+/** The profile with only the missing time answers filled in: an answer the profile already has is never replaced. */
+export function withMissingTimes(p: ProfileV2, a: TimeAnswers): ProfileV2 {
+  return {
+    ...p,
+    ...(p.wake === undefined && a.wake ? { wake: a.wake } : {}),
+    ...(p.inBed === undefined && a.inBed !== undefined && (p.wake ?? a.wake)?.kind === 'time'
+      ? { inBed: a.inBed }
+      : {}),
+  };
+}
+
+export type AddStep =
+  | { status: 'ok'; profile: ProfileV2; habit: PlanHabit }
+  | { status: 'ask'; question: 'wake' | 'bed' }
+  | { status: 'unsuitable'; message: string };
+
+/**
+ * Adding a library habit to a running plan, one step at a time. With the time answers given so far: add it (with
+ * the profile those answers complete), ask the next missing time, or explain why the answers make it unsuitable.
+ * Eligibility is checked again with every answer, so an answer can rule a habit out but never unlock one, and
+ * nothing in the plan or its saved targets changes until the habit is actually added.
+ */
+export function prepareAdd(p: ProfileV2, plan: PlanHabit[], id: string, answers: TimeAnswers, day: number): AddStep {
+  const before = addableHabits(p, plan).find((o) => o.id === id);
+  const title = before?.title ?? BY_ID[id]?.title ?? 'That habit';
+  if (!before) return { status: 'unsuitable', message: `${title} can’t be added to your plan right now.` };
+  const next = withMissingTimes(p, answers);
+  const o = addableHabits(next, plan).find((x) => x.id === id);
+  if (!o) {
+    const reason = exclusion(BY_ID[id], next, DEV_CLEARED);
+    return {
+      status: 'unsuitable',
+      message: reason
+        ? `With that answer, ${title} isn’t a good fit: ${reason}. Nothing was added.`
+        : `With that answer, ${title} wouldn’t fit next to your plan. Nothing was added.`,
+    };
+  }
+  if (o.needsTime) return { status: 'ask', question: o.needsTime };
+  const habit = addedHabit(next, plan, id, day);
+  return habit ? { status: 'ok', profile: next, habit } : { status: 'unsuitable', message: `${title} can’t be added.` };
 }
 
 /** How many optional extras still fit in a new plan: the generated habits and choices come first. */
@@ -289,8 +337,10 @@ export function extraRoom(r: Extract<PreviewPlan, { status: 'ok' }>, chosen: str
 }
 
 /**
- * Optional extras for a new plan, after the generated habits and the choices made (`chosen` may also hold extras
- * already added). The choice step's own alternatives aren't repeated here. Never preselected by the app.
+ * Optional extras for a new plan, after the generated habits and any required choices (`chosen` may also hold
+ * extras already added). When the plan's choice step is optional, its alternatives are the first extras, in the
+ * engine's order, so there is one optional list; a required choice step stays separate and isn't repeated here.
+ * Never preselected by the app.
  */
 export function extraOptions(
   p: ProfileV2,
@@ -299,7 +349,12 @@ export function extraOptions(
 ): LibraryOption[] {
   if (r.blocked) return [];
   const choiceIds = r.options.map((o) => o.id);
-  return libraryOptions(p, [...r.picks.map((x) => x.id), ...chosen]).filter((o) => !choiceIds.includes(o.id));
+  const list = libraryOptions(p, [...r.picks.map((x) => x.id), ...chosen]);
+  if ((r.choice?.required ?? 0) > 0) return list.filter((o) => !choiceIds.includes(o.id));
+  return [
+    ...choiceIds.map((id) => list.find((o) => o.id === id)).filter((o): o is LibraryOption => !!o),
+    ...list.filter((o) => !choiceIds.includes(o.id)),
+  ];
 }
 
 /** D.6: what a V2 habit can be swapped for, age- and precaution-aware and gated. Each starts at Easy. */

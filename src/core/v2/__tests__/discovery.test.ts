@@ -13,6 +13,8 @@ import {
   extraOptions,
   extraRoom,
   libraryOptions,
+  prepareAdd,
+  withMissingTimes,
   PLAN_MAX,
   previewPlan,
   type PreviewPlan,
@@ -78,11 +80,11 @@ describe('library discovery reuses the plan’s own rules', () => {
     }
   });
 
-  it('a running plan can only take what fits now: room under 6, and targets whose times are known', () => {
+  it('a running plan can only take what fits now: room under 6; a habit needing a time is added only once it is known', () => {
     for (const p of Object.values(FIXTURES)) {
       const plan = started(p);
       if (!plan) continue;
-      for (const o of addableHabits(p, plan)) expect(o.needsTime).toBeNull();
+      for (const o of addableHabits(p, plan)) if (o.needsTime) expect(addedHabit(p, plan, o.id, 10)).toBeNull();
       const full: PlanHabit[] = [...plan];
       for (const o of addableHabits(p, plan)) {
         if (full.length >= PLAN_MAX) break;
@@ -137,7 +139,14 @@ describe('optional extras during onboarding', () => {
       const chosen = r.options.slice(0, r.choice?.required ?? 0).map((o) => o.id);
       if (!assemblePlan(p, chosen)) continue;
       const pool = extraOptions(p, r, chosen);
-      for (const o of pool) expect(r.options.map((x) => x.id)).not.toContain(o.id);
+      const choiceIds = r.options.map((x) => x.id);
+      if ((r.choice?.required ?? 0) > 0) for (const o of pool) expect(choiceIds).not.toContain(o.id);
+      else {
+        // One optional list: the optional choice's alternatives that still fit come first, in the engine's order.
+        const fromChoice = pool.filter((o) => choiceIds.includes(o.id)).map((o) => o.id);
+        expect(pool.slice(0, fromChoice.length).map((o) => o.id)).toEqual(fromChoice);
+        expect(fromChoice).toEqual(choiceIds.filter((id) => fromChoice.includes(id)));
+      }
       // Everything on offer, one after another: accepted only while it fits and there's room.
       const all = pool.filter((o) => o.needsTime === null).map((o) => o.id);
       const made = assemblePlan(p, chosen, 1, all);
@@ -156,6 +165,103 @@ describe('optional extras during onboarding', () => {
       const chosen = r.options.slice(0, r.choice?.required ?? 0).map((o) => o.id);
       if (r.picks.length + chosen.length >= PLAN_MAX) expect(extraRoom(r, chosen)).toBe(0);
     }
+  });
+});
+
+describe('one optional list during onboarding', () => {
+  it('an optional choice taken as an extra gives exactly the habit the choice step gave (same targets)', () => {
+    let checked = 0;
+    for (const p of [...Object.values(FIXTURES), ...PROFILES.slice(0, 400)]) {
+      if (p.age === 'u16') continue;
+      const r = previewPlan(p);
+      if (r.status !== 'ok' || r.blocked || !r.choice || r.choice.required > 0) continue;
+      for (const o of r.options) {
+        const asChoice = assemblePlan(p, [o.id]);
+        const asExtra = assemblePlan(p, [], 1, [o.id]);
+        if (!asChoice) continue;
+        expect(asExtra).toEqual(asChoice);
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+});
+
+describe('adding a habit that needs a time answer', () => {
+  /** A running plan for this profile with no time answers, so time-anchored habits need asking. */
+  const noTimes = (p: ProfileV2): ProfileV2 => ({ ...p, wake: undefined, inBed: undefined });
+  const cases = PROFILES.slice(0, 500)
+    .filter((p) => p.age !== 'u16')
+    .map(noTimes)
+    .map((p) => ({ p, plan: started(p) }))
+    .filter((x): x is { p: ProfileV2; plan: PlanHabit[] } => !!x.plan);
+
+  it('asks only what is missing, then adds it with targets from the answer; nothing else changes', () => {
+    let added = 0;
+    for (const { p, plan } of cases) {
+      for (const o of addableHabits(p, plan).filter((x) => x.needsTime === 'wake')) {
+        const first = prepareAdd(p, plan, o.id, {}, 5);
+        expect(first).toEqual({ status: 'ask', question: 'wake' });
+        const answers = { wake: { kind: 'time' as const, time: '07:00' }, inBed: '23:30' };
+        let step = prepareAdd(p, plan, o.id, { wake: answers.wake }, 5);
+        if (step.status === 'ask') {
+          expect(step.question).toBe('bed');
+          step = prepareAdd(p, plan, o.id, answers, 5);
+        }
+        if (step.status !== 'ok') continue;
+        added++;
+        expect(step.habit).toMatchObject({ habitId: o.id, level: 'easy', addedOnDay: 5 });
+        // Targets come from the answer, e.g. "Up within 60 min of 07:00".
+        if (o.id === 'sleep_wake') expect(step.habit.spec!.targets.easy).toMatch(/07:00/);
+        // Only the missing answers are added to the profile; nothing else in it changes.
+        expect({ ...step.profile, wake: undefined, inBed: undefined }).toEqual({
+          ...p,
+          wake: undefined,
+          inBed: undefined,
+        });
+      }
+    }
+    expect(added).toBeGreaterThan(0);
+  });
+
+  it('an answer that makes the habit unsuitable is explained and adds nothing', () => {
+    let explained = 0;
+    for (const { p, plan } of cases) {
+      const o = addableHabits(p, plan).find((x) => x.id === 'sleep_wake' && x.needsTime === 'wake');
+      if (!o) continue;
+      for (const wake of [{ kind: 'varies' as const }, { kind: 'shift' as const }]) {
+        const step = prepareAdd(p, plan, o.id, { wake }, 5);
+        expect(step.status).toBe('unsuitable');
+        if (step.status === 'unsuitable') expect(step.message).toMatch(/Nothing was added/);
+        explained++;
+      }
+    }
+    expect(explained).toBeGreaterThan(0);
+  });
+
+  it('answers never unlock a habit that wasn’t on offer, and never replace an answer already given', () => {
+    for (const { p, plan } of cases.slice(0, 120)) {
+      const offered = addableHabits(p, plan).map((o) => o.id);
+      for (const id of ['sleep_bedtime', 'sleep_wake', 'move_strength_prep', 'move_balance', 'discipline_bed']) {
+        if (offered.includes(id)) continue;
+        const step = prepareAdd(p, plan, id, { wake: { kind: 'time', time: '07:00' }, inBed: '23:00' }, 5);
+        expect([p.age, id, step.status]).toEqual([p.age, id, 'unsuitable']);
+      }
+    }
+    const C = FIXTURES['C · 28, energy'];
+    expect(withMissingTimes(C, { wake: { kind: 'shift' }, inBed: '01:00' })).toEqual(C);
+    // A bedtime is only kept with a wake time.
+    expect(withMissingTimes(noTimes(C), { wake: { kind: 'varies' }, inBed: '23:00' }).inBed).toBeUndefined();
+  });
+
+  it('teens are never offered Earlier bedtime, whatever they answer', () => {
+    const teen = noTimes(FIXTURES['A · 16, focus']);
+    const plan = started(teen);
+    if (!plan) return;
+    expect(addableHabits(teen, plan).map((o) => o.id)).not.toContain('sleep_bedtime');
+    expect(
+      prepareAdd(teen, plan, 'sleep_bedtime', { wake: { kind: 'time', time: '07:00' }, inBed: '23:00' }, 3).status,
+    ).toBe('unsuitable');
   });
 });
 

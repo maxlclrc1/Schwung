@@ -99,7 +99,6 @@ export default function PlanV2() {
 
   const { picks, choice, options, planNotes, limitation, blocked } = plan;
   const required = choice?.required ?? 0;
-  const total = picks.length + chosen.length + extras.length;
   // The plan as it will start: a required choice counts toward it from the start.
   const planned = picks.length + Math.max(required, chosen.length) + extras.length;
   const ready = !blocked && (required === 0 || chosen.length === required);
@@ -239,14 +238,15 @@ export default function PlanV2() {
           </ThemedView>
         ) : null}
 
-        {choice && !blocked ? (
+        {/* A required choice keeps its own step; an optional one is part of "Make it yours" below. */}
+        {choice && !blocked && required > 0 ? (
           <View style={{ gap: space.md }}>
             <View style={{ gap: space.xs }}>
               <T v="overline" color={c.textDim}>
-                {required > 0 ? 'Choose to continue' : 'Optional'}
+                Choose to continue
               </T>
               <T v="heading" accessibilityRole="header">
-                {required > 0 ? `Choose ${required} more` : 'Choose one more?'}
+                Choose {required} more
               </T>
               <T v="caption" color={c.textDim}>
                 {choice.ruleNote}
@@ -314,23 +314,15 @@ export default function PlanV2() {
             onMore={() => setMoreExtras(true)}
             available={extraAvailable}
             onToggle={toggleExtra}
+            note={required === 0 ? choice?.ruleNote : undefined}
+            notice={required === 0 ? notice : null}
           />
         ) : null}
 
         {example ? <Growth title={example.title} targets={example.targets} /> : null}
       </ScrollView>
       <View style={styles.footer}>
-        <Button
-          label={
-            blocked
-              ? 'Not available yet'
-              : choice && required === 0 && chosen.length === 0
-                ? `Keep ${total} habits and begin`
-                : 'Begin with this plan'
-          }
-          onPress={begin}
-          disabled={!ready}
-        />
+        <Button label={blocked ? 'Not available yet' : 'Begin with this plan'} onPress={begin} disabled={!ready} />
       </View>
     </Screen>
   );
@@ -383,6 +375,8 @@ function Extras({
   onMore,
   available,
   onToggle,
+  note,
+  notice,
 }: {
   pool: LibraryOption[];
   extras: string[];
@@ -391,6 +385,9 @@ function Extras({
   onMore: () => void;
   available: (id: string) => boolean;
   onToggle: (o: LibraryOption) => void;
+  /** The plan's own note on small plans (how the 80% rule works with this many habits). */
+  note?: string;
+  notice: string | null;
 }) {
   const { c } = useTheme();
   const first = pool.slice(0, EXTRAS_SHOWN);
@@ -449,6 +446,16 @@ function Extras({
           Your plan is ready as it is. If one of these interests you, you can add {room === 1 ? 'it' : `up to ${room}`}
           {room === 1 ? '' : ' more'}. You can also add habits later from Today.
         </T>
+        {note ? (
+          <T v="caption" color={c.textDim}>
+            {note}
+          </T>
+        ) : null}
+        {notice ? (
+          <T v="caption" color={c.accentInk} accessibilityLiveRegion="polite">
+            {notice}
+          </T>
+        ) : null}
         {extras.length && left === 0 ? (
           <T v="caption" color={c.accentInk} accessibilityLiveRegion="polite">
             That makes 6 habits, the most a plan holds.
