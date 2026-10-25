@@ -21,6 +21,7 @@ import { Notices } from '../../components/Notices';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { Button, ProgressBar, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
+import { useWorldLayer } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor } from '../../core/ascent';
 import { comebackFor } from '../../core/comeback';
 import { dueOn, isDueOn, nextSessionLabel, wasDueOn } from '../../core/schedule';
@@ -61,6 +62,9 @@ export default function Today() {
   const bottomInset = tabs() ? 0 : insets.bottom;
   // The public release keeps the mountain here; testing builds show it on the Journey tab instead.
   const mountain = !tabs();
+  // Testing builds in dark mode: the tabs' shared world shows through (Habits' misty valley, veiled).
+  const world = useWorldLayer();
+  const plain = !mountain && !world;
   const { todayKey, yesterdayEditable } = useClock();
   const startedAt = useApp((s) => s.startedAt);
   const plan = useApp((s) => s.plan);
@@ -189,7 +193,7 @@ export default function Today() {
   if (!startedAt) return tabs() ? <NoProgram /> : null;
 
   return (
-    <ThemedView style={[styles.root, !mountain && { backgroundColor: c.bg }]}>
+    <ThemedView style={[styles.root, plain && { backgroundColor: c.bg }]}>
       {mountain ? (
         <Animated.View pointerEvents="none" style={[styles.world, worldLayer, parallax]}>
           <WorldBackdrop zoneTop={zoneTop} />
@@ -407,7 +411,7 @@ export default function Today() {
       {/* The same sky, fixed behind the status bar, so the page scrolls under it rather than under the clock. */}
       <ThemedView
         pointerEvents="none"
-        style={[styles.statusSky, { height: insets.top }, !mountain && { backgroundColor: c.bg }]}
+        style={[styles.statusSky, { height: insets.top }, plain && { backgroundColor: c.bg }]}
       >
         {mountain ? (
           <Animated.View style={[styles.world, worldLayer, parallax]}>

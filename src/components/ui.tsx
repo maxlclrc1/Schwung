@@ -21,16 +21,19 @@ export function Screen({
   edges = ['top', 'bottom'],
   style,
   backdrop,
+  transparent = false,
 }: {
   children: ReactNode;
   edges?: Edge[];
   style?: StyleProp<ViewStyle>;
   /** Drawn behind everything, edge to edge (under the status bar too), e.g. the world. */
   backdrop?: ReactNode;
+  /** No background of its own: something behind the screen (the tabs' shared world) shows through. */
+  transparent?: boolean;
 }) {
   const { c } = useTheme();
   return (
-    <ThemedView style={{ flex: 1, backgroundColor: c.bg }}>
+    <ThemedView style={{ flex: 1, backgroundColor: transparent ? 'transparent' : c.bg }}>
       {backdrop}
       <SafeAreaView edges={edges} style={[{ flex: 1 }, style]}>
         {children}

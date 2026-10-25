@@ -10,6 +10,7 @@ import { DayStrip, FieldTrail, Observation } from '../../components/FieldNotes';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { Button, Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
+import { useWorldLayer } from '../../components/WorldLayer';
 import { formatTime } from '../../core/dates';
 import { experimentById, experimentOptions, GOALS, OBSERVATION } from '../../core/fieldnotes/catalog';
 import { baselineLine, PATTERN_HEADING, summarize, summaryThrough, CAVEAT } from '../../core/fieldnotes/insights';
@@ -46,9 +47,10 @@ export default function FieldNotesToday() {
 /** The Field Notes tab before an experiment has started: one way in, to the existing setup. */
 function NotStarted() {
   const { c } = useTheme();
+  const world = useWorldLayer();
   const insets = useSafeAreaInsets();
   return (
-    <Screen edges={[]}>
+    <Screen edges={[]} transparent={world}>
       <View style={[styles.notStarted, { paddingTop: insets.top + space.sm }]}>
         <View style={styles.top}>
           <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
@@ -154,6 +156,8 @@ const DECISIONS: { id: Decision; label: string }[] = [
 
 function Daily() {
   const { c } = useTheme();
+  // Testing builds in dark mode: the tabs' shared world (the lakeside) is behind this page instead.
+  const world = useWorldLayer();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const run = useFieldNotes((s) => s.run);
@@ -242,14 +246,16 @@ function Daily() {
 
   return (
     // The tab bar keeps clear of the home indicator.
-    <Screen edges={[]}>
+    <Screen edges={[]} transparent={world}>
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={StyleSheet.absoluteFill}>
-          <WorldBackdrop zoneTop={zoneTop} />
-        </View>
+        {world ? null : (
+          <View style={StyleSheet.absoluteFill}>
+            <WorldBackdrop zoneTop={zoneTop} />
+          </View>
+        )}
 
         <View style={styles.pad}>
           <View style={styles.top}>
