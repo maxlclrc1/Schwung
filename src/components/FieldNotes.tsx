@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ASCENT_ASPECT, DAY_POINTS, trailDots } from '../core/ascent';
 import { OBSERVATION } from '../core/fieldnotes/catalog';
 import { CAMPS, campReached, dayRecord, FN_DAYS, trailFraction, type CampKey } from '../core/fieldnotes/journey';
+import { LAKESIDE_DOTS, lakesidePoint } from '../core/fieldnotes/route';
 import type { FnGoal, FnRun, Rating } from '../core/fieldnotes/types';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
@@ -14,9 +15,11 @@ const trailDay = (day: number) => Math.round(trailFraction(day) * (DAY_POINTS.le
 const DOTS = trailDots(3);
 
 /**
- * The Ascent painting as a journey of five camps: each a real moment of the experiment (the question, the
- * starting point, a first look, the discovery, the field note). The trail is walked up to today; camps light up
- * when reached. Drawn over the WorldBackdrop, which the screen places behind it (like Today).
+ * The journey of five camps: each a real moment of the experiment (the question, the starting point, a first
+ * look, the discovery, the field note). The trail is walked up to today; camps light up when reached.
+ * - 'lakeside': Field Notes' own route in the continuous world (testing builds, dark), from the tent on the shore
+ *   to the overlook (core/fieldnotes/route.ts).
+ * - 'ascent': the 14 days spread along the Ascent's trail, over the screen's own WorldBackdrop (like Today).
  */
 export function FieldTrail({
   run,
@@ -24,22 +27,29 @@ export function FieldTrail({
   width,
   selected,
   onSelect,
+  route = 'ascent',
 }: {
   run: FnRun;
   today: number;
   width: number;
   selected: CampKey | null;
   onSelect: (k: CampKey) => void;
+  route?: 'ascent' | 'lakeside';
 }) {
   const { c, isDark } = useTheme();
   const height = Math.round(width / ASCENT_ASPECT);
-  const here = trailDay(today);
+  const lakeside = route === 'lakeside';
+  const pointFor = (day: number) => (lakeside ? lakesidePoint(day) : DAY_POINTS[trailDay(day) - 1]);
+  const dots = lakeside ? LAKESIDE_DOTS : DOTS;
+  // The last day the walked trail reaches, counted the way the route's dots are.
+  const here = lakeside ? Math.min(today, FN_DAYS) : trailDay(today);
+  const herePoint = pointFor(today);
   const walked = isDark ? 'rgba(167,139,250,0.75)' : 'rgba(116,81,200,0.7)';
   const ahead = isDark ? 'rgba(245,243,255,0.22)' : 'rgba(25,22,33,0.18)';
   const badgeBg = isDark ? 'rgba(28,27,37,0.92)' : 'rgba(255,255,255,0.94)';
   return (
     <View style={{ width, height }}>
-      {DOTS.map((d, i) => (
+      {dots.map((d, i) => (
         <View
           key={i}
           pointerEvents="none"
@@ -50,7 +60,7 @@ export function FieldTrail({
         />
       ))}
       {CAMPS.map((camp) => {
-        const p = DAY_POINTS[trailDay(camp.day) - 1];
+        const p = pointFor(camp.day);
         const reached = campReached(camp, today, run);
         const isSelected = selected === camp.key;
         const size = isSelected ? 38 : 32;
@@ -93,8 +103,8 @@ export function FieldTrail({
           style={[
             styles.here,
             {
-              left: DAY_POINTS[here - 1].x * width - 6,
-              top: DAY_POINTS[here - 1].y * height - 6,
+              left: herePoint.x * width - 6,
+              top: herePoint.y * height - 6,
               backgroundColor: c.accentLight,
               borderColor: c.accent,
             },

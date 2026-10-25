@@ -9,7 +9,7 @@ import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { JourneyView } from '../../components/JourneyView';
 import { Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
-import { journeyAnchor, journeyScroll, useWorldLayer, worldCamera } from '../../components/WorldLayer';
+import { useWorldLayer, worldAnchor, worldCamera, worldScroll } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor, type AscentDay } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { getHabit, habitTitle } from '../../core/habits';
@@ -100,7 +100,7 @@ function Ascent({ picked }: { picked: number | null }) {
   // trail and labels fade in as the camera arrives, so they never slide across the mountain mid-pan.
   const world = useWorldLayer();
   const onScroll = useAnimatedScrollHandler((e) => {
-    journeyScroll.set(e.contentOffset.y);
+    worldScroll[1].set(e.contentOffset.y);
   });
   const arrive = useAnimatedStyle(() => ({
     opacity: world ? Math.min(1, Math.max(0, 1 - Math.abs(worldCamera.get() - 1) * 4)) : 1,
@@ -146,7 +146,7 @@ function Ascent({ picked }: { picked: number | null }) {
         <Pressable
           onLayout={(e) => {
             setZoneTop(e.nativeEvent.layout.y);
-            journeyAnchor.set(e.nativeEvent.layout.y);
+            worldAnchor[1].set(e.nativeEvent.layout.y);
           }}
           onPress={(e) => {
             const day = nearestDay(tapPoint(e), width, zoneHeight, 16);

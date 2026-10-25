@@ -1,3 +1,4 @@
+import { channel } from '../lib/flags';
 import { PROGRAM_DAYS } from './dates';
 import { dayQualifies, doneCount, logForDay, Logs, PHASE_START } from './progression';
 
@@ -33,7 +34,7 @@ export type Point = { x: number; y: number };
  * Switchbacks from the valley floor (bottom left) to the summit (upper right).
  * The summit point matches the peak drawn in assets/ascent-*.jpg.
  */
-const WAYPOINTS: Point[] = [
+const ORIGINAL_WAYPOINTS: Point[] = [
   { x: 0.07, y: 0.9 },
   { x: 0.34, y: 0.92 },
   { x: 0.62, y: 0.87 },
@@ -50,10 +51,36 @@ const WAYPOINTS: Point[] = [
   { x: 0.7, y: 0.105 },
 ];
 
+/**
+ * The same route, checked against the painting in the continuous world (Step 2C): two turns moved onto solid
+ * ground. At the left turn (days 37–39) the trail crossed a pocket of mist above the ridge; it now turns on the
+ * ridge and climbs the grassy terrace. At the right turn (days 53–56) it ran along the rock's misty skyline; it
+ * now stays on the rock. Testing builds only: the public release keeps its trail exactly as it was.
+ */
+const CORRECTED_WAYPOINTS: Point[] = [
+  { x: 0.07, y: 0.9 },
+  { x: 0.34, y: 0.92 },
+  { x: 0.62, y: 0.87 },
+  { x: 0.82, y: 0.78 },
+  { x: 0.6, y: 0.7 },
+  { x: 0.3, y: 0.66 },
+  { x: 0.19, y: 0.59 },
+  { x: 0.255, y: 0.545 },
+  { x: 0.34, y: 0.495 },
+  { x: 0.62, y: 0.45 },
+  { x: 0.76, y: 0.395 },
+  { x: 0.62, y: 0.29 },
+  { x: 0.5, y: 0.22 },
+  { x: 0.6, y: 0.15 },
+  { x: 0.7, y: 0.105 },
+];
+
+const WAYPOINTS = channel() === 'production' ? ORIGINAL_WAYPOINTS : CORRECTED_WAYPOINTS;
+
 export const SUMMIT = WAYPOINTS[WAYPOINTS.length - 1];
 
-/** Catmull-Rom through the waypoints, sampled densely. */
-function smoothPath(points: Point[], stepsPerSegment = 24): Point[] {
+/** Catmull-Rom through the waypoints, sampled densely (`stepsPerSegment` points per waypoint). */
+export function smoothPath(points: Point[], stepsPerSegment = 24): Point[] {
   const out: Point[] = [];
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)];
@@ -74,7 +101,7 @@ function smoothPath(points: Point[], stepsPerSegment = 24): Point[] {
 }
 
 /** Evenly spaced points along a polyline, by real on-screen distance (x is wider than y). */
-function resample(path: Point[], count: number, aspect: number): Point[] {
+export function resample(path: Point[], count: number, aspect: number): Point[] {
   const len = (a: Point, b: Point) => Math.hypot((b.x - a.x) * aspect, b.y - a.y);
   const cumulative = [0];
   for (let i = 1; i < path.length; i++) cumulative.push(cumulative[i - 1] + len(path[i - 1], path[i]));
