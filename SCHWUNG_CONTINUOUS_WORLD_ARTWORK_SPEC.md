@@ -1,207 +1,188 @@
 # Schwung — continuous world: artwork specification
 
-**Status:** specification only. Nothing in this document is built yet. The artwork is produced outside the codebase,
-approved, and only then integrated.
+**Status:** specification only; nothing here is built yet. The artwork is made in ChatGPT, uploaded, approved, and
+then stitched, graded and integrated by our scripts.
 
-**Grounded in:**
+**Revised to fit how the art is actually made.** ChatGPT paints at most 1536 × 1024 (or 1024 × 1536) per image.
+The current world is already three such pieces stacked vertically and stitched by `design/canvas/join_pieces.py` /
+`assemble_canvas.py`. So the panorama is built the same way:
 
-- the current world: `assets/world-{light,dark}.jpg`, 1536 × 3584 progressive JPEG, about 0.5 MB each;
-- how the Ascent is placed (`src/core/world.ts`, `src/core/ascent.ts`);
-- the three-tab layout (`src/app/(tabs)/`, JS bottom tabs from `expo-router/js-tabs`, Expo SDK 58);
-- the app's settings: iPhone only, portrait (`supportsTablet: false`).
+- the existing stitched column stays **untouched** as the Journey region;
+- ChatGPT paints matching pieces to its left (Habits) and right (Field Notes);
+- we stitch, grade, extend and slice.
+
+Nobody has to paint one giant image.
 
 ## 1. Layout diagram
 
-The panorama is three regions side by side, read left to right in tab order. Each region is exactly one screen
-wide on every iPhone, and the whole panorama scales to the screen's width.
+Every cell is one ChatGPT piece (1536 × 1024, landscape). The middle column already exists.
 
 ```
-x (px) 0                        1344                        2688                        4032
-       ┌──────────────────────────┬──────────────────────────┬──────────────────────────┐ y (px)
-       │ status bar · quiet sky   │ status bar · quiet sky   │ status bar · quiet sky   │    0
-       │                          │                          │                          │  200
-       │ HEADER BAND: greeting,   │ HEADER BAND: title,      │ HEADER BAND: kicker,     │
-       │ day line (quiet, pale)   │ stats pill (quiet sky)   │ question (quiet)         │
-       │   distant peak, faint    │          ★ summit        │   distant peak (Journey  │  600
-       │ ·······················  │  ┌────────────────────┐  │   mountain, seen across  │
-       │ HABITS — PEACEFUL VALLEY │  │ JOURNEY — ASCENT   │  │   the lake)              │
-       │ soft meadow, mist        │  │ painting 1344×896  │  │ FIELD NOTES — DISCOVERY  │
-       │ (behind the habit cards: │  │ (3:2): mountain,   │  │ lakeside camp / overlook │
-       │  low contrast, low       │  │ switchback trail   │  │ "camp band" 1344×896     │
-       │  detail)                 │  │ (waypoints §6)     │  │ (3:2) at y 600–1496      │
-       │                          │  └────────────────────┘  │                          │ 1496
-       │ mist, meadow, stream ────┼── valley · LAKE ─────────┼── lakeshore, reflections │
-       │                          │ (always visible: caption │                          │
-       │                          │  and day details)        │                          │ 2190  ← lowest row visible
-       │ lower valley             │ lower valley, shore      │ shore, reeds, path       │        on iPhone SE above the tab bar
-       │ (seen on taller phones)  │                          │                          │ 2920  ← lowest row visible on
-       │ travel margin            │ travel margin            │ travel margin            │        notched iPhones at rest
-       └──────────────────────────┴──────────────────────────┴──────────────────────────┘ 3200
-       │◄── edge band ──►│ 96 px either side of each inner border: no focal subjects │
+            HABITS — peaceful valley      JOURNEY — the ascent           FIELD NOTES — the discovery
+x (px)      0                    1536     1536                   3072    3072                   4608
+            ┌────────────────────────┐    ┌────────────────────────┐    ┌────────────────────────┐ y (px)
+ sky        │ sky (script-extended)  │    │ sky (script-extended)  │    │ sky (script-extended)  │    0
+            │ header band: greeting  │    │ header band: title,    │    │ header band: kicker,   │
+            │                        │    │ stats pill             │    │ question               │  800
+ row 1      │ h1  NEW                │◄──►│ a1  EXISTS (locked)    │◄──►│ f1  NEW                │
+            │ distant peak, faint,   │    │ summit + switchback    │    │ overlook / lake camp;  │
+            │ pale meadow and mist   │    │ trail (the day markers │    │ the Journey mountain   │
+            │                        │    │ are drawn on it)       │    │ seen across the water  │ 1824
+ row 2      │ h2  NEW                │◄──►│ l1  EXISTS             │◄──►│ f2  NEW                │
+            │ soft slopes, mist,     │    │ slopes, treeline,      │    │ shore path, reeds,     │
+            │ few details            │    │ pine forest            │    │ tent / fire            │ ~2850
+ row 3      │ h3  NEW                │◄──►│ l2  EXISTS             │◄──►│ f3  NEW                │
+            │ quiet valley floor     │    │ misty valley and lake  │    │ lakeshore, reflections │ ~3584
+            │ fade to app background │    │ fade to app background │    │ fade to app background │ 3840
+            └────────────────────────┘    └────────────────────────┘    └────────────────────────┘
+            ◄────────────────────── one seamless panorama, 4608 × 3840 after stitching ──────────────────────►
 ```
 
-## 2. Panorama and region dimensions
+## 2. What to give ChatGPT (the originals)
 
-|                               | Pixels                   | Aspect             | Notes                                                                                                       |
-| ----------------------------- | ------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------- |
-| **Whole panorama (master)**   | **4032 × 3200**          | 1.26 : 1           | One continuous painting; both inner borders are seamless.                                                   |
-| Each region                   | **1344 × 3200**          | 0.42 : 1 (21 : 50) | 1344 = 448pt at 3× (covers the widest iPhone, 440pt). Multiple of 16, so it aligns with compression blocks. |
-| Journey painting (trail area) | 1344 × 896 at y 600–1496 | 3 : 2              | Same 3:2 shape as today's Ascent, so the trail coordinates carry over.                                      |
-| Field Notes camp band         | 1344 × 896 at y 600–1496 | 3 : 2              | Reserved for a future five-camp route; Field Notes doesn't change now.                                      |
+Per theme, the three original pieces of the Journey column, plus the stitched world so it sees how they join:
 
-**Why width-fit:** the world scales so that one region equals the screen width, the way the current world already
-works.
+| Theme | Summit (row 1)                              | Forest (row 2)    | Valley (row 3)    | Stitched result          |
+| ----- | ------------------------------------------- | ----------------- | ----------------- | ------------------------ |
+| Dark  | `design/artwork-candidates/a1-dark-v2.png`  | `l1-dark-v3.png`  | `l2-dark-v1.png`  | `assets/world-dark.jpg`  |
+| Light | `design/artwork-candidates/a1-light-v1.png` | `l1-light-v1.png` | `l2-light-v1.png` | `assets/world-light.jpg` |
 
-- Every iPhone shows each region's full width.
-- A tab change pans exactly one screen.
-- The Journey trail stays registered to the painting on every phone.
-- Only the visible height differs by phone (table below).
+- The light `a1` in the app has a haze pass on top (`soften_light.py`). Give ChatGPT the original; we re-apply the
+  haze.
+- **Dark first, light as a relight.** Paint the six dark side pieces first. Then make each light piece as a relight
+  of its dark piece (same composition, soft morning haze), exactly as the current light art was made. That way the
+  theme crossfade can't ghost.
 
-| iPhone (pt)                        | Scale (px per pt) | Rows visible at rest | Status bar | Tab bar covers |
-| ---------------------------------- | ----------------- | -------------------- | ---------- | -------------- |
-| SE (375 × 667)                     | 3.58              | 0–2391               | 0–72       | 2190–2391      |
-| 13 mini (375 × 812)                | 3.58              | 0–2910               | 0–194      | 2587–2910      |
-| 15 / 16 / 16e (390–393 × 844–852)  | 3.42–3.45         | 0–2914               | 0–186      | 2604–2914      |
-| 16 Pro (402 × 874)                 | 3.34              | 0–2922               | 0–181      | 2621–2922      |
-| Plus / Pro Max (430–440 × 932–956) | 3.06–3.13         | 0–2920               | 0–169      | 2639–2920      |
+## 3. The pieces ChatGPT paints
 
-## 3. Safe areas inside every region
+Twelve images in all: 6 dark, then 6 light relights. Each one is **1536 × 1024 (landscape)**, ChatGPT's native size.
 
-| Band (y px) | What's in front                                                                           | Artwork rule                                                               |
-| ----------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 0–200       | Status bar (clock, battery)                                                               | Plain sky. No detail, no bright spots.                                     |
-| 200–600     | Screen titles, header buttons, Journey stats pill, Habits greeting and day line           | Calm and low-contrast. Light: background lightness L* ≥ 85. Dark: L* ≤ 25. |
-| 600–1496    | Journey: the mountain and trail. Field Notes: camp band. Habits: top of the cards.        | Journey's focal subject. Habits stays soft.                                |
-| 1496–2190   | Journey: day caption and details. Habits and Field Notes: cards. Visible on every iPhone. | Journey: valley and lake. Elsewhere: soft.                                 |
-| 2190–2920   | Visible on notched iPhones. The tab bar covers 2587–2920 on most.                         | Continuation only; nothing important.                                      |
-| 2920–3200   | Never visible at rest; only during vertical parallax and overscroll.                      | Simple continuation (no edges or blank).                                   |
+| Piece | Sits beside   | Content and intensity                                                                     |
+| ----- | ------------- | ----------------------------------------------------------------------------------------- |
+| `h1`  | left of `a1`  | Habits sky to distant peaks: pale, misty, low contrast; the mountain small and faint      |
+| `h2`  | left of `l1`  | Soft slopes and mist; very little detail (habit cards cover most of it)                   |
+| `h3`  | left of `l2`  | Quiet valley floor, mist; ends low and soft                                               |
+| `f1`  | right of `a1` | Overlook or lakeside camp; the Journey mountain visible across the water; moderate detail |
+| `f2`  | right of `l1` | Shore path, reeds, a tent or campfire glow; calm                                          |
+| `f3`  | right of `l2` | Lakeshore and reflections, continuing Journey's lake                                      |
 
-- **Horizontal:** keep 48 px (about 16pt) on the outer left and right edges of the panorama free of focal subjects.
-- **Inner borders** (x 1248–1440 and x 2592–2784): this edge band is the screen edge at rest. Paint continuously
-  across it, with nothing that looks cut off.
-- **Habit cards** cover x 16pt to (width − 16pt) from about y 450 px down and are opaque, so the art shows only in
-  the gutters and the 8pt gaps between cards. Don't spend detail there.
+**Rules for every piece:**
 
-## 4. Intensity by region
+- **Edges meet their neighbour.** `h*` pieces continue the left edge of the Journey piece on the same row; `f*`
+  pieces continue its right edge. Pieces on the same side continue the piece above them.
+  - Attach the neighbour and say, for example: _"Paint the landscape that continues to the LEFT of this image. Your
+    right edge must flow into its left edge: same horizon height, same light, same palette."_
+  - Don't expect a perfect join. We blend about 220 px of overlap, as we did for the forest and valley.
+- **Horizon and light:** keep the horizon, the light direction and the haze level matching the Journey piece on
+  the same row.
+- **Nothing focal within 200 px of a join**, because we blend there.
+- **Habits pieces:** pale and low-contrast, about 60% of Journey's saturation, nothing dramatic.
+- **Field Notes pieces:** about 75% of Journey's contrast.
+- **No text, frames, people's faces or UI.**
 
-**Paint the intensity into the artwork, and add one light code veil.** The painted gradient guarantees continuity.
-The veil keeps text readable and can be tuned without repainting.
+**File names:** upload to `design/artwork-candidates/` with the existing scheme, `<piece>-<theme>-v<n>.png`. For
+example `h1-dark-v1.png` or `f2-light-v1.png`. Upload the original download, not a screenshot. A `.txt` file with
+the same name holding the prompt is welcome.
 
-| Region      | In the artwork                                                                                                                         | Code veil (background colour over the world) |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Habits      | Pale, misty, low contrast (luminance range within about 25 L*), saturation about 60% of Journey's; the mountain only distant and faint | Light 45%, dark 50%                          |
-| Journey     | Full contrast, depth and light; the richest detail                                                                                     | 0%                                           |
-| Field Notes | Atmospheric and reflective; contrast about 75% of Journey's                                                                            | 15–20%                                       |
+## 4. What we do with them (no repainting)
 
-- The veil's opacity follows the camera position continuously (for example `interpolate(camera, [0, 1, 2],
-[0.45, 0, 0.18])`). Brightness changes smoothly during a pan, never in a jump, provided the artwork's own grading
-  also eases across the edge bands.
-- **Legibility:** habit cards are opaque (`#FFFFFF` / `#1C1B25`), so they're legible on any art. Text directly on
-  the world (greetings, section labels, the stats pill) relies on the veil plus the header-band lightness rule. Aim
-  for at least 4.5 : 1 contrast. With iOS "Reduce Transparency" or "Increase Contrast" on, the veil rises (Habits
-  70%, Field Notes 40%).
-
-## 5. Files, formats and budgets
-
-**Deliverables from the artist:** two master files, light and dark, in the existing candidates folder and naming
-scheme.
-
-| File                                                              | Contents                                                                                    |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `design/artwork-candidates/world-pano-light-v1.png`               | 4032 × 3200, 16-bit PNG (or layered PSD/TIFF alongside), sRGB                               |
-| `design/artwork-candidates/world-pano-dark-v1.png`                | Same geometry: identical ridgelines, trail, lake and camp, so day and night line up exactly |
-| _(optional)_ `design/artwork-candidates/world-pano-guides-v1.png` | Transparent overlay marking the summit, the trail and the five camp spots                   |
-
-**Shipped files (we generate them by slicing and encoding; no repainting):**
+1. **Stitch** each side column vertically, the same way the current world was: brightness and colour graded to the
+   piece above, crossfaded over 220 rows.
+2. **Join** the columns horizontally to the Journey column: colour matched at the join, crossfaded over about
+   220 px.
+3. **Extend** the sky above and fade to the exact app background below (as `extend_tall.py` /
+   `assemble_canvas.py` do now), to a full height of **3840 px**.
+4. **Slice and encode** into three tiles per theme, with a 16 px bleed on inner edges so no hairline seam appears:
 
 ```
 assets/world/
-  pano-light-habits.webp      1360 × 3200   (region + 16 px bleed on the right)
-  pano-light-journey.webp     1376 × 3200   (16 px bleed on both sides)
-  pano-light-fieldnotes.webp  1360 × 3200   (16 px bleed on the left)
-  pano-dark-habits.webp       …same three in dark
-  pano-dark-journey.webp
-  pano-dark-fieldnotes.webp
+  pano-dark-habits.webp       1552 × 3840   (region + 16 px bleed on the right)
+  pano-dark-journey.webp      1568 × 3840   (16 px bleed on both sides)
+  pano-dark-fieldnotes.webp   1552 × 3840   (16 px bleed on the left)
+  pano-light-habits.webp      …same three in light
+  pano-light-journey.webp
+  pano-light-fieldnotes.webp
 ```
 
-- **Format:** ship **WebP**, lossy at quality about 80. It's opaque, about 30% smaller than JPEG, and supported by
-  React Native's image loader on iOS 14 and later. Fall back to progressive JPEG (quality 85) only if a sky bands
-  visibly. Never ship PNG for these: the files would be several MB with no visible gain.
-- **Anti-banding:** add 1–2% fine grain in the master. Large soft skies and mist band after compression without it.
-- **One image or tiles:** **three tiles per theme.** The active region can load first, tiles can be replaced
-  independently, and the app avoids one 52 MB decode for a 4032-wide image. The 16 px bleed lets tiles overlap by a
-  few pixels in code, so no hairline seam appears at fractional positions.
-- **Light and dark:** **yes, two versions**, as today. A single asset can't be both pale-misty for light mode and
-  dusk for dark mode and stay legible behind text.
+## 5. Dimensions and safe bands
 
-**Budgets:**
+- **Region:** 1536 × 3840, one per tab, the width of the existing art. The whole panorama is **4608 × 3840**.
+- **Width-fit:** the world scales so one region equals the screen width, as it does today. Every iPhone sees a whole
+  region, a tab change pans exactly one screen, and the Journey trail stays on the painting.
+- The Journey painting stays at rows **800–1824**, where it is today, so the day markers line up with no new
+  coordinates.
 
-|                | Per tile (compressed)  | Per theme                                                                                | Both themes                                      |
-| -------------- | ---------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Habits         | ≤ 350 KB               |                                                                                          |                                                  |
-| Journey        | ≤ 800 KB               |                                                                                          |                                                  |
-| Field Notes    | ≤ 500 KB               | ≤ 1.65 MB                                                                                | **≤ 3.3 MB** in the app (today's world: 0.97 MB) |
-| Decoded (RGBA) | about 17.6 MB per tile | **about 53 MB** with all three tiles of one theme held (today: about 44 MB, both themes) | Never hold both themes at once (see §7)          |
+With the Journey painting's top at the safe-area top + 100pt, the rows each iPhone shows at rest:
 
-## 6. Journey trail registration
+| iPhone (pt)         | px per pt | Rows visible | Status bar ends | Tab bar starts |
+| ------------------- | --------- | ------------ | --------------- | -------------- |
+| SE (375 × 667)      | 4.10      | 308–3041     | 390             | 2811           |
+| 13 mini (375 × 812) | 4.10      | 169–3495     | 390             | 3127           |
+| 15 / 16 (393 × 852) | 3.91      | 179–3509     | 409             | 3157           |
+| 16 Pro (402 × 874)  | 3.82      | 181–3520     | 418             | 3177           |
+| Pro Max (440 × 956) | 3.49      | 234–3572     | 451             | 3258           |
 
-The trail overlay (day markers, landmarks, today's orb) is drawn in code from fixed waypoints. A new Journey
-painting must either keep the trail on these points or supply a replacement set.
+| Rows              | In front of the art                                                               | Rule                                                |
+| ----------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 0–450             | Status bar (and above the screen on most phones)                                  | Plain sky (script-extended)                         |
+| 450–800           | Titles, header buttons, the stats pill                                            | Calm, low-contrast sky; light L* ≥ 85, dark L* ≤ 25 |
+| 800–1824 (row 1)  | Journey: mountain and trail. Field Notes: camp band. Habits: greeting, then cards | Journey is the focal point; Habits stays faint      |
+| 1824–2811 (row 2) | Journey: day caption and details. Others: cards and notes                         | Visible on every iPhone                             |
+| 2811–3584 (row 3) | Visible on notched iPhones; partly under the tab bar                              | Continuation; the lake can live here                |
+| 3584–3840         | Fade to the background, used by vertical parallax                                 | Script-made                                         |
 
-Panorama coordinates in px, valley floor to summit:
+## 6. Intensity, light and dark, formats, memory
 
-`1438,1406 · 1801,1424 · 2177,1380 · 2446,1299 · 2150,1227 · 1747,1191 · 1559,1111 · 1801,1030 · 2177,1003 ·
-2419,932 · 2177,860 · 2016,797 · 2150,734 · 2285,694` (summit).
-
-- These are today's `WAYPOINTS` mapped into the Journey painting (x 1344–2688, y 600–1496). The existing guide
-  `design/artwork-guides/ascent-guide-1500x1000.png` shows the same route.
-- Landmarks sit on days 7 (first week, footsteps), 21 (base camp, bonfire), 44 (high camp, flag) and 66 (summit, star).
-- Keep the trail's line a little lighter than its surroundings, with no busy texture under it, so the markers read.
+- **Intensity:** painted into the pieces (above), plus a code veil of background colour that follows the camera
+  continuously: Habits 45% light / 50% dark, Journey 0%, Field Notes 15–20%. With Reduce Transparency or Increase
+  Contrast on, it rises to 70% / 40%. Brightness never jumps during a pan. Habit cards are opaque, so they stay
+  legible on any art.
+- **Light and dark:** separate versions, required, with identical geometry (the light pieces are relights of the
+  dark ones).
+- **Formats:**
+  - From ChatGPT: PNG originals.
+  - Shipped: lossy WebP at quality about 80 (opaque, supported by React Native on iOS 14 and later). Progressive
+    JPEG at quality 85 only if a sky bands.
+  - We add 1–2% grain before encoding to prevent banding.
+- **Compressed budget:** Habits ≤ 400 KB, Journey ≤ 900 KB, Field Notes ≤ 600 KB per tile. That's ≤ 1.9 MB per theme
+  and ≤ 3.8 MB for both (today's world is 0.97 MB).
+- **Decoded memory:** about 24 MB per tile at full size, so about 72 MB for one theme. That's too much to hold
+  permanently. Two remedies:
+  - Decode Habits and Field Notes at 2/3 scale (their art is soft and the downscale isn't visible): about 42 MB per
+    theme in total.
+  - Never hold both themes at once: on a theme change, fade through the background colour.
+  - Then measure on an iPhone SE with Instruments.
+- **Layers:** one flattened image per region for the first version. An optional transparent mist strip could add
+  depth during pans later.
 
 ## 7. Recommended implementation (not built yet)
 
-1. **One persistent world layer.** A `WorldLayer` rendered once in `src/app/(tabs)/_layout.tsx`, behind the `Tabs`
-   navigator.
-   - The three scenes become transparent (`sceneStyle: { backgroundColor: 'transparent' }`), and the tab screens
-     stop drawing their own `WorldBackdrop`.
+1. **One persistent world layer** in `src/app/(tabs)/_layout.tsx`, behind the `Tabs` navigator.
+   - The three scenes become transparent, and the tab screens stop drawing their own `WorldBackdrop`.
    - The tiles stay mounted, so switching tabs never reloads or resets the background.
-   - Testing builds only; the public release keeps today's Today screen as it is.
-2. **Camera.** A Reanimated shared value `camera` (0 = Habits, 1 = Journey, 2 = Field Notes) set from the focused
-   tab and animated with `withTiming(index, { duration: 420, easing: Easing.inOut(Easing.cubic) })`.
-   - The layer's `translateX = −camera × screenWidth` runs on the UI thread with no React re-render.
-   - The foreground uses the tabs' built-in `animation: 'shift'`, so content slides the same way as the world.
+   - Testing builds only; the public release keeps Today as it is.
+2. **Camera:** a Reanimated shared value (0 Habits, 1 Journey, 2 Field Notes) animated with `withTiming` over
+   420 ms, `Easing.inOut(Easing.cubic)`.
+   - The layer's `translateX = −camera × screenWidth` runs on the UI thread with no re-render.
+   - The foreground uses the tabs' built-in `animation: 'shift'`.
 3. **Vertical position, shared but not forced.** Each tab keeps its own scroll.
-   - Each tab's scroll handler writes its offset to a per-tab shared value.
-   - The world's `translateY` is the camera-weighted blend of each tab's parallax offset: Habits 0.2 × scroll,
-     Field Notes 0.2 × scroll, Journey 0, clamped to the 280 px travel margin.
-   - No screen scrolls another, and a pan eases from one tab's height to the other's without a jump.
-4. **Journey stays registered.** The mountain doesn't scroll on Journey (Part A made the page short).
-   - The trail overlay moves into the world layer with the Journey tile, so it pans with the mountain.
-   - The page keeps a transparent hit area over the painting for day taps.
-   - The day details are the only part that scrolls.
-5. **Field Notes:** its five camps are drawn today on the Ascent's coordinates. When the lakeside region exists, the
-   camps need their own route in the camp band. That's a later product decision; nothing changes now.
-6. **Safe areas:** the world is edge to edge, under the status bar and tab bar. Foreground content keeps using the
-   insets. The world's top always aligns with the screen top.
-7. **Memory and loading:**
-   - Bundle the tiles; resolve and prefetch the current theme's three tiles at startup and keep them mounted.
-   - On a theme change, fade the world to the background colour, swap the tiles, then fade back, rather than
-     holding both themes (today's world crossfades both).
-   - Check decoded memory with Xcode Instruments on an iPhone SE. If it's too high, generate @2× variants at build
-     time, which React Native picks per device.
-8. **Accessibility:**
-   - The world is decorative (`accessibilityElementsHidden`, `importantForAccessibility="no-hide-descendants"`).
-   - **Reduce Motion:** no pan (a 150 ms crossfade instead), no vertical parallax, and tabs `animation: 'none'`.
-   - **Reduce Transparency / Increase Contrast:** a stronger veil (§4).
-9. **Layered assets:** not needed for the first version; a single flattened layer per region keeps seams and memory
-   simple. Optional later: one transparent mist strip (4032 × 900, WebP with alpha) that moves at 1.1× the camera
-   for depth during pans (off with Reduce Motion), about 14.5 MB decoded at full size, or 6.5 MB if generated at 2×.
+   - The world's `translateY` is the camera-weighted blend of each tab's parallax: Habits 0.2 × scroll, Field Notes
+     0.2 × scroll, Journey 0, clamped to the fade margin.
+   - Nothing scrolls another screen, and pans ease between heights.
+4. **Journey:** the mountain doesn't scroll. The trail overlay moves into the world layer and pans with it. Taps hit
+   a transparent area over the painting.
+5. **Field Notes:** its camps use the Ascent's coordinates today. A lakeside region needs its own camp route later;
+   that's a product decision, and nothing changes now.
+6. **Safe areas:** the world is edge to edge under the status bar and tab bar; foreground content keeps its insets.
+7. **Accessibility:**
+   - The world is decorative and hidden from VoiceOver.
+   - **Reduce Motion:** a 150 ms crossfade instead of the pan, no parallax, tabs `animation: 'none'`.
 
-## 8. Approval checklist for the artwork
+## 8. Approval checklist
 
-- [ ] 4032 × 3200, light and dark, identical geometry, sRGB, 16-bit master with light grain.
-- [ ] Seamless at x 1344 and x 2688, with no focal subjects in the 96 px edge bands.
-- [ ] Bands follow §3: quiet sky to y 600, header band calm, nothing important below y 2920.
-- [ ] Journey: summit and trail on the §6 waypoints (or a replacement set supplied); lake and valley in y 1496–2190.
-- [ ] Habits: pale, low-contrast, mountain distant; Field Notes: lakeside camp or overlook in the camp band.
-- [ ] Intensity eases across the borders (no brightness step), dark version stays dark behind header text.
+- [ ] 6 dark pieces (`h1–h3`, `f1–f3`), 1536 × 1024 PNG originals, uploaded with the naming scheme.
+- [ ] Each continues its neighbour's edge: horizon, light, palette. Nothing important within 200 px of a join.
+- [ ] Habits pale and low-contrast with the mountain faint; Field Notes calm with a lakeside camp or overlook.
+- [ ] 6 light relights with identical composition.
+- [ ] Our stitched preview (we'll render it with the app's screens on top) reviewed and approved before anything
+      ships.
