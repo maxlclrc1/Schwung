@@ -35,7 +35,7 @@ x (px)      0                    1536     1536                   3072    3072   
             │ quiet valley floor     │    │ misty valley and lake  │    │ lakeshore, reflections │ ~3584
             │ fade to app background │    │ fade to app background │    │ fade to app background │ 3840
             └────────────────────────┘    └────────────────────────┘    └────────────────────────┘
-            ◄────────────────────── one seamless panorama, 4608 × 3840 after stitching ──────────────────────►
+            ◄────────────────────── one seamless panorama: 4096 × 3840 as built (side regions 1280 wide) ──────────────────────►
 ```
 
 ## 2. What to give ChatGPT (the originals)
@@ -96,9 +96,9 @@ the same name holding the prompt is welcome.
 
 ```
 assets/world/
-  pano-dark-habits.webp       1552 × 3840   (region + 16 px bleed on the right)
-  pano-dark-journey.webp      1568 × 3840   (16 px bleed on both sides)
-  pano-dark-fieldnotes.webp   1552 × 3840   (16 px bleed on the left)
+  pano-dark-habits.webp       1296 × 3840   (x 0–1296: Habits + 16 px bleed)
+  pano-dark-journey.webp      1568 × 3840   (x 1264–2832: Journey + 16 px bleed on both sides)
+  pano-dark-fieldnotes.webp   1296 × 3840   (x 2800–4096: 16 px bleed + Field Notes)
   pano-light-habits.webp      …same three in light
   pano-light-journey.webp
   pano-light-fieldnotes.webp
@@ -106,9 +106,15 @@ assets/world/
 
 ## 5. Dimensions and safe bands
 
-- **Region:** 1536 × 3840, one per tab, the width of the existing art. The whole panorama is **4608 × 3840**.
-- **Width-fit:** the world scales so one region equals the screen width, as it does today. Every iPhone sees a whole
-  region, a tab change pans exactly one screen, and the Journey trail stays on the painting.
+- **As built (dark v2):** the side pieces were painted over guides holding a 256 px strip of Journey, so each adds
+  1280 px of new land. The panorama is **4096 × 3840**:
+  - Habits: x 0–1280
+  - Journey: x 1280–2816 (the existing art)
+  - Field Notes: x 2816–4096
+- **Width-fit:** the world scales so 1536 px equals the screen width, as it does today. The camera rests at
+  x = 0 (Habits), 1280 (Journey) and 2560 (Field Notes). Habits and Field Notes therefore show their own land plus
+  the mountain's outer 256 px at the inner edge, and a tab change pans 1280 px (5/6 of a screen). The Journey trail
+  stays on the painting.
 - The Journey painting stays at rows **800–1824**, where it is today, so the day markers line up with no new
   coordinates.
 
