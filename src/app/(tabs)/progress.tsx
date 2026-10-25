@@ -1,13 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, { useAnimatedScrollHandler, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { JourneyView } from '../../components/JourneyView';
 import { Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
+import { journeyAnchor, journeyScroll, useWorldLayer, worldCamera } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor, type AscentDay } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { getHabit, habitTitle } from '../../core/habits';
@@ -31,9 +33,10 @@ export default function JourneyTab() {
   const started = useApp((s) => s.startedAt !== null);
   // Opened with a day (e.g. from a link): start with that day selected.
   const picked = Number(useLocalSearchParams<{ day?: string }>().day) || null;
+  const world = useWorldLayer();
   if (!tabs()) return <Redirect href="/journey" />;
   return (
-    <Screen edges={[]}>
+    <Screen edges={[]} transparent={world}>
       {started ? (
         <Ascent picked={picked} />
       ) : (
@@ -93,18 +96,32 @@ function Ascent({ picked }: { picked: number | null }) {
     [logs, start, today],
   );
   const pick = (day: number) => setChosen(day === lastDay ? null : day);
+  // With the tabs' shared world, this page's scroll moves it (the trail must stay on the painting), and the
+  // trail and labels fade in as the camera arrives, so they never slide across the mountain mid-pan.
+  const world = useWorldLayer();
+  const onScroll = useAnimatedScrollHandler((e) => {
+    journeyScroll.set(e.contentOffset.y);
+  });
+  const arrive = useAnimatedStyle(() => ({
+    opacity: world ? Math.min(1, Math.max(0, 1 - Math.abs(worldCamera.get() - 1) * 4)) : 1,
+  }));
   const summary = daySummary(days[shownDay - 1], logForDay(logs, start, shownDay), shownDay === today);
 
   return (
     <>
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* The world behind the whole page; its painting starts where the trail area is measured. */}
-        <View style={StyleSheet.absoluteFill}>
-          <WorldBackdrop zoneTop={zoneTop} fadeTop />
-        </View>
+        {/* The world behind the page, its painting starting where the trail area is measured: the tabs' shared
+            world (moved with this page's scroll), or this screen's own. */}
+        {world ? null : (
+          <View style={StyleSheet.absoluteFill}>
+            <WorldBackdrop zoneTop={zoneTop} fadeTop />
+          </View>
+        )}
 
         <View style={styles.pad}>
           <Header onCalendar={() => setCalendar(true)} />
@@ -127,7 +144,10 @@ function Ascent({ picked }: { picked: number | null }) {
 
         {/* The Ascent. Tap a marker to see that day. */}
         <Pressable
-          onLayout={(e) => setZoneTop(e.nativeEvent.layout.y)}
+          onLayout={(e) => {
+            setZoneTop(e.nativeEvent.layout.y);
+            journeyAnchor.set(e.nativeEvent.layout.y);
+          }}
           onPress={(e) => {
             const day = nearestDay(tapPoint(e), width, zoneHeight, 16);
             if (day === null || day > PROGRAM_DAYS) return;
@@ -139,7 +159,7 @@ function Ascent({ picked }: { picked: number | null }) {
           accessibilityLabel={ascentLabel(days, today)}
           style={{ width, height: zoneHeight }}
         >
-          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, arrive]}>
             <AscentScene
               days={days}
               today={today}
@@ -147,8 +167,10 @@ function Ascent({ picked }: { picked: number | null }) {
               selected={chosen !== null && chosen !== today ? chosen : null}
               todayDone={todayDone}
             />
-          </View>
-          <AscentLabels today={today} width={width} />
+          </Animated.View>
+          <Animated.View pointerEvents="none" style={arrive}>
+            <AscentLabels today={today} width={width} />
+          </Animated.View>
         </Pressable>
 
         <View style={styles.pad}>
@@ -190,7 +212,7 @@ function Ascent({ picked }: { picked: number | null }) {
             />
           ) : null}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* The full 66 days, on demand: pick a day to see it on the mountain and its habits below. */}
       <Modal
