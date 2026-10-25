@@ -1,5 +1,8 @@
 # Habit card artwork — specification for Step 2
 
+Re-checked after Step 2A: the card itself is unchanged, so every dimension below still holds. The only change is what
+surrounds the cards: the Habits tab no longer has the mountain, so cards sit on the plain app background.
+
 Measured from the current habit card (`src/components/HabitRow.tsx`) and the Habits tab (`src/app/(tabs)/today.tsx`).
 No artwork is implemented yet.
 
@@ -9,7 +12,8 @@ No artwork is implemented yet.
 - Today: min height 76pt, 16pt padding, a 30pt round check control at the leading edge, the title and target in the
   middle, and an 18pt level badge at the trailing edge.
 - Card surface is `#FFFFFF` in light mode and `#1C1B25` in dark. When checked, it fades to a violet tint and the text
-  fades to 55%. The mountain painting shows through between cards.
+  fades to 55%. Since Step 2A the Habits tab has no painting behind the list: between cards is the plain background,
+  `#F7F6FB` in light mode and `#111116` in dark.
 
 ## Recommended layout
 

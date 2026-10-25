@@ -315,7 +315,14 @@ describe('routes', () => {
       ['fieldnotes', 'Field Notes'],
     ]);
     // The release opens the journey as the same sheet as before; the Journey tab sends it there too.
-    expect(read('(tabs)/today.tsx')).toContain("else router.push(day ? `/journey?day=${day}` : '/journey');");
+    const today = read('(tabs)/today.tsx');
+    expect(today).toContain("router.push(day ? `/journey?day=${day}` : '/journey')");
+    // The mountain is drawn on Today only in the public release; testing builds draw it once, on Journey.
+    expect(today).toContain('const mountain = !tabs();');
+    expect(today.match(/<AscentScene/g)).toHaveLength(1);
+    expect(today).toMatch(/\{mountain \? \(\s*<Animated\.View pointerEvents="none"[^]*?<AscentScene/);
+    expect(read('(tabs)/progress.tsx').match(/<AscentScene/g)).toHaveLength(1);
+    expect(read('(tabs)/progress.tsx')).not.toContain('JourneyView');
     expect(read('(tabs)/progress.tsx')).toContain('if (!tabs()) return <Redirect href="/journey" />;');
     // Day 1 opens from Today once it's inside the navigator, never pushed during onboarding's last replace.
     expect(read('reminder.tsx')).not.toMatch(/push\('\/ceremony|markCeremonySeen/);

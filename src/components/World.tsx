@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
@@ -14,9 +15,18 @@ const ART = {
  * The Schwung world behind a screen: sky, the mountain, and fog that settles into the app background.
  * `zoneTop` is where the painting (the trail area) starts, measured from this view's top.
  * `dim` veils it with the background color for text-heavy screens.
+ * `fadeTop` softens the sky's top edge into the background, for screens where that edge is on screen.
  * Decorative only: hidden from screen readers and ignores touches.
  */
-export function WorldBackdrop({ zoneTop, dim = 0 }: { zoneTop: number; dim?: number }) {
+export function WorldBackdrop({
+  zoneTop,
+  dim = 0,
+  fadeTop = false,
+}: {
+  zoneTop: number;
+  dim?: number;
+  fadeTop?: boolean;
+}) {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
   const { imageTop, imageHeight } = worldFrame(width, zoneTop);
@@ -38,10 +48,18 @@ export function WorldBackdrop({ zoneTop, dim = 0 }: { zoneTop: number; dim?: num
       {/* Both themes stay mounted and crossfade with the theme. */}
       <Animated.Image source={ART.dark} style={[image, darkArt]} resizeMode="cover" />
       <Animated.Image source={ART.light} style={[image, lightArt]} resizeMode="cover" />
+      {fadeTop ? (
+        <LinearGradient
+          colors={[c.bg, `${c.bg}00`]}
+          style={{ position: 'absolute', left: 0, width, top: imageTop - 1, height: TOP_FADE }}
+        />
+      ) : null}
       {dim > 0 ? <ThemedView style={[styles.fill, { backgroundColor: c.bg, opacity: dim }]} /> : null}
     </ThemedView>
   );
 }
+
+const TOP_FADE = 140;
 
 const styles = StyleSheet.create({
   fill: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
