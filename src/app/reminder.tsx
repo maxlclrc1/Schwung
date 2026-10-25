@@ -31,13 +31,10 @@ export default function Reminder() {
     const s = useApp.getState();
     s.setReminder(time, granted);
     await rescheduleReminders().catch(() => {});
-    // Onboarding is done: Today becomes the root, and Day 1 opens straight over it, so Today never
-    // flashes first. Marked seen up front so Today doesn't queue the same ceremony a second time.
-    const firstTime = !s.seenCeremonies.includes(1);
-    if (firstTime) s.markCeremonySeen(1);
+    // Onboarding is done: Today becomes the root and opens Day 1 over itself as soon as it's there. (Pushing the
+    // ceremony from here, in the same moment as the replace, can be lost while Today's navigator is still forming.)
     if (router.canDismiss()) router.dismissAll();
     router.replace('/today');
-    if (firstTime) router.push('/ceremony?m=1');
   };
 
   return (

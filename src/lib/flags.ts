@@ -41,3 +41,11 @@ export function devTools(): boolean {
 export function storageKey(ch: Channel = channel(), dev: boolean = __DEV__): string {
   return dev && ch === 'internal' ? 'schwung-state-internal' : 'schwung-state';
 }
+
+/**
+ * The three-tab layout (Habits, Journey, Field Notes). Development and internal-testing builds only: the public
+ * release keeps its single Today screen with the journey as a sheet, exactly as before.
+ */
+export function tabs(ch: Channel = channel()): boolean {
+  return ch !== 'production';
+}
