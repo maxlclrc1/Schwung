@@ -12,24 +12,25 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
-import { Confetti } from '../components/Art';
-import { AscentCaption, ascentLabel, AscentLabels, AscentScene, tapPoint } from '../components/Ascent';
-import { Comeback } from '../components/Comeback';
-import { HabitRow } from '../components/HabitRow';
-import { Notices } from '../components/Notices';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { Button, ProgressBar, T } from '../components/ui';
-import { WorldBackdrop } from '../components/World';
-import { ascentDays, nearestDay, phaseFor } from '../core/ascent';
-import { comebackFor } from '../core/comeback';
-import { dueOn, isDueOn, nextSessionLabel, wasDueOn } from '../core/schedule';
-import { isExercise } from '../core/v2/exercise';
-import { SelfCheckToggle } from '../components/Exercise';
-import type { DayLog } from '../core/types';
+import { Confetti } from '../../components/Art';
+import { AscentCaption, ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
+import { Comeback } from '../../components/Comeback';
+import { HabitRow } from '../../components/HabitRow';
+import { SettingsButton } from '../../components/HeaderButton';
+import { Notices } from '../../components/Notices';
+import { ThemeToggle } from '../../components/ThemeToggle';
+import { Button, ProgressBar, T } from '../../components/ui';
+import { WorldBackdrop } from '../../components/World';
+import { ascentDays, nearestDay, phaseFor } from '../../core/ascent';
+import { comebackFor } from '../../core/comeback';
+import { dueOn, isDueOn, nextSessionLabel, wasDueOn } from '../../core/schedule';
+import { isExercise } from '../../core/v2/exercise';
+import { SelfCheckToggle } from '../../components/Exercise';
+import type { DayLog } from '../../core/types';
 
-import { PARALLAX, trailPoint, worldFrame } from '../core/world';
-import { dateForDay, PROGRAM_DAYS } from '../core/dates';
-import { habitTitle, LEVEL_NAME, levelUp, shownTaskAt } from '../core/habits';
+import { PARALLAX, trailPoint, worldFrame } from '../../core/world';
+import { dateForDay, PROGRAM_DAYS } from '../../core/dates';
+import { habitTitle, LEVEL_NAME, levelUp, shownTaskAt } from '../../core/habits';
 import {
   currentStreak,
   dayQualifies,
@@ -41,13 +42,14 @@ import {
   STREAK_THRESHOLD,
   totalXp,
   XP_FULL_DAY_BONUS,
-} from '../core/progression';
-import { haptic } from '../lib/haptics';
-import { rescheduleSoon } from '../lib/notifications';
-import { useClock } from '../lib/useClock';
-import { appNow, currentDay, useApp } from '../store/useApp';
-import { radius, space, useTheme } from '../theme';
-import { ThemedView } from '../theme/transition';
+} from '../../core/progression';
+import { tabs } from '../../lib/flags';
+import { haptic } from '../../lib/haptics';
+import { rescheduleSoon } from '../../lib/notifications';
+import { useClock } from '../../lib/useClock';
+import { appNow, currentDay, useApp } from '../../store/useApp';
+import { radius, space, useTheme } from '../../theme';
+import { ThemedView } from '../../theme/transition';
 
 const todayLogRested = (logs: Record<string, DayLog>, start: string, day: number) =>
   logs[dateForDay(start, day)]?.rested ?? [];
@@ -55,6 +57,8 @@ const todayLogRested = (logs: Record<string, DayLog>, start: string, day: number
 export default function Today() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  // The tab bar already keeps clear of the home indicator.
+  const bottomInset = tabs() ? 0 : insets.bottom;
   const { todayKey, yesterdayEditable } = useClock();
   const startedAt = useApp((s) => s.startedAt);
   const plan = useApp((s) => s.plan);
@@ -130,7 +134,11 @@ export default function Today() {
     },
     [toggleHabit, today],
   );
-  const onOpenJourney = useCallback((day?: number) => router.push(day ? `/journey?day=${day}` : '/journey'), []);
+  // Testing builds have a Journey tab; the public release opens the journey as a sheet.
+  const onOpenJourney = useCallback((day?: number) => {
+    if (tabs()) router.navigate(`/progress?day=${day ?? ''}`);
+    else router.push(day ? `/journey?day=${day}` : '/journey');
+  }, []);
   const onTrailPress = useCallback(
     (e: GestureResponderEvent) => {
       const day = nearestDay(trailPoint(tapPoint(e), scrollY.get()), width, zoneHeight, 16);
@@ -172,12 +180,14 @@ export default function Today() {
     if (!startedAt) return;
     const m = pendingCeremony(seen, today, todayFull, todayQualifies);
     if (m === null) return;
-    // A milestone reached by a check-off waits a beat so the check animation and haptic land first.
-    const t = setTimeout(() => router.push(`/ceremony?m=${m}`), m === today && m !== 1 ? 900 : 350);
+    // Day 1 opens straight over a new Today (right after onboarding), so Today never flashes first. A milestone
+    // reached by a check-off waits a beat so the check animation and haptic land first.
+    const delay = m === 1 ? 0 : m === today ? 900 : 350;
+    const t = setTimeout(() => router.push(`/ceremony?m=${m}`), delay);
     return () => clearTimeout(t);
   }, [startedAt, seen, today, todayFull, todayQualifies]);
 
-  if (!startedAt) return null;
+  if (!startedAt) return tabs() ? <NoProgram /> : null;
 
   return (
     <View style={styles.root}>
@@ -192,7 +202,7 @@ export default function Today() {
         scrollEventThrottle={16}
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: insets.top + space.sm, paddingBottom: insets.bottom + space.xxxl },
+          { paddingTop: insets.top + space.sm, paddingBottom: bottomInset + space.xxxl },
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -207,7 +217,7 @@ export default function Today() {
           </View>
           <View style={styles.headerIcons}>
             <ThemeToggle />
-            <IconButton name="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
+            <SettingsButton />
           </View>
         </View>
 
@@ -394,7 +404,7 @@ export default function Today() {
 
       {celebrate ? <Confetti spread={200} /> : null}
       {celebrate ? (
-        <View pointerEvents="none" style={[styles.celebrateWrap, { bottom: insets.bottom + space.xl }]}>
+        <View pointerEvents="none" style={[styles.celebrateWrap, { bottom: bottomInset + space.xl }]}>
           <ThemedView
             entering={FadeInDown.springify().damping(16)}
             exiting={FadeOut.duration(250)}
@@ -512,36 +522,30 @@ function Mission({
   );
 }
 
-function IconButton({
-  name,
-  label,
-  onPress,
-}: {
-  name: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-}) {
+/** The Habits tab before a program has started (testing builds, e.g. someone who began with Field Notes). */
+function NoProgram() {
   const { c } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
-    <Pressable
-      onPress={() => {
-        haptic.tap();
-        onPress();
-      }}
-      hitSlop={8}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-    >
-      <ThemedView style={[styles.iconButton, { backgroundColor: c.surface }]}>
-        <Ionicons name={name} size={20} color={c.text} />
-      </ThemedView>
-    </Pressable>
+    <View style={[styles.empty, { paddingTop: insets.top + space.sm }]}>
+      <View style={styles.header}>
+        <T v="heading" accessibilityRole="header">
+          Habits
+        </T>
+        <SettingsButton />
+      </View>
+      <View style={styles.emptyBody}>
+        <T color={c.textDim}>You haven’t started a habit plan yet. Your daily habits will show up here.</T>
+        <Button label="Start my reset" onPress={() => router.push('/welcome')} />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  empty: { flex: 1, paddingHorizontal: space.lg },
+  emptyBody: { flex: 1, justifyContent: 'center', gap: space.lg },
   world: { position: 'absolute', left: 0, right: 0, top: 0 },
   statusSky: { position: 'absolute', left: 0, right: 0, top: 0, overflow: 'hidden' },
   scene: { position: 'absolute', left: 0 },
@@ -551,7 +555,6 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.md },
   tabular: { fontVariant: ['tabular-nums'] },
   headerIcons: { flexDirection: 'row', gap: space.sm },
-  iconButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   mission: { borderRadius: radius.lg, padding: space.lg, gap: space.sm },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.xs },
   segments: { flex: 1, flexDirection: 'row', gap: 4 },

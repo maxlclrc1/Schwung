@@ -303,9 +303,36 @@ describe('routes', () => {
     }
   });
 
+  it('three tabs (Habits, Journey, Field Notes) only in testing builds; the public release keeps Today on its own', () => {
+    const { tabs } = jest.requireActual<typeof import('../../lib/flags')>('../../lib/flags');
+    expect([tabs('production'), tabs('internal'), tabs('development')]).toEqual([false, true, true]);
+    const layout = read('(tabs)/_layout.tsx');
+    expect(layout).toContain('tabBar={on ? undefined : () => null}');
+    const order = [...layout.matchAll(/name="(\w+)"\s+options=\{\{\s*title: '([^']+)'/g)].map((m) => [m[1], m[2]]);
+    expect(order).toEqual([
+      ['today', 'Habits'],
+      ['progress', 'Journey'],
+      ['fieldnotes', 'Field Notes'],
+    ]);
+    // The release opens the journey as the same sheet as before; the Journey tab sends it there too.
+    expect(read('(tabs)/today.tsx')).toContain("else router.push(day ? `/journey?day=${day}` : '/journey');");
+    expect(read('(tabs)/progress.tsx')).toContain('if (!tabs()) return <Redirect href="/journey" />;');
+    // Day 1 opens from Today once it's inside the navigator, never pushed during onboarding's last replace.
+    expect(read('reminder.tsx')).not.toMatch(/push\('\/ceremony|markCeremonySeen/);
+    expect(read('(tabs)/today.tsx')).toContain('const delay = m === 1 ? 0 : m === today ? 900 : 350;');
+  });
+
   it('Welcome has no developer switch and no V2 or preview wording on any normal screen', () => {
     expect(read('welcome.tsx')).not.toMatch(/setDevV2Preview|Developer/);
-    for (const f of ['welcome.tsx', 'v2/quiz.tsx', 'v2/plan.tsx', 'v2/time.tsx', 'today.tsx']) {
+    for (const f of [
+      'welcome.tsx',
+      'v2/quiz.tsx',
+      'v2/plan.tsx',
+      'v2/time.tsx',
+      '(tabs)/today.tsx',
+      '(tabs)/progress.tsx',
+      '(tabs)/_layout.tsx',
+    ]) {
       const visible = read(f)
         .split('\n')
         .filter((l) => !/^\s*(\/\/|\*|\/\*|import)/.test(l))

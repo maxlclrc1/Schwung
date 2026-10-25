@@ -73,7 +73,10 @@ describe('Field Notes is separate from Schwung', () => {
     expect(fieldNotesAvailable('internal')).toBe(true);
     expect(fieldNotesAvailable('development')).toBe(true);
     for (const file of ['index', 'setup', 'note', 'history']) {
-      const src = fs.readFileSync(`${process.cwd()}/src/app/fieldnotes/${file}.tsx`, 'utf8');
+      const src = fs.readFileSync(
+        `${process.cwd()}/src/app/${file === 'index' ? '(tabs)/fieldnotes' : `fieldnotes/${file}`}.tsx`,
+        'utf8',
+      );
       expect([
         file,
         src.includes(

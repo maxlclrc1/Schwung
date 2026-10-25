@@ -7,6 +7,7 @@ import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 're
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DayStrip, FieldTrail, Observation } from '../../components/FieldNotes';
+import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { Button, Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
 import { formatTime } from '../../core/dates';
@@ -40,6 +41,40 @@ export default function FieldNotesToday() {
     return <Redirect href="/" />;
   }
   return <Daily />;
+}
+
+/** The Field Notes tab before an experiment has started: one way in, to the existing setup. */
+function NotStarted() {
+  const { c } = useTheme();
+  const insets = useSafeAreaInsets();
+  return (
+    <Screen edges={[]}>
+      <View style={[styles.notStarted, { paddingTop: insets.top + space.sm }]}>
+        <View style={styles.top}>
+          <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
+            Field Notes · 14 days
+          </T>
+          <SettingsButton />
+        </View>
+        <View style={styles.notStartedBody}>
+          <T v="heading" accessibilityRole="header" maxFontSizeMultiplier={1.6}>
+            Discover what actually works for you.
+          </T>
+          <T color={c.textDim}>
+            One question, one small thing to try, and a few notes along the way. Separate from your habit plan.
+          </T>
+          <Button
+            label="Start Field Notes"
+            style={{ marginTop: space.sm }}
+            onPress={() => {
+              useFieldNotes.getState().setActive(true);
+              router.push('/fieldnotes/setup');
+            }}
+          />
+        </View>
+      </View>
+    </Screen>
+  );
 }
 
 /** What the top of the day says: where they are in the 14 days, in a few words. */
@@ -138,7 +173,7 @@ function Daily() {
     [run, today],
   );
 
-  if (!run) return <Redirect href="/fieldnotes/setup" />;
+  if (!run) return <NotStarted />;
 
   const stage = stageOf(today);
   const rec = dayRecord(run, Math.min(today, FN_DAYS));
@@ -206,7 +241,8 @@ function Daily() {
   };
 
   return (
-    <Screen edges={['bottom']}>
+    // The tab bar keeps clear of the home indicator.
+    <Screen edges={[]}>
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
@@ -220,16 +256,14 @@ function Daily() {
             <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
               {line.kicker}
             </T>
-            <Pressable
-              onPress={() => router.push('/fieldnotes/history')}
-              accessibilityRole="button"
-              accessibilityLabel="Your notes"
-              hitSlop={10}
-            >
-              <ThemedView style={[styles.iconBtn, { backgroundColor: c.surface }]}>
-                <Ionicons name="journal-outline" size={20} color={c.text} />
-              </ThemedView>
-            </Pressable>
+            <View style={styles.headerIcons}>
+              <IconButton
+                name="journal-outline"
+                label="Your notes"
+                onPress={() => router.push('/fieldnotes/history')}
+              />
+              <SettingsButton />
+            </View>
           </View>
           <T v="heading" accessibilityRole="header" maxFontSizeMultiplier={1.6}>
             {run.experiment.question}
@@ -586,7 +620,7 @@ function Daily() {
                       useFieldNotes.getState().setActive(true);
                       setConfirmReset(false);
                       void rescheduleReminders().catch(() => {});
-                      router.replace('/fieldnotes/setup');
+                      router.push('/fieldnotes/setup');
                     }}
                   />
                 </View>
@@ -652,7 +686,9 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: space.xxxl },
   pad: { paddingHorizontal: space.lg, gap: space.md },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
-  iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  headerIcons: { flexDirection: 'row', gap: space.sm },
+  notStarted: { flex: 1, paddingHorizontal: space.xl, gap: space.lg },
+  notStartedBody: { flex: 1, justifyContent: 'center', gap: space.md },
   campCard: { borderRadius: radius.lg, padding: space.lg, gap: space.xs, marginTop: space.sm },
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
   pair: { flexDirection: 'row', gap: space.sm },

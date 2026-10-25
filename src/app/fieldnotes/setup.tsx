@@ -88,7 +88,8 @@ function Setup() {
     }
     void rescheduleReminders().catch(() => {});
     haptic.success();
-    router.replace('/fieldnotes');
+    // Back to the Field Notes tab underneath, or into the tabs when set up from Welcome.
+    router.dismissTo('/fieldnotes');
   };
 
   const option = (key: string, label: string, sub: string | undefined, on: boolean, onPress: () => void) => (
