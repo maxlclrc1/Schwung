@@ -3,14 +3,14 @@ import { Redirect, router } from 'expo-router';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown, useAnimatedScrollHandler, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DayStrip, FieldTrail, Observation } from '../../components/FieldNotes';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { Button, Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
-import { useWorldLayer } from '../../components/WorldLayer';
+import { useWorldLayer, worldAnchor, worldCamera, worldScroll } from '../../components/WorldLayer';
 import { formatTime } from '../../core/dates';
 import { experimentById, experimentOptions, GOALS, OBSERVATION } from '../../core/fieldnotes/catalog';
 import { baselineLine, PATTERN_HEADING, summarize, summaryThrough, CAVEAT } from '../../core/fieldnotes/insights';
@@ -170,6 +170,14 @@ function Daily() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [otherOpen, setOtherOpen] = useState(false);
   const today = run ? fnToday({ run, devDayOffset: offset }) : 0;
+  // In the shared world this page scrolls the lakeside with it, so the camps stay on the art, and the camps fade
+  // in as the camera arrives rather than sliding across the landscape mid-pan.
+  const onScroll = useAnimatedScrollHandler((e) => {
+    worldScroll[2].set(e.contentOffset.y);
+  });
+  const arrive = useAnimatedStyle(() => ({
+    opacity: world ? Math.min(1, Math.max(0, 1 - Math.abs(worldCamera.get() - 2) * 4)) : 1,
+  }));
 
   // The latest camp reached is the one shown, until the person taps another.
   const latest = useMemo(
@@ -247,7 +255,9 @@ function Daily() {
   return (
     // The tab bar keeps clear of the home indicator.
     <Screen edges={[]} transparent={world}>
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
       >
@@ -276,15 +286,25 @@ function Daily() {
           </T>
         </View>
 
-        {/* The mountain: five camps, each a real moment of the experiment. */}
-        <View onLayout={(e) => setZoneTop(e.nativeEvent.layout.y)} style={{ width, height: zoneHeight }}>
-          <FieldTrail
-            run={run}
-            today={today}
-            width={width}
-            selected={shownCamp}
-            onSelect={(k) => setCamp({ key: k, latest })}
-          />
+        {/* Five camps, each a real moment of the experiment: on the lakeside in the shared world, else on the
+            mountain behind this page. */}
+        <View
+          onLayout={(e) => {
+            setZoneTop(e.nativeEvent.layout.y);
+            worldAnchor[2].set(e.nativeEvent.layout.y);
+          }}
+          style={{ width, height: zoneHeight }}
+        >
+          <Animated.View style={arrive}>
+            <FieldTrail
+              run={run}
+              today={today}
+              width={width}
+              selected={shownCamp}
+              onSelect={(k) => setCamp({ key: k, latest })}
+              route={world ? 'lakeside' : 'ascent'}
+            />
+          </Animated.View>
         </View>
 
         <View style={styles.pad}>
@@ -645,7 +665,7 @@ function Daily() {
 
           {devTools() ? <DevClock today={today} /> : null}
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </Screen>
   );
 }

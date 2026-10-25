@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
 import { tabs } from '../lib/flags';
 import { useTheme } from '../theme';
 
@@ -30,15 +31,22 @@ const SCREEN_PX = 1536;
 const HEIGHT_PX = 3584;
 /** Where the camera rests for each tab, in panorama px. */
 const STOP_PX = 1280;
-const PAINTING_TOP_PX = 800;
+/**
+ * The panorama row each tab lines up with its trail area: the Journey painting's top (row 800) under Journey's
+ * trail, and the lakeside band under Field Notes' camps. Habits has no trail and keeps Journey's alignment.
+ */
+const BAND_TOP_PX = [800, 800, LAKESIDE_BAND_TOP];
 /** How much of the background colour veils each region, so text over the world stays readable. */
 const VEIL = [0.5, 0, 0.18];
 
 /** 0 Habits, 1 Journey, 2 Field Notes; animated between. */
 export const worldCamera = makeMutable(0);
-/** The Journey screen's scroll offset and where its trail area starts in its content (pt; -1 until measured). */
-export const journeyScroll = makeMutable(0);
-export const journeyAnchor = makeMutable(-1);
+/**
+ * Per tab: where its trail area starts in its page (pt; -1 until measured) and how far its page has scrolled.
+ * Journey and Field Notes scroll the world with their pages, so their markers stay on the art; Habits doesn't.
+ */
+export const worldAnchor = [makeMutable(-1), makeMutable(-1), makeMutable(-1)];
+export const worldScroll = [makeMutable(0), makeMutable(0), makeMutable(0)];
 
 const TAB_INDEX: Record<string, number> = { '/today': 0, '/progress': 1, '/fieldnotes': 2 };
 
@@ -55,7 +63,8 @@ export function WorldLayer() {
   const reduceMotion = useReducedMotion();
   const pathname = usePathname();
   const scale = width / SCREEN_PX;
-  const fallbackAnchor = insets.top + 107;
+  // Before a tab's page has been measured: roughly where its trail area starts.
+  const fallback = [insets.top + 107, insets.top + 107, insets.top + 125];
 
   useEffect(() => {
     const index = TAB_INDEX[pathname];
@@ -66,15 +75,18 @@ export function WorldLayer() {
 
   const pan = useAnimatedStyle(() => {
     const cam = worldCamera.get();
-    // Journey's page scrolls the world with it (its trail must stay on the painting); the others leave it still.
-    const onJourney = Math.max(0, 1 - Math.abs(cam - 1));
-    const anchor = journeyAnchor.get() >= 0 ? journeyAnchor.get() : fallbackAnchor;
-    return {
-      transform: [
-        { translateX: -cam * STOP_PX * scale },
-        { translateY: anchor - PAINTING_TOP_PX * scale - journeyScroll.get() * onJourney },
-      ],
-    };
+    // Each tab's own vertical placement, blended by how close the camera is to it, so a pan between tabs eases
+    // from one to the other. Habits follows Journey's placement and never scrolls the world.
+    const anchorOf = (i: number) => (worldAnchor[i].get() >= 0 ? worldAnchor[i].get() : fallback[i]);
+    let y = 0;
+    for (let i = 0; i < 3; i++) {
+      const weight = Math.max(0, 1 - Math.abs(cam - i));
+      if (weight === 0) continue;
+      const anchor = i === 0 ? anchorOf(1) : anchorOf(i);
+      const scroll = i === 0 ? 0 : worldScroll[i].get();
+      y += weight * (anchor - BAND_TOP_PX[i] * scale - scroll);
+    }
+    return { transform: [{ translateX: -cam * STOP_PX * scale }, { translateY: y }] };
   });
   const veil = useAnimatedStyle(() => ({ opacity: interpolate(worldCamera.get(), [0, 1, 2], VEIL) }));
 
