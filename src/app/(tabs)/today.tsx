@@ -59,6 +59,8 @@ export default function Today() {
   const insets = useSafeAreaInsets();
   // The tab bar already keeps clear of the home indicator.
   const bottomInset = tabs() ? 0 : insets.bottom;
+  // The public release keeps the mountain here; testing builds show it on the Journey tab instead.
+  const mountain = !tabs();
   const { todayKey, yesterdayEditable } = useClock();
   const startedAt = useApp((s) => s.startedAt);
   const plan = useApp((s) => s.plan);
@@ -134,11 +136,8 @@ export default function Today() {
     },
     [toggleHabit, today],
   );
-  // Testing builds have a Journey tab; the public release opens the journey as a sheet.
-  const onOpenJourney = useCallback((day?: number) => {
-    if (tabs()) router.navigate(`/progress?day=${day ?? ''}`);
-    else router.push(day ? `/journey?day=${day}` : '/journey');
-  }, []);
+  // Only where the mountain is here (the public release): the journey opens as a sheet over Today.
+  const onOpenJourney = useCallback((day?: number) => router.push(day ? `/journey?day=${day}` : '/journey'), []);
   const onTrailPress = useCallback(
     (e: GestureResponderEvent) => {
       const day = nearestDay(trailPoint(tapPoint(e), scrollY.get()), width, zoneHeight, 16);
@@ -190,13 +189,15 @@ export default function Today() {
   if (!startedAt) return tabs() ? <NoProgram /> : null;
 
   return (
-    <View style={styles.root}>
-      <Animated.View pointerEvents="none" style={[styles.world, worldLayer, parallax]}>
-        <WorldBackdrop zoneTop={zoneTop} />
-        <View style={[styles.scene, { top: zoneTop }]}>
-          <AscentScene days={days} today={today} width={width} selected={selectedDay} todayDone={todayQualifies} />
-        </View>
-      </Animated.View>
+    <ThemedView style={[styles.root, !mountain && { backgroundColor: c.bg }]}>
+      {mountain ? (
+        <Animated.View pointerEvents="none" style={[styles.world, worldLayer, parallax]}>
+          <WorldBackdrop zoneTop={zoneTop} />
+          <View style={[styles.scene, { top: zoneTop }]}>
+            <AscentScene days={days} today={today} width={width} selected={selectedDay} todayDone={todayQualifies} />
+          </View>
+        </Animated.View>
+      ) : null}
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
@@ -214,6 +215,12 @@ export default function Today() {
             <T v="heading" numberOfLines={1} maxFontSizeMultiplier={1.4}>
               {greeting(appNow())}
             </T>
+            {/* With the mountain on its own tab, where you are in the 66 days is said here. */}
+            {mountain ? null : (
+              <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4} style={styles.tabular}>
+                {dayLine(today)}
+              </T>
+            )}
           </View>
           <View style={styles.headerIcons}>
             <ThemeToggle />
@@ -221,21 +228,23 @@ export default function Today() {
           </View>
         </View>
 
-        <Pressable
-          onLayout={(e) => setZoneTop(e.nativeEvent.layout.y)}
-          onPress={onTrailPress}
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel={ascentLabel(days, today)}
-          accessibilityHint="Opens your journey"
-          accessibilityActions={[{ name: 'activate', label: 'Open journey' }]}
-          onAccessibilityAction={() => onOpenJourney()}
-          style={[styles.zone, { width, height: zoneHeight }]}
-        >
-          {/* The words on the mountain scroll with the page; the mountain and trail behind stay still. */}
-          <AscentLabels today={today} width={width} />
-        </Pressable>
-        <AscentCaption days={days} selected={selectedDay} onOpenJourney={onOpenJourney} />
+        {mountain ? (
+          <Pressable
+            onLayout={(e) => setZoneTop(e.nativeEvent.layout.y)}
+            onPress={onTrailPress}
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={ascentLabel(days, today)}
+            accessibilityHint="Opens your journey"
+            accessibilityActions={[{ name: 'activate', label: 'Open journey' }]}
+            onAccessibilityAction={() => onOpenJourney()}
+            style={[styles.zone, { width, height: zoneHeight }]}
+          >
+            {/* The words on the mountain scroll with the page; the mountain and trail behind stay still. */}
+            <AscentLabels today={today} width={width} />
+          </Pressable>
+        ) : null}
+        {mountain ? <AscentCaption days={days} selected={selectedDay} onOpenJourney={onOpenJourney} /> : null}
 
         {viewing === 'today' ? <Comeback comeback={comeback} plan={plan} onStart={onStartComeback} /> : null}
 
@@ -396,11 +405,16 @@ export default function Today() {
         ) : null}
       </Animated.ScrollView>
       {/* The same sky, fixed behind the status bar, so the page scrolls under it rather than under the clock. */}
-      <View pointerEvents="none" style={[styles.statusSky, { height: insets.top }]}>
-        <Animated.View style={[styles.world, worldLayer, parallax]}>
-          <WorldBackdrop zoneTop={zoneTop} />
-        </Animated.View>
-      </View>
+      <ThemedView
+        pointerEvents="none"
+        style={[styles.statusSky, { height: insets.top }, !mountain && { backgroundColor: c.bg }]}
+      >
+        {mountain ? (
+          <Animated.View style={[styles.world, worldLayer, parallax]}>
+            <WorldBackdrop zoneTop={zoneTop} />
+          </Animated.View>
+        ) : null}
+      </ThemedView>
 
       {celebrate ? <Confetti spread={200} /> : null}
       {celebrate ? (
@@ -417,8 +431,14 @@ export default function Today() {
           </ThemedView>
         </View>
       ) : null}
-    </View>
+    </ThemedView>
   );
+}
+
+/** Where you are in the program, in a few words. */
+function dayLine(today: number): string {
+  if (today > PROGRAM_DAYS) return 'Summit reached · Maintenance';
+  return `Day ${today} of ${PROGRAM_DAYS} · ${phaseFor(today).name}`;
 }
 
 function greeting(now: Date): string {

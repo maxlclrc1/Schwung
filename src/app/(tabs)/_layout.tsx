@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router/js-tabs';
 import type { ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,16 @@ import { useTheme } from '../../theme';
 export const unstable_settings = { anchor: 'today' };
 
 type Icon = keyof typeof Ionicons.glyphMap;
+
+type MountainIcon = keyof typeof MaterialCommunityIcons.glyphMap;
+
+/** The Journey tab's mountain (Ionicons has none). */
+function mountainIcon(on: MountainIcon, off: MountainIcon) {
+  function MountainTabIcon({ focused, color, size }: { focused: boolean; color: ColorValue; size: number }) {
+    return <MaterialCommunityIcons name={focused ? on : off} size={size} color={color as string} />;
+  }
+  return MountainTabIcon;
+}
 
 function tabIcon(on: Icon, off: Icon) {
   function TabIcon({ focused, color, size }: { focused: boolean; color: ColorValue; size: number }) {
@@ -51,7 +61,7 @@ export default function TabsLayout() {
         name="progress"
         options={{
           title: 'Journey',
-          tabBarIcon: tabIcon('trail-sign', 'trail-sign-outline'),
+          tabBarIcon: mountainIcon('image-filter-hdr', 'image-filter-hdr-outline'),
           href: on ? undefined : null,
         }}
       />
