@@ -114,6 +114,40 @@ describe('adding a reviewed habit to a running V2 program', () => {
   });
 });
 
+describe('adding a habit that needs a time answer', () => {
+  // B's plan never asks for a wake-up time; Steady wake-up needs one.
+  const B = { ...FIXTURES['B · 19, confidence'], wake: undefined, inBed: undefined };
+
+  it('without the answer nothing is added or saved; with it, only the habit and the missing answer are', async () => {
+    expect(startV2(B)).toBe(true);
+    at(12);
+    for (const h of s().plan) s().toggleHabit(12, h.habitId);
+    const o = addableHabits(s().profile!, s().plan).find((x) => x.id === 'sleep_wake');
+    expect(o?.needsTime).toBe('wake');
+    if (!o) return;
+    const before = JSON.parse(JSON.stringify({ plan: s().plan, logs: s().logs, profile: s().profile }));
+    // Back, Cancel or an unsuitable answer: the add isn't made, so nothing changes.
+    expect(s().addLibraryHabit(o.id)).toBe(false);
+    expect(s().addLibraryHabit(o.id, { wake: { kind: 'shift' } })).toBe(false);
+    expect(JSON.parse(JSON.stringify({ plan: s().plan, logs: s().logs, profile: s().profile }))).toEqual(before);
+    expect(s().addLibraryHabit(o.id, { wake: { kind: 'time', time: '06:30' } })).toBe(true);
+    const added = s().plan.find((h) => h.habitId === o.id)!;
+    expect(added).toMatchObject({ level: 'easy', addedOnDay: 12 });
+    expect(added.spec!.targets.easy).toMatch(/06:30/);
+    expect(s().plan.slice(0, before.plan.length)).toEqual(before.plan); // existing habits and targets untouched
+    expect(s().logs[dateForDay(s().startedAt!, 11)]).toEqual(before.logs[dateForDay(s().startedAt!, 11)]);
+    expect(s().profile!.wake).toBeDefined();
+    expect({ ...s().profile, wake: undefined }).toEqual({ ...before.profile, wake: undefined });
+    expect(s().programVersion).toBe(2);
+    // A saved answer is never replaced by a later one.
+    const wake = s().profile!.wake;
+    const next = addableHabits(s().profile!, s().plan).find((x) => x.needsTime === null);
+    if (next) s().addLibraryHabit(next.id, { wake: { kind: 'varies' } });
+    expect(s().profile!.wake).toEqual(wake);
+    await wait(10);
+  });
+});
+
 describe('optional extras at the start', () => {
   it('start with the extras picked, after the recommended plan, which itself is unchanged', () => {
     const r = previewPlan(C);

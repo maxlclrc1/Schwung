@@ -7,9 +7,18 @@ import { SheetHeader } from '../components/SheetHeader';
 import { TargetPath } from '../components/TargetPath';
 import { Button, Screen, T } from '../components/ui';
 import { shownText } from '../core/habits';
-import { addableHabits, CATEGORIES, iconFor, libraryOptions, PLAN_MAX, type LibraryOption } from '../core/v2/program';
+import { TimeQuestion } from '../components/TimeQuestion';
+import {
+  addableHabits,
+  CATEGORIES,
+  iconFor,
+  PLAN_MAX,
+  prepareAdd,
+  type LibraryOption,
+  type TimeAnswers,
+} from '../core/v2/program';
 import { haptic } from '../lib/haptics';
-import { useApp } from '../store/useApp';
+import { currentDay, useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 
@@ -62,31 +71,82 @@ export default function AddHabit() {
   );
 }
 
-/** Reviewed habits that suit this person and fit next to their plan, goal habits first. */
+/**
+ * Reviewed habits that suit this person and fit next to their plan, goal habits first. A habit whose targets need
+ * a wake-up or bed time the plan never asked for asks it when added, checks the habit again with the answer, and
+ * only then adds it (Back or Cancel add nothing and change nothing).
+ */
 function Explore() {
   const { c } = useTheme();
   const profile = useApp((s) => s.profile)!;
   const plan = useApp((s) => s.plan);
   const [open, setOpen] = useState<string | null>(null);
+  const [asking, setAsking] = useState<{
+    id: string;
+    title: string;
+    question: 'wake' | 'bed';
+    answers: TimeAnswers;
+  } | null>(null);
+  // Why the last answer ruled a habit out, shown in that habit's own card (which stays open).
+  const [notice, setNotice] = useState<{ id: string; text: string } | null>(null);
   const full = plan.length >= PLAN_MAX;
   const options = addableHabits(profile, plan);
-  // Habits that would fit but need a wake-up or bed time this plan never asked for.
-  const needTime = full
-    ? []
-    : libraryOptions(
-        profile,
-        plan.filter((h) => !h.custom).map((h) => h.habitId),
-      ).filter((o) => o.needsTime !== null);
   const forGoal = options.filter((o) => o.forGoal);
   const rest = options.filter((o) => !o.forGoal);
 
-  const add = (id: string) => {
-    if (!useApp.getState().addLibraryHabit(id)) return;
+  const done = () => {
     haptic.success();
     // Back to Today (or straight there when Add was opened on its own).
     if (router.canGoBack()) router.back();
     else router.replace('/today');
   };
+
+  /** One step of adding: add it, ask the next missing time, or explain why it no longer fits. */
+  const step = (id: string, title: string, answers: TimeAnswers) => {
+    const s = useApp.getState();
+    const next = prepareAdd(profile, s.plan, id, answers, currentDay(s));
+    if (next.status === 'ask') {
+      setAsking({ id, title, question: next.question, answers });
+      return;
+    }
+    setAsking(null);
+    if (next.status === 'unsuitable') {
+      haptic.warning();
+      setNotice({ id, text: next.message });
+      setOpen(id);
+      return;
+    }
+    if (s.addLibraryHabit(id, answers)) done();
+  };
+
+  if (asking) {
+    return (
+      <ScrollView contentContainerStyle={[styles.scroll, styles.asking]}>
+        <Pressable
+          onPress={() => {
+            haptic.tap();
+            setAsking(null);
+          }}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={`Back to the list. ${asking.title} isn’t added.`}
+          style={styles.backRow}
+        >
+          <Ionicons name="chevron-back" size={22} color={c.text} />
+          <T v="bodyStrong">Back</T>
+        </Pressable>
+        <TimeQuestion
+          key={asking.question}
+          question={asking.question}
+          why={`${asking.title} sets its targets around your own day. Nothing else in your plan changes.`}
+          onAnswer={(a) => {
+            haptic.tap();
+            step(asking.id, asking.title, { ...asking.answers, ...a });
+          }}
+        />
+      </ScrollView>
+    );
+  }
 
   const group = (title: string, items: LibraryOption[]) =>
     items.length ? (
@@ -101,9 +161,11 @@ function Explore() {
             open={open === o.id}
             onOpen={() => {
               haptic.tap();
+              setNotice(null);
               setOpen(open === o.id ? null : o.id);
             }}
-            onAdd={() => add(o.id)}
+            onAdd={() => step(o.id, o.title, {})}
+            notice={notice?.id === o.id ? notice.text : null}
           />
         ))}
       </View>
@@ -140,12 +202,6 @@ function Explore() {
           rest.filter((o) => o.category === cat),
         ),
       )}
-      {needTime.length ? (
-        <T v="caption" color={c.textFaint}>
-          {needTime.map((o) => o.title).join(', ')} {needTime.length === 1 ? 'needs' : 'need'} a usual wake-up or bed
-          time, which your plan didn’t ask for, so {needTime.length === 1 ? 'it isn’t' : 'they aren’t'} listed.
-        </T>
-      ) : null}
     </ScrollView>
   );
 }
@@ -155,11 +211,13 @@ function LibraryRow({
   open,
   onOpen,
   onAdd,
+  notice,
 }: {
   o: LibraryOption;
   open: boolean;
   onOpen: () => void;
   onAdd: () => void;
+  notice: string | null;
 }) {
   const { c } = useTheme();
   return (
@@ -185,12 +243,27 @@ function LibraryRow({
       </Pressable>
       {open ? (
         <View style={{ gap: space.md }}>
+          {notice ? (
+            <ThemedView style={[styles.notice, { backgroundColor: c.surfaceHigh }]} accessibilityLiveRegion="polite">
+              <Ionicons name="information-circle" size={18} color={c.accentInk} />
+              <T v="caption" style={{ flex: 1 }}>
+                {notice}
+              </T>
+            </ThemedView>
+          ) : null}
           <T color={c.textDim}>{o.why}</T>
           {o.notes.map((n) => (
             <T key={n} v="caption" color={c.textFaint}>
               {shownText(n)}
             </T>
           ))}
+          {o.needsTime ? (
+            <T v="caption" color={c.textDim}>
+              {o.needsTime === 'wake'
+                ? 'Adding it asks for your usual wake-up time first, then sets its targets from your answer.'
+                : 'Adding it asks what time you usually get into bed first, then sets its targets from your answer.'}
+            </T>
+          ) : null}
           <TargetPath targets={o.targets} />
           <Button label="Add to my plan" onPress={onAdd} />
         </View>
@@ -253,4 +326,7 @@ const styles = StyleSheet.create({
   row: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
   rowHead: { flexDirection: 'row', alignItems: 'center', gap: space.lg },
   icon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  asking: { flexGrow: 1 },
+  notice: { flexDirection: 'row', gap: space.sm, borderRadius: radius.md, padding: space.md, alignItems: 'flex-start' },
+  backRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs, minHeight: 44, alignSelf: 'flex-start' },
 });

@@ -5,7 +5,7 @@ import { getHabit, levelUp } from '../core/habits';
 import { dateForDay, dayNumber, toDateKey } from '../core/dates';
 import { MILESTONES, phaseLevel, phaseOf, reconcile } from '../core/progression';
 import type { Answers, DayLog, Level, Notice, PlanHabit, ThemePreference, Weekday } from '../core/types';
-import { addedHabit, assemblePlan, swappedHabit } from '../core/v2/program';
+import { assemblePlan, prepareAdd, swappedHabit, type TimeAnswers } from '../core/v2/program';
 import type { ProfileV2 } from '../core/v2/types';
 import { devTools, storageKey, v2ForNewPrograms } from '../lib/flags';
 import { migrateSaved, sanitize, STORAGE_VERSION } from './migrate';
@@ -62,8 +62,11 @@ type Actions = {
   setProfile: (p: ProfileV2 | null) => void;
   /** Starts a V2 program from the saved profile, the choice-step picks and any optional extras. False if not allowed. */
   startProgramV2: (chosen: string[], extras?: string[]) => boolean;
-  /** Adds a reviewed library habit to a running V2 program, at Easy from today. False if it isn't on offer. */
-  addLibraryHabit: (habitId: string) => boolean;
+  /**
+   * Adds a reviewed library habit to a running V2 program, at Easy from today, with any time answers it needed
+   * (only missing ones are saved, and only when the habit is added). False if it can't be added as answered.
+   */
+  addLibraryHabit: (habitId: string, answers?: TimeAnswers) => boolean;
   swapHabitV2: (oldId: string, newId: string) => boolean;
   /** Changes the weekdays a scheduled habit is due (2–3 days; every weekday must keep a due habit). */
   setSchedule: (habitId: string, days: Weekday[]) => boolean;
@@ -226,13 +229,15 @@ export const useApp = create<AppState>()(
           );
         },
 
-        addLibraryHabit: (habitId) => {
+        addLibraryHabit: (habitId, answers = {}) => {
           const { programVersion, profile, plan } = get();
           if (programVersion !== 2 || !profile) return false;
-          const habit = addedHabit(profile, plan, habitId, currentDay(get()));
-          if (!habit) return false;
-          // Past days keep their own lists; only today's is re-synced (see updatePlan).
-          updatePlan((p) => [...p, habit]);
+          const step = prepareAdd(profile, plan, habitId, answers, currentDay(get()));
+          if (step.status !== 'ok') return false;
+          // The new time answers join the profile; every existing habit keeps its saved targets. Past days keep
+          // their own lists; only today's is re-synced (see updatePlan).
+          set({ profile: step.profile });
+          updatePlan((p) => [...p, step.habit]);
           return true;
         },
 
