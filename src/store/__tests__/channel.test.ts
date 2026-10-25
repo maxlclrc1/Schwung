@@ -322,7 +322,11 @@ describe('routes', () => {
     expect(today.match(/<AscentScene/g)).toHaveLength(1);
     expect(today).toMatch(/\{mountain \? \(\s*<Animated\.View pointerEvents="none"[^]*?<AscentScene/);
     expect(read('(tabs)/progress.tsx').match(/<AscentScene/g)).toHaveLength(1);
-    expect(read('(tabs)/progress.tsx')).not.toContain('JourneyView');
+    // Journey's calendar is a sheet, opened from a button: never laid over the landscape.
+    const journey = read('(tabs)/progress.tsx');
+    expect(journey.match(/<JourneyView/g)).toHaveLength(1);
+    expect(journey.indexOf('<JourneyView')).toBeGreaterThan(journey.indexOf('<Modal'));
+    expect(journey).toContain('visible={calendar}');
     expect(read('(tabs)/progress.tsx')).toContain('if (!tabs()) return <Redirect href="/journey" />;');
     // Day 1 opens from Today once it's inside the navigator, never pushed during onboarding's last replace.
     expect(read('reminder.tsx')).not.toMatch(/push\('\/ceremony|markCeremonySeen/);

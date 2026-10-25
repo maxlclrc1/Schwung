@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { haptic } from '../lib/haptics';
 import { Card, T } from './ui';
 import { PROGRAM_DAYS } from '../core/dates';
 import {
@@ -23,8 +24,19 @@ const PHASES = [
   { n: 3, from: PHASE_START[3], to: PROGRAM_DAYS },
 ];
 
-/** The 66 days, phase by phase, with the person's stats: the journey sheet, and the Journey tab. */
-export function JourneyView({ picked }: { picked: number | null }) {
+/**
+ * The 66 days, phase by phase, with the person's stats: the journey sheet, and the Journey tab's calendar. With
+ * `onSelect`, each day is a button that picks it.
+ */
+export function JourneyView({
+  picked,
+  onSelect,
+  bottomInset = 0,
+}: {
+  picked: number | null;
+  onSelect?: (day: number) => void;
+  bottomInset?: number;
+}) {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
   const logs = useApp((s) => s.logs);
@@ -46,7 +58,7 @@ export function JourneyView({ picked }: { picked: number | null }) {
   const cell = Math.floor((Math.min(width, 520) - space.xl * 2 - gap * (COLS - 1)) / COLS);
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
+    <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: space.xxl + bottomInset }]}>
       <Card style={styles.stats}>
         {stats.map((s) => (
           <View key={s.label} style={styles.stat}>
@@ -77,10 +89,11 @@ export function JourneyView({ picked }: { picked: number | null }) {
               const ratio = dayRatio(log);
               const bg = future ? 'transparent' : full ? c.accent : ok ? c.accentSoft : c.surface;
               const fg = full ? c.onAccent : future ? c.textFaint : ok ? c.accentInk : c.textDim;
-              return (
+              const label = `Day ${day}${future ? '' : `, ${Math.round(ratio * 100)}% done`}${isToday && onSelect ? ', today' : ''}${isPicked ? ', selected' : ''}`;
+              const box = (
                 <ThemedView
                   key={day}
-                  accessibilityLabel={`Day ${day}${future ? '' : `, ${Math.round(ratio * 100)}% done`}${isPicked ? ', selected' : ''}`}
+                  accessibilityLabel={onSelect ? undefined : label}
                   style={[
                     styles.cell,
                     {
@@ -99,6 +112,23 @@ export function JourneyView({ picked }: { picked: number | null }) {
                     <View style={[styles.partial, { backgroundColor: c.accentInk, width: `${ratio * 70}%` }]} />
                   ) : null}
                 </ThemedView>
+              );
+              return onSelect ? (
+                <Pressable
+                  key={day}
+                  onPress={() => {
+                    haptic.tap();
+                    onSelect(day);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected: day === picked }}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  {box}
+                </Pressable>
+              ) : (
+                box
               );
             })}
           </View>
