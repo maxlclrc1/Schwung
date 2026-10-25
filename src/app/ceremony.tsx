@@ -257,7 +257,9 @@ function Finale() {
         height: 1350,
         result: 'tmpfile',
       });
-      await Sharing.shareAsync(uri, { mimeType: 'image/png', UTI: 'public.png', dialogTitle: 'Share your reset' });
+      // view-shot 6 can return a bare path on iOS; the share sheet needs a file URI.
+      const file = uri.startsWith('file://') ? uri : `file://${uri}`;
+      await Sharing.shareAsync(file, { mimeType: 'image/png', UTI: 'public.png', dialogTitle: 'Share your reset' });
     } catch {
       // Cancelled or unavailable; nothing to tell the user.
     } finally {
