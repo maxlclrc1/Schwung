@@ -5,27 +5,27 @@
 
 - The whole card is the habit's scene, with the title, target and a swipe track written over it.
 - Scenes are looked up by stable habit id in `src/components/habitArt.ts`.
-- No final scene ships yet. Until one does, each card shows a crop of the world panorama, the same crop for a habit
-  every time. These crops are temporary: they're landscape, not pictures of the habit.
+- **Shipped:** `mind_read` (Read) and `focus_deepwork` (Focused work), each in light and dark.
+- **Every other habit** (Walk next) shows a crop of the world panorama until its scene exists, the same crop for a
+  habit every time.
 
 ## The card the scene fills
 
-| iPhone width            | Card (pt)         | At 3× (px)  | Aspect    |
-| ----------------------- | ----------------- | ----------- | --------- |
-| 375 (SE, mini)          | 343 × 213         | 1029 × 639  | 1.61      |
-| 390–393                 | 358–361 × 222–224 | ~1083 × 672 | 1.61      |
-| 402 (16 Pro)            | 370 × 229         | 1110 × 687  | 1.61      |
-| 430–440 (Plus, Pro Max) | 398–408 × 240     | ~1224 × 720 | 1.66–1.70 |
+| iPhone width   | Card (pt)     | At 3× (px)  | Aspect    |
+| -------------- | ------------- | ----------- | --------- |
+| 375 (SE, mini) | 343 × 240     | 1029 × 720  | 1.43      |
+| 390–393        | 358–361 × 250 | ~1083 × 750 | 1.44      |
+| 402–440        | 370–408 × 250 | ~1224 × 750 | 1.48–1.63 |
 
 - Corner radius is 26pt, with 16pt between cards.
-- The card grows taller with larger text. The scene then crops more from the sides.
+- The level label sits in the top-left corner. The title, target and swipe track sit in the lower ~55%.
+- The card grows taller with larger text.
 
 ## The image
 
-- **Size:** **1290 × 800 px** (about 1.61 : 1). That covers the largest card at 3× with a margin.
-- **Crop:** the image fills the card from the centre (`cover`).
-  - On the widest phones about 40 px comes off the top and bottom in total.
-  - On cards made taller by larger text, the left and right edges are cropped.
+- **Size:** **1290 × 800 px** (1.61 : 1). ChatGPT's 1536 × 1024 is trimmed from the bottom to 1536 × 953 and scaled.
+- **Crop:** the image fills the card from the centre (`cover`). Cards are narrower than the image (1.43–1.63 : 1), so
+  up to about 6% of the width comes off each side; more on cards made taller by larger text.
 - **Opaque scene,** painted in the Schwung world's language (the panorama's mist, light and palette).
   - **Light:** pale mist and soft lavender-grey.
   - **Dark:** deep indigo twilight.
@@ -38,12 +38,11 @@
 
 ```
  0 ┌──────────────────────────────────────────────┐
-   │  THE WINDOW (rows 0–330): the subject and     │  ← the only part seen clearly
-   │  focal point of the scene                     │
-330├──────────────────────────────────────────────┤
-   │  rows 330–480: the veil begins; secondary     │
-480├──────────────────────────────────────────────┤
-   │  rows 480–800: under the title, target and    │  ← calm, low detail, even tone:
+   │  rows 0–60: sky behind the level label        │
+   │  THE WINDOW (rows 60–360): the subject and    │  ← seen clearly (the pilots: the book, the hut)
+   │  focal point                                  │
+360├──────────────────────────────────────────────┤
+   │  rows 360–800: under the title, target and    │  ← calm, low detail, even tone:
    │  swipe track (a veil darkens it in dark mode, │    no bright spots, no busy texture
    │  lightens it in light mode)                   │
 800└──────────────────────────────────────────────┘

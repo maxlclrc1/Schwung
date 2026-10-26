@@ -35,8 +35,8 @@ type Props = {
  */
 
 const PAD = 16;
-const TRACK = 52;
-const KNOB = 44;
+const TRACK = 48;
+const KNOB = 40;
 const RADIUS = 26;
 /** How far across the swipe has to go to count. */
 const THRESHOLD = 0.6;
@@ -48,14 +48,21 @@ const LONG_PRESS_MS = 380;
  */
 const NO_SELECT = Platform.OS === 'web' ? ({ userSelect: 'none' } as object) : null;
 
-/** Card height: a window onto the scene, 200–240 pt (213 on a 375pt iPhone); it grows if larger text needs more. */
+/**
+ * Card height: a window onto the scene, 240 pt on a 375pt iPhone and up to 250 on larger ones, tall enough that the
+ * top ~45% of the scene (where its subject is painted) stays clear of the text; it grows if larger text needs more.
+ */
 export function cardHeight(width: number): number {
-  return Math.max(200, Math.min(240, Math.round(width * 0.62)));
+  return Math.max(220, Math.min(250, Math.round(width * 0.7)));
 }
 
-const INK: Record<Theme, { veil: string[]; title: string; target: string; track: string; edge: string }> = {
+const INK: Record<
+  Theme,
+  { veil: string[]; top: string[]; title: string; target: string; track: string; edge: string }
+> = {
   dark: {
     veil: ['rgba(13,12,22,0)', 'rgba(13,12,22,0.5)', 'rgba(13,12,22,0.86)'],
+    top: ['rgba(13,12,22,0.45)', 'rgba(13,12,22,0)'],
     title: '#F7F5FF',
     target: 'rgba(240,237,255,0.82)',
     track: 'rgba(28,27,37,0.62)',
@@ -63,6 +70,7 @@ const INK: Record<Theme, { veil: string[]; title: string; target: string; track:
   },
   light: {
     veil: ['rgba(247,246,251,0)', 'rgba(247,246,251,0.62)', 'rgba(247,246,251,0.94)'],
+    top: ['rgba(247,246,251,0.6)', 'rgba(247,246,251,0)'],
     title: '#1B1830',
     target: 'rgba(27,24,48,0.72)',
     track: 'rgba(255,255,255,0.7)',
@@ -73,7 +81,9 @@ const INK: Record<Theme, { veil: string[]; title: string; target: string; track:
 /** The habit's scene: its own art once it exists, otherwise a crop of the world panorama. */
 function Scene({ habitId, theme, width, height }: { habitId: string; theme: Theme; width: number; height: number }) {
   const art = habitScene(habitId, theme);
-  if (art) return <Image source={art} resizeMode="cover" style={StyleSheet.absoluteFill} />;
+  // An explicit size (not just absoluteFill): the web otherwise draws the image at its natural size.
+  if (art)
+    return <Image source={art} resizeMode="cover" style={{ position: 'absolute', left: 0, top: 0, width, height }} />;
   const crop = placeholderCrop(habitId);
   const tile = TILES[theme][crop.tile];
   const k = width / crop.width;
@@ -270,27 +280,34 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress }: Props) 
       <LinearGradient
         pointerEvents="none"
         colors={ink.veil as [string, string, string]}
-        locations={[0.15, 0.5, 1]}
+        locations={[0.35, 0.62, 1]}
         style={StyleSheet.absoluteFill}
       />
+      {/* A faint veil at the top, for the level label over the sky. */}
+      <LinearGradient pointerEvents="none" colors={ink.top as [string, string]} style={styles.topVeil} />
 
+      {/* The level, quietly in the top-left corner, so the scene's window stays clear. */}
+      {isCustom(habit) ? null : (
+        <View
+          style={[styles.levelRow, styles.levelTop]}
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+        >
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={[
+                styles.levelBar,
+                { backgroundColor: i <= levelIndex ? ink.title : ink.edge, opacity: i <= levelIndex ? 0.9 : 1 },
+              ]}
+            />
+          ))}
+          <T v="caption" color={ink.target} style={styles.levelText} maxFontSizeMultiplier={1.3}>
+            {LEVEL_NAME[habit.level]}
+          </T>
+        </View>
+      )}
       <View style={styles.body}>
-        {isCustom(habit) ? null : (
-          <View style={styles.levelRow} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-            {[0, 1, 2].map((i) => (
-              <View
-                key={i}
-                style={[
-                  styles.levelBar,
-                  { backgroundColor: i <= levelIndex ? ink.title : ink.edge, opacity: i <= levelIndex ? 0.9 : 1 },
-                ]}
-              />
-            ))}
-            <T v="caption" color={ink.target} style={styles.levelText} maxFontSizeMultiplier={1.3}>
-              {LEVEL_NAME[habit.level]}
-            </T>
-          </View>
-        )}
         <T color={ink.title} style={styles.title} numberOfLines={2} maxFontSizeMultiplier={1.5}>
           {title}
         </T>
@@ -346,7 +363,9 @@ export const HabitCard = memo(HabitCardImpl);
 const styles = StyleSheet.create({
   card: { borderRadius: 26, overflow: 'hidden', justifyContent: 'flex-end' },
   body: { padding: PAD, gap: 4 },
-  levelRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 2 },
+  levelRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  levelTop: { position: 'absolute', top: 14, left: PAD },
+  topVeil: { position: 'absolute', left: 0, right: 0, top: 0, height: 64 },
   levelBar: { width: 14, height: 3, borderRadius: 2 },
   levelText: { marginLeft: 6, fontSize: 12, lineHeight: 15, fontWeight: '600', letterSpacing: 0.4 },
   title: { fontSize: 24, lineHeight: 29, fontWeight: '700', letterSpacing: -0.3 },
