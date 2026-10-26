@@ -16,7 +16,7 @@ import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
 import { currentDay, exportData, useApp } from '../store/useApp';
 import type { ThemePreference, Weekday } from '../core/types';
-import { radius, space, useTheme } from '../theme';
+import { radius, space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 export default function Settings() {
@@ -207,7 +207,8 @@ const APPEARANCE: { value: ThemePreference; label: string; icon: keyof typeof Io
 ];
 
 function AppearancePicker() {
-  const { c, preference } = useTheme();
+  const { c } = useTheme();
+  const preference = useThemePreference();
   const setThemePreference = useApp((s) => s.setThemePreference);
   return (
     <View style={styles.segment} accessibilityRole="radiogroup">

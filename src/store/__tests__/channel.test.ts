@@ -317,7 +317,12 @@ describe('routes', () => {
     // The release opens the journey as the same sheet as before; the Journey tab sends it there too.
     const today = read('(tabs)/today.tsx');
     // The habit cards are a testing-build design; the public release keeps its rows.
-    expect(today).toContain('const Row = mountain ? HabitRow : HabitCard;');
+    expect(today).toMatch(
+      /\{shown\.map\(\(h\) =>\s*\/\/[^\n]*\n\s*mountain \? \(\s*<HabitRow[^]*?\) : \(\s*<HabitCard/,
+    );
+    // Only the cards' swipe ever holds the page's scroll, and only while swiping.
+    expect(today).toContain('scrollEnabled={!swiping}');
+    expect(today).toContain('onSwipe={setSwiping}');
     expect(today).toContain("router.push(day ? `/journey?day=${day}` : '/journey')");
     // The mountain is drawn on Today only in the public release; testing builds draw it once, on Journey.
     expect(today).toContain('const mountain = !tabs();');

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet } from 'react-native';
 import { haptic } from '../lib/haptics';
 import { useApp } from '../store/useApp';
-import { useTheme } from '../theme';
+import { useTheme, useThemeTarget } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 /**
@@ -10,7 +10,10 @@ import { ThemedView } from '../theme/transition';
  * Shows the mode you'll switch *to*: a sun in dark mode, a moon in light mode.
  */
 export function ThemeToggle() {
-  const { c, isDark } = useTheme();
+  const { c } = useTheme();
+  // The theme asked for, which can be a moment ahead of the one on screen while its paintings load (testing builds):
+  // the icon answers the tap at once, and a second tap asks to go back.
+  const isDark = useThemeTarget() === 'dark';
   const setThemePreference = useApp((s) => s.setThemePreference);
   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
 

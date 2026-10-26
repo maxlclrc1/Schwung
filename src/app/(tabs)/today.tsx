@@ -63,7 +63,8 @@ export default function Today() {
   const bottomInset = tabs() ? 0 : insets.bottom;
   // The public release keeps the mountain here; testing builds show it on the Journey tab instead.
   const mountain = !tabs();
-  const Row = mountain ? HabitRow : HabitCard;
+  // While a habit card is being swiped, the page holds its scroll (the swipe has the touch).
+  const [swiping, setSwiping] = useState(false);
   // Testing builds in dark mode: the tabs' shared world shows through (Habits' misty valley, veiled).
   const world = useWorldLayer();
   const plain = !mountain && !world;
@@ -166,19 +167,23 @@ export default function Today() {
   );
   const onLongPress = useCallback((habitId: string) => router.push(`/habit/${habitId}`), []);
 
-  // Completion moment, fired only on the transition to "all done" (not on open).
-  const [celebrate, setCelebrate] = useState(false);
+  // Completion moment, fired only on the transition to "all done" (not on open). It shows only while the day is
+  // still complete: undoing a habit takes it (and its bonus line) away at once, and completing again starts afresh.
+  const [celebrated, setCelebrated] = useState(0);
   const wasFull = useRef(todayFull);
   useEffect(() => {
     if (todayFull && !wasFull.current) {
       haptic.success();
-      setCelebrate(true);
-      const t = setTimeout(() => setCelebrate(false), 2200);
-      wasFull.current = todayFull;
-      return () => clearTimeout(t);
+      setCelebrated(Date.now());
     }
     wasFull.current = todayFull;
   }, [todayFull]);
+  useEffect(() => {
+    if (!celebrated) return;
+    const t = setTimeout(() => setCelebrated(0), 2200);
+    return () => clearTimeout(t);
+  }, [celebrated]);
+  const celebrate = celebrated > 0 && todayFull;
 
   // Ceremonies: day 1 right away, milestones once that day is done (or later, if missed).
   useEffect(() => {
@@ -207,6 +212,9 @@ export default function Today() {
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
+        scrollEnabled={!swiping}
+        // iOS: a drag that starts mostly sideways doesn't scroll the page diagonally.
+        directionalLockEnabled
         contentContainerStyle={[
           styles.scroll,
           { paddingTop: insets.top + space.sm, paddingBottom: bottomInset + space.xxxl },
@@ -366,16 +374,27 @@ export default function Today() {
         </View>
 
         <Animated.View layout={LinearTransition.duration(200)} style={mountain ? styles.list : styles.cards}>
-          {shown.map((h) => (
+          {shown.map((h) =>
             // Testing builds show the habit cards; the public release keeps its rows.
-            <Row
-              key={h.habitId}
-              habit={h}
-              done={!!log?.completed.includes(h.habitId)}
-              onToggle={onToggle}
-              onLongPress={viewing === 'today' ? onLongPress : undefined}
-            />
-          ))}
+            mountain ? (
+              <HabitRow
+                key={h.habitId}
+                habit={h}
+                done={!!log?.completed.includes(h.habitId)}
+                onToggle={onToggle}
+                onLongPress={viewing === 'today' ? onLongPress : undefined}
+              />
+            ) : (
+              <HabitCard
+                key={h.habitId}
+                habit={h}
+                done={!!log?.completed.includes(h.habitId)}
+                onToggle={onToggle}
+                onLongPress={viewing === 'today' ? onLongPress : undefined}
+                onSwipe={setSwiping}
+              />
+            ),
+          )}
         </Animated.View>
 
         {viewing === 'today' && (resting.length || restedToday.length) ? (

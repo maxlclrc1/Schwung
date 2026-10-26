@@ -3,7 +3,8 @@
 **Status (Step 3A, revised):** each habit on the Habits tab is a large image card, built in
 `src/components/HabitCard.tsx` (testing builds only; the public release keeps `HabitRow`).
 
-- The whole card is the habit's scene, with the title, target and a swipe track written over it.
+- The whole card is the habit's scene, with the title, target and a status row written over it.
+  The whole card is swiped to the right to complete the habit.
 - Scenes are looked up by stable habit id in `src/components/habitArt.ts`.
 - **Shipped:** the three pilots, `mind_read` (Read), `focus_deepwork` (Focused work) and `move_walk` (Walk), each
   in light and dark.
@@ -19,7 +20,8 @@
 | 402–440        | 370–408 × 250 | ~1224 × 750 | 1.48–1.63 |
 
 - Corner radius is 26pt, with 16pt between cards.
-- The level label sits in the top-left corner. The title, target and swipe track sit in the lower ~55%.
+- The level label sits in the top-left corner. The title, target and status row (the swipe hint
+  and check button, or Done and Undo) sit in the lower ~55%. A check badge appears top-right when done.
 - The card grows taller with larger text.
 
 ## The image
@@ -44,7 +46,7 @@
    │  focal point                                  │
 360├──────────────────────────────────────────────┤
    │  rows 360–800: under the title, target and    │  ← calm, low detail, even tone:
-   │  swipe track (a veil darkens it in dark mode, │    no bright spots, no busy texture
+   │  status row (a veil darkens it in dark mode,  │    no bright spots, no busy texture
    │  lightens it in light mode)                   │
 800└──────────────────────────────────────────────┘
    keep the subject inside the central 80% of the width (x 130–1160)
