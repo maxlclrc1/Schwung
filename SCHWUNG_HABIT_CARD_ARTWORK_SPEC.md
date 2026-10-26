@@ -5,8 +5,9 @@
 
 - The whole card is the habit's scene, with the title, target and a swipe track written over it.
 - Scenes are looked up by stable habit id in `src/components/habitArt.ts`.
-- **Shipped:** `mind_read` (Read) and `focus_deepwork` (Focused work), each in light and dark.
-- **Every other habit** (Walk next) shows a crop of the world panorama until its scene exists, the same crop for a
+- **Shipped:** the three pilots, `mind_read` (Read), `focus_deepwork` (Focused work) and `move_walk` (Walk), each
+  in light and dark.
+- **Every other habit** shows a crop of the world panorama until its scene exists, the same crop for a
   habit every time.
 
 ## The card the scene fills
@@ -39,7 +40,7 @@
 ```
  0 ┌──────────────────────────────────────────────┐
    │  rows 0–60: sky behind the level label        │
-   │  THE WINDOW (rows 60–360): the subject and    │  ← seen clearly (the pilots: the book, the hut)
+   │  THE WINDOW (rows 60–360): the subject and    │  ← seen clearly (the pilots: the book, the hut, the path)
    │  focal point                                  │
 360├──────────────────────────────────────────────┤
    │  rows 360–800: under the title, target and    │  ← calm, low detail, even tone:
