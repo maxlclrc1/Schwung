@@ -11,7 +11,18 @@ import type { Theme, TileName } from './worldTiles';
  *   mind_read: { light: require('../../assets/habits/mind_read-light.webp'),
  *                dark: require('../../assets/habits/mind_read-dark.webp') },
  */
-const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>> = {};
+const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>> = {
+  // Pilots, from design/artwork-candidates/scene-<id>-<theme>-v1.png (1536 × 1024, trimmed from the bottom to the
+  // card's 1.61 : 1 and scaled to 1290 × 800).
+  mind_read: {
+    light: require('../../assets/habits/mind_read-light.webp'),
+    dark: require('../../assets/habits/mind_read-dark.webp'),
+  },
+  focus_deepwork: {
+    light: require('../../assets/habits/focus_deepwork-light.webp'),
+    dark: require('../../assets/habits/focus_deepwork-dark.webp'),
+  },
+};
 
 /** The final scene for a habit in a theme, once it has one. */
 export function habitScene(habitId: string, theme: Theme): ImageSourcePropType | undefined {
