@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
+import { PAGE_MS } from '../core/pager';
 import { tabs } from '../lib/flags';
 import { useTheme } from '../theme';
 import { ThemedView, useThemeProgress } from '../theme/transition';
@@ -49,6 +50,26 @@ export const worldScroll = [makeMutable(0), makeMutable(0), makeMutable(0)];
 
 const TAB_INDEX: Record<string, number> = { '/today': 0, '/progress': 1, '/fieldnotes': 2 };
 
+/**
+ * For what a tab's page draws on the painting (Journey's trail and labels, Field Notes' camps). Pages slide a
+ * screen width per tab while the painting pans STOP_PX of SCREEN_PX, so mid-slide the drawing is moved by the
+ * difference and stays on its spot of the painting; it fades out as the camera leaves its tab (and in as it
+ * arrives), so it's never seen out of place where the world also moves vertically between tabs.
+ */
+export function useOnPainting(index: number) {
+  const on = useWorldLayer();
+  const { width } = useWindowDimensions();
+  const slip = width * (1 - STOP_PX / SCREEN_PX);
+  return useAnimatedStyle(() => {
+    if (!on) return { opacity: 1, transform: [{ translateX: 0 }] };
+    const off = index - worldCamera.get();
+    return {
+      opacity: Math.min(1, Math.max(0, 1 - Math.abs(off) * 3)),
+      transform: [{ translateX: -off * slip }],
+    };
+  });
+}
+
 /** Whether the continuous world is shown: testing builds (the public release keeps its own screens). */
 export function useWorldLayer(): boolean {
   return tabs();
@@ -69,7 +90,8 @@ export function WorldLayer() {
     const index = TAB_INDEX[pathname];
     // Settings and the sheets open over the tabs: the camera stays on the tab underneath.
     if (index === undefined) return;
-    worldCamera.set(reduceMotion ? index : withTiming(index, { duration: 420, easing: Easing.inOut(Easing.cubic) }));
+    // With the pages' slide (TabPager): the same timing, from wherever the camera is (a swipe leaves it mid-way).
+    worldCamera.set(reduceMotion ? index : withTiming(index, { duration: PAGE_MS, easing: Easing.out(Easing.cubic) }));
   }, [pathname, reduceMotion]);
 
   const pan = useAnimatedStyle(() => {

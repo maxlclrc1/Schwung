@@ -308,6 +308,10 @@ describe('routes', () => {
     expect([tabs('production'), tabs('internal'), tabs('development')]).toEqual([false, true, true]);
     const layout = read('(tabs)/_layout.tsx');
     expect(layout).toContain('tabBar={on ? undefined : () => null}');
+    // Swiping between tabs only where there are tabs (testing builds): the release has no pager and no slide.
+    expect(layout).toContain('{...(on && world ? pager : null)}');
+    expect(layout).toContain('enabled: on && world,');
+    expect(layout).toContain('detachInactiveScreens={!slide}');
     const order = [...layout.matchAll(/name="(\w+)"\s+options=\{\{\s*title: '([^']+)'/g)].map((m) => [m[1], m[2]]);
     expect(order).toEqual([
       ['today', 'Habits'],
