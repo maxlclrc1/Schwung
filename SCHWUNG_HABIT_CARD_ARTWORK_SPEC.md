@@ -1,4 +1,28 @@
-# Habit card artwork — specification for Step 2
+# Habit card artwork — specification
+
+**Status (Step 3A):** the card is built: `src/components/HabitCard.tsx` (testing builds; the public release keeps
+`HabitRow`), with the image wired through `src/components/habitArt.ts`. No illustration ships yet: until one exists,
+a card shows its habit's own icon on the right instead.
+
+## The three pilot illustrations
+
+| Habit        | Stable id (V1 and V2) | Upload the master to                                    | Ships as                            |
+| ------------ | --------------------- | ------------------------------------------------------- | ----------------------------------- |
+| Read         | `mind_read`           | `design/artwork-candidates/habit-mind_read-v1.png`      | `assets/habits/mind_read.webp`      |
+| Focused work | `focus_deepwork`      | `design/artwork-candidates/habit-focus_deepwork-v1.png` | `assets/habits/focus_deepwork.webp` |
+| Walk         | `move_walk`           | `design/artwork-candidates/habit-move_walk-v1.png`      | `assets/habits/move_walk.webp`      |
+
+Masters: 384 × 384 px PNG with transparency. Claude converts each to WebP and adds its line to `habitArt.ts`; the
+id (never the display name) picks the image, so a renamed or swapped habit can't show the wrong one, and custom
+habits never get one.
+
+**As built:** the illustration fills a 104 × 104pt square flush with the card's right, top and bottom edges,
+clipped by the card's 22pt corners, centred with `cover`: when larger text makes the card taller, the square grows
+in height and its sides are cropped. No fade is drawn at its left edge (transparent art needs none). On a done
+card it shows at 50 % opacity over the card's opaque violet tint, so test it on `#FFFFFF`, `#1C1B25`, and those two
+tinted 12 % toward the accent (`#EEEAF8` light, `#2D283F` dark).
+
+---
 
 Re-checked after Step 2A: the card itself is unchanged, so every dimension below still holds. The only change is what
 surrounds the cards: the Habits tab no longer has the mountain, so cards sit on the plain app background.
@@ -49,7 +73,7 @@ With larger Dynamic Type the card grows taller; the artwork area grows with it a
 - **Light and dark:** **one asset can serve both** if it is transparent and painted in mid tones. Avoid pure white
   highlights and near-black outlines, and check the artwork on `#FFFFFF` and on `#1C1B25`. Opaque full scenes would
   need a separate light and dark version of each image.
-- **Checked state:** the card fades when checked, so the artwork should still read at about 55 % opacity.
+- **Checked state:** on a done card the artwork shows at 50 % opacity, so it should still read at that strength.
 - **Formats:** supply **PNG-24 with alpha** masters. They'll ship as **WebP with alpha**: smaller, and supported by
   React Native on iOS.
 - **File size:** at most **60 KB** per image as shipped (WebP), with a hard cap of 100 KB. Masters can be any size.

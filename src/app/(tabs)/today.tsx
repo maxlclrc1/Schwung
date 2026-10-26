@@ -15,6 +15,7 @@ import Animated, {
 import { Confetti } from '../../components/Art';
 import { AscentCaption, ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { Comeback } from '../../components/Comeback';
+import { HabitCard } from '../../components/HabitCard';
 import { HabitRow } from '../../components/HabitRow';
 import { SettingsButton } from '../../components/HeaderButton';
 import { Notices } from '../../components/Notices';
@@ -62,6 +63,7 @@ export default function Today() {
   const bottomInset = tabs() ? 0 : insets.bottom;
   // The public release keeps the mountain here; testing builds show it on the Journey tab instead.
   const mountain = !tabs();
+  const Row = mountain ? HabitRow : HabitCard;
   // Testing builds in dark mode: the tabs' shared world shows through (Habits' misty valley, veiled).
   const world = useWorldLayer();
   const plain = !mountain && !world;
@@ -363,9 +365,10 @@ export default function Today() {
           </T>
         </View>
 
-        <Animated.View layout={LinearTransition.duration(200)} style={styles.list}>
+        <Animated.View layout={LinearTransition.duration(200)} style={mountain ? styles.list : styles.cards}>
           {shown.map((h) => (
-            <HabitRow
+            // Testing builds show the habit cards; the public release keeps its rows.
+            <Row
               key={h.habitId}
               habit={h}
               done={!!log?.completed.includes(h.habitId)}
@@ -603,6 +606,7 @@ const styles = StyleSheet.create({
   steppedUp: { flexDirection: 'row', alignItems: 'center', gap: space.md, borderRadius: radius.lg, padding: space.lg },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: space.sm },
   list: { gap: space.sm },
+  cards: { gap: 10 },
   footer: { gap: space.md, marginTop: space.sm },
   resting: { gap: space.xs, paddingHorizontal: space.xs },
   addButton: {
