@@ -2,14 +2,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { useAnimatedScrollHandler, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { JourneyView } from '../../components/JourneyView';
+import { usePagerBlock } from '../../components/TabPager';
 import { Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
-import { useWorldLayer, worldAnchor, worldCamera, worldScroll } from '../../components/WorldLayer';
+import { useOnPainting, useWorldLayer, worldAnchor, worldScroll } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor, type AscentDay } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { getHabit, habitTitle } from '../../core/habits';
@@ -82,6 +83,8 @@ function Ascent({ picked }: { picked: number | null }) {
   // Its habits stay folded away until asked for, so the valley below the mountain stays in view.
   const [expanded, setExpanded] = useState(picked !== null);
   const [calendar, setCalendar] = useState(false);
+  // No swiping between tabs under the calendar sheet.
+  usePagerBlock(calendar);
   const lastDay = Math.min(today, PROGRAM_DAYS);
   const shownDay = chosen ?? lastDay;
 
@@ -97,14 +100,12 @@ function Ascent({ picked }: { picked: number | null }) {
   );
   const pick = (day: number) => setChosen(day === lastDay ? null : day);
   // With the tabs' shared world, this page's scroll moves it (the trail must stay on the painting), and the
-  // trail and labels fade in as the camera arrives, so they never slide across the mountain mid-pan.
+  // trail and labels stay on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).
   const world = useWorldLayer();
   const onScroll = useAnimatedScrollHandler((e) => {
     worldScroll[1].set(e.contentOffset.y);
   });
-  const arrive = useAnimatedStyle(() => ({
-    opacity: world ? Math.min(1, Math.max(0, 1 - Math.abs(worldCamera.get() - 1) * 4)) : 1,
-  }));
+  const arrive = useOnPainting(1);
   const summary = daySummary(days[shownDay - 1], logForDay(logs, start, shownDay), shownDay === today);
 
   return (

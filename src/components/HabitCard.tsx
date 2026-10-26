@@ -18,6 +18,7 @@ import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { useThemeProgress } from '../theme/transition';
 import { habitScene, placeholderCrop } from './habitArt';
+import { claimTouch } from './TabPager';
 import { ThemedImage } from './ThemedImage';
 import { TILE_HEIGHT, TILES, type Theme } from './worldTiles';
 
@@ -274,6 +275,8 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
 
   const touches = {
     onStartShouldSetResponderCapture: (e: GestureResponderEvent) => {
+      // Sideways drags that start on a card are the card's, never a swipe between tabs.
+      claimTouch();
       const g = gesture.current;
       g.x0 = e.nativeEvent.pageX;
       g.y0 = e.nativeEvent.pageY;
