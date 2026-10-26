@@ -1,12 +1,12 @@
 import { describe, expect, it } from '@jest/globals';
-import { habitArt } from '../../components/habitArt';
+import { habitScene, placeholderCrop } from '../../components/habitArt';
 import { getHabit } from '../habits';
 import { BY_ID } from '../v2/library';
 
-/** The three pilot illustrations, by the stable id they're filed under. */
+/** The three pilot scenes, by the stable id they're filed under. */
 const PILOTS = { mind_read: 'Read', focus_deepwork: 'Focused work', move_walk: 'Walk' } as const;
 
-describe('habit illustrations', () => {
+describe('habit scenes', () => {
   it('the pilot ids are real habits, the same id in the V1 and V2 libraries', () => {
     for (const [id, title] of Object.entries(PILOTS)) {
       expect(getHabit(id)).toBeDefined();
@@ -14,7 +14,14 @@ describe('habit illustrations', () => {
     }
   });
 
-  it('no illustration is wired up until the files exist, so every card shows its icon', () => {
-    for (const id of [...Object.keys(PILOTS), 'discipline_bed', 'custom_123']) expect(habitArt(id)).toBeUndefined();
+  it('no final scene is wired up yet, so every card shows a crop of the world, the same one every time', () => {
+    for (const id of Object.keys(PILOTS)) {
+      expect(habitScene(id, 'dark')).toBeUndefined();
+      expect(habitScene(id, 'light')).toBeUndefined();
+    }
+    expect(placeholderCrop('mind_read')).toEqual(placeholderCrop('mind_read'));
+    // A typical plan doesn't show the same scene on every card.
+    const plan = ['discipline_bed', 'sleep_bedtime', 'move_walk', 'nutrition_produce', 'screen_video'];
+    expect(new Set(plan.map((id) => JSON.stringify(placeholderCrop(id)))).size).toBeGreaterThanOrEqual(3);
   });
 });
