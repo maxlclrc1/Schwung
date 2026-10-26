@@ -14,16 +14,16 @@ describe('habit scenes', () => {
     }
   });
 
-  it('Read and Focused work have their scenes in both themes; Walk and the rest show a crop of the world', () => {
-    for (const id of ['mind_read', 'focus_deepwork']) {
+  it('the three pilots have their scenes in both themes; the rest show a crop of the world', () => {
+    for (const id of Object.keys(PILOTS)) {
       expect(habitScene(id, 'dark')).toBeDefined();
       expect(habitScene(id, 'light')).toBeDefined();
     }
-    expect(habitScene('move_walk', 'dark')).toBeUndefined();
+    expect(habitScene('discipline_bed', 'dark')).toBeUndefined();
     expect(habitScene('custom', 'light')).toBeUndefined();
     expect(placeholderCrop('mind_read')).toEqual(placeholderCrop('mind_read'));
     // A typical plan doesn't show the same scene on every card.
-    const plan = ['discipline_bed', 'sleep_bedtime', 'move_walk', 'nutrition_produce', 'screen_video'];
+    const plan = ['discipline_bed', 'sleep_bedtime', 'mind_journal', 'nutrition_produce', 'screen_video'];
     expect(new Set(plan.map((id) => JSON.stringify(placeholderCrop(id)))).size).toBeGreaterThanOrEqual(3);
   });
 });

@@ -22,6 +22,10 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>>
     light: require('../../assets/habits/focus_deepwork-light.webp'),
     dark: require('../../assets/habits/focus_deepwork-dark.webp'),
   },
+  move_walk: {
+    light: require('../../assets/habits/move_walk-light.webp'),
+    dark: require('../../assets/habits/move_walk-dark.webp'),
+  },
 };
 
 /** The final scene for a habit in a theme, once it has one. */
