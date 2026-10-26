@@ -1,6 +1,6 @@
 import { usePathname } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Image, StyleSheet, useWindowDimensions } from 'react-native';
+import { useEffect } from 'react';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
@@ -13,8 +13,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
 import { tabs } from '../lib/flags';
 import { useTheme } from '../theme';
-import { THEME_FADE_MS, ThemedView, useThemeProgress } from '../theme/transition';
-import { type Theme, TILE_HEIGHT, TILES } from './worldTiles';
+import { ThemedView, useThemeProgress } from '../theme/transition';
+import { ThemedImage } from './ThemedImage';
+import { type Theme, TILE_HEIGHT, type TileName, TILES } from './worldTiles';
+
+const TILE_NAMES = Object.keys(TILES.dark) as TileName[];
 
 /*
  * One continuous world behind the three tabs (testing builds), in a light and a dark painting:
@@ -52,22 +55,8 @@ export function useWorldLayer(): boolean {
 }
 
 export function WorldLayer() {
-  const { c, isDark } = useTheme();
-  const theme: Theme = isDark ? 'dark' : 'light';
+  const { c } = useTheme();
   const progress = useThemeProgress();
-  // Only the current theme's painting is held, except while the theme fades: then the outgoing one stays until
-  // the fade ends, so the two crossfade (as the old world did) without both living in memory all the time.
-  const [outgoing, setOutgoing] = useState<Theme | null>(null);
-  const [shown, setShown] = useState<Theme>(theme);
-  if (shown !== theme) {
-    setOutgoing(shown);
-    setShown(theme);
-  }
-  useEffect(() => {
-    if (!outgoing) return;
-    const t = setTimeout(() => setOutgoing(null), THEME_FADE_MS + 100);
-    return () => clearTimeout(t);
-  }, [outgoing]);
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotion();
@@ -105,9 +94,6 @@ export function WorldLayer() {
       opacity: interpolate(cam, [0, 1, 2], VEIL.dark) * (1 - light) + interpolate(cam, [0, 1, 2], VEIL.light) * light,
     };
   });
-  // The light painting fades in as the theme turns light; the dark one fades out (none stays underneath).
-  const lightArt = useAnimatedStyle(() => ({ opacity: progress.get() }));
-  const darkArt = useAnimatedStyle(() => ({ opacity: 1 - progress.get() }));
 
   return (
     <ThemedView
@@ -117,27 +103,25 @@ export function WorldLayer() {
       importantForAccessibility="no-hide-descendants"
       style={[StyleSheet.absoluteFill, { backgroundColor: c.bg, overflow: 'hidden' }]}
     >
+      {/* Each tile holds only the theme on screen; a theme switch loads the other first (ThemedImage). */}
       <Animated.View style={[styles.pano, pan]}>
-        {(['dark', 'light'] as const)
-          .filter((t) => t === shown || t === outgoing)
-          .map((t) => (
-            <Animated.View key={t} style={[StyleSheet.absoluteFill, t === 'light' ? lightArt : darkArt]}>
-              {Object.values(TILES[t]).map((tile) => (
-                <Image
-                  key={tile.x}
-                  source={tile.source}
-                  resizeMode="stretch"
-                  style={{
-                    position: 'absolute',
-                    left: tile.x * scale,
-                    top: 0,
-                    width: tile.width * scale,
-                    height: TILE_HEIGHT * scale,
-                  }}
-                />
-              ))}
-            </Animated.View>
-          ))}
+        {TILE_NAMES.map((name) => {
+          const tile = TILES.dark[name];
+          return (
+            <ThemedImage
+              key={name}
+              sources={{ dark: tile.source, light: TILES.light[name].source }}
+              resizeMode="stretch"
+              style={{
+                position: 'absolute',
+                left: tile.x * scale,
+                top: 0,
+                width: tile.width * scale,
+                height: TILE_HEIGHT * scale,
+              }}
+            />
+          );
+        })}
       </Animated.View>
       {/* ThemedView flattens its style, so the animated veil opacity sits on a wrapper. */}
       <Animated.View style={[StyleSheet.absoluteFill, veil]}>

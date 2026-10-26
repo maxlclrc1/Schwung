@@ -9,7 +9,7 @@ import { rescheduleReminders } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
 import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
 import { useApp } from '../store/useApp';
-import { useTheme } from '../theme';
+import { useTheme, useThemePreference } from '../theme';
 import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -59,21 +59,27 @@ function Housekeeping() {
   return null;
 }
 
-export default function RootLayout() {
-  const hydrated = useHydrated();
-  const { c, isDark, preference } = useTheme();
-
-  useEffect(() => {
-    void SystemUI.setBackgroundColorAsync(c.bg).catch(() => {});
-  }, [c.bg]);
-
-  // Native UI (alerts, keyboard, date picker) follows the app's choice too; 'unspecified' hands
-  // control back to the phone's setting.
+/**
+ * Native UI (alerts, keyboard, date picker) follows the app's choice too; 'unspecified' hands control back to the
+ * phone's setting. On its own, so a theme choice doesn't re-render the whole app from the root.
+ */
+function NativeAppearance() {
+  const preference = useThemePreference();
   useEffect(() => {
     // Not every platform implements it (react-native-web doesn't), and it's only a nicety.
     if (typeof Appearance.setColorScheme !== 'function') return;
     Appearance.setColorScheme(preference === 'system' ? 'unspecified' : preference);
   }, [preference]);
+  return null;
+}
+
+export default function RootLayout() {
+  const hydrated = useHydrated();
+  const { c, isDark } = useTheme();
+
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(c.bg).catch(() => {});
+  }, [c.bg]);
 
   useEffect(() => {
     if (hydrated) void SplashScreen.hideAsync().catch(() => {});
@@ -86,6 +92,7 @@ export default function RootLayout() {
       <ThemeTransitionProvider>
         <StatusBar style={isDark ? 'light' : 'dark'} />
         <Housekeeping />
+        <NativeAppearance />
         <Stack
           screenOptions={{
             headerShown: false,

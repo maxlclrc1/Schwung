@@ -9,8 +9,10 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { tabs } from '../lib/flags';
 import { animatedColors, ColorProp, THEME_FADE_MS } from './fade';
-import { Colors, palettes, Scheme, useTheme } from './index';
+import { requestScheme } from './gate';
+import { Colors, palettes, Scheme, useTheme, useThemeTarget } from './index';
 
 export { animatedColors, findToken, THEME_FADE_MS, themedPairs } from './fade';
 
@@ -19,7 +21,8 @@ export { animatedColors, findToken, THEME_FADE_MS, themedPairs } from './fade';
  * theme changes: a toggle, a Settings choice, or the phone's own appearance under "System".
  * Themed components map each palette color they use back to its token and blend between that
  * token's dark and light values on the UI thread. Nothing remounts and nothing is overlaid;
- * the preference itself is saved immediately, exactly as before.
+ * the preference itself is saved immediately, exactly as before. In testing builds the fade starts once the
+ * incoming theme's paintings have loaded (./gate), so the colours and the world change as one.
  */
 
 const progressFor = (scheme: Scheme) => (scheme === 'light' ? 1 : 0);
@@ -28,8 +31,14 @@ const ThemeProgress = createContext<SharedValue<number> | null>(null);
 
 export function ThemeTransitionProvider({ children }: { children: ReactNode }) {
   const { scheme } = useTheme();
+  const target = useThemeTarget();
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(progressFor(scheme));
+
+  // Testing builds: a new theme is shown (and faded to, below) once its paintings are ready (./gate).
+  useEffect(() => {
+    if (tabs()) requestScheme(target);
+  }, [target]);
 
   useEffect(() => {
     const target = progressFor(scheme);
