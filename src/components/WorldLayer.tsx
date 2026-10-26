@@ -14,6 +14,7 @@ import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
 import { tabs } from '../lib/flags';
 import { useTheme } from '../theme';
 import { THEME_FADE_MS, ThemedView, useThemeProgress } from '../theme/transition';
+import { type Theme, TILE_HEIGHT, TILES } from './worldTiles';
 
 /*
  * One continuous world behind the three tabs (testing builds), in a light and a dark painting:
@@ -23,21 +24,7 @@ import { THEME_FADE_MS, ThemedView, useThemeProgress } from '../theme/transition
  * Journey painting (rows 800-1824) keeps lining up with the trail drawn by the Journey screen.
  */
 
-type Theme = 'light' | 'dark';
-const TILES: Record<Theme, { x: number; width: number; source: number }[]> = {
-  dark: [
-    { x: 0, width: 1296, source: require('../../assets/world/pano-dark-habits.webp') },
-    { x: 1264, width: 1568, source: require('../../assets/world/pano-dark-journey.webp') },
-    { x: 2800, width: 1296, source: require('../../assets/world/pano-dark-fieldnotes.webp') },
-  ],
-  light: [
-    { x: 0, width: 1296, source: require('../../assets/world/pano-light-habits.webp') },
-    { x: 1264, width: 1568, source: require('../../assets/world/pano-light-journey.webp') },
-    { x: 2800, width: 1296, source: require('../../assets/world/pano-light-fieldnotes.webp') },
-  ],
-};
 const SCREEN_PX = 1536;
-const HEIGHT_PX = 3584;
 /** Where the camera rests for each tab, in panorama px. */
 const STOP_PX = 1280;
 /**
@@ -135,7 +122,7 @@ export function WorldLayer() {
           .filter((t) => t === shown || t === outgoing)
           .map((t) => (
             <Animated.View key={t} style={[StyleSheet.absoluteFill, t === 'light' ? lightArt : darkArt]}>
-              {TILES[t].map((tile) => (
+              {Object.values(TILES[t]).map((tile) => (
                 <Image
                   key={tile.x}
                   source={tile.source}
@@ -145,7 +132,7 @@ export function WorldLayer() {
                     left: tile.x * scale,
                     top: 0,
                     width: tile.width * scale,
-                    height: HEIGHT_PX * scale,
+                    height: TILE_HEIGHT * scale,
                   }}
                 />
               ))}

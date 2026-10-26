@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   steppedUp: { flexDirection: 'row', alignItems: 'center', gap: space.md, borderRadius: radius.lg, padding: space.lg },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: space.sm },
   list: { gap: space.sm },
-  cards: { gap: 10 },
+  cards: { gap: space.lg },
   footer: { gap: space.md, marginTop: space.sm },
   resting: { gap: space.xs, paddingHorizontal: space.xs },
   addButton: {

@@ -1,82 +1,83 @@
-# Habit card artwork — specification
+# Habit card scenes — artwork specification
 
-**Status (Step 3A):** the card is built: `src/components/HabitCard.tsx` (testing builds; the public release keeps
-`HabitRow`), with the image wired through `src/components/habitArt.ts`. No illustration ships yet: until one exists,
-a card shows its habit's own icon on the right instead.
+**Status (Step 3A, revised):** each habit on the Habits tab is a large image card, built in
+`src/components/HabitCard.tsx` (testing builds only; the public release keeps `HabitRow`).
 
-## The three pilot illustrations
+- The whole card is the habit's scene, with the title, target and a swipe track written over it.
+- Scenes are looked up by stable habit id in `src/components/habitArt.ts`.
+- No final scene ships yet. Until one does, each card shows a crop of the world panorama, the same crop for a habit
+  every time. These crops are temporary: they're landscape, not pictures of the habit.
 
-| Habit        | Stable id (V1 and V2) | Upload the master to                                    | Ships as                            |
-| ------------ | --------------------- | ------------------------------------------------------- | ----------------------------------- |
-| Read         | `mind_read`           | `design/artwork-candidates/habit-mind_read-v1.png`      | `assets/habits/mind_read.webp`      |
-| Focused work | `focus_deepwork`      | `design/artwork-candidates/habit-focus_deepwork-v1.png` | `assets/habits/focus_deepwork.webp` |
-| Walk         | `move_walk`           | `design/artwork-candidates/habit-move_walk-v1.png`      | `assets/habits/move_walk.webp`      |
+## The card the scene fills
 
-Masters: 384 × 384 px PNG with transparency. Claude converts each to WebP and adds its line to `habitArt.ts`; the
-id (never the display name) picks the image, so a renamed or swapped habit can't show the wrong one, and custom
-habits never get one.
+| iPhone width            | Card (pt)         | At 3× (px)  | Aspect    |
+| ----------------------- | ----------------- | ----------- | --------- |
+| 375 (SE, mini)          | 343 × 213         | 1029 × 639  | 1.61      |
+| 390–393                 | 358–361 × 222–224 | ~1083 × 672 | 1.61      |
+| 402 (16 Pro)            | 370 × 229         | 1110 × 687  | 1.61      |
+| 430–440 (Plus, Pro Max) | 398–408 × 240     | ~1224 × 720 | 1.66–1.70 |
 
-**As built:** the illustration fills a 104 × 104pt square flush with the card's right, top and bottom edges,
-clipped by the card's 22pt corners, centred with `cover`: when larger text makes the card taller, the square grows
-in height and its sides are cropped. No fade is drawn at its left edge (transparent art needs none). On a done
-card it shows at 50 % opacity over the card's opaque violet tint, so test it on `#FFFFFF`, `#1C1B25`, and those two
-tinted 12 % toward the accent (`#EEEAF8` light, `#2D283F` dark).
+- Corner radius is 26pt, with 16pt between cards.
+- The card grows taller with larger text. The scene then crops more from the sides.
 
----
+## The image
 
-Re-checked after Step 2A: the card itself is unchanged, so every dimension below still holds. The only change is what
-surrounds the cards: the Habits tab no longer has the mountain, so cards sit on the plain app background.
+- **Size:** **1290 × 800 px** (about 1.61 : 1). That covers the largest card at 3× with a margin.
+- **Crop:** the image fills the card from the centre (`cover`).
+  - On the widest phones about 40 px comes off the top and bottom in total.
+  - On cards made taller by larger text, the left and right edges are cropped.
+- **Opaque scene,** painted in the Schwung world's language (the panorama's mist, light and palette).
+  - **Light:** pale mist and soft lavender-grey.
+  - **Dark:** deep indigo twilight.
+- **Two versions per habit, light and dark,** with the same composition (dark is a relight of light, like the
+  world).
+- **No text, logos or UI** in the image, and no close-up faces. Avoid loud gradients, cartoon or emoji-like
+  objects, and stock-photo looks.
 
-Measured from the current habit card (`src/components/HabitRow.tsx`) and the Habits tab (`src/app/(tabs)/today.tsx`).
-No artwork is implemented yet.
-
-## Current card
-
-- Width: screen minus 16pt each side → **343pt** at 375pt, **358pt** at 390pt. Corner radius 22pt, 8pt between cards.
-- Today: min height 76pt, 16pt padding, a 30pt round check control at the leading edge, the title and target in the
-  middle, and an 18pt level badge at the trailing edge.
-- Card surface is `#FFFFFF` in light mode and `#1C1B25` in dark. When checked, it fades to a violet tint and the text
-  fades to 55%. Since Step 2A the Habits tab has no painting behind the list: between cards is the plain background,
-  `#F7F6FB` in light mode and `#111116` in dark.
-
-## Recommended layout
+### Safe areas (rows of the 1290 × 800 image)
 
 ```
-┌────────────────────────────────────────────────┬──────────────┐
-│ (✓)  Walk                                       │              │
-│ 30pt 5 min walk at a comfortable pace           │  artwork     │
-│      ▪▪▫ level                                  │  104 × 104pt │
-└────────────────────────────────────────────────┴──────────────┘
+ 0 ┌──────────────────────────────────────────────┐
+   │  THE WINDOW (rows 0–330): the subject and     │  ← the only part seen clearly
+   │  focal point of the scene                     │
+330├──────────────────────────────────────────────┤
+   │  rows 330–480: the veil begins; secondary     │
+480├──────────────────────────────────────────────┤
+   │  rows 480–800: under the title, target and    │  ← calm, low detail, even tone:
+   │  swipe track (a veil darkens it in dark mode, │    no bright spots, no busy texture
+   │  lightens it in light mode)                   │
+800└──────────────────────────────────────────────┘
+   keep the subject inside the central 80% of the width (x 130–1160)
 ```
 
-- The artwork sits at the **trailing edge**, full card height, bleeding to the top, right and bottom edges and
-  clipped by the 22pt corner radius. A short fade (about 16pt) blends its left edge into the card surface.
-- The check control stays at the leading edge: same position and size, and still the tap target. The title and target
-  stay in the middle column. The level badge moves under the target text so it doesn't sit on the artwork.
-- Text column width: about **165pt** at 375pt and **180pt** at 390pt. That's enough for two-line titles.
+## Files
 
-| Screen width            | Card  | Artwork area | Card height |
-| ----------------------- | ----- | ------------ | ----------- |
-| 375pt (iPhone SE, mini) | 343pt | 104 × 104pt  | **104pt**   |
-| 390pt (iPhone 12–16)    | 358pt | 104 × 104pt  | **104pt**   |
+|                          | Path                                               |
+| ------------------------ | -------------------------------------------------- |
+| Upload each master (PNG) | `design/artwork-candidates/scene-<habit id>-<light | dark>-v1.png`                          |
+| Claude ships it as       | `assets/habits/<habit id>-<light                   | dark>.webp` (WebP q≈80, ≤ 150 KB each) |
+| …and switches it on in   | `src/components/habitArt.ts` (one line per habit)  |
 
-With larger Dynamic Type the card grows taller; the artwork area grows with it and crops the sides.
+Memory: about 4 MB decoded per visible card, and only the current theme's scenes are loaded.
 
-## Image files
+## Habit ids ready for a scene
 
-- **Pixel size:** **384 × 384 px** (1:1). The display needs 312 px at 3×; the extra covers taller cards at larger
-  text sizes.
-- **Crop:** fills the area and is centred. On taller cards the left and right edges are cropped. Keep the subject
-  inside the **central 70 %** (about 270 × 270 px), with nothing important in the outer 15 % on any side.
-- **Background:** **transparent** (alpha), with soft edges. No baked-in white or coloured backgrounds, frames,
-  rounded corners or drop shadows; the card supplies those.
-- **Light and dark:** **one asset can serve both** if it is transparent and painted in mid tones. Avoid pure white
-  highlights and near-black outlines, and check the artwork on `#FFFFFF` and on `#1C1B25`. Opaque full scenes would
-  need a separate light and dark version of each image.
-- **Checked state:** on a done card the artwork shows at 50 % opacity, so it should still read at that strength.
-- **Formats:** supply **PNG-24 with alpha** masters. They'll ship as **WebP with alpha**: smaller, and supported by
-  React Native on iOS.
-- **File size:** at most **60 KB** per image as shipped (WebP), with a hard cap of 100 KB. Masters can be any size.
-  About 40 habit images comes to roughly 2–3 MB.
-- **Naming:** one file per habit, named by habit id (for example `move_walk.png`). Habits that share artwork can
-  point to one file.
+Any habit id can take a scene; it's matched by id, never by display name, and custom habits always show a world
+crop. The pilots come first:
+
+| Pilot | Id               | Title                        |
+| ----- | ---------------- | ---------------------------- |
+| 1     | `mind_read`      | Read                         |
+| 2     | `focus_deepwork` | Focused work (V1: Deep work) |
+| 3     | `move_walk`      | Walk (V1: Daily walk)        |
+
+The other habits the testing builds can offer (V2 release gate), in rough order of how often plans include them:
+
+- Sleep: `discipline_bed`, `sleep_bedtime`, `sleep_no_phone_bed`, `sleep_wake`, `sleep_morning_light`
+- Screens: `screen_morning`, `screen_social`, `screen_app_limit`
+- Food: `food_produce`, `food_unsweetened`, `food_water_meals`
+- Mind: `mind_journal`, `mind_breathe`
+- Focus: `focus_top3`
+- Social: `social_reach_out`, `confidence_compliment`, `confidence_talk`
+
+V1 plans also use `screen_limit`, `move_workout`, `move_steps`, `water`, `mind_meditate` and `discipline_cold`.
