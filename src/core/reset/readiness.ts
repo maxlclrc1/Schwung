@@ -26,8 +26,10 @@ export const READINESS = {
   offerAt: 80,
   earlyAt: 90,
   easierBelow: 60,
-  /** A declined offer isn't made again for this many days. */
+  /** A declined offer (up or down) isn't made again for this many days. */
   declineCooldownDays: 7,
+  /** "Too hard" given this recently (and since the current target began) holds back step-up offers. */
+  tooHardDays: 14,
 } as const;
 
 /** The first day each phase's targets become available. */
@@ -229,7 +231,10 @@ export type Constraints = {
   workdays?: Weekday[];
 };
 
-/** The first day a harder target can start: tomorrow for daily habits, next week for weekly ones. */
+/**
+ * The first day a changed target can start, up or down: tomorrow for daily habits, next Monday for weekly ones. A
+ * target never changes partway through a day or a week that has already started.
+ */
 export function nextBoundary(s: ProgressionState, ctx: WeeklyContext, today: number): number {
   const schedule = scheduleOn(scheduleEras(s), today);
   return schedule?.kind === 'daily' ? today + 1 : weekOf(ctx.startKey, today, ctx.programDays).lastDay + 1;
@@ -265,8 +270,9 @@ export function checkLevel(habitId: string, from: Level, to: Level, c: Constrain
 
 /**
  * The offer to show now, if any. A step-up only within the person's chosen intensity, only when ready and the next
- * phase is open (or early with 90% and "too easy"), and only if it fits their constraints. A step-down is suggested
- * when struggling. Nothing is offered while an accepted change is waiting, or within the cooldown after a decline.
+ * phase is open (or early with 90% and "too easy"), and only if it fits their constraints. A step-up isn't suggested
+ * after a recent "too hard". A step-down is suggested when struggling (never because of feedback alone), from the
+ * next boundary. Nothing is offered while an accepted change is waiting, or within the cooldown after a decline.
  */
 export function progressionOffer(input: ReadinessInput & { constraints?: Constraints }): Offer | null {
   const { state, today, ctx } = input;
@@ -277,6 +283,8 @@ export function progressionOffer(input: ReadinessInput & { constraints?: Constra
     !!state.declined && sameLevel(state.declined.to, to) && today < state.declined.day + READINESS.declineCooldownDays;
 
   if (r.outcome === 'ready' || r.outcome === 'ready-early') {
+    // The person recently said it's too hard: no step-up is suggested (and nothing is lowered because of it).
+    if (saidTooHard(state, today)) return null;
     const to = nextPhase(from);
     if (!to || cooling(to) || checkLevel(state.habitId, from, to, input.constraints)) return null;
     const open = today >= PHASE_OPENS[to.phase];
@@ -286,16 +294,22 @@ export function progressionOffer(input: ReadinessInput & { constraints?: Constra
   if (r.outcome === 'struggling') {
     const to = easierLevel(from);
     if (!to || cooling(to) || checkLevel(state.habitId, from, to, input.constraints)) return null;
-    // An easier target helps at once.
-    return { kind: 'step-down', from, to, early: false, effectiveDay: today };
+    return { kind: 'step-down', from, to, early: false, effectiveDay: nextBoundary(state, ctx, today) };
   }
   return null;
 }
 
-/** Replaces any change still waiting, then adds this one. */
+/** "Too hard", said since the current target began and within the last `tooHardDays` days. */
+export function saidTooHard(s: ProgressionState, today: number): boolean {
+  const f = s.feedback;
+  return f?.kind === 'too-hard' && f.day >= eraOn(s, today).fromDay && today - f.day < READINESS.tooHardDays;
+}
+
+/** Replaces any change still waiting, then adds this one (or just cancels the waiting one, if it leads back). */
 function withEra(s: ProgressionState, era: Era, today: number): ProgressionState {
   const eras = s.eras.filter((e) => e.fromDay <= today && e.fromDay < era.fromDay);
-  const out: ProgressionState = { ...s, eras: [...eras, era] };
+  const back = eras.length > 0 && sameLevel(eras[eras.length - 1], era);
+  const out: ProgressionState = { ...s, eras: back ? eras : [...eras, era] };
   delete out.declined;
   return out;
 }
@@ -318,16 +332,16 @@ export function setFeedback(s: ProgressionState, kind: Feedback['kind'], day: nu
 export type ManualResult = { state: ProgressionState; level: Level } | { blocked: string };
 
 /**
- * "Make it easier", any time, without waiting for readiness: one step easier, starting today. Blocked only at Starter
- * Foundation or by a constraint.
+ * "Make it easier", any time, without waiting for readiness: one step easier, from the next boundary (tomorrow, or
+ * next Monday for a weekly habit). Blocked only at Starter Foundation or by a constraint.
  */
-export function makeEasier(s: ProgressionState, today: number, c: Constraints = {}): ManualResult {
+export function makeEasier(s: ProgressionState, ctx: WeeklyContext, today: number, c: Constraints = {}): ManualResult {
   const from = levelOn(s, pendingChange(s, today)?.fromDay ?? today);
   const to = easierLevel(from);
   if (!to) return { blocked: 'this is already the easiest target' };
   const reason = checkLevel(s.habitId, from, to, c);
   if (reason) return { blocked: reason };
-  return { state: withEra(s, { ...to, fromDay: today, reason: 'easier' }, today), level: to };
+  return { state: withEra(s, { ...to, fromDay: nextBoundary(s, ctx, today), reason: 'easier' }, today), level: to };
 }
 
 /**

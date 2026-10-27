@@ -1,6 +1,7 @@
 # Schwung — Life Reset Progression
 
-**Stage 4 of the Life Reset:** readiness-based progression. **A pure engine, not used by the app.**
+**Stage 4 of the Life Reset, refined in Stage 4B:** readiness-based progression. **A pure engine, not used by the
+app.**
 
 - **New code:** `src/core/reset/readiness.ts`.
 - **Tests:** `src/core/__tests__/resetReadiness.test.ts`.
@@ -38,6 +39,7 @@ All values live in `READINESS` and are adjustable.
 | Keep the target            | 60–79%                                                 |
 | Suggest an easier target   | Done in **< 60%** of recorded opportunities            |
 | Cooldown after a "Not now" | **7** days for that same offer                         |
+| "Too hard" holds step-ups  | **14** days                                            |
 
 The outcome (`readiness`) is one of `ready`, `ready-early`, `maintain`, `struggling` or `insufficient-data`, checked
 in this order:
@@ -112,7 +114,7 @@ engine (`weekSummary` in `weekly.ts`).
 - **Short weeks:** partial first and last weeks use the scheduling engine's scaled goal, so they're judged the same
   way as any week. A week too short for a goal is left out, never counted against the person.
 - **Phase changes inside a week:** the week uses the lowest goal in effect (as the scheduling engine already does),
-  and a step-up starts at the next week, so a week is never judged against a target raised partway through.
+  and every change starts at the next week, so a week is never judged against a target changed partway through.
 - **Fewer days a week isn't easier:** every weekly habit needs the same 80% of its weeks and the same 2 judged weeks,
   whatever its quota. A week is one opportunity, whether its quota is 2 or 5.
 - **Examples:** 3 of 3 weeks achieved → ready. 2 achieved + 1 unrecorded → 67%, keep. 1 achieved + 2 unrecorded → 1
@@ -124,11 +126,15 @@ engine (`weekSummary` in `weekly.ts`).
   - **Only once that phase is open** (Day 22, Day 45), or **early** with 90% and "too easy" (`early: true`).
   - **Starts at the next boundary:** tomorrow for a daily habit, next Monday for a weekly one
     (`nextBoundary`), so nobody is asked for more mid-day or mid-week.
+  - **Not after a recent "too hard":** no step-up is offered, early or not, for 14 days after the person says the
+    current target is too hard (`saidTooHard`). The answer never lowers anything by itself.
   - **At Mastery nothing is offered.** A higher intensity is never offered.
 - **Step-down:** when struggling, one step easier (the previous phase, or at Foundation the next intensity down's
-  Foundation; nothing below Starter Foundation). **Starts today**, because easier always helps at once.
+  Foundation; nothing below Starter Foundation). **Starts at the next boundary** too: tomorrow, or next Monday for a
+  weekly habit. Only the data suggests a step-down, never a "too hard" answer alone.
 - **Nothing is offered** while an accepted change is waiting for its boundary, or for the same target within 7 days
-  of a "Not now". A declined step-up doesn't block a different suggestion (a step-down).
+  of a "Not now" (step-ups and step-downs alike). A declined step-up doesn't block a different suggestion (a
+  step-down). Manual controls are never held back.
 - **Every offer is checked against the person's constraints** (below); one that doesn't fit isn't offered.
 
 ### Accepting and declining
@@ -137,8 +143,9 @@ engine (`weekSummary` in `weekly.ts`).
   waiting change is replaced, and a decline is cleared.
 - **`declineOffer`:** nothing changes. The same offer returns after 7 days if the habit is still ready. Declining
   again starts a new 7 days.
-- **`setFeedback`:** "too easy" or "too hard". Only "too easy" given since the current target began counts toward an
-  early step-up.
+- **`setFeedback`:** "too easy" or "too hard"; only the latest answer is kept. "Too easy" given since the current
+  target began counts toward an early step-up. "Too hard" given since the current target began and within the last
+  14 days holds back every step-up offer; it changes no readiness outcome and never steps anything down.
 
 ## Manual controls
 
@@ -146,10 +153,16 @@ The person never waits for the engine to make a safe change.
 
 | Control        | Step                                                                                  | Starts            | Blocked when                                |
 | -------------- | ------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------- |
-| Make it easier | Previous phase; at Foundation, the next intensity down's Foundation                   | Today             | Already Starter Foundation, or a constraint |
+| Make it easier | Previous phase; at Foundation, the next intensity down's Foundation                   | The next boundary | Already Starter Foundation, or a constraint |
 | Make it harder | Next phase (even before it opens); at Mastery, the next intensity's Mastery (consent) | The next boundary | Already Challenge Mastery, or a constraint  |
 
-- A change made while another is waiting builds on the waiting one and replaces it.
+- **The next boundary** is tomorrow for a daily habit and next Monday for a weekly one: Sunday → Monday, Monday → the
+  following Monday. A program day is a date key, so whether it's 23:59 or 00:01 only matters through which day it is,
+  and a change on Day 21 or 44 starts on the day the next phase opens.
+- A change made while another is waiting builds on the waiting one and replaces it; one that leads back to the
+  current target simply cancels the waiting change.
+- **Intensity and phase stay separate:** offers keep the chosen intensity; only a manual change crosses intensities.
+  No increase is ever mandatory: ignoring every offer keeps the target to the end of the program.
 - Both return `{ state, level }` or `{ blocked: reason }`, with a reason a future UI can show.
 
 ## Constraints (`checkLevel`)
@@ -191,13 +204,17 @@ type ProgressionState = {
 - **Old saves:** logs without tracking details read correctly after the existing loader (tested through
   `sanitize`).
 
+## Decisions applied in Stage 4B (2026-10-27)
+
+| Decision                                                                                                                     | Applied                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Weekly readiness: the last 3 finished weeks, at least 2 judged; all 3 needn't exist; unrecorded weeks never count as success | Unchanged rule, confirmed and tested (a habit started in Week 2 is offered after Weeks 2 and 3) |
+| Reductions start tomorrow (daily) or next Monday (weekly); never partway through a started day or week                       | Step-down offers and Make it easier use `nextBoundary`, like step-ups                           |
+| The 7-day cooldown after "Not now" holds for step-ups and step-downs; manual controls stay available                         | Unchanged rule, tested in both directions                                                       |
+| Recent "too hard" suppresses automated step-up offers, early ones included; never lowers difficulty by itself                | `saidTooHard`, `READINESS.tooHardDays`                                                          |
+
 ## Still open
 
-1. **Weekly window:** 3 closed weeks with at least 2 judged. The earlier outline said "the last two weeks, both met";
-   with 3 weeks, one unrecorded week can't make a habit ready, and one bad week doesn't block it.
-2. **Step-down offers start today**, like Make it easier. Confirm, or start them at the next boundary too.
-3. **Cooldown:** 7 days after "Not now" for both step-ups and step-downs.
-4. **"Too hard" feedback** is recorded but doesn't change any outcome yet; it could lower the bar for an easier
-   suggestion.
-5. **Integration** (where the state is saved, the Life Reset program marker, the offer banner, Habit Detail controls)
+1. **"Too hard" recency:** 14 days (the length of the daily window), and only about the current target. Confirm.
+2. **Integration** (where the state is saved, the Life Reset program marker, the offer banner, Habit Detail controls)
    is a later stage.
