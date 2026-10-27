@@ -1,5 +1,8 @@
 # Schwung — The 66-Day Life Reset: Habit System Audit and Redesign
 
+> **Superseded (habits-first correction):** the product unit is now a concrete habit, not a flagship challenge. See
+> `SCHWUNG_LIFE_RESET_HABITS.md`. The audit findings in sections 1–2 still stand; the challenges, missions and destinations below are replaced.
+
 **Status:** proposal for review. **Nothing here is implemented.** No code, saved programs, artwork, tabs, ceremonies,
 Field Notes or production behaviour were changed. Held fitness prototypes stay inactive.
 
