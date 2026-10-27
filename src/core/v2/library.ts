@@ -33,6 +33,9 @@ export function timeInBed(inBed: string, wake: string): number {
   return ((((minutes(wake) - minutes(inBed)) % 1440) + 1440) % 1440) / 60;
 }
 
+/** The longest single focus block offered to 16–17-year-olds (Focused work, and Life Reset focus or practice blocks). */
+export const TEEN_FOCUS_MAX_MIN = 60;
+
 /** Sleep below the age band (CDC: teens 8–10 h, adults 7+ h [POP]). */
 export const sleepBelowBand = (p: ProfileV2) =>
   p.sleepHours === 'lt6' || p.sleepHours === '6_7' || (isTeen(p) && p.sleepHours === '7_8');
@@ -324,9 +327,9 @@ export const LIBRARY: HabitDef[] = [
     release: 'candidate',
     exclude: () => null,
     ladder: (p) =>
-      (isTeen(p) ? [10, 15, 25, 45, 60] : [10, 15, 25, 45, 60, 90]).map(
-        (m) => `${m} min of focused work, phone in another room`,
-      ),
+      [10, 15, 25, 45, 60, 90]
+        .filter((m) => !isTeen(p) || m <= TEEN_FOCUS_MAX_MIN)
+        .map((m) => `${m} min of focused work, phone in another room`),
     start: () => 1,
     why: 'One protected block of focus.',
   },
