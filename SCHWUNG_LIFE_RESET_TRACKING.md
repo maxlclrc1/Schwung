@@ -1,12 +1,13 @@
 # Schwung — Life Reset Tracking Foundations
 
-**Stage 3 of the Life Reset:** recording how a habit was done, with an optional timer, counter and strength session
-log. **Pure foundations, not used by the app.**
+**Stage 3 of the Life Reset, refined in Stage 3B:** recording how a habit was done, with an optional timer, counter,
+strength session log and weekly Screen Time measure. **Pure foundations, not used by the app.**
 
 - **Unchanged:** cards, swipe, onboarding, XP, streaks, ceremonies, saves and production.
 - **New code:**
   - `src/core/reset/timer.ts`: the timer state machine.
-  - `src/core/reset/tracking.ts`: day records, counters, sessions, skips, undo.
+  - `src/core/reset/tracking.ts`: day records, counters, sessions, skips, undo, optional amounts.
+  - `src/core/reset/measures.ts`: Less Scrolling's weekly self-reported measure.
 - **Types:** `DayLog.track` (optional) in `src/core/types.ts`.
 - **Tests:** `src/core/__tests__/resetTracking.test.ts`.
 
@@ -26,11 +27,19 @@ ceremonies and the weekly scheduling all read that list and nothing else.
 
 ## Two ways to complete
 
-- **Quick completion** (`confirmDone`): the swipe. It completes on the person's word and records `by: 'manual'`; it's
-  idempotent. An optional amount (for example minutes) can be recorded. Nothing claims it was checked.
-- **Assisted completion:** a timer that finishes (`by: 'timer'`), a counter that reaches its target
-  (`by: 'counter'`), or a logged session (`by: 'session'`). A habit already completed by a swipe stays completed; the
-  timer's minutes are simply added.
+Completion always comes from the person; nothing claims it was checked.
+
+- **Quick completion** (`confirmDone`): the swipe. It's immediate and idempotent, needs no amount, and records
+  `by: 'manual'`.
+- **Assisted completion:**
+  - **A ready timer**, confirmed with one tap (`confirmTimer`, the same as a swipe): `by: 'timer'`.
+  - **A counter** the person taps up to its target: `by: 'counter'`.
+  - **A logged session:** `by: 'session'`.
+
+  A habit already completed stays completed; a timer's minutes are simply added.
+
+- **Optional amount, later** (`recordAmount`): minutes or pages, entered any time before or after completing, or
+  cleared. It never completes, undoes or creates a completion, and invalid values are ignored.
 
 ## Day status
 
@@ -41,7 +50,14 @@ ceremonies and the weekly scheduling all read that list and nothing else.
 | `incomplete` | The day has a record but the habit isn't done (it may have partial progress)                                                  |
 | `unrecorded` | No record for that day. An undo or unskip of nothing never creates one                                                        |
 
-Skipping is only recorded: it has **no effect on any rule yet** (see decisions below).
+**Skips** (approved rules, `SKIP_RULES`):
+
+- **No completion credit:** an explicitly skipped due habit earns no credit toward a day's success, now or in future
+  calculations. (XP and streaks read only `completed`, so they're unchanged.)
+- **Readiness:** for future readiness calculations, `observation` and `tally` keep skips **separate** from ordinary
+  misses. `doneShare` counts a skip as not done, so skipping can never raise a share or speed up a step-up. Unknown
+  days are left out.
+- **Not wired in:** no existing rule uses these yet.
 
 ## Timers (Focus Time, Read Daily, Daily Movement, Tidy Up, Practice a Skill)
 
@@ -56,19 +72,42 @@ Skipping is only recorded: it has **no effect on any rule yet** (see decisions b
   finds it exactly where it was.
 - **Backgrounding:** a running timer keeps counting while the app is in the background, because the person is meant
   to be away (the phone in another room).
-- **App suspended or terminated** (`loadTimer`, `settle`):
-  - **Reopened on the same program day:** the time is there. If the target has passed, the timer finishes and
-    completes the habit once, recording its minutes.
-  - **Reopened on a later program day:** the timer **expires**. The stretch that was still running isn't counted,
-    because nobody knows when it really stopped. Time banked by earlier pauses stays as that day's partial progress.
-    Nothing completes.
+- **Reaching the target makes it ready to confirm** (`ready`, with `readyAt`), **never completed**. Running a timer
+  doesn't prove the habit was done (especially Daily Movement), so the person confirms with one tap or the swipe.
+  Timer minutes, partial or complete, are kept as tracking information and award no XP by themselves.
+- **App suspended or terminated** (`loadTimer`, `settle`): reopened the same program day, the time is there; past the
+  target, the timer is ready (as of the moment it got there), waiting for confirmation.
+- **Midnight** (the program's local calendar day):
+  - **The boundary:** the local midnight ending the timer's day is computed when the timer is created
+    (`localDayEnd`, the device's time zone at that moment) and stored as `dayEndsAt`.
+  - **Effect:** a later time-zone change or a delayed reopening can't move it.
+  - **A timer running at midnight:** credits time up to midnight to its starting day, stops there (`day-ended`),
+    carries nothing into the next day, and completes nothing. It stays on that day's record for confirmation or
+    correction when the person returns.
+  - **Before then:** a target reached before midnight stays `ready`, however late the app reopens.
+  - **Older saves:** a timer saved without a boundary can't place a stretch reopened on a later day, so that stretch
+    isn't credited.
+- **Forgotten timers:** a timer can never complete a habit by itself, so an abandoned one creates nothing.
+  - **The flag:** a ready timer left unconfirmed for longer than its habit's grace period (`needsCheck`) is flagged,
+    so a future UI asks "did you finish?" rather than assuming.
+  - **Configurable grace periods** (`TIMER_GRACE_MIN`):
+
+    | Habit                                    | Grace                              |
+    | ---------------------------------------- | ---------------------------------- |
+    | Focus Time, Read Daily, Practice a Skill | 120 min                            |
+    | Tidy Up                                  | 60 min                             |
+    | Daily Movement                           | 30 min (it proves least)           |
+    | Other                                    | 60 min (`DEFAULT_TIMER_GRACE_MIN`) |
+
+  - **Nothing discarded:** time spent in the background is valid and never thrown away. A timer can't count past its
+    target, and midnight stops it.
 - **Clock moved backwards:** a negative stretch counts as zero.
-- **Limits:** a finished timer never counts past its target, and saving it again (another tab, another reopen) never
-  completes twice.
+- **No duplicates:** saving a timer again (another tab, another reopen) never completes anything, and confirming twice
+  changes nothing.
 - **Blocks:**
   - **16–17:** a 90-minute target is always two 45-minute blocks (the focus cap).
   - **Adults:** they can choose the split.
-  - **Between blocks** the timer waits (`between-blocks`) for the person to start the next one. The habit completes
+  - **Between blocks** the timer waits (`between-blocks`) for the person to start the next one. It's ready to confirm
     after the last block.
 
 ## Counters (Get It Done, Stay Connected)
@@ -78,7 +117,10 @@ Skipping is only recorded: it has **no effect on any rule yet** (see decisions b
 - **Reaching the target** completes the habit (once).
 - **Going back under it** undoes a completion **the counter** made, as a correction. A completion the person
   confirmed by swiping is never undone by the counter.
-- **Undo** keeps the count, so nothing the person did is lost.
+- **Undo of a counter's completion** removes the completion and sets the count to **one below the target it completed
+  at** (`countTarget`). One new, intentional tap completes it again, without a second celebration (`first: false`)
+  or extra XP.
+- **Undo of a swiped completion** leaves the count as it was.
 
 ## Strength Training sessions
 
@@ -107,19 +149,37 @@ Skipping is only recorded: it has **no effect on any rule yet** (see decisions b
 - **Isolation:** no app code imports these modules. The only reference outside them is the type of the optional
   `track` field in `core/types.ts` (tested).
 
-## Unresolved product decisions
+## Less Scrolling's weekly measure (`measures.ts`)
 
-1. **Skipped days:** should an explicit skip of a daily habit count differently from a plain miss? For example: not
-   counted toward the 80% day rule, or not a miss for step-downs. Today it's only recorded.
-2. **Timer completion without a swipe:** a finished timer completes the habit automatically. Should a future UI ask
-   for a confirming tap instead, for example for Daily Movement, where the timer may run while the person isn't
-   moving?
-3. **Expired timers:** confirm that time running across midnight is dropped rather than credited to the start day.
-4. **A timer left running** (the person forgets it) completes when reopened the same day after its target. Is a cap
-   wanted, for example no automatic completion when reopened much later than the target?
-5. **Counter undo:** after an undo, the count stays at or above the target, and only going under and back up
-   completes again. Alternatively, an undo could lower the count to just under the target.
-6. **Manual amounts:** should a swipe offer an optional "how many minutes?" (recorded, never required), or only the
-   timer?
-7. **Weekly Screen Time check for Less Scrolling** (approved as optional): where it's stored is decided with the
-   weekly UI; nothing here records it yet.
+- **What it stores:** an optional weekly record of the person's own Screen Time reading: their daily average for the
+  main app or category (`minutesPerDay`, optional `category`).
+- **Which week:** stored under the program week from `weekOf` (Monday to Sunday, Week 1 contains Day 1).
+- **Always self-reported:** `source: 'self-reported'`; Schwung never checks it.
+- **Editable:** recording it again replaces it and counts the edit; `clearWeekly` removes it. Invalid values change
+  nothing.
+- **Separate records:** never stored in day logs, so it can't change any completed day, XP, streak or weekly goal
+  (tested).
+- **Missing weeks:** simply absent, with no penalty. Damaged entries read as missing.
+- **Persistence:** where the measures are saved in the program state is decided at integration; the type is
+  optional.
+
+## Decisions applied in Stage 3B (2026-10-27)
+
+| Decision                                                                                                                                        | Applied                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Skipping: completed, skipped and unrecorded stay distinct; no completion credit for a skip; skips kept apart for readiness without inflating it | `SKIP_RULES`, `observation`, `tally`, `doneShare` (not wired into any rule) |
+| A timer at its target is ready to confirm, never complete                                                                                       | `ready` status; `saveTimer` never completes; `confirmTimer`                 |
+| Midnight: credit up to the local midnight, stop, nothing carried over, kept for confirmation                                                    | `dayEndsAt`, `day-ended`                                                    |
+| Forgotten timers: no automatic completion; configurable check                                                                                   | `needsCheck`, `TIMER_GRACE_MIN`                                             |
+| Counter undo: back to one below the target, a new tap completes again, no repeat celebration                                                    | `countTarget`, `undoDone`                                                   |
+| Optional manual amount, later                                                                                                                   | `recordAmount`                                                              |
+| Weekly self-reported Less Scrolling measure                                                                                                     | `measures.ts`                                                               |
+
+## Still open
+
+1. **Timer cap for long sessions:** no single block is longer than 90 minutes, so no extra unattended-duration cap
+   was needed beyond the target, midnight and the confirmation step. Revisit if longer targets are added.
+2. **Grace periods:** the values above are first guesses to test with people.
+3. **Where weekly measures are saved** (a new optional field in the saved program) is decided at integration.
+4. **Future rules for skips:** how readiness and step-downs use them beyond "never inflates" is decided with the
+   readiness engine.

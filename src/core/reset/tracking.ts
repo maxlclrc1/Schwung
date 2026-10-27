@@ -14,6 +14,9 @@ import { activeMinutes, settle, type TimerRun } from './timer';
  * Every change returns the new logs and at most one event, and only when completion actually changes. `first` tells a
  * future UI whether this is the day's first completion of the habit, so crossing a target again after a correction
  * never celebrates twice.
+ *
+ * Completion always comes from the person: a swipe or a tap (also to confirm a ready timer), a counter they tap up to
+ * its target, or a session they log. A timer alone never completes anything.
  */
 
 export type SessionType = 'full body' | 'upper' | 'lower' | 'other';
@@ -28,8 +31,12 @@ export type HabitTrack = {
   skipped?: true;
   /** Counter progress (tasks finished, people reached). */
   count?: number;
-  /** Active minutes the timer counted, or minutes the person entered. */
+  /** Active minutes the timer counted (tracking information; never completion by itself). */
   minutes?: number;
+  /** The counter target in force when the counter completed the habit (an undo goes back to one below it). */
+  countTarget?: number;
+  /** An amount the person entered, any time, optionally (never needed to complete). */
+  amount?: Amount;
   /** The day's timer, while one exists. */
   timer?: TimerRun;
   /** Strength Training: optional details of the day's session. */
@@ -37,6 +44,9 @@ export type HabitTrack = {
   /** The habit has been completed at least once today (one celebration a day, however often it's corrected). */
   everCompleted?: true;
 };
+
+export type Amount = { value: number; unit: 'minutes' | 'pages' };
+const AMOUNT_MAX: Record<Amount['unit'], number> = { minutes: 1440, pages: 5000 };
 
 export type DayStatus = 'completed' | 'skipped' | 'incomplete' | 'unrecorded';
 
@@ -48,6 +58,8 @@ export type Change = { logs: Logs; event: Event };
 export type At = { startKey: string; day: number; planned: string[] };
 
 const keyOf = (at: At) => dateForDay(at.startKey, at.day);
+const validAmount = (v: unknown, unit: Amount['unit']) =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 1 && v <= AMOUNT_MAX[unit];
 const empty: HabitTrack = { v: 1 };
 
 /** A habit's tracking details on a day, read defensively: anything damaged is ignored, never trusted. */
@@ -61,6 +73,10 @@ export function readTrack(log: DayLog | undefined, habitId: string): HabitTrack 
   if (r.skipped === true) out.skipped = true;
   if (n(r.count) !== undefined) out.count = n(r.count);
   if (n(r.minutes) !== undefined) out.minutes = n(r.minutes);
+  if (n(r.countTarget) !== undefined && n(r.countTarget)! > 0) out.countTarget = n(r.countTarget);
+  const a = r.amount as Record<string, unknown> | undefined;
+  if (a && typeof a === 'object' && (a.unit === 'minutes' || a.unit === 'pages') && validAmount(a.value, a.unit))
+    out.amount = { value: Math.round(a.value as number), unit: a.unit };
   if (r.everCompleted === true) out.everCompleted = true;
   const t = r.timer as TimerRun | undefined;
   if (t && typeof t === 'object' && t.v === 1 && Array.isArray(t.blocks) && typeof t.status === 'string') out.timer = t;
@@ -114,24 +130,50 @@ const completedBy = (t: HabitTrack, by: NonNullable<HabitTrack['by']>): HabitTra
 const notCompleted = (t: HabitTrack): HabitTrack => {
   const out = { ...t };
   delete out.by;
+  delete out.countTarget;
   return out;
 };
 
 /**
- * Quick completion: the person says it's done (a swipe). Idempotent: doing it twice changes nothing. An optional
- * amount (for example minutes read) is recorded as given.
+ * Quick completion: the person says it's done (a swipe or a tap). Immediate and idempotent: doing it twice changes
+ * nothing, and no amount is needed. Confirming while the day's timer is ready to confirm records it as timer-assisted
+ * (its minutes are already there); otherwise it's manual. Either way it's the person's word, not a check.
  */
-export function confirmDone(logs: Logs, at: At, habitId: string, minutes?: number): Change {
+export function confirmDone(logs: Logs, at: At, habitId: string): Change {
   return edit(logs, at, habitId, (done, t) =>
-    done
-      ? [true, minutes === undefined ? t : { ...t, minutes }]
-      : [true, completedBy(minutes === undefined ? t : { ...t, minutes }, 'manual')],
+    done ? [true, t] : [true, completedBy(t, t.timer?.status === 'ready' ? 'timer' : 'manual')],
   );
 }
 
-/** Undo a completion. Progress (a counter, timer minutes) stays as it was, so nothing the person did is lost. */
+/** Confirming a ready timer is the same one tap as a swipe. */
+export const confirmTimer = confirmDone;
+
+/**
+ * Undo a completion. Timer minutes and any entered amount stay. A completion the counter made goes back to one below
+ * the target it completed at, so one new, intentional tap completes it again; a swiped completion leaves the count
+ * as it was.
+ */
 export function undoDone(logs: Logs, at: At, habitId: string): Change {
-  return edit(logs, at, habitId, (done, t) => (done ? [false, notCompleted(t)] : [false, t]));
+  return edit(logs, at, habitId, (done, t) => {
+    if (!done) return [false, t];
+    if (t.by === 'counter' && t.countTarget !== undefined)
+      return [false, { ...notCompleted(t), count: Math.max(0, t.countTarget - 1) }];
+    return [false, notCompleted(t)];
+  });
+}
+
+/**
+ * Records (or, with null, clears) an optional amount the person entered, such as minutes read, at any time, before
+ * or after completing. It never completes, undoes or creates a completion; invalid values are ignored.
+ */
+export function recordAmount(logs: Logs, at: At, habitId: string, amount: Amount | null): Change {
+  return edit(logs, at, habitId, (done, t) => {
+    const out = { ...t };
+    if (amount === null) delete out.amount;
+    else if (validAmount(amount.value, amount.unit))
+      out.amount = { value: Math.round(amount.value), unit: amount.unit };
+    return [done, out];
+  });
 }
 
 /** Skip today on purpose. Not possible once completed (undo first); never counted as a failure here. */
@@ -156,7 +198,8 @@ export function setCount(logs: Logs, at: At, habitId: string, count: number, tar
   return edit(logs, at, habitId, (done, t) => {
     const before = t.count ?? 0;
     const next: HabitTrack = { ...t, count: n };
-    if (!done && n >= target && before < target) return [true, completedBy(next, 'counter')];
+    if (!done && n >= target && before < target)
+      return [true, { ...completedBy(next, 'counter'), countTarget: target }];
     if (done && n < target && t.by === 'counter') return [false, notCompleted(next)];
     return [done, next];
   });
@@ -174,20 +217,19 @@ export function countProgress(logs: Logs, startKey: string, day: number, habitId
 }
 
 /**
- * Saves a timer (the person's timer survives tab switches and restarts this way) after bringing it up to date. A
- * timer that finishes completes the habit once, recording its active minutes; an expired one completes nothing.
- * A habit already completed by a swipe stays completed, with the timer's minutes added.
+ * Saves a timer (so it survives tab switches and restarts) after bringing it up to date, on its own day's record,
+ * with its active minutes. It never completes the habit: a ready timer waits for the person to confirm. A habit
+ * already completed stays completed, with the minutes added.
  */
 export function saveTimer(logs: Logs, at: At, timer: TimerRun, now: number): Change {
   const t = settle(timer, now, at.day);
-  return edit(logs, { ...at, day: t.day }, t.habitId, (done, tr) => {
-    const next: HabitTrack = { ...tr, timer: t, minutes: activeMinutes(t, now) };
-    if (t.status === 'finished' && !done) return [true, completedBy(next, 'timer')];
-    return [done, next];
-  });
+  return edit(logs, { ...at, day: t.day }, t.habitId, (done, tr) => [
+    done,
+    { ...tr, timer: t, minutes: activeMinutes(t, now) },
+  ]);
 }
 
-/** The day's saved timer for a habit, brought up to date (expired if the day has passed). */
+/** The day's saved timer for a habit, brought up to date (stopped at midnight if that day has ended). */
 export function loadTimer(logs: Logs, startKey: string, day: number, habitId: string, now: number, today: number) {
   const t = readTrack(logs[dateForDay(startKey, day)], habitId).timer;
   return t ? settle(t, now, today) : null;
@@ -231,4 +273,46 @@ export function undoSession(logs: Logs, at: At, habitId: string): Change {
 /** Whether a session was also logged the day before: the gentle recovery note. Informational only. */
 export function recoveryNote(logs: Logs, startKey: string, day: number, habitId: string): boolean {
   return day > 1 && dayStatus(logs, startKey, day - 1, habitId) === 'completed';
+}
+
+// --- Skips, for future daily-success and readiness calculations (not used by any rule yet). ---
+
+/** The approved skip rules (2026-10-27). XP and streaks are unchanged: they read only `completed`. */
+export const SKIP_RULES = {
+  /** A skipped due habit earns no completion credit toward a day's success. */
+  completionCredit: false,
+  /** For readiness, a skip is not done: skipping can never raise the share and so speed up a step-up. */
+  countsAsDoneForReadiness: false,
+  /** Skips are counted separately from ordinary misses, so future rules can treat them differently. */
+  separateFromMisses: true,
+} as const;
+
+export type Observation = 'done' | 'skipped' | 'missed' | 'unknown';
+
+/** How a day's status counts as an observation: an unrecorded day is unknown, never a miss. */
+export function observation(status: DayStatus): Observation {
+  return status === 'completed'
+    ? 'done'
+    : status === 'skipped'
+      ? 'skipped'
+      : status === 'incomplete'
+        ? 'missed'
+        : 'unknown';
+}
+
+/** Counts of each observation, kept apart. */
+export function tally(obs: Observation[]): Record<Observation, number> {
+  const out = { done: 0, skipped: 0, missed: 0, unknown: 0 };
+  for (const o of obs) out[o]++;
+  return out;
+}
+
+/**
+ * The share of known days that were done: skips and misses both count as not done, unknown days are left out. Null
+ * when nothing is known. (A skip never inflates it.)
+ */
+export function doneShare(obs: Observation[]): number | null {
+  const t = tally(obs);
+  const known = t.done + t.skipped + t.missed;
+  return known ? t.done / known : null;
 }
