@@ -49,6 +49,7 @@ import { tabs } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { rescheduleSoon } from '../../lib/notifications';
 import { useClock } from '../../lib/useClock';
+import { pilot, usePilotActive } from '../../store/pilotGate';
 import { appNow, currentDay, useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
@@ -56,7 +57,14 @@ import { ThemedView } from '../../theme/transition';
 const todayLogRested = (logs: Record<string, DayLog>, start: string, day: number) =>
   logs[dateForDay(start, day)]?.rested ?? [];
 
+/** The Habits tab: the running program, or the Life Reset pilot while a tester has it on (testing builds only). */
 export default function Today() {
+  const active = usePilotActive();
+  if (pilot && active) return <pilot.Today />;
+  return <ProgramToday />;
+}
+
+function ProgramToday() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   // The tab bar already keeps clear of the home indicator.

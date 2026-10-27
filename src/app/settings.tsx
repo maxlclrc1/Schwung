@@ -14,6 +14,7 @@ import { haptic } from '../lib/haptics';
 import { channel, devTools } from '../lib/flags';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
+import { pilot } from '../store/pilotGate';
 import { currentDay, exportData, useApp } from '../store/useApp';
 import type { ThemePreference, Weekday } from '../core/types';
 import { radius, space, useTheme, useThemePreference } from '../theme';
@@ -133,6 +134,9 @@ export default function Settings() {
             />
           </Section>
         ) : null}
+
+        {/* Testing builds only: the Life Reset pilot, a separate program beside this one (store/resetPilot). */}
+        {pilot && pilot.store.resetPilotAvailable() ? <pilot.Settings Section={Section} Row={Row} /> : null}
 
         <Section title="About">
           <Row label="Privacy policy" icon="open-outline" onPress={() => void Linking.openURL(PRIVACY_URL)} />

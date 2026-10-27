@@ -4,7 +4,7 @@ import type { DayLog, Weekday } from '../types';
 import { RESET_BY_ID, type Intensity, type Phase, type Schedule } from './habits';
 
 /*
- * Flexible weekly scheduling for Life Reset habits (foundation only: nothing in the app uses it yet, and V1/V2
+ * Flexible weekly scheduling for Life Reset habits (used only by the Life Reset pilot, in testing builds; V1/V2
  * daily and fixed-weekday scheduling in `schedule.ts` is untouched). Rules, with the reasons, are in
  * SCHWUNG_LIFE_RESET_CATALOG_NOTES.md ("Weekly scheduling rules"). In short:
  *

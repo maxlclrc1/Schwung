@@ -30,6 +30,29 @@ type Props = {
   onLongPress?: (habitId: string) => void;
   /** A swipe has taken (true) or let go of (false) the touch: the page holds its scroll meanwhile. */
   onSwipe?: (active: boolean) => void;
+  /**
+   * For a card that isn't a plan habit (the Life Reset pilot): its own title, target, level and words. Absent for
+   * every existing card, which reads them from the plan habit as before.
+   */
+  display?: CardDisplay;
+  /** A small row under the target (weekly progress, an optional timer). Its buttons are CardButtons. */
+  accessory?: ReactNode;
+  /** Extra VoiceOver actions (the accessory's buttons, which aren't separately accessible). */
+  actions?: { name: string; label: string; run: () => void }[];
+};
+
+export type CardDisplay = {
+  title: string;
+  task?: string;
+  /** 0–2: how many of the three level bars are lit. */
+  levelIndex: number;
+  levelLabel: string;
+  /** Read after the title and target by VoiceOver (e.g. "2 of 4 this week"). */
+  summary?: string;
+  /** The hint in the to-do row ("Swipe right to complete" by default). */
+  hint?: string;
+  /** The done pill ("Done for today" by default). */
+  doneText?: string;
 };
 
 /*
@@ -169,7 +192,7 @@ function Ink({
  * A small button on the card, on the responder system like the card itself (so a swipe that starts on it is still
  * the card's, and a drag never ends in a press). Not separately accessible: the card's own actions cover it.
  */
-function CardButton({ onPress, style, children }: { onPress: () => void; style: object; children: ReactNode }) {
+export function CardButton({ onPress, style, children }: { onPress: () => void; style: object; children: ReactNode }) {
   const start = useRef({ x: 0, y: 0 });
   return (
     <View
@@ -189,7 +212,7 @@ function CardButton({ onPress, style, children }: { onPress: () => void; style: 
   );
 }
 
-function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }: Props) {
+function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, display, accessory, actions }: Props) {
   const { c, isDark } = useTheme();
   const theme: Theme = isDark ? 'dark' : 'light';
   const ink = INK[theme];
@@ -376,13 +399,17 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
   const todoRow = useAnimatedStyle(() => ({ opacity: 1 - doneP.get() }));
   const badge = useAnimatedStyle(() => ({ opacity: doneP.get(), transform: [{ scale: 0.7 + 0.3 * doneP.get() }] }));
 
-  const title = habitTitle(habit);
-  const target = shownTaskAt(habit);
+  const title = display?.title ?? habitTitle(habit);
+  const target = display ? display.task : shownTaskAt(habit);
   const task = target === title ? undefined : target;
-  const levelText = isCustom(habit)
-    ? ''
-    : `. ${LEVEL_NAME[habit.level]}, level ${LEVELS.indexOf(habit.level) + 1} of 3`;
-  const levelIndex = LEVELS.indexOf(habit.level);
+  const levelText = display
+    ? `. ${display.levelLabel}${display.summary ? `. ${display.summary}` : ''}`
+    : isCustom(habit)
+      ? ''
+      : `. ${LEVEL_NAME[habit.level]}, level ${LEVELS.indexOf(habit.level) + 1} of 3`;
+  const levelIndex = display?.levelIndex ?? LEVELS.indexOf(habit.level);
+  const levelName = display?.levelLabel ?? LEVEL_NAME[habit.level];
+  const leveled = !!display || !isCustom(habit);
 
   return (
     <Animated.View
@@ -397,12 +424,16 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
       }
       accessibilityActions={[
         { name: 'activate' },
-        ...(onLongPress ? [{ name: 'longpress' }, { name: 'details', label: 'Edit, swap or remove' }] : []),
+        ...(onLongPress
+          ? [{ name: 'longpress' }, { name: 'details', label: display ? 'Details' : 'Edit, swap or remove' }]
+          : []),
+        ...(actions ?? []).map((a) => ({ name: a.name, label: a.label })),
       ]}
       onAccessibilityAction={(e) => {
         const name = e.nativeEvent.actionName;
         if (name === 'activate') toggle();
         else if ((name === 'longpress' || name === 'details') && onLongPress) onLongPress(habit.habitId);
+        else actions?.find((a) => a.name === name)?.run();
       }}
       style={[styles.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
     >
@@ -413,7 +444,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
       <Veil pick="top" style={styles.topVeil} />
 
       {/* The level, quietly in the top-left corner, so the scene's window stays clear. */}
-      {isCustom(habit) ? null : (
+      {!leveled ? null : (
         <View
           style={[styles.levelRow, styles.levelTop]}
           importantForAccessibility="no-hide-descendants"
@@ -429,7 +460,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
             />
           ))}
           <Ink pick="target" style={styles.levelText}>
-            {LEVEL_NAME[habit.level]}
+            {levelName}
           </Ink>
         </View>
       )}
@@ -468,6 +499,11 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
             {task}
           </Ink>
         ) : null}
+        {accessory ? (
+          <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+            {accessory}
+          </View>
+        ) : null}
 
         {/* The status row: how to complete, or done with an undo. */}
         <View style={styles.status} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
@@ -475,7 +511,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
             <View style={styles.hint}>
               <Ionicons name="chevron-forward" size={16} color={ink.target} />
               <Ink pick="target" style={styles.hintText}>
-                {readOnly ? 'Not done' : 'Swipe right to complete'}
+                {readOnly ? 'Not done' : (display?.hint ?? 'Swipe right to complete')}
               </Ink>
             </View>
             {readOnly ? null : (
@@ -488,7 +524,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe }
             <View style={[styles.donePill, { backgroundColor: c.accent }]}>
               <Ionicons name="checkmark" size={16} color={c.onAccent} />
               <Animated.Text style={[styles.doneText, { color: c.onAccent }]} maxFontSizeMultiplier={1.3}>
-                Done for today
+                {display?.doneText ?? 'Done for today'}
               </Animated.Text>
             </View>
             {readOnly ? null : (

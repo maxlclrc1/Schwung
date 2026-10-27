@@ -94,8 +94,8 @@ export type DayLog = {
   /** Exercise habits the person chose to rest that day: not planned, so never a miss. */
   rested?: string[];
   /**
-   * Life Reset tracking details per habit (timer, counter, strength session, skip). Optional and not used by the app
-   * yet: whether a habit was done is always `completed`, never this.
+   * Life Reset tracking details per habit (timer, counter, strength session, skip). Optional; only the Life Reset
+   * pilot writes it (its own save, testing builds): whether a habit was done is always `completed`, never this.
    */
   track?: Record<string, HabitTrack>;
 };

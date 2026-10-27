@@ -163,7 +163,11 @@ remain open.
 10. **The Strength guidance link** ("your national health service's strength guidance") needs a reviewed source
     before release.
 
-## Dependencies for later stages (none wired into the app)
+## Dependencies for later stages
+
+Read Daily, Focus Time and Strength Training run in the testing-build pilot (Stage 5, `SCHWUNG_LIFE_RESET_PILOT.md`):
+a separate program with the weekly scheduling, tracking and readiness engines wired in. Nothing below is wired into a
+regular program yet.
 
 | Dependency                                                                                                                                                                  | Needed for                                                                                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |

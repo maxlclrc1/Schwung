@@ -582,7 +582,7 @@ describe('persistence and compatibility', () => {
     expect(dayStatus(r.logs, start, 7, 'mind_read')).toBe('completed');
   });
 
-  it('isn’t used by the app: nothing outside src/core imports the Life Reset modules', () => {
+  it('is used only by the Life Reset pilot (testing builds), and otherwise only as a log field’s type', () => {
     const root = path.join(__dirname, '../..');
     const files: string[] = [];
     const walk = (dir: string) => {
@@ -595,10 +595,17 @@ describe('persistence and compatibility', () => {
     };
     walk(root);
     const users = files.filter((f) =>
-      /from '[^']*reset\/(habits|weekly|timer|tracking|measures|readiness)'/.test(fs.readFileSync(f, 'utf8')),
+      /from '[^']*reset\/(habits|weekly|timer|tracking|measures|readiness|pilot)'/.test(fs.readFileSync(f, 'utf8')),
     );
-    // Only the type-only reference in core/types.ts (an optional log field the app never reads).
-    expect(users.map((f) => path.relative(root, f))).toEqual(['core/types.ts']);
+    // The pilot's own store and screens (reached only through store/pilotGate.ts: see resetPilot.test.ts), and the
+    // type-only reference in core/types.ts (an optional log field the program never reads).
+    expect(users.map((f) => path.relative(root, f)).sort()).toEqual([
+      'components/pilot/PilotHabit.tsx',
+      'components/pilot/PilotSetup.tsx',
+      'components/pilot/PilotToday.tsx',
+      'core/types.ts',
+      'store/resetPilot.ts',
+    ]);
     expect(fs.readFileSync(path.join(root, 'core/types.ts'), 'utf8')).toContain(
       "import type { HabitTrack } from './reset/tracking';",
     );
