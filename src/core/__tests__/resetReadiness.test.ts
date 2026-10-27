@@ -17,6 +17,7 @@ import {
   progressionOffer,
   READINESS,
   readiness,
+  saidTooHard,
   setFeedback,
   type Constraints,
   type ProgressionState,
@@ -340,14 +341,14 @@ describe('phase boundaries and offers', () => {
     expect(nextBoundary(walk(), ctx, 24)).toBe(25);
   });
 
-  it('suggests one step easier, from today, when struggling (and nothing below Starter Foundation)', () => {
+  it('suggests one step easier, from tomorrow, when struggling (and nothing below Starter Foundation)', () => {
     const struggling = logsFor(WALK, range(8, 13), [], range(14, 21));
     expect(progressionOffer({ state: walk('standard'), logs: struggling, ctx, today: 22 })).toEqual({
       kind: 'step-down',
       from: { intensity: 'standard', phase: 'foundation' },
       to: { intensity: 'starter', phase: 'foundation' },
       early: false,
-      effectiveDay: 22,
+      effectiveDay: 23,
     });
     expect(progressionOffer({ state: walk('standard', 1, 'momentum'), logs: struggling, ctx, today: 22 })?.to).toEqual({
       intensity: 'standard',
@@ -382,11 +383,12 @@ describe('accepting and declining', () => {
     expect(outcome(accepted, allDone(30), 24)).toBe('insufficient-data');
   });
 
-  it('applies an accepted step-down at once', () => {
+  it('applies an accepted step-down from tomorrow, never partway through today', () => {
     const s = walk('standard');
     const offer = progressionOffer({ state: s, logs: logsFor(WALK, [], [], range(8, 21)), ctx, today: 22 })!;
     const accepted = acceptOffer(s, offer, 22);
-    expect(levelOn(accepted, 22)).toEqual({ intensity: 'starter', phase: 'foundation' });
+    expect(levelOn(accepted, 22)).toEqual({ intensity: 'standard', phase: 'foundation' });
+    expect(levelOn(accepted, 23)).toEqual({ intensity: 'starter', phase: 'foundation' });
     expect(accepted.eras.map((e) => e.reason)).toEqual(['start', 'step-down']);
   });
 
@@ -421,13 +423,15 @@ describe('accepting and declining', () => {
 });
 
 describe('manual easier and harder', () => {
-  it('makes it easier from today, any time, one step at a time', () => {
-    const r = makeEasier(walk('standard', 1, 'momentum'), 5);
+  it('makes it easier from tomorrow, any time, one step at a time', () => {
+    const r = makeEasier(walk('standard', 1, 'momentum'), ctx, 5);
     expect(r).toMatchObject({ level: { intensity: 'standard', phase: 'foundation' } });
     if (!('state' in r)) throw new Error('blocked');
-    expect(levelOn(r.state, 5)).toEqual({ intensity: 'standard', phase: 'foundation' });
-    expect(makeEasier(r.state, 6)).toMatchObject({ level: { intensity: 'starter', phase: 'foundation' } });
-    expect(makeEasier(walk('starter'), 5)).toEqual({ blocked: 'this is already the easiest target' });
+    expect(levelOn(r.state, 5)).toEqual({ intensity: 'standard', phase: 'momentum' });
+    expect(levelOn(r.state, 6)).toEqual({ intensity: 'standard', phase: 'foundation' });
+    expect(r.state.eras[1]).toMatchObject({ fromDay: 6, reason: 'easier' });
+    expect(makeEasier(r.state, ctx, 6)).toMatchObject({ level: { intensity: 'starter', phase: 'foundation' } });
+    expect(makeEasier(walk('starter'), ctx, 5)).toEqual({ blocked: 'this is already the easiest target' });
   });
 
   it('makes it harder from the next boundary without waiting for readiness or a phase', () => {
@@ -464,13 +468,10 @@ describe('manual easier and harder', () => {
       ['foundation', 1],
       ['mastery', 4],
     ]);
-    // Making it easier while a rise waits cancels the rise and steps down from it.
-    const back = makeEasier(once.state, 3);
+    // Making it easier while a rise waits simply cancels the rise.
+    const back = makeEasier(once.state, ctx, 3);
     if (!('state' in back)) throw new Error('blocked');
-    expect(back.state.eras.map((e) => [e.phase, e.fromDay])).toEqual([
-      ['foundation', 1],
-      ['foundation', 3],
-    ]);
+    expect(back.state.eras.map((e) => [e.phase, e.fromDay])).toEqual([['foundation', 1]]);
     expect(pendingChange(back.state, 3)).toBeNull();
   });
 });
@@ -498,7 +499,7 @@ describe('constraints', () => {
     expect(makeHarder(s, ctx, 3, { profile: heart })).toHaveProperty('blocked');
     // Joint pain rules out Starter (a physiotherapist's routine first), so Standard can't step down to it.
     const joint: ProfileV2 = { ...ADULT, precautions: ['joint'] };
-    expect(makeEasier(s, 3, { profile: joint })).toHaveProperty('blocked');
+    expect(makeEasier(s, ctx, 3, { profile: joint })).toHaveProperty('blocked');
     const logs = logsFor(STRENGTH, [1, 8], [], [3, 10, 17]);
     expect(progressionOffer({ state: s, logs, ctx, today: 22 })?.kind).toBe('step-down');
     expect(progressionOffer({ state: s, logs, ctx, today: 22, constraints: { profile: joint } })).toBeNull();
@@ -513,7 +514,7 @@ describe('constraints', () => {
       level: { phase: 'momentum' },
     });
     // Easier always fits better, so time never blocks it.
-    expect(makeEasier(s, 3, { availableMinutes: 20, otherMinutes: 0 })).toMatchObject({
+    expect(makeEasier(s, ctx, 3, { availableMinutes: 20, otherMinutes: 0 })).toMatchObject({
       level: { intensity: 'starter' },
     });
   });
@@ -537,7 +538,192 @@ describe('constraints', () => {
     const m = newProgression('screen_app_limit', 'starter', 45, 'mastery');
     expect(makeHarder(m, ctx, 50, { pullBaseline: 180, statedNeed: 140 })).toHaveProperty('blocked');
     // Easier is never blocked by the floor.
-    expect(makeEasier(s, 30, { pullBaseline: 60 })).toMatchObject({ level: { phase: 'foundation' } });
+    expect(makeEasier(s, ctx, 30, { pullBaseline: 60 })).toMatchObject({ level: { phase: 'foundation' } });
+  });
+});
+
+describe('Step 4B: effective dates', () => {
+  it('starts every change for a daily habit tomorrow, whenever today it is made', () => {
+    // A program day is a date key, so 23:59 or 00:01 only matters through which day it is.
+    for (const today of [1, 6, 7, 8, 21, 44]) {
+      expect(nextBoundary(walk(), ctx, today)).toBe(today + 1);
+      const e = makeEasier(walk('standard'), ctx, today);
+      expect('state' in e && pendingChange(e.state, today)?.fromDay).toBe(today + 1);
+      const h = makeHarder(walk('standard'), ctx, today);
+      expect('state' in h && pendingChange(h.state, today)?.fromDay).toBe(today + 1);
+    }
+  });
+
+  it('keeps today’s target until midnight, even while yesterday can still be edited', () => {
+    const struggling = logsFor(WALK, [], [], range(6, 20));
+    const offer = progressionOffer({
+      state: walk('standard'),
+      logs: struggling,
+      ctx,
+      today: 22,
+      yesterdayEditable: true,
+    });
+    expect(offer).toMatchObject({ kind: 'step-down', effectiveDay: 23 });
+    const accepted = acceptOffer(walk('standard'), offer!, 22);
+    expect([levelOn(accepted, 22).intensity, levelOn(accepted, 23).intensity]).toEqual(['standard', 'starter']);
+  });
+
+  it('starts every change for a weekly habit on the next Monday, never mid-week', () => {
+    // Day 7 is a Sunday, Day 8 a Monday.
+    expect(nextBoundary(strength(), ctx, 7)).toBe(8);
+    expect(nextBoundary(strength(), ctx, 8)).toBe(15);
+    expect(nextBoundary(strength(), ctx, 1)).toBe(8);
+    const sunday = makeEasier(strength(), ctx, 7);
+    expect('state' in sunday && sunday.state.eras.map((e) => [e.intensity, e.fromDay])).toEqual([
+      ['standard', 1],
+      ['starter', 8],
+    ]);
+    const monday = makeEasier(strength(), ctx, 8);
+    expect('state' in monday && pendingChange(monday.state, 8)?.fromDay).toBe(15);
+    // A struggling weekly habit's step-down also waits for next Monday.
+    const struggling = logsFor(STRENGTH, [1, 8], [], [3, 10, 17]);
+    expect(progressionOffer({ state: strength(), logs: struggling, ctx, today: 24 })).toMatchObject({
+      kind: 'step-down',
+      effectiveDay: 29,
+    });
+  });
+
+  it('leaves the week’s goal as it was until the change starts', () => {
+    // Made easier on Wednesday of Week 4 (Day 24): Week 4 is still judged at 2 sessions, Week 5 at Starter.
+    const r = makeEasier(strength('standard'), ctx, 24);
+    if (!('state' in r)) throw new Error('blocked');
+    expect([levelOn(r.state, 28).intensity, levelOn(r.state, 29).intensity]).toEqual(['standard', 'starter']);
+  });
+
+  it('handles phase transitions: a change made on Day 21 or 44 starts on the day the phase opens', () => {
+    const early = progressionOffer({
+      state: setFeedback(walk('standard'), 'too-easy', 20),
+      logs: logsFor(WALK, range(1, 20)),
+      ctx,
+      today: 21,
+    });
+    expect(early).toMatchObject({ early: true, effectiveDay: 22 });
+    const h = makeHarder(walk('standard', 22, 'momentum'), ctx, 44);
+    expect('state' in h && [levelOn(h.state, 44).phase, levelOn(h.state, 45).phase]).toEqual(['momentum', 'mastery']);
+    // Nothing happens on Day 22 or 45 by itself: an offer is only an offer.
+    expect(levelOn(walk('standard'), 45)).toEqual({ intensity: 'standard', phase: 'foundation' });
+  });
+});
+
+describe('Step 4B: weekly habits progress after two observed weeks', () => {
+  it('offers a step-up after two achieved weeks (all three needn’t exist)', () => {
+    // Started on Day 8: Weeks 2 and 3 are the only finished weeks.
+    const s = strength('standard', 8);
+    const logs = logsFor(STRENGTH, [8, 10, 15, 17]);
+    expect(readiness({ state: s, logs, ctx, today: 22 })).toMatchObject({ window: 2, outcome: 'ready' });
+    expect(progressionOffer({ state: s, logs, ctx, today: 22 })).toMatchObject({ kind: 'step-up', effectiveDay: 29 });
+  });
+
+  it('never counts unrecorded weeks as successes', () => {
+    // 2 achieved of 3 with one unrecorded: 67%, kept; 2 of 2 judged is not the same as 2 of 3.
+    const s = strength();
+    expect(outcome(s, logsFor(STRENGTH, [8, 10, 15, 17]), 22)).toBe('maintain');
+    expect(progressionOffer({ state: s, logs: logsFor(STRENGTH, [8, 10, 15, 17]), ctx, today: 22 })).toBeNull();
+  });
+});
+
+describe('Step 4B: skipped and unrecorded days never inflate readiness', () => {
+  it('gives the same or a lower outcome when a done day becomes skipped or unrecorded', () => {
+    const rank = { 'insufficient-data': 0, struggling: 1, maintain: 2, ready: 3, 'ready-early': 4 } as const;
+    const s = setFeedback(walk('standard'), 'too-easy', 21);
+    const W = range(8, 21);
+    for (let n = 0; n <= 14; n++) {
+      const done = W.slice(0, 14 - n);
+      const rest = W.slice(14 - n);
+      const base = rank[outcome(s, logsFor(WALK, W), 22)];
+      for (const logs of [logsFor(WALK, done, rest), logsFor(WALK, done, [], rest), logsFor(WALK, done)]) {
+        const r = outcome(s, logs, 22);
+        expect(rank[r] <= base).toBe(true);
+        // Any non-done days take away readiness exactly as missed days would.
+        if (r === 'ready' || r === 'ready-early') expect(done.length * 100 >= 80 * 14).toBe(true);
+      }
+    }
+  });
+});
+
+describe('Step 4B: declined offers and the 7-day cooldown', () => {
+  it('holds back a declined step-down for 7 days too, while manual controls stay available', () => {
+    const s = walk('standard');
+    const struggling = (to: number) => logsFor(WALK, [], [], range(1, to));
+    const offer = progressionOffer({ state: s, logs: struggling(21), ctx, today: 22 })!;
+    expect(offer.kind).toBe('step-down');
+    const declined = declineOffer(s, offer, 22);
+    for (let d = 22; d < 29; d++)
+      expect(progressionOffer({ state: declined, logs: struggling(d - 1), ctx, today: d })).toBeNull();
+    expect(progressionOffer({ state: declined, logs: struggling(28), ctx, today: 29 })).toMatchObject({
+      kind: 'step-down',
+      effectiveDay: 30,
+    });
+    // The person can still change it themselves at any time.
+    expect(makeEasier(declined, ctx, 23)).toMatchObject({ level: { intensity: 'starter' } });
+    expect(makeHarder(declined, ctx, 23)).toMatchObject({ level: { phase: 'momentum' } });
+  });
+});
+
+describe('Step 4B: “too hard” feedback', () => {
+  const allDone = (to: number) => logsFor(WALK, range(1, to));
+
+  it('suppresses step-up offers, early ones included', () => {
+    const s = walk('standard');
+    expect(progressionOffer({ state: s, logs: allDone(21), ctx, today: 22 })?.kind).toBe('step-up');
+    expect(progressionOffer({ state: setFeedback(s, 'too-hard', 20), logs: allDone(21), ctx, today: 22 })).toBeNull();
+    // Early: "too hard" replaces an earlier "too easy" (only the latest answer counts).
+    const easy = setFeedback(s, 'too-easy', 10);
+    expect(progressionOffer({ state: easy, logs: allDone(14), ctx, today: 15 })?.early).toBe(true);
+    expect(
+      progressionOffer({ state: setFeedback(easy, 'too-hard', 12), logs: allDone(14), ctx, today: 15 }),
+    ).toBeNull();
+  });
+
+  it('never lowers the target by itself, and leaves the readiness outcome as the data says', () => {
+    const s = setFeedback(walk('standard'), 'too-hard', 20);
+    expect(outcome(s, allDone(21), 22)).toBe('ready');
+    // A habit that's keeping its target isn't stepped down because of the answer.
+    expect(
+      progressionOffer({ state: s, logs: logsFor(WALK, range(8, 18), [], range(19, 21)), ctx, today: 22 }),
+    ).toBeNull();
+    expect(levelOn(s, 40)).toEqual(levelOn(walk('standard'), 40));
+    // A step-down is still suggested when the data shows struggling, as before.
+    expect(progressionOffer({ state: s, logs: logsFor(WALK, [], [], range(8, 21)), ctx, today: 22 })?.kind).toBe(
+      'step-down',
+    );
+    // Manual changes stay available.
+    expect(makeHarder(s, ctx, 22)).toMatchObject({ level: { phase: 'momentum' } });
+    expect(makeEasier(s, ctx, 22)).toMatchObject({ level: { intensity: 'starter' } });
+  });
+
+  it('counts only when recent and given about the current target', () => {
+    const s = walk('standard');
+    // Said on Day 8: still held back on Day 21 (13 days), offered again on Day 22 (14 days).
+    const said = setFeedback(s, 'too-hard', 8);
+    expect(saidTooHard(said, 21)).toBe(true);
+    expect(saidTooHard(said, 22)).toBe(false);
+    expect(progressionOffer({ state: said, logs: allDone(21), ctx, today: 22 })?.kind).toBe('step-up');
+    // About a previous target: doesn't count for the current one.
+    const changed: ProgressionState = {
+      ...setFeedback(s, 'too-hard', 4),
+      eras: [...s.eras, { intensity: 'starter', phase: 'foundation', fromDay: 5, reason: 'easier' }],
+    };
+    expect(saidTooHard(changed, 10)).toBe(false);
+    expect(saidTooHard(setFeedback(s, 'too-easy', 20), 21)).toBe(false);
+  });
+});
+
+describe('Step 4B: intensity and phase stay distinct; increases are never mandatory', () => {
+  it('keeps the selected intensity through phase step-ups, and only offers', () => {
+    let s = walk('starter');
+    const up = progressionOffer({ state: s, logs: logsFor(WALK, range(1, 21)), ctx, today: 22 })!;
+    s = acceptOffer(s, up, 22);
+    expect(levelOn(s, 23)).toEqual({ intensity: 'starter', phase: 'momentum' });
+    const up2 = progressionOffer({ state: s, logs: logsFor(WALK, range(1, 44)), ctx, today: 45 })!;
+    expect(up2.to).toEqual({ intensity: 'starter', phase: 'mastery' });
+    // Ignoring every offer leaves the target exactly where it is, to the end of the program.
+    expect(levelOn(s, 66)).toEqual({ intensity: 'starter', phase: 'momentum' });
   });
 });
 
@@ -576,7 +762,7 @@ describe('compatibility and isolation', () => {
     acceptOffer(s, offer, 22);
     declineOffer(s, offer, 22);
     makeHarder(s, ctx, 22);
-    makeEasier(s, 22);
+    makeEasier(s, ctx, 22);
     expect(JSON.stringify(logs)).toBe(copy);
   });
 });
