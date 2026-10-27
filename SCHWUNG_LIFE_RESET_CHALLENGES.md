@@ -1,5 +1,8 @@
 # Schwung — Life Reset Challenge Definitions (Stage 1)
 
+> **Superseded (habits-first correction):** the product unit is now a concrete habit, not a flagship challenge. See
+> `SCHWUNG_LIFE_RESET_HABITS.md`. The catalog described here (`src/core/reset/challenges.ts`) is kept only until the habit catalog replaces it; nothing imports it.
+
 **Status:** a data-only catalog. Nothing in the app imports it:
 
 - **No changes to:** onboarding, recommendations, programs, progress, XP, streaks, cards, navigation, Field Notes or
