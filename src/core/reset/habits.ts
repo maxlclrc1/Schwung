@@ -2,8 +2,9 @@ import { BY_ID, hasPrecaution, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN } 
 import type { ProfileV2 } from '../v2/types';
 
 /*
- * The 66-Day Life Reset habit catalog (SCHWUNG_LIFE_RESET_HABITS.md, commit 70481e6). Pure data: nothing in the app
- * imports it, no habit here is offered to anyone yet, and no existing V1 or V2 habit, plan or save changes.
+ * The 66-Day Life Reset habit catalog (SCHWUNG_LIFE_RESET_HABITS.md, commit 70481e6). Pure data, used only by the
+ * Life Reset pilot (testing builds: Read Daily, Focus Time and Strength Training; see pilot.ts). No other habit here
+ * is offered to anyone yet, and no existing V1 or V2 habit, plan or save changes.
  *
  * Eight habits reuse an existing habit id (so their scenes and safety rules carry over); a Life Reset plan will save
  * its own targets with each habit, as V2 plans do, so a reused id never changes an existing program. Every target is

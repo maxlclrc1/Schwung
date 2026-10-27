@@ -6,8 +6,8 @@ import { dayStatus, observation, type Observation } from './tracking';
 import { erasFor, programWeeks, scheduleOn, weekOf, weekSummary, type ScheduleEra, type WeeklyContext } from './weekly';
 
 /*
- * Readiness-based progression for future Life Reset programs. Pure and not used by the app: existing V1/V2 programs
- * keep `reconcile` (automatic Day 22/45 rises, early offers, step-downs) exactly as it is.
+ * Readiness-based progression for Life Reset programs. Pure; used only by the Life Reset pilot (testing builds):
+ * existing V1/V2 programs keep `reconcile` (automatic Day 22/45 rises, early offers, step-downs) exactly as it is.
  *
  * Difficulty only changes when the person chooses: phases say which targets are *available* (Momentum from Day 22,
  * Mastery from Day 45), readiness decides whether one is *offered*, and every change, up or down, is accepted or

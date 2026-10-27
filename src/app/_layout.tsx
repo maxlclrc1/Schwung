@@ -8,22 +8,25 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { rescheduleReminders } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
 import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
+import { onPilotHydrated, pilotHydrated } from '../store/pilotGate';
 import { useApp } from '../store/useApp';
 import { useTheme, useThemePreference } from '../theme';
 import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Both saves (Schwung's and Field Notes') are loaded before anything is shown.
+// Every save (Schwung's, Field Notes' and the Life Reset pilot's) is loaded before anything is shown.
 const subscribeHydration = (cb: () => void) => {
   const a = useApp.persist.onFinishHydration(cb);
   const b = useFieldNotes.persist.onFinishHydration(cb);
+  const c = onPilotHydrated(cb);
   return () => {
     a();
     b();
+    c();
   };
 };
-const isHydrated = () => useApp.persist.hasHydrated() && useFieldNotes.persist.hasHydrated();
+const isHydrated = () => useApp.persist.hasHydrated() && useFieldNotes.persist.hasHydrated() && pilotHydrated();
 
 function useHydrated() {
   return useSyncExternalStore(subscribeHydration, isHydrated);
@@ -115,6 +118,9 @@ export default function RootLayout() {
           {/* Today, and in testing builds the Habits, Journey and Field Notes tabs. */}
           <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
+          {/* The Life Reset pilot: development and internal-testing builds only. */}
+          <Stack.Screen name="pilot/setup" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="pilot/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
