@@ -167,6 +167,9 @@ const pending = (...reviews: string[]): Availability => ({
   beforeProduction: ['Founder approval', ...reviews],
 });
 
+/** A 90-minute block is split into two for 16–17 (the focus cap); adults may choose to split it. */
+export const BLOCK_SPLIT = { teen: 'required', adult: 'optional' } as const;
+
 /** Focus and practice blocks over the 16–17 cap are shown as two blocks (the approved "2 × 45"). */
 const twoBlocksOver = (m: number) => (m > TEEN_FOCUS_MAX_MIN ? { blocks: 2 } : {});
 
@@ -180,10 +183,24 @@ export const SCROLLING_FLOOR_MIN = 30;
 /** The answers to "About how long a day do you spend on [your main app] now?" (minutes; the last is "4 h+"). */
 export const PULL_MINUTES_OPTIONS = [30, 60, 90, 120, 180, 240];
 
-/** The daily limit for a person's own baseline: rounded to 15 min, never below the floor. */
-export function scrollingLimit(baselineMinutes: number, reduceBy: number): number {
-  const raw = baselineMinutes - reduceBy;
-  return Math.max(SCROLLING_FLOOR_MIN, Math.round(raw / 15) * 15);
+/**
+ * Less Scrolling is recommended automatically only from this much daily time on the main app; below it, a person can
+ * still choose it themselves (decision of 2026-10-27).
+ */
+export const SCROLLING_AUTO_RECOMMEND_MIN = 60;
+
+export function scrollingRecommended(baselineMinutes: number): boolean {
+  return baselineMinutes >= SCROLLING_AUTO_RECOMMEND_MIN;
+}
+
+/**
+ * The daily limit for a person's own baseline: rounded to 15 min, never below the floor, never below the time they
+ * say they need, and never above where they are now (a low starting point is kept, not pushed further down).
+ */
+export function scrollingLimit(baselineMinutes: number, reduceBy: number, statedNeedMinutes = 0): number {
+  const raw = Math.round((baselineMinutes - reduceBy) / 15) * 15;
+  const floor = Math.max(SCROLLING_FLOOR_MIN, statedNeedMinutes);
+  return Math.max(raw, Math.min(floor, baselineMinutes));
 }
 
 /** Sleep Routine: the card's "Up by" time, from the person's own wake time plus the window. */
@@ -289,7 +306,8 @@ const strengthTarget = (text: string, perWeek: number, aboutMinutes: number, opt
 });
 const ownSessions = (text: string, optional?: string): Target => ({
   text,
-  amount: { kind: 'own', min: 2, max: 4 },
+  // Their own current number, kept as it is (up to one credited session a day); never raised automatically.
+  amount: { kind: 'own', min: 2, max: 7 },
   unit: 'sessions',
   schedule: sessions('own'),
   minutesPerDueDay: null,
@@ -666,7 +684,7 @@ export const RESET_HABITS: ResetHabit[] = [
         mastery: strengthTarget('3 a week, ~45 min', 3, 45),
       },
       challenge: {
-        foundation: ownSessions('Your current sessions (2–4)'),
+        foundation: ownSessions('Your current sessions (2 or more)'),
         momentum: ownSessions('Same, kept steady'),
         mastery: ownSessions('Same, kept steady', '+1 a week only if you choose'),
       },

@@ -11,6 +11,7 @@ import {
   resetExclusion,
   SCROLLING_RULES,
   scrollingLimit,
+  scrollingRecommended,
   SOCIAL_ACTIONS,
   SOCIAL_RULES,
   STRENGTH_RULES,
@@ -177,7 +178,7 @@ describe('the exact approved targets', () => {
     expect(t('strength_log')).toEqual([
       ['2 sessions a week, ~20 min', '2 a week, ~30 min', '2 a week, ~30 min'],
       ['2 a week, ~30 min', '3 a week, ~40 min', '3 a week, ~45 min'],
-      ['Your current sessions (2–4)', 'Same, kept steady', 'Same, kept steady'],
+      ['Your current sessions (2 or more)', 'Same, kept steady', 'Same, kept steady'],
     ]);
     expect(RESET_BY_ID.strength_log.targets.starter.mastery.optional).toBe('or 3 if it feels good');
     expect(RESET_BY_ID.strength_log.targets.challenge.mastery.optional).toBe('+1 a week only if you choose');
@@ -197,6 +198,12 @@ describe('the exact approved targets', () => {
     // Never below 30 min, rounded to 15.
     expect(scrollingLimit(60, 45)).toBe(30);
     expect(scrollingLimit(100, 30)).toBe(75);
+    // Recommended automatically from 60 min a day; below that it can be chosen, and a low starting point is kept.
+    expect([scrollingRecommended(60), scrollingRecommended(45)]).toEqual([true, false]);
+    expect(scrollingLimit(30, 45)).toBe(30);
+    expect(scrollingLimit(20, 15)).toBe(20);
+    // Never below the time the person says they need.
+    expect(scrollingLimit(180, 120, 90)).toBe(90);
   });
 
   it('computes Sleep Routine’s “Up by” time from the person’s own wake time', () => {
@@ -275,7 +282,7 @@ describe('experienced people', () => {
   it('keep their own number of strength sessions: no automatic increase', () => {
     const c = RESET_BY_ID.strength_log.targets.challenge;
     for (const p of PHASES) {
-      expect(c[p].amount).toEqual({ kind: 'own', min: 2, max: 4 });
+      expect(c[p].amount).toEqual({ kind: 'own', min: 2, max: 7 });
       expect(c[p].schedule).toEqual({ kind: 'sessions', perWeek: 'own', maxPerDay: 1 });
     }
     expect(STRENGTH_RULES.autoIncreasesFrequency).toBe(false);
