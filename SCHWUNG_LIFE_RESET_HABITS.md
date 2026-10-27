@@ -456,6 +456,9 @@ Existing Swap and Remove stay.
 
 ## 5. Progression
 
+> **Superseded for Life Reset programs** by the readiness rules in `SCHWUNG_LIFE_RESET_PROGRESSION.md` (Stage 4):
+> 14-opportunity window, 80% / 90% + "too easy" / under 60%, minimum coverage, closed weeks for weekly habits.
+
 - **Levels are the phases:** a habit's Easy, Medium and Hard levels are its Foundation, Momentum and Mastery targets
   for the chosen intensity. Habit Detail and the card already show them that way.
 - **When it rises:**

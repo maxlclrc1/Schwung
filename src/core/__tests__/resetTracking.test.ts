@@ -595,7 +595,7 @@ describe('persistence and compatibility', () => {
     };
     walk(root);
     const users = files.filter((f) =>
-      /from '[^']*reset\/(habits|weekly|timer|tracking)'/.test(fs.readFileSync(f, 'utf8')),
+      /from '[^']*reset\/(habits|weekly|timer|tracking|measures|readiness)'/.test(fs.readFileSync(f, 'utf8')),
     );
     // Only the type-only reference in core/types.ts (an optional log field the app never reads).
     expect(users.map((f) => path.relative(root, f))).toEqual(['core/types.ts']);

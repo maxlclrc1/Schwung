@@ -181,5 +181,5 @@ Completion always comes from the person; nothing claims it was checked.
    was needed beyond the target, midnight and the confirmation step. Revisit if longer targets are added.
 2. **Grace periods:** the values above are first guesses to test with people.
 3. **Where weekly measures are saved** (a new optional field in the saved program) is decided at integration.
-4. **Future rules for skips:** how readiness and step-downs use them beyond "never inflates" is decided with the
-   readiness engine.
+4. **Skips in readiness:** decided in Stage 4 (`SCHWUNG_LIFE_RESET_PROGRESSION.md`): a skip is recorded, never
+   done, and counts in both shares.
