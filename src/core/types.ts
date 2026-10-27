@@ -1,3 +1,5 @@
+import type { HabitTrack } from './reset/tracking';
+
 /** Every value each quiz answer can take. The answer types below are derived from these lists. */
 export const ANSWER_VALUES = {
   sleep: ['<5h', '5-6h', '6-7h', '7-8h', '8h+'],
@@ -91,6 +93,11 @@ export type DayLog = {
   planned: string[];
   /** Exercise habits the person chose to rest that day: not planned, so never a miss. */
   rested?: string[];
+  /**
+   * Life Reset tracking details per habit (timer, counter, strength session, skip). Optional and not used by the app
+   * yet: whether a habit was done is always `completed`, never this.
+   */
+  track?: Record<string, HabitTrack>;
 };
 
 export type Notice =
