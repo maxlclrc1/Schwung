@@ -1,7 +1,7 @@
 # Schwung — Life Reset Challenge Definitions (Stage 1)
 
 > **Superseded (habits-first correction):** the product unit is now a concrete habit, not a flagship challenge. See
-> `SCHWUNG_LIFE_RESET_HABITS.md`. The catalog described here (`src/core/reset/challenges.ts`) is kept only until the habit catalog replaces it; nothing imports it.
+> `SCHWUNG_LIFE_RESET_HABITS.md`. The catalog described here was removed when the habit catalog (`src/core/reset/habits.ts`) replaced it; it remains in git history at commit `d72875d`.
 
 **Status:** a data-only catalog. Nothing in the app imports it:
 
