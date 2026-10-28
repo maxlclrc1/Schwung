@@ -99,8 +99,8 @@ describe('all 11 habits', () => {
     expect(P.timerBlocksFor({ ...mastery, answers: ADULT }, 'focus_deepwork', 1)).toEqual([90]);
   });
 
-  it('use the existing artwork for Reading, Focus and Walking, and world crops for the others', () => {
-    const own = ['mind_read', 'focus_deepwork', 'move_walk'];
+  it('use their own artwork in both themes, and a world crop for Social Confidence until its light version exists', () => {
+    const own = P.PILOT_HABITS.filter((id) => id !== 'confidence_talk');
     for (const theme of ['light', 'dark'] as const) {
       for (const id of own) expect(habitScene(id, theme)).toBeTruthy();
       for (const id of P.PILOT_HABITS.filter((x) => !own.includes(x))) expect(habitScene(id, theme)).toBeUndefined();
