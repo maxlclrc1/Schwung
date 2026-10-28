@@ -489,7 +489,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Do today’s social step: swap it or skip it any time',
     category: 'social',
     existingId: 'confidence_talk',
-    art: null,
+    art: 'confidence_talk',
     frequency: 'mixed',
     targets: (() => {
       const cell = (days: number, levels: SocialLevel[]): Target => ({

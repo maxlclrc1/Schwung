@@ -118,8 +118,8 @@ describe('Life Reset habit catalog: the 11 approved habits', () => {
       expect(habitScene(h.art, 'light')).toBeDefined();
       expect(habitScene(h.art, 'dark')).toBeDefined();
     }
-    // Every habit has its own scene except Social Confidence, which waits for its light version.
-    expect(RESET_HABITS.filter((h) => !h.art).map((h) => h.id)).toEqual(['confidence_talk']);
+    // Every habit has its own scene.
+    expect(RESET_HABITS.filter((h) => !h.art)).toEqual([]);
     for (const h of RESET_HABITS) if (h.art) expect(h.art).toBe(h.id);
   });
 });
