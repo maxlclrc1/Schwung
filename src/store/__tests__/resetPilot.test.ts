@@ -286,6 +286,8 @@ describe('builds', () => {
     expect(src).toContain('scrollEnabled={!swiping}');
     expect(src).toContain('directionalLockEnabled');
     // The card's own gesture code is shared, unchanged: a sideways drag on a card is the card's, never the pager's.
-    expect(fs.readFileSync(`${SRC}/components/HabitCard.tsx`, 'utf8')).toContain('claimTouch();');
+    const card = fs.readFileSync(`${SRC}/components/HabitCard.tsx`, 'utf8');
+    expect(card).toContain('const block = useCardBlock();');
+    expect(card).toContain('<GestureDetector gesture={block}>{card}</GestureDetector>');
   });
 });

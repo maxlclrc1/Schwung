@@ -1,6 +1,6 @@
 /*
- * Swiping between the tabs (testing builds; src/components/TabPager.tsx): where a released page swipe lands, and how
- * far a page moves for a drag. Distances are in pt, velocities in pt per ms; dx < 0 is a swipe to the left, which
+ * Swiping between the tabs (testing builds; src/components/PagerTabs.tsx): where a released page swipe lands, and how
+ * far a page moves for a drag. Both run on the UI thread, in the pager's gesture (worklets). Distances are in pt, velocities in pt per ms; dx < 0 is a swipe to the left, which
  * goes to the next tab.
  */
 
@@ -17,6 +17,7 @@ export const EDGE_RESISTANCE = 0.2;
 
 /** The tab a released swipe lands on: the next or previous one, or the same one (it springs back). */
 export function pageTarget(dx: number, vx: number, width: number, index: number, count: number): number {
+  'worklet';
   const dir = dx < 0 ? 1 : -1;
   const next = index + dir;
   if (dx === 0 || next < 0 || next >= count) return index;
@@ -29,6 +30,7 @@ export function pageTarget(dx: number, vx: number, width: number, index: number,
 
 /** How far the page moves for a drag: with the finger, or only a little past the first or last tab. */
 export function pageOffset(dx: number, index: number, count: number): number {
+  'worklet';
   const pastEdge = (index === 0 && dx > 0) || (index === count - 1 && dx < 0);
   return pastEdge ? dx * EDGE_RESISTANCE : dx;
 }

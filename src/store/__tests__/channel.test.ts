@@ -307,17 +307,32 @@ describe('routes', () => {
     const { tabs } = jest.requireActual<typeof import('../../lib/flags')>('../../lib/flags');
     expect([tabs('production'), tabs('internal'), tabs('development')]).toEqual([false, true, true]);
     const layout = read('(tabs)/_layout.tsx');
-    expect(layout).toContain('tabBar={on ? undefined : () => null}');
-    // Swiping between tabs only where there are tabs (testing builds): the release has no pager and no slide.
-    expect(layout).toContain('{...(on && world ? pager : null)}');
-    expect(layout).toContain('enabled: on && world,');
-    expect(layout).toContain('detachInactiveScreens={!slide}');
-    const order = [...layout.matchAll(/name="(\w+)"\s+options=\{\{\s*title: '([^']+)'/g)].map((m) => [m[1], m[2]]);
+    // Testing builds: one pager over the world (UI-thread swipe); the release keeps its js-tabs, with no tab bar, no
+    // pager and no world layer.
+    expect(layout).toContain('return tabs() ? <TestingTabs /> : <ReleaseTabs />;');
+    const testing = layout.slice(layout.indexOf('function TestingTabs'), layout.indexOf('function ReleaseTabs'));
+    const release = layout.slice(layout.indexOf('function ReleaseTabs'));
+    expect(testing).toContain('<PagerTabs>');
+    expect(testing).toContain('<WorldLayer />');
+    expect(release).not.toMatch(/PagerTabs|WorldLayer|GestureHandlerRootView/);
+    expect(release).toContain('tabBar={() => null}');
+    expect(release).toContain('detachInactiveScreens');
+    expect(release).toContain('<Tabs.Screen name="progress" options={{ ...JOURNEY, href: null }} />');
+    const order = [...testing.matchAll(/name="(\w+)" options=\{(\w+)\}/g)].map((m) => [m[1], m[2]]);
     expect(order).toEqual([
-      ['today', 'Habits'],
-      ['progress', 'Journey'],
-      ['insights', 'Insights'],
+      ['today', 'HABITS'],
+      ['progress', 'JOURNEY'],
+      ['insights', 'INSIGHTS'],
     ]);
+    expect(layout).toContain("const HABITS = { title: 'Habits'");
+    expect(layout).toContain("const JOURNEY = { title: 'Journey'");
+    expect(layout).toContain("const INSIGHTS = { title: 'Insights'");
+    // The pager: a UI-thread pan (worklets), off under a modal or with the keyboard up, and blocked by habit cards.
+    const pager = read('../components/PagerTabs.tsx');
+    expect(pager).toContain('enabled: pagerOpen,');
+    expect(pager.match(/'worklet';/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(pager).toContain('pageTarget(e.translationX, e.velocityX / 1000, width, at, count)');
+    expect(pager).toContain('<PagerGesture value={pan}>');
     // The release opens the journey as the same sheet as before; the Journey tab sends it there too.
     const today = read('(tabs)/today.tsx');
     // The habit cards are a testing-build design; the public release keeps its rows.
