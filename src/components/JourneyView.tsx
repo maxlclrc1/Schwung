@@ -3,17 +3,8 @@ import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 're
 import { haptic } from '../lib/haptics';
 import { Card, T } from './ui';
 import { PROGRAM_DAYS } from '../core/dates';
-import {
-  bestStreak,
-  currentStreak,
-  dayQualifies,
-  dayRatio,
-  daysCompleted,
-  isFullDay,
-  logForDay,
-  PHASE_START,
-} from '../core/progression';
-import { currentDay, useApp } from '../store/useApp';
+import { dayQualifies, dayRatio, isFullDay, logForDay, PHASE_START } from '../core/progression';
+import { useJourneySource } from './journeySource';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 
@@ -39,19 +30,16 @@ export function JourneyView({
 }) {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
-  const logs = useApp((s) => s.logs);
-  const startedAt = useApp((s) => s.startedAt);
-  const offset = useApp((s) => s.devDayOffset);
-  const today = currentDay({ startedAt, devDayOffset: offset });
-  const start = startedAt ?? '';
-
+  // The shown program's days: the Life Reset's while it's on (testing builds), otherwise the program's.
+  const source = useJourneySource();
+  const { logs, start, today } = source;
   const stats = useMemo(
     () => [
-      { n: daysCompleted(logs, start, today), label: 'days done' },
-      { n: currentStreak(logs, start, today), label: 'streak' },
-      { n: bestStreak(logs, start, today), label: 'best' },
+      { n: source.stats.done, label: 'days done' },
+      { n: source.stats.streak, label: 'streak' },
+      { n: source.stats.best, label: 'best' },
     ],
-    [logs, start, today],
+    [source.stats],
   );
 
   const gap = 6;
@@ -87,9 +75,10 @@ export function JourneyView({
               const full = isFullDay(log);
               const ok = dayQualifies(log);
               const ratio = dayRatio(log);
-              const bg = future ? 'transparent' : full ? c.accent : ok ? c.accentSoft : c.surface;
+              const rest = !ok && !isToday && !future && !!source.rest?.(day);
+              const bg = future || rest ? 'transparent' : full ? c.accent : ok ? c.accentSoft : c.surface;
               const fg = full ? c.onAccent : future ? c.textFaint : ok ? c.accentInk : c.textDim;
-              const label = `Day ${day}${future ? '' : `, ${Math.round(ratio * 100)}% done`}${isToday && onSelect ? ', today' : ''}${isPicked ? ', selected' : ''}`;
+              const label = `Day ${day}${future ? '' : rest ? ', rest day' : `, ${Math.round(ratio * 100)}% done`}${isToday && onSelect ? ', today' : ''}${isPicked ? ', selected' : ''}`;
               const box = (
                 <ThemedView
                   key={day}
@@ -100,7 +89,13 @@ export function JourneyView({
                       width: cell,
                       height: cell,
                       backgroundColor: bg,
-                      borderColor: isToday ? c.accentInk : isPicked ? c.text : future ? c.border : 'transparent',
+                      borderColor: isToday
+                        ? c.accentInk
+                        : isPicked
+                          ? c.text
+                          : future || rest
+                            ? c.border
+                            : 'transparent',
                       borderWidth: isToday || isPicked ? 2 : 1,
                     },
                   ]}

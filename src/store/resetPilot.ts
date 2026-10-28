@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { dayNumber, toDateKey } from '../core/dates';
+import { canEditYesterday, dayNumber, toDateKey } from '../core/dates';
 import * as P from '../core/reset/pilot';
 import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
@@ -8,10 +8,11 @@ import { channel, devTools, type Channel } from '../lib/flags';
 import { debouncedStorage } from './storage';
 
 /*
- * The Life Reset pilot's own saved state (a separate key from Schwung's and Field Notes'): starting, using or ending
- * the pilot never reads or writes the running Schwung program, which stays exactly as it was and can be returned to
- * at any time. Development and internal-testing builds only (resetPilotAvailable); the public release never shows or
- * saves it. Rules: core/reset/pilot.ts and SCHWUNG_LIFE_RESET_PILOT.md.
+ * The Life Reset program's own saved state (a separate key from Schwung's and Field Notes'; it began as the pilot's
+ * and keeps the pilot's key, so a pilot program carries on as it was). Starting, using or ending it never reads or
+ * writes the running V1/V2 program, which stays exactly as it was and can be returned to at any time. Development
+ * and internal-testing builds only (resetPilotAvailable); the public release never shows or saves it. Rules:
+ * core/reset/pilot.ts and SCHWUNG_LIFE_RESET_PROGRAM.md.
  */
 
 export const resetPilotAvailable = (ch: Channel = channel()) => ch !== 'production';
@@ -38,16 +39,17 @@ type Actions = {
   start: (answers: P.PilotAnswers, choices: P.PilotChoice[]) => boolean;
   /** Ends the pilot and deletes its data (only the pilot's). */
   end: () => void;
-  toggle: (habitId: string) => P.PilotChange['event'];
+  /** Today, or yesterday while it can still be corrected (until noon). */
+  toggle: (habitId: string, day?: number) => P.PilotChange['event'];
   complete: (habitId: string) => P.PilotChange['event'];
   undo: (habitId: string) => P.PilotChange['event'];
-  startTimer: (habitId: string) => void;
-  pauseTimer: (habitId: string) => void;
-  resetTimer: (habitId: string) => void;
-  /** Saves timers that reached their target or the day's end while the app was away. */
-  settleTimers: () => void;
+  /** Get It Done / Stay Connected: +1 or −1 on today's counter. */
+  count: (habitId: string, by: 1 | -1) => P.PilotChange['event'];
+  setSkipped: (habitId: string, on: boolean) => void;
   setMinutes: (habitId: string, minutes: number | null) => void;
   setSession: (details: { type?: SessionType; minutes?: number }) => void;
+  /** Less Scrolling's weekly Screen Time check (this week). */
+  setScreenTime: (minutesPerDay: number) => void;
   accept: (habitId: string, offer: Offer) => void;
   decline: (habitId: string, offer: Offer) => void;
   feedback: (habitId: string, kind: Feedback['kind']) => void;
@@ -59,7 +61,7 @@ type Actions = {
 const initial: ResetPilotData = { active: false, program: null, devDayOffset: 0 };
 
 /** "Now" for the pilot, with its own development clock. */
-export function pilotNow(offset = useResetPilot.getState().devDayOffset): Date {
+export function pilotNow(offset: number = useResetPilot.getState().devDayOffset): Date {
   const d = new Date();
   if (devTools() && offset) d.setDate(d.getDate() + offset);
   return d;
@@ -73,11 +75,11 @@ export function pilotToday(s: Pick<ResetPilotData, 'program' | 'devDayOffset'> =
 export const useResetPilot = create<ResetPilotData & Actions>()(
   persist(
     (set, get) => {
-      /** Runs a change on today's record; time is real time (timers measure durations, never the dev offset). */
-      const change = (f: (p: P.PilotProgram, day: number, now: number) => P.PilotChange) => {
+      /** Runs a change on today's record. */
+      const change = (f: (p: P.PilotProgram, day: number) => P.PilotChange) => {
         const { program } = get();
         if (!program || !resetPilotAvailable()) return null;
-        const r = f(program, pilotToday(get()), Date.now());
+        const r = f(program, pilotToday(get()));
         if (r.program !== program) set({ program: r.program });
         return r.event;
       };
@@ -109,25 +111,19 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
 
         end: () => set({ ...initial }),
 
-        toggle: (id) => change((p, day) => P.toggle(p, id, day)),
+        toggle: (id, on) =>
+          change((p, today) => {
+            const day = on ?? today;
+            const editable = day === today || (day === today - 1 && canEditYesterday(pilotNow(get().devDayOffset)));
+            return editable ? P.toggle(p, id, day) : { program: p, event: null };
+          }),
         complete: (id) => change((p, day) => P.complete(p, id, day)),
         undo: (id) => change((p, day) => P.undo(p, id, day)),
-        startTimer: (id) => void change((p, day, now) => P.startTimer(p, id, day, now)),
-        pauseTimer: (id) => void change((p, day, now) => P.pauseTimer(p, id, day, now)),
-        resetTimer: (id) => void change((p, day, now) => P.resetTimer(p, id, day, now)),
-        settleTimers: () => {
-          const { program } = get();
-          if (!program) return;
-          const today = pilotToday(get());
-          const now = Date.now();
-          let p = program;
-          // Today's timers, and yesterday's (one left running at midnight stops there).
-          for (const day of [today - 1, today])
-            for (const id of p.habits) if (day >= 1) p = P.settleTimer(p, id, day, now, today).program;
-          if (p !== program) set({ program: p });
-        },
+        count: (id, by) => change((p, day) => P.count(p, id, day, by)),
+        setSkipped: (id, on) => void change((p, day) => P.setSkipped(p, id, day, on)),
         setMinutes: (id, minutes) => void change((p, day) => P.setMinutes(p, id, day, minutes)),
         setSession: (details) => void change((p, day) => P.setSession(p, day, details)),
+        setScreenTime: (minutes) => progress((p, day) => P.setScreenTime(p, day, minutes)),
 
         accept: (id, offer) => progress((p, day) => P.accept(p, id, offer, day)),
         decline: (id, offer) => progress((p, day) => P.decline(p, id, offer, day)),

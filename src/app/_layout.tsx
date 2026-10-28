@@ -7,7 +7,7 @@ import { Appearance, AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { rescheduleReminders } from '../lib/notifications';
 import { useClock } from '../lib/useClock';
-import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
+import { useFieldNotes } from '../store/fieldNotes';
 import { onPilotHydrated, pilotHydrated } from '../store/pilotGate';
 import { useApp } from '../store/useApp';
 import { useTheme, useThemePreference } from '../theme';
@@ -15,7 +15,7 @@ import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Every save (Schwung's, Field Notes' and the Life Reset pilot's) is loaded before anything is shown.
+// Every save (Schwung's, retired Field Notes' and the Life Reset's) is loaded before anything is shown.
 const subscribeHydration = (cb: () => void) => {
   const a = useApp.persist.onFinishHydration(cb);
   const b = useFieldNotes.persist.onFinishHydration(cb);
@@ -36,25 +36,15 @@ function useHydrated() {
 function Housekeeping() {
   const { todayKey, yesterdayEditable } = useClock();
   const startedAt = useApp((s) => s.startedAt);
-  const fieldNotes = useFieldNotes((s) => fieldNotesAvailable() && s.active);
-  const fieldNotesRun = useFieldNotes((s) => s.run?.startedAt ?? null);
 
   useEffect(() => {
     if (startedAt) useApp.getState().reconcileNow(yesterdayEditable);
-    if (startedAt || fieldNotes) void rescheduleReminders().catch(() => {});
-  }, [startedAt, todayKey, yesterdayEditable, fieldNotes, fieldNotesRun]);
+    if (startedAt) void rescheduleReminders().catch(() => {});
+  }, [startedAt, todayKey, yesterdayEditable]);
 
-  // The study's local log of app opens (development and internal-testing builds only; never leaves the phone).
   useEffect(() => {
-    const log = () => {
-      if (!fieldNotesAvailable()) return;
-      useFieldNotes.getState().noteOpen(useFieldNotes.getState().active ? 'fieldnotes' : 'schwung');
-    };
-    log();
     const sub = AppState.addEventListener('change', (s) => {
-      if (s !== 'active') return;
-      log();
-      void rescheduleReminders().catch(() => {});
+      if (s === 'active') void rescheduleReminders().catch(() => {});
     });
     return () => sub.remove();
   }, []);

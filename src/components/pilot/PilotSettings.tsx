@@ -13,7 +13,7 @@ type RowC = ComponentType<{
   destructive?: boolean;
 }>;
 
-/** Settings: start, open, leave or end the Life Reset pilot. The program above it is never touched. */
+/** Settings: start, open, leave or end the Life Reset. The previous program is never touched. */
 export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }) {
   const program = useResetPilot((s) => s.program);
   const active = useResetPilot((s) => s.active);
@@ -25,12 +25,12 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
   };
   const end = () =>
     Alert.alert(
-      'End the Life Reset pilot?',
-      'Its days and progress are deleted. Your own program stays exactly as it is.',
+      'End the Life Reset?',
+      'Its days and progress are deleted. Your previous program stays exactly as it is.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'End pilot',
+          text: 'End the Life Reset',
           style: 'destructive',
           onPress: () => {
             useResetPilot.getState().end();
@@ -41,16 +41,12 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
       ],
     );
   return (
-    <Section title="Life Reset pilot · testing">
+    <Section title="Life Reset · testing">
       {!program ? (
-        <Row
-          label="Try the Life Reset pilot · 3 habits"
-          icon="flask-outline"
-          onPress={() => router.push('/pilot/setup')}
-        />
+        <Row label="Start the 66-day Life Reset" icon="flask-outline" onPress={() => router.push('/pilot/setup')} />
       ) : active ? (
         <Row
-          label="Back to my program"
+          label="Switch to my previous program"
           icon="return-down-back-outline"
           onPress={() => {
             useResetPilot.getState().setActive(false);
@@ -59,9 +55,9 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
           }}
         />
       ) : (
-        <Row label="Open the Life Reset pilot" icon="flask-outline" onPress={open} />
+        <Row label="Open the Life Reset" icon="flask-outline" onPress={open} />
       )}
-      {program ? <Row label="End the pilot" icon="trash-outline" destructive onPress={end} /> : null}
+      {program ? <Row label="End the Life Reset" icon="trash-outline" destructive onPress={end} /> : null}
     </Section>
   );
 }

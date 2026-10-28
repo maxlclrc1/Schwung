@@ -8,8 +8,8 @@ import type { Scheme } from './index';
  * image never blocks the switch) the new scheme is shown, and the UI colours and the paintings fade together.
  */
 
-/** The longest a switch waits for its paintings. */
-export const THEME_READY_TIMEOUT_MS = 600;
+/** The longest a switch waits for a painting that is still loading (both themes are normally decoded already). */
+export const THEME_READY_TIMEOUT_MS = 300;
 
 type Loaded = Record<string, readonly Scheme[]>;
 type Gate = {

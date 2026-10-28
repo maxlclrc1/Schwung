@@ -344,7 +344,7 @@ const READ_PAGES: Record<Intensity, [number, number, number]> = {
   challenge: [20, 30, 40],
 };
 
-const SKILLS = ['Language', 'Instrument', 'Drawing', 'Coding', 'Writing', 'Sport skill', 'Other'];
+export const SKILLS = ['Language', 'Instrument', 'Drawing', 'Coding', 'Writing', 'Sport skill', 'Other'];
 
 export const RESET_HABITS: ResetHabit[] = [
   {

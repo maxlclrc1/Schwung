@@ -165,9 +165,9 @@ remain open.
 
 ## Dependencies for later stages
 
-Read Daily, Focus Time and Strength Training run in the testing-build pilot (Stage 5, `SCHWUNG_LIFE_RESET_PILOT.md`):
-a separate program with the weekly scheduling, tracking and readiness engines wired in. Nothing below is wired into a
-regular program yet.
+All 11 habits run in the testing-build Life Reset program (Stage 6, `SCHWUNG_LIFE_RESET_PROGRAM.md`), with the weekly
+scheduling, tracking and readiness engines wired in. What's still open there is listed in that document; the table
+below is the original list, kept for reference.
 
 | Dependency                                                                                                                                                                  | Needed for                                                                                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |

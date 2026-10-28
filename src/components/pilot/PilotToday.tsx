@@ -4,16 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { canEditYesterday, dateForDay, PROGRAM_DAYS } from '../../core/dates';
+import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { levelProgress, playerLevel, XP_FULL_DAY_BONUS } from '../../core/progression';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
-import { activeMs, type TimerRun } from '../../core/reset/timer';
-import { readTrack } from '../../core/reset/tracking';
 import type { PlanHabit } from '../../core/types';
 import { devTools } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
+import { useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
@@ -23,38 +22,35 @@ import { Button, ProgressBar, T } from '../ui';
 import { useWorldLayer } from '../WorldLayer';
 
 /*
- * The Habits tab while the Life Reset pilot is on (development and internal-testing builds only): the pilot's three
- * habits as the usual illustrated cards, with what to do, how much, whether it's done and the week's progress. The
- * same whole-card swipe completes and undoes; a timer is an optional extra on the card. Long-press for details.
+ * The Habits tab while the Life Reset is on (development and internal-testing builds only): its habits as the usual
+ * illustrated cards, with what to do, how much, whether it's done and the week's progress. The whole-card swipe
+ * completes and undoes; counters (tasks, people) and a strength session's details are small extras on the card.
+ * Long-press a card (or open Insights) for details and difficulty. No timers: a swipe confirms.
  */
 
-/** The card's scene comes from the habit id (Read and Focus have their own; Strength a crop of the world). */
+/** The card's scene comes from the habit id (Read, Focus and Movement have their own; the others a world crop). */
 const asPlanHabit = (habitId: string): PlanHabit => ({ habitId, level: 'easy', addedOnDay: 1, levelSince: 0 });
 
-const clock = (ms: number) => {
-  const s = Math.max(0, Math.round(ms / 1000));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-};
-
-/** Re-renders each second while a timer runs, on the date change, and on return to the app. */
-function usePilotClock(running: boolean) {
+/** Re-renders when the date or the "yesterday is editable" window changes (on return to the app, and every 30 s). */
+function useResetClock() {
   const offset = useResetPilot((s) => s.devDayOffset);
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => pilotNow(offset));
   useEffect(() => {
-    const tick = () => setNow(Date.now());
-    const sub = AppState.addEventListener('change', (s) => {
-      if (s !== 'active') return;
-      useResetPilot.getState().settleTimers();
-      tick();
-    });
-    const id = setInterval(tick, running ? 1000 : 30_000);
+    const refresh = () =>
+      setNow((prev) => {
+        const next = pilotNow(offset);
+        const same = toDateKey(prev) === toDateKey(next) && canEditYesterday(prev) === canEditYesterday(next);
+        return same ? prev : next;
+      });
+    refresh();
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && refresh());
+    const id = setInterval(refresh, 30_000);
     return () => {
       sub.remove();
       clearInterval(id);
     };
-  }, [running]);
-  useEffect(() => useResetPilot.getState().settleTimers(), [offset]);
-  return { now, yesterdayEditable: canEditYesterday(pilotNow(offset)) };
+  }, [offset]);
+  return { yesterdayEditable: canEditYesterday(now) };
 }
 
 export function PilotToday() {
@@ -65,12 +61,8 @@ export function PilotToday() {
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = pilotToday({ program, devDayOffset: offset });
   const [swiping, setSwiping] = useState(false);
-  // Ticks each second only while a saved timer is running.
-  const running = program.habits.some(
-    (id) => readTrack(program.logs[dateForDay(program.startedAt, today)], id).timer?.status === 'running',
-  );
-  const { now, yesterdayEditable } = usePilotClock(running);
-  const timers = program.habits.map((id) => P.timerOn(program, id, today, now, today));
+  const { yesterdayEditable } = useResetClock();
+  const hasProgram = useApp((s) => s.startedAt !== null);
 
   const xp = useMemo(() => P.pilotXp(program), [program]);
   const streak = useMemo(() => P.pilotStreak(program, today), [program, today]);
@@ -116,10 +108,10 @@ export function PilotToday() {
         <View style={styles.header}>
           <View style={{ flexShrink: 1 }}>
             <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
-              Life Reset pilot
+              Life Reset
             </T>
             <T v="heading" numberOfLines={1} maxFontSizeMultiplier={1.4}>
-              {today > PROGRAM_DAYS ? 'Pilot complete' : `Day ${today} of ${PROGRAM_DAYS}`}
+              {today > PROGRAM_DAYS ? 'Summit reached' : `Day ${today} of ${PROGRAM_DAYS}`}
             </T>
             <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4}>
               {phaseLine(today)}
@@ -156,7 +148,7 @@ export function PilotToday() {
             <View
               style={[styles.statItem, { flexGrow: 1, justifyContent: 'flex-end' }]}
               accessible
-              accessibilityLabel={`Pilot level ${playerLevel(xp)}, ${xp} XP`}
+              accessibilityLabel={`Level ${playerLevel(xp)}, ${xp} XP`}
             >
               <T v="caption" style={{ fontWeight: '700' }}>
                 Lv {playerLevel(xp)}
@@ -196,14 +188,12 @@ export function PilotToday() {
         ) : null}
 
         <Animated.View layout={LinearTransition.duration(200)} style={styles.cards}>
-          {program.habits.map((id, i) => (
+          {program.habits.map((id) => (
             <PilotCard
               key={id}
               program={program}
               habitId={id}
               today={today}
-              now={now}
-              timer={timers[i]}
               onToggle={onToggle}
               onDetails={onDetails}
               onSwipe={setSwiping}
@@ -213,16 +203,18 @@ export function PilotToday() {
 
         <View style={styles.footer}>
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            Swipe a card to complete it. Long-press for the timer, details and difficulty.
+            Swipe a card to complete it. Long-press for details and difficulty.
           </T>
-          <Button
-            label="Back to my program"
-            kind="secondary"
-            onPress={() => {
-              useResetPilot.getState().setActive(false);
-              router.replace('/');
-            }}
-          />
+          {hasProgram ? (
+            <Button
+              label="Switch to my previous program"
+              kind="secondary"
+              onPress={() => {
+                useResetPilot.getState().setActive(false);
+                router.replace('/');
+              }}
+            />
+          ) : null}
           {__DEV__ && devTools() ? <PilotClock today={today} /> : null}
         </View>
       </Animated.ScrollView>
@@ -255,13 +247,11 @@ function phaseLine(today: number): string {
 const summaryLabel = (done: number, total: number, daily: string[]) =>
   `${done} of ${total} habits done today. ${daily.length ? `${daily.map(P.habitName).join(', ')} is due every day.` : ''}`;
 
-/** One pilot habit as the usual card, with its week and an optional timer underneath the target. */
+/** One habit as the usual card: its target, its week, and a counter or session details where it has them. */
 function PilotCard({
   program,
   habitId,
   today,
-  now,
-  timer,
   onToggle,
   onDetails,
   onSwipe,
@@ -269,76 +259,57 @@ function PilotCard({
   program: P.PilotProgram;
   habitId: P.PilotHabitId;
   today: number;
-  now: number;
-  timer: TimerRun | null;
   onToggle: (id: string) => void;
   onDetails: (id: string) => void;
   onSwipe: (active: boolean) => void;
 }) {
-  const { c, isDark } = useTheme();
+  const { isDark } = useTheme();
   const level = P.levelFor(program, habitId, today);
   const done = P.isDone(program, habitId, today);
   const week = P.weekProgress(program, habitId, today);
-  const track = readTrack(program.logs[dateForDay(program.startedAt, today)], habitId);
+  const state = P.stateOn(program, habitId, today);
+  const track = P.trackOf(program, habitId, today);
+  const counter = P.counterTarget(program, habitId, today);
   const strength = habitId === 'strength_log';
-  const timed = !strength;
   const ink = isDark ? '#F7F5FF' : '#1B1830';
   const chip = isDark ? 'rgba(28,27,37,0.62)' : 'rgba(255,255,255,0.72)';
   const edge = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(27,24,48,0.12)';
 
-  const weekText = week
-    ? week.goal === 0
-      ? 'A short week: no goal this week'
-      : week.credited >= week.goal
-        ? `${week.credited} of ${week.goal} this week · goal met`
-        : `${week.credited} of ${week.goal} this week`
-    : 'Every day';
-  const timerTotal = timer ? timer.blocks.reduce((a, b) => a + b, 0) * 60_000 : 0;
-  const timerText = !timer
-    ? 'Timer'
-    : timer.status === 'ready'
-      ? 'Timer done · tap to confirm'
-      : timer.status === 'day-ended'
-        ? `Stopped at midnight · ${clock(activeMs(timer, now))}`
-        : timer.status === 'between-blocks'
-          ? `Block ${timer.block} done · start block ${timer.block + 1}`
-          : `${clock(activeMs(timer, now))} / ${clock(timerTotal)}`;
-  const timerPress = () => {
-    const s = useResetPilot.getState();
-    haptic.tap();
-    if (timer?.status === 'ready') s.complete(habitId);
-    else if (timer?.status === 'running') s.pauseTimer(habitId);
-    else if (timer?.status !== 'day-ended') s.startTimer(habitId);
-  };
-  const timerIcon =
-    timer?.status === 'running'
-      ? 'pause'
-      : timer?.status === 'ready'
-        ? 'checkmark'
-        : timer?.status === 'day-ended'
-          ? 'moon'
-          : 'play';
-  const minutes = track.amount?.value ?? track.minutes;
+  const weekText =
+    state === 'not-eligible'
+      ? 'Not a workday · rest'
+      : week
+        ? week.goal === 0
+          ? 'A short week: no goal this week'
+          : week.credited >= week.goal
+            ? `${week.credited} of ${week.goal} this week · goal met`
+            : `${week.credited} of ${week.goal} this week`
+        : 'Every day';
+  const count = track.count ?? 0;
+  const counterText = counter !== null ? `${Math.min(count, counter)} of ${counter}` : null;
 
   const accessory = (
     <View style={styles.accessory}>
       <T v="caption" color={ink} style={styles.week} numberOfLines={1}>
         {weekText}
       </T>
-      {timed && !done ? (
+      {counter !== null && !done ? (
         <CardButton
-          onPress={timerPress}
-          style={[styles.pill, { backgroundColor: timer?.status === 'ready' ? c.accent : chip, borderColor: edge }]}
+          onPress={() => {
+            haptic.tap();
+            useResetPilot.getState().count(habitId, 1);
+          }}
+          style={[styles.pill, { backgroundColor: chip, borderColor: edge }]}
         >
-          <Ionicons name={timerIcon} size={14} color={timer?.status === 'ready' ? c.onAccent : ink} />
-          <T v="caption" color={timer?.status === 'ready' ? c.onAccent : ink} style={styles.pillText}>
-            {timerText}
+          <Ionicons name="add" size={16} color={ink} />
+          <T v="caption" color={ink} style={styles.pillText}>
+            {counterText}
           </T>
         </CardButton>
       ) : null}
-      {timed && done && minutes ? (
+      {track.skipped && !done ? (
         <T v="caption" color={ink} style={styles.week}>
-          {minutes} min
+          Skipped today
         </T>
       ) : null}
       {strength && done ? (
@@ -360,16 +331,8 @@ function PilotCard({
   );
 
   const actions =
-    timed && !done
-      ? [
-          timer?.status === 'running'
-            ? { name: 'pause', label: 'Pause timer', run: () => useResetPilot.getState().pauseTimer(habitId) }
-            : {
-                name: 'start',
-                label: timer ? 'Resume timer' : 'Start timer',
-                run: () => useResetPilot.getState().startTimer(habitId),
-              },
-        ]
+    counter !== null && !done
+      ? [{ name: 'count', label: `Add one (${counterText})`, run: () => useResetPilot.getState().count(habitId, 1) }]
       : [];
 
   return (
@@ -386,7 +349,7 @@ function PilotCard({
         task: P.targetText(program, habitId, today),
         levelIndex: P.phaseIndex(level),
         levelLabel: P.levelLabel(level),
-        summary: [weekText, timed && timer ? timerText : null].filter(Boolean).join('. '),
+        summary: [weekText, counterText].filter(Boolean).join('. '),
         hint: strength ? 'Swipe right to log a session' : week ? 'Swipe right if you did it today' : undefined,
         doneText: strength ? 'Session logged' : undefined,
       }}
@@ -449,7 +412,7 @@ function OfferCard({
   );
 }
 
-/** Development builds: the pilot's own clock (Schwung's program clock is never moved). */
+/** Development builds: the Life Reset's own clock (the previous program's clock is never moved). */
 function PilotClock({ today }: { today: number }) {
   const { c } = useTheme();
   const offset = useResetPilot((s) => s.devDayOffset);
@@ -458,7 +421,7 @@ function PilotClock({ today }: { today: number }) {
   return (
     <ThemedView style={[styles.devClock, { borderColor: c.border }]}>
       <T v="caption" color={c.textDim}>
-        Pilot clock (development): Day {today}, offset {offset}
+        Life Reset clock (development): Day {today}, offset {offset}
       </T>
       <View style={styles.devRow}>
         {[

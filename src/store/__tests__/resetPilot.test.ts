@@ -98,7 +98,7 @@ describe('a separate, temporary pilot program', () => {
     expect(r().start(ADULT, ALL)).toBe(true);
     expect(r().active).toBe(true);
     r().complete('mind_read');
-    r().startTimer('focus_deepwork');
+    r().complete('focus_deepwork');
     r().setSession({ type: 'upper', minutes: 30 });
     at(8);
     r().complete('mind_read');
@@ -158,35 +158,42 @@ describe('persistence and recovery', () => {
     await useResetPilot.persist.rehydrate();
   }
 
-  it('keeps progress, timers, pending changes and declines across a restart', async () => {
-    r().start(ADULT, ALL);
+  it('keeps progress, counters, details, pending changes and the Screen Time check across a restart', async () => {
+    r().start({ ...ADULT, phone: '4_6', pullMinutes: 120 }, [
+      ...ALL,
+      { habitId: 'focus_top3', intensity: 'standard' },
+      { habitId: 'screen_app_limit', intensity: 'starter' },
+    ]);
     r().complete('mind_read');
-    r().startTimer('focus_deepwork');
+    r().count('focus_top3', 1);
     r().setSession({ minutes: 25 });
     r().easier('strength_log');
+    r().setScreenTime(95);
     const before = JSON.parse(JSON.stringify(r().program));
     await relaunch();
     expect(r().program).toEqual(before);
     expect(r().active).toBe(true);
-    // The timer kept running while the app was closed (time comes from saved timestamps).
-    expect(readTrack(todayLog(), 'focus_deepwork').timer?.status).toBe('running');
+    expect(readTrack(todayLog(), 'focus_top3').count).toBe(1);
     expect(r().program!.progression.strength_log.eras).toHaveLength(2);
+    expect(r().program!.measures?.screen_app_limit).toBeDefined();
   });
 
-  it('settles timers on return: a target reached while away is ready, never completed', () => {
+  it('corrects yesterday only while it can still be edited (until noon), never older days', () => {
     r().start(ADULT, ALL);
-    const now = jest.spyOn(Date, 'now');
-    const t0 = Date.now();
-    now.mockReturnValue(t0);
-    r().startTimer('mind_read');
-    now.mockReturnValue(t0 + 21 * 60_000);
-    r().settleTimers();
-    expect(readTrack(todayLog(), 'mind_read').timer?.status).toBe('ready');
-    expect(todayLog().completed).toEqual([]);
-    r().complete('mind_read');
-    r().complete('mind_read');
-    expect(todayLog().completed).toEqual(['mind_read']);
-    now.mockRestore();
+    at(3);
+    const noon = new Date();
+    const clock = jest.spyOn(Date, 'now');
+    // Morning: yesterday can be corrected; afternoon: it can't.
+    jest.useFakeTimers({ now: new Date(noon.getFullYear(), noon.getMonth(), noon.getDate(), 9, 0) });
+    r().toggle('mind_read', 2);
+    expect(r().program!.logs[dateForDay(r().program!.startedAt, 2)]?.completed).toEqual(['mind_read']);
+    r().toggle('mind_read', 1);
+    expect(r().program!.logs[dateForDay(r().program!.startedAt, 1)]).toBeUndefined();
+    jest.setSystemTime(new Date(noon.getFullYear(), noon.getMonth(), noon.getDate(), 15, 0));
+    r().toggle('mind_read', 2);
+    expect(r().program!.logs[dateForDay(r().program!.startedAt, 2)]?.completed).toEqual(['mind_read']);
+    jest.useRealTimers();
+    clock.mockRestore();
   });
 
   it('drops a damaged save rather than trusting it', () => {
@@ -262,6 +269,13 @@ describe('builds', () => {
     }
     expect(fs.readFileSync(`${SRC}/app/(tabs)/today.tsx`, 'utf8')).toContain(
       'if (pilot && active) return <pilot.Today />;',
+    );
+    // Insights and Journey show the Life Reset only through the gate, too.
+    expect(fs.readFileSync(`${SRC}/app/(tabs)/insights.tsx`, 'utf8')).toContain(
+      '{pilot && lifeReset ? <pilot.Insights /> : <ProgramInsights />}',
+    );
+    expect(fs.readFileSync(`${SRC}/components/journeySource.ts`, 'utf8')).toContain(
+      "if (reset && pilot) return { kind: 'reset', started: true, ...pilot.journey(reset.program, reset.today) };",
     );
   });
 

@@ -73,7 +73,7 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
         const color =
           s === 'done' || (s === 'today' && todayDone)
             ? tone.lit
-            : s === 'missed' || s === 'today'
+            : s === 'missed' || s === 'rest' || s === 'today'
               ? tone.walked
               : tone.ahead;
         return (
@@ -100,10 +100,15 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
               style={[styles.marker, styles.hollow, { left: x - 3.5, top: y - 3.5, borderColor: tone.walked }]}
             />
           );
+        // A rest day (nothing was due) is walked past, not missed: a small mark in the walked tone.
         return (
           <View
             key={d.day}
-            style={[styles.marker, styles.small, { left: x - 2.5, top: y - 2.5, backgroundColor: tone.ahead }]}
+            style={[
+              styles.marker,
+              styles.small,
+              { left: x - 2.5, top: y - 2.5, backgroundColor: d.status === 'rest' ? tone.walked : tone.ahead },
+            ]}
           />
         );
       })}

@@ -1,18 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Screen, T } from '../ui';
-import { INTENSITIES, type Intensity } from '../../core/reset/habits';
+import { INTENSITIES, PULL_MINUTES_OPTIONS, SKILLS, type Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
-import type { AgeBand, Precaution } from '../../core/v2/types';
+import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/v2/types';
 import { haptic } from '../../lib/haptics';
 import { useFieldNotes } from '../../store/fieldNotes';
 import { useResetPilot } from '../../store/resetPilot';
 import { useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
+import { Button, Screen, T } from '../ui';
 
+// The existing questions' answers, with their existing wording.
 const AGES: { id: AgeBand; label: string }[] = [
   { id: 'u16', label: 'Under 16' },
   { id: '16_17', label: '16–17' },
@@ -21,8 +22,6 @@ const AGES: { id: AgeBand; label: string }[] = [
   { id: '50_64', label: '50–64' },
   { id: '65p', label: '65+' },
 ];
-
-// The existing precautions question, unchanged.
 const HEALTH: { id: Precaution; label: string }[] = [
   { id: 'joint', label: 'Joint, back or injury pain' },
   { id: 'walkingDifficult', label: 'Walking or standing for long is difficult for me' },
@@ -31,25 +30,54 @@ const HEALTH: { id: Precaution; label: string }[] = [
   { id: 'fluidLimit', label: 'A clinician told me to limit fluids' },
   { id: 'sleepCondition', label: 'Diagnosed sleep condition' },
 ];
-
+const PHONE: { id: PhoneHours; label: string }[] = [
+  { id: 'lt1', label: 'Under 1 h' },
+  { id: '1_2', label: '1–2 h' },
+  { id: '2_4', label: '2–4 h' },
+  { id: '4_6', label: '4–6 h' },
+  { id: '6p', label: '6 h+' },
+  { id: 'unknown', label: 'Not sure' },
+];
+const ACTIVE: { id: ActiveDays; label: string }[] = [
+  { id: '0', label: '0' },
+  { id: '1_2', label: '1–2' },
+  { id: '3_4', label: '3–4' },
+  { id: '5p', label: '5+' },
+];
 const STARTS: { id: P.StrengthStart; label: string }[] = [
   { id: 'new', label: 'New to it' },
   { id: 'sometimes', label: 'Sometimes' },
   { id: 'regular', label: 'Regularly' },
 ];
+const WAKE_TIMES = ['05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30'];
 
-/** Life Reset pilot set-up (development and internal-testing builds only: see app/pilot/setup.tsx). */
+const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60}` : ''}`);
+
+type Step = 'about' | 'habits' | 'details' | 'levels' | 'review';
+
+/**
+ * The Life Reset set-up (development and internal-testing builds only: see app/pilot/setup.tsx): about you, the
+ * habits you want, only the questions those habits need, how hard each starts and the time you have, then a review.
+ * Nothing is pre-selected; a manageable first set is suggested.
+ */
 export function PilotSetup() {
   const { c } = useTheme();
   const running = useResetPilot((s) => s.program !== null);
-  // Schwung's own answers, read only, so nothing is asked twice. Never changed here.
+  // The program's own answers, read only, so nothing is asked twice. Never changed here.
   const known = useApp((s) => (s.profile && s.profile.age !== 'u16' ? s.profile : null));
+  const [step, setStep] = useState<Step>('about');
   const [age, setAge] = useState<AgeBand | null>(known?.age ?? null);
   const [health, setHealth] = useState<Precaution[] | 'unknown' | null>(known ? known.precautions : null);
+  const [picked, setPicked] = useState<P.PilotHabitId[]>([]);
+  const [levels, setLevels] = useState<Partial<Record<string, Intensity>>>({});
   const [minutes, setMinutes] = useState<number | null>(null);
+  const [phone, setPhone] = useState<PhoneHours | undefined>(known?.phone);
+  const [pull, setPull] = useState<number | undefined>(undefined);
+  const [wake, setWake] = useState<P.PilotAnswers['wake']>(known?.wake);
+  const [active, setActive] = useState<ActiveDays | undefined>(known?.activeDays);
+  const [skill, setSkill] = useState<string | undefined>(undefined);
   const [start, setStart] = useState<P.StrengthStart | undefined>(undefined);
   const [own, setOwn] = useState(2);
-  const [picked, setPicked] = useState<Partial<Record<P.PilotHabitId, Intensity>>>({});
 
   if (running) return <Redirect href="/today" />;
 
@@ -57,234 +85,375 @@ export function PilotSetup() {
     age: age ?? '18_29',
     precautions: health ?? 'unknown',
     minutesPerDay: minutes ?? 0,
+    ...(phone ? { phone } : {}),
+    ...(pull !== undefined ? { pullMinutes: pull } : {}),
+    ...(wake ? { wake } : {}),
+    ...(active ? { activeDays: active } : {}),
+    ...(skill ? { skill } : {}),
     ...(start ? { strengthStart: start } : {}),
-    ...(picked.strength_log === 'challenge' ? { ownSessions: own } : {}),
+    ...(levels.strength_log === 'challenge' ? { ownSessions: own } : {}),
   };
-  const choices: P.PilotChoice[] = P.PILOT_HABITS.filter((id) => picked[id]).map((id) => ({
-    habitId: id,
-    intensity: picked[id]!,
-  }));
-  const ready = age !== null && health !== null && minutes !== null;
-  const problems = ready ? P.setupProblems(answers, choices) : [];
+  const intensityOf = (id: string): Intensity | null => {
+    const l = levels[id];
+    const allowed = P.intensityOptions(id, answers).filter((o) => !o.reason);
+    if (l && allowed.some((o) => o.intensity === l)) return l;
+    return P.suggestedIntensity(id, answers);
+  };
+  const choices: P.PilotChoice[] = picked
+    .map((id) => ({ habitId: id, intensity: intensityOf(id) }))
+    .filter((x): x is P.PilotChoice => x.intensity !== null);
+  const baselines = P.baselinesFor(picked);
+  const problems = P.setupProblems(answers, choices);
+  const excludedPicked = picked.filter((id) => P.habitExclusion(id, answers));
   const total = P.busiestDayMinutes(
     choices.map((x) => ({ habitId: x.habitId, level: { intensity: x.intensity, phase: 'foundation' } })),
   );
 
-  const toggleHabit = (id: P.PilotHabitId) => {
+  const order: Step[] = ['about', 'habits', ...(baselines.length ? (['details'] as Step[]) : []), 'levels', 'review'];
+  const go = (dir: 1 | -1) => {
     haptic.tap();
-    setPicked((p) => {
-      if (p[id]) {
-        const next = { ...p };
-        delete next[id];
-        return next;
-      }
-      const suggestion = P.suggestedIntensity(id, answers);
-      return suggestion ? { ...p, [id]: suggestion } : p;
-    });
+    const i = order.indexOf(step) + dir;
+    if (i < 0) {
+      if (router.canGoBack()) router.back();
+      else router.replace('/');
+      return;
+    }
+    setStep(order[Math.min(i, order.length - 1)]);
   };
-  const toggleHealth = (id: Precaution) => {
+  const togglePick = (id: string) => {
     haptic.tap();
-    setHealth((h) => {
-      const list = Array.isArray(h) ? h : [];
-      return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
-    });
+    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= P.MAX_HABITS ? p : [...p, id]));
   };
   const begin = () => {
     if (!useResetPilot.getState().start(answers, choices)) return;
     haptic.success();
-    // Open into the pilot (Field Notes, if it was on, is simply switched off; its data stays).
+    // Open into the Life Reset (Field Notes is retired; its data stays where it was).
     useFieldNotes.getState().setActive(false);
     if (router.canDismiss()) router.dismissAll();
     router.replace('/today');
   };
 
+  const canContinue =
+    step === 'about'
+      ? age !== null && age !== 'u16' && health !== null
+      : step === 'habits'
+        ? picked.length > 0
+        : step === 'details'
+          ? baselines.every((b) =>
+              b === 'phone'
+                ? !!phone
+                : b === 'pullMinutes'
+                  ? pull !== undefined
+                  : b === 'wake'
+                    ? !!wake
+                    : b === 'activeDays'
+                      ? !!active
+                      : b === 'skill'
+                        ? !!skill
+                        : !!start,
+            )
+          : step === 'levels'
+            ? minutes !== null && excludedPicked.length === 0
+            : problems.length === 0;
+
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.top}>
-          <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back">
-            <Ionicons name="chevron-back" size={26} color={c.text} />
-          </Pressable>
-          <T v="overline" color={c.accentInk}>
-            Testing only
-          </T>
+      <View style={styles.top}>
+        <Pressable onPress={() => go(-1)} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={26} color={c.text} />
+        </Pressable>
+        <View style={styles.dots} accessibilityLabel={`Step ${order.indexOf(step) + 1} of ${order.length}`}>
+          {order.map((s) => (
+            <ThemedView key={s} style={[styles.dot, { backgroundColor: s === step ? c.accentInk : c.border }]} />
+          ))}
         </View>
-        <T v="title" accessibilityRole="header">
-          Life Reset pilot
-        </T>
-        <T color={c.textDim}>
-          A separate 66-day test with up to three new habits. Your current program stays exactly as it is, and you can
-          switch back to it at any time.
-        </T>
+      </View>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {step === 'about' ? (
+          <>
+            <T v="overline" color={c.accentInk}>
+              The 66-day Life Reset
+            </T>
+            <T v="title" accessibilityRole="header">
+              A few things first
+            </T>
+            <T color={c.textDim}>
+              Your current program stays exactly as it is. You can switch back to it any time from Settings.
+            </T>
+            <Section title="How old are you?">
+              <Chips items={AGES} selected={(id) => age === id} onPress={setAge} />
+              {age === 'u16' ? <T color={c.danger}>Schwung is made for people 16 and older.</T> : null}
+            </Section>
+            <Section title="Anything we should keep in mind?" hint="Optional. It stays on your phone.">
+              <Chips
+                items={HEALTH}
+                selected={(id) => Array.isArray(health) && health.includes(id)}
+                onPress={(id) =>
+                  setHealth((h) => {
+                    const list = Array.isArray(h) ? h : [];
+                    return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+                  })
+                }
+              />
+              <View style={styles.chips}>
+                <Chip
+                  label="None of these"
+                  on={Array.isArray(health) && health.length === 0}
+                  onPress={() => setHealth([])}
+                />
+                <Chip label="Skip" on={health === 'unknown'} onPress={() => setHealth('unknown')} />
+              </View>
+            </Section>
+          </>
+        ) : null}
 
-        <Section title="How old are you?">
-          <Chips
-            items={AGES}
-            selected={(id) => age === id}
-            onPress={(id) => {
-              haptic.tap();
-              setAge(id);
-            }}
-          />
-          {age === 'u16' ? <T color={c.danger}>Schwung is made for people 16 and older.</T> : null}
-        </Section>
-
-        <Section title="Anything we should keep in mind?" hint="Optional. It stays on your phone.">
-          <Chips
-            items={HEALTH}
-            selected={(id) => Array.isArray(health) && health.includes(id)}
-            onPress={toggleHealth}
-          />
-          <View style={styles.chips}>
-            <Chip
-              label="None of these"
-              on={Array.isArray(health) && health.length === 0}
-              onPress={() => setHealth([])}
+        {step === 'habits' ? (
+          <>
+            <T v="title" accessibilityRole="header">
+              Which habits do you want?
+            </T>
+            <T color={c.textDim}>
+              Two to four is a good start; up to {P.MAX_HABITS}. You can make each one easier or harder later.
+            </T>
+            <Button
+              label="Start with a suggested three"
+              kind="secondary"
+              onPress={() => {
+                haptic.tap();
+                setPicked(P.SUGGESTED_START.filter((id) => !P.habitExclusion(id, answers)));
+              }}
             />
-            <Chip label="Skip" on={health === 'unknown'} onPress={() => setHealth('unknown')} />
-          </View>
-        </Section>
-
-        <Section
-          title="On a day all your habits fall on, how much time do you have?"
-          hint="The habits you choose have to fit."
-        >
-          <Chips
-            items={P.PILOT_TIME_OPTIONS.map((m) => ({
-              id: m,
-              label: m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60}` : ''}` : `${m} min`,
-            }))}
-            selected={(m) => minutes === m}
-            onPress={(m) => {
-              haptic.tap();
-              setMinutes(m);
-            }}
-          />
-        </Section>
-
-        {age && age !== 'u16' && health !== null ? (
-          <Section title="Choose your habits" hint="Pick any of the three, and how hard each starts.">
             {P.PILOT_HABITS.map((id) => {
-              const on = !!picked[id];
-              const options = P.intensityOptions(id, answers);
-              const blocked = options.every((o) => o.reason);
-              const preview = picked[id] ? P.previewTarget(id, picked[id]!, answers) : null;
+              const on = picked.includes(id);
+              const reason = P.habitExclusion(id, answers);
+              const full = !on && picked.length >= P.MAX_HABITS;
               return (
-                <ThemedView
+                <Pressable
                   key={id}
-                  style={[styles.habit, { backgroundColor: c.surface, borderColor: on ? c.accentInk : c.border }]}
+                  onPress={() => !reason && !full && togglePick(id)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: on, disabled: !!reason || full }}
+                  accessibilityHint={reason ? `Not available: ${reason}` : undefined}
                 >
-                  <Pressable
-                    onPress={() => !blocked && toggleHabit(id)}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: on, disabled: blocked }}
-                    style={styles.habitHead}
+                  <ThemedView
+                    style={[
+                      styles.habit,
+                      {
+                        backgroundColor: c.surface,
+                        borderColor: on ? c.accentInk : c.border,
+                        opacity: reason || full ? 0.5 : 1,
+                      },
+                    ]}
                   >
-                    <Ionicons
-                      name={on ? 'checkbox' : 'square-outline'}
-                      size={24}
-                      color={blocked ? c.textFaint : c.accentInk}
-                    />
-                    <T v="bodyStrong" style={{ flex: 1 }}>
-                      {P.habitName(id)}
-                    </T>
-                  </Pressable>
-                  {blocked ? (
-                    <T v="caption" color={c.textDim}>
-                      Not available: {options[0].reason}.
-                    </T>
-                  ) : null}
-                  {on && id === 'strength_log' ? (
-                    <View style={{ gap: space.xs }}>
-                      <T v="caption" color={c.textDim}>
-                        Where are you starting from?
-                      </T>
-                      <Chips
-                        items={STARTS}
-                        selected={(s) => start === s}
-                        onPress={(s) => {
-                          haptic.tap();
-                          setStart(s);
-                          const suggestion = P.suggestedIntensity(id, { ...answers, strengthStart: s });
-                          if (suggestion) setPicked((p) => ({ ...p, [id]: suggestion }));
-                        }}
-                      />
-                    </View>
-                  ) : null}
-                  {on ? (
-                    <View style={styles.chips}>
-                      {INTENSITIES.map((i) => {
-                        const reason = options.find((o) => o.intensity === i)?.reason;
-                        return (
-                          <Chip
-                            key={i}
-                            label={P.INTENSITY_NAME[i]}
-                            on={picked[id] === i}
-                            disabled={!!reason}
-                            onPress={() => setPicked((p) => ({ ...p, [id]: i }))}
-                          />
-                        );
-                      })}
-                    </View>
-                  ) : null}
-                  {on && id === 'strength_log' && picked[id] === 'challenge' ? (
-                    <View style={styles.stepper}>
-                      <T v="caption" color={c.textDim} style={{ flex: 1 }}>
-                        Sessions a week you already do
-                      </T>
-                      <Chip label="−" on={false} onPress={() => setOwn((n) => Math.max(2, n - 1))} />
-                      <T v="bodyStrong">{own}</T>
-                      <Chip label="+" on={false} onPress={() => setOwn((n) => Math.min(7, n + 1))} />
-                    </View>
-                  ) : null}
-                  {preview ? (
-                    <T v="caption" color={c.textDim}>
-                      Starts at Foundation: {preview.target} · {preview.frequency}
-                    </T>
-                  ) : null}
-                  {on && id === 'strength_log'
-                    ? P.habitNotes(id, answers).map((n) => (
-                        <T key={n} v="caption" color={c.textFaint}>
-                          {n}
+                    <Ionicons name={on ? 'checkbox' : 'square-outline'} size={22} color={c.accentInk} />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <View style={styles.row}>
+                        <T v="bodyStrong" style={{ flexShrink: 1 }}>
+                          {P.habitName(id)}
                         </T>
-                      ))
-                    : null}
+                        {(P.SUGGESTED_START as readonly string[]).includes(id) && !reason ? (
+                          <T v="caption" color={c.accentInk} style={styles.tag}>
+                            Suggested
+                          </T>
+                        ) : null}
+                      </View>
+                      <T v="caption" color={c.textDim}>
+                        {reason ? `Not available: ${reason}.` : P.habitDescription(id)}
+                      </T>
+                    </View>
+                  </ThemedView>
+                </Pressable>
+              );
+            })}
+          </>
+        ) : null}
+
+        {step === 'details' ? (
+          <>
+            <T v="title" accessibilityRole="header">
+              Just what your habits need
+            </T>
+            {baselines.includes('phone') ? (
+              <Section title="Less Scrolling: how long are you on your phone a day?">
+                <Chips items={PHONE} selected={(x) => phone === x} onPress={setPhone} />
+              </Section>
+            ) : null}
+            {baselines.includes('pullMinutes') ? (
+              <Section
+                title="And on your main app (the one that pulls you in most)?"
+                hint="Settings → Screen Time shows it, if you want the real number."
+              >
+                <Chips
+                  items={PULL_MINUTES_OPTIONS.map((m) => ({ id: m, label: m === 240 ? '4 h+' : duration(m) }))}
+                  selected={(m) => pull === m}
+                  onPress={setPull}
+                />
+              </Section>
+            ) : null}
+            {baselines.includes('wake') ? (
+              <Section
+                title="Sleep Routine: when do you usually get up?"
+                hint="Your own time is the anchor; never earlier."
+              >
+                <Chips
+                  items={WAKE_TIMES.map((t) => ({ id: t, label: t }))}
+                  selected={(t) => wake?.kind === 'time' && wake.time === t}
+                  onPress={(t) => setWake({ kind: 'time', time: t })}
+                />
+                <View style={styles.chips}>
+                  <Chip
+                    label="It varies a lot"
+                    on={wake?.kind === 'varies'}
+                    onPress={() => setWake({ kind: 'varies' })}
+                  />
+                  <Chip label="I work shifts" on={wake?.kind === 'shift'} onPress={() => setWake({ kind: 'shift' })} />
+                </View>
+              </Section>
+            ) : null}
+            {baselines.includes('activeDays') ? (
+              <Section title="Daily Movement: on how many days a week are you active now?">
+                <Chips items={ACTIVE} selected={(x) => active === x} onPress={setActive} />
+              </Section>
+            ) : null}
+            {baselines.includes('skill') ? (
+              <Section title="Practice a Skill: which skill?">
+                <Chips
+                  items={SKILLS.map((x) => ({ id: x, label: x }))}
+                  selected={(x) => skill === x}
+                  onPress={setSkill}
+                />
+              </Section>
+            ) : null}
+            {baselines.includes('strengthStart') ? (
+              <Section title="Strength Training: where are you starting from?">
+                <Chips items={STARTS} selected={(x) => start === x} onPress={setStart} />
+                {P.habitNotes('strength_log', answers).map((n) => (
+                  <T key={n} v="caption" color={c.textFaint}>
+                    {n}
+                  </T>
+                ))}
+              </Section>
+            ) : null}
+          </>
+        ) : null}
+
+        {step === 'levels' ? (
+          <>
+            <T v="title" accessibilityRole="header">
+              How hard to start
+            </T>
+            <T color={c.textDim}>Starter is a manageable beginning. Every habit starts at its Foundation level.</T>
+            {picked.map((id) => {
+              const reason = P.habitExclusion(id, answers);
+              const options = P.intensityOptions(id, answers);
+              const chosen = intensityOf(id);
+              const preview = chosen && !reason ? P.previewTarget(id, chosen, answers) : null;
+              return (
+                <ThemedView key={id} style={[styles.level, { backgroundColor: c.surface }]}>
+                  <T v="bodyStrong">{P.habitName(id)}</T>
+                  {reason ? (
+                    <>
+                      <T v="caption" color={c.danger}>
+                        Not available: {reason}.
+                      </T>
+                      <Chip label="Remove it" on={false} onPress={() => setPicked((p) => p.filter((x) => x !== id))} />
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.chips}>
+                        {INTENSITIES.map((i) => {
+                          const blocked = options.find((o) => o.intensity === i)?.reason;
+                          return (
+                            <Chip
+                              key={i}
+                              label={P.INTENSITY_NAME[i]}
+                              on={chosen === i}
+                              disabled={!!blocked}
+                              onPress={() => setLevels((l) => ({ ...l, [id]: i }))}
+                            />
+                          );
+                        })}
+                      </View>
+                      {id === 'strength_log' && chosen === 'challenge' ? (
+                        <View style={styles.row}>
+                          <T v="caption" color={c.textDim} style={{ flex: 1 }}>
+                            Sessions a week you already do
+                          </T>
+                          <Chip label="−" on={false} onPress={() => setOwn((n) => Math.max(2, n - 1))} />
+                          <T v="bodyStrong">{own}</T>
+                          <Chip label="+" on={false} onPress={() => setOwn((n) => Math.min(7, n + 1))} />
+                        </View>
+                      ) : null}
+                      {preview ? (
+                        <T v="caption" color={c.textDim}>
+                          {preview.target} · {preview.frequency}
+                        </T>
+                      ) : null}
+                    </>
+                  )}
                 </ThemedView>
               );
             })}
-          </Section>
+            <Section
+              title="On a day all your habits fall on, how much time do you have?"
+              hint="Your habits have to fit."
+            >
+              <Chips
+                items={P.PILOT_TIME_OPTIONS.map((m) => ({ id: m, label: duration(m) }))}
+                selected={(m) => minutes === m}
+                onPress={setMinutes}
+              />
+            </Section>
+          </>
         ) : null}
 
-        {choices.length ? (
-          <Section title="Review">
+        {step === 'review' ? (
+          <>
+            <T v="title" accessibilityRole="header">
+              Your Life Reset
+            </T>
             {choices.map((x) => {
               const p = P.previewTarget(x.habitId, x.intensity, answers);
               return (
-                <T key={x.habitId}>
-                  <T v="bodyStrong">{P.habitName(x.habitId)}</T> · {P.INTENSITY_NAME[x.intensity]}: {p.target},{' '}
-                  {p.frequency.toLowerCase()}
-                </T>
+                <ThemedView key={x.habitId} style={[styles.level, { backgroundColor: c.surface }]}>
+                  <T v="bodyStrong">
+                    {P.habitName(x.habitId)} · {P.INTENSITY_NAME[x.intensity]}
+                  </T>
+                  <T>{p.target}</T>
+                  <T v="caption" color={c.textDim}>
+                    {p.frequency}
+                  </T>
+                </ThemedView>
               );
             })}
             <T v="caption" color={c.textDim}>
-              About {total} min on a day they all fall on{minutes ? `, of the ${minutes} min you have` : ''}. Targets
-              only change when you choose: readiness offers come when you’ve been consistent.
+              About {total} min on a day they all fall on{minutes ? `, of the ${duration(minutes)} you have` : ''}.
+              Targets only change when you choose: offers come when you’ve been consistent. A swipe marks a habit done.
             </T>
-          </Section>
+          </>
         ) : null}
 
-        {problems.map((p) => (
-          <T key={p} v="caption" color={c.danger}>
-            {p}
-          </T>
-        ))}
-        <Button label="Begin the 66-day pilot" disabled={!ready || problems.length > 0} onPress={begin} />
+        {(step === 'levels' || step === 'review') && minutes !== null
+          ? problems
+              .filter((p) => step === 'review' || p.startsWith('These take'))
+              .map((p) => (
+                <T key={p} v="caption" color={c.danger}>
+                  {p}
+                </T>
+              ))
+          : null}
+
+        <Button
+          label={step === 'review' ? 'Begin Day 1' : 'Continue'}
+          disabled={!canContinue}
+          onPress={step === 'review' ? begin : () => go(1)}
+        />
       </ScrollView>
     </Screen>
   );
 }
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   const { c } = useTheme();
   return (
     <View style={styles.section}>
@@ -313,7 +482,15 @@ function Chips<K extends string | number>({
   return (
     <View style={styles.chips}>
       {items.map((x) => (
-        <Chip key={String(x.id)} label={x.label} on={selected(x.id)} onPress={() => onPress(x.id)} />
+        <Chip
+          key={String(x.id)}
+          label={x.label}
+          on={selected(x.id)}
+          onPress={() => {
+            haptic.tap();
+            onPress(x.id);
+          }}
+        />
       ))}
     </View>
   );
@@ -354,9 +531,19 @@ function Chip({
 }
 
 const styles = StyleSheet.create({
+  top: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+  },
+  dots: { flexDirection: 'row', gap: 6 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
   scroll: { padding: space.lg, gap: space.lg, paddingBottom: space.xxxl },
-  top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   section: { gap: space.sm },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  tag: { fontWeight: '700' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
     minHeight: 40,
@@ -365,7 +552,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
   },
-  habit: { borderWidth: 1, borderRadius: radius.lg, padding: space.md, gap: space.sm },
-  habitHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  habit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    borderWidth: 1,
+    borderRadius: radius.lg,
+    padding: space.md,
+  },
+  level: { borderRadius: radius.lg, padding: space.md, gap: space.sm },
 });

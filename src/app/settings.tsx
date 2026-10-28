@@ -13,7 +13,7 @@ import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
 import { channel, devTools } from '../lib/flags';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
-import { fieldNotesAvailable, useFieldNotes } from '../store/fieldNotes';
+import { useFieldNotes } from '../store/fieldNotes';
 import { pilot } from '../store/pilotGate';
 import { currentDay, exportData, useApp } from '../store/useApp';
 import type { ThemePreference, Weekday } from '../core/types';
@@ -49,9 +49,23 @@ export default function Settings() {
   const exportJson = async () => {
     try {
       const file = new File(Paths.cache, `${APP_NAME.toLowerCase()}-export.json`);
-      // In testing builds, the study's local log of app opens comes along (it never leaves the phone otherwise).
-      const study = fieldNotesAvailable() ? { studyOpens: useFieldNotes.getState().opens } : {};
-      await file.write(JSON.stringify({ exportedAt: new Date().toISOString(), ...exportData(), ...study }, null, 2));
+      // Retired Field Notes data, if this phone has any, comes along so it's never out of reach.
+      const fn = useFieldNotes.getState();
+      const fieldNotes = fn.run || fn.archive.length ? { fieldNotes: { run: fn.run, archive: fn.archive } } : {};
+      // The Life Reset (testing builds) comes along too, beside the program.
+      const reset = pilot?.store.useResetPilot.getState().program;
+      await file.write(
+        JSON.stringify(
+          {
+            exportedAt: new Date().toISOString(),
+            ...exportData(),
+            ...fieldNotes,
+            ...(reset ? { lifeReset: reset } : {}),
+          },
+          null,
+          2,
+        ),
+      );
       await Sharing.shareAsync(file.uri, {
         mimeType: 'application/json',
         UTI: 'public.json',
@@ -119,24 +133,12 @@ export default function Settings() {
           <Row label="Restart program" icon="refresh" destructive onPress={restart} />
         </Section>
 
-        {/* Testing builds only: switch to the separate 14-day Field Notes experience. */}
-        {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') && fieldNotesAvailable() ? (
-          <Section title="Field Notes">
-            <Row
-              label="Try Field Notes · 14 days"
-              icon="compass-outline"
-              onPress={() => {
-                useFieldNotes.getState().setActive(true);
-                void rescheduleReminders().catch(() => {});
-                if (router.canDismiss()) router.dismissAll();
-                router.replace('/fieldnotes');
-              }}
-            />
-          </Section>
+        {/* Testing builds only: the Life Reset, a separate program beside this one (store/pilotGate.ts). */}
+        {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') &&
+        pilot &&
+        pilot.store.resetPilotAvailable() ? (
+          <pilot.Settings Section={Section} Row={Row} />
         ) : null}
-
-        {/* Testing builds only: the Life Reset pilot, a separate program beside this one (store/resetPilot). */}
-        {pilot && pilot.store.resetPilotAvailable() ? <pilot.Settings Section={Section} Row={Row} /> : null}
 
         <Section title="About">
           <Row label="Privacy policy" icon="open-outline" onPress={() => void Linking.openURL(PRIVACY_URL)} />
