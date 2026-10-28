@@ -139,7 +139,8 @@ export function trailDots(perGap = 3): { x: number; y: number; between: number }
   return dots;
 }
 
-export type DayStatus = 'done' | 'missed' | 'today' | 'future';
+/** 'rest': a Life Reset day with nothing due (weekly habits resting), neither done nor missed. */
+export type DayStatus = 'done' | 'missed' | 'rest' | 'today' | 'future';
 
 export type AscentDay = {
   day: number;
@@ -161,14 +162,14 @@ export function phaseFor(day: number): AscentPhase {
  * Past days that weren't successful are "missed" but stay on the walked trail, so a missed
  * day never hides earlier progress. Beyond day 66 (maintenance), every day is in the past.
  */
-export function ascentDays(logs: Logs, startKey: string, today: number): AscentDay[] {
+export function ascentDays(logs: Logs, startKey: string, today: number, rest?: (day: number) => boolean): AscentDay[] {
   return DAY_POINTS.map((point, i) => {
     const day = i + 1;
     const log = logForDay(logs, startKey, day);
     let status: DayStatus;
     if (day === today) status = 'today';
     else if (day > today) status = 'future';
-    else status = dayQualifies(log) ? 'done' : 'missed';
+    else status = dayQualifies(log) ? 'done' : rest?.(day) ? 'rest' : 'missed';
     return {
       day,
       phase: phaseFor(day).n,

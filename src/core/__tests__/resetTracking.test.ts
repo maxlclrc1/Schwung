@@ -601,8 +601,10 @@ describe('persistence and compatibility', () => {
     // type-only reference in core/types.ts (an optional log field the program never reads).
     expect(users.map((f) => path.relative(root, f)).sort()).toEqual([
       'components/pilot/PilotHabit.tsx',
+      'components/pilot/PilotInsights.tsx',
       'components/pilot/PilotSetup.tsx',
       'components/pilot/PilotToday.tsx',
+      'components/pilot/pilotJourney.ts',
       'core/types.ts',
       'store/resetPilot.ts',
     ]);

@@ -1,26 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { JourneyView } from '../../components/JourneyView';
+import { useJourneySource, type JourneySource } from '../../components/journeySource';
 import { usePagerBlock } from '../../components/TabPager';
 import { Screen, T } from '../../components/ui';
 import { WorldBackdrop } from '../../components/World';
 import { useOnPainting, useWorldLayer, worldAnchor, worldScroll } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor, type AscentDay } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
-import { getHabit, habitTitle } from '../../core/habits';
-import { bestStreak, currentStreak, dayQualifies, daysCompleted, logForDay } from '../../core/progression';
+import { dayQualifies, logForDay } from '../../core/progression';
 import type { DayLog } from '../../core/types';
-import { BY_ID } from '../../core/v2/library';
 import { worldFrame } from '../../core/world';
 import { tabs } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
-import { currentDay, useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 
@@ -28,10 +26,17 @@ import { ThemedView } from '../../theme/transition';
  * The Journey tab (testing builds): the Ascent fills the screen, with the stats in one small line above it, the
  * full 66-day calendar a tap away, and any day's details below. The public release keeps the mountain on Today
  * and the journey as a sheet.
+ * Memoized, so a tab change doesn't re-render the page before the slide can start.
  */
 export default function JourneyTab() {
+  return <JourneyPage />;
+}
+
+const JourneyPage = memo(function JourneyPage() {
   const insets = useSafeAreaInsets();
-  const started = useApp((s) => s.startedAt !== null);
+  // The Life Reset's days while it's on, otherwise the program's (never mixed).
+  const source = useJourneySource();
+  const started = source.started;
   // Opened with a day (e.g. from a link): start with that day selected.
   const picked = Number(useLocalSearchParams<{ day?: string }>().day) || null;
   const world = useWorldLayer();
@@ -39,7 +44,7 @@ export default function JourneyTab() {
   return (
     <Screen edges={[]} transparent={world}>
       {started ? (
-        <Ascent picked={picked} />
+        <Ascent picked={picked} source={source} />
       ) : (
         <View style={[styles.empty, { paddingTop: insets.top + space.sm }]}>
           <Header />
@@ -50,7 +55,7 @@ export default function JourneyTab() {
       )}
     </Screen>
   );
-}
+});
 
 function Header({ onCalendar }: { onCalendar?: () => void }) {
   return (
@@ -66,16 +71,11 @@ function Header({ onCalendar }: { onCalendar?: () => void }) {
   );
 }
 
-function Ascent({ picked }: { picked: number | null }) {
+function Ascent({ picked, source }: { picked: number | null; source: JourneySource }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const logs = useApp((s) => s.logs);
-  const plan = useApp((s) => s.plan);
-  const startedAt = useApp((s) => s.startedAt);
-  const offset = useApp((s) => s.devDayOffset);
-  const today = currentDay({ startedAt, devDayOffset: offset });
-  const start = startedAt ?? '';
+  const { logs, today, start, stats, title } = source;
   const [zoneTop, setZoneTop] = useState(insets.top + 100);
   const { zoneHeight } = worldFrame(width, zoneTop);
   // The day shown below the mountain: today until another is picked (on the trail or in the calendar).
@@ -88,16 +88,8 @@ function Ascent({ picked }: { picked: number | null }) {
   const lastDay = Math.min(today, PROGRAM_DAYS);
   const shownDay = chosen ?? lastDay;
 
-  const days = useMemo(() => ascentDays(logs, start, today), [logs, start, today]);
+  const days = useMemo(() => ascentDays(logs, start, today, source.rest), [logs, start, today, source.rest]);
   const todayDone = dayQualifies(logForDay(logs, start, today));
-  const stats = useMemo(
-    () => ({
-      done: daysCompleted(logs, start, today),
-      streak: currentStreak(logs, start, today),
-      best: bestStreak(logs, start, today),
-    }),
-    [logs, start, today],
-  );
   const pick = (day: number) => setChosen(day === lastDay ? null : day);
   // With the tabs' shared world, this page's scroll moves it (the trail must stay on the painting), and the
   // trail and labels stay on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).
@@ -208,7 +200,8 @@ function Ascent({ picked }: { picked: number | null }) {
               day={shownDay}
               logs={logs}
               start={start}
-              plan={plan}
+              title={title}
+              rest={source.rest?.(shownDay) ?? false}
               when={shownDay === today ? 'today' : shownDay > today ? 'ahead' : 'past'}
             />
           ) : null}
@@ -293,21 +286,19 @@ function DayDetail({
   day,
   logs,
   start,
-  plan,
+  title,
+  rest,
   when,
 }: {
   day: number;
   logs: Parameters<typeof logForDay>[0];
   start: string;
-  plan: ReturnType<typeof useApp.getState>['plan'];
+  title: (id: string) => string;
+  rest: boolean;
   when: 'past' | 'today' | 'ahead';
 }) {
   const { c } = useTheme();
   const log = logForDay(logs, start, day);
-  const title = (id: string) => {
-    const h = plan.find((p) => p.habitId === id);
-    return h ? habitTitle(h) : (getHabit(id)?.title ?? BY_ID[id]?.title ?? id);
-  };
   return (
     <ThemedView style={[styles.card, { backgroundColor: c.surface }]} accessibilityLiveRegion="polite">
       {log && (log.planned.length || log.rested?.length) ? (
@@ -347,7 +338,9 @@ function DayDetail({
             ? 'Still ahead.'
             : when === 'today'
               ? 'Nothing checked off yet today.'
-              : 'Nothing was logged this day.'}
+              : rest
+                ? 'A rest day: nothing was due.'
+                : 'Nothing was logged this day.'}
         </T>
       )}
     </ThemedView>

@@ -19,11 +19,13 @@ import { channel, devTools, type Channel } from '../lib/flags';
 import { debouncedStorage } from './storage';
 
 /*
- * Field Notes' own saved state (a separate key from Schwung's): starting, recording or restarting it never reads
- * or writes a Schwung program. Available only in development and internal-testing builds (fieldNotesAvailable).
+ * Field Notes' own saved state (a separate key from Schwung's). Field Notes is retired: Insights took its tab, and
+ * nothing in the app starts, shows or reminds about it any more (fieldNotesAvailable is false in every build). Its
+ * saved data is kept exactly as it was (loaded, never deleted) and is included in "Export my data".
  */
 
-export const fieldNotesAvailable = (ch: Channel = channel()) => ch !== 'production';
+/** Retired in every build (2026-10-28); the store stays so existing saves load and export unchanged. */
+export const fieldNotesAvailable = (_ch: Channel = channel()) => false;
 
 /** Its own key, alongside Schwung's (which is 'schwung-state' or 'schwung-state-internal'). */
 export function fieldNotesKey(ch: Channel = channel(), dev: boolean = __DEV__): string {

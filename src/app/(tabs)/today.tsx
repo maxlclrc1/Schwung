@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GestureResponderEvent, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -57,12 +57,19 @@ import { ThemedView } from '../../theme/transition';
 const todayLogRested = (logs: Record<string, DayLog>, start: string, day: number) =>
   logs[dateForDay(start, day)]?.rested ?? [];
 
-/** The Habits tab: the running program, or the Life Reset pilot while a tester has it on (testing builds only). */
+/**
+ * The Habits tab: the running program, or the Life Reset while a tester has it on (testing builds only). Memoized,
+ * so a tab change (which re-renders the navigator) doesn't re-render the page before the slide can start.
+ */
 export default function Today() {
+  return <TodayPage />;
+}
+
+const TodayPage = memo(function TodayPage() {
   const active = usePilotActive();
   if (pilot && active) return <pilot.Today />;
   return <ProgramToday />;
-}
+});
 
 function ProgramToday() {
   const { c } = useTheme();
@@ -591,6 +598,11 @@ function NoProgram() {
       <View style={styles.emptyBody}>
         <T color={c.textDim}>You haven’t started a habit plan yet. Your daily habits will show up here.</T>
         <Button label="Start my reset" onPress={() => router.push('/welcome')} />
+        {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') &&
+        pilot &&
+        pilot.store.resetPilotAvailable() ? (
+          <Button label="Start the 66-day Life Reset" kind="secondary" onPress={() => router.push('/pilot/setup')} />
+        ) : null}
       </View>
     </View>
   );

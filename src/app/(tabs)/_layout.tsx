@@ -9,11 +9,10 @@ import { onPageTransitionStart, pageTransition, useTabPager } from '../../compon
 import { useWorldLayer, WorldLayer } from '../../components/WorldLayer';
 import { tabs } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
-import { fieldNotesAvailable } from '../../store/fieldNotes';
 import { useTheme } from '../../theme';
 
 /** The tabs a swipe moves between, in order. */
-const PAGES = ['/today', '/progress', '/fieldnotes'] as const;
+const PAGES = ['/today', '/progress', '/insights'] as const;
 type Page = (typeof PAGES)[number];
 /** On the web, the browser keeps vertical pans and hands sideways ones to the pager (iOS decides natively). */
 const WEB_PAN_Y = Platform.OS === 'web' ? ({ touchAction: 'pan-y' } as object) : null;
@@ -41,7 +40,7 @@ function tabIcon(on: Icon, off: Icon) {
 }
 
 /**
- * Habits, Journey and Field Notes as bottom tabs (development and internal-testing builds). The public release
+ * Habits, Journey and Insights as bottom tabs (development and internal-testing builds). The public release
  * has no tab bar and no other tabs: Today shows on its own, exactly as before. (It's still this navigator rather
  * than a bare Slot, so Today can open the ceremony, the journey sheet and Settings over itself.)
  */
@@ -55,7 +54,7 @@ export default function TabsLayout() {
   const pathname = usePathname();
   // Swiping between the tabs, over the world (testing builds; see TabPager). The pages sit side by side and all
   // stay mounted, so a drag shows the next one coming in; with Reduce Motion a swipe just changes tab (a fade).
-  const routes = fieldNotesAvailable() ? PAGES : PAGES.slice(0, 2);
+  const routes = PAGES;
   const index = (routes as readonly string[]).indexOf(pathname);
   // The tab underneath while a sheet or Settings is open over it.
   const [focused, setFocused] = useState(Math.max(0, index));
@@ -106,11 +105,11 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="fieldnotes"
+          name="insights"
           options={{
-            title: 'Field Notes',
-            tabBarIcon: tabIcon('compass', 'compass-outline'),
-            href: on && fieldNotesAvailable() ? undefined : null,
+            title: 'Insights',
+            tabBarIcon: tabIcon('stats-chart', 'stats-chart-outline'),
+            href: on ? undefined : null,
           }}
         />
       </Tabs>

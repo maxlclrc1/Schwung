@@ -68,22 +68,34 @@ describe('Field Notes is separate from Schwung', () => {
     expect(await AsyncStorage.getItem('schwung-state')).toBe(disk);
   });
 
-  it('is only available in development and internal-testing builds, and every screen checks it', () => {
-    expect(fieldNotesAvailable('production')).toBe(false);
-    expect(fieldNotesAvailable('internal')).toBe(true);
-    expect(fieldNotesAvailable('development')).toBe(true);
-    for (const file of ['index', 'setup', 'note', 'history']) {
-      const src = fs.readFileSync(
-        `${process.cwd()}/src/app/${file === 'index' ? '(tabs)/fieldnotes' : `fieldnotes/${file}`}.tsx`,
-        'utf8',
-      );
-      expect([
-        file,
-        src.includes(
-          "if (!(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') || !fieldNotesAvailable()) {",
-        ),
-      ]).toEqual([file, true]);
-    }
+  it('is retired in every build: no screens, no entry points, no reminders (Insights took its tab)', () => {
+    for (const ch of ['production', 'internal', 'development'] as const) expect(fieldNotesAvailable(ch)).toBe(false);
+    const exists = (f: string) => {
+      try {
+        fs.readFileSync(`${process.cwd()}/src/${f}`, 'utf8');
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    for (const f of ['app/(tabs)/fieldnotes.tsx', 'app/fieldnotes/setup.tsx', 'app/fieldnotes/note.tsx'])
+      expect([f, exists(f)]).toEqual([f, false]);
+    for (const f of ['app/welcome.tsx', 'app/settings.tsx', 'app/index.tsx', 'app/(tabs)/_layout.tsx'])
+      expect([f, fs.readFileSync(`${process.cwd()}/src/${f}`, 'utf8').includes('/fieldnotes')]).toEqual([f, false]);
+  });
+
+  it('keeps saved Field Notes data loadable and untouched (never deleted automatically)', async () => {
+    f().start('focus', ADULT, 'focus_read', null);
+    f().record({ rating: 3 });
+    await wait(400);
+    const disk = await AsyncStorage.getItem('schwung-fieldnotes');
+    // A relaunch: memory cleared, the save on disk loaded again.
+    useFieldNotes.setState({ run: null });
+    await wait(400);
+    await AsyncStorage.setItem('schwung-fieldnotes', disk!);
+    await useFieldNotes.persist.rehydrate();
+    expect(f().run?.days).toEqual(JSON.parse(disk!).state.run.days);
+    expect(await AsyncStorage.getItem('schwung-fieldnotes')).toBe(disk);
   });
 });
 

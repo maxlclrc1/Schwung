@@ -303,7 +303,7 @@ describe('routes', () => {
     }
   });
 
-  it('three tabs (Habits, Journey, Field Notes) only in testing builds; the public release keeps Today on its own', () => {
+  it('three tabs (Habits, Journey, Insights) only in testing builds; the public release keeps Today on its own', () => {
     const { tabs } = jest.requireActual<typeof import('../../lib/flags')>('../../lib/flags');
     expect([tabs('production'), tabs('internal'), tabs('development')]).toEqual([false, true, true]);
     const layout = read('(tabs)/_layout.tsx');
@@ -316,7 +316,7 @@ describe('routes', () => {
     expect(order).toEqual([
       ['today', 'Habits'],
       ['progress', 'Journey'],
-      ['fieldnotes', 'Field Notes'],
+      ['insights', 'Insights'],
     ]);
     // The release opens the journey as the same sheet as before; the Journey tab sends it there too.
     const today = read('(tabs)/today.tsx');

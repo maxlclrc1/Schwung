@@ -2,8 +2,23 @@ import { dateForDay, PROGRAM_DAYS } from '../dates';
 import { dayQualifies, isFullDay, totalXp } from '../progression';
 import type { DayLog } from '../types';
 import { isTeen } from '../v2/library';
-import type { AgeBand, Precaution, ProfileV2 } from '../v2/types';
-import { INTENSITIES, PHASES, RESET_BY_ID, resetExclusion, strengthNotes, type Intensity, type Target } from './habits';
+import type { ActiveDays, AgeBand, PhoneHours, Precaution, ProfileV2, Wake } from '../v2/types';
+import {
+  INTENSITIES,
+  PHASES,
+  RESET_BY_ID,
+  RESET_HABITS,
+  resetExclusion,
+  scrollingLimit,
+  SKILLS,
+  SOCIAL_ACTIONS,
+  strengthNotes,
+  upBy,
+  type Intensity,
+  type SocialAction,
+  type Target,
+} from './habits';
+import { recordWeekly, weeklyMeasure, type WeeklyMeasure, type WeeklyMeasures } from './measures';
 import {
   acceptOffer,
   declineOffer,
@@ -22,52 +37,83 @@ import {
   type Offer,
   type ProgressionState,
 } from './readiness';
-import { createTimer, localDayEnd, pause, reset, start, type TimerRun } from './timer';
+import { timerBlocks } from './timer';
 import {
   confirmDone,
+  decrement,
   editSession,
-  loadTimer,
+  increment,
   logSession,
   readTrack,
   recordAmount,
-  saveTimer,
+  skip,
   undoDone,
   undoSession,
+  unskip,
   type At,
   type Change,
   type SessionType,
 } from './tracking';
-import { countsTowardDay, dayState, scheduleOn, weekSummary, type DayState, type WeeklyContext } from './weekly';
+import {
+  countsTowardDay,
+  dayState,
+  scheduleOn,
+  weekOf,
+  weekSummaries,
+  weekSummary,
+  type DayState,
+  type WeekSummary,
+  type WeeklyContext,
+} from './weekly';
 
 /*
- * The first in-app Life Reset pilot (development and internal-testing builds only; see store/resetPilot.ts): three
- * habits, Read Daily, Focus Time and Strength Training, in a separate 66-day test program with its own save. This
- * module is the pilot's rules, pure: it joins the catalog, weekly scheduling, tracking and readiness engines and adds
- * only what a running program needs. Every pilot-specific rule (day lists, XP, streak, no ceremonies) is documented
- * in SCHWUNG_LIFE_RESET_PILOT.md and tested in resetPilot.test.ts.
+ * The Life Reset program (development and internal-testing builds only; see store/resetPilot.ts). It began as a
+ * three-habit pilot, kept its save, and now runs all 11 catalog habits. This module is its rules, pure: it joins the
+ * catalog, weekly scheduling, tracking and readiness engines and adds only what a running program needs. Every
+ * program-specific rule (day lists, XP, streak, no ceremonies, the Insights numbers) is documented in
+ * SCHWUNG_LIFE_RESET_PROGRAM.md and tested in resetPilot.test.ts.
+ *
+ * Timers are not part of the experience: targets are just shown, and a swipe confirms. Timer data saved by the pilot
+ * stays in the day records, untouched (timer.ts is kept, unused).
  */
 
-export const PILOT_HABITS = ['mind_read', 'focus_deepwork', 'strength_log'] as const;
-export type PilotHabitId = (typeof PILOT_HABITS)[number];
-export const isPilotHabit = (id: string): id is PilotHabitId => (PILOT_HABITS as readonly string[]).includes(id);
+/** All 11 habits, in the catalog's order (the cards' order too). */
+export const PILOT_HABITS = RESET_HABITS.map((h) => h.id) as readonly string[];
+export type PilotHabitId = string;
+export const isPilotHabit = (id: string): id is PilotHabitId => PILOT_HABITS.includes(id);
+
+/** The existing plan limit (SCHWUNG_LIFE_RESET_HABITS.md §6), kept for now. */
+export const MAX_HABITS = 6;
 
 /** "On a day all your habits fall on, about how long can you give them?" (minutes). */
-export const PILOT_TIME_OPTIONS = [20, 30, 45, 60, 90, 120] as const;
+export const PILOT_TIME_OPTIONS = [20, 30, 45, 60, 90, 120, 180] as const;
+
+/** A suggested first set: easy to start, no special answers needed beyond the setup's. Never pre-selected. */
+export const SUGGESTED_START = ['mind_read', 'move_walk', 'sleep_wake'] as const;
 
 export type StrengthStart = 'new' | 'sometimes' | 'regular';
 
-/** Only what these three habits need to know. */
+/** Only what the chosen habits need to know. */
 export type PilotAnswers = {
   age: AgeBand;
   /** The existing precautions question; skipping it is 'unknown', never "none". */
   precautions: Precaution[] | 'unknown';
   minutesPerDay: number;
-  /** Strength Training only: where the person is starting from. */
+  /** Strength Training: where the person is starting from. */
   strengthStart?: StrengthStart;
   /** Strength Training at Challenge: the sessions a week the person already does (2–7), kept as it is. */
   ownSessions?: number;
   /** Adults: time a 90-minute Focus block as two halves. 16–17 always get blocks of at most 60 minutes. */
   splitFocus?: boolean;
+  /** Less Scrolling: overall phone time (the existing question), and daily minutes on the main app. */
+  phone?: PhoneHours;
+  pullMinutes?: number;
+  /** Sleep Routine: the existing wake question (a time, varies, or shifts). */
+  wake?: Wake;
+  /** Daily Movement: active days a week (the existing question). */
+  activeDays?: ActiveDays;
+  /** Practice a Skill: which one. */
+  skill?: string;
 };
 
 export type PilotChoice = { habitId: PilotHabitId; intensity: Intensity };
@@ -83,35 +129,59 @@ export type PilotProgram = {
   progression: Record<string, ProgressionState>;
   /** Day records, keyed by date: `completed` decides everything; `track` holds the details. */
   logs: Record<string, DayLog>;
+  /** Less Scrolling's optional weekly Screen Time check (self-reported). */
+  measures?: WeeklyMeasures;
 };
 
 // --- Setup ---
 
 /**
- * The profile the existing eligibility rules read. Only `age` and `precautions` matter for these three habits; the
- * other fields are neutral values the rules never use for them (they're never shown or saved as answers).
+ * The profile the existing eligibility rules read, from the setup's answers. Fields no rule reads for these habits
+ * hold neutral values (never shown or saved as answers).
  */
-export function pilotProfile(a: Pick<PilotAnswers, 'age' | 'precautions'>): ProfileV2 {
+export function pilotProfile(a: PilotAnswers): ProfileV2 {
   return {
     age: a.age,
     goal: 'focus',
     sleepHours: '7_8',
     sleepTrouble: 'rarely',
-    activeDays: '0',
+    activeDays: a.activeDays ?? '0',
     produce: '3_4',
-    phone: '2_4',
+    phone: a.phone ?? '2_4',
     routines: [],
     precautions: a.precautions,
+    ...(a.wake ? { wake: a.wake } : {}),
   };
 }
 
 export const habitName = (id: string) => RESET_BY_ID[id]?.name ?? id;
+export const habitDescription = (id: string) => RESET_BY_ID[id]?.description ?? '';
 export const INTENSITY_NAME: Record<Intensity, string> = {
   starter: 'Starter',
   standard: 'Standard',
   challenge: 'Challenge',
 };
 export const PHASE_NAME = { foundation: 'Foundation', momentum: 'Momentum', mastery: 'Mastery' } as const;
+
+/** The baseline questions a habit needs answered before it can start. */
+export type Baseline = 'phone' | 'pullMinutes' | 'wake' | 'activeDays' | 'skill' | 'strengthStart';
+export const BASELINES: Partial<Record<string, Baseline[]>> = {
+  screen_app_limit: ['phone', 'pullMinutes'],
+  sleep_wake: ['wake'],
+  move_walk: ['activeDays'],
+  skill_practice: ['skill'],
+  strength_log: ['strengthStart'],
+};
+
+/** The baselines the chosen habits need, in a stable order. */
+export function baselinesFor(ids: string[]): Baseline[] {
+  const all = ids.flatMap((id) => BASELINES[id] ?? []);
+  return (['phone', 'pullMinutes', 'wake', 'activeDays', 'skill', 'strengthStart'] as Baseline[]).filter((b) =>
+    all.includes(b),
+  );
+}
+
+const answered = (a: PilotAnswers, b: Baseline) => a[b] !== undefined;
 
 /** Each intensity of a habit for this person, with the reason when the existing rules don't allow it. */
 export function intensityOptions(
@@ -125,7 +195,16 @@ export function intensityOptions(
   }));
 }
 
-/** A starting suggestion: Strength from where the person is starting; the others at Standard. Always allowed, if any is. */
+/** Why a habit can't be taken at all by this person (every intensity excluded), or null. */
+export function habitExclusion(habitId: PilotHabitId, a: PilotAnswers): string | null {
+  const o = intensityOptions(habitId, a);
+  return o.every((x) => x.reason) ? o[0].reason : null;
+}
+
+/**
+ * A starting suggestion, always one the person can take: Strength from where they're starting, Movement from their
+ * active days, Less Scrolling from their main-app time, Starter otherwise (a manageable start).
+ */
 export function suggestedIntensity(habitId: PilotHabitId, a: PilotAnswers): Intensity | null {
   const allowed = intensityOptions(habitId, a)
     .filter((o) => !o.reason)
@@ -138,7 +217,17 @@ export function suggestedIntensity(habitId: PilotHabitId, a: PilotAnswers): Inte
         : a.strengthStart === 'sometimes'
           ? 'standard'
           : 'starter'
-      : 'standard';
+      : habitId === 'move_walk'
+        ? a.activeDays === '5p'
+          ? 'challenge'
+          : a.activeDays === '3_4'
+            ? 'standard'
+            : 'starter'
+        : habitId === 'screen_app_limit'
+          ? (a.pullMinutes ?? 0) >= 180
+            ? 'standard'
+            : 'starter'
+          : 'starter';
   // The nearest allowed one, preferring easier.
   const i = INTENSITIES.indexOf(wanted);
   return [...allowed].sort(
@@ -156,14 +245,24 @@ export function habitNotes(habitId: PilotHabitId, a: PilotAnswers): string[] {
 
 export const targetFor = (habitId: string, l: Level): Target => RESET_BY_ID[habitId].targets[l.intensity][l.phase];
 
-/** Minutes a target takes on a day it's done (Read and Focus: the target; Strength: its approximate length). */
+/** Minutes a target takes on a day it's done (timed habits: the target; Strength: its approximate length). */
 export const minutesFor = (habitId: string, l: Level) => targetFor(habitId, l).minutesPerDueDay ?? 0;
+
+const BASELINE_PROBLEM: Record<Baseline, string> = {
+  phone: 'Less Scrolling: say how long you use your phone a day.',
+  pullMinutes: 'Less Scrolling: say how long a day you spend on your main app.',
+  wake: 'Sleep Routine: say when you usually get up.',
+  activeDays: 'Daily Movement: say how many days a week you’re active.',
+  skill: 'Practice a Skill: choose your skill.',
+  strengthStart: 'Strength Training: say where you’re starting from.',
+};
 
 /** The checks for starting: one problem per line, or none. */
 export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[] {
   const out: string[] = [];
   if (a.age === 'u16') return ['Schwung is made for people 16 and older.'];
   if (!choices.length) out.push('Choose at least one habit.');
+  if (choices.length > MAX_HABITS) out.push(`Choose at most ${MAX_HABITS} habits for now.`);
   const ids = new Set<string>();
   for (const c of choices) {
     if (!isPilotHabit(c.habitId) || ids.has(c.habitId)) {
@@ -171,16 +270,20 @@ export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[]
       continue;
     }
     ids.add(c.habitId);
-    const reason = resetExclusion(RESET_BY_ID[c.habitId], pilotProfile(a), c.intensity);
-    if (reason) out.push(`${habitName(c.habitId)} at ${INTENSITY_NAME[c.intensity]}: ${reason}.`);
+    for (const b of BASELINES[c.habitId] ?? []) if (!answered(a, b)) out.push(BASELINE_PROBLEM[b]);
+    if ((BASELINES[c.habitId] ?? []).every((b) => answered(a, b))) {
+      const reason = resetExclusion(RESET_BY_ID[c.habitId], pilotProfile(a), c.intensity);
+      if (reason) out.push(`${habitName(c.habitId)} at ${INTENSITY_NAME[c.intensity]}: ${reason}.`);
+    }
   }
-  if (ids.has('strength_log')) {
-    if (!a.strengthStart) out.push('Strength Training: say where you’re starting from.');
-    const strength = choices.find((c) => c.habitId === 'strength_log');
-    const own = a.ownSessions;
-    if (strength?.intensity === 'challenge' && !(own !== undefined && Number.isInteger(own) && own >= 2 && own <= 7))
-      out.push('Strength Training at Challenge: say how many sessions a week you already do (2–7).');
-  }
+  if (ids.has('skill_practice') && a.skill !== undefined && !SKILLS.includes(a.skill))
+    out.push('Practice a Skill: choose your skill.');
+  if (ids.has('screen_app_limit') && a.pullMinutes !== undefined && !(a.pullMinutes > 0 && a.pullMinutes <= 1440))
+    out.push('Less Scrolling: say how long a day you spend on your main app.');
+  const strength = choices.find((c) => c.habitId === 'strength_log');
+  const own = a.ownSessions;
+  if (strength?.intensity === 'challenge' && !(own !== undefined && Number.isInteger(own) && own >= 2 && own <= 7))
+    out.push('Strength Training at Challenge: say how many sessions a week you already do (2–7).');
   if (!PILOT_TIME_OPTIONS.includes(a.minutesPerDay as (typeof PILOT_TIME_OPTIONS)[number]))
     out.push('Say how much time you have on a busy day.');
   else {
@@ -190,7 +293,7 @@ export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[]
         `These take about ${total} min on a day they all fall on, more than the ${a.minutesPerDay} min you have. Choose an easier intensity or fewer habits.`,
       );
   }
-  return out;
+  return [...new Set(out)];
 }
 
 const foundation = (intensity: Intensity): Level => ({ intensity, phase: 'foundation' });
@@ -200,23 +303,34 @@ export function busiestDayMinutes(habits: { habitId: string; level: Level }[]): 
   return habits.reduce((n, h) => n + minutesFor(h.habitId, h.level), 0);
 }
 
-/** A new pilot program, starting today at Foundation for each chosen intensity; null if the setup has a problem. */
-export function createPilot(a: PilotAnswers, choices: PilotChoice[], startKey: string): PilotProgram | null {
-  if (setupProblems(a, choices).length) return null;
-  const answers: PilotAnswers = {
+/** Only the answers the chosen habits use are kept. */
+function keptAnswers(a: PilotAnswers, ids: string[]): PilotAnswers {
+  const needs = new Set(baselinesFor(ids));
+  const strength = ids.includes('strength_log');
+  return {
     age: a.age,
     precautions: a.precautions,
     minutesPerDay: a.minutesPerDay,
-    ...(choices.some((c) => c.habitId === 'strength_log')
+    ...(needs.has('phone') && a.phone ? { phone: a.phone } : {}),
+    ...(needs.has('pullMinutes') && a.pullMinutes !== undefined ? { pullMinutes: a.pullMinutes } : {}),
+    ...(needs.has('wake') && a.wake ? { wake: a.wake } : {}),
+    ...(needs.has('activeDays') && a.activeDays ? { activeDays: a.activeDays } : {}),
+    ...(needs.has('skill') && a.skill ? { skill: a.skill } : {}),
+    ...(strength
       ? { strengthStart: a.strengthStart, ...(a.ownSessions !== undefined ? { ownSessions: a.ownSessions } : {}) }
       : {}),
     ...(a.splitFocus ? { splitFocus: true } : {}),
   };
+}
+
+/** A new program, starting today at Foundation for each chosen intensity; null if the setup has a problem. */
+export function createPilot(a: PilotAnswers, choices: PilotChoice[], startKey: string): PilotProgram | null {
+  if (setupProblems(a, choices).length) return null;
   const ordered = PILOT_HABITS.filter((id) => choices.some((c) => c.habitId === id));
   return {
     v: 1,
     startedAt: startKey,
-    answers,
+    answers: keptAnswers(a, ordered),
     habits: ordered,
     progression: Object.fromEntries(
       ordered.map((id) => [id, newProgression(id, choices.find((c) => c.habitId === id)!.intensity, 1)]),
@@ -246,10 +360,11 @@ export const ctxOf = (p: PilotProgram): WeeklyContext => ({
 });
 
 export const levelFor = (p: PilotProgram, id: string, day: number): Level => levelOn(p.progression[id], day);
+const erasOf = (p: PilotProgram, id: string) => scheduleEras(p.progression[id]);
 
-/** Whether a habit is due every day (Read Daily) or counted by the week (Focus Time, Strength Training). */
+/** Whether a habit is due every day, or counted by the week, on a day. */
 export function isDaily(p: PilotProgram, id: string, day: number): boolean {
-  return scheduleOn(scheduleEras(p.progression[id]), day)?.kind === 'daily';
+  return scheduleOn(erasOf(p, id), day)?.kind === 'daily';
 }
 
 /**
@@ -258,26 +373,79 @@ export function isDaily(p: PilotProgram, id: string, day: number): boolean {
  */
 export function plannedOn(p: PilotProgram, day: number, completed: string[]): string[] {
   return p.habits.filter((id) => {
-    const s = scheduleOn(scheduleEras(p.progression[id]), day);
+    const s = scheduleOn(erasOf(p, id), day);
     return s !== null && countsTowardDay(s, completed.includes(id));
   });
 }
 
 const logOf = (p: PilotProgram, day: number) => p.logs[dateForDay(p.startedAt, day)];
 export const isDone = (p: PilotProgram, id: string, day: number) => !!logOf(p, day)?.completed.includes(id);
+export const trackOf = (p: PilotProgram, id: string, day: number) => readTrack(logOf(p, day), id);
 
-/** What the card says: the target, in a few words. */
+const fmtMinutes = (m: number) => `${m} minute${m === 1 ? '' : 's'}`;
+const fmtDuration = (m: number) =>
+  m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${String(m % 60).padStart(2, '0')}` : ''}`;
+const skillWords = (skill: string | undefined) =>
+  !skill || skill === 'Other' ? 'your skill' : skill === 'Sport skill' ? 'your sport skill' : skill.toLowerCase();
+
+/** Less Scrolling's limit for a level, from the person's own main-app time. */
+export function scrollLimitFor(p: PilotProgram, l: Level): number {
+  const a = targetFor('screen_app_limit', l).amount;
+  return a.kind === 'below-baseline' ? scrollingLimit(p.answers.pullMinutes ?? 120, a.reduceBy) : 0;
+}
+
+/** Social Confidence: the steps that count at a level (any of them does). */
+export function socialSteps(p: PilotProgram, day: number): SocialAction[] {
+  const levels = targetFor('confidence_talk', levelFor(p, 'confidence_talk', day)).levels ?? [1];
+  return SOCIAL_ACTIONS.filter((a) => levels.includes(a.level));
+}
+
+/** Social Confidence: the day's suggested step (it changes each day; any step from the list counts). */
+export function socialStep(p: PilotProgram, day: number): SocialAction {
+  const steps = socialSteps(p, day);
+  return steps[(day * 7) % steps.length];
+}
+
+/** The counter's daily number for Get It Done (tasks) and Stay Connected (people); null for other habits. */
+export function counterTarget(p: PilotProgram, id: string, day: number): number | null {
+  if (RESET_BY_ID[id]?.completion.kind !== 'counter') return null;
+  const a = targetFor(id, levelFor(p, id, day)).amount;
+  return a.kind === 'fixed' ? a.value : null;
+}
+
+/** What the card says: what to do and how much, in a few words. */
 export function targetText(p: PilotProgram, id: string, day: number): string {
   const l = levelFor(p, id, day);
   const t = targetFor(id, l);
-  if (id === 'strength_log') {
-    const n = t.amount.kind === 'own' ? (p.answers.ownSessions ?? 2) : t.amount.kind === 'fixed' ? t.amount.value : 0;
-    return `${n} session${n === 1 ? '' : 's'} a week${t.aboutMinutes ? `, about ${t.aboutMinutes} min` : ''}`;
-  }
   const minutes = t.amount.kind === 'fixed' ? t.amount.value : 0;
   const blocks = timerBlocksFor(p, id, day);
-  const time = blocks.length > 1 ? `${blocks.length} × ${blocks[0]} min` : `${minutes} min`;
-  return id === 'focus_deepwork' ? `${time}, phone in another room` : `Read ${time}`;
+  const time = blocks.length > 1 ? `${blocks.length} × ${fmtMinutes(blocks[0])}` : fmtMinutes(minutes);
+  switch (id) {
+    case 'strength_log': {
+      const n = t.amount.kind === 'own' ? (p.answers.ownSessions ?? 2) : minutes;
+      return `${n} session${n === 1 ? '' : 's'} a week${t.aboutMinutes ? `, about ${t.aboutMinutes} min` : ''}`;
+    }
+    case 'focus_deepwork':
+      return `Focus for ${time}, phone in another room`;
+    case 'mind_read':
+      return `Read for ${time}`;
+    case 'move_walk':
+      return `Move for ${time}, any way you like`;
+    case 'home_tidy':
+      return `Tidy up for ${time}`;
+    case 'skill_practice':
+      return `Practise ${skillWords(p.answers.skill)} for ${time}`;
+    case 'screen_app_limit':
+      return `Keep your main app under ${fmtDuration(scrollLimitFor(p, l))} today`;
+    case 'sleep_wake':
+      return p.answers.wake?.kind === 'time' ? `Up by ${upBy(p.answers.wake.time, minutes)}` : 'Up at your usual time';
+    case 'confidence_talk':
+      return socialStep(p, day).text;
+    case 'social_reach_out':
+      return `Reach out to ${minutes} ${minutes === 1 ? 'person' : 'people'}${t.calls ? ', one of them a call' : ''} (more than a like)`;
+    default:
+      return t.text;
+  }
 }
 
 /** How often, in words. */
@@ -286,7 +454,7 @@ export function frequencyText(p: PilotProgram, id: string, day: number): string 
   if (s.kind === 'daily') return 'Every day';
   if (s.kind === 'weekly') return `Any ${s.days} days a week`;
   if (s.kind === 'sessions') return 'Any days you choose, one session a day at most';
-  return `${s.days} workdays a week`;
+  return `Any ${s.days} workdays a week`;
 }
 
 export type WeekProgress = { credited: number; goal: number; status: string; daysLeft: number };
@@ -294,28 +462,19 @@ export type WeekProgress = { credited: number; goal: number; status: string; day
 /** This week's progress for a weekly habit (null for a daily one). Rest days are never misses. */
 export function weekProgress(p: PilotProgram, id: string, day: number): WeekProgress | null {
   if (isDaily(p, id, day)) return null;
-  const w = weekSummary(id, scheduleEras(p.progression[id]), p.logs, ctxOf(p), day, day);
+  const w = weekSummary(id, erasOf(p, id), p.logs, ctxOf(p), day, day);
   return { credited: w.credited, goal: w.goal, status: w.status, daysLeft: w.lastDay - day + 1 };
 }
 
-/** What the habit asks of the day: due (daily), open or goal met (weekly), done. */
+/** What the habit asks of the day: due (daily), open or goal met (weekly), done, not a workday. */
 export const stateOn = (p: PilotProgram, id: string, day: number): DayState =>
-  dayState(id, scheduleEras(p.progression[id]), p.logs, ctxOf(p), day);
+  dayState(id, erasOf(p, id), p.logs, ctxOf(p), day);
 
-/** The blocks a timed target is split into (16–17 always within the focus cap). */
+/** The blocks a timed target is shown in (16–17 always within the focus cap; adults only if they chose). */
 export function timerBlocksFor(p: PilotProgram, id: string, day: number): number[] {
-  const t = createTimer(id, day, targetFor(id, levelFor(p, id, day)), timerOpts(p));
-  return t?.blocks ?? [];
-}
-
-const timerOpts = (p: PilotProgram) => ({
-  teen: isTeen(pilotProfile(p.answers)),
-  split: !!p.answers.splitFocus,
-});
-
-/** The day's timer as it stands now (brought up to date; stopped at midnight if that day is over), or null. */
-export function timerOn(p: PilotProgram, id: string, day: number, now: number, today: number): TimerRun | null {
-  return loadTimer(p.logs, p.startedAt, day, id, now, today);
+  const t = targetFor(id, levelFor(p, id, day));
+  if (t.unit !== 'minutes') return [];
+  return timerBlocks(t, { teen: isTeen(pilotProfile(p.answers)), split: !!p.answers.splitFocus });
 }
 
 // --- Day rules: XP, streak, a full day ---
@@ -327,21 +486,47 @@ export const pilotXp = (p: PilotProgram) => totalXp(p.logs);
 export const dayFull = (p: PilotProgram, day: number) => isFullDay(logOf(p, day));
 
 /**
- * The pilot's streak: consecutive days that count by the 80% rule, ending today (an unfinished today doesn't break
- * it). A day with no daily habit and nothing done (only weekly habits, resting) is neutral: it neither counts nor
- * breaks the streak, so weekly habits never turn a rest day into a broken streak.
+ * How a day counts for the streak and the Journey: 'rest' when nothing was due (no daily habit, nothing done:
+ * weekly habits resting), else whether it met the existing 80% rule.
+ */
+export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'missed' {
+  const log = logOf(p, day);
+  const dailyDue = p.habits.some((id) => isDaily(p, id, day));
+  const planned = log ? plannedOn(p, day, log.completed) : dailyDue ? ['due'] : [];
+  if (planned.length === 0) return 'rest';
+  return log && dayQualifies({ ...log, planned }) ? 'counted' : 'missed';
+}
+
+/**
+ * The streak: consecutive days that count by the 80% rule, ending today (an unfinished today doesn't break it). A
+ * rest day is neutral: it neither counts nor breaks the streak.
  */
 export function pilotStreak(p: PilotProgram, today: number): number {
   let streak = 0;
   for (let d = today; d >= 1; d--) {
-    const log = logOf(p, d);
-    const dailyDue = p.habits.some((id) => isDaily(p, id, d));
-    const planned = log ? plannedOn(p, d, log.completed) : dailyDue ? ['due'] : [];
-    if (planned.length === 0) continue; // a rest day: neutral
-    if (log && dayQualifies({ ...log, planned })) streak++;
+    const r = dayResult(p, d);
+    if (r === 'rest') continue;
+    if (r === 'counted') streak++;
     else if (d !== today) break;
   }
   return streak;
+}
+
+/** The best streak so far (rest days neutral), and the days that counted. */
+export function journeyStats(p: PilotProgram, today: number) {
+  let best = 0;
+  let run = 0;
+  let done = 0;
+  for (let d = 1; d <= Math.min(today, PROGRAM_DAYS); d++) {
+    const r = dayResult(p, d);
+    if (r === 'rest') continue;
+    if (r === 'counted') {
+      done++;
+      run++;
+      best = Math.max(best, run);
+    } else if (d !== today) run = 0;
+  }
+  return { done, streak: pilotStreak(p, today), best };
 }
 
 // --- Changes. Each returns the new program and the tracking event (at most one, only when completion changes). ---
@@ -354,7 +539,7 @@ const atFor = (p: PilotProgram, day: number): At => ({
   planned: plannedOn(p, day, logOf(p, day)?.completed ?? []),
 });
 
-/** Applies a tracking change and re-derives that day's list from what's done (pilot days are never hand-planned). */
+/** Applies a tracking change and re-derives that day's list from what's done (days are never hand-planned). */
 function apply(p: PilotProgram, day: number, f: (logs: PilotProgram['logs'], at: At) => Change): PilotChange {
   const r = f(p.logs, atFor(p, day));
   if (r.logs === p.logs) return { program: p, event: null };
@@ -365,17 +550,18 @@ function apply(p: PilotProgram, day: number, f: (logs: PilotProgram['logs'], at:
 }
 
 const inProgram = (p: PilotProgram, id: string, day: number) =>
-  p.habits.includes(id as PilotHabitId) && day >= 1 && day <= PROGRAM_DAYS;
+  p.habits.includes(id) && day >= 1 && day <= PROGRAM_DAYS;
+const none = (p: PilotProgram): PilotChange => ({ program: p, event: null });
 
-/** The swipe, the check button or a timer's confirmation: done. Idempotent (no second XP, ever). */
+/** The swipe or the check button: done. Idempotent (no second XP, ever). */
 export function complete(p: PilotProgram, id: string, day: number): PilotChange {
-  if (!inProgram(p, id, day)) return { program: p, event: null };
+  if (!inProgram(p, id, day)) return none(p);
   return apply(p, day, (logs, at) => (id === 'strength_log' ? logSession(logs, at, id) : confirmDone(logs, at, id)));
 }
 
-/** Undo. A strength session is removed with its details; a timer's minutes and an entered amount stay. */
+/** Undo. A strength session is removed with its details; a counter goes back to one below its target. */
 export function undo(p: PilotProgram, id: string, day: number): PilotChange {
-  if (!inProgram(p, id, day) || !isDone(p, id, day)) return { program: p, event: null };
+  if (!inProgram(p, id, day) || !isDone(p, id, day)) return none(p);
   return apply(p, day, (logs, at) => (id === 'strength_log' ? undoSession(logs, at, id) : undoDone(logs, at, id)));
 }
 
@@ -383,40 +569,22 @@ export function toggle(p: PilotProgram, id: string, day: number): PilotChange {
   return isDone(p, id, day) ? undo(p, id, day) : complete(p, id, day);
 }
 
-/** Starts or resumes the day's timer (creating it with the day's local midnight as its end). Never completes. */
-export function startTimer(p: PilotProgram, id: string, day: number, now: number): PilotChange {
-  if (!inProgram(p, id, day)) return { program: p, event: null };
-  const t =
-    timerOn(p, id, day, now, day) ??
-    createTimer(id, day, targetFor(id, levelFor(p, id, day)), { ...timerOpts(p), dayEndsAt: localDayEnd(now) });
-  if (!t) return { program: p, event: null };
-  return apply(p, day, (logs, at) => saveTimer(logs, at, start(t, now, day), now));
+/** Get It Done and Stay Connected: one more (reaching the day's number completes it) or one less (a correction). */
+export function count(p: PilotProgram, id: string, day: number, by: 1 | -1): PilotChange {
+  const target = counterTarget(p, id, day);
+  if (!inProgram(p, id, day) || target === null) return none(p);
+  return apply(p, day, (logs, at) => (by > 0 ? increment : decrement)(logs, at, id, target));
 }
 
-export function pauseTimer(p: PilotProgram, id: string, day: number, now: number): PilotChange {
-  const t = timerOn(p, id, day, now, day);
-  if (!t) return { program: p, event: null };
-  return apply(p, day, (logs, at) => saveTimer(logs, at, pause(t, now, day), now));
+/** Skip today on purpose (Social Confidence: skipping a step is never a failure, but it's not done either). */
+export function setSkipped(p: PilotProgram, id: string, day: number, on: boolean): PilotChange {
+  if (!inProgram(p, id, day)) return none(p);
+  return apply(p, day, (logs, at) => (on ? skip : unskip)(logs, at, id));
 }
 
-/** Back to zero (the minutes it had counted go too; an entered amount stays). */
-export function resetTimer(p: PilotProgram, id: string, day: number, now: number): PilotChange {
-  const t = timerOn(p, id, day, now, day);
-  if (!t) return { program: p, event: null };
-  return apply(p, day, (logs, at) => saveTimer(logs, at, reset(t), now));
-}
-
-/** Saves the day's timer as it now stands (a ready or day-ended state is kept for the person to see). */
-export function settleTimer(p: PilotProgram, id: string, day: number, now: number, today: number): PilotChange {
-  const t = timerOn(p, id, day, now, today);
-  const saved = readTrack(logOf(p, day), id).timer;
-  if (!t || !saved || t.status === saved.status) return { program: p, event: null };
-  return apply(p, day, (logs, at) => saveTimer(logs, at, t, now));
-}
-
-/** Minutes the person adds later (null clears them). Never completes or undoes anything. */
+/** Optional minutes the person notes (null clears them). Never completes or undoes anything. */
 export function setMinutes(p: PilotProgram, id: string, day: number, minutes: number | null): PilotChange {
-  if (!inProgram(p, id, day)) return { program: p, event: null };
+  if (!inProgram(p, id, day)) return none(p);
   return apply(p, day, (logs, at) =>
     recordAmount(logs, at, id, minutes === null ? null : { value: minutes, unit: 'minutes' }),
   );
@@ -429,10 +597,21 @@ export function setSession(
   details: { type?: SessionType; minutes?: number },
 ): PilotChange {
   const id = 'strength_log';
-  if (!inProgram(p, id, day)) return { program: p, event: null };
+  if (!inProgram(p, id, day)) return none(p);
   return apply(p, day, (logs, at) =>
     isDone(p, id, day) ? editSession(logs, at, id, details) : logSession(logs, at, id, details),
   );
+}
+
+/** Less Scrolling's weekly Screen Time check: the person's own daily average this week (self-reported). */
+export function setScreenTime(p: PilotProgram, day: number, minutesPerDay: number): PilotProgram {
+  if (!p.habits.includes('screen_app_limit')) return p;
+  const measures = recordWeekly(p.measures ?? {}, p.startedAt, day, 'screen_app_limit', minutesPerDay);
+  return measures === p.measures ? p : { ...p, measures };
+}
+
+export function screenTimeFor(p: PilotProgram, day: number): WeeklyMeasure | null {
+  return weeklyMeasure(p.measures, 'screen_app_limit', weekOf(p.startedAt, day).week);
 }
 
 // --- Progression ---
@@ -445,6 +624,7 @@ export function constraintsFor(p: PilotProgram, id: string, day: number): Constr
     otherMinutes: busiestDayMinutes(
       p.habits.filter((x) => x !== id).map((x) => ({ habitId: x, level: levelOn(p.progression[x], day + 1) })),
     ),
+    ...(p.answers.pullMinutes !== undefined ? { pullBaseline: p.answers.pullMinutes } : {}),
   };
 }
 
@@ -494,7 +674,7 @@ export const easier = (p: PilotProgram, id: string, today: number): ManualChange
 export const harder = (p: PilotProgram, id: string, today: number): ManualChange =>
   manual(p, id, makeHarder(p.progression[id], ctxOf(p), today, constraintsFor(p, id, today)));
 
-/** A change waiting to start, in words ("Momentum from tomorrow"), or null. */
+/** A change waiting to start, in words ("Standard Momentum from tomorrow: …"), or null. */
 export function pendingText(p: PilotProgram, id: string, today: number): string | null {
   const e = pendingChange(p.progression[id], today);
   if (!e) return null;
@@ -502,11 +682,111 @@ export function pendingText(p: PilotProgram, id: string, today: number): string 
   return `${INTENSITY_NAME[e.intensity]} ${PHASE_NAME[e.phase]} from ${when}: ${targetText(p, id, e.fromDay)}`;
 }
 
-/** "Standard · Foundation", and the level's position (0–8) for the card's three bars. */
+/** "Standard · Foundation", and the phase's position (0–2) for the card's three bars. */
 export function levelLabel(l: Level): string {
   return `${INTENSITY_NAME[l.intensity]} · ${PHASE_NAME[l.phase]}`;
 }
 export const phaseIndex = (l: Level) => PHASES.indexOf(l.phase);
+
+// --- Insights: numbers from the saved days only (rules in SCHWUNG_LIFE_RESET_PROGRAM.md) ---
+
+export type Tally = { done: number; eligible: number };
+const share = (t: Tally) => (t.eligible ? t.done / t.eligible : null);
+export const consistency = share;
+
+/**
+ * A habit's opportunities so far, never inventing a miss:
+ * - daily habits: each day from Day 1 to yesterday is one opportunity; today counts only once it's done;
+ * - weekly habits: each finished week brings its goal (a closed week's credited completions, up to the goal, are
+ *   done); the current week counts only what's already credited, never what's still possible.
+ * Before noon yesterday is still editable, but it already counts here (a correction updates it).
+ */
+export function habitTally(p: PilotProgram, id: string, today: number): Tally {
+  const last = Math.min(today, PROGRAM_DAYS);
+  let done = 0;
+  let eligible = 0;
+  const weeks = weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), last);
+  for (const w of weeks) {
+    // Within a week, a habit is daily or weekly on a day by its schedule then (mixed habits change between phases).
+    for (let d = w.firstDay; d <= Math.min(w.lastDay, last); d++) {
+      if (!isDaily(p, id, d)) continue;
+      const isDoneDay = isDone(p, id, d);
+      if (d < today || isDoneDay) eligible++;
+      if (isDoneDay) done++;
+    }
+    const weekly = Array.from({ length: Math.min(w.lastDay, last) - w.firstDay + 1 }, (_, i) => w.firstDay + i).some(
+      (d) => !isDaily(p, id, d),
+    );
+    if (!weekly || w.goal === 0) continue;
+    // Credited: eligible days done, at most one a day, up to the goal (extras and non-workdays don't count).
+    done += w.credited;
+    eligible += w.closed ? w.goal : w.credited;
+  }
+  return { done, eligible };
+}
+
+/** Every habit's tally together (the overall consistency). */
+export function overallTally(p: PilotProgram, today: number): Tally {
+  return p.habits.reduce(
+    (t, id) => {
+      const h = habitTally(p, id, today);
+      return { done: t.done + h.done, eligible: t.eligible + h.eligible };
+    },
+    { done: 0, eligible: 0 },
+  );
+}
+
+/** Every completed habit action on record (each habit once a day at most). */
+export function totalCompleted(p: PilotProgram): number {
+  return Object.values(p.logs).reduce((n, l) => n + l.completed.filter((id) => p.habits.includes(id)).length, 0);
+}
+
+/**
+ * This calendar week so far: for daily habits, each day up to today is eligible (today included: it's still
+ * possible) and done days count; for weekly habits, the week's goal is eligible and its credited days are done.
+ */
+export function weekTally(p: PilotProgram, today: number): Tally {
+  const w = weekOf(p.startedAt, Math.min(today, PROGRAM_DAYS));
+  let done = 0;
+  let eligible = 0;
+  for (const id of p.habits) {
+    const days = Array.from({ length: Math.min(today, w.lastDay) - w.firstDay + 1 }, (_, i) => w.firstDay + i);
+    if (days.every((d) => isDaily(p, id, d))) {
+      eligible += days.length;
+      done += days.filter((d) => isDone(p, id, d)).length;
+    } else {
+      const s = weekSummary(id, erasOf(p, id), p.logs, ctxOf(p), w.firstDay, today);
+      eligible += s.goal;
+      done += s.credited;
+    }
+  }
+  return { done, eligible };
+}
+
+/** A habit's recent days, newest last: done, skipped, not done, or rest (a weekly habit's day off). */
+export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
+  const out: { day: number; state: 'done' | 'skipped' | 'missed' | 'rest' | 'today' }[] = [];
+  for (let d = Math.max(1, today - n + 1); d <= Math.min(today, PROGRAM_DAYS); d++) {
+    const t = trackOf(p, id, d);
+    out.push({
+      day: d,
+      state: isDone(p, id, d)
+        ? 'done'
+        : t.skipped
+          ? 'skipped'
+          : d === today
+            ? 'today'
+            : isDaily(p, id, d)
+              ? 'missed'
+              : 'rest',
+    });
+  }
+  return out;
+}
+
+/** A weekly habit's weeks so far (Strength Training: sessions a week). */
+export const habitWeeks = (p: PilotProgram, id: string, today: number): WeekSummary[] =>
+  weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), Math.min(today, PROGRAM_DAYS));
 
 // --- Loading saves ---
 
@@ -532,7 +812,7 @@ function validState(s: unknown, id: string): s is ProgressionState {
   );
 }
 
-/** A saved pilot program, if it's well formed (damaged day records are repaired or dropped); otherwise null. */
+/** A saved program, if it's well formed (damaged day records are repaired or dropped); otherwise null. */
 export function sanitizePilotProgram(x: unknown): PilotProgram | null {
   if (!isObj(x) || x.v !== 1 || typeof x.startedAt !== 'string' || !DATE_KEY.test(x.startedAt)) return null;
   const a = x.answers;
@@ -557,5 +837,13 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
       planned: strings(l.planned),
     } as DayLog;
   }
-  return { v: 1, startedAt: x.startedAt, answers: a as PilotAnswers, habits, progression, logs };
+  return {
+    v: 1,
+    startedAt: x.startedAt,
+    answers: a as PilotAnswers,
+    habits,
+    progression,
+    logs,
+    ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
+  };
 }

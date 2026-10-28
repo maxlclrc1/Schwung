@@ -1,5 +1,5 @@
 import { usePathname } from 'expo-router';
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
@@ -22,36 +22,36 @@ const TILE_NAMES = Object.keys(TILES.dark) as TileName[];
 
 /*
  * One continuous world behind the three tabs (testing builds), in a light and a dark painting:
- * Habits' peaceful valley, Journey's ascent and Field Notes' lakeside camp are regions of one panorama
+ * Habits' peaceful valley, Journey's ascent and Insights' lakeside camp are regions of one panorama
  * (design/canvas/assemble_panorama.py, SCHWUNG_CONTINUOUS_WORLD_ARTWORK_SPEC.md). Switching tabs pans the camera
  * across it; nothing reloads. The panorama scales so 1536 px span the screen, as the old world did, so the
  * Journey painting (rows 800-1824) keeps lining up with the trail drawn by the Journey screen.
  */
 
-const SCREEN_PX = 1536;
+export const SCREEN_PX = 1536;
 /** Where the camera rests for each tab, in panorama px. */
 const STOP_PX = 1280;
 /**
  * The panorama row each tab lines up with its trail area: the Journey painting's top (row 800) under Journey's
- * trail, and the lakeside band under Field Notes' camps. Habits has no trail and keeps Journey's alignment.
+ * trail, and the lakeside band under Insights' window onto the camp. Habits has no trail and keeps Journey's alignment.
  */
 const BAND_TOP_PX = [800, 800, LAKESIDE_BAND_TOP];
-/** How much of the background colour veils each region (Habits, Journey, Field Notes), so text stays readable. */
+/** How much of the background colour veils each region (Habits, Journey, Insights), so text stays readable. */
 const VEIL: Record<Theme, number[]> = { dark: [0.5, 0, 0.18], light: [0.45, 0, 0.15] };
 
-/** 0 Habits, 1 Journey, 2 Field Notes; animated between. */
+/** 0 Habits, 1 Journey, 2 Insights; animated between. */
 export const worldCamera = makeMutable(0);
 /**
  * Per tab: where its trail area starts in its page (pt; -1 until measured) and how far its page has scrolled.
- * Journey and Field Notes scroll the world with their pages, so their markers stay on the art; Habits doesn't.
+ * Journey scrolls the world with its page, so its markers stay on the art; Habits and Insights don't.
  */
 export const worldAnchor = [makeMutable(-1), makeMutable(-1), makeMutable(-1)];
 export const worldScroll = [makeMutable(0), makeMutable(0), makeMutable(0)];
 
-const TAB_INDEX: Record<string, number> = { '/today': 0, '/progress': 1, '/fieldnotes': 2 };
+const TAB_INDEX: Record<string, number> = { '/today': 0, '/progress': 1, '/insights': 2 };
 
 /**
- * For what a tab's page draws on the painting (Journey's trail and labels, Field Notes' camps). Pages slide a
+ * For what a tab's page draws on the painting (Journey's trail and labels). Pages slide a
  * screen width per tab while the painting pans STOP_PX of SCREEN_PX, so mid-slide the drawing is moved by the
  * difference and stays on its spot of the painting; it fades out as the camera leaves its tab (and in as it
  * arrives), so it's never seen out of place where the world also moves vertically between tabs.
@@ -104,7 +104,8 @@ export function WorldLayer() {
       const weight = Math.max(0, 1 - Math.abs(cam - i));
       if (weight === 0) continue;
       const anchor = i === 0 ? anchorOf(1) : anchorOf(i);
-      const scroll = i === 0 ? 0 : worldScroll[i].get();
+      // Habits and Insights keep the world still while their pages scroll; Journey moves it (its trail is on it).
+      const scroll = i === 1 ? worldScroll[i].get() : 0;
       y += weight * (anchor - BAND_TOP_PX[i] * scale - scroll);
     }
     return { transform: [{ translateX: -cam * STOP_PX * scale }, { translateY: y }] };
@@ -125,25 +126,9 @@ export function WorldLayer() {
       importantForAccessibility="no-hide-descendants"
       style={[StyleSheet.absoluteFill, { backgroundColor: c.bg, overflow: 'hidden' }]}
     >
-      {/* Each tile holds only the theme on screen; a theme switch loads the other first (ThemedImage). */}
+      {/* The camera moves this view on the UI thread; the tiles inside never re-render for it. */}
       <Animated.View style={[styles.pano, pan]}>
-        {TILE_NAMES.map((name) => {
-          const tile = TILES.dark[name];
-          return (
-            <ThemedImage
-              key={name}
-              sources={{ dark: tile.source, light: TILES.light[name].source }}
-              resizeMode="stretch"
-              style={{
-                position: 'absolute',
-                left: tile.x * scale,
-                top: 0,
-                width: tile.width * scale,
-                height: TILE_HEIGHT * scale,
-              }}
-            />
-          );
-        })}
+        <Tiles scale={scale} />
       </Animated.View>
       {/* ThemedView flattens its style, so the animated veil opacity sits on a wrapper. */}
       <Animated.View style={[StyleSheet.absoluteFill, veil]}>
@@ -152,6 +137,30 @@ export function WorldLayer() {
     </ThemedView>
   );
 }
+
+/**
+ * The six tiles (both themes of each region, kept decoded: see ThemedImage), memoized so a tab change, a pathname
+ * update or a camera move never re-renders them.
+ */
+const Tiles = memo(function Tiles({ scale }: { scale: number }) {
+  return TILE_NAMES.map((name) => {
+    const tile = TILES.dark[name];
+    return (
+      <ThemedImage
+        key={name}
+        sources={{ dark: tile.source, light: TILES.light[name].source }}
+        resizeMode="stretch"
+        style={{
+          position: 'absolute',
+          left: tile.x * scale,
+          top: 0,
+          width: tile.width * scale,
+          height: TILE_HEIGHT * scale,
+        }}
+      />
+    );
+  });
+});
 
 const styles = StyleSheet.create({
   pano: { position: 'absolute', left: 0, top: 0 },

@@ -1,5 +1,8 @@
 # Schwung — Life Reset In-App Pilot
 
+> **Superseded** by `SCHWUNG_LIFE_RESET_PROGRAM.md` (Stage 6): the pilot became the full Life Reset program with
+> all 11 habits and no timers. Kept as the record of Stage 5; its save carries on unchanged.
+
 **Stage 5:** the first end-to-end Life Reset pilot. Three habits (Read Daily, Focus Time, Strength Training) run in a
 **separate, temporary 66-day test program** in development and internal-testing builds. The other eight Life Reset
 habits stay inactive. The public release is unchanged, and its bundle doesn't contain the pilot.

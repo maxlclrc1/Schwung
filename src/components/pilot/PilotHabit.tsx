@@ -1,40 +1,30 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SheetHeader } from '../SheetHeader';
-import { Button, Card, Screen, T } from '../ui';
-import { dateForDay } from '../../core/dates';
+import { canEditYesterday } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
-import { activeMs } from '../../core/reset/timer';
-import { readTrack, recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
+import { recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
 import { haptic } from '../../lib/haptics';
-import { pilotToday, useResetPilot } from '../../store/resetPilot';
+import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
+import { SheetHeader } from '../SheetHeader';
+import { Button, Card, Screen, T } from '../ui';
 
-const clock = (ms: number) => {
-  const s = Math.max(0, Math.round(ms / 1000));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-};
+/** Habits measured in minutes, where noting the minutes is offered (optional, never needed). */
+const TIMED = new Set(['focus_deepwork', 'mind_read', 'move_walk', 'home_tidy', 'skill_practice']);
 
 /**
- * A pilot habit's details: today, the optional timer and minutes, a strength session's details, and difficulty
- * (development and internal-testing builds only: see app/pilot/[id].tsx).
+ * A Life Reset habit's details (development and internal-testing builds only: see app/pilot/[id].tsx): today and,
+ * until noon, yesterday; a counter, a strength session's details or optional minutes where they apply; Social
+ * Confidence's steps; and difficulty. Nothing here is needed to complete a habit: a swipe on the card is enough.
  */
 export function PilotHabit() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { c } = useTheme();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
-  const [now, setNow] = useState(() => Date.now());
   const [message, setMessage] = useState<string | null>(null);
-  const today = program ? pilotToday({ program, devDayOffset: offset }) : 0;
-  const timer = program && P.isPilotHabit(id) ? P.timerOn(program, id, today, now, today) : null;
-  const running = timer?.status === 'running';
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), running ? 1000 : 30_000);
-    return () => clearInterval(t);
-  }, [running]);
 
   if (!program || !P.isPilotHabit(id) || !program.habits.includes(id)) {
     return (
@@ -45,18 +35,21 @@ export function PilotHabit() {
   }
 
   const s = useResetPilot.getState;
+  const today = pilotToday({ program, devDayOffset: offset });
+  const yesterday = today > 1 && canEditYesterday(pilotNow(offset)) ? today - 1 : null;
   const level = P.levelFor(program, id, today);
   const done = P.isDone(program, id, today);
   const week = P.weekProgress(program, id, today);
-  const track = readTrack(program.logs[dateForDay(program.startedAt, today)], id);
+  const track = P.trackOf(program, id, today);
   const strength = id === 'strength_log';
+  const social = id === 'confidence_talk';
+  const counter = P.counterTarget(program, id, today);
   const pending = P.pendingText(program, id, today);
   const fb = program.progression[id].feedback;
   // Feedback about the current target only (as readiness reads it).
   const since = program.progression[id].eras.filter((e) => e.fromDay <= today).pop()?.fromDay ?? 1;
   const recentFeedback = fb && fb.day >= since ? fb.kind : null;
   const amount = track.amount?.value ?? null;
-  const total = timer ? timer.blocks.reduce((a, b) => a + b, 0) * 60_000 : 0;
 
   const change = (f: () => string | null) => {
     const blocked = f();
@@ -77,7 +70,8 @@ export function PilotHabit() {
           <T v="overline" color={c.accentInk}>
             {P.levelLabel(level)}
           </T>
-          <T v="heading">{P.targetText(program, id, today)}</T>
+          <T v="heading">{social ? 'Today’s step' : P.targetText(program, id, today)}</T>
+          {social ? <T>{P.targetText(program, id, today)}</T> : null}
           <T color={c.textDim}>{P.frequencyText(program, id, today)}</T>
           {week ? (
             <T v="bodyStrong">
@@ -101,61 +95,67 @@ export function PilotHabit() {
         <Card style={styles.gap}>
           <T v="bodyStrong">Today</T>
           <T color={c.textDim}>
-            {done ? (strength ? 'Session logged.' : 'Done.') : strength ? 'No session logged today.' : 'Not done yet.'}
+            {done
+              ? strength
+                ? 'Session logged.'
+                : 'Done.'
+              : track.skipped
+                ? 'Skipped today. That’s fine: it never counts as a failure.'
+                : strength
+                  ? 'No session logged today.'
+                  : 'Not done yet.'}
           </T>
+          {counter !== null ? (
+            <View style={styles.stepper}>
+              <Step label="−1" onPress={() => s().count(id, -1)} />
+              <T v="heading" style={[styles.tabular, styles.flexCenter]}>
+                {Math.min(track.count ?? 0, counter)} of {counter}
+              </T>
+              <Step label="+1" onPress={() => s().count(id, 1)} />
+            </View>
+          ) : null}
           <Button
             label={done ? (strength ? 'Undo session' : 'Undo') : strength ? 'Log a session' : 'Mark as done'}
             kind={done ? 'secondary' : 'primary'}
             onPress={() => s().toggle(id)}
           />
+          {social && !done ? (
+            <Button
+              label={track.skipped ? 'Don’t skip today' : 'Skip today'}
+              kind="ghost"
+              onPress={() => s().setSkipped(id, !track.skipped)}
+            />
+          ) : null}
+          {yesterday !== null ? (
+            <View style={styles.yesterday}>
+              <T v="caption" color={c.textDim} style={{ flex: 1 }}>
+                Yesterday: {P.isDone(program, id, yesterday) ? 'done' : 'not done'} (you can correct it until noon)
+              </T>
+              <Choice
+                label={P.isDone(program, id, yesterday) ? 'Undo yesterday' : 'Done yesterday'}
+                on={false}
+                onPress={() => s().toggle(id, yesterday)}
+              />
+            </View>
+          ) : null}
         </Card>
 
-        {!strength ? (
+        {social ? (
           <Card style={styles.gap}>
-            <T v="bodyStrong">Timer (optional)</T>
-            {timer ? (
-              <T v="title" style={styles.tabular}>
-                {clock(activeMs(timer, now))} / {clock(total)}
+            <T v="bodyStrong">Any of these counts</T>
+            {P.socialSteps(program, today).map((a) => (
+              <T key={a.id} v="caption" color={c.textDim}>
+                · {a.text}
               </T>
-            ) : null}
-            {timer && timer.blocks.length > 1 ? (
-              <T v="caption" color={c.textDim}>
-                {timer.blocks.length} blocks of {timer.blocks[0]} min. Block{' '}
-                {Math.min(timer.block + 1, timer.blocks.length)}.
-              </T>
-            ) : null}
-            <T v="caption" color={c.textDim}>
-              {timer?.status === 'ready'
-                ? 'Target reached. Confirm when you’ve finished: the timer never marks it done by itself.'
-                : timer?.status === 'day-ended'
-                  ? 'The timer stopped at midnight. Its time stays with that day.'
-                  : 'Keeps counting when you leave the app. You can always just swipe instead.'}
-            </T>
-            <View style={styles.buttons}>
-              {timer?.status === 'ready' && !done ? (
-                <Button label="Confirm done" style={styles.flex} onPress={() => s().complete(id)} />
-              ) : running ? (
-                <Button label="Pause" style={styles.flex} onPress={() => s().pauseTimer(id)} />
-              ) : timer?.status !== 'day-ended' && timer?.status !== 'ready' && !done ? (
-                <Button
-                  label={timer && timer.status !== 'idle' ? 'Resume' : 'Start'}
-                  style={styles.flex}
-                  onPress={() => s().startTimer(id)}
-                />
-              ) : null}
-              {timer && timer.status !== 'idle' ? (
-                <Button label="Reset" kind="secondary" style={styles.flex} onPress={() => s().resetTimer(id)} />
-              ) : null}
-            </View>
+            ))}
           </Card>
         ) : null}
 
-        {!strength ? (
+        {TIMED.has(id) ? (
           <Card style={styles.gap}>
             <T v="bodyStrong">Minutes (optional)</T>
             <T v="caption" color={c.textDim}>
-              Note how long you {id === 'mind_read' ? 'read' : 'focused'}, now or later. It never changes whether today
-              is done.{track.minutes ? ` The timer counted ${track.minutes} min.` : ''}
+              Note how long it took, if you like. It never changes whether today is done.
             </T>
             <View style={styles.stepper}>
               <Step label="−5" onPress={() => s().setMinutes(id, amount && amount > 5 ? amount - 5 : null)} />
@@ -164,9 +164,10 @@ export function PilotHabit() {
               </T>
               <Step label="+5" onPress={() => s().setMinutes(id, (amount ?? 0) + 5)} />
             </View>
-            {amount ? <Button label="Clear minutes" kind="ghost" onPress={() => s().setMinutes(id, null)} /> : null}
           </Card>
-        ) : (
+        ) : null}
+
+        {strength ? (
           <Card style={styles.gap}>
             <T v="bodyStrong">Session details (optional)</T>
             <T v="caption" color={c.textDim}>
@@ -198,7 +199,7 @@ export function PilotHabit() {
               </T>
             ) : null}
           </Card>
-        )}
+        ) : null}
 
         <Card style={styles.gap}>
           <T v="bodyStrong">Difficulty</T>
@@ -261,11 +262,10 @@ function Choice({ label, on, onPress }: { label: string; on: boolean; onPress: (
 const styles = StyleSheet.create({
   scroll: { padding: space.lg, gap: space.lg, paddingBottom: space.xxxl },
   gap: { gap: space.sm },
-  buttons: { flexDirection: 'row', gap: space.sm },
   stack: { gap: space.sm },
-  flex: { flex: 1 },
   flexCenter: { flex: 1, textAlign: 'center' },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  yesterday: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
     minHeight: 40,
