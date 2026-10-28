@@ -56,11 +56,11 @@ export function InsightsPage({ children }: { children: ReactNode }) {
         </T>
         <SettingsButton />
       </View>
-      {/* A window onto the lakeside, between the title and the numbers. */}
+      {/* A narrow window onto the lakeside, between the title and the numbers. */}
       <View
         accessible={false}
         importantForAccessibility="no-hide-descendants"
-        style={{ height: Math.round(width * 0.36), marginHorizontal: -space.lg }}
+        style={{ height: Math.round(width * 0.12), marginHorizontal: -space.lg }}
       />
       {children}
     </Animated.ScrollView>
