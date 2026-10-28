@@ -26,6 +26,36 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>>
     light: require('../../assets/habits/move_walk-light.webp'),
     dark: require('../../assets/habits/move_walk-dark.webp'),
   },
+  // The Life Reset's other habits, from design/artwork-candidates/scene-<id>-<theme>-v1.png (same conversion).
+  // Social Confidence (confidence_talk) waits for its light version; until then it keeps a world crop.
+  sleep_wake: {
+    light: require('../../assets/habits/sleep_wake-light.webp'),
+    dark: require('../../assets/habits/sleep_wake-dark.webp'),
+  },
+  focus_top3: {
+    light: require('../../assets/habits/focus_top3-light.webp'),
+    dark: require('../../assets/habits/focus_top3-dark.webp'),
+  },
+  screen_app_limit: {
+    light: require('../../assets/habits/screen_app_limit-light.webp'),
+    dark: require('../../assets/habits/screen_app_limit-dark.webp'),
+  },
+  strength_log: {
+    light: require('../../assets/habits/strength_log-light.webp'),
+    dark: require('../../assets/habits/strength_log-dark.webp'),
+  },
+  home_tidy: {
+    light: require('../../assets/habits/home_tidy-light.webp'),
+    dark: require('../../assets/habits/home_tidy-dark.webp'),
+  },
+  skill_practice: {
+    light: require('../../assets/habits/skill_practice-light.webp'),
+    dark: require('../../assets/habits/skill_practice-dark.webp'),
+  },
+  social_reach_out: {
+    light: require('../../assets/habits/social_reach_out-light.webp'),
+    dark: require('../../assets/habits/social_reach_out-dark.webp'),
+  },
 };
 
 /** The final scene for a habit in a theme, once it has one. */

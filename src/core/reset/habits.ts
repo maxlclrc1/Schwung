@@ -377,7 +377,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Keep your main app under your daily limit',
     category: 'digital',
     existingId: 'screen_app_limit',
-    art: null,
+    art: 'screen_app_limit',
     frequency: 'daily',
     targets: Object.fromEntries(
       INTENSITIES.map((i) => [
@@ -410,7 +410,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Write today’s top tasks and finish them',
     category: 'execution',
     existingId: 'focus_top3',
-    art: null,
+    art: 'focus_top3',
     frequency: 'workdays',
     targets: (() => {
       const row = (i: Intensity, days: number, cells: [string, number, string | undefined][]): Record<Phase, Target> =>
@@ -546,7 +546,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Be up by your time, every day',
     category: 'sleep',
     existingId: 'sleep_wake',
-    art: null,
+    art: 'sleep_wake',
     frequency: 'daily',
     targets: Object.fromEntries(
       (
@@ -585,7 +585,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Tidy your room, desk or kitchen',
     category: 'home',
     existingId: null,
-    art: null,
+    art: 'home_tidy',
     frequency: 'daily',
     targets: minutesTargets(
       { starter: [5, 8, 10], standard: [10, 12, 15], challenge: [15, 20, 25] },
@@ -608,7 +608,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Practise the skill you picked',
     category: 'skill',
     existingId: null,
-    art: null,
+    art: 'skill_practice',
     frequency: 'weekly',
     targets: minutesTargets(
       { starter: [10, 15, 20], standard: [20, 30, 40], challenge: [40, 60, 90] },
@@ -635,7 +635,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Message or call people you care about (more than a like)',
     category: 'social',
     existingId: 'social_reach_out',
-    art: null,
+    art: 'social_reach_out',
     frequency: 'mixed',
     targets: (() => {
       const cell = (people: number, days: number, calls?: number): Target => ({
@@ -671,7 +671,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Log a strength session from a routine you follow or choose',
     category: 'strength',
     existingId: null,
-    art: null,
+    art: 'strength_log',
     frequency: 'sessions',
     targets: {
       starter: {
