@@ -7,13 +7,14 @@
   The whole card is swiped to the right to complete the habit.
 - Scenes are looked up by stable habit id in `src/components/habitArt.ts`.
 - **Shipped:** the three pilots, `mind_read` (Read), `focus_deepwork` (Focused work) and `move_walk` (Walk), and
-  seven more Life Reset habits: `sleep_wake`, `focus_top3`, `screen_app_limit`, `strength_log`, `home_tidy`,
-  `skill_practice` and `social_reach_out` (prompts: `design/canvas/HABIT_SCENE_PROMPTS_2.md`), each in light and dark.
+  the other eight Life Reset habits: `sleep_wake`, `focus_top3`, `screen_app_limit`, `strength_log`, `home_tidy`,
+  `skill_practice`, `social_reach_out` and `confidence_talk` (prompts: `design/canvas/HABIT_SCENE_PROMPTS_2.md`), each in light and dark.
   - Their light masters came back as saturated golden sunsets, so the shipped light files get a morning-mist grade:
     colour at 75%, then blended toward the world's lavender-grey mist (#E8E4F0) from 15% at the top to 45% at the
     bottom, which keeps dark text readable and matches the pilots. The masters stay as uploaded.
-  - `confidence_talk` (Social Confidence) has a dark master only (`scene-confidence_talk-dark-v1.png`); it keeps a
-    world crop until its light version exists. `scene-social_reach_out-*-alt.png` are the unused alternatives.
+  - `confidence_talk` (Social Confidence) came later, with the same grade: its light master is a close repaint
+    rather than an exact relight (the bridge sits a little to the right), which the theme cross-fade hides.
+  - `scene-social_reach_out-*-alt.png` are the unused alternatives.
 - **Every other habit** shows a crop of the world panorama until its scene exists, the same crop for a
   habit every time.
 

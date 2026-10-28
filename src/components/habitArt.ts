@@ -27,7 +27,6 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>>
     dark: require('../../assets/habits/move_walk-dark.webp'),
   },
   // The Life Reset's other habits, from design/artwork-candidates/scene-<id>-<theme>-v1.png (same conversion).
-  // Social Confidence (confidence_talk) waits for its light version; until then it keeps a world crop.
   sleep_wake: {
     light: require('../../assets/habits/sleep_wake-light.webp'),
     dark: require('../../assets/habits/sleep_wake-dark.webp'),
@@ -55,6 +54,10 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>>
   social_reach_out: {
     light: require('../../assets/habits/social_reach_out-light.webp'),
     dark: require('../../assets/habits/social_reach_out-dark.webp'),
+  },
+  confidence_talk: {
+    light: require('../../assets/habits/confidence_talk-light.webp'),
+    dark: require('../../assets/habits/confidence_talk-dark.webp'),
   },
 };
 
