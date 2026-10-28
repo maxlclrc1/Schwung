@@ -9,15 +9,21 @@ import {
   type TabNavigationState,
   useNavigationBuilder,
 } from 'expo-router/react-navigation';
-import React, { memo, type ReactNode, useEffect, useSyncExternalStore } from 'react';
+import React, { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View, type ColorValue } from 'react-native';
-import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
+import {
+  GestureDetector,
+  GestureStateManager,
+  type GestureTouchEvent,
+  usePanGesture,
+} from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
   Easing,
   makeMutable,
   useAnimatedStyle,
   useReducedMotion,
+  useSharedValue,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -27,7 +33,7 @@ import { PAGE_MS, pageOffset, pageTarget } from '../core/pager';
 import { haptic } from '../lib/haptics';
 import { useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
-import { PagerGesture, pagerOpen } from './TabPager';
+import { cardDownAt, InPager, pagerOpen } from './TabPager';
 import { worldCamera } from './WorldLayer';
 
 /*
@@ -38,7 +44,8 @@ import { worldCamera } from './WorldLayer';
  *
  * - The drag is a gesture-handler pan with worklet callbacks: it activates once the drag is clearly sideways (a
  *   vertical or diagonal drag stays the page's scroll), never on a touch that started on a habit card (the card
- *   blocks it: TabPager.useCardBlock), and not under a modal or with the keyboard up (pagerOpen).
+ *   marks it: TabPager.useCardBlock), and not under a modal or with the keyboard up (pagerOpen). Its worklets are
+ *   created once and never wait on another gesture.
  * - On release the camera springs from the finger's position and speed to the target tab (no jump, and a flick is
  *   carried through); the navigator's state follows on the JS thread, which moves nothing.
  * - A tab tap or a link animates the camera the same way. With Reduce Motion, nothing follows the finger: a swipe
@@ -128,47 +135,90 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
     if (names[target] && target !== focused) navigation.navigate(names[target]);
     else highlight(focused);
   };
-
-  const pan = usePanGesture({
-    enabled: pagerOpen,
-    activeOffsetX: [-14, 14],
-    failOffsetY: [-10, 10],
-    onActivate: () => {
-      'worklet';
-      cancelAnimation(worldCamera);
-    },
-    onUpdate: (e) => {
-      'worklet';
-      if (reduceMotion) return;
-      const at = pagerIndex.get();
-      worldCamera.set(at - pageOffset(e.translationX, at, count) / width);
-    },
-    onDeactivate: (e) => {
-      'worklet';
-      const at = pagerIndex.get();
-      // Gesture-handler velocities are in pt/s; the pager's rules use pt/ms.
-      const target = e.canceled ? at : pageTarget(e.translationX, e.velocityX / 1000, width, at, count);
-      pagerIndex.set(target);
-      // The tab bar shows the new tab at once (a tiny update); the navigator's state, which re-renders more, follows
-      // once the slide has landed, so no React work competes with it. An interrupted slide hands over to the next.
-      if (target !== at) scheduleOnRN(highlight, target);
-      if (reduceMotion) {
-        worldCamera.set(target);
-        scheduleOnRN(go, target);
-      } else
-        worldCamera.set(
-          withSpring(target, { ...SPRING, velocity: -e.velocityX / width }, (finished) => {
-            if (finished) scheduleOnRN(go, target);
-          }),
-        );
-    },
+  // The gesture's worklets are created once (a new config would re-send it to the native handler on every render);
+  // what changes reaches them through shared values, and the landing through a stable function.
+  const goRef = useRef(go);
+  useEffect(() => {
+    goRef.current = go;
   });
+  const land = useCallback((target: number) => goRef.current(target), []);
+  const pageWidth = useSharedValue(width);
+  const pageCount = useSharedValue(count);
+  const still = useSharedValue(reduceMotion);
+  useEffect(() => {
+    pageWidth.set(width);
+    pageCount.set(count);
+    still.set(reduceMotion);
+  }, [width, count, reduceMotion, pageWidth, pageCount, still]);
+
+  // Where and when this touch began, and whether the pager took it (UI thread).
+  const touch = useSharedValue({ x: 0, y: 0, at: 0, active: false });
+  const config = useMemo(
+    () => ({
+      enabled: pagerOpen,
+      // The pager decides itself when to take a drag (below), so nothing can activate it before those checks.
+      manualActivation: true,
+      onTouchesDown: (e: GestureTouchEvent) => {
+        'worklet';
+        const t = e.allTouches[0];
+        if (t) touch.set({ x: t.absoluteX, y: t.absoluteY, at: Date.now(), active: false });
+      },
+      onTouchesMove: (e: GestureTouchEvent) => {
+        'worklet';
+        const t = e.allTouches[0];
+        const s = touch.get();
+        if (!t || s.active) return;
+        // A touch that began on a habit card (the card stamped the same moment) is the card's.
+        if (Math.abs(cardDownAt.get() - s.at) < 150) return GestureStateManager.fail(e.handlerTag);
+        const dx = Math.abs(t.absoluteX - s.x);
+        const dy = Math.abs(t.absoluteY - s.y);
+        // Vertical (or more vertical than sideways) first: the page's scroll. Clearly sideways: the pager's.
+        if (dy > 10 && dy >= dx) return GestureStateManager.fail(e.handlerTag);
+        if (dx >= 14) {
+          touch.set({ ...s, active: true });
+          GestureStateManager.activate(e.handlerTag);
+        }
+      },
+      onActivate: () => {
+        'worklet';
+        cancelAnimation(worldCamera);
+      },
+      onUpdate: (e: { translationX: number }) => {
+        'worklet';
+        if (still.get()) return;
+        const at = pagerIndex.get();
+        worldCamera.set(at - pageOffset(e.translationX, at, pageCount.get()) / pageWidth.get());
+      },
+      onDeactivate: (e: { translationX: number; velocityX: number; canceled: boolean }) => {
+        'worklet';
+        const at = pagerIndex.get();
+        const w = pageWidth.get();
+        // Gesture-handler velocities are in pt/s; the pager's rules use pt/ms.
+        const target = e.canceled ? at : pageTarget(e.translationX, e.velocityX / 1000, w, at, pageCount.get());
+        pagerIndex.set(target);
+        // The tab bar shows the new tab at once (a tiny update); the navigator's state, which re-renders more,
+        // follows once the slide has landed, so no React work competes with it. An interrupted slide hands over.
+        if (target !== at) scheduleOnRN(highlight, target);
+        if (still.get()) {
+          worldCamera.set(target);
+          scheduleOnRN(land, target);
+        } else
+          worldCamera.set(
+            withSpring(target, { ...SPRING, velocity: -e.velocityX / w }, (finished) => {
+              if (finished) scheduleOnRN(land, target);
+            }),
+          );
+      },
+    }),
+    [land, pageWidth, pageCount, still, touch],
+  );
+  const pan = usePanGesture(config);
 
   const row = useAnimatedStyle(() => ({ transform: [{ translateX: -worldCamera.get() * width }] }));
 
   return (
     <NavigationContent>
-      <PagerGesture value={pan}>
+      <InPager value>
         <View style={styles.fill}>
           <GestureDetector gesture={pan}>
             <View style={[styles.fill, styles.clip, WEB_PAN_Y]}>
@@ -196,7 +246,7 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
             }}
           />
         </View>
-      </PagerGesture>
+      </InPager>
     </NavigationContent>
   );
 }

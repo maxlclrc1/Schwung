@@ -331,8 +331,18 @@ describe('routes', () => {
     const pager = read('../components/PagerTabs.tsx');
     expect(pager).toContain('enabled: pagerOpen,');
     expect(pager.match(/'worklet';/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(pager).toContain('pageTarget(e.translationX, e.velocityX / 1000, width, at, count)');
-    expect(pager).toContain('<PagerGesture value={pan}>');
+    expect(pager).toContain('pageTarget(e.translationX, e.velocityX / 1000, w, at, pageCount.get())');
+    expect(pager).toContain('<InPager value>');
+    // Created once (never re-sent to the native handler on a render), activated only by its own checks, and never
+    // waiting on another gesture: a card's gesture only stamps its touch and fails at once.
+    expect(pager).toContain('const config = useMemo(');
+    expect(pager).toContain('manualActivation: true,');
+    expect(pager).toContain(
+      'if (Math.abs(cardDownAt.get() - s.at) < 150) return GestureStateManager.fail(e.handlerTag);',
+    );
+    const owner = read('../components/TabPager.tsx');
+    expect(owner).not.toMatch(/block:|requireToFail|simultaneousWith/);
+    expect(owner).toContain('cardDownAt.set(Date.now());');
     // The release opens the journey as the same sheet as before; the Journey tab sends it there too.
     const today = read('(tabs)/today.tsx');
     // The habit cards are a testing-build design; the public release keeps its rows.
