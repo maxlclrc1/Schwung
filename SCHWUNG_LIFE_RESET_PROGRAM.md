@@ -264,8 +264,12 @@ alignment are unchanged.
   re-renders more, is updated only after the page has landed, so no React work competes with the slide.
 - **Rules unchanged:** `core/pager.ts` (the 30% distance, the flick, cancelling) now runs as worklets.
 - **Ownership:**
-  - a habit card holds a gesture that blocks the pager natively, so a touch that starts on a card is always the
-    card's;
+  - a habit card stamps the moment a touch begins on it (a gesture that fails at once and never waits on anything);
+    the pager activates itself only after its own checks (manual activation), and never for a touch that began on
+    a card, so the card's own swipe always wins;
+  - the gesture's setup is created once and never re-sent to the native handler on a render (an earlier version
+    re-sent it on every tab change and had each card's gesture block the pager until it ended, which on iOS could
+    leave the app unresponsive after a few swipes);
   - a sheet over a tab and the keyboard (text entry) switch the pager off through a shared value;
   - the stack's modals (Settings, a habit's details) sit above the tabs and get no tab swipes.
 - **Reduce Motion:** nothing follows the finger; a swipe or a tap changes tab at once.
