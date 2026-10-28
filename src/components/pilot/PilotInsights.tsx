@@ -1,17 +1,19 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import * as C from '../../core/reset/charts';
 import * as P from '../../core/reset/pilot';
 import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
+import { Heatmap, PersonalRecords, useShownOnce, useWhileFocused, WeeklyTrend } from '../InsightCharts';
 import { DayStrip, HabitInsight, Overview, SectionTitle, WeekBars } from '../Insights';
 import { Button, T } from '../ui';
 
 /**
- * Insights for the Life Reset (testing builds): the overview, then each habit with its consistency, its week and
- * its history, and, a tap away, its details and difficulty. Less Scrolling adds the optional weekly Screen Time
+ * Insights for the Life Reset (testing builds): the overview and the weekly trend, then each habit as a bar with its
+ * week (a tap shows its history, details and difficulty), the 66-day heatmap and the personal records. Less Scrolling adds the optional weekly Screen Time
  * check. Numbers come from the saved days only (reset/pilot.ts: habitTally, weekTally, recentDays, habitWeeks).
  */
 export function PilotInsights() {
@@ -27,18 +29,38 @@ export function PilotInsights() {
     }),
     [program, today],
   );
+  // The charts mount once Insights is first shown, and follow the saved days while it's shown (InsightCharts).
+  const shown = useShownOnce();
+  const frozen = useWhileFocused(program);
+  const frozenToday = useWhileFocused(today);
+  const charts = useMemo(() => {
+    if (!shown) return null;
+    const trend = C.weeklyTrend(frozen, frozenToday);
+    return {
+      trend,
+      cells: C.dayCells(frozen, frozenToday),
+      records: C.records(frozen, frozenToday, trend),
+      bars: new Map(C.habitBars(frozen, frozenToday).map((b) => [b.id, b])),
+    };
+  }, [frozen, frozenToday, shown]);
 
   return (
     <>
       <Overview {...data} day={today} />
+      {charts ? <WeeklyTrend points={charts.trend} /> : null}
       <SectionTitle>Your habits</SectionTitle>
       {program.habits.map((id) => {
         const week = P.weekProgress(program, id, today);
         const level = P.levelFor(program, id, today);
+        const bar = charts?.bars.get(id);
+        const met =
+          bar && bar.kind === 'weekly' && bar.weeksJudged
+            ? ` · goal met ${bar.weeksMet} of ${bar.weeksJudged} weeks`
+            : '';
         const subtitle = week
           ? week.goal === 0
-            ? `${P.levelLabel(level)} · a short week, no goal`
-            : `${P.levelLabel(level)} · ${week.credited} of ${week.goal} this week`
+            ? `${P.levelLabel(level)} · a short week, no goal${met}`
+            : `${P.levelLabel(level)} · ${week.credited} of ${week.goal} this week${met}`
           : `${P.levelLabel(level)} · every day`;
         return (
           <HabitInsight
@@ -64,6 +86,12 @@ export function PilotInsights() {
           </HabitInsight>
         );
       })}
+      {charts ? (
+        <>
+          <Heatmap cells={charts.cells} today={today} name={P.habitName} />
+          <PersonalRecords records={charts.records} />
+        </>
+      ) : null}
       {program.habits.includes('screen_app_limit') ? <ScreenTimeCheck program={program} today={today} /> : null}
     </>
   );

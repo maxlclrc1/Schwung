@@ -703,26 +703,34 @@ export const consistency = share;
  */
 export function habitTally(p: PilotProgram, id: string, today: number): Tally {
   const last = Math.min(today, PROGRAM_DAYS);
+  return weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), last).reduce(
+    (t, w) => {
+      const x = weekTallyOf(p, id, w, today);
+      return { done: t.done + x.done, eligible: t.eligible + x.eligible };
+    },
+    { done: 0, eligible: 0 },
+  );
+}
+
+/** One habit's opportunities in one program week (habitTally's rules; the weekly trend adds these up). */
+export function weekTallyOf(p: PilotProgram, id: string, w: WeekSummary, today: number): Tally {
+  const last = Math.min(w.lastDay, today, PROGRAM_DAYS);
   let done = 0;
   let eligible = 0;
-  const weeks = weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), last);
-  for (const w of weeks) {
-    // Within a week, a habit is daily or weekly on a day by its schedule then (mixed habits change between phases).
-    for (let d = w.firstDay; d <= Math.min(w.lastDay, last); d++) {
-      if (!isDaily(p, id, d)) continue;
-      const isDoneDay = isDone(p, id, d);
-      if (d < today || isDoneDay) eligible++;
-      if (isDoneDay) done++;
+  let weekly = false;
+  // Within a week, a habit is daily or weekly on a day by its schedule then (mixed habits change between phases).
+  for (let d = w.firstDay; d <= last; d++) {
+    if (!isDaily(p, id, d)) {
+      weekly = true;
+      continue;
     }
-    const weekly = Array.from({ length: Math.min(w.lastDay, last) - w.firstDay + 1 }, (_, i) => w.firstDay + i).some(
-      (d) => !isDaily(p, id, d),
-    );
-    if (!weekly || w.goal === 0) continue;
-    // Credited: eligible days done, at most one a day, up to the goal (extras and non-workdays don't count).
-    done += w.credited;
-    eligible += w.closed ? w.goal : w.credited;
+    const isDoneDay = isDone(p, id, d);
+    if (d < today || isDoneDay) eligible++;
+    if (isDoneDay) done++;
   }
-  return { done, eligible };
+  if (!weekly || w.goal === 0) return { done, eligible };
+  // Credited: eligible days done, at most one a day, up to the goal (extras and non-workdays don't count).
+  return { done: done + w.credited, eligible: eligible + (w.closed ? w.goal : w.credited) };
 }
 
 /** Every habit's tally together (the overall consistency). */
