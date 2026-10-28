@@ -145,12 +145,51 @@ Insights shows the program on screen (Life Reset or V1/V2), from its saved days 
 - **Weekly habits:** each finished week contributes its goal; the current week counts only what's already credited.
 - **V1/V2:** each due day since the habit joined, and today once done. Rest days of scheduled habits never count.
 
-**Per habit:** consistency, this week ("2 of 4"), and a quiet history (the last 14 days as small marks, or a weekly
-habit's weeks as small bars). Tap a habit for more:
+**Per habit:** a compact bar (its consistency), this week ("2 of 4") and, for a weekly habit, how many finished
+weeks met their goal. Tap a habit for:
 
+- **Its history:** the last 14 days as small marks, or a weekly habit's weeks as small bars.
 - **Its target.**
 - **Strength:** sessions per week against the target.
 - **A link to its details:** corrections and difficulty.
+
+### Insights charts
+
+Plain views, no chart library (`components/InsightCharts.tsx`); the numbers are pure functions with tests
+(`core/charts.ts`, `core/reset/charts.ts`, and `core/insights.ts` for V1/V2).
+
+- **Weekly consistency:** one bar per program week (Monday to Sunday, so the first and last can be short).
+  - **Value:** done ÷ eligible with exactly the overall consistency's opportunities, added up week by week; the
+    weeks always sum to the overall number (tested). Rest days are never opportunities; weekly habits count by
+    their goal.
+  - **This week:** an outlined bar, "so far" (today and open weekly goals aren't counted yet).
+  - **A finished week with no record at all:** a dashed gap, "no days recorded", never a 0% bar. Within a week that
+    has records, an unrecorded day still counts as a missed opportunity, as in the overall consistency.
+  - **A week with nothing due:** a dot, "nothing was due".
+  - **Too little data:** before the first week ends, and with only one finished week, a note says so.
+  - **Interaction:** tap a bar for its numbers; the last finished week is selected at first.
+- **The 66-day heatmap:** one column per calendar week, Monday on top, each day on its real date and weekday.
+  - **Day states:** all done (solid), some (lighter, by the share done), none done on a day with a record (a ring),
+    skipped (faint fill), rest (a small dot: nothing was due), no record (dashed), today (accent ring), not yet
+    reached (faint).
+  - **Each state has a shape too**, not only a colour; a legend is always shown.
+  - **Tap a day** for its date, Day number and what was recorded ("1 of 3 done: Read Daily. Skipped: Daily
+    Movement."). VoiceOver reads the same for every cell.
+- **Personal records:**
+  - the most consistent **full** finished week (a short first week never counts);
+  - total habit actions done;
+  - the longest streak, by the program's own rule;
+  - reading days (if Read Daily is in the program);
+  - strength sessions (if Strength Training is).
+  - Never minutes or hours.
+- **Empty states:** "—" with what's needed ("after your first full week"); records start at 0.
+- **Performance:**
+  - the charts mount only once Insights is first shown, a frame after it comes into focus, never during the slide
+    (and never at all for someone who doesn't open it);
+  - while another tab is shown they keep the numbers they had, and recompute when Insights is shown again (a habit
+    checked off on Habits doesn't recompute charts behind the page);
+  - everything is memoized per change, nothing is computed per animation frame, and the only animation is one
+    200 ms fade-in (instant with Reduce Motion).
 
 **Less Scrolling:** an optional weekly Screen Time check. The person's own daily average, saved per week as
 self-reported, never affecting a day or a streak.
@@ -202,25 +241,65 @@ alignment are unchanged.
   colour system to move off React context (a larger change); it's the next suspect if the switch still feels late
   on a device.
 
-**Next page slow to appear.**
+**Tab swiping lag (the cause).** Before this change, a swipe ran through two animation systems and the JS thread:
 
-- **The cause:** releasing a swipe navigates. Navigating re-rendered the tab layout and, through it, all three
-  pages (Habits with its cards, Journey with its 66-day mountain, Insights) before the native slide could start.
-- **Changes:**
-  - each tab page now renders a memoized body, so a tab change doesn't re-render page content;
-  - the world's six tiles are memoized, so a tab change or camera move never re-renders them;
-  - the timer ticking (once a second while a timer ran) is gone with the timers.
-- **Unchanged and already fine:**
-  - the pages are kept mounted and attached (no first render mid-gesture);
-  - card images are decoded with their page, not during a gesture;
-  - the world pans on the UI thread (Reanimated), and the pages' drag offset is a native-driven `Animated.Value`.
-- **Still on the JS thread:** the pager's touch handling is the responder system, so each finger move passes
-  through JS (one `setValue` and one shared-value write). A busy JS thread can still make the drag lag. Moving the
-  gesture to the UI thread would need react-native-gesture-handler, a new native dependency, so it isn't done here.
+- **The finger:** the pager used React Native's responder system, so every finger move went through the JS thread,
+  then set the pages' offset (React Native `Animated`) and the panorama's camera (Reanimated) separately. Any JS
+  work (a re-render, a timer, a save) delayed the drag, and the page trailed the finger by about a frame.
+- **The release:** navigating re-rendered the tab layout and its pages before js-tabs' slide started, and the
+  panorama only started moving from an effect after React committed. At 6× CPU slowdown that showed as an 83 ms
+  frame at the moment of release.
+- **Not the cause:** image decoding (pages stay mounted and decoded), mounted pages (kept, for scroll positions),
+  and the world tiles (memoized, never re-rendered by a swipe).
+
+**Tab swiping (the change).** One value on the UI thread, `worldCamera`, now moves everything:
+
+- **Navigator:** a small Expo Router navigator (`components/PagerTabs.tsx`, built on its tab router) lays the three
+  pages side by side in one row that is translated by the camera; the panorama reads the same camera. Page and
+  landscape move in the same frame by construction, and the Journey trail and the Insights lake stay aligned.
+- **Gesture:** a react-native-gesture-handler pan with worklet callbacks (UI thread). It activates on a clearly
+  sideways drag (14 pt), fails on a vertical one (10 pt), and gives only a little past the first and last tab.
+- **Release:** a critically damped spring from the finger's position **and speed** to the target tab, so there's no
+  jump and a flick carries through. The tab bar highlights the new tab at once; the navigator's state, which
+  re-renders more, is updated only after the page has landed, so no React work competes with the slide.
+- **Rules unchanged:** `core/pager.ts` (the 30% distance, the flick, cancelling) now runs as worklets.
+- **Ownership:**
+  - a habit card holds a gesture that blocks the pager natively, so a touch that starts on a card is always the
+    card's;
+  - a sheet over a tab and the keyboard (text entry) switch the pager off through a shared value;
+  - the stack's modals (Settings, a habit's details) sit above the tabs and get no tab swipes.
+- **Reduce Motion:** nothing follows the finger; a swipe or a tap changes tab at once.
+- **Trade-offs:**
+  - react-native-gesture-handler (~3.3.0, the SDK 58 version, also in Expo Go) is a new native dependency: a new
+    development or internal build is needed. The public release's JavaScript doesn't use it (Today alone, js-tabs,
+    as before), but its next native build will contain the module.
+  - The tab bar is the navigator's own (it looks like the js-tabs bar it replaces).
+  - When the page lands, the navigator's re-render still happens on the JS thread (about 100 ms at 6× slowdown in
+    the browser), but after the slide, not during it.
+
+**Before and after** (browser, internal web export, 390 × 844, 6× CPU slowdown via Chrome DevTools Protocol, median
+of 5 runs, a 240 pt swipe from Habits to Journey, measured in the page with `requestAnimationFrame` frame times, a
+long-task observer and DevTools memory metrics; the same script ran against both builds):
+
+| Measure                           | Before (`5adc6f2`) | After      |
+| --------------------------------- | ------------------ | ---------- |
+| Input to visual movement          | 15 ms              | ≈ 0 ms     |
+| Worst frame while the page slides | 67 ms              | 17–33 ms   |
+| Dropped frames during the slide   | 1                  | 0–1        |
+| Release to page at rest           | 423 ms             | 276–283 ms |
+| JS heap after the swipe           | 22.5 MB            | 22.1 MB    |
+| Long tasks after release (total)  | 82 ms              | 114–132 ms |
+
+At normal speed (1×): latency 16 ms → about 0 ms; settle 363 ms → 263 ms; no dropped frames either way. The longer
+long tasks after the change are the navigator's update, which now runs once the page has landed. On a phone the
+slide itself runs on the UI thread, so JS work can't stall it at all; the browser runs everything on one thread, so
+these numbers measure JS-side work, not the iPhone's frame rate.
 
 **Browser checks** (internal web export, iPhone-sized viewport):
 
-- the three tabs swipe in order and back;
+- the three tabs swipe in order and back; a cancelled drag springs back; a vertical or diagonal drag scrolls and
+  never changes tab; a flick changes tab exactly as before (same distances and speeds); tab taps work;
+- a swipe over a modal (Settings) never moves the tabs;
 - a drag that starts on a card stays the card's;
 - Reduce Motion still changes tab;
 - light and dark both render, and the switch is immediate in the browser.
@@ -232,9 +311,24 @@ device.**
 
 - **Theme switch:** how long light ↔ dark takes, on all three tabs, and right after launch (before every painting
   has loaded).
-- **Swiping between tabs:**
-  - how quickly the incoming page follows the finger, and whether the panorama and the page stay together;
-  - with a long Habits list.
+- **Swiping between tabs (a reproducible test):** a new development or internal build (the gesture handler is
+  native). In Settings → Accessibility → Display & Text Size, turn **Reduce Motion off**. With a Life Reset of 5 or
+  more habits:
+  1. On Habits, drag slowly right-to-left and back without lifting: the page and the landscape must stay under the
+     finger with no visible lag, and nothing moves vertically.
+  2. Release at about a third of the way: the page settles on Journey without a jump. Release before that: it
+     springs back.
+  3. Flick quickly (a short, fast drag): it changes tab.
+  4. Swipe Habits → Journey → Insights → back, ten times quickly: no stutter, and the Journey trail and Insights lake
+     stay attached to their pages.
+  5. Start a drag on a habit card: only the card swipes. Scroll Habits vertically, then diagonally: no tab change.
+  6. Open a habit's details and Settings, and type in a text field: no tab swipes.
+  7. Turn Reduce Motion on: a swipe or a tap changes tab at once, without a slide.
+  - **Measure:** Xcode Instruments (Animation Hitches, or Core Animation FPS) on an internal build while doing
+    step 4; the Perf Monitor in a development build (shake → Perf Monitor) shows the UI and JS frame rates. Compare
+    with the `5adc6f2` build.
+- **Insights on a device:** the charts' first appearance (once, after the slide lands), tapping weeks and days,
+  VoiceOver on heatmap cells, and Dynamic Type on the records.
 - **Memory:** use with both themes held, and whether iOS ever drops the images under pressure.
 - **Gestures:**
   - card swipe priority, diagonal drags and vertical scrolling next to the pager;
@@ -247,7 +341,7 @@ device.**
 
 ## Testing
 
-**Automated:** 640 tests in 39 suites, all passing; typecheck, lint and formatting are clean.
+**Automated:** 658 tests in 40 suites, all passing; typecheck, lint and formatting are clean.
 
 - **All 11 habits:** catalog order and ids, targets, frequencies, art, and the 16–17 Focus blocks.
 - **Setup:** only the needed baselines, kept answers, exclusions (phone time, wake time, precautions, age, joint pain),
@@ -259,6 +353,12 @@ device.**
   and "too hard".
 - **Insights:** the numbers against hand-computed saved days, for the Life Reset and for V1/V2; the Screen Time check
   kept apart from the days.
+- **Insights charts:** weekly tallies that add up to the overall consistency; finished, current, unrecorded and empty
+  weeks; short first weeks; heatmap dates, weekdays and layout; full, partial, missed, skipped, rest, unrecorded,
+  today and future days; the habit breakdown by quota; records (no minutes); empty states; the inspected day's
+  words; V1/V2 the same way.
+- **Pager:** the layout uses the UI-thread pager in testing builds only, and its gesture rules (worklets, the
+  modal/keyboard switch, card blocking).
 - **Journey:** rest days for the Life Reset; V1/V2 unchanged.
 - **Persistence:** a restart keeps progress, counters, details, pending changes and the Screen Time check; yesterday
   can be corrected only until noon.
@@ -272,7 +372,9 @@ device.**
 
 - **Setup and the Habits screen:** the full setup with five habits and baseline answers; Day 1 with swipe
   completion, the counter and the art.
-- **Tabs:** Journey (the Life Reset's own day), Insights (dark and light), and tab swipes both ways.
+- **Tabs:** Journey (the Life Reset's own day), Insights with its charts (dark and light, a 20-day history with gaps,
+  a skipped day and an explicit non-completion, and a new program), and tab swipes both ways (with the swipe
+  benchmark).
 - **Gestures and theme:** card-swipe priority, the theme switch, and Reduce Motion.
 - **Saves and switching:** a pilot save loading next to an existing V2 program, and switching to the previous
   program (Habits, Journey and Insights follow it, both saves untouched).
@@ -288,6 +390,6 @@ device.**
 5. **Less Scrolling:** uses the main-app minutes given at setup as the baseline. The weekly Screen Time check is
    recorded but doesn't move the limit.
 6. **Theme switch:** still re-renders all three mounted pages (see Performance).
-7. **The pager's touch handling:** still on the JS thread (see Performance).
+7. **Tab swiping:** moved to the UI thread in a browser-tested build; it still needs the iPhone test above.
 8. **The weekly "not achieved" rule:** a week counts as recorded when any habit was recorded, so an untouched weekly
    habit can be offered a step easier (an offer only).

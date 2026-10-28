@@ -11,6 +11,9 @@ import {
   programStreak,
   programTally,
   programTotal,
+  programCells,
+  programRecords,
+  programTrend,
   programWeekTally,
   type Tally,
 } from '../core/insights';
@@ -19,6 +22,7 @@ import { currentDay, useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SettingsButton } from './HeaderButton';
+import { Heatmap, PersonalRecords, useShownOnce, useWhileFocused, WeeklyTrend } from './InsightCharts';
 import { ProgressBar, T } from './ui';
 import { SCREEN_PX, worldAnchor } from './WorldLayer';
 import { TILE_HEIGHT } from './worldTiles';
@@ -189,7 +193,7 @@ export function WeekBars({ weeks }: { weeks: { week: number; credited: number; g
   );
 }
 
-/** One habit: its name and consistency, its week, its history; tap for more. */
+/** One habit as a compact bar: its name and consistency; tap for its history (and more, when given). */
 export function HabitInsight({
   title,
   subtitle,
@@ -207,37 +211,38 @@ export function HabitInsight({
   const [open, setOpen] = useState(false);
   const p = pct(tally);
   return (
-    <ThemedView style={[styles.card, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.card, styles.habit, { backgroundColor: c.surface }]}>
       <Pressable
-        onPress={
-          children
-            ? () => {
-                haptic.tap();
-                setOpen((o) => !o);
-              }
-            : undefined
-        }
-        disabled={!children}
-        accessibilityRole={children ? 'button' : undefined}
-        accessibilityState={children ? { expanded: open } : undefined}
+        onPress={() => {
+          haptic.tap();
+          setOpen((o) => !o);
+        }}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityHint="Shows its history"
         accessibilityLabel={`${title}. ${p === null ? 'No days yet' : `${p} percent, ${tally.done} of ${tally.eligible}`}. ${subtitle}`}
-        style={{ gap: space.sm }}
+        style={{ gap: 6 }}
       >
         <View style={styles.rowTop}>
           <T v="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
             {title}
           </T>
-          <T v="bodyStrong" color={c.accentInk} style={styles.tabular}>
+          <T v="bodyStrong" color={p === null ? c.textFaint : c.accentInk} style={styles.tabular}>
             {p === null ? '—' : `${p}%`}
           </T>
-          {children ? <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textDim} /> : null}
+          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textDim} />
         </View>
+        <ProgressBar value={p === null ? 0 : p / 100} height={6} />
         <T v="caption" color={c.textDim}>
           {subtitle}
         </T>
-        {history}
       </Pressable>
-      {open ? <View style={{ gap: space.sm }}>{children}</View> : null}
+      {open ? (
+        <View style={{ gap: space.sm }}>
+          {history}
+          {children}
+        </View>
+      ) : null}
     </ThemedView>
   );
 }
@@ -272,6 +277,22 @@ export function ProgramInsights() {
         : null,
     [plan, logs, start, startedAt, today],
   );
+  const shown = useShownOnce();
+  // The charts follow the saved days only while Insights is shown (see useWhileFocused).
+  const pl = useWhileFocused(plan);
+  const lg = useWhileFocused(logs);
+  const td = useWhileFocused(today);
+  const charts = useMemo(() => {
+    if (!startedAt || !shown) return null;
+    const trend = programTrend(pl, lg, start, td);
+    const names = new Map(pl.map((h) => [h.habitId, habitTitle(h)]));
+    return {
+      trend,
+      cells: programCells(pl, lg, start, td),
+      records: programRecords(pl, lg, start, td, trend),
+      name: (id: string) => names.get(id) ?? id,
+    };
+  }, [pl, lg, td, start, startedAt, shown]);
   if (!data)
     return (
       <ThemedView style={[styles.card, { backgroundColor: c.surface }]}>
@@ -281,6 +302,7 @@ export function ProgramInsights() {
   return (
     <>
       <Overview {...data} day={today} />
+      {charts ? <WeeklyTrend points={charts.trend} /> : null}
       <SectionTitle>Your habits</SectionTitle>
       {plan.map((h) => (
         <HabitInsight
@@ -291,6 +313,12 @@ export function ProgramInsights() {
           history={<DayStrip days={programRecent(h, logs, start, today)} />}
         />
       ))}
+      {charts ? (
+        <>
+          <Heatmap cells={charts.cells} today={today} name={charts.name} />
+          <PersonalRecords records={charts.records} />
+        </>
+      ) : null}
     </>
   );
 }
@@ -299,6 +327,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.md },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 44 },
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
+  habit: { paddingVertical: space.md },
   big: { flexDirection: 'row', alignItems: 'baseline', gap: space.md },
   stats: { flexDirection: 'row', gap: space.md },
   stat: { flex: 1, gap: 2 },
