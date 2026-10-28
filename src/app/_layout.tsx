@@ -105,20 +105,16 @@ export default function RootLayout() {
           <Stack.Screen name="v2/plan" options={{ animation: 'slide_from_right' }} />
           {/* The program has started by now; there's no going back into onboarding. */}
           <Stack.Screen name="reminder" options={{ animation: 'slide_from_right', gestureEnabled: false }} />
-          {/* Today, and in testing builds the Habits, Journey and Field Notes tabs. */}
+          {/* Today, and in testing builds the Habits, Journey and Insights tabs. */}
           <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-          {/* The Life Reset pilot: development and internal-testing builds only. */}
+          {/* The Life Reset: development and internal-testing builds only. */}
           <Stack.Screen name="pilot/setup" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="pilot/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
-          {/* Field Notes: development and internal-testing builds only (each screen redirects away otherwise). */}
-          <Stack.Screen name="fieldnotes/setup" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="fieldnotes/note" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="fieldnotes/history" options={{ presentation: 'modal', animation: 'default' }} />
           {/* Development builds only (the screen redirects away in release builds). */}
           <Stack.Screen name="dev/exercise" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen

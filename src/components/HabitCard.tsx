@@ -18,7 +18,8 @@ import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { useThemeProgress } from '../theme/transition';
 import { habitScene, placeholderCrop } from './habitArt';
-import { claimTouch } from './TabPager';
+import { useCardBlock } from './TabPager';
+import { GestureDetector } from 'react-native-gesture-handler';
 import { ThemedImage } from './ThemedImage';
 import { TILE_HEIGHT, TILES, type Theme } from './worldTiles';
 
@@ -298,8 +299,6 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
 
   const touches = {
     onStartShouldSetResponderCapture: (e: GestureResponderEvent) => {
-      // Sideways drags that start on a card are the card's, never a swipe between tabs.
-      claimTouch();
       const g = gesture.current;
       g.x0 = e.nativeEvent.pageX;
       g.y0 = e.nativeEvent.pageY;
@@ -410,8 +409,9 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
   const levelIndex = display?.levelIndex ?? LEVELS.indexOf(habit.level);
   const levelName = display?.levelLabel ?? LEVEL_NAME[habit.level];
   const leveled = !!display || !isCustom(habit);
+  const block = useCardBlock();
 
-  return (
+  const card = (
     <Animated.View
       {...touches}
       role="checkbox"
@@ -540,6 +540,8 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
       </View>
     </Animated.View>
   );
+  // Inside the tab pager, a touch that starts on the card is the card's: it blocks the pager (TabPager).
+  return block ? <GestureDetector gesture={block}>{card}</GestureDetector> : card;
 }
 
 export const HabitCard = memo(HabitCardImpl);

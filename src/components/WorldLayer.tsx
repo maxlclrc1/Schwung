@@ -1,17 +1,8 @@
-import { usePathname } from 'expo-router';
-import { memo, useEffect } from 'react';
+import { memo } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
-import Animated, {
-  Easing,
-  interpolate,
-  makeMutable,
-  useAnimatedStyle,
-  useReducedMotion,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { interpolate, makeMutable, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
-import { PAGE_MS } from '../core/pager';
 import { tabs } from '../lib/flags';
 import { useTheme } from '../theme';
 import { ThemedView, useThemeProgress } from '../theme/transition';
@@ -39,7 +30,7 @@ const BAND_TOP_PX = [800, 800, LAKESIDE_BAND_TOP];
 /** How much of the background colour veils each region (Habits, Journey, Insights), so text stays readable. */
 const VEIL: Record<Theme, number[]> = { dark: [0.5, 0, 0.18], light: [0.45, 0, 0.15] };
 
-/** 0 Habits, 1 Journey, 2 Insights; animated between. */
+/** 0 Habits, 1 Journey, 2 Insights; moved by the pager (PagerTabs) on the UI thread, pages and world together. */
 export const worldCamera = makeMutable(0);
 /**
  * Per tab: where its trail area starts in its page (pt; -1 until measured) and how far its page has scrolled.
@@ -47,8 +38,6 @@ export const worldCamera = makeMutable(0);
  */
 export const worldAnchor = [makeMutable(-1), makeMutable(-1), makeMutable(-1)];
 export const worldScroll = [makeMutable(0), makeMutable(0), makeMutable(0)];
-
-const TAB_INDEX: Record<string, number> = { '/today': 0, '/progress': 1, '/insights': 2 };
 
 /**
  * For what a tab's page draws on the painting (Journey's trail and labels). Pages slide a
@@ -80,19 +69,9 @@ export function WorldLayer() {
   const progress = useThemeProgress();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const reduceMotion = useReducedMotion();
-  const pathname = usePathname();
   const scale = width / SCREEN_PX;
   // Before a tab's page has been measured: roughly where its trail area starts.
   const fallback = [insets.top + 107, insets.top + 107, insets.top + 125];
-
-  useEffect(() => {
-    const index = TAB_INDEX[pathname];
-    // Settings and the sheets open over the tabs: the camera stays on the tab underneath.
-    if (index === undefined) return;
-    // With the pages' slide (TabPager): the same timing, from wherever the camera is (a swipe leaves it mid-way).
-    worldCamera.set(reduceMotion ? index : withTiming(index, { duration: PAGE_MS, easing: Easing.out(Easing.cubic) }));
-  }, [pathname, reduceMotion]);
 
   const pan = useAnimatedStyle(() => {
     const cam = worldCamera.get();
