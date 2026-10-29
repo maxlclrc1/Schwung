@@ -28,7 +28,7 @@ export const HEALTH: { id: Precaution; label: string }[] = [
   { id: 'fluidLimit', label: 'A clinician told me to limit fluids' },
   { id: 'sleepCondition', label: 'Diagnosed sleep condition' },
 ];
-const PHONE: { id: PhoneHours; label: string }[] = [
+export const PHONE: { id: PhoneHours; label: string }[] = [
   { id: 'lt1', label: 'Under 1 h' },
   { id: '1_2', label: '1–2 h' },
   { id: '2_4', label: '2–4 h' },
@@ -36,18 +36,18 @@ const PHONE: { id: PhoneHours; label: string }[] = [
   { id: '6p', label: '6 h+' },
   { id: 'unknown', label: 'Not sure' },
 ];
-const ACTIVE: { id: ActiveDays; label: string }[] = [
+export const ACTIVE: { id: ActiveDays; label: string }[] = [
   { id: '0', label: '0' },
   { id: '1_2', label: '1–2' },
   { id: '3_4', label: '3–4' },
   { id: '5p', label: '5+' },
 ];
-const STARTS: { id: P.StrengthStart; label: string }[] = [
+export const STARTS: { id: P.StrengthStart; label: string }[] = [
   { id: 'new', label: 'New to it' },
   { id: 'sometimes', label: 'Sometimes' },
   { id: 'regular', label: 'Regularly' },
 ];
-const WAKE_TIMES = ['05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30'];
+export const WAKE_TIMES = ['05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30'];
 
 export const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60}` : ''}`);
 
