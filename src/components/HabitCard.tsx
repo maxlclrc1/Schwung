@@ -120,7 +120,7 @@ function Scene({ habitId, scene, width, height }: { habitId: string; scene?: num
     return (
       <ThemedImage
         sources={{ dark, light }}
-        resizeMode="cover"
+        contentFit="cover"
         style={{ position: 'absolute', left: 0, top: 0, width, height }}
       />
     );
@@ -131,7 +131,7 @@ function Scene({ habitId, scene, width, height }: { habitId: string; scene?: num
   return (
     <ThemedImage
       sources={{ dark: tile.source, light: TILES.light[crop.tile].source }}
-      resizeMode="stretch"
+      contentFit="fill"
       style={{
         position: 'absolute',
         width: tile.width * k,

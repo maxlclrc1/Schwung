@@ -11,8 +11,8 @@ import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { ThemedImage } from '../ThemedImage';
 import { Button, T } from '../ui';
+import { WORLD_ART } from '../World';
 
-const ART = { dark: require('../../../assets/world-dark.jpg'), light: require('../../../assets/world-light.jpg') };
 const BANNER = 120;
 /** The painting row the window opens at: the summit and the upper switchbacks. */
 const FROM_ROW = 860;
@@ -60,8 +60,8 @@ export function WelcomeBack({
           importantForAccessibility="no-hide-descendants"
         >
           <ThemedImage
-            sources={ART}
-            resizeMode="cover"
+            sources={WORLD_ART}
+            contentFit="cover"
             style={{ position: 'absolute', left: 0, top: -FROM_ROW * k, width: w, height: WORLD.height * k }}
           />
           <LinearGradient colors={veil as [string, string]} locations={[0.45, 1]} style={StyleSheet.absoluteFill} />

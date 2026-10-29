@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library/legacy';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -27,7 +28,9 @@ import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { rise } from '../onboarding/kit';
+import { ART_IMAGE } from '../ThemedImage';
 import { Button, T } from '../ui';
+import { WORLD_ART } from '../World';
 
 /*
  * The 66-Day Story (app/life-reset/story.tsx): a keepsake made at the summit, a portrait poster of Schwung's own
@@ -40,7 +43,6 @@ import { Button, T } from '../ui';
 const sys = ReduceMotion.System;
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-const ART = { dark: require('../../../assets/world-dark.jpg'), light: require('../../../assets/world-light.jpg') };
 
 const short = (key: string) => {
   const [y, m, d] = key.split('-').map(Number);
@@ -187,7 +189,8 @@ export function StoryKeepsake() {
         >
           <Animated.View style={[StyleSheet.absoluteFill, art]}>
             <Image
-              source={isDark ? ART.dark : ART.light}
+              {...ART_IMAGE}
+              source={isDark ? WORLD_ART.dark : WORLD_ART.light}
               style={{ position: 'absolute', left: 0, top: imageTop, width: W, height: WORLD.height * k }}
             />
             <Svg width={W} height={H} style={StyleSheet.absoluteFill}>

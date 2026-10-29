@@ -7,6 +7,7 @@ import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CeremonyHost } from '../components/ceremony/Ceremonies';
 import { FinaleHost } from '../components/onboarding/Handoff';
+import { prefetchArt } from '../components/artPrefetch';
 import { cleanupTemps } from '../lib/appFiles';
 import { RecoveryScreen } from '../components/RecoveryScreen';
 import { ReminderSync } from '../components/reminders/ReminderSync';
@@ -59,6 +60,8 @@ export default function RootLayout() {
     void SplashScreen.hideAsync().catch(() => {});
     // Temporary share files left by a share that was cut off (lib/appFiles.ts); never saves or recovery copies.
     cleanupTemps();
+    // The artwork about to be seen, decoded ahead of time (components/artPrefetch.ts).
+    void prefetchArt(useResetPilot.getState().program);
   }, [hydrated]);
 
   if (!hydrated) return null;

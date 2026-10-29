@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { AppState, Image, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 import { habitLine, reminderText } from '../../core/reminders';
 import * as P from '../../core/reset/pilot';
@@ -195,7 +196,7 @@ export function RemindersSettings() {
                 Preview
               </T>
               <ThemedView style={[styles.bubble, { backgroundColor: c.surfaceHigh }]}>
-                <Image source={require('../../../assets/icon.png')} style={styles.appIcon} />
+                <Image source={require('../../../assets/icon.png')} style={styles.appIcon} cachePolicy="memory-disk" />
                 <View style={{ flex: 1, gap: 1 }}>
                   <View style={styles.bubbleTop}>
                     <T v="caption" color={c.textDim} style={styles.appName}>

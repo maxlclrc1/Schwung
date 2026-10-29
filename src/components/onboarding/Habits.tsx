@@ -34,7 +34,7 @@ export function HabitArt({ id, width, height }: { id: string; width: number; hei
   return (
     <ThemedImage
       sources={{ dark, light }}
-      resizeMode="cover"
+      contentFit="cover"
       style={{ position: 'absolute', left: 0, top: 0, width, height }}
     />
   );

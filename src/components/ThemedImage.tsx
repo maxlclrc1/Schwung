@@ -1,5 +1,6 @@
+import { Image, type ImageContentFit } from 'expo-image';
 import { useEffect, useId, useState } from 'react';
-import { Image, type ImageResizeMode, type ImageSourcePropType, type ImageStyle } from 'react-native';
+import type { ImageRequireSource, ImageStyle } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { Scheme } from '../theme';
 import { forgetPainting, reportLoaded } from '../theme/gate';
@@ -14,19 +15,33 @@ import { useThemeProgress } from '../theme/transition';
  *
  * Why both: holding only the theme on screen meant every switch first loaded and decoded the other version of the
  * large panorama tiles (and each card's scene) before the fade could start, which is the delay people felt on a
- * phone (up to the gate's timeout). Keeping both costs memory instead: about 65 MB for the six panorama tiles at
- * screen resolution, and about 6 MB per card scene (SCHWUNG_LIFE_RESET_PROGRAM.md, "Performance").
+ * phone (up to the gate's timeout).
+ *
+ * Drawn with expo-image (ART_IMAGE): each painting is decoded once into a shared memory cache and every view of it
+ * (the six tiles behind the tabs, each card cropping a tile, a revisited screen) draws that same bitmap, at full
+ * resolution, without decoding or resizing again. React Native's Image never caches a decoded image this large, so
+ * it decoded each one again on every mount, which is the wait people saw (about two seconds in development, where
+ * each mount also fetched the file from the dev server).
  * Paintings must be opaque. `style` places the image (it needs an explicit size on the web).
  */
+
+/** How the app's bundled artwork is drawn: cached decoded, full resolution, shown the moment it's ready (no fade). */
+export const ART_IMAGE = {
+  cachePolicy: 'memory-disk',
+  allowDownscaling: false,
+  // No fade-in at all, so a cached painting is simply there and a first load never replays one
+  // (transition.skipOnCacheHit only matters when there is a transition).
+  transition: null,
+} as const;
 
 export function ThemedImage({
   sources,
   style,
-  resizeMode,
+  contentFit = 'cover',
 }: {
-  sources: Record<Scheme, ImageSourcePropType>;
+  sources: Record<Scheme, ImageRequireSource>;
   style: ImageStyle;
-  resizeMode?: ImageResizeMode;
+  contentFit?: ImageContentFit;
 }) {
   const progress = useThemeProgress();
   const [loaded, setLoaded] = useState<Scheme[]>([]);
@@ -47,20 +62,31 @@ export function ThemedImage({
   return (
     <>
       <Image
+        {...ART_IMAGE}
         source={sources.dark}
-        resizeMode={resizeMode}
+        contentFit={contentFit}
+        priority="high"
         onLoad={onLoad('dark')}
         // A broken image never holds a switch up.
         onError={onLoad('dark')}
         style={style}
+        accessible={false}
       />
-      <Animated.Image
-        source={sources.light}
-        resizeMode={resizeMode}
-        onLoad={onLoad('light')}
-        onError={onLoad('light')}
-        style={[style, lightStyle]}
-      />
+      {/* The fade sits on a wrapper placed exactly like the image. */}
+      <Animated.View pointerEvents="none" style={[style, lightStyle]}>
+        <Image
+          {...ART_IMAGE}
+          source={sources.light}
+          contentFit={contentFit}
+          priority="high"
+          onLoad={onLoad('light')}
+          onError={onLoad('light')}
+          style={styles.fill}
+          accessible={false}
+        />
+      </Animated.View>
     </>
   );
 }
+
+const styles = { fill: { width: '100%', height: '100%' } } as const;
