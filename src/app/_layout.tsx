@@ -5,6 +5,7 @@ import * as SystemUI from 'expo-system-ui';
 import { useEffect, useSyncExternalStore } from 'react';
 import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { FinaleHost } from '../components/onboarding/Handoff';
 import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
 import { useTheme, useThemePreference } from '../theme';
@@ -81,6 +82,8 @@ export default function RootLayout() {
           <Stack.Screen name="life-reset/add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
+        {/* The onboarding finale, over everything, so Habits can come up beneath it. */}
+        <FinaleHost />
       </ThemeTransitionProvider>
     </SafeAreaProvider>
   );
