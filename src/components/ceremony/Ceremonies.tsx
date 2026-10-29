@@ -1,4 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -124,13 +125,14 @@ export function CeremonyHost() {
   if (!active || !program) return null;
 
   /** Seen through or skipped: saved at once, then the ceremony fades into the app. */
-  const finish = (kind: 'day1' | 'summit' | 'milestone', fast: boolean) => {
+  const finish = (kind: 'day1' | 'summit' | 'milestone', fast: boolean, then?: () => void) => {
     if (kind === 'milestone') useResetPilot.getState().markMilestone(milestoneDay ?? 0);
     else useResetPilot.getState().markCeremony(kind);
     void flushStorage().catch(() => {});
     const done = () => {
       setActive(null);
       setCeremonyState({ day1FromFinale: false });
+      then?.();
     };
     ceremonyCover.set(
       withTiming(0, { duration: fast ? 450 : 850, easing: Easing.out(Easing.quad), reduceMotion: sys }, (f) => {
@@ -150,7 +152,7 @@ export function CeremonyHost() {
           program={program}
           today={today}
           onSeen={() => useResetPilot.getState().markCeremony('summit')}
-          onDone={(fast) => finish('summit', fast)}
+          onDone={(fast, story) => finish('summit', fast, story ? () => router.push('/life-reset/story') : undefined)}
         />
       )}
     </Animated.View>
@@ -614,17 +616,18 @@ function SummitCeremony({
   today: number;
   /** The summary is on screen: from here it counts as seen, even if the app closes. */
   onSeen: () => void;
-  onDone: (fast: boolean) => void;
+  /** `story`: on to the 66-Day Story as the ceremony fades. */
+  onDone: (fast: boolean, story?: boolean) => void;
 }) {
   const { c } = useTheme();
   const reduce = useReducedMotion();
   const stage = useStage();
   const [phase, setPhase] = useState<'rise' | 'summary'>('rise');
   const finished = useRef(false);
-  const done = (fast: boolean) => {
+  const done = (fast: boolean, story?: boolean) => {
     if (finished.current) return;
     finished.current = true;
-    onDone(fast);
+    onDone(fast, story);
   };
 
   // Everything from the saved days.
@@ -755,7 +758,10 @@ function SummitCeremony({
                 .reduceMotion(sys)}
               style={styles.cta}
             >
-              <Button label="Return to Schwung" onPress={() => done(false)} />
+              <View style={{ gap: space.xs }}>
+                <Button label="See my journey" onPress={() => done(false, true)} />
+                <Button label="Return to Schwung" kind="ghost" onPress={() => done(false)} />
+              </View>
             </Animated.View>
           </>
         ) : null}

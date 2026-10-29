@@ -47,7 +47,15 @@
         }
       ],
       "expo-status-bar",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": false,
+          "savePhotosPermission": "Schwung saves your 66-day story to your photos only when you ask it to.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ]
   }
 }

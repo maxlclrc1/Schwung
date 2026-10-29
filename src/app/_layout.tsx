@@ -84,6 +84,10 @@ export default function RootLayout() {
           <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="life-reset/add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="life-reset/reflect" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen
+            name="life-reset/story"
+            options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+          />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
