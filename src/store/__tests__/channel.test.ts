@@ -94,12 +94,12 @@ describe('one app: the Life Reset', () => {
     const habits = fs.readFileSync(`${SRC}/components/pilot/PilotToday.tsx`, 'utf8');
     expect(habits).toContain('scrollEnabled={!swiping}');
     expect(habits).toContain('onSwipe={setSwiping}');
-    // The mountain is drawn once, on Journey; its calendar is a sheet, never laid over the landscape.
+    // The mountain is drawn once, on Journey, with the 66-day expedition calendar below it (never over it).
     const journey = read('(tabs)/progress.tsx');
     expect(journey.match(/<AscentScene/g)).toHaveLength(1);
-    expect(journey.match(/<JourneyView/g)).toHaveLength(1);
-    expect(journey.indexOf('<JourneyView')).toBeGreaterThan(journey.indexOf('<Modal'));
-    expect(journey).toContain('visible={calendar}');
+    expect(journey.match(/<ExpeditionCalendar/g)).toHaveLength(1);
+    expect(journey.indexOf('<ExpeditionCalendar')).toBeGreaterThan(journey.indexOf('<AscentScene'));
+    expect(journey).not.toContain('<Modal');
   });
 
   it('has no earlier program, switching or test wording anywhere a person reads', () => {

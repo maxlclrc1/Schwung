@@ -117,11 +117,50 @@ def crossfade(outer, inner, width, outer_on_left):
     return outer * (1 - w) + inner * w
 
 
-pano[:, SIDE:SIDE + STRIP] = crossfade(
-    habits[:, SIDE:], journey[:, :STRIP], blend_width(habits[:, SIDE:], journey[:, :STRIP]), True
-)
-pano[:, SIDE + J - STRIP:SIDE + J] = crossfade(
-    notes[:, :STRIP], journey[:, -STRIP:], blend_width(notes[:, :STRIP], journey[:, -STRIP:]), False
-)
+def seam_join(outer, inner, outer_on_left, feather=56):
+    """Join a piece to Journey along the path where the two already agree most (a minimum-error seam, found
+    row by row), with a short feather across it. Unlike a crossfade over the whole strip, the two paintings are
+    never laid over each other, so nothing is seen twice (no ghosted trees or half-lakes) and no hard line shows."""
+    h = outer.shape[0]
+    diff = np.abs(outer - inner).sum(2)
+
+    # Detail (trees, rocks, shorelines) costs extra, so the cut runs through soft mist where it can.
+    def detail(a):
+        g = a.mean(2)
+        return np.abs(np.diff(g, axis=1, append=g[:, -1:])) + np.abs(np.diff(g, axis=0, append=g[-1:]))
+
+    diff = blur_rows(diff + 1.5 * (detail(outer) + detail(inner)), 4)
+    x = np.arange(STRIP)
+    # Keep the cut off the strip's ends (where one side has no counterpart beyond).
+    cost = diff + (np.clip(32 - x, 0, None) + np.clip(x - (STRIP - 33), 0, None)) * 40.0
+    acc = cost.copy()
+    back = np.zeros((h, STRIP), np.int64)
+    big = 1e12
+    for y in range(1, h):
+        prev = acc[y - 1]
+        cands = np.full((5, STRIP), big)
+        for i, k in enumerate(range(-2, 3)):
+            if k < 0:
+                cands[i, -k:] = prev[:k]
+            elif k > 0:
+                cands[i, :-k] = prev[k:]
+            else:
+                cands[i] = prev
+        pick = cands.argmin(0)
+        acc[y] = cost[y] + cands[pick, x]
+        back[y] = x + (pick - 2)
+    path = np.zeros(h)
+    col = int(acc[-1].argmin())
+    for y in range(h - 1, -1, -1):
+        path[y] = col
+        col = back[y, col]
+    path = blur_rows(path[:, None], 24)[:, 0]
+    t = smooth(np.clip((x[None, :] - path[:, None]) / feather + 0.5, 0, 1))
+    w_inner = t if outer_on_left else 1 - t
+    return outer * (1 - w_inner[..., None]) + inner * w_inner[..., None]
+
+
+pano[:, SIDE:SIDE + STRIP] = seam_join(habits[:, SIDE:], journey[:, :STRIP], True)
+pano[:, SIDE + J - STRIP:SIDE + J] = seam_join(notes[:, :STRIP], journey[:, -STRIP:], False)
 Image.fromarray(pano.clip(0, 255).astype(np.uint8)).save(out_p)
 print(f'{out_p}: {pano.shape[1]}x{pano.shape[0]}; Journey fades out at row {fade_end}')

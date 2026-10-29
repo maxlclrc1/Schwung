@@ -7,13 +7,13 @@ import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
-import { Heatmap, PersonalRecords, useShownOnce, useWhileFocused, WeeklyTrend } from '../InsightCharts';
+import { PersonalRecords, useShownOnce, useWhileFocused, WeeklyTrend } from '../InsightCharts';
 import { DayStrip, HabitInsight, Overview, SectionTitle, WeekBars } from '../Insights';
 import { Button, T } from '../ui';
 
 /**
  * Insights for the Life Reset: the overview and the weekly trend, then each habit as a bar with its
- * week (a tap shows its history, details and difficulty), the 66-day heatmap and the personal records. Less Scrolling adds the optional weekly Screen Time
+ * week (a tap shows its history, details and difficulty), and the personal records (the 66 days are on Journey). Less Scrolling adds the optional weekly Screen Time
  * check. Numbers come from the saved days only (reset/pilot.ts: habitTally, weekTally, recentDays, habitWeeks).
  */
 export function PilotInsights() {
@@ -38,7 +38,6 @@ export function PilotInsights() {
     const trend = C.weeklyTrend(frozen, frozenToday);
     return {
       trend,
-      cells: C.dayCells(frozen, frozenToday),
       records: C.records(frozen, frozenToday, trend),
       bars: new Map(C.habitBars(frozen, frozenToday).map((b) => [b.id, b])),
     };
@@ -88,7 +87,6 @@ export function PilotInsights() {
       })}
       {charts ? (
         <>
-          <Heatmap cells={charts.cells} today={today} name={(id) => P.nameOf(program, id)} />
           <PersonalRecords records={charts.records} />
         </>
       ) : null}
