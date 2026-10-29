@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { FinaleHost } from '../components/onboarding/Handoff';
 import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
-import { useTheme, useThemePreference } from '../theme';
+import { useRootTheme, useThemePreference } from '../theme';
 import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -44,7 +44,7 @@ function NativeAppearance() {
 
 export default function RootLayout() {
   const hydrated = useHydrated();
-  const { c, isDark } = useTheme();
+  const { c, isDark } = useRootTheme();
 
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(c.bg).catch(() => {});

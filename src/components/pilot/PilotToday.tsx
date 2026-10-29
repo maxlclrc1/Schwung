@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
-import { levelProgress, playerLevel, XP_FULL_DAY_BONUS } from '../../core/progression';
+import { XP_FULL_DAY_BONUS } from '../../core/progression';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
 import { devTools } from '../../lib/flags';
@@ -21,12 +21,10 @@ import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
-import { SettingsButton } from '../HeaderButton';
 import { cover } from '../onboarding/cover';
 import { todayReady } from '../onboarding/Handoff';
-import { RollingText } from '../RollingText';
-import { ThemeToggle } from '../ThemeToggle';
-import { Button, ProgressBar, T } from '../ui';
+import { Button, T } from '../ui';
+import { TodayHero } from './TodayHero';
 
 /*
  * The Habits tab: the program's habits as illustrated cards, with what to do, how much, whether it's done and the week's progress. The whole-card swipe
@@ -116,75 +114,20 @@ export function PilotToday() {
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm, paddingBottom: space.xxxl }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View style={{ flexShrink: 1 }}>
-            <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
-              Life Reset
-            </T>
-            <T v="heading" numberOfLines={1} maxFontSizeMultiplier={1.4}>
-              {today > PROGRAM_DAYS ? 'Summit reached' : `Day ${today} of ${PROGRAM_DAYS}`}
-            </T>
-            <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4}>
-              {phaseLine(today)}
-            </T>
-          </View>
-          <View style={styles.headerIcons}>
-            <ThemeToggle />
-            <SettingsButton />
-          </View>
-        </View>
-
-        <ThemedView style={[styles.summary, { backgroundColor: c.surface }]}>
-          <T
-            v="bodyStrong"
-            color={full ? c.sageInk : c.text}
-            accessibilityLabel={summaryLabel(
-              done,
-              program.habits.length,
-              daily.map((id) => P.nameOf(program, id)),
-            )}
-            maxFontSizeMultiplier={1.4}
-          >
-            {full
-              ? 'Today is complete.'
-              : done
-                ? `${done} of ${program.habits.length} done today`
-                : 'Nothing done yet today'}
-          </T>
-          {/* Today's share done, filling in sage as cards are completed. */}
-          <ProgressBar value={full ? 1 : done / Math.max(1, program.habits.length)} height={6} color={c.sage} />
-          <T v="caption" color={c.textDim}>
-            Weekly habits count on the days you do them. Rest days are never missed days.
-          </T>
-          <ThemedView style={[styles.stats, { borderTopColor: c.border }]}>
-            <View style={styles.statItem} accessible accessibilityLabel={`${streak} day streak`}>
-              <Ionicons name="flame" size={16} color={streak > 0 ? c.peach : c.textFaint} />
-              <T v="caption" style={{ fontWeight: '700' }}>
-                {streak > 0 ? `${streak}-day streak` : 'Streak starts today'}
-              </T>
-            </View>
-            <View
-              style={[styles.statItem, { flexGrow: 1, justifyContent: 'flex-end' }]}
-              accessible
-              accessibilityLabel={`Level ${playerLevel(xp)}, ${xp} XP`}
-            >
-              <T v="caption" color={c.peachInk} style={{ fontWeight: '800' }}>
-                Lv {playerLevel(xp)}
-              </T>
-              <View style={{ width: 40 }}>
-                <ProgressBar value={levelProgress(xp)} height={4} color={c.peach} />
-              </View>
-              {/* XP rolls up digit by digit as it's earned (and back on an undo). */}
-              <View style={styles.xp}>
-                <RollingText text={`${xp}`} size={14} charWidth={8.6} weight="700" color={c.textDim} />
-                <T v="caption" color={c.textDim}>
-                  {' '}
-                  XP
-                </T>
-              </View>
-            </View>
-          </ThemedView>
-        </ThemedView>
+        <TodayHero
+          today={today}
+          done={done}
+          total={program.habits.length}
+          full={full}
+          streak={streak}
+          xp={xp}
+          phase={phaseLine(today)}
+          label={summaryLabel(
+            done,
+            program.habits.length,
+            daily.map((id) => P.nameOf(program, id)),
+          )}
+        />
 
         {offer ? (
           <OfferCard
@@ -210,6 +153,14 @@ export function PilotToday() {
           </ThemedView>
         ) : null}
 
+        <View style={styles.section}>
+          <T v="overline" color={c.textDim}>
+            Today’s habits
+          </T>
+          <T v="caption" color={full ? c.sageInk : c.textDim} style={{ fontWeight: '700' }}>
+            {full ? 'All done' : `${done} of ${program.habits.length}`}
+          </T>
+        </View>
         <Animated.View layout={LinearTransition.duration(200)} style={styles.cards}>
           {program.habits.map((id) => (
             <PilotCard
@@ -464,24 +415,16 @@ function PilotClock({ today }: { today: number }) {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { paddingHorizontal: space.lg, gap: space.lg },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.md },
-  headerIcons: { flexDirection: 'row', gap: space.sm },
-  xp: { flexDirection: 'row', alignItems: 'center' },
-  summary: { borderRadius: radius.lg, padding: space.lg, gap: space.sm },
-  stats: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    columnGap: space.md,
-    rowGap: space.sm,
-    marginTop: space.xs,
-    paddingTop: space.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  statItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   offer: { borderWidth: 1, borderRadius: radius.lg, padding: space.lg, gap: 4 },
   offerButtons: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
   changed: { flexDirection: 'row', alignItems: 'center', gap: space.md, borderRadius: radius.lg, padding: space.lg },
+  section: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: space.xs,
+    marginBottom: -space.xs,
+  },
   cards: { gap: space.lg },
   accessory: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.sm, marginTop: 6 },
   week: { fontWeight: '600', opacity: 0.85 },

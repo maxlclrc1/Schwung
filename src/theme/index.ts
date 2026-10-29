@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react';
 import { Appearance, useColorScheme } from 'react-native';
 import type { TextStyle } from 'react-native';
 import type { ThemePreference } from '../core/types';
@@ -112,11 +113,23 @@ export function useThemePreference(): ThemePreference {
 }
 
 /**
- * The theme on screen, which follows the one asked for once its paintings are ready (./gate). Only the gate is
- * watched here, so asking for a theme re-renders nothing until the switch itself.
+ * The scheme React renders with, provided by ThemeTransitionProvider (./transition). A switch shows on the UI
+ * thread at once (every themed colour and painting follows one shared value); this context follows in a
+ * low-priority, interruptible render, so the re-render of the whole app never holds the switch or a frame up.
  */
+export const SchemeContext = createContext<Scheme | null>(null);
+
+const initialScheme = () =>
+  useThemeGate.getState().shown ??
+  resolveScheme(usePreferences.getState().themePreference, Appearance.getColorScheme());
+
+/** The theme on screen, for rendering (see SchemeContext). */
 export function useTheme() {
+  return themeFor(useContext(SchemeContext) ?? initialScheme());
+}
+
+/** For the root layout, above the provider: the scheme on screen, straight from the gate. */
+export function useRootTheme() {
   const shown = useThemeGate((g) => g.shown);
-  // Before the first request (the very first render): the theme asked for.
-  return themeFor(shown ?? resolveScheme(usePreferences.getState().themePreference, Appearance.getColorScheme()));
+  return themeFor(shown ?? initialScheme());
 }
