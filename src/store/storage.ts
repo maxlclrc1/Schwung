@@ -14,6 +14,9 @@ import type { PersistStorage, StateStorage, StorageValue } from 'zustand/middlew
 const DELAY_MS = 250;
 /** A value to write: the text, or how to make it (serialized at write time). */
 const pending = new Map<string, string | (() => string)>();
+/** How many times each key has been changed, so a failed write never brings back a value older than the newest. */
+const changes = new Map<string, number>();
+const changed = (k: string) => changes.set(k, (changes.get(k) ?? 0) + 1);
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 const text = (v: string | (() => string)) => (typeof v === 'string' ? v : v());
@@ -25,11 +28,13 @@ async function flush() {
   pending.clear();
   if (!entries.length) return;
   const writes = entries.map(([k, v]) => [k, text(v)] as [string, string]);
+  const at = new Map(writes.map(([k]) => [k, changes.get(k) ?? 0]));
   try {
     await AsyncStorage.multiSet(writes);
   } catch (e) {
-    // Not written: keep what failed (unless something newer replaced it) for the next try.
-    for (const [k, v] of writes) if (!pending.has(k)) pending.set(k, v);
+    // Not written: keep what failed for the next try, unless the key changed since (a newer value is pending, or
+    // was already written by a later flush while this one was in flight).
+    for (const [k, v] of writes) if (!pending.has(k) && changes.get(k) === at.get(k)) pending.set(k, v);
     // And try again shortly, without waiting for the next change.
     if (!timer) timer = setTimeout(() => flush().catch(() => {}), 2000);
     throw e;
@@ -38,7 +43,10 @@ async function flush() {
 
 /** Drops pending (not yet written) values for these keys: used only by "Delete my data". */
 export function discardPending(keys: string[]) {
-  for (const k of keys) pending.delete(k);
+  for (const k of keys) {
+    pending.delete(k);
+    changed(k);
+  }
 }
 
 /** Writes anything pending now; resolves once it is on disk (for moments that must not be lost). */
@@ -59,10 +67,12 @@ export const debouncedStorage: StateStorage = {
   },
   setItem: (name, value) => {
     pending.set(name, value);
+    changed(name);
     schedule();
   },
   removeItem: async (name) => {
     pending.delete(name);
+    changed(name);
     await AsyncStorage.removeItem(name);
   },
 };
@@ -76,6 +86,7 @@ export function deferredJSONStorage<S>(): PersistStorage<S> {
     },
     setItem: (name, value) => {
       pending.set(name, () => JSON.stringify(value));
+      changed(name);
       schedule();
     },
     removeItem: (name) => debouncedStorage.removeItem(name),

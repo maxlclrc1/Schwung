@@ -7,7 +7,7 @@ import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CeremonyHost } from '../components/ceremony/Ceremonies';
 import { FinaleHost } from '../components/onboarding/Handoff';
-import { prefetchArt } from '../components/artPrefetch';
+import { configureArtCache, prefetchArt } from '../components/artPrefetch';
 import { cleanupTemps } from '../lib/appFiles';
 import { RecoveryScreen } from '../components/RecoveryScreen';
 import { ReminderSync } from '../components/reminders/ReminderSync';
@@ -46,6 +46,8 @@ function NativeAppearance() {
   }, [preference]);
   return null;
 }
+
+configureArtCache();
 
 export default function RootLayout() {
   const hydrated = useHydrated();
