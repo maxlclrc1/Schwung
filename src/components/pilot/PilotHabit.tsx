@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { canEditYesterday } from '../../core/dates';
@@ -25,8 +25,10 @@ export function PilotHabit() {
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
   const [message, setMessage] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
-  if (!program || !P.isPilotHabit(id) || !program.habits.includes(id)) {
+  if (!program || !program.habits.includes(id)) {
     return (
       <Screen>
         <SheetHeader title="Habit" />
@@ -35,9 +37,10 @@ export function PilotHabit() {
   }
 
   const s = useResetPilot.getState;
+  const own = program.custom?.[id];
+  const name = P.nameOf(program, id);
   const today = pilotToday({ program, devDayOffset: offset });
   const yesterday = today > 1 && canEditYesterday(pilotNow(offset)) ? today - 1 : null;
-  const level = P.levelFor(program, id, today);
   const done = P.isDone(program, id, today);
   const week = P.weekProgress(program, id, today);
   const track = P.trackOf(program, id, today);
@@ -64,11 +67,11 @@ export function PilotHabit() {
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title={P.habitName(id)} />
+      <SheetHeader title={name} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Card style={styles.gap}>
           <T v="overline" color={c.accentInk}>
-            {P.levelLabel(level)}
+            {P.levelLineFor(program, id, today)}
           </T>
           <T v="heading">{social ? 'Today’s step' : P.targetText(program, id, today)}</T>
           {social ? <T>{P.targetText(program, id, today)}</T> : null}
@@ -201,30 +204,75 @@ export function PilotHabit() {
           </Card>
         ) : null}
 
-        <Card style={styles.gap}>
-          <T v="bodyStrong">Difficulty</T>
-          <T v="caption" color={c.textDim}>
-            Change it any time. Easier and harder start {week ? 'next Monday' : 'tomorrow'}, never partway through.
-          </T>
-          <View style={styles.stack}>
-            <Button label="Make it easier" kind="secondary" onPress={() => change(() => s().easier(id))} />
-            <Button label="Make it harder" kind="secondary" onPress={() => change(() => s().harder(id))} />
-          </View>
-          <T v="caption" color={c.textDim}>
-            How does it feel?
-          </T>
-          <View style={styles.chips}>
-            <Choice label="Too easy" on={recentFeedback === 'too-easy'} onPress={() => s().feedback(id, 'too-easy')} />
-            <Choice label="Too hard" on={recentFeedback === 'too-hard'} onPress={() => s().feedback(id, 'too-hard')} />
-          </View>
-          {message ? <T v="caption">{message}</T> : null}
-        </Card>
+        {own ? null : (
+          <Card style={styles.gap}>
+            <T v="bodyStrong">Difficulty</T>
+            <T v="caption" color={c.textDim}>
+              Change it any time. Easier and harder start {week ? 'next Monday' : 'tomorrow'}, never partway through.
+            </T>
+            <View style={styles.stack}>
+              <Button label="Make it easier" kind="secondary" onPress={() => change(() => s().easier(id))} />
+              <Button label="Make it harder" kind="secondary" onPress={() => change(() => s().harder(id))} />
+            </View>
+            <T v="caption" color={c.textDim}>
+              How does it feel?
+            </T>
+            <View style={styles.chips}>
+              <Choice
+                label="Too easy"
+                on={recentFeedback === 'too-easy'}
+                onPress={() => s().feedback(id, 'too-easy')}
+              />
+              <Choice
+                label="Too hard"
+                on={recentFeedback === 'too-hard'}
+                onPress={() => s().feedback(id, 'too-hard')}
+              />
+            </View>
+            {message ? <T v="caption">{message}</T> : null}
+          </Card>
+        )}
 
-        {P.habitNotes(id, program.answers).map((n) => (
-          <T key={n} v="caption" color={c.textFaint}>
-            {n}
+        {own
+          ? null
+          : P.habitNotes(id, program.answers).map((n) => (
+              <T key={n} v="caption" color={c.textFaint}>
+                {n}
+              </T>
+            ))}
+
+        <Card style={styles.gap}>
+          <T v="bodyStrong">Remove from my Life Reset</T>
+          <T v="caption" color={c.textDim}>
+            {P.isDone(program, id, today) ? 'It leaves from tomorrow (today stays done).' : 'It leaves from today.'} Its
+            past days stay in your Journey and Insights{own ? '' : ', and you can add it again any time'}.
           </T>
-        ))}
+          {removing ? (
+            <View style={styles.stack}>
+              <Button
+                label={`Remove ${name}`}
+                kind="danger"
+                onPress={() => {
+                  const problem = s().removeHabit(id);
+                  if (problem) setRemoveError(problem);
+                  else {
+                    haptic.success();
+                    if (router.canGoBack()) router.back();
+                    else router.replace('/today');
+                  }
+                }}
+              />
+              <Button label="Keep it" kind="ghost" onPress={() => setRemoving(false)} />
+            </View>
+          ) : (
+            <Button label="Remove this habit" kind="secondary" onPress={() => setRemoving(true)} />
+          )}
+          {removeError ? (
+            <T v="caption" color={c.danger}>
+              {removeError}
+            </T>
+          ) : null}
+        </Card>
       </ScrollView>
     </Screen>
   );

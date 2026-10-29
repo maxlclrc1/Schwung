@@ -2,7 +2,16 @@ import { PHASE_START } from '../progression';
 import type { Weekday } from '../dates';
 import type { DayLog } from '../types';
 import type { Profile } from './profile';
-import { INTENSITIES, PHASES, RESET_BY_ID, resetExclusion, scrollingLimit, type Intensity, type Phase } from './habits';
+import {
+  INTENSITIES,
+  PHASES,
+  RESET_BY_ID,
+  resetExclusion,
+  scrollingLimit,
+  type Intensity,
+  type Phase,
+  type Schedule,
+} from './habits';
 import { dayStatus, observation, type Observation } from './tracking';
 import { erasFor, programWeeks, scheduleOn, weekOf, weekSummary, type ScheduleEra, type WeeklyContext } from './weekly';
 
@@ -51,6 +60,10 @@ export type ProgressionState = {
   feedback?: Feedback;
   /** The last offer the person declined, and when. */
   declined?: { to: Level; day: number };
+  /** A habit of the person's own: its schedule (it has no catalog targets, levels or offers). */
+  schedule?: Schedule;
+  /** Out of the program from `from` (removed), and back from `to` (added again); its days in between don't exist. */
+  gaps?: { from: number; to?: number }[];
 };
 
 export function newProgression(habitId: string, intensity: Intensity, day: number, phase: Phase = 'foundation') {
@@ -81,10 +94,21 @@ export function pendingChange(s: ProgressionState, today: number): Era | null {
 
 /** The habit's schedule over time, for the weekly scheduling engine. */
 export function scheduleEras(s: ProgressionState): ScheduleEra[] {
-  return erasFor(
-    s.habitId,
-    s.eras.map((e) => ({ fromDay: e.fromDay, intensity: e.intensity, phase: e.phase })),
-  );
+  const own = s.schedule;
+  const base: ScheduleEra[] = own
+    ? s.eras.map((e) => ({ fromDay: e.fromDay, schedule: own }))
+    : erasFor(
+        s.habitId,
+        s.eras.map((e) => ({ fromDay: e.fromDay, intensity: e.intensity, phase: e.phase })),
+      );
+  if (!s.gaps?.length) return base;
+  // A gap ends the schedule from its first day; coming back picks up the schedule in effect then. On the same day,
+  // these markers come after the eras (a stable sort), so they win.
+  const marks: ScheduleEra[] = s.gaps.flatMap((g) => [
+    { fromDay: g.from, schedule: null },
+    ...(g.to !== undefined ? [{ fromDay: g.to, schedule: scheduleOn(base, g.to) }] : []),
+  ]);
+  return [...base, ...marks].sort((a, b) => a.fromDay - b.fromDay);
 }
 
 /** The next phase within the same intensity (never a higher intensity), or null at Mastery. */

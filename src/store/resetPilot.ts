@@ -5,6 +5,7 @@ import * as P from '../core/reset/pilot';
 import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
 import { channel, devTools, type Channel } from '../lib/flags';
+import { CROP_COUNT } from '../components/habitArt';
 import { debouncedStorage } from './storage';
 
 /*
@@ -31,6 +32,10 @@ type Actions = {
   start: (answers: P.PilotAnswers, choices: P.PilotChoice[]) => boolean;
   /** Adds a habit from today (the set-up's rules); false if it can't join. */
   addHabit: (extra: Partial<P.PilotAnswers>, choice: P.PilotChoice) => boolean;
+  /** Adds a habit of the person's own from today; false if it can't be added. */
+  addCustomHabit: (def: { name: string; note?: string; perWeek: number }) => boolean;
+  /** Takes a habit out from today (its past stays); the reason it can't be, or null when done. */
+  removeHabit: (habitId: string) => string | null;
   /** Ends the program and deletes its data. */
   end: () => void;
   /** Today, or yesterday while it can still be corrected (until noon). */
@@ -108,6 +113,24 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
           if (!next) return false;
           set({ program: next });
           return true;
+        },
+
+        addCustomHabit: (def) => {
+          const { program } = get();
+          if (!program) return false;
+          const r = P.addCustomHabit(program, def, pilotToday(get()), CROP_COUNT);
+          if (!r) return false;
+          set({ program: r.program });
+          return true;
+        },
+
+        removeHabit: (id) => {
+          const { program } = get();
+          if (!program) return 'There’s no program.';
+          const problem = P.removeProblem(program, id);
+          if (problem) return problem;
+          set({ program: P.removeHabit(program, id, pilotToday(get())) });
+          return null;
         },
 
         end: () => set({ ...initial }),

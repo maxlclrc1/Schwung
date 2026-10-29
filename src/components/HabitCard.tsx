@@ -15,7 +15,7 @@ import { swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../core/swipe';
 import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { useThemeProgress } from '../theme/transition';
-import { habitScene, placeholderCrop } from './habitArt';
+import { cropAt, habitScene, placeholderCrop } from './habitArt';
 import { useCardBlock } from './TabPager';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { ThemedImage } from './ThemedImage';
@@ -31,6 +31,8 @@ type Props = {
   onSwipe?: (active: boolean) => void;
   /** The card's title, target, level and words. */
   display: CardDisplay;
+  /** A habit of the person's own: which part of the panorama it shows (habitArt.ts cropAt). */
+  scene?: number;
   /** A small row under the target (weekly progress, an optional timer). Its buttons are CardButtons. */
   accessory?: ReactNode;
   /** Extra VoiceOver actions (the accessory's buttons, which aren't separately accessible). */
@@ -104,8 +106,11 @@ const INK: Record<Theme, { veil: string[]; top: string[]; title: string; target:
     },
   };
 
-/** The habit's scene: its own art once it exists, otherwise a crop of the world panorama. */
-function Scene({ habitId, width, height }: { habitId: string; width: number; height: number }) {
+/**
+ * The habit's scene: its own art, or a part of the world panorama (the one given to a habit of the person's own, or
+ * one picked by id).
+ */
+function Scene({ habitId, scene, width, height }: { habitId: string; scene?: number; width: number; height: number }) {
   const dark = habitScene(habitId, 'dark');
   const light = habitScene(habitId, 'light');
   // An explicit size (not just absoluteFill): the web otherwise draws the image at its natural size.
@@ -117,7 +122,7 @@ function Scene({ habitId, width, height }: { habitId: string; width: number; hei
         style={{ position: 'absolute', left: 0, top: 0, width, height }}
       />
     );
-  const crop = placeholderCrop(habitId);
+  const crop = scene !== undefined ? cropAt(scene) : placeholderCrop(habitId);
   const tile = TILES.dark[crop.tile];
   const k = width / crop.width;
   const regionHeight = height / k;
@@ -210,6 +215,7 @@ export function CardButton({ onPress, style, children }: { onPress: () => void; 
 
 function HabitCardImpl({
   habitId,
+  scene,
   done,
   readOnly,
   onToggle,
@@ -435,7 +441,7 @@ function HabitCardImpl({
       }}
       style={[styles.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
     >
-      <Scene habitId={habitId} width={width} height={height} />
+      <Scene habitId={habitId} scene={scene} width={width} height={height} />
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: c.accent }, washStyle]} />
       <Veil pick="veil" locations={[0.35, 0.62, 1]} style={StyleSheet.absoluteFill} />
       {/* A faint veil at the top, for the level label over the sky. */}

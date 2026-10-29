@@ -36,7 +36,7 @@ export function useJourneySource(): JourneySource {
       today,
       rest: (day: number) => day < today && P.dayResult(program, day) === 'rest',
       stats: P.journeyStats(program, today),
-      title: (id: string) => P.habitName(id),
+      title: (id: string) => P.nameOf(program, id),
     };
   }, [program, today]);
 }

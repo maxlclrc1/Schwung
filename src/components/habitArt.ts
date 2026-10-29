@@ -83,6 +83,12 @@ const CROPS: WorldCrop[] = [
   { tile: 'habits', cx: 650, cy: 1950, width: 800 }, // slopes and pines
 ];
 
+/** How many parts of the panorama a card can show. */
+export const CROP_COUNT = CROPS.length;
+
+/** One of the views, by number (a habit of the person's own keeps the one it was given). */
+export const cropAt = (i: number): WorldCrop => CROPS[((i % CROPS.length) + CROPS.length) % CROPS.length];
+
 export function placeholderCrop(habitId: string): WorldCrop {
   let h = 0;
   for (let i = 0; i < habitId.length; i++) h = (h * 31 + habitId.charCodeAt(i)) >>> 0;

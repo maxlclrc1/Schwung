@@ -51,7 +51,7 @@ export function PilotInsights() {
       <SectionTitle>Your habits</SectionTitle>
       {program.habits.map((id) => {
         const week = P.weekProgress(program, id, today);
-        const level = P.levelFor(program, id, today);
+        const line = P.levelLineFor(program, id, today);
         const bar = charts?.bars.get(id);
         const met =
           bar && bar.kind === 'weekly' && bar.weeksJudged
@@ -59,13 +59,13 @@ export function PilotInsights() {
             : '';
         const subtitle = week
           ? week.goal === 0
-            ? `${P.levelLabel(level)} · a short week, no goal${met}`
-            : `${P.levelLabel(level)} · ${week.credited} of ${week.goal} this week${met}`
-          : `${P.levelLabel(level)} · every day`;
+            ? `${line} · a short week, no goal${met}`
+            : `${line} · ${week.credited} of ${week.goal} this week${met}`
+          : `${line} · every day`;
         return (
           <HabitInsight
             key={id}
-            title={P.habitName(id)}
+            title={P.nameOf(program, id)}
             subtitle={subtitle}
             tally={P.habitTally(program, id, today)}
             history={
@@ -88,7 +88,7 @@ export function PilotInsights() {
       })}
       {charts ? (
         <>
-          <Heatmap cells={charts.cells} today={today} name={P.habitName} />
+          <Heatmap cells={charts.cells} today={today} name={(id) => P.nameOf(program, id)} />
           <PersonalRecords records={charts.records} />
         </>
       ) : null}
