@@ -19,7 +19,7 @@ import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 
 /*
- * The Insights charts (testing builds): the weekly consistency trend, the 66-day heatmap and the personal records,
+ * The Insights charts: the weekly consistency trend, the 66-day heatmap and the personal records,
  * as plain views (no chart library). Their numbers come from core/charts.ts (memoized by the screens); nothing here
  * computes per frame or animates beyond one quiet fade-in, and none of it mounts until Insights is first shown.
  */

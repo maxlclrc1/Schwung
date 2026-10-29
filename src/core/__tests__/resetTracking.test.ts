@@ -49,18 +49,7 @@ import {
 } from '../reset/tracking';
 import { erasFor, weekSummary } from '../reset/weekly';
 import type { DayLog } from '../types';
-import { sanitize } from '../../store/migrate';
-
-// Node's file APIs, typed locally like the channel tests do (the project has no Node type definitions).
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const fs = require('fs') as {
-  readdirSync(dir: string): string[];
-  statSync(p: string): { isDirectory(): boolean };
-  readFileSync(file: string, encoding: 'utf8'): string;
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const path = require('path') as { join(...parts: string[]): string; relative(from: string, to: string): string };
-declare const __dirname: string;
+import { sanitizePilotProgram } from '../reset/pilot';
 
 const MON = '2026-11-02'; // Day 1 is a Monday
 const at = (day: number, planned: string[] = []): At => ({ startKey: MON, day, planned });
@@ -546,20 +535,23 @@ describe('persistence and compatibility', () => {
     expect(readTrack(undefined, 'x')).toEqual({ v: 1 });
   });
 
-  it('loads old saves exactly as before, and keeps tracking details through a reload', () => {
+  it('keeps tracking details through a save and reload', () => {
     const date = dateForDay(MON, 1);
-    const old: Logs = {
-      [date]: { day: 1, date, completed: ['discipline_bed'], planned: ['discipline_bed', 'mind_read'] },
-    };
-    const saved = {
+    const program = {
+      v: 1,
       startedAt: MON,
-      plan: [{ habitId: 'discipline_bed', level: 'easy', addedOnDay: 1, levelSince: 0 }],
-      logs: old,
+      answers: { age: '30_49', precautions: [], minutesPerDay: 90 },
+      habits: ['mind_read', 'focus_top3'],
+      progression: Object.fromEntries(
+        ['mind_read', 'focus_top3'].map((id) => [
+          id,
+          { v: 1, habitId: id, eras: [{ intensity: 'starter', phase: 'foundation', fromDay: 1, reason: 'start' }] },
+        ]),
+      ),
+      logs: increment({}, at(1), 'focus_top3', 3).logs,
     };
-    expect((sanitize(JSON.parse(JSON.stringify(saved))).logs as Logs)[date]).toEqual(old[date]);
-    const tracked = increment(old, at(1), 'mind_read', 3).logs;
-    const back = sanitize(JSON.parse(JSON.stringify({ ...saved, logs: tracked }))).logs as Logs;
-    expect(readTrack(back[date], 'mind_read').count).toBe(1);
+    const back = sanitizePilotProgram(JSON.parse(JSON.stringify(program)))!;
+    expect(readTrack(back.logs[date], 'focus_top3').count).toBe(1);
   });
 
   it('leaves XP, the 80% rule and full days exactly as the completed list says', () => {
@@ -580,37 +572,6 @@ describe('persistence and compatibility', () => {
     const r = confirmDone({}, { startKey: start, day: 7, planned: [] }, 'mind_read');
     expect(Object.keys(r.logs)).toEqual(['2026-10-25']);
     expect(dayStatus(r.logs, start, 7, 'mind_read')).toBe('completed');
-  });
-
-  it('is used only by the Life Reset pilot (testing builds), and otherwise only as a log field’s type', () => {
-    const root = path.join(__dirname, '../..');
-    const files: string[] = [];
-    const walk = (dir: string) => {
-      for (const f of fs.readdirSync(dir)) {
-        const p = path.join(dir, f);
-        if (fs.statSync(p).isDirectory()) {
-          if (f !== '__tests__' && f !== 'reset') walk(p);
-        } else if (/\.tsx?$/.test(f)) files.push(p);
-      }
-    };
-    walk(root);
-    const users = files.filter((f) =>
-      /from '[^']*reset\/(habits|weekly|timer|tracking|measures|readiness|pilot)'/.test(fs.readFileSync(f, 'utf8')),
-    );
-    // The pilot's own store and screens (reached only through store/pilotGate.ts: see resetPilot.test.ts), and the
-    // type-only reference in core/types.ts (an optional log field the program never reads).
-    expect(users.map((f) => path.relative(root, f)).sort()).toEqual([
-      'components/pilot/PilotHabit.tsx',
-      'components/pilot/PilotInsights.tsx',
-      'components/pilot/PilotSetup.tsx',
-      'components/pilot/PilotToday.tsx',
-      'components/pilot/pilotJourney.ts',
-      'core/types.ts',
-      'store/resetPilot.ts',
-    ]);
-    expect(fs.readFileSync(path.join(root, 'core/types.ts'), 'utf8')).toContain(
-      "import type { HabitTrack } from './reset/tracking';",
-    );
   });
 });
 

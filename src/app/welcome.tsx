@@ -9,30 +9,20 @@ import { Button, Screen, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
 import { worldFrame } from '../core/world';
 import { APP_NAME } from '../lib/constants';
-import { lifeResetForNewPrograms, v2ForNewPrograms } from '../lib/flags';
-import { pilot, usePilotActive } from '../store/pilotGate';
-import { useApp } from '../store/useApp';
+import { useResetPilot } from '../store/resetPilot';
 import { space, useTheme } from '../theme';
 
 export default function Welcome() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  // Which onboarding a new program uses is the build channel's (lib/flags), never the person's: the Life Reset in
-  // development and internal builds, V1 in the public release.
-  const lifeReset = !!pilot && lifeResetForNewPrograms();
-  const v2 = v2ForNewPrograms();
-  // Answers saved but no program yet: they left during a V1/V2 onboarding, so offer to pick it back up (never where
-  // new programs are Life Reset programs; those answers stay saved, untouched).
-  const resumable = useApp((s) => (v2 ? s.profile : s.answers) !== null && s.startedAt === null) && !lifeReset;
   // The world scrolls with the page here (short phones may scroll), so the trailhead and painting never drift.
   const [zoneTop, setZoneTop] = useState(insets.top + space.sm);
   const { zoneHeight } = worldFrame(width, zoneTop);
-  const started = useApp((s) => s.startedAt !== null);
-  const resetRunning = usePilotActive();
+  const started = useResetPilot((s) => s.program !== null);
 
   // A running program never sees the start screen again.
-  if (started || resetRunning) return <Redirect href="/today" />;
+  if (started) return <Redirect href="/today" />;
 
   return (
     <Screen edges={['bottom']}>
@@ -68,19 +58,9 @@ export default function Welcome() {
           </Animated.View>
         </View>
         <Animated.View entering={FadeInDown.delay(380).duration(500)} style={{ gap: space.sm }}>
-          <Button
-            label="Start my reset"
-            onPress={() => router.push(lifeReset ? '/life-reset/setup' : v2 ? '/v2/quiz' : '/quiz')}
-          />
-          {resumable ? (
-            <Button
-              label="Pick up where you left off"
-              kind="ghost"
-              onPress={() => router.push(v2 ? '/v2/plan' : '/start')}
-            />
-          ) : null}
+          <Button label="Start my reset" onPress={() => router.push('/life-reset/setup')} />
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            About two minutes. Everything stays on your phone.
+            About a minute. Everything stays on your phone.
           </T>
         </Animated.View>
       </ScrollView>

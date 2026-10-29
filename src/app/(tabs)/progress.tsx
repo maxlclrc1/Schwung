@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -10,22 +10,19 @@ import { JourneyView } from '../../components/JourneyView';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
 import { usePagerBlock } from '../../components/TabPager';
 import { Screen, T } from '../../components/ui';
-import { WorldBackdrop } from '../../components/World';
-import { useOnPainting, useWorldLayer, worldAnchor, worldScroll } from '../../components/WorldLayer';
+import { useOnPainting, worldAnchor, worldScroll } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor, type AscentDay } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { dayQualifies, logForDay } from '../../core/progression';
 import type { DayLog } from '../../core/types';
 import { worldFrame } from '../../core/world';
-import { tabs } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 
 /**
- * The Journey tab (testing builds): the Ascent fills the screen, with the stats in one small line above it, the
- * full 66-day calendar a tap away, and any day's details below. The public release keeps the mountain on Today
- * and the journey as a sheet.
+ * The Journey tab: the Ascent fills the screen, with the stats in one small line above it, the full 66-day calendar
+ * a tap away, and any day's details below.
  * Memoized, so a tab change doesn't re-render the page before the slide can start.
  */
 export default function JourneyTab() {
@@ -34,22 +31,19 @@ export default function JourneyTab() {
 
 const JourneyPage = memo(function JourneyPage() {
   const insets = useSafeAreaInsets();
-  // The Life Reset's days while it's on, otherwise the program's (never mixed).
   const source = useJourneySource();
   const started = source.started;
   // Opened with a day (e.g. from a link): start with that day selected.
   const picked = Number(useLocalSearchParams<{ day?: string }>().day) || null;
-  const world = useWorldLayer();
-  if (!tabs()) return <Redirect href="/journey" />;
   return (
-    <Screen edges={[]} transparent={world}>
+    <Screen edges={[]} transparent>
       {started ? (
         <Ascent picked={picked} source={source} />
       ) : (
         <View style={[styles.empty, { paddingTop: insets.top + space.sm }]}>
           <Header />
           <View style={styles.emptyBody}>
-            <T>Your 66 days will show here once you start a habit plan.</T>
+            <T>Your 66 days will show here once you start your Life Reset.</T>
           </View>
         </View>
       )}
@@ -91,9 +85,8 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   const days = useMemo(() => ascentDays(logs, start, today, source.rest), [logs, start, today, source.rest]);
   const todayDone = dayQualifies(logForDay(logs, start, today));
   const pick = (day: number) => setChosen(day === lastDay ? null : day);
-  // With the tabs' shared world, this page's scroll moves it (the trail must stay on the painting), and the
-  // trail and labels stay on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).
-  const world = useWorldLayer();
+  // This page's scroll moves the shared world (the trail must stay on the painting), and the trail and labels stay
+  // on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).
   const onScroll = useAnimatedScrollHandler((e) => {
     worldScroll[1].set(e.contentOffset.y);
   });
@@ -108,14 +101,6 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* The world behind the page, its painting starting where the trail area is measured: the tabs' shared
-            world (moved with this page's scroll), or this screen's own. */}
-        {world ? null : (
-          <View style={StyleSheet.absoluteFill}>
-            <WorldBackdrop zoneTop={zoneTop} fadeTop />
-          </View>
-        )}
-
         <View style={styles.pad}>
           <Header onCalendar={() => setCalendar(true)} />
           <ThemedView
@@ -301,7 +286,7 @@ function DayDetail({
   const log = logForDay(logs, start, day);
   return (
     <ThemedView style={[styles.card, { backgroundColor: c.surface }]} accessibilityLiveRegion="polite">
-      {log && (log.planned.length || log.rested?.length) ? (
+      {log && log.planned.length ? (
         <View style={styles.habits}>
           {log.planned.map((id) => {
             const done = log.completed.includes(id);
@@ -323,14 +308,6 @@ function DayDetail({
               </View>
             );
           })}
-          {(log.rested ?? []).map((id) => (
-            <View key={`rest-${id}`} style={styles.habit} accessible accessibilityLabel={`${title(id)}, rest day`}>
-              <Ionicons name="bed-outline" size={18} color={c.textDim} />
-              <T v="caption" color={c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.4}>
-                {title(id)} · rest day
-              </T>
-            </View>
-          ))}
         </View>
       ) : (
         <T v="caption" color={c.textDim}>

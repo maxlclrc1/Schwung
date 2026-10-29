@@ -1,36 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PROGRAM_DAYS } from '../core/dates';
-import { habitTitle } from '../core/habits';
-import {
-  programHabitTally,
-  programRecent,
-  programStreak,
-  programTally,
-  programTotal,
-  programCells,
-  programRecords,
-  programTrend,
-  programWeekTally,
-  type Tally,
-} from '../core/insights';
 import { haptic } from '../lib/haptics';
-import { currentDay, useApp } from '../store/useApp';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
+import type { Tally } from '../core/charts';
 import { SettingsButton } from './HeaderButton';
-import { Heatmap, PersonalRecords, useShownOnce, useWhileFocused, WeeklyTrend } from './InsightCharts';
 import { ProgressBar, T } from './ui';
 import { SCREEN_PX, worldAnchor } from './WorldLayer';
-import { TILE_HEIGHT } from './worldTiles';
-import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
+import { LAKESIDE_BAND_TOP, TILE_HEIGHT } from './worldTiles';
 
 /*
- * Insights (testing builds' third tab, at the lakeside camp of the shared world): the main numbers at a glance, then
- * each habit, quietly. Everything comes from saved days (core/insights.ts, reset/pilot.ts); nothing is estimated.
+ * Insights (the third tab, at the lakeside camp of the shared world): the main numbers at a glance, then each habit,
+ * quietly. Everything comes from saved days (reset/pilot.ts, reset/charts.ts); nothing is estimated.
  * A window near the top shows the lakeside band; like Habits, the world stays still while the page scrolls (so the
  * painting's lower edge stays hidden behind the tab bar).
  */
@@ -253,73 +238,6 @@ export function SectionTitle({ children }: { children: string }) {
     <T v="overline" color={c.textDim} style={{ marginTop: space.sm }}>
       {children}
     </T>
-  );
-}
-
-/** Insights for the existing V1/V2 program. */
-export function ProgramInsights() {
-  const { c } = useTheme();
-  const plan = useApp((s) => s.plan);
-  const logs = useApp((s) => s.logs);
-  const startedAt = useApp((s) => s.startedAt);
-  const offset = useApp((s) => s.devDayOffset);
-  const today = currentDay({ startedAt, devDayOffset: offset });
-  const start = startedAt ?? '';
-  const data = useMemo(
-    () =>
-      startedAt
-        ? {
-            overall: programTally(plan, logs, start, today),
-            total: programTotal(logs),
-            streak: programStreak(logs, start, today),
-            week: programWeekTally(plan, logs, start, today),
-          }
-        : null,
-    [plan, logs, start, startedAt, today],
-  );
-  const shown = useShownOnce();
-  // The charts follow the saved days only while Insights is shown (see useWhileFocused).
-  const pl = useWhileFocused(plan);
-  const lg = useWhileFocused(logs);
-  const td = useWhileFocused(today);
-  const charts = useMemo(() => {
-    if (!startedAt || !shown) return null;
-    const trend = programTrend(pl, lg, start, td);
-    const names = new Map(pl.map((h) => [h.habitId, habitTitle(h)]));
-    return {
-      trend,
-      cells: programCells(pl, lg, start, td),
-      records: programRecords(pl, lg, start, td, trend),
-      name: (id: string) => names.get(id) ?? id,
-    };
-  }, [pl, lg, td, start, startedAt, shown]);
-  if (!data)
-    return (
-      <ThemedView style={[styles.card, { backgroundColor: c.surface }]}>
-        <T color={c.textDim}>Your numbers show here once you start a program.</T>
-      </ThemedView>
-    );
-  return (
-    <>
-      <Overview {...data} day={today} />
-      {charts ? <WeeklyTrend points={charts.trend} /> : null}
-      <SectionTitle>Your habits</SectionTitle>
-      {plan.map((h) => (
-        <HabitInsight
-          key={h.habitId}
-          title={habitTitle(h)}
-          subtitle={h.schedule ? 'On its scheduled days' : 'Every day'}
-          tally={programHabitTally(h, logs, start, today)}
-          history={<DayStrip days={programRecent(h, logs, start, today)} />}
-        />
-      ))}
-      {charts ? (
-        <>
-          <Heatmap cells={charts.cells} today={today} name={charts.name} />
-          <PersonalRecords records={charts.records} />
-        </>
-      ) : null}
-    </>
   );
 }
 

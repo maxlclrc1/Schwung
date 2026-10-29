@@ -4,7 +4,7 @@ import * as P from './pilot';
 import { programWeeks } from './weekly';
 
 /*
- * The Life Reset's Insights charts (testing builds), from its saved days only. The weekly trend adds up exactly the
+ * The Life Reset's Insights charts, from its saved days only. The weekly trend adds up exactly the
  * opportunities the overall consistency counts (pilot.ts habitTally, week by week), so the two always agree. Rules:
  * SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
  */

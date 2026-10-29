@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Scheme } from './index';
 
 /*
- * Theme switches that wait for their paintings (testing builds). A toggle asks for a scheme; the app keeps showing
+ * Theme switches that wait for their paintings. A toggle asks for a scheme; the app keeps showing
  * the current one while every themed painting on screen (the world tiles, the habit cards' scenes; see ThemedImage)
  * loads and decodes the incoming one, hidden. Once all of them have it (or after THEME_READY_TIMEOUT_MS, so a slow
  * image never blocks the switch) the new scheme is shown, and the UI colours and the paintings fade together.

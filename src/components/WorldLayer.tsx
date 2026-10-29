@@ -2,17 +2,15 @@ import { memo } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, { interpolate, makeMutable, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LAKESIDE_BAND_TOP } from '../core/fieldnotes/route';
-import { tabs } from '../lib/flags';
 import { useTheme } from '../theme';
 import { ThemedView, useThemeProgress } from '../theme/transition';
 import { ThemedImage } from './ThemedImage';
-import { type Theme, TILE_HEIGHT, type TileName, TILES } from './worldTiles';
+import { LAKESIDE_BAND_TOP, type Theme, TILE_HEIGHT, type TileName, TILES } from './worldTiles';
 
 const TILE_NAMES = Object.keys(TILES.dark) as TileName[];
 
 /*
- * One continuous world behind the three tabs (testing builds), in a light and a dark painting:
+ * One continuous world behind the three tabs, in a light and a dark painting:
  * Habits' peaceful valley, Journey's ascent and Insights' lakeside camp are regions of one panorama
  * (design/canvas/assemble_panorama.py, SCHWUNG_CONTINUOUS_WORLD_ARTWORK_SPEC.md). Switching tabs pans the camera
  * across it; nothing reloads. The panorama scales so 1536 px span the screen, as the old world did, so the
@@ -46,22 +44,15 @@ export const worldScroll = [makeMutable(0), makeMutable(0), makeMutable(0)];
  * arrives), so it's never seen out of place where the world also moves vertically between tabs.
  */
 export function useOnPainting(index: number) {
-  const on = useWorldLayer();
   const { width } = useWindowDimensions();
   const slip = width * (1 - STOP_PX / SCREEN_PX);
   return useAnimatedStyle(() => {
-    if (!on) return { opacity: 1, transform: [{ translateX: 0 }] };
     const off = index - worldCamera.get();
     return {
       opacity: Math.min(1, Math.max(0, 1 - Math.abs(off) * 3)),
       transform: [{ translateX: -off * slip }],
     };
   });
-}
-
-/** Whether the continuous world is shown: testing builds (the public release keeps its own screens). */
-export function useWorldLayer(): boolean {
-  return tabs();
 }
 
 export function WorldLayer() {

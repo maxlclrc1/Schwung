@@ -1,13 +1,8 @@
 import { Redirect } from 'expo-router';
-import { usePilotActive } from '../store/pilotGate';
-import { useApp } from '../store/useApp';
+import { useResetPilot } from '../store/resetPilot';
 
-/**
- * Where the app opens: the program shown (a Life Reset, or a V1/V2 program kept as it was), or the start screen
- * when there's none. In development and internal builds the start screen leads into the Life Reset set-up.
- */
+/** Where the app opens: the program, or the start screen (which leads into set-up) when there's none yet. */
 export default function Index() {
-  const started = useApp((s) => s.startedAt !== null);
-  const lifeReset = usePilotActive();
-  return <Redirect href={started || lifeReset ? '/today' : '/welcome'} />;
+  const started = useResetPilot((s) => s.program !== null);
+  return <Redirect href={started ? '/today' : '/welcome'} />;
 }

@@ -4,11 +4,9 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { INTENSITIES, PULL_MINUTES_OPTIONS, SKILLS, type Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
-import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/v2/types';
+import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
-import { useFieldNotes } from '../../store/fieldNotes';
 import { useResetPilot } from '../../store/resetPilot';
-import { useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Button, Screen, T } from '../ui';
@@ -56,8 +54,7 @@ const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h$
 type Step = 'about' | 'habits' | 'details' | 'levels' | 'review';
 
 /**
- * The Life Reset set-up (development and internal builds, where it's how every new program starts: see
- * app/life-reset/setup.tsx): about you, the
+ * The Life Reset set-up, how every program starts (app/life-reset/setup.tsx): about you, the
  * habits you want, only the questions those habits need, how hard each starts and the time you have, then a review.
  * Nothing is pre-selected; a manageable first set is suggested.
  */
@@ -65,19 +62,16 @@ export function PilotSetup() {
   const { c } = useTheme();
   // One Life Reset at a time: with one saved, set-up never runs again (it would never replace it either: start()).
   const running = useResetPilot((s) => s.program !== null);
-  const previous = useApp((s) => s.startedAt !== null);
-  // The program's own answers, read only, so nothing is asked twice. Never changed here.
-  const known = useApp((s) => (s.profile && s.profile.age !== 'u16' ? s.profile : null));
   const [step, setStep] = useState<Step>('about');
-  const [age, setAge] = useState<AgeBand | null>(known?.age ?? null);
-  const [health, setHealth] = useState<Precaution[] | 'unknown' | null>(known ? known.precautions : null);
+  const [age, setAge] = useState<AgeBand | null>(null);
+  const [health, setHealth] = useState<Precaution[] | 'unknown' | null>(null);
   const [picked, setPicked] = useState<P.PilotHabitId[]>([]);
   const [levels, setLevels] = useState<Partial<Record<string, Intensity>>>({});
   const [minutes, setMinutes] = useState<number | null>(null);
-  const [phone, setPhone] = useState<PhoneHours | undefined>(known?.phone);
+  const [phone, setPhone] = useState<PhoneHours | undefined>(undefined);
   const [pull, setPull] = useState<number | undefined>(undefined);
-  const [wake, setWake] = useState<P.PilotAnswers['wake']>(known?.wake);
-  const [active, setActive] = useState<ActiveDays | undefined>(known?.activeDays);
+  const [wake, setWake] = useState<P.PilotAnswers['wake']>(undefined);
+  const [active, setActive] = useState<ActiveDays | undefined>(undefined);
   const [skill, setSkill] = useState<string | undefined>(undefined);
   const [start, setStart] = useState<P.StrengthStart | undefined>(undefined);
   const [own, setOwn] = useState(2);
@@ -130,8 +124,6 @@ export function PilotSetup() {
   const begin = () => {
     if (!useResetPilot.getState().start(answers, choices)) return;
     haptic.success();
-    // Open into the Life Reset (Field Notes is retired; its data stays where it was).
-    useFieldNotes.getState().setActive(false);
     if (router.canDismiss()) router.dismissAll();
     router.replace('/today');
   };
@@ -180,13 +172,7 @@ export function PilotSetup() {
             <T v="title" accessibilityRole="header">
               A few things first
             </T>
-            {previous ? (
-              <T color={c.textDim}>
-                Your current program stays saved, with all its history. You can switch back to it any time in Settings.
-              </T>
-            ) : (
-              <T color={c.textDim}>66 days, a few habits you choose, each growing with you. It takes about a minute.</T>
-            )}
+            <T color={c.textDim}>66 days, a few habits you choose, each growing with you. It takes about a minute.</T>
             <Section title="How old are you?">
               <Chips items={AGES} selected={(id) => age === id} onPress={setAge} />
               {age === 'u16' ? <T color={c.danger}>Schwung is made for people 16 and older.</T> : null}

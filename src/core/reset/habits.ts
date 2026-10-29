@@ -1,15 +1,9 @@
-import { BY_ID, hasPrecaution, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN } from '../v2/library';
-import type { ProfileV2 } from '../v2/types';
+import { hasPrecaution, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN, type Profile } from './profile';
 
 /*
- * The 66-Day Life Reset habit catalog (SCHWUNG_LIFE_RESET_HABITS.md, commit 70481e6). Pure data, used only by the
- * Life Reset pilot (testing builds: Read Daily, Focus Time and Strength Training; see pilot.ts). No other habit here
- * is offered to anyone yet, and no existing V1 or V2 habit, plan or save changes.
- *
- * Eight habits reuse an existing habit id (so their scenes and safety rules carry over); a Life Reset plan will save
- * its own targets with each habit, as V2 plans do, so a reused id never changes an existing program. Every target is
- * a design default the person can make easier or harder; scheduling, recording and progression are later stages.
- * Open questions are in SCHWUNG_LIFE_RESET_CATALOG_NOTES.md.
+ * The 66-Day Life Reset habit catalog (SCHWUNG_LIFE_RESET_HABITS.md): the 11 habits every program chooses from.
+ * Pure data. Every target is a design default the person can make easier or harder. Open questions are in
+ * SCHWUNG_LIFE_RESET_CATALOG_NOTES.md.
  */
 
 export type Intensity = 'starter' | 'standard' | 'challenge';
@@ -87,8 +81,8 @@ export type Completion = {
 /** One short answer a habit needs (or can use) from the person. */
 export type Personalization =
   | { key: 'pullMinutes'; required: true; options: number[] } // current daily time on the main app
-  | { key: 'wakeTime'; required: true } // the existing W1 question
-  | { key: 'activeDays'; required: true } // the existing V2 question
+  | { key: 'wakeTime'; required: true } // when they usually get up
+  | { key: 'activeDays'; required: true } // active days a week
   | { key: 'ownMinutes'; required: false } // Daily Movement: someone already doing more keeps their number
   | { key: 'readingMode'; required: false; options: ['minutes', 'pages'] }
   | { key: 'skill'; required: true; options: string[] }
@@ -98,12 +92,12 @@ export type Personalization =
   | { key: 'strengthDays'; required: false }
   | { key: 'sessionDetails'; required: false; options: ['full body', 'upper', 'lower', 'other'] };
 
+/** The catalog review's status for a habit: the reviews listed are still open before an App Store release. */
 export type Availability = {
-  /** Never true in this stage: nothing is offered in the app yet. */
+  /** Not yet signed off for the App Store release. */
   active: false;
-  /** May be offered in internal testing builds once its later stages are built and approved. */
   status: 'internal-test-candidate';
-  /** Reviews still needed before it can reach production. */
+  /** Reviews still needed before it can reach the App Store. */
   beforeProduction: string[];
 };
 
@@ -113,7 +107,7 @@ export type ResetHabit = {
   /** What the card says under the name when no target is filled in. */
   description: string;
   category: Category;
-  /** The existing V1/V2 habit this id belongs to, or null for a new one. */
+  /** The earlier Schwung habit id this one grew from (kept for its art and history), or null for a new one. */
   existingId: string | null;
   /** The light/dark scene id (a habit id with art in `habitArt.ts`), or null for the world-crop fallback. */
   art: string | null;
@@ -713,17 +707,12 @@ export const RESET_HABITS: ResetHabit[] = [
 
 export const RESET_BY_ID: Record<string, ResetHabit> = Object.fromEntries(RESET_HABITS.map((h) => [h.id, h]));
 
-// --- Eligibility, from the existing V2 rules. ---
+// --- Eligibility ---
+//
+// Carried over unchanged from the earlier habit library's rules for these habits, minus the answers that only said
+// the person already does a habit (a Life Reset habit welcomes people who already do it).
 
-/**
- * Only answers that say the person *already does* a habit (their routines, being active most days) are removed
- * before reusing a V2 habit's rules: a Life Reset habit welcomes people who already do it. Every age, precaution and
- * feasibility rule stays exactly as V2 has it.
- */
-const withoutBaseline = (p: ProfileV2): ProfileV2 => ({ ...p, routines: [], activeDays: '0' });
-
-/** The extra notes Strength Training shows for some answers (not exclusions). */
-export function strengthNotes(p: ProfileV2): string[] {
+export function strengthNotes(p: Profile): string[] {
   const out: string[] = [];
   if (hasPrecaution(p, 'joint')) out.push('Keep to what your physiotherapist or clinician has advised.');
   if (isTeen(p))
@@ -735,18 +724,22 @@ export function strengthNotes(p: ProfileV2): string[] {
 }
 
 /** Why this habit can't be taken by this person at this intensity (null = it can). */
-export function resetExclusion(h: ResetHabit, p: ProfileV2, intensity: Intensity): string | null {
+export function resetExclusion(h: ResetHabit, p: Profile, intensity: Intensity): string | null {
   if (p.age === 'u16') return 'Schwung is made for people 16 and older';
   if (!(isTeen(p) ? h.ages.teen : h.ages.adult).includes(intensity))
     return 'this intensity isn’t offered to 16–17-year-olds';
   switch (h.id) {
     case 'move_walk':
+      if (hasPrecaution(p, 'walkingDifficult'))
+        return 'walking or standing for long is difficult for you (no reviewed alternative yet)';
+      if (hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy'))
+        return 'needs individual advice from your clinician or midwife (waiting for expert review)';
+      return null;
     case 'sleep_wake':
-      return BY_ID[h.id].exclude(withoutBaseline(p));
+      return p.wake && p.wake.kind !== 'time' ? 'your wake time changes a lot or you work shifts' : null;
     case 'screen_app_limit':
-      // App time's existing rule: not offered under 2 h of overall phone use. Its pull-type rule isn't reused:
-      // Less Scrolling covers social media too (named after the person's main pull).
-      return BY_ID.screen_app_limit.start(p) === null ? 'you use your phone less than 2 hours a day' : null;
+      // Not offered under 2 hours of overall phone use (a day under 2 h has little to cut).
+      return p.phone === 'lt1' || p.phone === '1_2' ? 'you use your phone less than 2 hours a day' : null;
     case 'strength_log':
       // The same conditions the held exercise programmes exclude, without using or releasing them.
       if (precautionsUnknown(p)) return 'answer the health question first: a professional can advise what suits you';

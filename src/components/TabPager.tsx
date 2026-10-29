@@ -4,7 +4,7 @@ import { GestureStateManager, type GestureTouchEvent, useManualGesture } from 'r
 import { makeMutable } from 'react-native-reanimated';
 
 /*
- * Who owns a sideways drag between the tabs (testing builds; the pager itself is components/PagerTabs.tsx). The
+ * Who owns a sideways drag between the tabs (the pager itself is components/PagerTabs.tsx). The
  * pager's pan runs on the UI thread, so these rules are native too, never a flag read from JS mid-gesture:
  * - a touch that starts on a habit card belongs to the card: the card stamps the moment it begins, on the UI thread
  *   (useCardBlock), and the pager, which only activates itself (manual activation), never does for a touch that began
@@ -51,7 +51,7 @@ export const InPager = createContext(false);
 /**
  * A gesture for a habit card: it stamps the moment a touch begins on the card and fails at once, so it never
  * activates, never lingers and has no relation to any other gesture (the card's own swipe is its JS responder,
- * untouched). Null outside the pager (the public release), where there is nothing to mark.
+ * untouched). Null outside the pager, where there is nothing to mark.
  */
 export function useCardBlock() {
   const inPager = use(InPager);

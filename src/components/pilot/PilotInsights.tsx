@@ -12,7 +12,7 @@ import { DayStrip, HabitInsight, Overview, SectionTitle, WeekBars } from '../Ins
 import { Button, T } from '../ui';
 
 /**
- * Insights for the Life Reset (testing builds): the overview and the weekly trend, then each habit as a bar with its
+ * Insights for the Life Reset: the overview and the weekly trend, then each habit as a bar with its
  * week (a tap shows its history, details and difficulty), the 66-day heatmap and the personal records. Less Scrolling adds the optional weekly Screen Time
  * check. Numbers come from the saved days only (reset/pilot.ts: habitTally, weekTally, recentDays, habitWeeks).
  */

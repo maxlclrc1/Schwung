@@ -3,20 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dateForDay } from '../../core/dates';
 import type { PilotAnswers, PilotChoice } from '../../core/reset/pilot';
 import { readTrack } from '../../core/reset/tracking';
-import type { Answers } from '../../core/types';
-import { FIXTURES } from '../../core/v2/__tests__/fixtures';
-import { previewPlan } from '../../core/v2/program';
 import type { Channel } from '../../lib/flags';
-import { lifeResetForNewPrograms, LIFE_RESET_IN_PRODUCTION } from '../../lib/flags';
-import {
-  lifeResetShown,
-  pilotToday,
-  resetPilotAvailable,
-  resetPilotKey,
-  sanitizeResetPilot,
-  useResetPilot,
-} from '../resetPilot';
-import { useApp } from '../useApp';
+import { pilotToday, resetPilotKey, sanitizeResetPilot, useResetPilot } from '../resetPilot';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -25,30 +13,20 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 // The build channel, switchable per test (a build has one; these tests play every build).
 const mockChannel: { value: Channel } = { value: 'development' };
-// (The pilot's store reads the channel as it loads, before this file's constants exist: development then.)
+// (The store reads the channel as it loads, before this file's constants exist: development then.)
 const ch = (): Channel => mockChannel?.value ?? 'development';
 jest.mock('../../lib/flags', () => {
   const actual = jest.requireActual('../../lib/flags') as object;
-  return {
-    ...actual,
-    channel: () => ch(),
-    v2ForNewPrograms: () => ch() !== 'production',
-    devTools: () => ch() === 'development',
-  };
+  return { ...actual, channel: () => ch(), devTools: () => ch() === 'development' };
 });
 
 // Node built-ins under Jest (the app itself has no Node types).
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const fs = require('fs') as {
-  readFileSync(file: string, encoding: 'utf8'): string;
-  readdirSync(dir: string): string[];
-  statSync(p: string): { isDirectory(): boolean };
-};
+const fs = require('fs') as { readFileSync(file: string, encoding: 'utf8'): string };
 const SRC = `${process.cwd()}/src`;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const r = () => useResetPilot.getState();
-const s = () => useApp.getState();
 const ADULT: PilotAnswers = { age: '30_49', precautions: [], minutesPerDay: 90, strengthStart: 'sometimes' };
 const ALL: PilotChoice[] = [
   { habitId: 'mind_read', intensity: 'standard' },
@@ -56,55 +34,23 @@ const ALL: PilotChoice[] = [
   { habitId: 'strength_log', intensity: 'standard' },
 ];
 const at = (day: number) => r().setDevDayOffset(day - 1);
-const schwungSnapshot = () => {
-  const { startedAt, plan, logs, programVersion, profile, notices, seenCeremonies, appliedPhase, answers } = s();
-  return JSON.parse(
-    JSON.stringify({ startedAt, plan, logs, programVersion, profile, notices, seenCeremonies, appliedPhase, answers }),
-  );
-};
 const todayLog = () => r().program!.logs[dateForDay(r().program!.startedAt, pilotToday())];
-
-function startV2() {
-  const p = FIXTURES['C · 28, energy'];
-  s().setProfile(p);
-  const plan = previewPlan(p);
-  if (plan.status !== 'ok') throw new Error('expected a plan');
-  expect(s().startProgramV2(plan.options.slice(0, plan.choice?.required ?? 0).map((o) => o.id))).toBe(true);
-}
 
 beforeEach(async () => {
   mockChannel.value = 'development';
   r().end();
-  s().restart();
-  s().setDevDayOffset(0);
-  s().setProfile(null);
-  s().setAnswers(null as unknown as Answers);
   await wait(400);
 });
 
-describe('a separate, temporary pilot program', () => {
-  it('has its own save key, beside Schwung’s and Field Notes’', () => {
+describe('the program', () => {
+  it('has its own save key ("-internal" in Expo Go’s internal channel)', () => {
     expect(resetPilotKey('development', true)).toBe('schwung-reset-pilot');
     expect(resetPilotKey('internal', true)).toBe('schwung-reset-pilot-internal');
     expect(resetPilotKey('internal', false)).toBe('schwung-reset-pilot');
-    for (const other of [
-      'schwung-state',
-      'schwung-state-internal',
-      'schwung-fieldnotes',
-      'schwung-fieldnotes-internal',
-    ])
-      expect([resetPilotKey('development', true), resetPilotKey('internal', true)]).not.toContain(other);
   });
 
-  it('starts, runs and ends without ever touching a running Schwung program or its save', async () => {
-    startV2();
-    s().toggleHabit(1, s().plan[0].habitId);
-    await wait(400);
-    const before = schwungSnapshot();
-    const disk = await AsyncStorage.getItem('schwung-state');
-
+  it('starts, runs and ends, saved on its key', async () => {
     expect(r().start(ADULT, ALL)).toBe(true);
-    expect(r().active).toBe(true);
     r().complete('mind_read');
     r().complete('focus_deepwork');
     r().setSession({ type: 'upper', minutes: 30 });
@@ -113,29 +59,17 @@ describe('a separate, temporary pilot program', () => {
     r().harder('mind_read');
     await wait(400);
     expect(await AsyncStorage.getItem('schwung-reset-pilot')).toContain('"mind_read"');
-    expect(schwungSnapshot()).toEqual(before);
-    expect(await AsyncStorage.getItem('schwung-state')).toBe(disk);
-
-    // Back to the program: the pilot is kept, the program is as it was.
-    r().setActive(false);
-    expect(r().program).not.toBeNull();
-    expect(schwungSnapshot()).toEqual(before);
-    // Ending deletes only the pilot.
     r().end();
     await wait(400);
     expect(r().program).toBeNull();
-    expect(schwungSnapshot()).toEqual(before);
-    expect(await AsyncStorage.getItem('schwung-state')).toBe(disk);
+    expect(JSON.parse((await AsyncStorage.getItem('schwung-reset-pilot'))!).state.program).toBeNull();
   });
 
-  it('never starts over a running pilot, and never converts an existing program', () => {
-    startV2();
+  it('never creates a second program, however often set-up finishes', () => {
     expect(r().start(ADULT, ALL)).toBe(true);
     const first = r().program;
-    expect(r().start(ADULT, ALL.slice(0, 1))).toBe(false);
+    for (let i = 0; i < 3; i++) expect(r().start(ADULT, ALL.slice(0, 1))).toBe(false);
     expect(r().program).toBe(first);
-    expect(s().programVersion).toBe(2);
-    expect(s().plan.some((h) => h.habitId === 'strength_log')).toBe(false);
   });
 
   it('refuses a setup the eligibility or time rules don’t allow', () => {
@@ -146,79 +80,17 @@ describe('a separate, temporary pilot program', () => {
     expect(r().program).toBeNull();
   });
 
-  it('can only be shown while it exists', () => {
-    r().setActive(true);
-    expect(r().active).toBe(false);
-    r().start(ADULT, ALL);
-    r().setActive(false);
-    r().setActive(true);
-    expect(r().active).toBe(true);
-  });
-});
-
-describe('the Life Reset as the default program (development and internal builds)', () => {
-  it('is how new programs start in development and internal builds; production stays on V1 until a release decision', () => {
-    expect([
-      lifeResetForNewPrograms('development'),
-      lifeResetForNewPrograms('internal'),
-      lifeResetForNewPrograms('production'),
-    ]).toEqual([true, true, false]);
-    expect(LIFE_RESET_IN_PRODUCTION).toBe(false);
-  });
-
-  it('shows the Life Reset when chosen, or when there is no V1/V2 program; otherwise the V1/V2 program', () => {
-    const program = {} as NonNullable<ReturnType<typeof r>['program']>;
-    // [has a Life Reset, chose it, has a V1/V2 program] → Life Reset shown
-    const cases: [boolean, boolean, boolean, boolean][] = [
-      [false, false, false, false], // a new installation: nothing to show (the start screen leads to set-up)
-      [false, false, true, false], // only a V1/V2 program: it stays shown
-      [true, true, false, true],
-      [true, false, false, true], // a Life Reset saved without the choice (an older pilot save), nothing else
-      [true, true, true, true], // switched to the Life Reset
-      [true, false, true, false], // switched back: the V1/V2 program, the Life Reset kept
-    ];
-    for (const [has, chose, legacy, shown] of cases)
-      expect([has, chose, legacy, lifeResetShown({ program: has ? program : null, active: chose }, legacy)]).toEqual([
-        has,
-        chose,
-        legacy,
-        shown,
-      ]);
-  });
-
-  it('switches back and forth on request, never touching either program', () => {
-    startV2();
-    const before = schwungSnapshot();
-    expect(lifeResetShown(r(), true)).toBe(false);
-    expect(r().start(ADULT, ALL)).toBe(true);
-    expect(lifeResetShown(r(), true)).toBe(true);
-    r().complete('mind_read');
-    const reset = r().program;
-    r().setActive(false);
-    expect(lifeResetShown(r(), true)).toBe(false);
-    r().setActive(true);
-    expect(lifeResetShown(r(), true)).toBe(true);
-    expect(r().program).toBe(reset);
-    expect(schwungSnapshot()).toEqual(before);
-  });
-
   it('starts only with the 11 Life Reset habits: retired ones (Phone-Free Wind-Down…) are refused', () => {
     for (const id of ['sleep_no_phone_bed', 'sleep_bedtime', 'water', 'mind_meditate', 'move_strength_session'])
       expect([id, r().start(ADULT, [{ habitId: id, intensity: 'starter' }])]).toEqual([id, false]);
     expect(r().program).toBeNull();
   });
 
-  it('never creates a second Life Reset, however often set-up finishes', () => {
-    expect(r().start(ADULT, ALL)).toBe(true);
-    const first = r().program;
-    for (let i = 0; i < 3; i++) expect(r().start(ADULT, ALL.slice(0, 1))).toBe(false);
-    expect(r().program).toBe(first);
-  });
-
-  it('keeps an older pilot save as the Life Reset, chosen or not, with its tracking data', () => {
+  it('loads an older pilot save unchanged, with its tracking data (its old "active" choice ignored)', () => {
     const date = dateForDay('2026-01-05', 1);
     const saved = {
       active: false,
+      inviteHidden: true,
       program: {
         v: 1,
         startedAt: '2026-01-05',
@@ -244,21 +116,8 @@ describe('the Life Reset as the default program (development and internal builds
       devDayOffset: 0,
     };
     const loaded = sanitizeResetPilot(saved);
-    expect(loaded.active).toBe(false);
+    expect(Object.keys(loaded).sort()).toEqual(['devDayOffset', 'program']);
     expect(loaded.program?.logs[date].track?.mind_read).toEqual(saved.program.logs[date].track.mind_read);
-    // Not chosen: shown only when there's no V1/V2 program (then it is the program).
-    expect(lifeResetShown({ program: loaded.program!, active: false }, false)).toBe(true);
-    expect(lifeResetShown({ program: loaded.program!, active: false }, true)).toBe(false);
-  });
-
-  it('remembers "Not now" on the invitation across a restart and an ended Life Reset', () => {
-    r().hideInvite();
-    expect(sanitizeResetPilot({ active: false, program: null, inviteHidden: true }).inviteHidden).toBe(true);
-    expect(sanitizeResetPilot({ active: false, program: null }).inviteHidden).toBeUndefined();
-    r().start(ADULT, ALL);
-    r().end();
-    expect(r().inviteHidden).toBe(true);
-    expect(r().program).toBeNull();
   });
 });
 
@@ -266,7 +125,7 @@ describe('persistence and recovery', () => {
   async function relaunch() {
     await wait(400);
     const disk = await AsyncStorage.getItem('schwung-reset-pilot');
-    useResetPilot.setState({ program: null, active: false });
+    useResetPilot.setState({ program: null });
     await wait(400);
     if (disk) await AsyncStorage.setItem('schwung-reset-pilot', disk);
     await useResetPilot.persist.rehydrate();
@@ -286,7 +145,6 @@ describe('persistence and recovery', () => {
     const before = JSON.parse(JSON.stringify(r().program));
     await relaunch();
     expect(r().program).toEqual(before);
-    expect(r().active).toBe(true);
     expect(readTrack(todayLog(), 'focus_top3').count).toBe(1);
     expect(r().program!.progression.strength_log.eras).toHaveLength(2);
     expect(r().program!.measures?.screen_app_limit).toBeDefined();
@@ -311,86 +169,21 @@ describe('persistence and recovery', () => {
   });
 
   it('drops a damaged save rather than trusting it', () => {
-    expect(sanitizeResetPilot({ active: true, program: { v: 1, startedAt: 'x' } })).toEqual({
-      active: false,
-      program: null,
-    });
+    expect(sanitizeResetPilot({ program: { v: 1, startedAt: 'x' } })).toEqual({ program: null });
     expect(sanitizeResetPilot('nope')).toEqual({});
-    expect(sanitizeResetPilot({ active: true, program: null, devDayOffset: 3 })).toEqual({
-      active: false,
-      program: null,
-      devDayOffset: 3,
-    });
+    expect(sanitizeResetPilot({ program: null, devDayOffset: 3 })).toEqual({ program: null, devDayOffset: 3 });
   });
 });
 
 describe('builds', () => {
-  it('internal builds have the pilot without developer tools (no time travel)', () => {
-    mockChannel.value = 'internal';
-    expect(resetPilotAvailable()).toBe(true);
-    expect(r().start(ADULT, ALL)).toBe(true);
-    r().setDevDayOffset(10);
-    expect(r().devDayOffset).toBe(0);
-    expect(pilotToday()).toBe(1);
-  });
-
-  it('production: no pilot — nothing can start, show or change one', () => {
-    mockChannel.value = 'production';
-    expect(resetPilotAvailable()).toBe(false);
-    expect(r().start(ADULT, ALL)).toBe(false);
-    r().setActive(true);
-    expect([r().program, r().active]).toEqual([null, false]);
-    // Even a pilot left in storage by a testing build is inert.
-    mockChannel.value = 'development';
-    r().start(ADULT, ALL);
-    mockChannel.value = 'production';
-    expect(r().complete('mind_read')).toBeNull();
-    expect(todayLog()).toBeUndefined();
-    r().setActive(true);
-    expect(r().active).toBe(false);
-  });
-
-  it('reaches the app only through the gate, which a production bundle folds away', () => {
-    const gate = fs.readFileSync(`${SRC}/store/pilotGate.ts`, 'utf8');
-    expect(gate).toContain("__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal'");
-    // Nothing outside the pilot imports its store or screens directly (only lazily, through the gate).
-    const files: string[] = [];
-    const walk = (dir: string) => {
-      for (const f of fs.readdirSync(dir)) {
-        const p = `${dir}/${f}`;
-        if (fs.statSync(p).isDirectory()) {
-          if (f !== '__tests__') walk(p);
-        } else if (/\.tsx?$/.test(f)) files.push(p.slice(SRC.length + 1));
-      }
-    };
-    walk(SRC);
-    const direct = files.filter(
-      (f) =>
-        !f.startsWith('components/pilot/') &&
-        f !== 'store/pilotGate.ts' &&
-        /from '[^']*(store\/resetPilot|components\/pilot\/|\.\/resetPilot)'/.test(
-          fs.readFileSync(`${SRC}/${f}`, 'utf8'),
-        ),
-    );
-    expect(direct).toEqual([]);
-    // Every Life Reset route checks the gate before rendering.
-    for (const route of ['app/life-reset/setup.tsx', 'app/life-reset/[id].tsx']) {
-      const src = fs.readFileSync(`${SRC}/${route}`, 'utf8');
-      expect([
-        route,
-        src.includes('if (!pilot || !pilot.store.resetPilotAvailable()) return <Redirect href="/" />;'),
-      ]).toEqual([route, true]);
+  it('internal and production builds have no developer tools (no time travel)', () => {
+    for (const c of ['internal', 'production'] as Channel[]) {
+      mockChannel.value = c;
+      r().end();
+      expect(r().start(ADULT, ALL)).toBe(true);
+      r().setDevDayOffset(10);
+      expect([c, r().devDayOffset, pilotToday()]).toEqual([c, 0, 1]);
     }
-    expect(fs.readFileSync(`${SRC}/app/(tabs)/today.tsx`, 'utf8')).toContain(
-      'if (pilot && active) return <pilot.Today />;',
-    );
-    // Insights and Journey show the Life Reset only through the gate, too.
-    expect(fs.readFileSync(`${SRC}/app/(tabs)/insights.tsx`, 'utf8')).toContain(
-      '{pilot && lifeReset ? <pilot.Insights /> : <ProgramInsights />}',
-    );
-    expect(fs.readFileSync(`${SRC}/components/journeySource.ts`, 'utf8')).toContain(
-      "if (reset && pilot) return { kind: 'reset', started: true, ...pilot.journey(reset.program, reset.today) };",
-    );
   });
 
   it('keeps the card interactions: the same HabitCard, the page holding its scroll while a card is swiped', () => {

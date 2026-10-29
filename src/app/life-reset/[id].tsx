@@ -1,8 +1,6 @@
-import { Redirect } from 'expo-router';
-import { pilot } from '../../store/pilotGate';
+import { PilotHabit } from '../../components/pilot/PilotHabit';
 
-/** A Life Reset habit’s details: development and internal builds (see store/pilotGate.ts). */
-export default function PilotHabitRoute() {
-  if (!pilot || !pilot.store.resetPilotAvailable()) return <Redirect href="/" />;
-  return <pilot.Habit />;
+/** A Life Reset habit's details, corrections and difficulty. */
+export default function HabitRoute() {
+  return <PilotHabit />;
 }

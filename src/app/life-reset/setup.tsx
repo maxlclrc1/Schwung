@@ -1,8 +1,6 @@
-import { Redirect } from 'expo-router';
-import { pilot } from '../../store/pilotGate';
+import { PilotSetup } from '../../components/pilot/PilotSetup';
 
-/** Life Reset set-up: development and internal builds (see store/pilotGate.ts). */
-export default function PilotSetupRoute() {
-  if (!pilot || !pilot.store.resetPilotAvailable()) return <Redirect href="/" />;
-  return <pilot.Setup />;
+/** Life Reset set-up: how every program starts. */
+export default function SetupRoute() {
+  return <PilotSetup />;
 }

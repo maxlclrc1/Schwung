@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 import { dateForDay } from '../dates';
-import { PHASE_START, reconcile } from '../progression';
+import { PHASE_START } from '../progression';
 import {
   acceptOffer,
   checkLevel,
@@ -24,9 +24,8 @@ import {
 } from '../reset/readiness';
 import type { Intensity, Phase } from '../reset/habits';
 import type { WeeklyContext } from '../reset/weekly';
-import type { DayLog, PlanHabit } from '../types';
-import type { ProfileV2 } from '../v2/types';
-import { sanitize } from '../../store/migrate';
+import type { Profile } from '../reset/profile';
+import type { DayLog } from '../types';
 
 // 2026-11-02 is a Monday: weeks are Days 1–7, 8–14, 15–21, 22–28…
 const MON = '2026-11-02';
@@ -59,22 +58,14 @@ const strength = (intensity: Intensity = 'standard', day = 1) => newProgression(
 const outcome = (state: ProgressionState, logs: Logs, today: number, extra: { yesterdayEditable?: boolean } = {}) =>
   readiness({ state, logs, ctx, today, ...extra }).outcome;
 
-const ADULT: ProfileV2 = {
+const ADULT: Profile = {
   age: '18_29',
-  goal: 'focus',
-  sleepHours: '7_8',
-  sleepTrouble: 'rarely',
   activeDays: '1_2',
-  produce: '3_4',
-  sugary: 'rarely',
   phone: '2_4',
-  phonePull: 'social',
-  routines: [],
   precautions: [],
   wake: { kind: 'time', time: '07:15' },
-  inBed: '23:30',
 };
-const TEEN: ProfileV2 = { ...ADULT, age: '16_17', sugary: undefined };
+const TEEN: Profile = { ...ADULT, age: '16_17' };
 
 describe('daily readiness (the last 14 opportunities)', () => {
   // Today is Day 22; the window is Days 8–21.
@@ -486,7 +477,7 @@ describe('constraints', () => {
   });
 
   it('respects safety exclusions in every direction', () => {
-    const heart: ProfileV2 = { ...ADULT, precautions: ['heart'] };
+    const heart: Profile = { ...ADULT, precautions: ['heart'] };
     const s = strength();
     expect(
       checkLevel(
@@ -498,7 +489,7 @@ describe('constraints', () => {
     ).toMatch(/clinician/);
     expect(makeHarder(s, ctx, 3, { profile: heart })).toHaveProperty('blocked');
     // Joint pain rules out Starter (a physiotherapist's routine first), so Standard can't step down to it.
-    const joint: ProfileV2 = { ...ADULT, precautions: ['joint'] };
+    const joint: Profile = { ...ADULT, precautions: ['joint'] };
     expect(makeEasier(s, ctx, 3, { profile: joint })).toHaveProperty('blocked');
     const logs = logsFor(STRENGTH, [1, 8], [], [3, 10, 17]);
     expect(progressionOffer({ state: s, logs, ctx, today: 22 })?.kind).toBe('step-down');
@@ -738,20 +729,6 @@ describe('compatibility and isolation', () => {
     expect(back).toEqual(s);
     expect(back.v).toBe(1);
     expect(levelOn(back, 23)).toEqual({ intensity: 'standard', phase: 'momentum' });
-  });
-
-  it('reads old saved logs (no tracking details) after the existing loader', () => {
-    const logs = logsFor(WALK, range(1, 21));
-    const saved = { startedAt: MON, plan: [{ habitId: WALK, level: 'easy', addedOnDay: 1, levelSince: 0 }], logs };
-    const back = sanitize(JSON.parse(JSON.stringify(saved))).logs as Logs;
-    expect(outcome(walk(), back, 22)).toBe('ready');
-  });
-
-  it('leaves V1/V2 progression as it is: levels still rise automatically on Day 22', () => {
-    const plan: PlanHabit[] = [{ habitId: 'mind_read', level: 'easy', addedOnDay: 1, levelSince: 0 }];
-    const r = reconcile({ plan, appliedPhase: 1, startKey: MON, logs: {}, today: 22, yesterdayEditable: false });
-    expect(r.plan[0].level).toBe('medium');
-    expect(r.events).toContainEqual({ kind: 'phaseUp', phase: 2, day: 22 });
   });
 
   it('never changes the logs it reads', () => {
