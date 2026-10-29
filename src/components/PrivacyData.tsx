@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { buildExport, EXPORT_CONTAINS } from '../core/dataExport';
 import { PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
+import { legalVisible } from '../lib/legal';
 import { removeAllTemps, shareTemp, writeTemp } from '../lib/appFiles';
 import { cancelAllReminders } from '../lib/reminders';
 import { deleteAllLocalData } from '../store/deleteData';
@@ -115,8 +116,13 @@ export function PrivacyData() {
                 danger
                 onPress={() => setStep('delete')}
               />
-              <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-              <Row icon="open-outline" label="Privacy Policy" onPress={() => void Linking.openURL(PRIVACY_URL)} />
+              {/* Hidden from App Store builds while the address is still a placeholder (lib/legal.ts). */}
+              {legalVisible.privacyPolicy() ? (
+                <>
+                  <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
+                  <Row icon="open-outline" label="Privacy Policy" onPress={() => void Linking.openURL(PRIVACY_URL)} />
+                </>
+              ) : null}
             </ThemedView>
             <T v="caption" color={c.textFaint}>
               Ending the Life Reset (in Settings) ends your current program. Delete my data removes all your personal

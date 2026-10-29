@@ -49,6 +49,7 @@ describe('one app: the Life Reset', () => {
       '(tabs)/today.tsx',
       '_layout.tsx',
       'index.tsx',
+      'legal.tsx',
       'life-reset/[id].tsx',
       'life-reset/add.tsx',
       'life-reset/collection.tsx',

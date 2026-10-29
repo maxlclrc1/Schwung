@@ -10,6 +10,7 @@ import { Screen, T } from '../components/ui';
 import type { ThemePreference } from '../core/types';
 import { APP_NAME, CONTACT_EMAIL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
+import { legalVisible } from '../lib/legal';
 import { usePreferences } from '../store/preferences';
 import { radius, space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
@@ -34,7 +35,21 @@ export default function Settings() {
         </Section>
 
         <Section title="About">
-          <Row label="Contact" icon="mail-outline" onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
+          <Row
+            label="Wellness note"
+            icon="heart-outline"
+            onPress={() => router.push({ pathname: '/legal', params: { doc: 'wellness' } })}
+          />
+          {legalVisible.terms() ? (
+            <Row
+              label="Terms of Use"
+              icon="document-text-outline"
+              onPress={() => router.push({ pathname: '/legal', params: { doc: 'terms' } })}
+            />
+          ) : null}
+          {legalVisible.contact() ? (
+            <Row label="Contact" icon="mail-outline" onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
+          ) : null}
         </Section>
 
         <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
