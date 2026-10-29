@@ -1,8 +1,10 @@
 import type { ImageSourcePropType } from 'react-native';
 
 /*
- * The continuous world panorama as shipped: three tiles per theme, cut from design/canvas/panorama-<theme>-v2.jpg
- * (4096 x 3584 here), each placed at its x in panorama px. Used by the world behind the tabs, and for the habit
+ * The continuous world panorama as shipped: three tiles per theme, cut from the panorama assembled by
+ * design/canvas/assemble_panorama.py (4096 x 3584 here; side pieces joined to Journey along a minimum-error seam
+ * through the mist, not crossfaded), each placed at its x in panorama px. Encoded as WebP at quality 92: lower
+ * settings smeared the soft mist into visible blocks. Used by the world behind the tabs, and for the habit
  * cards' temporary scenes.
  */
 export type Theme = 'light' | 'dark';

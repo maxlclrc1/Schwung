@@ -50,13 +50,15 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
 
   const tone = useMemo(
     () => ({
-      lit: c.accent,
-      walked: isDark ? 'rgba(167,139,250,0.38)' : 'rgba(116,81,200,0.32)',
+      // Climbed in sage (complete days), today in indigo, milestones in peach.
+      lit: c.sage,
+      walked: isDark ? 'rgba(143,176,140,0.4)' : 'rgba(85,122,88,0.34)',
       ahead: isDark ? 'rgba(245,243,255,0.22)' : 'rgba(25,22,33,0.18)',
-      halo: isDark ? 'rgba(167,139,250,0.22)' : 'rgba(116,81,200,0.16)',
+      halo: isDark ? 'rgba(143,176,140,0.24)' : 'rgba(85,122,88,0.18)',
+      today: isDark ? 'rgba(127,125,208,0.32)' : 'rgba(79,77,154,0.22)',
       badge: isDark ? 'rgba(28,27,37,0.92)' : 'rgba(255,255,255,0.94)',
     }),
-    [c.accent, isDark],
+    [c.sage, isDark],
   );
 
   const status = (day: number) => days[day - 1]?.status;
@@ -119,8 +121,8 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
         <TodayOrb
           x={px(days[today - 1].point.x)}
           y={py(days[today - 1].point.y)}
-          color={c.accent}
-          halo={tone.halo}
+          color={c.indigo}
+          halo={tone.today}
           animate={!reduceMotion}
           todayDone={todayDone}
           landmark={days[today - 1].landmark}
@@ -134,7 +136,7 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
           const summit = d.day === PROGRAM_DAYS;
           const reached = d.status === 'done' || d.status === 'today';
           const size = summit ? 26 : 20;
-          const color = summit ? c.gold : reached ? c.accent : c.textDim;
+          const color = summit ? c.gold : reached ? c.peach : c.textDim;
           return (
             <View
               key={d.day}
@@ -147,7 +149,7 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
                   left: px(d.point.x) - size / 2,
                   top: py(d.point.y) - size / 2,
                   backgroundColor: tone.badge,
-                  borderColor: summit ? c.gold : reached ? c.accent : tone.ahead,
+                  borderColor: summit ? c.gold : reached ? c.peach : tone.ahead,
                 },
               ]}
             >
@@ -192,14 +194,21 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
       {ASCENT_PHASES.map((p) => {
         const at = PHASE_LABEL_AT[p.n];
         const current = !maintenance && p.n === phase.n;
+        // Each stage keeps its own colour (Foundation sage, Momentum misty blue, Mastery indigo), as in the
+        // expedition calendar below; the current one is filled.
+        const tint = p.n === 1 ? c.sage : p.n === 2 ? c.mist : c.indigo;
+        const ink = p.n === 1 ? c.sageInk : p.n === 2 ? c.mistInk : c.indigoInk;
         return (
-          <View key={p.n} style={[styles.phase, { left: px(at.x), top: py(at.y), backgroundColor: pill }]}>
-            <T
-              v="overline"
-              maxFontSizeMultiplier={1.2}
-              color={current ? c.accentInk : c.textDim}
-              style={styles.phaseText}
-            >
+          <View
+            key={p.n}
+            style={[
+              styles.phase,
+              styles.phaseRow,
+              { left: px(at.x), top: py(at.y), backgroundColor: current ? tint : pill },
+            ]}
+          >
+            {current ? null : <View style={[styles.phaseDot, { backgroundColor: tint }]} />}
+            <T v="overline" maxFontSizeMultiplier={1.2} color={current ? c.onTint : ink} style={styles.phaseText}>
               {p.name}
             </T>
           </View>
@@ -208,7 +217,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
 
       {/* Where you are: kept to the top-left corner, clear of the upper switchbacks. */}
       <View style={[styles.where, { maxWidth: width * 0.4 }]}>
-        <T v="overline" maxFontSizeMultiplier={1.15} color={c.accentInk} numberOfLines={1}>
+        <T v="overline" maxFontSizeMultiplier={1.15} color={c.indigoInk} numberOfLines={1}>
           {maintenance ? 'Summit reached' : `Phase ${phase.n} of 3`}
         </T>
         <View style={styles.dayLine}>
@@ -366,6 +375,8 @@ export function TodayOrb({
 }
 
 const styles = StyleSheet.create({
+  phaseRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  phaseDot: { width: 6, height: 6, borderRadius: 3 },
   abs: { position: 'absolute' },
   dot: { position: 'absolute', width: 2.5, height: 2.5, borderRadius: 1.25 },
   marker: { position: 'absolute', width: 7, height: 7, borderRadius: 3.5 },

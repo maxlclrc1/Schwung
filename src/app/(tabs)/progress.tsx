@@ -1,22 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
-import { Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, { useAnimatedRef, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
 import { ThemeToggle } from '../../components/ThemeToggle';
-import { JourneyView } from '../../components/JourneyView';
+import { ExpeditionCalendar, JourneySummary } from '../../components/Expedition';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
-import { usePagerBlock } from '../../components/TabPager';
 import { Screen, T } from '../../components/ui';
 import { useOnPainting, worldAnchor, worldScroll } from '../../components/WorldLayer';
 import { ascentDays, nearestDay, phaseFor, type AscentDay } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { dayQualifies, logForDay } from '../../core/progression';
 import type { DayLog } from '../../core/types';
+import * as C from '../../core/reset/charts';
 import { worldFrame } from '../../core/world';
+import { useResetPilot } from '../../store/resetPilot';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
@@ -58,9 +59,7 @@ function Header({ onCalendar }: { onCalendar?: () => void }) {
       <T v="heading" accessibilityRole="header" numberOfLines={1} style={{ flex: 1 }}>
         Your journey
       </T>
-      {onCalendar ? (
-        <IconButton name="calendar-outline" label="Your 66 days, as a calendar" onPress={onCalendar} />
-      ) : null}
+      {onCalendar ? <IconButton name="calendar-outline" label="Go to your 66 days" onPress={onCalendar} /> : null}
       <ThemeToggle />
       <SettingsButton />
     </View>
@@ -71,22 +70,25 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { logs, today, start, stats, title } = source;
+  const { logs, today, start, title } = source;
   const [zoneTop, setZoneTop] = useState(insets.top + 100);
   const { zoneHeight } = worldFrame(width, zoneTop);
   // The day shown below the mountain: today until another is picked (on the trail or in the calendar).
   const [chosen, setChosen] = useState<number | null>(picked);
   // Its habits stay folded away until asked for, so the valley below the mountain stays in view.
   const [expanded, setExpanded] = useState(picked !== null);
-  const [calendar, setCalendar] = useState(false);
-  // No swiping between tabs under the calendar sheet.
-  usePagerBlock(calendar);
+  // The expedition calendar below the mountain: the header's calendar button scrolls to it.
+  const scroll = useAnimatedRef<Animated.ScrollView>();
+  const [calendarY, setCalendarY] = useState(0);
+  // Every program day, judged on the habits it actually had (reset/charts.ts), for the summary and the calendar.
+  const program = useResetPilot((s) => s.program);
+  const cells = useMemo(() => (program ? C.dayCells(program, today) : []), [program, today]);
+  const completed = cells.filter((d) => d.state === 'full').length;
   const lastDay = Math.min(today, PROGRAM_DAYS);
   const shownDay = chosen ?? lastDay;
 
   const days = useMemo(() => ascentDays(logs, start, today, source.rest), [logs, start, today, source.rest]);
   const todayDone = dayQualifies(logForDay(logs, start, today));
-  const pick = (day: number) => setChosen(day === lastDay ? null : day);
   // This page's scroll moves the shared world (the trail must stay on the painting), and the trail and labels stay
   // on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -98,28 +100,14 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   return (
     <>
       <Animated.ScrollView
+        ref={scroll}
         onScroll={onScroll}
         scrollEventThrottle={16}
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.pad}>
-          <Header onCalendar={() => setCalendar(true)} />
-          <ThemedView
-            style={[styles.statsPill, { backgroundColor: c.surface }]}
-            accessible
-            accessibilityLabel={`${stats.done} days done, ${stats.streak} day streak, best ${stats.best}`}
-          >
-            <Stat n={stats.done} label="days done" color={c.sageInk} />
-            <T v="caption" color={c.textFaint}>
-              ·
-            </T>
-            <Stat n={stats.streak} label="streak" color={c.peachInk} />
-            <T v="caption" color={c.textFaint}>
-              ·
-            </T>
-            <Stat n={stats.best} label="best" color={c.indigoInk} />
-          </ThemedView>
+          <Header onCalendar={() => scroll.current?.scrollTo({ y: calendarY - space.lg, animated: true })} />
         </View>
 
         {/* The Ascent. Tap a marker to see that day. */}
@@ -193,61 +181,26 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             />
           ) : null}
         </View>
-      </Animated.ScrollView>
 
-      {/* The full 66 days, on demand: pick a day to see it on the mountain and its habits below. */}
-      <Modal
-        visible={calendar}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setCalendar(false)}
-      >
-        <ThemedView
-          style={[styles.sheet, { backgroundColor: c.bg, paddingTop: Platform.OS === 'ios' ? 0 : insets.top }]}
-        >
-          <View style={styles.sheetHeader}>
-            <ThemedView style={[styles.grabber, { backgroundColor: c.border }]} />
-            <View style={styles.sheetTitleRow}>
-              <T v="heading" accessibilityRole="header" numberOfLines={1} style={{ flex: 1 }}>
-                Your 66 days
+        {cells.length ? (
+          <View style={styles.pad} onLayout={(e) => setCalendarY(e.nativeEvent.layout.y)}>
+            <JourneySummary today={today} completed={completed} cells={cells} />
+            <View style={styles.expedition}>
+              <T v="overline" color={c.textDim}>
+                The expedition
               </T>
-              <Pressable onPress={() => setCalendar(false)} hitSlop={12} accessibilityRole="button">
-                <T v="bodyStrong" color={c.indigoInk}>
-                  Done
-                </T>
-              </Pressable>
+              <ExpeditionCalendar
+                cells={cells}
+                today={Math.min(today, PROGRAM_DAYS)}
+                selected={shownDay}
+                onSelect={(day) => setChosen(day === lastDay ? null : day)}
+                name={title}
+              />
             </View>
-            <T v="caption" color={c.textDim}>
-              Tap a day to see it on the mountain.
-            </T>
           </View>
-          <JourneyView
-            picked={chosen}
-            onSelect={(day) => {
-              pick(day);
-              setExpanded(true);
-              setCalendar(false);
-            }}
-            bottomInset={insets.bottom}
-          />
-        </ThemedView>
-      </Modal>
+        ) : null}
+      </Animated.ScrollView>
     </>
-  );
-}
-
-/** A number and its label, e.g. "7 days done". */
-function Stat({ n, label, color }: { n: number; label: string; color: string }) {
-  const { c } = useTheme();
-  return (
-    <View style={styles.stat}>
-      <T v="caption" color={color} style={[styles.tabular, { fontWeight: '800' }]} maxFontSizeMultiplier={1.3}>
-        {n}
-      </T>
-      <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.3}>
-        {label}
-      </T>
-    </View>
   );
 }
 
@@ -302,7 +255,7 @@ function DayDetail({
                 <Ionicons
                   name={done ? 'checkmark-circle' : 'ellipse-outline'}
                   size={18}
-                  color={done ? c.indigoInk : c.textFaint}
+                  color={done ? c.sage : c.textFaint}
                 />
                 <T v="caption" color={done ? c.text : c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.4}>
                   {title(id)}
@@ -329,19 +282,9 @@ function DayDetail({
 const styles = StyleSheet.create({
   scroll: { paddingBottom: space.xxxl, gap: space.md },
   pad: { paddingHorizontal: space.lg, gap: space.md },
+  expedition: { gap: space.md, marginTop: space.lg },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
   card: { borderRadius: radius.lg, padding: space.md, gap: space.md },
-  statsPill: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'baseline',
-    alignSelf: 'flex-start',
-    gap: 6,
-    paddingHorizontal: space.md,
-    paddingVertical: 6,
-    borderRadius: radius.pill,
-  },
-  stat: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
   captionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   caption: {
     flexDirection: 'row',
@@ -354,11 +297,6 @@ const styles = StyleSheet.create({
   },
   captionKicker: { fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 },
   captionText: { flexShrink: 1, fontWeight: '600' },
-  sheet: { flex: 1 },
-  sheetHeader: { paddingTop: space.sm, paddingHorizontal: space.xl, paddingBottom: space.lg, gap: 4 },
-  grabber: { width: 36, height: 5, borderRadius: 3, alignSelf: 'center', marginBottom: space.md },
-  sheetTitleRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 44 },
-  tabular: { fontVariant: ['tabular-nums'] },
   habits: { gap: 6 },
   habit: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   back: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
