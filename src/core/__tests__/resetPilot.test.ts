@@ -349,6 +349,100 @@ describe('readiness progression', () => {
   });
 });
 
+describe('adding a habit to a running program', () => {
+  // Read Daily alone from Day 1 (a Monday); Daily Movement joins on Day 10 (Wednesday of Week 2).
+  const base = () => doneOn(one('mind_read'), 'mind_read', [1, 2, 3]);
+  const withWalk = (p = base()) =>
+    P.addHabit(p, { activeDays: '1_2' }, { habitId: 'move_walk', intensity: 'starter' }, 10)!;
+
+  it('offers the habits not in the program yet, and asks only what the new one needs', () => {
+    const p = base();
+    expect(P.addableHabits(p)).toHaveLength(10);
+    expect(P.addableHabits(p)).not.toContain('mind_read');
+    expect(P.missingBaselines(p, 'move_walk')).toEqual(['activeDays']);
+    expect(P.missingBaselines(p, 'screen_app_limit')).toEqual(['phone', 'pullMinutes']);
+    expect(P.missingBaselines(p, 'focus_top3')).toEqual([]);
+  });
+
+  it('joins from the day it’s added, in catalog order, at Foundation, without touching earlier days', () => {
+    const before = base();
+    const p = withWalk(before);
+    expect(p.habits).toEqual(['mind_read', 'move_walk']);
+    expect(p.progression.move_walk.eras).toEqual([
+      { intensity: 'starter', phase: 'foundation', fromDay: 10, reason: 'start' },
+    ]);
+    expect(p.answers.activeDays).toBe('1_2');
+    expect(p.logs).toBe(before.logs);
+    // Before it joined it simply didn't exist: never a miss, never a rest day.
+    expect(P.isDaily(p, 'move_walk', 9)).toBe(false);
+    expect(P.plannedOn(p, 5, [])).toEqual(['mind_read']);
+    expect(P.recentDays(p, 'move_walk', 12).map((d) => d.day)).toEqual([10, 11, 12]);
+    const done = P.complete(p, 'move_walk', 10).program;
+    expect(P.habitTally(done, 'move_walk', 12)).toEqual({ done: 1, eligible: 2 }); // Days 10 and 11
+    expect(P.overallTally(done, 12)).toEqual({
+      done: P.habitTally(done, 'mind_read', 12).done + 1,
+      eligible: P.habitTally(done, 'mind_read', 12).eligible + 2,
+    });
+    expect(P.weekTally(done, 12)).toEqual({ done: 1 + 0, eligible: 5 + 3 }); // Read Days 8–12, Movement 10–12
+  });
+
+  it('counts a weekly habit that joins mid-week only from that day', () => {
+    const p = P.addHabit(base(), {}, { habitId: 'focus_deepwork', intensity: 'standard' }, 10)!;
+    const weeks = P.habitWeeks(p, 'focus_deepwork', 15);
+    expect(weeks.map((w) => [w.week, w.firstDay])).toEqual([
+      [2, 8],
+      [3, 15],
+    ]);
+    // Week 2's goal is scaled to the five days it was part of the program; nothing is owed for Week 1.
+    expect(P.habitTally(p, 'focus_deepwork', 15)).toEqual({ done: 0, eligible: weeks[0].goal });
+    expect(weeks[0].goal).toBeLessThan(5);
+  });
+
+  it('refuses what set-up refuses', () => {
+    const p = base();
+    const add = (id: string, extra: Partial<P.PilotAnswers> = {}, intensity: P.PilotChoice['intensity'] = 'starter') =>
+      P.addProblems(p, extra, { habitId: id, intensity }, 10);
+    expect(add('mind_read')).toEqual(['Read Daily is already in your Life Reset.']);
+    expect(add('sleep_no_phone_bed')).toEqual(['Choose from the Life Reset habits.']);
+    expect(add('sleep_wake')).toEqual(['Sleep Routine: say when you usually get up.']);
+    expect(add('sleep_wake', { wake: { kind: 'time', time: '07:00' } })).toEqual([]);
+    expect(add('strength_log', { strengthStart: 'new', precautions: ['heart'] })[0]).toMatch(/clinician or midwife/);
+    expect(P.addHabit(p, {}, { habitId: 'sleep_wake', intensity: 'starter' }, 10)).toBeNull();
+    // At most six habits.
+    let six = p;
+    for (const id of ['focus_top3', 'home_tidy', 'social_reach_out', 'confidence_talk', 'focus_deepwork'])
+      six = P.addHabit(six, {}, { habitId: id, intensity: 'starter' }, 10) ?? six;
+    expect(six.habits).toHaveLength(6);
+    expect(
+      P.addProblems(six, { skill: 'Language' }, { habitId: 'skill_practice', intensity: 'starter' }, 10),
+    ).toContain('You have 6 habits, the most for now.');
+  });
+
+  it('checks the time with every habit at today’s level, and accepts more time a day', () => {
+    const tight = P.addHabit(
+      one('focus_deepwork', 'challenge', { ...ADULT, minutesPerDay: 60 }),
+      {},
+      {
+        habitId: 'mind_read',
+        intensity: 'challenge',
+      },
+      3,
+    );
+    expect(tight).toBeNull();
+    const roomier = P.addHabit(
+      one('focus_deepwork', 'challenge', { ...ADULT, minutesPerDay: 60 }),
+      { minutesPerDay: 90 },
+      { habitId: 'mind_read', intensity: 'challenge' },
+      3,
+    );
+    expect(roomier?.answers.minutesPerDay).toBe(90);
+    // 45 + 30 + 30 = 105 min, over the 90 now available: the message says so.
+    expect(P.addProblems(roomier!, { activeDays: '3_4' }, { habitId: 'move_walk', intensity: 'challenge' }, 3)).toEqual(
+      [expect.stringMatching(/about 105 min .* more than the 90 min you have/)],
+    );
+  });
+});
+
 describe('Insights numbers, from the saved days only', () => {
   // Read every day (Standard) and Focus Time (5 days a week). Today is Day 9 (Tuesday of Week 2).
   const p = doneOn(doneOn(pilot(THREE.slice(0, 2)), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'focus_deepwork', [1, 2, 3]);

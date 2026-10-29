@@ -17,7 +17,8 @@ account, no paywall, no ads and no tracking; everything stays on the phone and w
      time available, then a review. "Begin Day 1" starts the program.
 3. **Habits tab:** each habit as an illustrated card with today's target; swipe a card right to complete it (left
    to undo). Weekly habits count by the week, with rest days never missed. Counters, strength sessions and
-   readiness offers (a step up from Day 22 or 45, or a step easier) live here too.
+   readiness offers (a step up from Day 22 or 45, or a step easier) live here too. **Add a habit** (up to six)
+   adds one of the 11 from today, asking only what it needs.
 4. **Journey tab:** the trail of 66 days up the mountain, the stats (days done, streak, best), any day's habits,
    and a 66-day calendar.
 5. **Insights tab:** consistency, the weekly trend, each habit's bar and history, a 66-day heatmap and personal

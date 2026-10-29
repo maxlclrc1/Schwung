@@ -1,55 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { INTENSITIES, PULL_MINUTES_OPTIONS, SKILLS, type Intensity } from '../../core/reset/habits';
+import type { Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
 import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Button, Screen, T } from '../ui';
-
-// The existing questions' answers, with their existing wording.
-const AGES: { id: AgeBand; label: string }[] = [
-  { id: 'u16', label: 'Under 16' },
-  { id: '16_17', label: '16–17' },
-  { id: '18_29', label: '18–29' },
-  { id: '30_49', label: '30–49' },
-  { id: '50_64', label: '50–64' },
-  { id: '65p', label: '65+' },
-];
-const HEALTH: { id: Precaution; label: string }[] = [
-  { id: 'joint', label: 'Joint, back or injury pain' },
-  { id: 'walkingDifficult', label: 'Walking or standing for long is difficult for me' },
-  { id: 'heart', label: 'Heart or blood-pressure condition' },
-  { id: 'pregnancy', label: 'Pregnant or recently gave birth' },
-  { id: 'fluidLimit', label: 'A clinician told me to limit fluids' },
-  { id: 'sleepCondition', label: 'Diagnosed sleep condition' },
-];
-const PHONE: { id: PhoneHours; label: string }[] = [
-  { id: 'lt1', label: 'Under 1 h' },
-  { id: '1_2', label: '1–2 h' },
-  { id: '2_4', label: '2–4 h' },
-  { id: '4_6', label: '4–6 h' },
-  { id: '6p', label: '6 h+' },
-  { id: 'unknown', label: 'Not sure' },
-];
-const ACTIVE: { id: ActiveDays; label: string }[] = [
-  { id: '0', label: '0' },
-  { id: '1_2', label: '1–2' },
-  { id: '3_4', label: '3–4' },
-  { id: '5p', label: '5+' },
-];
-const STARTS: { id: P.StrengthStart; label: string }[] = [
-  { id: 'new', label: 'New to it' },
-  { id: 'sometimes', label: 'Sometimes' },
-  { id: 'regular', label: 'Regularly' },
-];
-const WAKE_TIMES = ['05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30', '09:00', '09:30'];
-
-const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60}` : ''}`);
+import {
+  AGES,
+  BaselineQuestions,
+  Chip,
+  Chips,
+  duration,
+  HEALTH,
+  IntensityCard,
+  Section,
+  setupStyles,
+} from './SetupParts';
 
 type Step = 'about' | 'habits' | 'details' | 'levels' | 'review';
 
@@ -188,7 +159,7 @@ export function PilotSetup() {
                   })
                 }
               />
-              <View style={styles.chips}>
+              <View style={setupStyles.chips}>
                 <Chip
                   label="None of these"
                   on={Array.isArray(health) && health.length === 0}
@@ -230,7 +201,7 @@ export function PilotSetup() {
                 >
                   <ThemedView
                     style={[
-                      styles.habit,
+                      setupStyles.habit,
                       {
                         backgroundColor: c.surface,
                         borderColor: on ? c.accentInk : c.border,
@@ -240,7 +211,7 @@ export function PilotSetup() {
                   >
                     <Ionicons name={on ? 'checkbox' : 'square-outline'} size={22} color={c.accentInk} />
                     <View style={{ flex: 1, gap: 2 }}>
-                      <View style={styles.row}>
+                      <View style={setupStyles.row}>
                         <T v="bodyStrong" style={{ flexShrink: 1 }}>
                           {P.habitName(id)}
                         </T>
@@ -266,67 +237,24 @@ export function PilotSetup() {
             <T v="title" accessibilityRole="header">
               Just what your habits need
             </T>
-            {baselines.includes('phone') ? (
-              <Section title="Less Scrolling: how long are you on your phone a day?">
-                <Chips items={PHONE} selected={(x) => phone === x} onPress={setPhone} />
-              </Section>
-            ) : null}
-            {baselines.includes('pullMinutes') ? (
-              <Section
-                title="And on your main app (the one that pulls you in most)?"
-                hint="Settings → Screen Time shows it, if you want the real number."
-              >
-                <Chips
-                  items={PULL_MINUTES_OPTIONS.map((m) => ({ id: m, label: m === 240 ? '4 h+' : duration(m) }))}
-                  selected={(m) => pull === m}
-                  onPress={setPull}
-                />
-              </Section>
-            ) : null}
-            {baselines.includes('wake') ? (
-              <Section
-                title="Sleep Routine: when do you usually get up?"
-                hint="Your own time is the anchor; never earlier."
-              >
-                <Chips
-                  items={WAKE_TIMES.map((t) => ({ id: t, label: t }))}
-                  selected={(t) => wake?.kind === 'time' && wake.time === t}
-                  onPress={(t) => setWake({ kind: 'time', time: t })}
-                />
-                <View style={styles.chips}>
-                  <Chip
-                    label="It varies a lot"
-                    on={wake?.kind === 'varies'}
-                    onPress={() => setWake({ kind: 'varies' })}
-                  />
-                  <Chip label="I work shifts" on={wake?.kind === 'shift'} onPress={() => setWake({ kind: 'shift' })} />
-                </View>
-              </Section>
-            ) : null}
-            {baselines.includes('activeDays') ? (
-              <Section title="Daily Movement: on how many days a week are you active now?">
-                <Chips items={ACTIVE} selected={(x) => active === x} onPress={setActive} />
-              </Section>
-            ) : null}
-            {baselines.includes('skill') ? (
-              <Section title="Practice a Skill: which skill?">
-                <Chips
-                  items={SKILLS.map((x) => ({ id: x, label: x }))}
-                  selected={(x) => skill === x}
-                  onPress={setSkill}
-                />
-              </Section>
-            ) : null}
-            {baselines.includes('strengthStart') ? (
-              <Section title="Strength Training: where are you starting from?">
-                <Chips items={STARTS} selected={(x) => start === x} onPress={setStart} />
-                {P.habitNotes('strength_log', answers).map((n) => (
-                  <T key={n} v="caption" color={c.textFaint}>
-                    {n}
-                  </T>
-                ))}
-              </Section>
-            ) : null}
+            <BaselineQuestions
+              needs={baselines}
+              answers={answers}
+              values={{
+                phone,
+                setPhone,
+                pull,
+                setPull,
+                wake,
+                setWake,
+                active,
+                setActive,
+                skill,
+                setSkill,
+                start,
+                setStart,
+              }}
+            />
           </>
         ) : null}
 
@@ -336,57 +264,18 @@ export function PilotSetup() {
               How hard to start
             </T>
             <T color={c.textDim}>Starter is a manageable beginning. Every habit starts at its Foundation level.</T>
-            {picked.map((id) => {
-              const reason = P.habitExclusion(id, answers);
-              const options = P.intensityOptions(id, answers);
-              const chosen = intensityOf(id);
-              const preview = chosen && !reason ? P.previewTarget(id, chosen, answers) : null;
-              return (
-                <ThemedView key={id} style={[styles.level, { backgroundColor: c.surface }]}>
-                  <T v="bodyStrong">{P.habitName(id)}</T>
-                  {reason ? (
-                    <>
-                      <T v="caption" color={c.danger}>
-                        Not available: {reason}.
-                      </T>
-                      <Chip label="Remove it" on={false} onPress={() => setPicked((p) => p.filter((x) => x !== id))} />
-                    </>
-                  ) : (
-                    <>
-                      <View style={styles.chips}>
-                        {INTENSITIES.map((i) => {
-                          const blocked = options.find((o) => o.intensity === i)?.reason;
-                          return (
-                            <Chip
-                              key={i}
-                              label={P.INTENSITY_NAME[i]}
-                              on={chosen === i}
-                              disabled={!!blocked}
-                              onPress={() => setLevels((l) => ({ ...l, [id]: i }))}
-                            />
-                          );
-                        })}
-                      </View>
-                      {id === 'strength_log' && chosen === 'challenge' ? (
-                        <View style={styles.row}>
-                          <T v="caption" color={c.textDim} style={{ flex: 1 }}>
-                            Sessions a week you already do
-                          </T>
-                          <Chip label="−" on={false} onPress={() => setOwn((n) => Math.max(2, n - 1))} />
-                          <T v="bodyStrong">{own}</T>
-                          <Chip label="+" on={false} onPress={() => setOwn((n) => Math.min(7, n + 1))} />
-                        </View>
-                      ) : null}
-                      {preview ? (
-                        <T v="caption" color={c.textDim}>
-                          {preview.target} · {preview.frequency}
-                        </T>
-                      ) : null}
-                    </>
-                  )}
-                </ThemedView>
-              );
-            })}
+            {picked.map((id) => (
+              <IntensityCard
+                key={id}
+                id={id}
+                answers={answers}
+                chosen={intensityOf(id)}
+                onChoose={(i) => setLevels((l) => ({ ...l, [id]: i }))}
+                own={own}
+                setOwn={setOwn}
+                onRemove={() => setPicked((p) => p.filter((x) => x !== id))}
+              />
+            ))}
             <Section
               title="On a day all your habits fall on, how much time do you have?"
               hint="Your habits have to fit."
@@ -408,7 +297,7 @@ export function PilotSetup() {
             {choices.map((x) => {
               const p = P.previewTarget(x.habitId, x.intensity, answers);
               return (
-                <ThemedView key={x.habitId} style={[styles.level, { backgroundColor: c.surface }]}>
+                <ThemedView key={x.habitId} style={[setupStyles.level, { backgroundColor: c.surface }]}>
                   <T v="bodyStrong">
                     {P.habitName(x.habitId)} · {P.INTENSITY_NAME[x.intensity]}
                   </T>
@@ -446,83 +335,6 @@ export function PilotSetup() {
   );
 }
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
-  const { c } = useTheme();
-  return (
-    <View style={styles.section}>
-      <T v="bodyStrong" accessibilityRole="header">
-        {title}
-      </T>
-      {hint ? (
-        <T v="caption" color={c.textDim}>
-          {hint}
-        </T>
-      ) : null}
-      {children}
-    </View>
-  );
-}
-
-function Chips<K extends string | number>({
-  items,
-  selected,
-  onPress,
-}: {
-  items: { id: K; label: string }[];
-  selected: (id: K) => boolean;
-  onPress: (id: K) => void;
-}) {
-  return (
-    <View style={styles.chips}>
-      {items.map((x) => (
-        <Chip
-          key={String(x.id)}
-          label={x.label}
-          on={selected(x.id)}
-          onPress={() => {
-            haptic.tap();
-            onPress(x.id);
-          }}
-        />
-      ))}
-    </View>
-  );
-}
-
-function Chip({
-  label,
-  on,
-  disabled,
-  onPress,
-}: {
-  label: string;
-  on: boolean;
-  disabled?: boolean;
-  onPress: () => void;
-}) {
-  const { c } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityState={{ selected: on, disabled }}
-      style={{ opacity: disabled ? 0.4 : 1 }}
-    >
-      <ThemedView
-        style={[
-          styles.chip,
-          { backgroundColor: on ? c.accentSoft : c.surface, borderColor: on ? c.accentInk : c.border },
-        ]}
-      >
-        <T v="caption" color={on ? c.accentInk : c.text} style={{ fontWeight: '600' }}>
-          {label}
-        </T>
-      </ThemedView>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   top: {
     flexDirection: 'row',
@@ -534,24 +346,5 @@ const styles = StyleSheet.create({
   dots: { flexDirection: 'row', gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   scroll: { padding: space.lg, gap: space.lg, paddingBottom: space.xxxl },
-  section: { gap: space.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   tag: { fontWeight: '700' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: {
-    minHeight: 40,
-    paddingHorizontal: space.md,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    justifyContent: 'center',
-  },
-  habit: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: space.md,
-  },
-  level: { borderRadius: radius.lg, padding: space.md, gap: space.sm },
 });
