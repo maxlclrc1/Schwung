@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import { canEditYesterday, dayNumber, toDateKey } from '../core/dates';
 import * as P from '../core/reset/pilot';
 import type { Reflection, ReflectionAnswer } from '../core/reset/reflections';
@@ -7,7 +7,7 @@ import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
 import { channel, devTools, type Channel } from '../lib/flags';
 import { CROP_COUNT } from '../components/habitArt';
-import { debouncedStorage } from './storage';
+import { deferredJSONStorage } from './storage';
 
 /*
  * The Life Reset program's saved state: the app's one program. It began as the pilot's and keeps the pilot's key,
@@ -207,7 +207,7 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
     {
       name: resetPilotKey(),
       version: RESET_PILOT_VERSION,
-      storage: createJSONStorage(() => debouncedStorage),
+      storage: deferredJSONStorage<ResetPilotData>(),
       merge: (persisted, current) => ({ ...current, ...sanitizeResetPilot(persisted) }),
       partialize: (s): ResetPilotData => ({
         program: s.program,

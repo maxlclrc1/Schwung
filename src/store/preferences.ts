@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import { DEFAULT_REMINDERS, sanitizeReminders, type ReminderSettings } from '../core/reminders';
 import type { ThemePreference } from '../core/types';
-import { debouncedStorage } from './storage';
+import { deferredJSONStorage } from './storage';
 
 /** App-wide preferences (the appearance and the optional daily reminder), apart from the Life Reset's own save. */
 export type Preferences = {
@@ -33,7 +33,7 @@ export const usePreferences = create<
     {
       name: 'schwung-preferences',
       version: 1,
-      storage: createJSONStorage(() => debouncedStorage),
+      storage: deferredJSONStorage<Preferences>(),
       // Anything unexpected falls back to following the phone, and reminders off.
       merge: (persisted, current) => {
         const p = persisted as Partial<Preferences> | undefined;

@@ -274,7 +274,16 @@ function HabitCardImpl({
     if (readOnly) return;
     if (done) haptic.undo();
     else haptic.complete();
-    onToggle(habitId);
+    // The card answers at once, on the UI thread; the program (and everything that follows it: XP, the day, the
+    // other tabs) updates a frame later, so that work never holds the animation's first frame.
+    doneP.set(
+      reduceMotion
+        ? done
+          ? 0
+          : 1
+        : withTiming(done ? 0 : 1, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
+    );
+    requestAnimationFrame(() => onToggle(habitId));
   };
 
   // The card's touches, all on the responder system (so a swipe cleanly cancels a press or a long-press):

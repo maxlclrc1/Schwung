@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useShownProgram } from '../../components/shownProgram';
 import { router, useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -19,7 +20,6 @@ import { dayQualifies, logForDay } from '../../core/progression';
 import type { DayLog } from '../../core/types';
 import * as C from '../../core/reset/charts';
 import { worldFrame } from '../../core/world';
-import { useResetPilot } from '../../store/resetPilot';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
@@ -79,7 +79,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   // Its habits stay folded away until asked for, so the valley below the mountain stays in view.
   const [expanded, setExpanded] = useState(picked !== null);
   // Every program day, judged on the habits it actually had (reset/charts.ts), for the summary and the calendar.
-  const program = useResetPilot((s) => s.program);
+  const program = useShownProgram();
   const cells = useMemo(() => (program ? C.dayCells(program, today) : []), [program, today]);
   const completed = cells.filter((d) => d.state === 'full').length;
   const lastDay = Math.min(today, PROGRAM_DAYS);

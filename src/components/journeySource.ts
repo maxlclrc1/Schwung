@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useShownProgram } from './shownProgram';
 import * as P from '../core/reset/pilot';
 import type { DayLog } from '../core/types';
 import { pilotToday, useResetPilot } from '../store/resetPilot';
@@ -16,7 +17,7 @@ export type JourneySource = {
 };
 
 export function useJourneySource(): JourneySource {
-  const program = useResetPilot((s) => s.program);
+  const program = useShownProgram();
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = program ? pilotToday({ program, devDayOffset: offset }) : 0;
   return useMemo(() => {
