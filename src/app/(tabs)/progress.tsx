@@ -8,6 +8,7 @@ import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../componen
 import { SettingsButton } from '../../components/HeaderButton';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { ExpeditionCalendar, JourneySummary } from '../../components/Expedition';
+import { ReflectionHistory } from '../../components/reflection/ReflectionHistory';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
 import { Screen, T } from '../../components/ui';
 import { useOnPainting, worldAnchor, worldScroll } from '../../components/WorldLayer';
@@ -192,6 +193,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 name={title}
               />
             </View>
+            {program ? <ReflectionHistory program={program} today={today} /> : null}
           </View>
         ) : null}
       </Animated.ScrollView>

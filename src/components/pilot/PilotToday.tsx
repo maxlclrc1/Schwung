@@ -24,6 +24,7 @@ import { CardButton, HabitCard } from '../HabitCard';
 import { cover } from '../onboarding/cover';
 import { ceremonyCover } from '../ceremony/state';
 import { Button, T } from '../ui';
+import { ReflectionInvite } from '../reflection/ReflectionInvite';
 import { TodayHero } from './TodayHero';
 
 /*
@@ -129,6 +130,8 @@ export function PilotToday() {
             daily.map((id) => P.nameOf(program, id)),
           )}
         />
+
+        <ReflectionInvite program={program} today={today} />
 
         {offer ? (
           <OfferCard

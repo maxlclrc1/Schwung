@@ -26,6 +26,7 @@ import {
   type SocialAction,
   type Target,
 } from './habits';
+import { sanitizeReflections, type Reflection } from './reflections';
 import { recordWeekly, weeklyMeasure, type WeeklyMeasure, type WeeklyMeasures } from './measures';
 import {
   acceptOffer,
@@ -143,6 +144,8 @@ export type PilotProgram = {
   custom?: Record<string, CustomHabit>;
   /** The two ceremonies, once each per Life Reset: set when seen through (or skipped). */
   ceremonies?: { day1?: boolean; summit?: boolean };
+  /** Weekly reflections by program week (reflections.ts): answers kept on the phone, never acted on by themselves. */
+  reflections?: Record<string, Reflection>;
 };
 
 /**
@@ -1140,6 +1143,7 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     logs,
     ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
     ...(Object.keys(custom).length ? { custom } : {}),
+    ...(sanitizeReflections(x.reflections) ? { reflections: sanitizeReflections(x.reflections) } : {}),
     ...(isObj(x.ceremonies)
       ? {
           ceremonies: {
