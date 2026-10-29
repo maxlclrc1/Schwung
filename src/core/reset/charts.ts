@@ -14,7 +14,10 @@ const hasLog = (p: P.PilotProgram, day: number) => p.logs[dateForDay(p.startedAt
 /** Each program week up to this one: done ÷ eligible over every habit, with its state. */
 export function weeklyTrend(p: P.PilotProgram, today: number): WeekPoint[] {
   const last = Math.min(today, PROGRAM_DAYS);
-  const byHabit = p.habits.map((id) => ({ id, weeks: new Map(P.habitWeeks(p, id, last).map((w) => [w.week, w])) }));
+  const byHabit = P.allHabits(p).map((id) => ({
+    id,
+    weeks: new Map(P.habitWeeks(p, id, last).map((w) => [w.week, w])),
+  }));
   return programWeeks(p.startedAt)
     .filter((w) => w.firstDay <= last)
     .map((w) => {
@@ -42,9 +45,11 @@ export function dayCells(p: P.PilotProgram, today: number): DayCell[] {
       continue;
     }
     const log = p.logs[base.date];
-    const done = p.habits.filter((id) => log?.completed.includes(id));
-    const skipped = p.habits.filter((id) => !done.includes(id) && P.trackOf(p, id, d).skipped);
-    const dailyDue = p.habits.filter((id) => P.isDaily(p, id, d));
+    // Every habit that was in the program that day (one removed later still counts for its days).
+    const ids = P.allHabits(p);
+    const done = ids.filter((id) => log?.completed.includes(id));
+    const skipped = ids.filter((id) => !done.includes(id) && P.trackOf(p, id, d).skipped);
+    const dailyDue = ids.filter((id) => P.isDaily(p, id, d));
     // The day's list as the 80% rule sees it: daily habits, plus weekly ones done that day.
     const planned = log ? P.plannedOn(p, d, log.completed) : dailyDue;
     const full = done.length > 0 && planned.length > 0 && planned.every((id) => done.includes(id));
@@ -100,8 +105,8 @@ export function records(p: P.PilotProgram, today: number, trend = weeklyTrend(p,
   return {
     bestWeek: bestWeek(trend),
     total: P.totalCompleted(p),
-    readingDays: p.habits.includes('mind_read') ? daysDone(p, 'mind_read') : null,
-    strengthSessions: p.habits.includes('strength_log') ? daysDone(p, 'strength_log') : null,
+    readingDays: P.allHabits(p).includes('mind_read') ? daysDone(p, 'mind_read') : null,
+    strengthSessions: P.allHabits(p).includes('strength_log') ? daysDone(p, 'strength_log') : null,
     bestStreak: P.journeyStats(p, today).best,
   };
 }

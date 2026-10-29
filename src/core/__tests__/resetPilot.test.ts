@@ -443,6 +443,142 @@ describe('adding a habit to a running program', () => {
   });
 });
 
+describe('removing a habit', () => {
+  // Read and Movement every day; Movement done Days 1–5, Read Days 1–7. Movement is removed on Day 6.
+  const two = () =>
+    doneOn(
+      doneOn(
+        pilot([
+          { habitId: 'mind_read', intensity: 'starter' },
+          { habitId: 'move_walk', intensity: 'starter' },
+        ]),
+        'move_walk',
+        [1, 2, 3, 4, 5],
+      ),
+      'mind_read',
+      [1, 2, 3, 4, 5, 6, 7],
+    );
+
+  it('takes it out from that day, keeping its past exactly as it was', () => {
+    const before = two();
+    const p = P.removeHabit(before, 'move_walk', 6)!;
+    expect(p.habits).toEqual(['mind_read']);
+    expect(p.logs).toBe(before.logs);
+    // Days 1–5: both habits were there and done; from Day 6 only Read counts.
+    expect(P.plannedOn(p, 3, ['mind_read', 'move_walk'])).toEqual(['mind_read', 'move_walk']);
+    expect(P.plannedOn(p, 6, ['mind_read'])).toEqual(['mind_read']);
+    // Days 1–7 all count (Movement done while it was there): the streak isn't rewritten.
+    expect(P.journeyStats(p, 8)).toEqual({ done: 7, streak: 7, best: 7 });
+    expect(P.totalCompleted(p)).toBe(P.totalCompleted(before));
+    expect(P.pilotXp(p)).toBe(P.pilotXp(before));
+    // Its opportunities stop when it left: Days 1–5, all done.
+    expect(P.habitTally(p, 'move_walk', 8)).toEqual({ done: 5, eligible: 5 });
+    expect(P.overallTally(p, 8)).toEqual({ done: 12, eligible: 12 });
+    expect(P.complete(p, 'move_walk', 7).event).toBeNull();
+  });
+
+  it('keeps today when it was already done today (it leaves from tomorrow)', () => {
+    const p = P.removeHabit(two(), 'move_walk', 5)!;
+    expect(P.plannedOn(p, 5, ['mind_read', 'move_walk'])).toEqual(['mind_read', 'move_walk']);
+    expect(P.plannedOn(p, 6, ['mind_read'])).toEqual(['mind_read']);
+  });
+
+  it('never removes the last habit, nor one that isn’t there', () => {
+    const one1 = one('mind_read');
+    expect(P.removeProblem(one1, 'mind_read')).toMatch(/at least one habit/);
+    expect(P.removeHabit(one1, 'mind_read', 3)).toBeNull();
+    expect(P.removeProblem(two(), 'focus_top3')).toMatch(/isn’t in your Life Reset/);
+  });
+
+  it('can be added again later: the days away never existed, and its past is still there', () => {
+    const away = P.removeHabit(two(), 'move_walk', 6)!;
+    const back = P.addHabit(away, {}, { habitId: 'move_walk', intensity: 'standard' }, 10)!;
+    expect(back.habits).toEqual(['mind_read', 'move_walk']);
+    expect([6, 9, 10].map((d) => P.isDaily(back, 'move_walk', d))).toEqual([false, false, true]);
+    expect(P.levelFor(back, 'move_walk', 10)).toEqual({ intensity: 'standard', phase: 'foundation' });
+    expect(P.habitTally(back, 'move_walk', 12)).toEqual({ done: 5, eligible: 7 }); // Days 1–5, then 10–11
+    // A removed habit is offered again in "Add a habit".
+    expect(P.addableHabits(away)).toContain('move_walk');
+  });
+
+  it('survives a save and reload with its history', () => {
+    const p = P.removeHabit(two(), 'move_walk', 6)!;
+    const back = P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))!;
+    expect(back.habits).toEqual(['mind_read']);
+    expect(back.progression.move_walk.gaps).toEqual([{ from: 6 }]);
+    expect(P.habitTally(back, 'move_walk', 8)).toEqual({ done: 5, eligible: 5 });
+  });
+});
+
+describe('the person’s own habits', () => {
+  const make = (p = one('mind_read'), def = { name: 'Stretch', note: '10 minutes after work', perWeek: 7 }, day = 3) =>
+    P.addCustomHabit(p, def, day, 7)!;
+
+  it('join from that day with their name, what counts and how often, and no levels or offers', () => {
+    const { program: p, id } = make();
+    expect(id).toBe('custom_1');
+    expect(p.habits).toEqual(['mind_read', 'custom_1']);
+    expect(P.nameOf(p, id)).toBe('Stretch');
+    expect(P.targetText(p, id, 3)).toBe('10 minutes after work');
+    expect(P.frequencyText(p, id, 3)).toBe('Every day');
+    expect(P.levelLineFor(p, id, 3)).toBe('Your habit');
+    expect(P.isDaily(p, id, 2)).toBe(false); // before it was made
+    expect(P.isDaily(p, id, 3)).toBe(true);
+    expect(P.offersNow(P.complete(p, id, 3).program, 30, false).some((o) => o.habitId === id)).toBe(false);
+    expect(P.timerBlocksFor(p, id, 3)).toEqual([]);
+    expect(P.easier(p, id, 3)).toHaveProperty('blocked');
+  });
+
+  it('count like any habit: completion, XP, the day’s list and Insights', () => {
+    let { program: p } = make();
+    p = doneOn(p, 'custom_1', [3, 4]);
+    expect(P.plannedOn(p, 4, ['mind_read', 'custom_1'])).toEqual(['mind_read', 'custom_1']);
+    expect(P.habitTally(p, 'custom_1', 5)).toEqual({ done: 2, eligible: 2 });
+    expect(P.totalCompleted(p)).toBe(2);
+  });
+
+  it('can be weekly: any days the person chooses, counted by the week', () => {
+    const { program: p, id } = make(undefined, { name: 'Swim', perWeek: 2 } as never, 1);
+    expect(P.frequencyText(p, id, 1)).toBe('Any 2 days a week');
+    expect(P.targetText(p, id, 1)).toBe('Any 2 days a week');
+    expect(P.isDaily(p, id, 1)).toBe(false);
+    expect(P.weekProgress(P.complete(p, id, 2).program, id, 3)).toMatchObject({ credited: 1, goal: 2 });
+  });
+
+  it('each get a different part of the panorama while there are views to go round', () => {
+    let p = one('mind_read');
+    const scenes: number[] = [];
+    for (const name of ['A', 'B', 'C']) {
+      const r = P.addCustomHabit(p, { name, perWeek: 7 }, 1, 7)!;
+      p = r.program;
+      scenes.push(p.custom![r.id].scene);
+    }
+    expect(new Set(scenes).size).toBe(3);
+  });
+
+  it('are refused without a name, with a name already used, or past six habits', () => {
+    const p = one('mind_read');
+    expect(P.customProblems(p, '  ', 7)).toEqual(['Give it a name.']);
+    expect(P.customProblems(p, 'read daily', 7)).toEqual(['You already have a habit with that name.']);
+    expect(P.customProblems(p, 'x'.repeat(41), 7)).toEqual(['Keep the name to 40 characters.']);
+    expect(P.customProblems(p, 'Swim', 0)).toEqual(['Choose how many days a week.']);
+    let six = p;
+    for (const name of ['A', 'B', 'C', 'D', 'E']) six = P.addCustomHabit(six, { name, perWeek: 7 }, 1, 7)!.program;
+    expect(P.customProblems(six, 'F', 7)).toEqual(['You have 6 habits, the most for now.']);
+  });
+
+  it('can be removed, and survive a save and reload', () => {
+    let { program: p } = make();
+    p = P.removeHabit(doneOn(p, 'custom_1', [3]), 'custom_1', 5)!;
+    const back = P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))!;
+    expect(back.custom?.custom_1).toEqual({ name: 'Stretch', note: '10 minutes after work', perWeek: 7, scene: 0 });
+    expect(back.habits).toEqual(['mind_read']);
+    expect(P.habitTally(back, 'custom_1', 8)).toEqual({ done: 1, eligible: 2 });
+    // A made-up habit id with no definition is never trusted.
+    expect(P.sanitizePilotProgram({ ...JSON.parse(JSON.stringify(p)), habits: ['custom_9'] })).toBeNull();
+  });
+});
+
 describe('Insights numbers, from the saved days only', () => {
   // Read every day (Standard) and Focus Time (5 days a week). Today is Day 9 (Tuesday of Week 2).
   const p = doneOn(doneOn(pilot(THREE.slice(0, 2)), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'focus_deepwork', [1, 2, 3]);

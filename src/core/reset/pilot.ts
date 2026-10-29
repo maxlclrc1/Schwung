@@ -22,6 +22,7 @@ import {
   strengthNotes,
   upBy,
   type Intensity,
+  type Schedule,
   type SocialAction,
   type Target,
 } from './habits';
@@ -138,7 +139,33 @@ export type PilotProgram = {
   logs: Record<string, DayLog>;
   /** Less Scrolling's optional weekly Screen Time check (self-reported). */
   measures?: WeeklyMeasures;
+  /** The person's own habits, by id (`custom_1`, `custom_2`…). Their schedules are in `progression`. */
+  custom?: Record<string, CustomHabit>;
 };
+
+/** A habit the person made: a name, what counts (optional), how often, and its window onto the world. */
+export type CustomHabit = {
+  name: string;
+  note?: string;
+  /** Days a week: 7 is every day; 1–6 any days the person chooses. */
+  perWeek: number;
+  /** Which part of the panorama its card shows (habitArt.ts cropAt). */
+  scene: number;
+};
+
+export const isCustomId = (id: string) => /^custom_\d+$/.test(id);
+
+/** A habit's name: the catalog's, or the person's own. */
+export const nameOf = (p: PilotProgram, id: string) => p.custom?.[id]?.name ?? habitName(id);
+
+/**
+ * Every habit that has been part of the program, current first: the history (days, XP, streak, Insights) counts
+ * each one only on the days it was in the program (removed habits keep their past).
+ */
+export const allHabits = (p: PilotProgram) => [
+  ...p.habits,
+  ...Object.keys(p.progression).filter((id) => !p.habits.includes(id)),
+];
 
 // --- Setup ---
 
@@ -245,7 +272,8 @@ export function habitNotes(habitId: PilotHabitId, a: PilotAnswers): string[] {
 export const targetFor = (habitId: string, l: Level): Target => RESET_BY_ID[habitId].targets[l.intensity][l.phase];
 
 /** Minutes a target takes on a day it's done (timed habits: the target; Strength: its approximate length). */
-export const minutesFor = (habitId: string, l: Level) => targetFor(habitId, l).minutesPerDueDay ?? 0;
+export const minutesFor = (habitId: string, l: Level) =>
+  RESET_BY_ID[habitId] ? (targetFor(habitId, l).minutesPerDueDay ?? 0) : 0;
 
 const BASELINE_PROBLEM: Record<Baseline, string> = {
   phone: 'Less Scrolling: say how long you use your phone a day.',
@@ -391,12 +419,119 @@ export function addHabit(
   day: number,
 ): PilotProgram | null {
   if (addProblems(p, extra, choice, day).length) return null;
-  const habits = PILOT_HABITS.filter((id) => p.habits.includes(id) || id === choice.habitId);
+  const habits = ordered([...p.habits, choice.habitId]);
+  const before = p.progression[choice.habitId];
   return {
     ...p,
-    answers: keptAnswers({ ...p.answers, ...extra }, habits),
+    answers: keptAnswers({ ...p.answers, ...extra }, habits.filter(isPilotHabit)),
     habits,
-    progression: { ...p.progression, [choice.habitId]: newProgression(choice.habitId, choice.intensity, day) },
+    progression: {
+      ...p.progression,
+      [choice.habitId]: before
+        ? comeBack(before, { intensity: choice.intensity, phase: 'foundation' }, day)
+        : newProgression(choice.habitId, choice.intensity, day),
+    },
+  };
+}
+
+/** Catalog habits in catalog order, then the person's own in the order they were made. */
+const ordered = (ids: string[]) => [
+  ...PILOT_HABITS.filter((id) => ids.includes(id)),
+  ...ids.filter(isCustomId).sort((a, b) => Number(a.slice(7)) - Number(b.slice(7))),
+];
+
+/**
+ * A removed habit back in the program from `day`, at the given level: its earlier days stay as they were, and its days
+ * away never existed. (Removed earlier today after being done, it simply stays.)
+ */
+function comeBack(s: ProgressionState, level: Level, day: number): ProgressionState {
+  const gaps = s.gaps ?? [];
+  const open = gaps[gaps.length - 1];
+  const closed =
+    open && open.to === undefined
+      ? open.from > day
+        ? gaps.slice(0, -1)
+        : [...gaps.slice(0, -1), { ...open, to: day }]
+      : gaps;
+  return { ...s, eras: [...s.eras, { ...level, fromDay: day, reason: 'start' }], gaps: closed };
+}
+
+/** The part of the panorama a new habit of the person's own gets: the first view none of their current ones shows. */
+export function nextScene(p: PilotProgram, views: number): number {
+  const used = p.habits.flatMap((x) => (p.custom?.[x] ? [p.custom[x].scene] : []));
+  return Array.from({ length: views }, (_, i) => i).find((i) => !used.includes(i)) ?? used.length % views;
+}
+
+/** Why the person's own habit can't be added (one problem per line), or none. */
+export function customProblems(p: PilotProgram, name: string, perWeek: number): string[] {
+  const out: string[] = [];
+  const n = name.trim();
+  if (!n) out.push('Give it a name.');
+  else if (n.length > 40) out.push('Keep the name to 40 characters.');
+  else if (p.habits.some((id) => nameOf(p, id).toLowerCase() === n.toLowerCase()))
+    out.push('You already have a habit with that name.');
+  if (!(Number.isInteger(perWeek) && perWeek >= 1 && perWeek <= 7)) out.push('Choose how many days a week.');
+  if (p.habits.length >= MAX_HABITS) out.push(`You have ${MAX_HABITS} habits, the most for now.`);
+  return out;
+}
+
+/**
+ * The program with a habit of the person's own added from `day`: their name and what counts, every day or any 1–6
+ * days a week (counted by the week like the catalog's weekly habits). It has no levels or offers, and its card shows
+ * a part of the panorama that no other habit of theirs shows (while there are views to go round).
+ */
+export function addCustomHabit(
+  p: PilotProgram,
+  def: { name: string; note?: string; perWeek: number },
+  day: number,
+  views: number,
+): { program: PilotProgram; id: string } | null {
+  if (customProblems(p, def.name, def.perWeek).length) return null;
+  const custom = p.custom ?? {};
+  const id = `custom_${Object.keys(custom).length + 1}`;
+  const scene = nextScene(p, views);
+  const note = def.note?.trim().slice(0, 80);
+  const schedule: Schedule = def.perWeek >= 7 ? { kind: 'daily' } : { kind: 'weekly', days: def.perWeek };
+  return {
+    id,
+    program: {
+      ...p,
+      habits: ordered([...p.habits, id]),
+      custom: { ...custom, [id]: { name: def.name.trim(), ...(note ? { note } : {}), perWeek: def.perWeek, scene } },
+      progression: {
+        ...p.progression,
+        [id]: {
+          v: 1,
+          habitId: id,
+          eras: [{ intensity: 'starter', phase: 'foundation', fromDay: day, reason: 'start' }],
+          schedule,
+        },
+      },
+    },
+  };
+}
+
+/** Why a habit can't be removed, or null. */
+export function removeProblem(p: PilotProgram, id: string): string | null {
+  if (!p.habits.includes(id)) return 'It isn’t in your Life Reset.';
+  if (p.habits.length <= 1) return 'Keep at least one habit. To stop altogether, end the Life Reset in Settings.';
+  return null;
+}
+
+/**
+ * The program without a habit from `day` (from tomorrow if it's already done today, so today stays as it is). Its
+ * past stays: earlier days, XP, the streak and Insights count it while it was in the program, and never after. A
+ * change it had waiting is dropped. It can be added again later.
+ */
+export function removeHabit(p: PilotProgram, id: string, day: number): PilotProgram | null {
+  if (removeProblem(p, id)) return null;
+  const s = p.progression[id];
+  const from = isDone(p, id, day) ? day + 1 : day;
+  const eras = s.eras.filter((e, i) => i === 0 || e.fromDay <= day);
+  return {
+    ...p,
+    habits: p.habits.filter((x) => x !== id),
+    progression: { ...p.progression, [id]: { ...s, eras, gaps: [...(s.gaps ?? []), { from }] } },
   };
 }
 
@@ -436,7 +571,7 @@ export function isDaily(p: PilotProgram, id: string, day: number): boolean {
  * (it helps the day, and a rest day never pulls a day down). Derived, never chosen.
  */
 export function plannedOn(p: PilotProgram, day: number, completed: string[]): string[] {
-  return p.habits.filter((id) => {
+  return allHabits(p).filter((id) => {
     const s = scheduleOn(erasOf(p, id), day);
     return s !== null && countsTowardDay(s, completed.includes(id));
   });
@@ -479,6 +614,8 @@ export function counterTarget(p: PilotProgram, id: string, day: number): number 
 
 /** What the card says: what to do and how much, in a few words. */
 export function targetText(p: PilotProgram, id: string, day: number): string {
+  const own = p.custom?.[id];
+  if (own) return own.note || frequencyText(p, id, day);
   const l = levelFor(p, id, day);
   const t = targetFor(id, l);
   const minutes = t.amount.kind === 'fixed' ? t.amount.value : 0;
@@ -514,6 +651,8 @@ export function targetText(p: PilotProgram, id: string, day: number): string {
 
 /** How often, in words. */
 export function frequencyText(p: PilotProgram, id: string, day: number): string {
+  const own = p.custom?.[id];
+  if (own) return own.perWeek >= 7 ? 'Every day' : `Any ${own.perWeek} day${own.perWeek === 1 ? '' : 's'} a week`;
   const s = targetFor(id, levelFor(p, id, day)).schedule;
   if (s.kind === 'daily') return 'Every day';
   if (s.kind === 'weekly') return `Any ${s.days} days a week`;
@@ -536,6 +675,7 @@ export const stateOn = (p: PilotProgram, id: string, day: number): DayState =>
 
 /** The blocks a timed target is shown in (16–17 always within the focus cap; adults only if they chose). */
 export function timerBlocksFor(p: PilotProgram, id: string, day: number): number[] {
+  if (!RESET_BY_ID[id]) return [];
   const t = targetFor(id, levelFor(p, id, day));
   if (t.unit !== 'minutes') return [];
   return timerBlocks(t, { teen: isTeen(pilotProfile(p.answers)), split: !!p.answers.splitFocus });
@@ -555,7 +695,7 @@ export const dayFull = (p: PilotProgram, day: number) => isFullDay(logOf(p, day)
  */
 export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'missed' {
   const log = logOf(p, day);
-  const dailyDue = p.habits.some((id) => isDaily(p, id, day));
+  const dailyDue = allHabits(p).some((id) => isDaily(p, id, day));
   const planned = log ? plannedOn(p, day, log.completed) : dailyDue ? ['due'] : [];
   if (planned.length === 0) return 'rest';
   return log && dayQualifies({ ...log, planned }) ? 'counted' : 'missed';
@@ -700,6 +840,7 @@ export function offersNow(
 ): { habitId: PilotHabitId; offer: Offer }[] {
   if (today > PROGRAM_DAYS) return [];
   return p.habits.flatMap((id) => {
+    if (!RESET_BY_ID[id]) return []; // the person's own habits have no levels to offer
     const offer = progressionOffer({
       state: p.progression[id],
       logs: p.logs,
@@ -745,6 +886,10 @@ export function pendingText(p: PilotProgram, id: string, today: number): string 
   const when = e.fromDay === today + 1 ? 'tomorrow' : `Day ${e.fromDay}`;
   return `${INTENSITY_NAME[e.intensity]} ${PHASE_NAME[e.phase]} from ${when}: ${targetText(p, id, e.fromDay)}`;
 }
+
+/** The card's level line: "Standard · Foundation", or "Your habit" for one the person made. */
+export const levelLineFor = (p: PilotProgram, id: string, day: number) =>
+  p.custom?.[id] ? 'Your habit' : levelLabel(levelFor(p, id, day));
 
 /** "Standard · Foundation", and the phase's position (0–2) for the card's three bars. */
 export function levelLabel(l: Level): string {
@@ -801,7 +946,7 @@ export function weekTallyOf(p: PilotProgram, id: string, w: WeekSummary, today: 
 
 /** Every habit's tally together (the overall consistency). */
 export function overallTally(p: PilotProgram, today: number): Tally {
-  return p.habits.reduce(
+  return allHabits(p).reduce(
     (t, id) => {
       const h = habitTally(p, id, today);
       return { done: t.done + h.done, eligible: t.eligible + h.eligible };
@@ -812,7 +957,8 @@ export function overallTally(p: PilotProgram, today: number): Tally {
 
 /** Every completed habit action on record (each habit once a day at most). */
 export function totalCompleted(p: PilotProgram): number {
-  return Object.values(p.logs).reduce((n, l) => n + l.completed.filter((id) => p.habits.includes(id)).length, 0);
+  const ids = allHabits(p);
+  return Object.values(p.logs).reduce((n, l) => n + l.completed.filter((id) => ids.includes(id)).length, 0);
 }
 
 /**
@@ -823,7 +969,7 @@ export function weekTally(p: PilotProgram, today: number): Tally {
   const w = weekOf(p.startedAt, Math.min(today, PROGRAM_DAYS));
   let done = 0;
   let eligible = 0;
-  for (const id of p.habits) {
+  for (const id of allHabits(p)) {
     const days = Array.from({ length: Math.min(today, w.lastDay) - w.firstDay + 1 }, (_, i) => w.firstDay + i).filter(
       (d) => activeOn(p, id, d),
     );
@@ -886,7 +1032,18 @@ function validState(s: unknown, id: string): s is ProgressionState {
         PHASES.includes(e.phase as Level['phase']) &&
         typeof e.fromDay === 'number' &&
         Number.isInteger(e.fromDay),
-    )
+    ) &&
+    (s.gaps === undefined ||
+      (Array.isArray(s.gaps) &&
+        s.gaps.every(
+          (g) =>
+            isObj(g) &&
+            Number.isInteger(g.from) &&
+            (g.to === undefined || (Number.isInteger(g.to) && (g.to as number) >= (g.from as number))),
+        ))) &&
+    (s.schedule === undefined ||
+      (isObj(s.schedule) &&
+        (s.schedule.kind === 'daily' || (s.schedule.kind === 'weekly' && Number.isInteger(s.schedule.days)))))
   );
 }
 
@@ -896,7 +1053,29 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
   const a = x.answers;
   if (!isObj(a) || typeof a.age !== 'string' || typeof a.minutesPerDay !== 'number') return null;
   if (!(a.precautions === 'unknown' || Array.isArray(a.precautions))) return null;
-  const habits = strings(x.habits).filter(isPilotHabit);
+  const custom: Record<string, CustomHabit> = {};
+  for (const [id, c] of Object.entries(isObj(x.custom) ? x.custom : {}))
+    if (
+      isCustomId(id) &&
+      isObj(c) &&
+      typeof c.name === 'string' &&
+      c.name.trim() &&
+      typeof c.perWeek === 'number' &&
+      Number.isInteger(c.perWeek) &&
+      c.perWeek >= 1 &&
+      c.perWeek <= 7 &&
+      typeof c.scene === 'number' &&
+      Number.isInteger(c.scene) &&
+      c.scene >= 0
+    )
+      custom[id] = {
+        name: c.name.slice(0, 40),
+        ...(typeof c.note === 'string' && c.note ? { note: c.note.slice(0, 80) } : {}),
+        perWeek: c.perWeek,
+        scene: c.scene,
+      };
+  const known = (id: string) => isPilotHabit(id) || id in custom;
+  const habits = strings(x.habits).filter(known);
   if (!habits.length || !isObj(x.progression)) return null;
   const progression: Record<string, ProgressionState> = {};
   for (const id of habits) {
@@ -904,6 +1083,10 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     if (!validState(s, id)) return null;
     progression[id] = s;
   }
+  // Removed habits keep their state (their past counts); a damaged one is dropped with its history.
+  for (const [id, s] of Object.entries(x.progression))
+    if (!(id in progression) && known(id) && validState(s, id)) progression[id] = s;
+  for (const id of Object.keys(custom)) if (!(id in progression)) delete custom[id];
   const logs: Record<string, DayLog> = {};
   for (const [k, l] of Object.entries(isObj(x.logs) ? x.logs : {})) {
     if (!DATE_KEY.test(k) || !isObj(l) || typeof l.day !== 'number') continue;
@@ -923,5 +1106,6 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     progression,
     logs,
     ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
+    ...(Object.keys(custom).length ? { custom } : {}),
   };
 }

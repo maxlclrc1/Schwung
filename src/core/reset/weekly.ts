@@ -21,8 +21,8 @@ import { RESET_BY_ID, type Intensity, type Phase, type Schedule } from './habits
 export const WEEK_STARTS_ON: Weekday = 1; // Monday
 export const DEFAULT_WORKDAYS: Weekday[] = [1, 2, 3, 4, 5];
 
-/** From program day `fromDay` on, this schedule applies (until the next era). */
-export type ScheduleEra = { fromDay: number; schedule: Schedule };
+/** From program day `fromDay` on, this schedule applies (until the next era); null: not in the program (removed). */
+export type ScheduleEra = { fromDay: number; schedule: Schedule | null };
 
 export type WeeklyContext = {
   startKey: string;
@@ -54,7 +54,7 @@ export function programWeeks(startKey: string, programDays = PROGRAM_DAYS): Week
   return out;
 }
 
-/** The schedule in effect on a day, or null before the habit's first era. */
+/** The schedule in effect on a day, or null before the habit's first era (or while it's out of the program). */
 export function scheduleOn(eras: ScheduleEra[], day: number): Schedule | null {
   let current: Schedule | null = null;
   for (const e of eras) if (e.fromDay <= day) current = e.schedule;

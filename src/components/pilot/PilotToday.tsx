@@ -117,7 +117,11 @@ export function PilotToday() {
         <ThemedView style={[styles.summary, { backgroundColor: c.surface }]}>
           <T
             v="bodyStrong"
-            accessibilityLabel={summaryLabel(done, program.habits.length, daily)}
+            accessibilityLabel={summaryLabel(
+              done,
+              program.habits.length,
+              daily.map((id) => P.nameOf(program, id)),
+            )}
             maxFontSizeMultiplier={1.4}
           >
             {full
@@ -234,7 +238,7 @@ function phaseLine(today: number): string {
 }
 
 const summaryLabel = (done: number, total: number, daily: string[]) =>
-  `${done} of ${total} habits done today. ${daily.length ? `${daily.map(P.habitName).join(', ')} is due every day.` : ''}`;
+  `${done} of ${total} habits done today. ${daily.length ? `${daily.join(', ')} is due every day.` : ''}`;
 
 /** One habit as the usual card: its target, its week, and a counter or session details where it has them. */
 function PilotCard({
@@ -327,6 +331,7 @@ function PilotCard({
   return (
     <HabitCard
       habitId={habitId}
+      scene={program.custom?.[habitId]?.scene}
       done={done}
       onToggle={onToggle}
       onLongPress={onDetails}
@@ -334,10 +339,10 @@ function PilotCard({
       accessory={accessory}
       actions={actions}
       display={{
-        title: P.habitName(habitId),
+        title: P.nameOf(program, habitId),
         task: P.targetText(program, habitId, today),
         levelIndex: P.phaseIndex(level),
-        levelLabel: P.levelLabel(level),
+        levelLabel: P.levelLineFor(program, habitId, today),
         summary: [weekText, counterText].filter(Boolean).join('. '),
         hint: strength ? 'Swipe right to log a session' : week ? 'Swipe right if you did it today' : undefined,
         doneText: strength ? 'Session logged' : undefined,
@@ -361,7 +366,7 @@ function OfferCard({
   onAccepted: (text: string) => void;
 }) {
   const { c } = useTheme();
-  const name = P.habitName(habitId);
+  const name = P.nameOf(program, habitId);
   const next = P.targetText(P.accept(program, habitId, offer, today), habitId, offer.effectiveDay);
   const when = offer.effectiveDay === today + 1 ? 'tomorrow' : `next Monday (Day ${offer.effectiveDay})`;
   const up = offer.kind === 'step-up';
