@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -9,6 +9,7 @@ import { SettingsButton } from '../../components/HeaderButton';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { ExpeditionCalendar, JourneySummary } from '../../components/Expedition';
 import { ReflectionHistory } from '../../components/reflection/ReflectionHistory';
+import { storyAvailable } from '../../core/reset/story';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
 import { Screen, T } from '../../components/ui';
 import { useOnPainting, worldAnchor, worldScroll } from '../../components/WorldLayer';
@@ -181,6 +182,31 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
         {cells.length ? (
           <View style={styles.pad}>
             <JourneySummary today={today} completed={completed} cells={cells} />
+            {program && storyAvailable(program, today) ? (
+              <Pressable
+                onPress={() => {
+                  haptic.select();
+                  router.push('/life-reset/story');
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Your 66-day story. Open it to save or share"
+              >
+                {({ pressed }) => (
+                  <ThemedView style={[styles.story, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}>
+                    <View style={[styles.storyIcon, { backgroundColor: c.peachSoft }]}>
+                      <Ionicons name="image-outline" size={18} color={c.peachInk} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <T v="bodyStrong">Your 66-day story</T>
+                      <T v="caption" color={c.textDim}>
+                        A keepsake of the whole climb, to save or share.
+                      </T>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
+                  </ThemedView>
+                )}
+              </Pressable>
+            ) : null}
             <View style={styles.expedition}>
               <T v="overline" color={c.textDim}>
                 The expedition
@@ -280,6 +306,8 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: space.xxxl, gap: space.md },
   pad: { paddingHorizontal: space.lg, gap: space.md },
   expedition: { gap: space.md, marginTop: space.lg },
+  story: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
+  storyIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
   card: { borderRadius: radius.lg, padding: space.md, gap: space.md },
   captionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
