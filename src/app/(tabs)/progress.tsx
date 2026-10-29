@@ -2,10 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { useAnimatedRef, useAnimatedScrollHandler } from 'react-native-reanimated';
+import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
-import { IconButton, SettingsButton } from '../../components/HeaderButton';
+import { SettingsButton } from '../../components/HeaderButton';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { ExpeditionCalendar, JourneySummary } from '../../components/Expedition';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
@@ -53,13 +53,12 @@ const JourneyPage = memo(function JourneyPage() {
   );
 });
 
-function Header({ onCalendar }: { onCalendar?: () => void }) {
+function Header() {
   return (
     <View style={styles.header}>
       <T v="heading" accessibilityRole="header" numberOfLines={1} style={{ flex: 1 }}>
         Your journey
       </T>
-      {onCalendar ? <IconButton name="calendar-outline" label="Go to your 66 days" onPress={onCalendar} /> : null}
       <ThemeToggle />
       <SettingsButton />
     </View>
@@ -77,9 +76,6 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   const [chosen, setChosen] = useState<number | null>(picked);
   // Its habits stay folded away until asked for, so the valley below the mountain stays in view.
   const [expanded, setExpanded] = useState(picked !== null);
-  // The expedition calendar below the mountain: the header's calendar button scrolls to it.
-  const scroll = useAnimatedRef<Animated.ScrollView>();
-  const [calendarY, setCalendarY] = useState(0);
   // Every program day, judged on the habits it actually had (reset/charts.ts), for the summary and the calendar.
   const program = useResetPilot((s) => s.program);
   const cells = useMemo(() => (program ? C.dayCells(program, today) : []), [program, today]);
@@ -100,14 +96,13 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   return (
     <>
       <Animated.ScrollView
-        ref={scroll}
         onScroll={onScroll}
         scrollEventThrottle={16}
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.pad}>
-          <Header onCalendar={() => scroll.current?.scrollTo({ y: calendarY - space.lg, animated: true })} />
+          <Header />
         </View>
 
         {/* The Ascent. Tap a marker to see that day. */}
@@ -183,7 +178,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
         </View>
 
         {cells.length ? (
-          <View style={styles.pad} onLayout={(e) => setCalendarY(e.nativeEvent.layout.y)}>
+          <View style={styles.pad}>
             <JourneySummary today={today} completed={completed} cells={cells} />
             <View style={styles.expedition}>
               <T v="overline" color={c.textDim}>
