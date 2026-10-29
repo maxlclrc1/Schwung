@@ -62,6 +62,8 @@ type Actions = {
   reflect: (week: number, answer?: ReflectionAnswer, changed?: string[]) => void;
   /** An absence (by its first day) has been welcomed back: never again for it. */
   markComeback: (start: number) => void;
+  /** A milestone moment was seen through (or skipped); it and every earlier one never show again. */
+  markMilestone: (day: number) => void;
 };
 
 const initial: ResetPilotData = { program: null, devDayOffset: 0 };
@@ -178,6 +180,15 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
               : {}),
           };
           set({ program: { ...program, reflections: { ...program.reflections, [week]: entry } } });
+        },
+
+        markMilestone: (day) => {
+          const { program } = get();
+          if (!program) return;
+          const seen = program.ceremonies?.milestones ?? [];
+          const all = P.MILESTONE_DAYS.filter((m) => m <= day || seen.includes(m));
+          if (all.length === seen.length) return;
+          set({ program: { ...program, ceremonies: { ...program.ceremonies, milestones: [...all] } } });
         },
 
         markComeback: (start) => {

@@ -25,7 +25,7 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
 import { cover } from '../onboarding/cover';
-import { ceremonyCover, useCeremonyState } from '../ceremony/state';
+import { ceremonyCover, setCeremonyState, useCeremonyState } from '../ceremony/state';
 import { Button, T } from '../ui';
 import { ReflectionInvite } from '../reflection/ReflectionInvite';
 import { WelcomeBack } from './WelcomeBack';
@@ -123,6 +123,9 @@ export function PilotToday() {
   useEffect(() => {
     // Seen as soon as it's shown, so another open (or a restart) never brings it back for this absence.
     if (welcome !== null) useResetPilot.getState().markComeback(welcome);
+    // A milestone moment waits while the welcome back is up.
+    setCeremonyState({ welcomeUp: welcome !== null });
+    return () => setCeremonyState({ welcomeUp: false });
   }, [welcome]);
 
   const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);

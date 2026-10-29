@@ -143,12 +143,29 @@ export type PilotProgram = {
   /** The person's own habits, by id (`custom_1`, `custom_2`…). Their schedules are in `progression`. */
   custom?: Record<string, CustomHabit>;
   /** The two ceremonies, once each per Life Reset: set when seen through (or skipped). */
-  ceremonies?: { day1?: boolean; summit?: boolean };
+  ceremonies?: { day1?: boolean; summit?: boolean; milestones?: number[] };
   /** Weekly reflections by program week (reflections.ts): answers kept on the phone, never acted on by themselves. */
   reflections?: Record<string, Reflection>;
   /** The welcome back (comeback.ts): the first day of the last absence already welcomed. */
   comeback?: { seen: number };
 };
+
+/** The milestone moments between the two ceremonies: a first foothold, Foundation complete, Momentum complete. */
+export const MILESTONE_DAYS = [7, 21, 44] as const;
+
+/**
+ * The milestone moment due today, if any: the latest milestone reached, while its stage lasts (until the next
+ * milestone, or the summit), and not seen. Someone back after a milestone has passed sees at most that one (the
+ * earlier ones are marked with it), never a stack; consistency never decides it.
+ */
+export function milestoneDue(p: PilotProgram, today: number): number | null {
+  const seen = p.ceremonies?.milestones ?? [];
+  const reached = MILESTONE_DAYS.filter((m) => m <= today);
+  const m = reached[reached.length - 1];
+  if (!m || seen.includes(m)) return null;
+  const next = MILESTONE_DAYS.find((x) => x > m) ?? PROGRAM_DAYS;
+  return today < next ? m : null;
+}
 
 /**
  * The summit ceremony is due once the 66 days are done: on Day 66 when the day is complete, or from the day after
@@ -1154,6 +1171,13 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
           ceremonies: {
             ...(x.ceremonies.day1 === true ? { day1: true } : {}),
             ...(x.ceremonies.summit === true ? { summit: true } : {}),
+            ...(Array.isArray(x.ceremonies.milestones)
+              ? {
+                  milestones: (x.ceremonies.milestones as unknown[]).filter(
+                    (m): m is number => typeof m === 'number' && (MILESTONE_DAYS as readonly number[]).includes(m),
+                  ),
+                }
+              : {}),
           },
         }
       : {}),

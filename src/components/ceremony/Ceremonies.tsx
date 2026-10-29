@@ -80,10 +80,14 @@ export function CeremonyHost() {
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = program ? pilotToday({ program, devDayOffset: offset }) : 0;
   const seen = program?.ceremonies ?? {};
-  const [active, setActive] = useState<'day1' | 'summit' | null>(null);
+  const [active, setActive] = useState<'day1' | 'summit' | 'milestone' | null>(null);
+  const [milestoneDay, setMilestoneDay] = useState<number | null>(null);
 
   const day1 = !!program && !seen.day1 && !shared.finaleUp && (shared.day1FromFinale || today === 1);
   const summit = !!program && !shared.finaleUp && !day1 && P.summitDue(program, today);
+  // A milestone never interrupts the finale, a ceremony or the welcome back (it waits until they're done).
+  const milestone =
+    program && !shared.finaleUp && !day1 && !summit && !shared.welcomeUp ? P.milestoneDue(program, today) : null;
 
   // Day 1 starts at once (adjusting state while rendering, React's pattern for following a condition).
   if (!active && day1) setActive('day1');
@@ -106,14 +110,23 @@ export function CeremonyHost() {
       }, 1200);
       return () => clearTimeout(t);
     }
-  }, [active, day1, summit]);
+    if (milestone) {
+      const t = setTimeout(() => {
+        ceremonyCover.set(withTiming(1, { duration: 600, reduceMotion: sys }));
+        setMilestoneDay(milestone);
+        setActive('milestone');
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [active, day1, summit, milestone]);
 
   const fade = useAnimatedStyle(() => ({ opacity: ceremonyCover.value }));
   if (!active || !program) return null;
 
   /** Seen through or skipped: saved at once, then the ceremony fades into the app. */
-  const finish = (kind: 'day1' | 'summit', fast: boolean) => {
-    useResetPilot.getState().markCeremony(kind);
+  const finish = (kind: 'day1' | 'summit' | 'milestone', fast: boolean) => {
+    if (kind === 'milestone') useResetPilot.getState().markMilestone(milestoneDay ?? 0);
+    else useResetPilot.getState().markCeremony(kind);
     void flushStorage().catch(() => {});
     haptic.success();
     const done = () => {
@@ -131,6 +144,8 @@ export function CeremonyHost() {
     <Animated.View style={[StyleSheet.absoluteFill, fade]} accessibilityViewIsModal>
       {active === 'day1' ? (
         <DayOneCeremony onDone={(fast) => finish('day1', fast)} />
+      ) : active === 'milestone' && milestoneDay ? (
+        <MilestoneMoment day={milestoneDay} onDone={(fast) => finish('milestone', fast)} />
       ) : (
         <SummitCeremony
           program={program}
@@ -177,9 +192,12 @@ function MountainStage({
   glowDay,
   glowColor,
   camera,
+  ahead,
 }: {
   stage: Stage;
   trailTo: number;
+  /** A faint dotted way on from the end of the trail to this day (the approach to the summit). */
+  ahead?: number;
   lights: { day: number; color: string }[];
   glowDay: number;
   glowColor: string;
@@ -235,6 +253,10 @@ function MountainStage({
     transform: [{ scale: 0.8 + stage.light.value * 0.2 }],
   }));
   const path = useAnimatedProps(() => ({ strokeDashoffset: length * (1 - stage.trail.value) }));
+  // The way ahead shows once the trail has arrived.
+  const aheadProps = useAnimatedProps(() => ({
+    strokeOpacity: interpolate(stage.trail.value, [0.9, 1], [0, 0.55], 'clamp'),
+  }));
   const fog = isDark
     ? (['rgba(17,17,22,0)', 'rgba(17,17,22,0.78)', 'rgba(17,17,22,0)'] as const)
     : (['rgba(247,246,251,0)', 'rgba(247,246,251,0.82)', 'rgba(247,246,251,0)'] as const);
@@ -276,6 +298,19 @@ function MountainStage({
           />
         </Animated.View>
         <Svg width={W} height={zoneTop + zoneHeight + 40} style={StyleSheet.absoluteFill}>
+          {ahead ? (
+            <AnimatedPath
+              d={DAY_POINTS.slice(trailTo - 1, ahead)
+                .map((p, i) => `${i ? 'L' : 'M'}${(p.x * W).toFixed(1)} ${(zoneTop + p.y * zoneHeight).toFixed(1)}`)
+                .join(' ')}
+              stroke="#FFFFFF"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeDasharray="1 7"
+              fill="none"
+              animatedProps={aheadProps}
+            />
+          ) : null}
           <AnimatedPath
             d={d}
             stroke={glowColor}
@@ -447,6 +482,118 @@ function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
           {ready ? (
             <Animated.View entering={rise(0)}>
               <Button label="Take my first step" onPress={() => done(false)} />
+            </Animated.View>
+          ) : null}
+        </View>
+      </Words>
+      <SkipButton onPress={() => done(true)} />
+    </View>
+  );
+}
+
+// --- Days 7, 21 and 44: milestone moments ---
+
+/**
+ * Three chapters of the same climb, each picking up where the last left off: the trail is already lit to the previous
+ * milestone, the new stretch draws on to this one, the camera starts a little higher each time, and the light at
+ * the end is the chapter's own: a sage foothold, a peach base camp, then the way to the summit opening ahead.
+ */
+const CHAPTERS: Record<
+  number,
+  { from: number; overline: string; title: string; line: string; tint: 'sage' | 'peach' | 'indigo'; cameraY: number }
+> = {
+  7: {
+    from: 1,
+    overline: 'Day 7 · Finding your footing',
+    title: 'You’ve taken your first steps.',
+    line: 'A rhythm is forming, one day at a time.',
+    tint: 'sage',
+    cameraY: 40,
+  },
+  21: {
+    from: 7,
+    overline: 'Day 21 · Foundation complete',
+    title: 'Look what you’ve started.',
+    line: 'The Foundation is laid. Momentum begins today.',
+    tint: 'peach',
+    cameraY: 20,
+  },
+  44: {
+    from: 21,
+    overline: 'Day 44 · Momentum complete',
+    title: 'You’ve come further than you think.',
+    line: 'The summit is in view. Mastery begins.',
+    tint: 'indigo',
+    cameraY: 0,
+  },
+};
+
+function MilestoneMoment({ day, onDone }: { day: number; onDone: (fast: boolean) => void }) {
+  const { c } = useTheme();
+  const reduce = useReducedMotion();
+  const stage = useStage();
+  const ch = CHAPTERS[day] ?? CHAPTERS[7];
+  const tint = ch.tint === 'sage' ? c.sage : ch.tint === 'peach' ? c.peach : c.indigo;
+  const ink = ch.tint === 'sage' ? c.sageInk : ch.tint === 'peach' ? c.peachInk : c.indigoInk;
+  // Where the trail already stood before this chapter (days are evenly spaced along it).
+  const lit = (ch.from - 1) / (day - 1);
+  const finished = useRef(false);
+  const [ready, setReady] = useState(false);
+  const done = (fast: boolean) => {
+    if (finished.current) return;
+    finished.current = true;
+    onDone(fast);
+  };
+  useEffect(() => {
+    stage.trail.set(reduce ? 1 : lit);
+    if (reduce) {
+      tl(stage.mist, 0, 0, 400);
+      stage.camera.set(1);
+      tl(stage.light, 1, 0, 400);
+    } else {
+      tl(stage.mist, 0, 0, 1100, Easing.out(Easing.quad));
+      tl(stage.camera, 1, 0, 2600, Easing.bezier(0.33, 0, 0.2, 1));
+      tl(stage.trail, 1, 250, 1100, Easing.bezier(0.45, 0, 0.2, 1));
+      tl(stage.light, 1, 1000, 900);
+    }
+    const land = setTimeout(() => haptic.uncheck(), reduce ? 200 : 1250);
+    const t = setTimeout(() => setReady(true), reduce ? 400 : 1500);
+    return () => {
+      clearTimeout(land);
+      clearTimeout(t);
+    };
+  }, [reduce, lit, stage.mist, stage.camera, stage.light, stage.trail]);
+
+  const earlier = [7, 21, 44].filter((m) => m < day);
+  return (
+    <View style={[StyleSheet.absoluteFill, { backgroundColor: c.bg }]}>
+      <MountainStage
+        stage={stage}
+        trailTo={day}
+        ahead={day === 44 ? PROGRAM_DAYS : undefined}
+        lights={[...earlier.map((m) => ({ day: m, color: m === 7 ? c.sage : c.peach })), { day, color: tint }]}
+        glowDay={day}
+        glowColor={tint}
+        camera={{ from: { scale: 1.1, y: ch.cameraY + 30 }, to: { scale: 1.02, y: ch.cameraY } }}
+      />
+      <Words>
+        <Animated.View entering={rise(reduce ? 0 : 600)}>
+          <T v="overline" color={ink} style={{ letterSpacing: 2 }}>
+            {ch.overline}
+          </T>
+        </Animated.View>
+        <Animated.View entering={rise(reduce ? 50 : 750)}>
+          <T style={[styles.headline, { color: c.text }]} accessibilityRole="header">
+            {ch.title}
+          </T>
+        </Animated.View>
+        <Animated.View entering={rise(reduce ? 100 : 1100)}>
+          <T style={[styles.sub, { color: c.textDim }]}>{ch.line}</T>
+        </Animated.View>
+        <View style={styles.cta}>
+          {ready ? (
+            <Animated.View entering={rise(0)}>
+              <Button label="Continue climbing" onPress={() => done(false)} />
             </Animated.View>
           ) : null}
         </View>
