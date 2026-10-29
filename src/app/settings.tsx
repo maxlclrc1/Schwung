@@ -11,7 +11,7 @@ import { Screen, T } from '../components/ui';
 import { formatTime, PROGRAM_DAYS } from '../core/dates';
 import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
-import { channel, devTools } from '../lib/flags';
+import { channel, devTools, lifeResetForNewPrograms } from '../lib/flags';
 import { requestPermission, rescheduleReminders } from '../lib/notifications';
 import { useFieldNotes } from '../store/fieldNotes';
 import { pilot } from '../store/pilotGate';
@@ -52,7 +52,7 @@ export default function Settings() {
       // Retired Field Notes data, if this phone has any, comes along so it's never out of reach.
       const fn = useFieldNotes.getState();
       const fieldNotes = fn.run || fn.archive.length ? { fieldNotes: { run: fn.run, archive: fn.archive } } : {};
-      // The Life Reset (testing builds) comes along too, beside the program.
+      // The Life Reset (development and internal builds) comes along too, beside any previous program.
       const reset = pilot?.store.useResetPilot.getState().program;
       await file.write(
         JSON.stringify(
@@ -100,6 +100,10 @@ export default function Settings() {
     <Screen edges={['bottom']}>
       <SheetHeader title="Settings" />
       <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Development and internal builds: the program shown, the Life Reset or a previous V1/V2 program, and the
+            explicit ways to switch (store/pilotGate.ts). */}
+        {pilot && lifeResetForNewPrograms() ? <pilot.Settings Section={Section} Row={Row} /> : null}
+
         <Section title="Appearance">
           <AppearancePicker />
         </Section>
@@ -130,15 +134,12 @@ export default function Settings() {
 
         <Section title="Your data">
           <Row label="Export my data" icon="share-outline" onPress={exportJson} />
-          <Row label="Restart program" icon="refresh" destructive onPress={restart} />
+          {/* The public release's restart (V1 starts over from the quiz). Where new programs are Life Reset programs,
+              a previous program is never wiped from here: the Life Reset has its own "End" under Your program. */}
+          {pilot && lifeResetForNewPrograms() ? null : (
+            <Row label="Restart program" icon="refresh" destructive onPress={restart} />
+          )}
         </Section>
-
-        {/* Testing builds only: the Life Reset, a separate program beside this one (store/pilotGate.ts). */}
-        {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') &&
-        pilot &&
-        pilot.store.resetPilotAvailable() ? (
-          <pilot.Settings Section={Section} Row={Row} />
-        ) : null}
 
         <Section title="About">
           <Row label="Privacy policy" icon="open-outline" onPress={() => void Linking.openURL(PRIVACY_URL)} />

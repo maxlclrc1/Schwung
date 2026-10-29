@@ -8,7 +8,7 @@ import { OnboardingBackdrop } from '../../components/World';
 import { DEV_CLEARED } from '../../core/v2/gate';
 import { pendingTimeQuestion, type TimeAnswers } from '../../core/v2/program';
 import type { ProfileV2 } from '../../core/v2/types';
-import { v2ForNewPrograms } from '../../lib/flags';
+import { lifeResetForNewPrograms, v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useApp } from '../../store/useApp';
 import { space, useTheme } from '../../theme';
@@ -18,7 +18,8 @@ export default function TimeV2() {
   const { c } = useTheme();
   const profile = useApp((s) => s.profile);
   const started = useApp((s) => s.startedAt !== null);
-  const enabled = v2ForNewPrograms();
+  // Retired for new programs where they're Life Reset programs (lib/flags): the start screen leads there instead.
+  const enabled = v2ForNewPrograms() && !lifeResetForNewPrograms();
   // Opened from the plan's choice step: the choices (including the one that needs a time) come along.
   const params = useLocalSearchParams<{ with?: string }>();
   const extra = params.with ? params.with.split(',').filter(Boolean) : [];

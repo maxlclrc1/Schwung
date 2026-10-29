@@ -95,7 +95,7 @@ export function PilotToday() {
   }, [changed]);
 
   const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);
-  const onDetails = useCallback((id: string) => router.push(`/pilot/${id}`), []);
+  const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
   return (
     <ThemedView style={[styles.root, !world && { backgroundColor: c.bg }]}>

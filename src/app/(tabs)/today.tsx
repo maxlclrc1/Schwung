@@ -45,7 +45,7 @@ import {
   totalXp,
   XP_FULL_DAY_BONUS,
 } from '../../core/progression';
-import { tabs } from '../../lib/flags';
+import { lifeResetForNewPrograms, tabs } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { rescheduleSoon } from '../../lib/notifications';
 import { useClock } from '../../lib/useClock';
@@ -58,7 +58,7 @@ const todayLogRested = (logs: Record<string, DayLog>, start: string, day: number
   logs[dateForDay(start, day)]?.rested ?? [];
 
 /**
- * The Habits tab: the running program, or the Life Reset while a tester has it on (testing builds only). Memoized,
+ * The Habits tab: the program shown, the Life Reset or a V1/V2 program (store/pilotGate.ts usePilotActive). Memoized,
  * so a tab change (which re-renders the navigator) doesn't re-render the page before the slide can start.
  */
 export default function Today() {
@@ -309,6 +309,9 @@ function ProgramToday() {
         ) : null}
 
         {viewing === 'today' ? <Notices /> : null}
+
+        {/* Development and internal builds: the way from this program to the Life Reset (store/pilotGate.ts). */}
+        {pilot && viewing === 'today' ? <pilot.Invite /> : null}
 
         {viewing === 'today'
           ? offers.slice(0, 1).map((id) => {
@@ -583,7 +586,7 @@ function Mission({
   );
 }
 
-/** The Habits tab before a program has started (testing builds, e.g. someone who began with Field Notes). */
+/** The Habits tab before any program has started (testing builds): the way into the Life Reset set-up. */
 function NoProgram() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
@@ -597,12 +600,10 @@ function NoProgram() {
       </View>
       <View style={styles.emptyBody}>
         <T color={c.textDim}>You haven’t started a habit plan yet. Your daily habits will show up here.</T>
-        <Button label="Start my reset" onPress={() => router.push('/welcome')} />
-        {(__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal') &&
-        pilot &&
-        pilot.store.resetPilotAvailable() ? (
-          <Button label="Start the 66-day Life Reset" kind="secondary" onPress={() => router.push('/pilot/setup')} />
-        ) : null}
+        <Button
+          label="Start my reset"
+          onPress={() => router.push(pilot && lifeResetForNewPrograms() ? '/life-reset/setup' : '/welcome')}
+        />
       </View>
     </View>
   );

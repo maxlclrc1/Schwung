@@ -23,7 +23,22 @@ export function channel(): Channel {
   return CHANNEL;
 }
 
-/** Whether a new program starts with the personalised V2 onboarding (V1 otherwise). */
+/**
+ * The release decision for the public app: false keeps production on V1, exactly as it is. Flipping it is a
+ * deliberate release step, not a switch on its own: see SCHWUNG_LIFE_RESET_PROGRAM.md ("Releasing the Life Reset to
+ * production") for the other places that must change with it.
+ */
+export const LIFE_RESET_IN_PRODUCTION = false;
+
+/**
+ * Whether new programs are Life Reset programs: the default experience in development and internal builds. A
+ * running V1/V2 program is never converted; it stays the one shown until its owner chooses to switch.
+ */
+export function lifeResetForNewPrograms(ch: Channel = channel()): boolean {
+  return ch !== 'production' || LIFE_RESET_IN_PRODUCTION;
+}
+
+/** Whether a new V1/V2 program starts with the personalised V2 onboarding (V1 otherwise). */
 export function v2ForNewPrograms(): boolean {
   return channel() !== 'production';
 }

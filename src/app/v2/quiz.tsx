@@ -19,7 +19,7 @@ import {
   type QuestionV2,
   type SingleQuestion,
 } from '../../core/v2/quiz';
-import { v2ForNewPrograms } from '../../lib/flags';
+import { lifeResetForNewPrograms, v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useScreenReader } from '../../lib/useScreenReader';
 import { useApp } from '../../store/useApp';
@@ -32,7 +32,8 @@ type IconName = keyof typeof Ionicons.glyphMap;
 export default function QuizV2() {
   const { c } = useTheme();
   const started = useApp((s) => s.startedAt !== null);
-  const enabled = v2ForNewPrograms();
+  // Retired for new programs where they're Life Reset programs (lib/flags): the start screen leads there instead.
+  const enabled = v2ForNewPrograms() && !lifeResetForNewPrograms();
   const screenReader = useScreenReader();
   const [draft, setDraft] = useState<Draft>(() => useApp.getState().profile ?? {});
   const [step, setStep] = useState(0);
