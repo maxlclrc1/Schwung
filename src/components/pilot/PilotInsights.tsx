@@ -81,7 +81,7 @@ export function PilotInsights() {
             <Button
               label="Details, corrections & difficulty"
               kind="secondary"
-              onPress={() => router.push(`/pilot/${id}`)}
+              onPress={() => router.push(`/life-reset/${id}`)}
             />
           </HabitInsight>
         );

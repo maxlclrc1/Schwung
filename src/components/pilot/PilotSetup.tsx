@@ -56,13 +56,16 @@ const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h$
 type Step = 'about' | 'habits' | 'details' | 'levels' | 'review';
 
 /**
- * The Life Reset set-up (development and internal-testing builds only: see app/pilot/setup.tsx): about you, the
+ * The Life Reset set-up (development and internal builds, where it's how every new program starts: see
+ * app/life-reset/setup.tsx): about you, the
  * habits you want, only the questions those habits need, how hard each starts and the time you have, then a review.
  * Nothing is pre-selected; a manageable first set is suggested.
  */
 export function PilotSetup() {
   const { c } = useTheme();
+  // One Life Reset at a time: with one saved, set-up never runs again (it would never replace it either: start()).
   const running = useResetPilot((s) => s.program !== null);
+  const previous = useApp((s) => s.startedAt !== null);
   // The program's own answers, read only, so nothing is asked twice. Never changed here.
   const known = useApp((s) => (s.profile && s.profile.age !== 'u16' ? s.profile : null));
   const [step, setStep] = useState<Step>('about');
@@ -79,7 +82,7 @@ export function PilotSetup() {
   const [start, setStart] = useState<P.StrengthStart | undefined>(undefined);
   const [own, setOwn] = useState(2);
 
-  if (running) return <Redirect href="/today" />;
+  if (running) return <Redirect href="/" />;
 
   const answers: P.PilotAnswers = {
     age: age ?? '18_29',
@@ -177,9 +180,13 @@ export function PilotSetup() {
             <T v="title" accessibilityRole="header">
               A few things first
             </T>
-            <T color={c.textDim}>
-              Your current program stays exactly as it is. You can switch back to it any time from Settings.
-            </T>
+            {previous ? (
+              <T color={c.textDim}>
+                Your current program stays saved, with all its history. You can switch back to it any time in Settings.
+              </T>
+            ) : (
+              <T color={c.textDim}>66 days, a few habits you choose, each growing with you. It takes about a minute.</T>
+            )}
             <Section title="How old are you?">
               <Chips items={AGES} selected={(id) => age === id} onPress={setAge} />
               {age === 'u16' ? <T color={c.danger}>Schwung is made for people 16 and older.</T> : null}

@@ -4,18 +4,28 @@ import { canEditYesterday, dayNumber, toDateKey } from '../core/dates';
 import * as P from '../core/reset/pilot';
 import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
-import { channel, devTools, type Channel } from '../lib/flags';
+import { channel, devTools, lifeResetForNewPrograms, type Channel } from '../lib/flags';
 import { debouncedStorage } from './storage';
 
 /*
  * The Life Reset program's own saved state (a separate key from Schwung's and Field Notes'; it began as the pilot's
  * and keeps the pilot's key, so a pilot program carries on as it was). Starting, using or ending it never reads or
- * writes the running V1/V2 program, which stays exactly as it was and can be returned to at any time. Development
- * and internal-testing builds only (resetPilotAvailable); the public release never shows or saves it. Rules:
- * core/reset/pilot.ts and SCHWUNG_LIFE_RESET_PROGRAM.md.
+ * writes a V1/V2 program, which stays exactly as it was and can be returned to at any time. The default experience
+ * in development and internal builds (lib/flags lifeResetForNewPrograms); the public release never shows or saves
+ * it. Rules: core/reset/pilot.ts and SCHWUNG_LIFE_RESET_PROGRAM.md.
  */
 
-export const resetPilotAvailable = (ch: Channel = channel()) => ch !== 'production';
+export const resetPilotAvailable = (ch: Channel = channel()) => lifeResetForNewPrograms(ch);
+
+/**
+ * Which program the app shows: the Life Reset when there is one and its owner chose it (starting one chooses it),
+ * or when there's no V1/V2 program to show instead; otherwise the V1/V2 program. One rule for Habits, Journey,
+ * Insights, Settings and the start screen. A V1/V2 program is never shown over a chosen Life Reset, and never
+ * hidden unless its owner switched.
+ */
+export function lifeResetShown(s: Pick<ResetPilotData, 'active' | 'program'>, legacyStarted: boolean): boolean {
+  return s.program !== null && (s.active || !legacyStarted);
+}
 
 /** Its own key, alongside Schwung's ('schwung-state', or 'schwung-state-internal' in Expo Go's internal channel). */
 export function resetPilotKey(ch: Channel = channel(), dev: boolean = __DEV__): string {
@@ -26,8 +36,10 @@ export function resetPilotKey(ch: Channel = channel(), dev: boolean = __DEV__): 
 export const RESET_PILOT_VERSION = 1;
 
 export type ResetPilotData = {
-  /** Show the pilot on the Habits tab (the tester chose it); false returns to the existing program. */
+  /** The person chose the Life Reset as the program shown (lifeResetShown); false returns to a V1/V2 program. */
   active: boolean;
+  /** The "Start the Life Reset" card on a V1/V2 program's Habits screen was put away ("Not now"). */
+  inviteHidden?: boolean;
   program: P.PilotProgram | null;
   /** Development builds only: moves the pilot's clock (never Schwung's). */
   devDayOffset: number;
@@ -35,6 +47,7 @@ export type ResetPilotData = {
 
 type Actions = {
   setActive: (on: boolean) => void;
+  hideInvite: () => void;
   /** Starts a pilot program. Never over a running pilot (end it first); never touches the Schwung program. */
   start: (answers: P.PilotAnswers, choices: P.PilotChoice[]) => boolean;
   /** Ends the pilot and deletes its data (only the pilot's). */
@@ -100,6 +113,7 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
         ...initial,
 
         setActive: (active) => set({ active: active && resetPilotAvailable() && !!get().program }),
+        hideInvite: () => set({ inviteHidden: true }),
 
         start: (answers, choices) => {
           if (!resetPilotAvailable() || get().program) return false;
@@ -109,7 +123,8 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
           return true;
         },
 
-        end: () => set({ ...initial }),
+        // Only the Life Reset's own program goes; the invite stays put away if it was.
+        end: () => set({ ...initial, inviteHidden: get().inviteHidden }),
 
         toggle: (id, on) =>
           change((p, today) => {
@@ -141,6 +156,7 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
       merge: (persisted, current) => ({ ...current, ...sanitizeResetPilot(persisted) }),
       partialize: (s): ResetPilotData => ({
         active: s.active,
+        ...(s.inviteHidden ? { inviteHidden: true } : {}),
         program: s.program,
         devDayOffset: devTools() ? s.devDayOffset : 0,
       }),
@@ -157,5 +173,6 @@ export function sanitizeResetPilot(x: unknown): Partial<ResetPilotData> {
   out.program = program;
   out.active = p.active === true && !!program;
   if (typeof p.devDayOffset === 'number' && Number.isInteger(p.devDayOffset)) out.devDayOffset = p.devDayOffset;
+  if (p.inviteHidden === true) out.inviteHidden = true;
   return out;
 }

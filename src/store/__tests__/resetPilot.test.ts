@@ -7,7 +7,15 @@ import type { Answers } from '../../core/types';
 import { FIXTURES } from '../../core/v2/__tests__/fixtures';
 import { previewPlan } from '../../core/v2/program';
 import type { Channel } from '../../lib/flags';
-import { pilotToday, resetPilotAvailable, resetPilotKey, sanitizeResetPilot, useResetPilot } from '../resetPilot';
+import { lifeResetForNewPrograms, LIFE_RESET_IN_PRODUCTION } from '../../lib/flags';
+import {
+  lifeResetShown,
+  pilotToday,
+  resetPilotAvailable,
+  resetPilotKey,
+  sanitizeResetPilot,
+  useResetPilot,
+} from '../resetPilot';
 import { useApp } from '../useApp';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
@@ -148,6 +156,112 @@ describe('a separate, temporary pilot program', () => {
   });
 });
 
+describe('the Life Reset as the default program (development and internal builds)', () => {
+  it('is how new programs start in development and internal builds; production stays on V1 until a release decision', () => {
+    expect([
+      lifeResetForNewPrograms('development'),
+      lifeResetForNewPrograms('internal'),
+      lifeResetForNewPrograms('production'),
+    ]).toEqual([true, true, false]);
+    expect(LIFE_RESET_IN_PRODUCTION).toBe(false);
+  });
+
+  it('shows the Life Reset when chosen, or when there is no V1/V2 program; otherwise the V1/V2 program', () => {
+    const program = {} as NonNullable<ReturnType<typeof r>['program']>;
+    // [has a Life Reset, chose it, has a V1/V2 program] → Life Reset shown
+    const cases: [boolean, boolean, boolean, boolean][] = [
+      [false, false, false, false], // a new installation: nothing to show (the start screen leads to set-up)
+      [false, false, true, false], // only a V1/V2 program: it stays shown
+      [true, true, false, true],
+      [true, false, false, true], // a Life Reset saved without the choice (an older pilot save), nothing else
+      [true, true, true, true], // switched to the Life Reset
+      [true, false, true, false], // switched back: the V1/V2 program, the Life Reset kept
+    ];
+    for (const [has, chose, legacy, shown] of cases)
+      expect([has, chose, legacy, lifeResetShown({ program: has ? program : null, active: chose }, legacy)]).toEqual([
+        has,
+        chose,
+        legacy,
+        shown,
+      ]);
+  });
+
+  it('switches back and forth on request, never touching either program', () => {
+    startV2();
+    const before = schwungSnapshot();
+    expect(lifeResetShown(r(), true)).toBe(false);
+    expect(r().start(ADULT, ALL)).toBe(true);
+    expect(lifeResetShown(r(), true)).toBe(true);
+    r().complete('mind_read');
+    const reset = r().program;
+    r().setActive(false);
+    expect(lifeResetShown(r(), true)).toBe(false);
+    r().setActive(true);
+    expect(lifeResetShown(r(), true)).toBe(true);
+    expect(r().program).toBe(reset);
+    expect(schwungSnapshot()).toEqual(before);
+  });
+
+  it('starts only with the 11 Life Reset habits: retired ones (Phone-Free Wind-Down…) are refused', () => {
+    for (const id of ['sleep_no_phone_bed', 'sleep_bedtime', 'water', 'mind_meditate', 'move_strength_session'])
+      expect([id, r().start(ADULT, [{ habitId: id, intensity: 'starter' }])]).toEqual([id, false]);
+    expect(r().program).toBeNull();
+  });
+
+  it('never creates a second Life Reset, however often set-up finishes', () => {
+    expect(r().start(ADULT, ALL)).toBe(true);
+    const first = r().program;
+    for (let i = 0; i < 3; i++) expect(r().start(ADULT, ALL.slice(0, 1))).toBe(false);
+    expect(r().program).toBe(first);
+  });
+
+  it('keeps an older pilot save as the Life Reset, chosen or not, with its tracking data', () => {
+    const date = dateForDay('2026-01-05', 1);
+    const saved = {
+      active: false,
+      program: {
+        v: 1,
+        startedAt: '2026-01-05',
+        answers: { age: '30_49', precautions: [], minutesPerDay: 90 },
+        habits: ['mind_read'],
+        progression: {
+          mind_read: {
+            v: 1,
+            habitId: 'mind_read',
+            eras: [{ intensity: 'standard', phase: 'foundation', fromDay: 1, reason: 'start' }],
+          },
+        },
+        logs: {
+          [date]: {
+            day: 1,
+            date,
+            completed: ['mind_read'],
+            planned: ['mind_read'],
+            track: { mind_read: { v: 1, by: 'timer', minutes: 20, everCompleted: true } },
+          },
+        },
+      },
+      devDayOffset: 0,
+    };
+    const loaded = sanitizeResetPilot(saved);
+    expect(loaded.active).toBe(false);
+    expect(loaded.program?.logs[date].track?.mind_read).toEqual(saved.program.logs[date].track.mind_read);
+    // Not chosen: shown only when there's no V1/V2 program (then it is the program).
+    expect(lifeResetShown({ program: loaded.program!, active: false }, false)).toBe(true);
+    expect(lifeResetShown({ program: loaded.program!, active: false }, true)).toBe(false);
+  });
+
+  it('remembers "Not now" on the invitation across a restart and an ended Life Reset', () => {
+    r().hideInvite();
+    expect(sanitizeResetPilot({ active: false, program: null, inviteHidden: true }).inviteHidden).toBe(true);
+    expect(sanitizeResetPilot({ active: false, program: null }).inviteHidden).toBeUndefined();
+    r().start(ADULT, ALL);
+    r().end();
+    expect(r().inviteHidden).toBe(true);
+    expect(r().program).toBeNull();
+  });
+});
+
 describe('persistence and recovery', () => {
   async function relaunch() {
     await wait(400);
@@ -259,8 +373,8 @@ describe('builds', () => {
         ),
     );
     expect(direct).toEqual([]);
-    // Every pilot route checks the gate before rendering.
-    for (const route of ['app/pilot/setup.tsx', 'app/pilot/[id].tsx']) {
+    // Every Life Reset route checks the gate before rendering.
+    for (const route of ['app/life-reset/setup.tsx', 'app/life-reset/[id].tsx']) {
       const src = fs.readFileSync(`${SRC}/${route}`, 'utf8');
       expect([
         route,

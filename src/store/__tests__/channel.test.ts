@@ -291,14 +291,48 @@ describe('routes', () => {
     }
   });
 
-  it('Welcome sends a running program to Today', () => {
-    expect(read('welcome.tsx')).toMatch(/if \(started\) return <Redirect href="\/today" \/>;/);
+  it('Welcome sends a running program (either kind) to Today, and new programs into the Life Reset set-up', () => {
+    const welcome = read('welcome.tsx');
+    expect(welcome).toContain('if (started || resetRunning) return <Redirect href="/today" />;');
+    expect(welcome).toContain('const lifeReset = !!pilot && lifeResetForNewPrograms();');
+    expect(welcome).toContain("router.push(lifeReset ? '/life-reset/setup' : v2 ? '/v2/quiz' : '/quiz')");
+    // A half-finished V1/V2 onboarding is never offered where new programs are Life Reset programs.
+    expect(welcome).toContain('&& !lifeReset;');
+    // No second, separate Life Reset button: it is the way in.
+    expect(welcome).not.toContain('Or start the 66-day Life Reset');
+    expect(read('index.tsx')).toContain("<Redirect href={started || lifeReset ? '/today' : '/welcome'} />");
+  });
+
+  it('Settings shows the program choice, and never wipes a previous program where the Life Reset is the default', () => {
+    const settings = read('settings.tsx');
+    expect(settings).toContain(
+      '{pilot && lifeResetForNewPrograms() ? <pilot.Settings Section={Section} Row={Row} /> : null}',
+    );
+    expect(settings).toMatch(/\{pilot && lifeResetForNewPrograms\(\) \? null : \(\s*<Row label="Restart program"/);
+    expect(settings).not.toContain('Life Reset · testing');
+    const section = fs.readFileSync(`${SRC}/components/pilot/PilotSettings.tsx`, 'utf8');
+    // No "pilot" or "testing" in anything a person reads: string literals and text, imports aside.
+    const shown = (f: string) =>
+      fs
+        .readFileSync(`${SRC}/components/pilot/${f}`, 'utf8')
+        .split('\n')
+        .filter((l) => !/^import |^\s*(\/\/|\*|\/\*)/.test(l))
+        .join('\n');
+    for (const f of ['PilotSettings.tsx', 'LifeResetInvite.tsx', 'PilotSetup.tsx'])
+      expect([f, /['"`>][^'"`<\n]*\b(pilot|testing)\b/i.test(shown(f))]).toEqual([f, false]);
+    for (const label of [
+      'Switch to my previous program',
+      'Switch to my Life Reset',
+      'Start the Life Reset',
+      'End the Life Reset',
+    ])
+      expect(section).toContain(`label="${label}"`);
   });
 
   it('every V2 onboarding screen sends a running program to Today and is closed on production', () => {
     for (const f of ['v2/quiz.tsx', 'v2/plan.tsx', 'v2/time.tsx']) {
       const src = read(f);
-      expect([f, /const enabled = v2ForNewPrograms\(\);/.test(src)]).toEqual([f, true]);
+      expect([f, /const enabled = v2ForNewPrograms\(\) && !lifeResetForNewPrograms\(\);/.test(src)]).toEqual([f, true]);
       expect([f, src.includes('if (started) return <Redirect href="/today" />;')]).toEqual([f, true]);
     }
   });

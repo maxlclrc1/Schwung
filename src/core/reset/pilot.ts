@@ -265,7 +265,11 @@ export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[]
   if (choices.length > MAX_HABITS) out.push(`Choose at most ${MAX_HABITS} habits for now.`);
   const ids = new Set<string>();
   for (const c of choices) {
-    if (!isPilotHabit(c.habitId) || ids.has(c.habitId)) {
+    if (!isPilotHabit(c.habitId)) {
+      out.push('Choose from the Life Reset habits.');
+      continue;
+    }
+    if (ids.has(c.habitId)) {
       out.push('Each habit can be chosen once.');
       continue;
     }
@@ -287,7 +291,12 @@ export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[]
   if (!PILOT_TIME_OPTIONS.includes(a.minutesPerDay as (typeof PILOT_TIME_OPTIONS)[number]))
     out.push('Say how much time you have on a busy day.');
   else {
-    const total = busiestDayMinutes(choices.map((c) => ({ habitId: c.habitId, level: foundation(c.intensity) })));
+    // Only real Life Reset habits count (anything else is refused above, never looked up).
+    const total = busiestDayMinutes(
+      choices
+        .filter((c) => isPilotHabit(c.habitId))
+        .map((c) => ({ habitId: c.habitId, level: foundation(c.intensity) })),
+    );
     if (total > a.minutesPerDay)
       out.push(
         `These take about ${total} min on a day they all fall on, more than the ${a.minutesPerDay} min you have. Choose an easier intensity or fewer habits.`,

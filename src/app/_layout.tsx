@@ -109,8 +109,8 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           {/* The Life Reset: development and internal-testing builds only. */}
-          <Stack.Screen name="pilot/setup" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="pilot/[id]" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="life-reset/setup" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />

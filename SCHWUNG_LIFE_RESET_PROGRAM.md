@@ -1,8 +1,9 @@
-# Schwung — The Life Reset Program (testing builds)
+# Schwung — The Life Reset Program (development and internal builds)
 
-**Stage 6:** the complete Life Reset in development and internal-testing builds. It covers all 11 habits, three
-tabs (Habits, Journey, Insights), no timers, Field Notes retired, and work on the theme and page-transition lag. The
-public release (V1) is unchanged, and its bundle doesn't contain the Life Reset.
+**Stage 7:** the Life Reset is the default Schwung experience in development and internal builds: every new
+program is a Life Reset, with all 11 illustrated habits, three tabs (Habits, Journey, Insights) and no timers. An
+existing V1/V2 program is kept exactly as it was, and shown until its owner chooses to switch. The public release
+(V1) is unchanged, and its bundle doesn't contain the Life Reset.
 
 Supersedes `SCHWUNG_LIFE_RESET_PILOT.md` (the three-habit pilot this grew from).
 
@@ -39,10 +40,68 @@ carries on without any migration.
 - **Pilot programs carry on.** A three-habit pilot save loads unchanged, including its saved timer data, which is
   kept but never shown. Tested with a real pilot-shaped save, and checked in a browser.
 - **Damaged saves.** A damaged program is dropped, never trusted.
-- **Switching programs.** Settings → Life Reset · testing has Start, Open, "Switch to my previous program" and End.
-  The Habits screen also offers "Switch to my previous program" when there is one.
-  - **What follows the switch:** Habits, Journey and Insights all follow the program on screen.
-  - **What doesn't mix:** logs, XP and streaks.
+- **Switching programs:** see "The default experience" below. Logs, XP and streaks never mix.
+
+## The default experience (development and internal builds)
+
+**New installation, or no program at all:** the app opens on the start screen (the mountain, "Get your momentum
+back."). "Start my reset" goes straight into the Life Reset set-up, which offers only the 11 Life Reset habits,
+with their age, eligibility and health-precaution rules. "Begin Day 1" starts the program and opens Habits; Journey
+and Insights show it. Nothing needs activating in Settings.
+
+- **Retired for new programs:** the V1/V2 onboarding (quiz, plan, time, start, reveal) and its recommendations,
+  including habits such as Phone-Free Wind-Down. Their screens send anyone who reaches them back to the start, and
+  "Pick up where you left off" (a half-finished V1/V2 onboarding) isn't offered. Their definitions stay, for
+  existing programs.
+- **Interrupted set-up:** nothing is saved until "Begin Day 1"; reopening the app starts set-up again from the
+  start screen.
+- **No duplicates:** with a Life Reset saved, set-up never runs again (its route sends you home), and the store
+  refuses to start a second one.
+
+**Which program is shown** — one rule (`lifeResetShown`, `store/resetPilot.ts`), followed by Habits, Journey,
+Insights, Settings and the start screen:
+
+| Life Reset saved | Chosen (`active`) | V1/V2 program | Shown                             |
+| ---------------- | ----------------- | ------------- | --------------------------------- |
+| no               | –                 | no            | start screen → set-up             |
+| no               | –                 | yes           | the V1/V2 program                 |
+| yes              | yes               | either        | the Life Reset                    |
+| yes              | no                | no            | the Life Reset (only one)         |
+| yes              | no                | yes           | the V1/V2 program (switched back) |
+
+**Existing V1/V2 program:** it stays the one shown, untouched. Its Habits screen has a card, "Start the Life
+Reset", which says the program stays saved with all its history and can be switched back to in Settings ("Not now"
+puts the card away, remembered). Settings → **Your program** offers the same, says which program is on, and:
+
+- **On the Life Reset:** "Switch to my previous program" (also at the foot of Habits) and "End the Life Reset"
+  (confirmed; deletes only the Life Reset).
+- **On a previous program with a Life Reset saved:** "Switch to my Life Reset" (also on the Habits card).
+- **Never wiped from here:** the V1 "Restart program" row is hidden where the Life Reset is the default, so a
+  previous program can't be deleted by accident.
+
+**The choice persists:** it's `active` in the Life Reset's own save (`schwung-reset-pilot`), so it holds across
+restarts; switching only flips it. Neither program's data is read or written by a switch.
+
+**Older pilot saves** load as the Life Reset unchanged (progress, readiness, timer and tracking details). One saved
+before this change keeps its choice: chosen, it's shown; not chosen, it's shown only if there's no V1/V2 program.
+
+**Wording:** nothing a person reads says "pilot" or "testing" (tested). Routes are `/life-reset/setup` and
+`/life-reset/[id]`. The code keeps the pilot's names (`pilot.ts`, `PilotProgram`, the save key) so saves carry on.
+
+### Releasing the Life Reset to production (a future, explicit decision)
+
+Production stays on V1: `LIFE_RESET_IN_PRODUCTION` in `src/lib/flags.ts` is `false`. Making the Life Reset the
+public default takes, together:
+
+1. `LIFE_RESET_IN_PRODUCTION = true` (this turns on `lifeResetForNewPrograms` and `resetPilotAvailable`);
+2. letting `store/pilotGate.ts` load it in production (its literal `__DEV__ || … === 'internal'` check), so the
+   Life Reset's code is in the public bundle;
+3. `tabs()` in `src/lib/flags.ts` for the three tabs and the world (the release keeps Today alone now);
+4. a release review of the public bundle, existing V1 users (they keep V1, with the card), and the tests in
+   `src/store/__tests__/channel.test.ts` and `resetPilot.test.ts` that pin today's production behaviour.
+
+Held exercise-instruction programmes stay held either way: they aren't Life Reset habits, and set-up refuses
+anything outside the 11 (tested).
 
 ## Setup (stepped, about a minute)
 
@@ -345,7 +404,7 @@ device.**
 
 ## Testing
 
-**Automated:** 658 tests in 40 suites, all passing; typecheck, lint and formatting are clean.
+**Automated:** 666 tests in 40 suites, all passing; typecheck, lint and formatting are clean.
 
 - **All 11 habits:** catalog order and ids, targets, frequencies, art, and the 16–17 Focus blocks.
 - **Setup:** only the needed baselines, kept answers, exclusions (phone time, wake time, precautions, age, joint pain),
@@ -371,6 +430,11 @@ device.**
 - **Field Notes:** retired in every build with no screens or entries, and its data still loads unchanged.
 - **Isolation:** production refuses everything; nothing reaches the Life Reset except through the gate; the tab order
   is Habits, Journey, Insights.
+- **Default experience:** new programs are Life Reset programs in development and internal builds only; the
+  "which program is shown" rule in every case; switching back and forth leaves both programs untouched; no second
+  Life Reset; only the 11 habits (Phone-Free Wind-Down and other retired habits refused); an older pilot save kept
+  with its tracking data; "Not now" remembered; the start screen, Settings and the retired V1/V2 screens; no
+  "pilot" or "testing" in visible text.
 
 **Browser** (internal and production web exports):
 
@@ -383,6 +447,12 @@ device.**
 - **Saves and switching:** a pilot save loading next to an existing V2 program, and switching to the previous
   program (Habits, Journey and Insights follow it, both saves untouched).
 - **Production:** the build unchanged.
+- **Default experience** (internal web export): a new installation through the start screen and set-up to all three
+  tabs (11 habits offered, none retired); set-up interrupted midway (nothing saved, starts again); set-up reopened
+  and the old V2 quiz URL (both send you home, no second program); restarts; an existing V1 program (shown, its
+  card, the switch, Insights following each program, back and forth twice, restarts, both saves byte-for-byte
+  unchanged, "Not now" remembered); older pilot saves, chosen and not; production (V1 quiz, Life Reset routes
+  closed, none of its text in the bundle).
 
 ## Limitations and open questions
 

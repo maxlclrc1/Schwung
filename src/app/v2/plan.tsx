@@ -21,7 +21,7 @@ import {
   type LibraryOption,
 } from '../../core/v2/program';
 import type { ProfileV2, Targets } from '../../core/v2/types';
-import { v2ForNewPrograms } from '../../lib/flags';
+import { lifeResetForNewPrograms, v2ForNewPrograms } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
@@ -44,7 +44,8 @@ export default function PlanV2() {
   const { c } = useTheme();
   const profile = useApp((s) => s.profile);
   const started = useApp((s) => s.startedAt !== null);
-  const enabled = v2ForNewPrograms();
+  // Retired for new programs where they're Life Reset programs (lib/flags): the start screen leads there instead.
+  const enabled = v2ForNewPrograms() && !lifeResetForNewPrograms();
   const plan = useMemo(() => (profile ? previewPlan(profile) : null), [profile]);
   const [chosen, setChosen] = useState<string[]>([]);
   // Optional extras: never preselected, added only when the person picks them.
