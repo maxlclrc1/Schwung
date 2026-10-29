@@ -55,6 +55,8 @@ type Actions = {
   easier: (habitId: string) => string | null;
   harder: (habitId: string) => string | null;
   setDevDayOffset: (n: number) => void;
+  /** A ceremony has been seen through (or skipped): it never shows again in this Life Reset. */
+  markCeremony: (kind: 'day1' | 'summit') => void;
 };
 
 const initial: ResetPilotData = { program: null, devDayOffset: 0 };
@@ -156,6 +158,12 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
         harder: (id) => manual((p, day) => P.harder(p, id, day)),
 
         setDevDayOffset: (devDayOffset) => set({ devDayOffset: devTools() ? devDayOffset : 0 }),
+
+        markCeremony: (kind) => {
+          const { program } = get();
+          if (!program || program.ceremonies?.[kind]) return;
+          set({ program: { ...program, ceremonies: { ...program.ceremonies, [kind]: true } } });
+        },
       };
     },
     {

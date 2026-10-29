@@ -141,7 +141,18 @@ export type PilotProgram = {
   measures?: WeeklyMeasures;
   /** The person's own habits, by id (`custom_1`, `custom_2`…). Their schedules are in `progression`. */
   custom?: Record<string, CustomHabit>;
+  /** The two ceremonies, once each per Life Reset: set when seen through (or skipped). */
+  ceremonies?: { day1?: boolean; summit?: boolean };
 };
+
+/**
+ * The summit ceremony is due once the 66 days are done: on Day 66 when the day is complete, or from the day after
+ * whatever happened (consistency never decides it). Never before Day 66, never twice.
+ */
+export function summitDue(p: PilotProgram, today: number): boolean {
+  if (p.ceremonies?.summit) return false;
+  return today > PROGRAM_DAYS || (today === PROGRAM_DAYS && dayFull(p, PROGRAM_DAYS));
+}
 
 /** A habit the person made: a name, what counts (optional), how often, and its window onto the world. */
 export type CustomHabit = {
@@ -1129,5 +1140,13 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     logs,
     ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
     ...(Object.keys(custom).length ? { custom } : {}),
+    ...(isObj(x.ceremonies)
+      ? {
+          ceremonies: {
+            ...(x.ceremonies.day1 === true ? { day1: true } : {}),
+            ...(x.ceremonies.summit === true ? { summit: true } : {}),
+          },
+        }
+      : {}),
   };
 }
