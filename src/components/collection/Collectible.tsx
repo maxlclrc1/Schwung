@@ -18,16 +18,16 @@ const PLACEHOLDER: Record<string, { icon: Icon; tint: (c: Colors) => [string, st
 };
 
 /**
- * A collectible, drawn at `size`: its illustration once listed in art.ts (a locked one as a quiet silhouette of
+ * A collectible, drawn at `size`: its painting (one, for both themes) once listed in art.ts (a locked one as a quiet silhouette of
  * the same art), or its vector placeholder (locked: a faint outline). Decorative; the screen names it.
  */
 export function CollectibleArt({ id, size, locked }: { id: string; size: number; locked: boolean }) {
-  const { c, isDark } = useTheme();
+  const { c } = useTheme();
   const art = COLLECTIBLE_ART[id];
   if (art)
     return (
       <Image
-        source={isDark ? art.dark : art.light}
+        source={art}
         style={{ width: size, height: size, opacity: locked ? 0.5 : 1 }}
         tintColor={locked ? c.border : undefined}
         resizeMode="contain"

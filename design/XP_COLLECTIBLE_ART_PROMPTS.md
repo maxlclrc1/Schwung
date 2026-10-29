@@ -1,7 +1,8 @@
 # Schwung — XP collectible illustrations
 
-Seven alpine objects, one per XP milestone (`src/core/reset/collection.ts`). Each needs a **dark** and a **light**
-version with identical geometry. Prompts are standalone: paste one at a time.
+Seven alpine objects, one per XP milestone (`src/core/reset/collection.ts`). The app uses the **dark** version in
+both themes (`assets/collectibles/<id>-dark.webp`); the light-version notes below are optional. Prompts are
+standalone: paste one at a time.
 
 ## Delivery (all seven)
 
