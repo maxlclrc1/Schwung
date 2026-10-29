@@ -754,3 +754,32 @@ describe('the ceremonies', () => {
     expect(P.sanitizePilotProgram(JSON.parse(JSON.stringify(pilot())))?.ceremonies).toBeUndefined();
   });
 });
+
+describe('the milestone moments', () => {
+  const p = pilot([{ habitId: 'mind_read', intensity: 'starter' }]);
+  const seen = (milestones: number[]) => ({ ...p, ceremonies: { milestones } });
+
+  it('are due on reaching Days 7, 21 and 44, whatever the consistency, never early', () => {
+    expect(P.milestoneDue(p, 6)).toBeNull();
+    expect(P.milestoneDue(p, 7)).toBe(7);
+    expect(P.milestoneDue(p, 21)).toBe(21);
+    expect(P.milestoneDue(p, 44)).toBe(44);
+  });
+
+  it('show once, and someone back late sees only the latest, never a stack', () => {
+    expect(P.milestoneDue(seen([7]), 10)).toBeNull();
+    // Back on Day 30 having seen none: only Foundation's, while Momentum lasts.
+    expect(P.milestoneDue(p, 30)).toBe(21);
+    expect(P.milestoneDue(seen([7, 21]), 30)).toBeNull();
+    // Back after the summit: none at all (the summit ceremony speaks for the whole climb).
+    expect(P.milestoneDue(p, 70)).toBeNull();
+  });
+
+  it('keep which were seen through a save, and nothing else', () => {
+    const x = { ...p, ceremonies: { day1: true, milestones: [7, 9, 'x', 21] } };
+    expect(P.sanitizePilotProgram(JSON.parse(JSON.stringify(x)))?.ceremonies).toEqual({
+      day1: true,
+      milestones: [7, 21],
+    });
+  });
+});

@@ -10,8 +10,8 @@ import { makeMutable } from 'react-native-reanimated';
 
 export const ceremonyCover = makeMutable(0);
 
-type State = { finaleUp: boolean; day1FromFinale: boolean; ceremonyUp: boolean };
-let state: State = { finaleUp: false, day1FromFinale: false, ceremonyUp: false };
+type State = { finaleUp: boolean; day1FromFinale: boolean; ceremonyUp: boolean; welcomeUp: boolean };
+let state: State = { finaleUp: false, day1FromFinale: false, ceremonyUp: false, welcomeUp: false };
 const listeners = new Set<() => void>();
 
 export function setCeremonyState(next: Partial<State>) {
