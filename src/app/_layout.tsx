@@ -83,6 +83,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="life-reset/add" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="life-reset/collection" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="life-reset/reflect" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen
             name="life-reset/story"

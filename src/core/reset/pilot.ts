@@ -26,6 +26,7 @@ import {
   type SocialAction,
   type Target,
 } from './habits';
+import { sanitizeCollection } from './collection';
 import { sanitizeReflections, type Reflection } from './reflections';
 import { recordWeekly, weeklyMeasure, type WeeklyMeasure, type WeeklyMeasures } from './measures';
 import {
@@ -148,6 +149,8 @@ export type PilotProgram = {
   reflections?: Record<string, Reflection>;
   /** The welcome back (comeback.ts): the first day of the last absence already welcomed. */
   comeback?: { seen: number };
+  /** The XP collection (collection.ts): objects unlocked, kept for good. */
+  collection?: { unlocked: string[] };
 };
 
 /** The milestone moments between the two ceremonies: a first foothold, Foundation complete, Momentum complete. */
@@ -1163,6 +1166,7 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
     ...(Object.keys(custom).length ? { custom } : {}),
     ...(sanitizeReflections(x.reflections) ? { reflections: sanitizeReflections(x.reflections) } : {}),
+    ...(sanitizeCollection(x.collection) ? { collection: sanitizeCollection(x.collection) } : {}),
     ...(isObj(x.comeback) && Number.isInteger(x.comeback.seen)
       ? { comeback: { seen: x.comeback.seen as number } }
       : {}),

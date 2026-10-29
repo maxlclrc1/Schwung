@@ -15,6 +15,7 @@ import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { XP_FULL_DAY_BONUS } from '../../core/progression';
 import * as C from '../../core/reset/charts';
 import { absenceStart } from '../../core/reset/comeback';
+import { newlyReached, type Collectible } from '../../core/reset/collection';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
 import { devTools } from '../../lib/flags';
@@ -29,6 +30,7 @@ import { ceremonyCover, setCeremonyState, useCeremonyState } from '../ceremony/s
 import { Button, T } from '../ui';
 import { ReflectionInvite } from '../reflection/ReflectionInvite';
 import { WelcomeBack } from './WelcomeBack';
+import { UnlockMoment } from '../collection/UnlockMoment';
 import { TodayHero } from './TodayHero';
 
 /*
@@ -130,6 +132,21 @@ export function PilotToday() {
     return () => setCeremonyState({ welcomeUp: false });
   }, [welcome]);
 
+  // The collection: objects XP has reached join it (for good), with a moment for the newest, once the habit that
+  // earned it has landed, and never over a ceremony, the onboarding finale or the welcome back.
+  const owned = program.collection?.unlocked;
+  const fresh = useMemo(() => newlyReached(xp, owned ?? []), [xp, owned]);
+  const [unlock, setUnlock] = useState<{ item: Collectible; more: number } | null>(null);
+  const quiet = ceremony.ceremonyUp || ceremony.finaleUp || welcome !== null;
+  useEffect(() => {
+    if (!fresh.length || unlock || quiet) return;
+    const t = setTimeout(() => {
+      useResetPilot.getState().unlockCollectibles(fresh.map((f) => f.id));
+      setUnlock({ item: fresh[fresh.length - 1], more: fresh.length - 1 });
+    }, 900);
+    return () => clearTimeout(t);
+  }, [fresh, unlock, quiet]);
+
   const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);
   const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
@@ -228,6 +245,7 @@ export function PilotToday() {
         </View>
       </Animated.ScrollView>
 
+      {unlock ? <UnlockMoment item={unlock.item} more={unlock.more} onClose={() => setUnlock(null)} /> : null}
       {celebrate ? (
         <View pointerEvents="none" style={styles.celebrateWrap}>
           <ThemedView

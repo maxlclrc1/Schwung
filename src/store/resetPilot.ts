@@ -62,6 +62,8 @@ type Actions = {
   reflect: (week: number, answer?: ReflectionAnswer, changed?: string[]) => void;
   /** An absence (by its first day) has been welcomed back: never again for it. */
   markComeback: (start: number) => void;
+  /** Objects reached by XP join the collection, for good (an undo never takes one back). */
+  unlockCollectibles: (ids: string[]) => void;
   /** A milestone moment was seen through (or skipped); it and every earlier one never show again. */
   markMilestone: (day: number) => void;
 };
@@ -189,6 +191,15 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
           const all = P.MILESTONE_DAYS.filter((m) => m <= day || seen.includes(m));
           if (all.length === seen.length) return;
           set({ program: { ...program, ceremonies: { ...program.ceremonies, milestones: [...all] } } });
+        },
+
+        unlockCollectibles: (ids) => {
+          const { program } = get();
+          if (!program) return;
+          const have = program.collection?.unlocked ?? [];
+          const add = ids.filter((id) => !have.includes(id));
+          if (!add.length) return;
+          set({ program: { ...program, collection: { unlocked: [...have, ...add] } } });
         },
 
         markComeback: (start) => {
