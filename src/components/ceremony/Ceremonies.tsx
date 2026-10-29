@@ -87,6 +87,8 @@ export function CeremonyHost() {
 
   // Day 1 starts at once (adjusting state while rendering, React's pattern for following a condition).
   if (!active && day1) setActive('day1');
+  // Others (the welcome back) wait while a ceremony is up.
+  useEffect(() => setCeremonyState({ ceremonyUp: !!active }), [active]);
   const fromFinale = shared.day1FromFinale;
   useEffect(() => {
     // From the finale the ceremony is already covered by it; on its own it fades in.

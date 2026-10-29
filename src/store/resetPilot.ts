@@ -60,6 +60,8 @@ type Actions = {
   markCeremony: (kind: 'day1' | 'summit') => void;
   /** A week's reflection: its answer (and the habits changed from it), or put off with no answer ("Not now"). */
   reflect: (week: number, answer?: ReflectionAnswer, changed?: string[]) => void;
+  /** An absence (by its first day) has been welcomed back: never again for it. */
+  markComeback: (start: number) => void;
 };
 
 const initial: ResetPilotData = { program: null, devDayOffset: 0 };
@@ -176,6 +178,12 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
               : {}),
           };
           set({ program: { ...program, reflections: { ...program.reflections, [week]: entry } } });
+        },
+
+        markComeback: (start) => {
+          const { program } = get();
+          if (!program || program.comeback?.seen === start) return;
+          set({ program: { ...program, comeback: { seen: start } } });
         },
 
         markCeremony: (kind) => {

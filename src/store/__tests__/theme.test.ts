@@ -47,6 +47,8 @@ describe('the theme preference', () => {
       themePreference: 'dark',
       // Reminders are saved alongside, off until turned on.
       reminders: { enabled: false, hour: 9, minute: 0, showHabits: false },
+      // The welcome back is on until turned off.
+      comebacks: true,
     });
     expect(useResetPilot.getState().program).toBeNull();
   });

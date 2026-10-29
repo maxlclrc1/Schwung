@@ -13,18 +13,22 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { XP_FULL_DAY_BONUS } from '../../core/progression';
+import * as C from '../../core/reset/charts';
+import { absenceStart } from '../../core/reset/comeback';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
 import { devTools } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
+import { usePreferences } from '../../store/preferences';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
 import { cover } from '../onboarding/cover';
-import { ceremonyCover } from '../ceremony/state';
+import { ceremonyCover, useCeremonyState } from '../ceremony/state';
 import { Button, T } from '../ui';
 import { ReflectionInvite } from '../reflection/ReflectionInvite';
+import { WelcomeBack } from './WelcomeBack';
 import { TodayHero } from './TodayHero';
 
 /*
@@ -105,6 +109,22 @@ export function PilotToday() {
     transform: [{ translateY: reduceMotion ? 0 : Math.max(cover.value, ceremonyCover.value) * 12 }],
   }));
 
+  // The welcome back, after an absence of two or more days that had something due (comeback.ts): once per absence,
+  // never during a ceremony or the onboarding finale, and only for those who haven't turned it off.
+  const comebacks = usePreferences((s) => s.comebacks);
+  const ceremony = useCeremonyState();
+  const cells = useMemo(() => C.dayCells(program, today), [program, today]);
+  const absence = absenceStart(cells, today);
+  const due =
+    comebacks && absence !== null && program.comeback?.seen !== absence && !ceremony.ceremonyUp && !ceremony.finaleUp;
+  const [welcome, setWelcome] = useState<number | null>(null);
+  // Adjusting state while rendering (React's pattern for following a condition): it stays up until dismissed.
+  if (due && welcome === null) setWelcome(absence);
+  useEffect(() => {
+    // Seen as soon as it's shown, so another open (or a restart) never brings it back for this absence.
+    if (welcome !== null) useResetPilot.getState().markComeback(welcome);
+  }, [welcome]);
+
   const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);
   const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
@@ -131,7 +151,15 @@ export function PilotToday() {
           )}
         />
 
-        <ReflectionInvite program={program} today={today} />
+        {welcome !== null ? (
+          <WelcomeBack
+            start={welcome}
+            completeDays={cells.filter((d) => d.state === 'full').length}
+            onClose={() => setWelcome(null)}
+          />
+        ) : (
+          <ReflectionInvite program={program} today={today} />
+        )}
 
         {offer ? (
           <OfferCard
