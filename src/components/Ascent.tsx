@@ -102,14 +102,18 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
               style={[styles.marker, styles.hollow, { left: x - 3.5, top: y - 3.5, borderColor: tone.walked }]}
             />
           );
-        // A rest day (nothing was due) is walked past, not missed: a small mark in the walked tone.
+        // Every day not completed is an empty circle (ahead, or walked past on a rest day); only a completed day
+        // fills in.
         return (
           <View
             key={d.day}
             style={[
               styles.marker,
-              styles.small,
-              { left: x - 2.5, top: y - 2.5, backgroundColor: d.status === 'rest' ? tone.walked : tone.ahead },
+              styles.hollow,
+              d.status === 'rest' && styles.small,
+              d.status === 'rest'
+                ? { left: x - 2.5, top: y - 2.5, borderColor: tone.walked }
+                : { left: x - 3.5, top: y - 3.5, borderColor: tone.ahead },
             ]}
           />
         );

@@ -95,7 +95,7 @@ export function HabitTile({
   selected: boolean;
   suggested: boolean;
   reason: string | null;
-  /** Six chosen already: this one can't join until one leaves. */
+  /** The most habits chosen already: this one can't join until one leaves. */
   full: boolean;
   onPress: () => void;
 }) {
@@ -157,9 +157,17 @@ export function Stones({ count, max }: { count: number; max: number }) {
   const { c } = useTheme();
   const t = useTints();
   const colors = [t.lavender, t.peach, t.sage, t.mist, t.indigo, t.lavender];
+  // Six stones at most; past six, the number says it.
+  if (count > 6)
+    return (
+      <T v="caption" color={t.lavender.ink} style={{ fontWeight: '700' }}>
+        {count} chosen
+      </T>
+    );
+  const stones = Math.min(max, 6);
   return (
-    <View style={styles.stones} accessible accessibilityLabel={`${count} of ${max} chosen`}>
-      {Array.from({ length: max }, (_, i) => (
+    <View style={styles.stones} accessible accessibilityLabel={`${count} chosen`}>
+      {Array.from({ length: stones }, (_, i) => (
         <View
           key={i}
           style={[
