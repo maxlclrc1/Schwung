@@ -1,11 +1,8 @@
-import { dateForDay } from './dates';
-import { weekdayOfDay } from './schedule';
+import { dateForDay, weekdayOfDay } from './dates';
 
 /*
- * The Insights charts' shapes (testing builds), shared by both kinds of program: the Life Reset fills them in
- * reset/charts.ts, an existing V1/V2 program in insights.ts. Everything here is plain data from the saved days,
- * computed once per change (memoized by the screens), never per animation frame. Rules: SCHWUNG_LIFE_RESET_PROGRAM.md
- * ("Insights charts").
+ * The Insights charts' shapes, filled in by reset/charts.ts from the saved days only, computed once per change
+ * (memoized by the screens), never per animation frame. Rules: SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
  */
 
 export type Tally = { done: number; eligible: number };

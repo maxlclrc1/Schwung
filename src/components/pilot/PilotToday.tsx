@@ -8,28 +8,21 @@ import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { levelProgress, playerLevel, XP_FULL_DAY_BONUS } from '../../core/progression';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
-import type { PlanHabit } from '../../core/types';
 import { devTools } from '../../lib/flags';
 import { haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
-import { useApp } from '../../store/useApp';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
 import { SettingsButton } from '../HeaderButton';
 import { ThemeToggle } from '../ThemeToggle';
 import { Button, ProgressBar, T } from '../ui';
-import { useWorldLayer } from '../WorldLayer';
 
 /*
- * The Habits tab while the Life Reset is on (development and internal-testing builds only): its habits as the usual
- * illustrated cards, with what to do, how much, whether it's done and the week's progress. The whole-card swipe
+ * The Habits tab: the program's habits as illustrated cards, with what to do, how much, whether it's done and the week's progress. The whole-card swipe
  * completes and undoes; counters (tasks, people) and a strength session's details are small extras on the card.
  * Long-press a card (or open Insights) for details and difficulty. No timers: a swipe confirms.
  */
-
-/** The card's scene comes from the habit id (Read, Focus and Movement have their own; the others a world crop). */
-const asPlanHabit = (habitId: string): PlanHabit => ({ habitId, level: 'easy', addedOnDay: 1, levelSince: 0 });
 
 /** Re-renders when the date or the "yesterday is editable" window changes (on return to the app, and every 30 s). */
 function useResetClock() {
@@ -56,13 +49,11 @@ function useResetClock() {
 export function PilotToday() {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
-  const world = useWorldLayer();
   const program = useResetPilot((s) => s.program)!;
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = pilotToday({ program, devDayOffset: offset });
   const [swiping, setSwiping] = useState(false);
   const { yesterdayEditable } = useResetClock();
-  const hasProgram = useApp((s) => s.startedAt !== null);
 
   const xp = useMemo(() => P.pilotXp(program), [program]);
   const streak = useMemo(() => P.pilotStreak(program, today), [program, today]);
@@ -98,7 +89,7 @@ export function PilotToday() {
   const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
   return (
-    <ThemedView style={[styles.root, !world && { backgroundColor: c.bg }]}>
+    <ThemedView style={styles.root}>
       <Animated.ScrollView
         scrollEnabled={!swiping}
         directionalLockEnabled
@@ -205,16 +196,6 @@ export function PilotToday() {
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
             Swipe a card to complete it. Long-press for details and difficulty.
           </T>
-          {hasProgram ? (
-            <Button
-              label="Switch to my previous program"
-              kind="secondary"
-              onPress={() => {
-                useResetPilot.getState().setActive(false);
-                router.replace('/');
-              }}
-            />
-          ) : null}
           {__DEV__ && devTools() ? <PilotClock today={today} /> : null}
         </View>
       </Animated.ScrollView>
@@ -337,7 +318,7 @@ function PilotCard({
 
   return (
     <HabitCard
-      habit={asPlanHabit(habitId)}
+      habitId={habitId}
       done={done}
       onToggle={onToggle}
       onLongPress={onDetails}
@@ -412,7 +393,7 @@ function OfferCard({
   );
 }
 
-/** Development builds: the Life Reset's own clock (the previous program's clock is never moved). */
+/** Development builds: the program's clock (time travel). */
 function PilotClock({ today }: { today: number }) {
   const { c } = useTheme();
   const offset = useResetPilot((s) => s.devDayOffset);

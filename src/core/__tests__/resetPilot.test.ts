@@ -1,11 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
 import { habitScene, placeholderCrop } from '../../components/habitArt';
 import { dateForDay } from '../dates';
-import { reconcile, totalXp } from '../progression';
+import { totalXp } from '../progression';
 import { HELD_EXERCISE_PROGRAMMES, RESET_HABITS } from '../reset/habits';
 import * as P from '../reset/pilot';
 import { readTrack } from '../reset/tracking';
-import type { PlanHabit } from '../types';
 
 // 2026-11-02 is a Monday: weeks are Days 1–7, 8–14, 15–21, 22–28… Day 6 is a Saturday.
 const MON = '2026-11-02';
@@ -471,12 +470,5 @@ describe('saves and compatibility', () => {
     expect(P.sanitizePilotProgram({ ...p, habits: ['move_strength_session'] })).toBeNull();
     const damaged = { ...p, logs: { ...p.logs, nope: { day: 1 }, '2026-11-03': { day: 2, completed: 'x' } } };
     expect(P.sanitizePilotProgram(damaged)?.logs['2026-11-03']).toMatchObject({ completed: [], planned: [] });
-  });
-
-  it('leave V1/V2 progression as it was', () => {
-    const plan: PlanHabit[] = [{ habitId: 'mind_read', level: 'easy', addedOnDay: 1, levelSince: 0 }];
-    const r = reconcile({ plan, appliedPhase: 1, startKey: MON, logs: {}, today: 22, yesterdayEditable: false });
-    expect(r.plan[0].level).toBe('medium');
-    expect(P.levelFor(pilot(), 'mind_read', 22).phase).toBe('foundation');
   });
 });

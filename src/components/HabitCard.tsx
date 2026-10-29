@@ -11,9 +11,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { habitTitle, isCustom, LEVEL_NAME, LEVELS, shownTaskAt } from '../core/habits';
 import { swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../core/swipe';
-import type { PlanHabit } from '../core/types';
 import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { useThemeProgress } from '../theme/transition';
@@ -24,18 +22,15 @@ import { ThemedImage } from './ThemedImage';
 import { TILE_HEIGHT, TILES, type Theme } from './worldTiles';
 
 type Props = {
-  habit: PlanHabit;
+  habitId: string;
   done: boolean;
   readOnly?: boolean;
   onToggle: (habitId: string) => void;
   onLongPress?: (habitId: string) => void;
   /** A swipe has taken (true) or let go of (false) the touch: the page holds its scroll meanwhile. */
   onSwipe?: (active: boolean) => void;
-  /**
-   * For a card that isn't a plan habit (the Life Reset pilot): its own title, target, level and words. Absent for
-   * every existing card, which reads them from the plan habit as before.
-   */
-  display?: CardDisplay;
+  /** The card's title, target, level and words. */
+  display: CardDisplay;
   /** A small row under the target (weekly progress, an optional timer). Its buttons are CardButtons. */
   accessory?: ReactNode;
   /** Extra VoiceOver actions (the accessory's buttons, which aren't separately accessible). */
@@ -57,7 +52,7 @@ export type CardDisplay = {
 };
 
 /*
- * A habit as a window into the Schwung world (testing builds; the public release keeps HabitRow): the whole card is
+ * A habit as a window into the Schwung world: the whole card is
  * the habit's scene, with its name and today's target written over it.
  *
  * Completing is a swipe of the whole card: drag it to the right and it follows the finger, tilting slightly, while a
@@ -213,7 +208,17 @@ export function CardButton({ onPress, style, children }: { onPress: () => void; 
   );
 }
 
-function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, display, accessory, actions }: Props) {
+function HabitCardImpl({
+  habitId,
+  done,
+  readOnly,
+  onToggle,
+  onLongPress,
+  onSwipe,
+  display,
+  accessory,
+  actions,
+}: Props) {
   const { c, isDark } = useTheme();
   const theme: Theme = isDark ? 'dark' : 'light';
   const ink = INK[theme];
@@ -236,7 +241,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
     if (readOnly) return;
     if (done) haptic.uncheck();
     else haptic.check();
-    onToggle(habit.habitId);
+    onToggle(habitId);
   };
 
   // The card's touches, all on the responder system (so a swipe cleanly cancels a press or a long-press):
@@ -324,7 +329,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
         gesture.current.timer = setTimeout(() => {
           gesture.current.mode = 'used';
           haptic.heavy();
-          onLongPress(habit.habitId);
+          onLongPress(habitId);
         }, LONG_PRESS_MS);
       }
       return false;
@@ -398,17 +403,12 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
   const todoRow = useAnimatedStyle(() => ({ opacity: 1 - doneP.get() }));
   const badge = useAnimatedStyle(() => ({ opacity: doneP.get(), transform: [{ scale: 0.7 + 0.3 * doneP.get() }] }));
 
-  const title = display?.title ?? habitTitle(habit);
-  const target = display ? display.task : shownTaskAt(habit);
+  const title = display.title;
+  const target = display.task;
   const task = target === title ? undefined : target;
-  const levelText = display
-    ? `. ${display.levelLabel}${display.summary ? `. ${display.summary}` : ''}`
-    : isCustom(habit)
-      ? ''
-      : `. ${LEVEL_NAME[habit.level]}, level ${LEVELS.indexOf(habit.level) + 1} of 3`;
-  const levelIndex = display?.levelIndex ?? LEVELS.indexOf(habit.level);
-  const levelName = display?.levelLabel ?? LEVEL_NAME[habit.level];
-  const leveled = !!display || !isCustom(habit);
+  const levelText = `. ${display.levelLabel}${display.summary ? `. ${display.summary}` : ''}`;
+  const levelIndex = display.levelIndex;
+  const levelName = display.levelLabel;
   const block = useCardBlock();
 
   const card = (
@@ -424,46 +424,42 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
       }
       accessibilityActions={[
         { name: 'activate' },
-        ...(onLongPress
-          ? [{ name: 'longpress' }, { name: 'details', label: display ? 'Details' : 'Edit, swap or remove' }]
-          : []),
+        ...(onLongPress ? [{ name: 'longpress' }, { name: 'details', label: 'Details' }] : []),
         ...(actions ?? []).map((a) => ({ name: a.name, label: a.label })),
       ]}
       onAccessibilityAction={(e) => {
         const name = e.nativeEvent.actionName;
         if (name === 'activate') toggle();
-        else if ((name === 'longpress' || name === 'details') && onLongPress) onLongPress(habit.habitId);
+        else if ((name === 'longpress' || name === 'details') && onLongPress) onLongPress(habitId);
         else actions?.find((a) => a.name === name)?.run();
       }}
       style={[styles.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
     >
-      <Scene habitId={isCustom(habit) ? 'custom' : habit.habitId} width={width} height={height} />
+      <Scene habitId={habitId} width={width} height={height} />
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: c.accent }, washStyle]} />
       <Veil pick="veil" locations={[0.35, 0.62, 1]} style={StyleSheet.absoluteFill} />
       {/* A faint veil at the top, for the level label over the sky. */}
       <Veil pick="top" style={styles.topVeil} />
 
       {/* The level, quietly in the top-left corner, so the scene's window stays clear. */}
-      {!leveled ? null : (
-        <View
-          style={[styles.levelRow, styles.levelTop]}
-          importantForAccessibility="no-hide-descendants"
-          accessibilityElementsHidden
-        >
-          {[0, 1, 2].map((i) => (
-            <View
-              key={i}
-              style={[
-                styles.levelBar,
-                { backgroundColor: i <= levelIndex ? ink.title : ink.edge, opacity: i <= levelIndex ? 0.9 : 1 },
-              ]}
-            />
-          ))}
-          <Ink pick="target" style={styles.levelText}>
-            {levelName}
-          </Ink>
-        </View>
-      )}
+      <View
+        style={[styles.levelRow, styles.levelTop]}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden
+      >
+        {[0, 1, 2].map((i) => (
+          <View
+            key={i}
+            style={[
+              styles.levelBar,
+              { backgroundColor: i <= levelIndex ? ink.title : ink.edge, opacity: i <= levelIndex ? 0.9 : 1 },
+            ]}
+          />
+        ))}
+        <Ink pick="target" style={styles.levelText}>
+          {levelName}
+        </Ink>
+      </View>
       {/* Done: a check in the top-right corner. */}
       <Animated.View
         pointerEvents="none"
@@ -511,7 +507,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
             <View style={styles.hint}>
               <Ionicons name="chevron-forward" size={16} color={ink.target} />
               <Ink pick="target" style={styles.hintText}>
-                {readOnly ? 'Not done' : (display?.hint ?? 'Swipe right to complete')}
+                {readOnly ? 'Not done' : (display.hint ?? 'Swipe right to complete')}
               </Ink>
             </View>
             {readOnly ? null : (
@@ -524,7 +520,7 @@ function HabitCardImpl({ habit, done, readOnly, onToggle, onLongPress, onSwipe, 
             <View style={[styles.donePill, { backgroundColor: c.accent }]}>
               <Ionicons name="checkmark" size={16} color={c.onAccent} />
               <Animated.Text style={[styles.doneText, { color: c.onAccent }]} maxFontSizeMultiplier={1.3}>
-                {display?.doneText ?? 'Done for today'}
+                {display.doneText ?? 'Done for today'}
               </Animated.Text>
             </View>
             {readOnly ? null : (

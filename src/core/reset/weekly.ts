@@ -1,11 +1,9 @@
-import { dateForDay, PROGRAM_DAYS } from '../dates';
-import { weekdayOfDay } from '../schedule';
-import type { DayLog, Weekday } from '../types';
+import { dateForDay, PROGRAM_DAYS, weekdayOfDay, type Weekday } from '../dates';
+import type { DayLog } from '../types';
 import { RESET_BY_ID, type Intensity, type Phase, type Schedule } from './habits';
 
 /*
- * Flexible weekly scheduling for Life Reset habits (used only by the Life Reset pilot, in testing builds; V1/V2
- * daily and fixed-weekday scheduling in `schedule.ts` is untouched). Rules, with the reasons, are in
+ * Flexible weekly scheduling for Life Reset habits. Rules, with the reasons, are in
  * SCHWUNG_LIFE_RESET_CATALOG_NOTES.md ("Weekly scheduling rules"). In short:
  *
  * - Weeks are calendar weeks, Monday to Sunday, from the program's local date keys (never elapsed time, so DST and

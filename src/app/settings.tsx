@@ -1,70 +1,30 @@
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { File, Paths } from 'expo-file-system';
-import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { ReactNode, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { ReactNode } from 'react';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { PilotSettings } from '../components/pilot/PilotSettings';
 import { SheetHeader } from '../components/SheetHeader';
-import { TimePicker } from '../components/TimePicker';
 import { Screen, T } from '../components/ui';
-import { formatTime, PROGRAM_DAYS } from '../core/dates';
+import type { ThemePreference } from '../core/types';
 import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
-import { channel, devTools, lifeResetForNewPrograms } from '../lib/flags';
-import { requestPermission, rescheduleReminders } from '../lib/notifications';
-import { useFieldNotes } from '../store/fieldNotes';
-import { pilot } from '../store/pilotGate';
-import { currentDay, exportData, useApp } from '../store/useApp';
-import type { ThemePreference, Weekday } from '../core/types';
+import { usePreferences } from '../store/preferences';
+import { useResetPilot } from '../store/resetPilot';
 import { radius, space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 export default function Settings() {
   const { c } = useTheme();
-  const reminderTime = useApp((s) => s.reminderTime);
-  const enabled = useApp((s) => s.notificationsEnabled);
-  const setReminder = useApp((s) => s.setReminder);
-  const [editingTime, setEditingTime] = useState(false);
-
-  const apply = async (time: string, on: boolean) => {
-    let granted = on;
-    if (on) {
-      granted = await requestPermission().catch(() => false);
-      if (!granted) {
-        Alert.alert(
-          'Notifications are off',
-          `Allow notifications for ${APP_NAME} in iOS Settings to get your daily reminder.`,
-          [
-            { text: 'Not now', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => void Linking.openSettings() },
-          ],
-        );
-      }
-    }
-    setReminder(time, granted);
-    await rescheduleReminders().catch(() => {});
-  };
 
   const exportJson = async () => {
     try {
       const file = new File(Paths.cache, `${APP_NAME.toLowerCase()}-export.json`);
-      // Retired Field Notes data, if this phone has any, comes along so it's never out of reach.
-      const fn = useFieldNotes.getState();
-      const fieldNotes = fn.run || fn.archive.length ? { fieldNotes: { run: fn.run, archive: fn.archive } } : {};
-      // The Life Reset (development and internal builds) comes along too, beside any previous program.
-      const reset = pilot?.store.useResetPilot.getState().program;
+      const { program } = useResetPilot.getState();
+      const { themePreference } = usePreferences.getState();
       await file.write(
-        JSON.stringify(
-          {
-            exportedAt: new Date().toISOString(),
-            ...exportData(),
-            ...fieldNotes,
-            ...(reset ? { lifeReset: reset } : {}),
-          },
-          null,
-          2,
-        ),
+        JSON.stringify({ exportedAt: new Date().toISOString(), lifeReset: program, themePreference }, null, 2),
       );
       await Sharing.shareAsync(file.uri, {
         mimeType: 'application/json',
@@ -76,69 +36,18 @@ export default function Settings() {
     }
   };
 
-  const restart = () =>
-    Alert.alert(
-      'Restart your program?',
-      'This clears your progress, history, and plan, and starts over from the quiz. It can’t be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Restart',
-          style: 'destructive',
-          onPress: () => {
-            haptic.warning();
-            useApp.getState().restart();
-            void rescheduleReminders().catch(() => {});
-            if (router.canDismiss()) router.dismissAll();
-            router.replace('/welcome');
-          },
-        },
-      ],
-    );
-
   return (
     <Screen edges={['bottom']}>
       <SheetHeader title="Settings" />
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Development and internal builds: the program shown, the Life Reset or a previous V1/V2 program, and the
-            explicit ways to switch (store/pilotGate.ts). */}
-        {pilot && lifeResetForNewPrograms() ? <pilot.Settings Section={Section} Row={Row} /> : null}
+        <PilotSettings Section={Section} Row={Row} />
 
         <Section title="Appearance">
           <AppearancePicker />
         </Section>
 
-        <Section title="Reminder">
-          <Row label="Daily reminder">
-            <Switch
-              value={enabled}
-              onValueChange={(v) => void apply(reminderTime, v)}
-              trackColor={{ true: c.accent, false: c.surfaceHigh }}
-              thumbColor="#FFFFFF"
-              ios_backgroundColor={c.surfaceHigh}
-            />
-          </Row>
-          {enabled ? (
-            <Row label="Time" onPress={() => setEditingTime((v) => !v)}>
-              <T v="bodyStrong" color={c.accentInk}>
-                {formatTime(reminderTime)}
-              </T>
-            </Row>
-          ) : null}
-          {enabled && editingTime ? (
-            <View style={{ alignItems: 'center', paddingBottom: space.md }}>
-              <TimePicker value={reminderTime} onChange={(t) => void apply(t, true)} />
-            </View>
-          ) : null}
-        </Section>
-
         <Section title="Your data">
           <Row label="Export my data" icon="share-outline" onPress={exportJson} />
-          {/* The public release's restart (V1 starts over from the quiz). Where new programs are Life Reset programs,
-              a previous program is never wiped from here: the Life Reset has its own "End" under Your program. */}
-          {pilot && lifeResetForNewPrograms() ? null : (
-            <Row label="Restart program" icon="refresh" destructive onPress={restart} />
-          )}
         </Section>
 
         <Section title="About">
@@ -146,64 +55,12 @@ export default function Settings() {
           <Row label="Contact" icon="mail-outline" onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
         </Section>
 
-        {/* The literal __DEV__ lets release bundles drop the developer tools entirely. */}
-        {__DEV__ && devTools() ? <DevTools /> : null}
-
         <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
           {APP_NAME} {Constants.expoConfig?.version ?? ''}
           {'\n'}Free. No account. No tracking. Everything stays on this phone.
         </T>
       </ScrollView>
     </Screen>
-  );
-}
-
-/** Development channel only (lib/flags): time travel to test progression, reminders, and ceremonies. */
-function DevTools() {
-  const offset = useApp((s) => s.devDayOffset);
-  const setOffset = useApp((s) => s.setDevDayOffset);
-  const startedAt = useApp((s) => s.startedAt);
-  const day = currentDay({ startedAt, devDayOffset: offset });
-  const programVersion = useApp((s) => s.programVersion);
-  const jumpTo = (target: number) => setOffset(offset + (target - day));
-  const addTestSession = (days: Weekday[]) => {
-    const id = useApp.getState().addDevScheduledHabit(days);
-    if (id) router.push(`/habit/${id}`);
-  };
-  const shift = (n: number) => setOffset(offset + n);
-
-  return (
-    <Section title={`Developer · Day ${day} (offset ${offset >= 0 ? '+' : ''}${offset})`}>
-      <View style={styles.devRow}>
-        <DevButton label="−1 day" onPress={() => shift(-1)} />
-        <DevButton label="+1 day" onPress={() => shift(1)} />
-        <DevButton label="+3 days" onPress={() => shift(3)} />
-        <DevButton label="+7 days" onPress={() => shift(7)} />
-      </View>
-      <View style={styles.devRow}>
-        <DevButton label="Day 7" onPress={() => jumpTo(7)} />
-        <DevButton label="Day 22" onPress={() => jumpTo(22)} />
-        <DevButton label="Day 66" onPress={() => jumpTo(PROGRAM_DAYS)} />
-        <DevButton label="Day 67" onPress={() => jumpTo(PROGRAM_DAYS + 1)} />
-      </View>
-      <View style={styles.devRow}>
-        <DevButton label="Reset clock" onPress={() => setOffset(0)} />
-        <DevButton label="Replay ceremonies" onPress={() => useApp.setState({ seenCeremonies: [] })} />
-      </View>
-      {startedAt ? (
-        <View style={styles.devRow}>
-          {/* Synthetic scheduled habits for testing the scheduler: not recommendations, not exercises. Each opens
-              straight away so its weekdays can be confirmed or changed (owner decision 6). */}
-          <DevButton label="+ Test session Mon/Wed/Fri" onPress={() => addTestSession([1, 3, 5])} />
-          <DevButton label="+ Test session Tue/Thu" onPress={() => addTestSession([2, 4])} />
-          <DevButton label="Exercise preview" onPress={() => router.push('/dev/exercise')} />
-        </View>
-      ) : null}
-      <T v="caption">
-        Channel: {channel()}. This program: V{programVersion}. New programs use V2; a running program keeps its own
-        version.
-      </T>
-    </Section>
   );
 }
 
@@ -216,7 +73,7 @@ const APPEARANCE: { value: ThemePreference; label: string; icon: keyof typeof Io
 function AppearancePicker() {
   const { c } = useTheme();
   const preference = useThemePreference();
-  const setThemePreference = useApp((s) => s.setThemePreference);
+  const setThemePreference = usePreferences((s) => s.setThemePreference);
   return (
     <View style={styles.segment} accessibilityRole="radiogroup">
       {APPEARANCE.map((o) => {
@@ -243,15 +100,6 @@ function AppearancePicker() {
         );
       })}
     </View>
-  );
-}
-
-function DevButton({ label, onPress }: { label: string; onPress: () => void }) {
-  const { c } = useTheme();
-  return (
-    <Pressable onPress={onPress} style={[styles.devButton, { backgroundColor: c.surfaceHigh }]}>
-      <T v="caption">{label}</T>
-    </Pressable>
   );
 }
 
@@ -315,6 +163,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.xs,
   },
-  devRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingVertical: space.sm },
-  devButton: { paddingHorizontal: space.md, paddingVertical: space.sm, borderRadius: radius.sm },
 });

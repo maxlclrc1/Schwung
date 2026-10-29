@@ -1,5 +1,5 @@
 /*
- * Swiping between the tabs (testing builds; src/components/PagerTabs.tsx): where a released page swipe lands, and how
+ * Swiping between the tabs (src/components/PagerTabs.tsx): where a released page swipe lands, and how
  * far a page moves for a drag. Both run on the UI thread, in the pager's gesture (worklets). Distances are in pt, velocities in pt per ms; dx < 0 is a swipe to the left, which
  * goes to the next tab.
  */

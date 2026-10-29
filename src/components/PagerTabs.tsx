@@ -57,7 +57,7 @@ import { worldCamera } from './WorldLayer';
 type Options = {
   title?: string;
   tabBarIcon?: (p: { focused: boolean; color: ColorValue; size: number }) => ReactNode;
-  /** null hides the tab (not used in testing builds, where all three are shown). */
+  /** null hides the tab (unused: all three are shown). */
   href?: null;
 };
 

@@ -1,8 +1,15 @@
 import { dateForDay, PROGRAM_DAYS } from '../dates';
 import { dayQualifies, isFullDay, totalXp } from '../progression';
 import type { DayLog } from '../types';
-import { isTeen } from '../v2/library';
-import type { ActiveDays, AgeBand, PhoneHours, Precaution, ProfileV2, Wake } from '../v2/types';
+import {
+  isTeen,
+  type ActiveDays,
+  type AgeBand,
+  type PhoneHours,
+  type Precaution,
+  type Profile,
+  type Wake,
+} from './profile';
 import {
   INTENSITIES,
   PHASES,
@@ -67,7 +74,7 @@ import {
 } from './weekly';
 
 /*
- * The Life Reset program (development and internal-testing builds only; see store/resetPilot.ts). It began as a
+ * The Life Reset program, the app's one program (saved by store/resetPilot.ts). It began as a
  * three-habit pilot, kept its save, and now runs all 11 catalog habits. This module is its rules, pure: it joins the
  * catalog, weekly scheduling, tracking and readiness engines and adds only what a running program needs. Every
  * program-specific rule (day lists, XP, streak, no ceremonies, the Insights numbers) is documented in
@@ -135,22 +142,14 @@ export type PilotProgram = {
 
 // --- Setup ---
 
-/**
- * The profile the existing eligibility rules read, from the setup's answers. Fields no rule reads for these habits
- * hold neutral values (never shown or saved as answers).
- */
-export function pilotProfile(a: PilotAnswers): ProfileV2 {
+/** The answers the eligibility rules read (reset/profile.ts), from the setup's. */
+export function pilotProfile(a: PilotAnswers): Profile {
   return {
     age: a.age,
-    goal: 'focus',
-    sleepHours: '7_8',
-    sleepTrouble: 'rarely',
-    activeDays: a.activeDays ?? '0',
-    produce: '3_4',
-    phone: a.phone ?? '2_4',
-    routines: [],
     precautions: a.precautions,
+    ...(a.phone ? { phone: a.phone } : {}),
     ...(a.wake ? { wake: a.wake } : {}),
+    ...(a.activeDays ? { activeDays: a.activeDays } : {}),
   };
 }
 

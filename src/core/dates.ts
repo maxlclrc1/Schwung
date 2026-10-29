@@ -51,3 +51,15 @@ export function formatTime(t: string): string {
   const d = new Date(2000, 0, 1, hour, minute);
   return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
+
+/** A day of the week: 0 Sunday … 6 Saturday (as Date#getDay). */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+export function weekdayOfKey(key: string): Weekday {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay() as Weekday;
+}
+
+export function weekdayOfDay(startKey: string, day: number): Weekday {
+  return weekdayOfKey(dateForDay(startKey, day));
+}

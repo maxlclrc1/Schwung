@@ -1,112 +1,58 @@
-# Schwung — The Life Reset Program (development and internal builds)
+# Schwung — The Life Reset Program
 
-**Stage 7:** the Life Reset is the default Schwung experience in development and internal builds: every new
-program is a Life Reset, with all 11 illustrated habits, three tabs (Habits, Journey, Insights) and no timers. An
-existing V1/V2 program is kept exactly as it was, and shown until its owner chooses to switch. The public release
-(V1) is unchanged, and its bundle doesn't contain the Life Reset.
+**Stage 8:** the Life Reset is the whole app, in every build (development, internal and the App Store release).
+The earlier V1/V2 program (quiz, plan, reminders, ceremonies), Field Notes and the switching between programs were
+removed from the app; they stay in the git history. Every program has the 11 illustrated habits, three tabs (Habits,
+Journey, Insights) and no timers.
 
 Supersedes `SCHWUNG_LIFE_RESET_PILOT.md` (the three-habit pilot this grew from).
 
 ## Where it lives
 
-| Part                   | File                                                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------------------------------- |
-| Rules (pure)           | `src/core/reset/pilot.ts` (catalog, weekly, tracking, readiness and measures joined)                  |
-| Insights for V1/V2     | `src/core/insights.ts`                                                                                |
-| Saved state            | `src/store/resetPilot.ts` (its own key)                                                               |
-| The only door in       | `src/store/pilotGate.ts`                                                                              |
-| Screens                | `src/components/pilot/` (Habits, Setup, Habit details, Insights, Settings section, Journey data)      |
-| Tabs                   | `src/app/(tabs)/today.tsx`, `progress.tsx` (Journey), `insights.tsx`                                  |
-| Shared Insights pieces | `src/components/Insights.tsx`                                                                         |
-| Journey's data         | `src/components/journeySource.ts`                                                                     |
-| Tests                  | `src/core/__tests__/resetPilot.test.ts`, `insights.test.ts`, `src/store/__tests__/resetPilot.test.ts` |
+| Part                 | File                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| Rules (pure)         | `src/core/reset/pilot.ts` (catalog, weekly, tracking, readiness and measures joined)              |
+| The person's answers | `src/core/reset/profile.ts` (age, precautions, phone time, wake time, active days)                |
+| Insights charts      | `src/core/charts.ts`, `src/core/reset/charts.ts`                                                  |
+| Saved state          | `src/store/resetPilot.ts` (the program), `src/store/preferences.ts` (the appearance)              |
+| Screens              | `src/components/pilot/` (Habits, Setup, Habit details, Insights, Settings section)                |
+| Routes               | `src/app/index.tsx`, `welcome.tsx`, `life-reset/setup.tsx`, `life-reset/[id].tsx`, `settings.tsx` |
+| Tabs                 | `src/app/(tabs)/today.tsx` (Habits), `progress.tsx` (Journey), `insights.tsx`                     |
+| Journey's data       | `src/components/journeySource.ts`                                                                 |
+| Tests                | `src/core/__tests__/reset*.test.ts`, `insightCharts.test.ts`, `src/store/__tests__/*.test.ts`     |
 
 The code keeps the pilot's names (`pilot.ts`, `PilotProgram`, the `schwung-reset-pilot` key), so a pilot program
 carries on without any migration.
 
-## Isolation and saves
+## One app, one program
 
-- **Testing builds only.** `store/pilotGate.ts` loads the Life Reset behind the literal check
-  `__DEV__ || process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal'`, which a production bundle folds to false.
-  - **Production bundle:** checked on a production web export, it has none of the Life Reset's text, screens or
-    save key.
-  - **Production app:** checked in a browser, it shows the V1 Today screen with the mountain, the rows and no tabs,
-    exactly as before.
-- **Its own save.**
-  - **Key:** `schwung-reset-pilot` (`-internal` in Expo Go's internal channel), version 1 (`v: 1` per program).
-  - **Separate:** it never reads or writes the V1/V2 program's `schwung-state` (tested on disk, and checked in a
-    browser).
-  - **No conversions:** no program is converted or migrated.
-- **Pilot programs carry on.** A three-habit pilot save loads unchanged, including its saved timer data, which is
-  kept but never shown. Tested with a real pilot-shaped save, and checked in a browser.
-- **Damaged saves.** A damaged program is dropped, never trusted.
-- **Switching programs:** see "The default experience" below. Logs, XP and streaks never mix.
-
-## The default experience (development and internal builds)
-
-**New installation, or no program at all:** the app opens on the start screen (the mountain, "Get your momentum
-back."). "Start my reset" goes straight into the Life Reset set-up, which offers only the 11 Life Reset habits,
-with their age, eligibility and health-precaution rules. "Begin Day 1" starts the program and opens Habits; Journey
-and Insights show it. Nothing needs activating in Settings.
-
-- **Retired for new programs:** the V1/V2 onboarding (quiz, plan, time, start, reveal) and its recommendations,
-  including habits such as Phone-Free Wind-Down. Their screens send anyone who reaches them back to the start, and
-  "Pick up where you left off" (a half-finished V1/V2 onboarding) isn't offered. Their definitions stay, for
-  existing programs.
-- **Interrupted set-up:** nothing is saved until "Begin Day 1"; reopening the app starts set-up again from the
-  start screen.
-- **No duplicates:** with a Life Reset saved, set-up never runs again (its route sends you home), and the store
-  refuses to start a second one.
-
-**Which program is shown** — one rule (`lifeResetShown`, `store/resetPilot.ts`), followed by Habits, Journey,
-Insights, Settings and the start screen:
-
-| Life Reset saved | Chosen (`active`) | V1/V2 program | Shown                             |
-| ---------------- | ----------------- | ------------- | --------------------------------- |
-| no               | –                 | no            | start screen → set-up             |
-| no               | –                 | yes           | the V1/V2 program                 |
-| yes              | yes               | either        | the Life Reset                    |
-| yes              | no                | no            | the Life Reset (only one)         |
-| yes              | no                | yes           | the V1/V2 program (switched back) |
-
-**Existing V1/V2 program:** it stays the one shown, untouched. Its Habits screen has a card, "Start the Life
-Reset", which says the program stays saved with all its history and can be switched back to in Settings ("Not now"
-puts the card away, remembered). Settings → **Your program** offers the same, says which program is on, and:
-
-- **On the Life Reset:** "Switch to my previous program" (also at the foot of Habits) and "End the Life Reset"
-  (confirmed; deletes only the Life Reset).
-- **On a previous program with a Life Reset saved:** "Switch to my Life Reset" (also on the Habits card).
-- **Never wiped from here:** the V1 "Restart program" row is hidden where the Life Reset is the default, so a
-  previous program can't be deleted by accident.
-
-**The choice persists:** it's `active` in the Life Reset's own save (`schwung-reset-pilot`), so it holds across
-restarts; switching only flips it. Neither program's data is read or written by a switch.
-
-**Older pilot saves** load as the Life Reset unchanged (progress, readiness, timer and tracking details). One saved
-before this change keeps its choice: chosen, it's shown; not chosen, it's shown only if there's no V1/V2 program.
-
-**Wording:** nothing a person reads says "pilot" or "testing" (tested). Routes are `/life-reset/setup` and
-`/life-reset/[id]`. The code keeps the pilot's names (`pilot.ts`, `PilotProgram`, the save key) so saves carry on.
-
-### Releasing the Life Reset to production (a future, explicit decision)
-
-Production stays on V1: `LIFE_RESET_IN_PRODUCTION` in `src/lib/flags.ts` is `false`. Making the Life Reset the
-public default takes, together:
-
-1. `LIFE_RESET_IN_PRODUCTION = true` (this turns on `lifeResetForNewPrograms` and `resetPilotAvailable`);
-2. letting `store/pilotGate.ts` load it in production (its literal `__DEV__ || … === 'internal'` check), so the
-   Life Reset's code is in the public bundle;
-3. `tabs()` in `src/lib/flags.ts` for the three tabs and the world (the release keeps Today alone now);
-4. a release review of the public bundle, existing V1 users (they keep V1, with the card), and the tests in
-   `src/store/__tests__/channel.test.ts` and `resetPilot.test.ts` that pin today's production behaviour.
-
-Held exercise-instruction programmes stay held either way: they aren't Life Reset habits, and set-up refuses
-anything outside the 11 (tested).
+- **Opening:** with a program, the app opens on Habits; without one (a new install, or after "End the Life
+  Reset"), on the start screen, whose "Start my reset" leads into set-up. Nothing needs activating.
+- **One program at a time:** with one saved, set-up never runs again (its route sends you home) and the store
+  refuses to start a second. Set-up saves nothing until "Begin Day 1", so an interrupted set-up starts again.
+- **Ending:** Settings → Your program → "End the Life Reset" (confirmed) deletes it; the start screen follows.
+- **Saves:**
+  - **The program:** `schwung-reset-pilot` (`-internal` in Expo Go's internal channel), version 1 (`v: 1` per
+    program). An older pilot save loads unchanged, its saved timer and tracking data kept; fields only the
+    earlier switching used (`active`, `inviteHidden`) are ignored. A damaged program is dropped, never trusted.
+  - **The appearance:** `schwung-preferences`, on its own.
+  - **Earlier saves** (`schwung-state`, `schwung-fieldnotes`) are never read, written or deleted; the app simply
+    doesn't use them.
+- **Only the 11 habits:** set-up offers the 11 with their age, eligibility and health-precaution rules, and the
+  store refuses anything else (Phone-Free Wind-Down and the other retired habits, and the held exercise
+  programmes, tested).
+- **Eligibility rules** that came from the earlier habit library now live in the catalog (`resetExclusion`), carried
+  over unchanged: Daily Movement (walking difficult; heart or pregnancy advice), Sleep Routine (wake time that
+  varies or shifts), Less Scrolling (under 2 hours of phone use).
+- **Removed with the old program:** reminders and notifications, the date picker and the share image (their
+  native packages too: `expo-notifications`, `@react-native-community/datetimepicker`, `react-native-view-shot`),
+  ceremonies, the V1 Today mountain image, the old restart and developer tools. The Life Reset's developer clock
+  stays (Habits screen, development builds).
+- **Wording:** nothing a person reads says "pilot", "testing", V1 or V2 (tested).
 
 ## Setup (stepped, about a minute)
 
-1. **About you:** age (under 16 is refused) and the existing precautions question (None, or Skip = unknown).
-   Prefilled from the program's V2 profile when there is one.
+1. **About you:** age (under 16 is refused) and the precautions question (None, or Skip = unknown).
 2. **Habits:** all 11, each with a line describing it.
    - **Unavailable habits:** shown disabled with the reason, from the existing eligibility rules.
    - **Limit:** up to 6 (the existing limit).
@@ -176,7 +122,7 @@ No projects, journals, missions or check-ins.
 
 ## Rules for XP, days and streaks
 
-Life Reset rules, unchanged from the pilot and tested; V1/V2 rules are untouched.
+Life Reset rules, unchanged from the pilot and tested.
 
 - **Completion** is only `log.completed`. Swipe, check button and counter all use the same idempotent completion,
   so XP is never awarded twice.
@@ -188,13 +134,13 @@ Life Reset rules, unchanged from the pilot and tested; V1/V2 rules are untouched
 
 ## Insights (the third tab, at the lakeside camp)
 
-Insights shows the program on screen (Life Reset or V1/V2), from its saved days only.
+Insights shows the program's numbers, from its saved days only.
 
 | Number          | How it's counted                                                                                                                   |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | **Consistency** | Done ÷ eligible opportunities so far (rules below)                                                                                 |
 | **Habits done** | Every completed habit action on record (each habit once a day)                                                                     |
-| **Day streak**  | As above (V1/V2: the existing streak)                                                                                              |
+| **Day streak**  | As above                                                                                                                           |
 | **Days**        | Today's day of 66                                                                                                                  |
 | **This week**   | From Monday: each daily-habit day up to today (today included, still possible), plus each weekly habit's goal; done is what's done |
 
@@ -202,7 +148,6 @@ Insights shows the program on screen (Life Reset or V1/V2), from its saved days 
 
 - **Daily habits:** each day from Day 1 to yesterday is one; today counts only once it's done.
 - **Weekly habits:** each finished week contributes its goal; the current week counts only what's already credited.
-- **V1/V2:** each due day since the habit joined, and today once done. Rest days of scheduled habits never count.
 
 **Per habit:** a compact bar (its consistency), this week ("2 of 4") and, for a weekly habit, how many finished
 weeks met their goal. Tap a habit for:
@@ -215,7 +160,7 @@ weeks met their goal. Tap a habit for:
 ### Insights charts
 
 Plain views, no chart library (`components/InsightCharts.tsx`); the numbers are pure functions with tests
-(`core/charts.ts`, `core/reset/charts.ts`, and `core/insights.ts` for V1/V2).
+(`core/charts.ts`, `core/reset/charts.ts`).
 
 - **Weekly consistency:** one bar per program week (Monday to Sunday, so the first and last can be short).
   - **Value:** done ÷ eligible with exactly the overall consistency's opportunities, added up week by week; the
@@ -260,27 +205,14 @@ self-reported, never affecting a day or a streak.
 - **The world:** it stays still while the page scrolls, and is placed so the painting fills the page and its edge
   never shows.
 
-No reflection or journaling was added: nothing optional of that kind could reuse saved data without bringing back
-a Field Notes-like program.
+No reflection or journaling was added.
 
 ## Journey
 
-The Journey tab and its 66-day calendar show the program on screen (`journeySource.ts`). The mountain, trail and
-alignment are unchanged.
+The Journey tab and its 66-day calendar show the program (`journeySource.ts`):
 
-- **Life Reset:**
-  - its own Day 1–66 position, logs and stats (days done, streak, best, with rest days neutral);
-  - a day with nothing due shows as a **rest** day: a small walked mark and a bordered calendar cell, never "missed".
-- **V1/V2:** exactly as before.
-
-## Field Notes, retired
-
-- **Tab:** Insights took Field Notes' tab and its lakeside place in the panorama, unchanged in both themes.
-- **Gone from the app:** Field Notes' screens, its welcome/Settings entries and its reminders.
-  `fieldNotesAvailable()` is false in every build.
-- **Data kept:**
-  - **Saved data** (`schwung-fieldnotes`): kept exactly as it was, loaded and never deleted (tested).
-  - **Export:** it's included in **Export my data** when present, beside the program and the Life Reset.
+- its Day 1–66 position, logs and stats (days done, streak, best, with rest days neutral);
+- a day with nothing due shows as a **rest** day: a small walked mark and a bordered calendar cell, never "missed".
 
 ## Performance: what was found, what changed, what needs an iPhone
 
@@ -333,9 +265,8 @@ alignment are unchanged.
   - the stack's modals (Settings, a habit's details) sit above the tabs and get no tab swipes.
 - **Reduce Motion:** nothing follows the finger; a swipe or a tap changes tab at once.
 - **Trade-offs:**
-  - react-native-gesture-handler (~3.3.0, the SDK 58 version, also in Expo Go) is a new native dependency: a new
-    development or internal build is needed. The public release's JavaScript doesn't use it (Today alone, js-tabs,
-    as before), but its next native build will contain the module.
+  - react-native-gesture-handler (~3.3.0, the SDK 58 version, also in Expo Go) is a native dependency: a new
+    development or internal build was needed when it was added.
   - The tab bar is the navigator's own (it looks like the js-tabs bar it replaces).
   - When the page lands, the navigator's re-render still happens on the JS thread (about 100 ms at 6× slowdown in
     the browser), but after the slide, not during it.
@@ -404,60 +335,43 @@ device.**
 
 ## Testing
 
-**Automated:** 666 tests in 40 suites, all passing; typecheck, lint and formatting are clean.
+**Automated:** 290 tests in 19 suites, all passing; typecheck, lint and formatting are clean.
 
-- **All 11 habits:** catalog order and ids, targets, frequencies, art, and the 16–17 Focus blocks.
+- **All 11 habits:** catalog order and ids, targets, frequencies, art in both themes, and the 16–17 Focus blocks.
 - **Setup:** only the needed baselines, kept answers, exclusions (phone time, wake time, precautions, age, joint pain),
-  the 6-habit limit, suggestions and the time check.
+  the 6-habit limit, suggestions and the time check; only the 11 habits, retired ones refused.
 - **Completion:** completion and undo with no double XP; counters (Get It Done, Stay Connected); Social Confidence
   skips; strength sessions with details, edits and undo; optional minutes.
+- **Day rules:** the 80% rule (4 of 5 counts), full days, XP and levels.
 - **Adherence:** daily lists, weekly rest days, workdays at weekends, and streaks through rest days.
 - **Readiness:** the Day 22 offer, a weekly offer from next Monday, the decline cooldown, time and baseline limits,
   and "too hard".
-- **Insights:** the numbers against hand-computed saved days, for the Life Reset and for V1/V2; the Screen Time check
-  kept apart from the days.
-- **Insights charts:** weekly tallies that add up to the overall consistency; finished, current, unrecorded and empty
-  weeks; short first weeks; heatmap dates, weekdays and layout; full, partial, missed, skipped, rest, unrecorded,
-  today and future days; the habit breakdown by quota; records (no minutes); empty states; the inspected day's
-  words; V1/V2 the same way.
-- **Pager:** the layout uses the UI-thread pager in testing builds only, and its gesture rules (worklets, the
-  modal/keyboard switch, card blocking).
-- **Journey:** rest days for the Life Reset; V1/V2 unchanged.
-- **Persistence:** a restart keeps progress, counters, details, pending changes and the Screen Time check; yesterday
-  can be corrected only until noon.
-- **Saves:** separate keys; the program's save untouched; a pilot save loads with its timer data kept; damaged saves
-  are dropped.
-- **Field Notes:** retired in every build with no screens or entries, and its data still loads unchanged.
-- **Isolation:** production refuses everything; nothing reaches the Life Reset except through the gate; the tab order
-  is Habits, Journey, Insights.
-- **Default experience:** new programs are Life Reset programs in development and internal builds only; the
-  "which program is shown" rule in every case; switching back and forth leaves both programs untouched; no second
-  Life Reset; only the 11 habits (Phone-Free Wind-Down and other retired habits refused); an older pilot save kept
-  with its tracking data; "Not now" remembered; the start screen, Settings and the retired V1/V2 screens; no
-  "pilot" or "testing" in visible text.
+- **Insights and charts:** the numbers against hand-computed saved days; weekly tallies adding up to the overall
+  consistency; finished, current, unrecorded and empty weeks; heatmap dates and day states; the habit breakdown;
+  records (no minutes); empty states.
+- **The program and its saves:** one at a time (no second program); start, run and end; a restart keeps progress,
+  counters, details, pending changes and the Screen Time check; yesterday correctable only until noon; an older
+  pilot save loads with its tracking data; damaged saves dropped; the appearance saved apart and kept across
+  restarts and an ended program.
+- **The app:** exactly its ten routes; where it opens; the three tabs and the pager's gesture rules; Settings (no
+  restart, reminder or V1 developer tools); no earlier-program, switching or test wording anywhere a person reads;
+  no developer clock outside development builds.
 
-**Browser** (internal and production web exports):
+**Browser** (internal and production web exports, iPhone-sized; both builds behave the same):
 
-- **Setup and the Habits screen:** the full setup with five habits and baseline answers; Day 1 with swipe
-  completion, the counter and the art.
-- **Tabs:** Journey (the Life Reset's own day), Insights with its charts (dark and light, a 20-day history with gaps,
-  a skipped day and an explicit non-completion, and a new program), and tab swipes both ways (with the swipe
-  benchmark).
-- **Gestures and theme:** card-swipe priority, the theme switch, and Reduce Motion.
-- **Saves and switching:** a pilot save loading next to an existing V2 program, and switching to the previous
-  program (Habits, Journey and Insights follow it, both saves untouched).
-- **Production:** the build unchanged.
-- **Default experience** (internal web export): a new installation through the start screen and set-up to all three
-  tabs (11 habits offered, none retired); set-up interrupted midway (nothing saved, starts again); set-up reopened
-  and the old V2 quiz URL (both send you home, no second program); restarts; an existing V1 program (shown, its
-  card, the switch, Insights following each program, back and forth twice, restarts, both saves byte-for-byte
-  unchanged, "Not now" remembered); older pilot saves, chosen and not; production (V1 quiz, Life Reset routes
-  closed, none of its text in the bundle).
+- **A new install:** opens on the start screen → set-up (11 habits, none retired) → Habits, Journey and Insights
+  with its charts; set-up interrupted midway saves nothing and starts again; set-up reopened sends you home, with
+  no second program; a restart keeps the program; with no program, Habits sends you to the start screen.
+- **Saves:** an old V1 save on the phone is ignored and left byte-for-byte as it was; an older pilot save with the
+  switching fields opens as the program; the appearance saves on its own key.
+- **Settings:** Your program (day, End the Life Reset), Appearance, Your data, About; nothing else.
+- **Unchanged:** three-tab swipes both ways, card-swipe priority, 30 quick swipes, the theme switch, light and
+  dark cards for all 11 habits, and the Insights charts.
 
 ## Limitations and open questions
 
 1. **Ceremonies:** none for the Life Reset yet (Day 1/7/21/44/66), as asked.
-2. **Reminders:** none for the Life Reset; the previous program's reminders continue.
+2. **Reminders:** none (the earlier program's reminders were removed with it).
 3. **Workdays:** Get It Done uses Monday to Friday; choosing workdays isn't offered yet.
 4. **Social Confidence:** the card suggests one step a day, and any step from the list counts, but there's no "swap
    to another suggestion" button.

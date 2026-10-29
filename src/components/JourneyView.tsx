@@ -30,7 +30,6 @@ export function JourneyView({
 }) {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
-  // The shown program's days: the Life Reset's while it's on (testing builds), otherwise the program's.
   const source = useJourneySource();
   const { logs, start, today } = source;
   const stats = useMemo(

@@ -1,4 +1,4 @@
-import { TEEN_FOCUS_MAX_MIN } from '../v2/library';
+import { TEEN_FOCUS_MAX_MIN } from './profile';
 import { RESET_BY_ID, type Target } from './habits';
 
 /*

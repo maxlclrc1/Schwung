@@ -9,10 +9,8 @@ import {
   type WeekPoint,
 } from '../charts';
 import { dateForDay, PROGRAM_DAYS } from '../dates';
-import { programCells, programRecords, programTally, programTrend } from '../insights';
 import * as C from '../reset/charts';
 import * as P from '../reset/pilot';
-import type { DayLog, PlanHabit } from '../types';
 
 // 2026-11-02 is a Monday: weeks are Days 1–7, 8–14, 15–21… Day 6 is a Saturday. 2026-11-07 is a Saturday.
 const MON = '2026-11-02';
@@ -207,51 +205,6 @@ describe('the best week', () => {
     expect(bestWeek([w(1, 0, 7, 'unrecorded')])).toBeNull();
     expect(bestWeek([{ ...w(1, 2, 2), days: 2 }, w(2, 6, 10)])?.week).toBe(2);
     expect(bestWeek([{ ...w(1, 2, 2), days: 2 }])).toBeNull();
-  });
-});
-
-describe('charts for an existing V1/V2 program', () => {
-  const A: PlanHabit = { habitId: 'mind_read', level: 'easy', addedOnDay: 1, levelSince: 0 };
-  const B: PlanHabit = { habitId: 'water', level: 'easy', addedOnDay: 1, levelSince: 0 };
-  const logs: Record<string, DayLog> = {};
-  const put = (day: number, completed: string[]) => {
-    const date = dateForDay(MON, day);
-    logs[date] = { day, date, completed, planned: ['mind_read', 'water'] };
-  };
-  put(1, ['mind_read', 'water']);
-  put(2, ['mind_read']);
-  put(3, []);
-  put(8, ['water']);
-
-  it('adds up to the same opportunities as the overall consistency', () => {
-    const t = programTrend([A, B], logs, MON, 9);
-    expect(t.map((x) => [x.week, x.done, x.eligible, x.state])).toEqual([
-      [1, 3, 14, 'closed'],
-      [2, 1, 2, 'current'],
-    ]);
-    expect({ done: t[0].done + t[1].done, eligible: t[0].eligible + t[1].eligible }).toEqual(
-      programTally([A, B], logs, MON, 9),
-    );
-  });
-
-  it('marks each day full, partial, missed, unrecorded, today or future', () => {
-    expect(states(programCells([A, B], logs, MON, 9), [1, 2, 3, 4, 9, 10])).toEqual([
-      'full',
-      'partial',
-      'missed',
-      'unrecorded',
-      'today',
-      'future',
-    ]);
-  });
-
-  it('keeps its records to what was done', () => {
-    expect(programRecords([A, B], logs, MON, 9)).toMatchObject({
-      total: 4,
-      readingDays: 2,
-      strengthSessions: null,
-      bestWeek: { week: 1, done: 3, eligible: 14 },
-    });
   });
 });
 

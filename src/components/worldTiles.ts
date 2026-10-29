@@ -23,3 +23,6 @@ export const TILES: Record<Theme, Record<TileName, Tile>> = {
     fieldnotes: { x: 2800, width: 1296, source: require('../../assets/world/pano-light-fieldnotes.webp') },
   },
 };
+
+/** The panorama row at the top of the lakeside band (Insights' camp and lake; the Journey painting's is row 800). */
+export const LAKESIDE_BAND_TOP = 1300;

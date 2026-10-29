@@ -3,53 +3,28 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useSyncExternalStore } from 'react';
-import { Appearance, AppState } from 'react-native';
+import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { rescheduleReminders } from '../lib/notifications';
-import { useClock } from '../lib/useClock';
-import { useFieldNotes } from '../store/fieldNotes';
-import { onPilotHydrated, pilotHydrated } from '../store/pilotGate';
-import { useApp } from '../store/useApp';
+import { usePreferences } from '../store/preferences';
+import { useResetPilot } from '../store/resetPilot';
 import { useTheme, useThemePreference } from '../theme';
 import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Every save (Schwung's, retired Field Notes' and the Life Reset's) is loaded before anything is shown.
+// Both saves (the preferences and the program) are loaded before anything is shown.
 const subscribeHydration = (cb: () => void) => {
-  const a = useApp.persist.onFinishHydration(cb);
-  const b = useFieldNotes.persist.onFinishHydration(cb);
-  const c = onPilotHydrated(cb);
+  const a = usePreferences.persist.onFinishHydration(cb);
+  const b = useResetPilot.persist.onFinishHydration(cb);
   return () => {
     a();
     b();
-    c();
   };
 };
-const isHydrated = () => useApp.persist.hasHydrated() && useFieldNotes.persist.hasHydrated() && pilotHydrated();
+const isHydrated = () => usePreferences.persist.hasHydrated() && useResetPilot.persist.hasHydrated();
 
 function useHydrated() {
   return useSyncExternalStore(subscribeHydration, isHydrated);
-}
-
-/** Keeps levels and reminders in step with the calendar. */
-function Housekeeping() {
-  const { todayKey, yesterdayEditable } = useClock();
-  const startedAt = useApp((s) => s.startedAt);
-
-  useEffect(() => {
-    if (startedAt) useApp.getState().reconcileNow(yesterdayEditable);
-    if (startedAt) void rescheduleReminders().catch(() => {});
-  }, [startedAt, todayKey, yesterdayEditable]);
-
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', (s) => {
-      if (s === 'active') void rescheduleReminders().catch(() => {});
-    });
-    return () => sub.remove();
-  }, []);
-
-  return null;
 }
 
 /**
@@ -84,7 +59,6 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeTransitionProvider>
         <StatusBar style={isDark ? 'light' : 'dark'} />
-        <Housekeeping />
         <NativeAppearance />
         <Stack
           screenOptions={{
@@ -96,31 +70,11 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="welcome" />
-          <Stack.Screen name="quiz" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="start" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="reveal" options={{ animation: 'slide_from_right' }} />
-          {/* Habit Science V2 onboarding: development preview only (lib/flags). */}
-          <Stack.Screen name="v2/quiz" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="v2/time" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="v2/plan" options={{ animation: 'slide_from_right' }} />
-          {/* The program has started by now; there's no going back into onboarding. */}
-          <Stack.Screen name="reminder" options={{ animation: 'slide_from_right', gestureEnabled: false }} />
-          {/* Today, and in testing builds the Habits, Journey and Insights tabs. */}
-          <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
-          <Stack.Screen name="habit/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-          {/* The Life Reset: development and internal-testing builds only. */}
           <Stack.Screen name="life-reset/setup" options={{ animation: 'slide_from_right' }} />
+          {/* Habits, Journey and Insights. */}
+          <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="swap/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="add" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="journey" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
-          {/* Development builds only (the screen redirects away in release builds). */}
-          <Stack.Screen name="dev/exercise" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen
-            name="ceremony"
-            options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
-          />
         </Stack>
       </ThemeTransitionProvider>
     </SafeAreaProvider>

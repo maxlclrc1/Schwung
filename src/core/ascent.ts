@@ -1,4 +1,3 @@
-import { channel } from '../lib/flags';
 import { PROGRAM_DAYS } from './dates';
 import { dayQualifies, doneCount, logForDay, Logs, PHASE_START } from './progression';
 
@@ -31,33 +30,12 @@ export const LANDMARKS: Record<number, { name: string; icon: 'footsteps' | 'bonf
 export type Point = { x: number; y: number };
 
 /**
- * Switchbacks from the valley floor (bottom left) to the summit (upper right).
- * The summit point matches the peak drawn in assets/ascent-*.jpg.
- */
-const ORIGINAL_WAYPOINTS: Point[] = [
-  { x: 0.07, y: 0.9 },
-  { x: 0.34, y: 0.92 },
-  { x: 0.62, y: 0.87 },
-  { x: 0.82, y: 0.78 },
-  { x: 0.6, y: 0.7 },
-  { x: 0.3, y: 0.66 },
-  { x: 0.16, y: 0.57 },
-  { x: 0.34, y: 0.48 },
-  { x: 0.62, y: 0.45 },
-  { x: 0.8, y: 0.37 },
-  { x: 0.62, y: 0.29 },
-  { x: 0.5, y: 0.22 },
-  { x: 0.6, y: 0.15 },
-  { x: 0.7, y: 0.105 },
-];
-
-/**
- * The same route, checked against the painting in the continuous world (Step 2C): two turns moved onto solid
- * ground. At the left turn (days 37–39) the trail crossed a pocket of mist above the ridge; it now turns on the
+ * Switchbacks from the valley floor (bottom left) to the summit (upper right), on the Journey painting. Checked against the painting in the continuous world: two turns
+ * sit on solid ground. At the left turn (days 37–39) the trail crossed a pocket of mist above the ridge; it now turns on the
  * ridge and climbs the grassy terrace. At the right turn (days 53–56) it ran along the rock's misty skyline; it
- * now stays on the rock. Testing builds only: the public release keeps its trail exactly as it was.
+ * now stays on the rock.
  */
-const CORRECTED_WAYPOINTS: Point[] = [
+const WAYPOINTS: Point[] = [
   { x: 0.07, y: 0.9 },
   { x: 0.34, y: 0.92 },
   { x: 0.62, y: 0.87 },
@@ -74,8 +52,6 @@ const CORRECTED_WAYPOINTS: Point[] = [
   { x: 0.6, y: 0.15 },
   { x: 0.7, y: 0.105 },
 ];
-
-const WAYPOINTS = channel() === 'production' ? ORIGINAL_WAYPOINTS : CORRECTED_WAYPOINTS;
 
 export const SUMMIT = WAYPOINTS[WAYPOINTS.length - 1];
 

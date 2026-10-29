@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 import {
   ASCENT_PHASES,
   ascentDays,
@@ -180,27 +180,5 @@ describe('selecting a day', () => {
     expect(describeDay(days[3])).toBe('Day 4 · Foundation · today');
     expect(describeDay(days[30])).toBe('Day 31 · Momentum · still ahead');
     expect(JSON.stringify(logs)).toBe(snapshot);
-  });
-});
-
-describe('the route per build', () => {
-  const load = (ch: string) => {
-    let points: typeof DAY_POINTS = [];
-    jest.isolateModules(() => {
-      jest.doMock('../../lib/flags', () => ({ channel: () => ch }));
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      points = (require('../ascent') as typeof import('../ascent')).DAY_POINTS;
-    });
-    jest.dontMock('../../lib/flags');
-    return points;
-  };
-
-  it('the public release keeps its trail; testing builds get the two corrected turns, same start and summit', () => {
-    const release = load('production');
-    const testing = load('internal');
-    expect(testing[0]).toEqual(release[0]);
-    expect(testing[65]).toEqual(release[65]);
-    // The left turn (days 37–39) now climbs the terrace lower down, and the right turn (days 53–56) sits lower.
-    for (const d of [38, 39, 54, 55]) expect(testing[d - 1].y).toBeGreaterThan(release[d - 1].y);
   });
 });

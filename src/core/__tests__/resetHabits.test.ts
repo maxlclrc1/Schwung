@@ -1,6 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
 import { habitScene } from '../../components/habitArt';
-import { HABITS } from '../habits';
 import {
   HELD_EXERCISE_PROGRAMMES,
   INTENSITIES,
@@ -22,26 +21,16 @@ import {
   type ResetHabit,
   type Target,
 } from '../reset/habits';
-import { DEV_CLEARED } from '../v2/gate';
-import { BY_ID, LIBRARY, TEEN_FOCUS_MAX_MIN } from '../v2/library';
-import type { ProfileV2 } from '../v2/types';
+import { TEEN_FOCUS_MAX_MIN, type Profile } from '../reset/profile';
 
-const ADULT: ProfileV2 = {
+const ADULT: Profile = {
   age: '18_29',
-  goal: 'focus',
-  sleepHours: '7_8',
-  sleepTrouble: 'rarely',
   activeDays: '1_2',
-  produce: '3_4',
-  sugary: 'rarely',
   phone: '2_4',
-  phonePull: 'social',
-  routines: [],
   precautions: [],
   wake: { kind: 'time', time: '07:15' },
-  inBed: '23:30',
 };
-const TEEN: ProfileV2 = { ...ADULT, age: '16_17', sugary: undefined };
+const TEEN: Profile = { ...ADULT, age: '16_17' };
 
 const num = (t: Target) =>
   t.amount.kind === 'fixed' ? t.amount.value : t.amount.kind === 'below-baseline' ? t.amount.reduceBy : t.amount.min;
@@ -82,17 +71,8 @@ describe('Life Reset habit catalog: the 11 approved habits', () => {
     ]);
   });
 
-  it('reuses the eight existing ids, and the three new ids collide with nothing', () => {
-    const v1 = new Set(HABITS.map((h) => h.id));
-    for (const h of RESET_HABITS) {
-      if (h.existingId) {
-        expect(h.existingId).toBe(h.id);
-        expect(BY_ID[h.id]).toBeDefined();
-      } else {
-        expect(v1.has(h.id)).toBe(false);
-        expect(BY_ID[h.id]).toBeUndefined();
-      }
-    }
+  it('keeps the eight ids it grew from, and three new ones', () => {
+    for (const h of RESET_HABITS) if (h.existingId) expect(h.existingId).toBe(h.id);
     expect(RESET_HABITS.filter((h) => h.existingId).length).toBe(8);
     expect(RESET_HABITS.filter((h) => !h.existingId).map((h) => h.id)).toEqual([
       'home_tidy',
@@ -275,9 +255,7 @@ describe('experienced people', () => {
   });
 
   it('aren’t turned away for already doing the habit', () => {
-    const active: ProfileV2 = { ...ADULT, activeDays: '5p', routines: ['walk', 'sameWake', 'reading', 'planning'] };
-    expect(BY_ID.move_walk.exclude(active)).not.toBeNull();
-    expect(BY_ID.sleep_wake.exclude(active)).not.toBeNull();
+    const active: Profile = { ...ADULT, activeDays: '5p', phone: '6p' };
     for (const h of RESET_HABITS) expect([h.id, resetExclusion(h, active, 'challenge')]).toEqual([h.id, null]);
   });
 
@@ -318,7 +296,7 @@ describe('Strength Training: tracking only', () => {
       for (const i of INTENSITIES) expect(resetExclusion(strength, { ...ADULT, precautions: [pre] }, i)).not.toBeNull();
     for (const i of INTENSITIES)
       expect(resetExclusion(strength, { ...ADULT, precautions: 'unknown' }, i)).not.toBeNull();
-    const joint: ProfileV2 = { ...ADULT, precautions: ['joint'] };
+    const joint: Profile = { ...ADULT, precautions: ['joint'] };
     expect(resetExclusion(strength, joint, 'starter')).not.toBeNull();
     expect(resetExclusion(strength, joint, 'standard')).toBeNull();
     expect(strengthNotes(joint)).toHaveLength(1);
@@ -334,11 +312,7 @@ describe('Strength Training: tracking only', () => {
     const ids = new Set(RESET_HABITS.map((h) => h.id));
     for (const id of HELD_EXERCISE_PROGRAMMES) {
       expect(ids.has(id)).toBe(false);
-      expect(BY_ID[id].release).not.toBe('candidate');
-      expect(DEV_CLEARED.has(id)).toBe(false);
     }
-    // Strength Training isn't in the V2 release gate either: it's a separate, inactive definition.
-    expect(DEV_CLEARED.has('strength_log')).toBe(false);
     expect(strings(RESET_HABITS).some((s) => HELD_EXERCISE_PROGRAMMES.some((id) => s.includes(id)))).toBe(false);
   });
 });
@@ -444,18 +418,5 @@ describe('approved product decisions', () => {
     const banned =
       /\bcold\b|fasting|calorie|weight loss|\bdiet\b|glasses of water|5 ?a\.?m|proven|guarantee|scientific|validated/i;
     for (const s of strings(RESET_HABITS)) expect([s, banned.test(s)]).toEqual([s, false]);
-  });
-});
-
-describe('existing behaviour is untouched', () => {
-  it('leaves the V1 and V2 libraries and the release gate as they were', () => {
-    expect(HABITS).toHaveLength(19);
-    expect(LIBRARY).toHaveLength(25);
-    expect(DEV_CLEARED.size).toBe(20);
-    const rungs = (p: ProfileV2) => BY_ID.focus_deepwork.ladder(p).map((s) => parseInt(s, 10));
-    expect(rungs(TEEN)).toEqual([10, 15, 25, 45, 60]);
-    expect(rungs(ADULT)).toEqual([10, 15, 25, 45, 60, 90]);
-    expect(BY_ID.focus_deepwork.title).toBe('Focused work');
-    expect(BY_ID.screen_app_limit.title).toBe('App time');
   });
 });

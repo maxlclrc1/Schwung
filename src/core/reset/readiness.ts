@@ -1,13 +1,13 @@
 import { PHASE_START } from '../progression';
-import type { DayLog, Weekday } from '../types';
-import type { ProfileV2 } from '../v2/types';
+import type { Weekday } from '../dates';
+import type { DayLog } from '../types';
+import type { Profile } from './profile';
 import { INTENSITIES, PHASES, RESET_BY_ID, resetExclusion, scrollingLimit, type Intensity, type Phase } from './habits';
 import { dayStatus, observation, type Observation } from './tracking';
 import { erasFor, programWeeks, scheduleOn, weekOf, weekSummary, type ScheduleEra, type WeeklyContext } from './weekly';
 
 /*
- * Readiness-based progression for Life Reset programs. Pure; used only by the Life Reset pilot (testing builds):
- * existing V1/V2 programs keep `reconcile` (automatic Day 22/45 rises, early offers, step-downs) exactly as it is.
+ * Readiness-based progression for Life Reset programs. Pure.
  *
  * Difficulty only changes when the person chooses: phases say which targets are *available* (Momentum from Day 22,
  * Mastery from Day 45), readiness decides whether one is *offered*, and every change, up or down, is accepted or
@@ -221,7 +221,7 @@ export type Offer = {
 
 /** What a change is checked against before it's offered or allowed. Anything not given isn't checked. */
 export type Constraints = {
-  profile?: ProfileV2;
+  profile?: Profile;
   /** Minutes a day the person said they can give, and what their other habits already take. */
   availableMinutes?: number;
   otherMinutes?: number;

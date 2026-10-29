@@ -1,8 +1,7 @@
 import { Appearance, useColorScheme } from 'react-native';
 import type { TextStyle } from 'react-native';
 import type { ThemePreference } from '../core/types';
-import { tabs } from '../lib/flags';
-import { useApp } from '../store/useApp';
+import { usePreferences } from '../store/preferences';
 import { useThemeGate } from './gate';
 
 /*
@@ -51,17 +50,6 @@ export const palettes = { dark, light } as const;
 export type { ThemePreference };
 export type Scheme = 'light' | 'dark';
 
-/** Ceremonies are always dark and cinematic, whatever the app theme. */
-export const ceremonyColors = dark;
-
-/** The share image is always dark so it looks the same in every feed. */
-export const shareCardColors = {
-  gradient: ['#2B2147', '#17151F', '#0E0D12'] as const,
-  base: '#0E0D12',
-  glow: 'rgba(167,139,250,0.14)',
-  tile: 'rgba(255,255,255,0.06)',
-};
-
 /** An explicit choice wins; "system" follows the phone. Unknown system values count as dark. */
 export function resolveScheme(preference: ThemePreference, system: string | null | undefined): Scheme {
   if (preference !== 'system') return preference;
@@ -87,29 +75,21 @@ const themeFor = (scheme: Scheme) => ({ c: scheme === 'dark' ? dark : light, isD
 /** The theme asked for: the preference, or the phone's under "System". */
 export function useThemeTarget(): Scheme {
   const system = useColorScheme();
-  const preference = useApp((st) => st.themePreference);
+  const preference = usePreferences((st) => st.themePreference);
   return resolveScheme(preference, system);
 }
 
 /** The saved choice (System, Light or Dark), for the controls that show it. */
 export function useThemePreference(): ThemePreference {
-  return useApp((st) => st.themePreference);
-}
-
-/** The public release: the theme asked for, at once. */
-function useDirectTheme() {
-  return themeFor(useThemeTarget());
+  return usePreferences((st) => st.themePreference);
 }
 
 /**
- * Testing builds: the theme on screen, which follows the one asked for once its paintings are ready (./gate). Only
- * the gate is watched here, so asking for a theme re-renders nothing until the switch itself.
+ * The theme on screen, which follows the one asked for once its paintings are ready (./gate). Only the gate is
+ * watched here, so asking for a theme re-renders nothing until the switch itself.
  */
-function useGatedTheme() {
+export function useTheme() {
   const shown = useThemeGate((g) => g.shown);
   // Before the first request (the very first render): the theme asked for.
-  return themeFor(shown ?? resolveScheme(useApp.getState().themePreference, Appearance.getColorScheme()));
+  return themeFor(shown ?? resolveScheme(usePreferences.getState().themePreference, Appearance.getColorScheme()));
 }
-
-/** The current theme's palette. Which version is fixed per build, so the hooks inside never change order. */
-export const useTheme = tabs() ? useGatedTheme : useDirectTheme;

@@ -1,6 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { dateForDay } from '../dates';
-import { dayQualifies, isFullDay, totalXp } from '../progression';
+import { dateForDay, weekdayOfDay } from '../dates';
 import { RESET_BY_ID, type Schedule } from '../reset/habits';
 import {
   countsTowardDay,
@@ -16,8 +15,7 @@ import {
   type ScheduleEra,
   type WeeklyContext,
 } from '../reset/weekly';
-import { isDueOn, plannedForDay, wasDueOn, weekdayOfDay } from '../schedule';
-import type { DayLog, PlanHabit } from '../types';
+import type { DayLog } from '../types';
 
 // 2026-11-02 is a Monday: Day 1 = Mon, Day 7 = Sun, Day 64 = Mon, Day 66 = Wed.
 const MON = '2026-11-02';
@@ -280,31 +278,5 @@ describe('separate from the daily streak and the 80% rule', () => {
     const weeks = weekSummaries(ID, only(S3), logs, ctx, 17); // weeks 1–3; week 3 still open
     expect(weeks.map((w) => w.status)).toEqual(['achieved', 'not-achieved', 'pending']);
     expect(weeklyAdherence(weeks)).toBe(0.5);
-  });
-});
-
-describe('existing scheduling and saves are unchanged', () => {
-  const plan: PlanHabit[] = [
-    { habitId: 'discipline_bed', level: 'easy', addedOnDay: 1, levelSince: 0 },
-    { habitId: 'devsched_x', level: 'easy', addedOnDay: 1, levelSince: 0, schedule: { days: [1, 3, 5] } },
-  ];
-
-  it('keeps fixed-weekday habits due exactly on their days, and daily habits every day', () => {
-    const due = (d: number) => plan.filter((h) => isDueOn(h, MON, d)).map((h) => h.habitId);
-    expect(due(1)).toEqual(['discipline_bed', 'devsched_x']);
-    expect(due(2)).toEqual(['discipline_bed']);
-    expect(plannedForDay(plan, MON, 3)).toEqual(['discipline_bed', 'devsched_x']);
-    expect(plannedForDay(plan, MON, 4)).toEqual(['discipline_bed']);
-  });
-
-  it('loads an existing V2 save’s logs with the same days, XP and success as before', () => {
-    const logs: Logs = {};
-    for (const d of [1, 2, 3]) {
-      const date = dateForDay(MON, d);
-      logs[date] = { day: d, date, completed: plannedForDay(plan, MON, d), planned: plannedForDay(plan, MON, d) };
-    }
-    expect(Object.values(logs).every((l) => isFullDay(l) && dayQualifies(l))).toBe(true);
-    expect(totalXp(logs)).toBe(3 * 20 + 5 * 10);
-    expect(wasDueOn(plan[1], logs, MON, 2)).toBe(false);
   });
 });

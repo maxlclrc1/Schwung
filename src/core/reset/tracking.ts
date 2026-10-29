@@ -4,7 +4,7 @@ import { activeMinutes, settle, type TimerRun } from './timer';
 
 /*
  * Tracking records for Life Reset habits: how a day's habit was done (a swipe, a timer, a counter, a strength
- * session), partial progress, explicit skips, corrections and undo. Pure; used only by the Life Reset pilot (testing builds).
+ * session), partial progress, explicit skips, corrections and undo. Pure.
  *
  * One rule keeps everything consistent: **whether a habit was done is only ever `log.completed`**, exactly as for
  * every existing habit. XP, the 80% rule, streaks and the weekly scheduling all read that list, so tracking details

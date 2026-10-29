@@ -15,7 +15,7 @@ import { Button, Card, Screen, T } from '../ui';
 const TIMED = new Set(['focus_deepwork', 'mind_read', 'move_walk', 'home_tidy', 'skill_practice']);
 
 /**
- * A Life Reset habit's details (development and internal-testing builds only: see app/pilot/[id].tsx): today and,
+ * A Life Reset habit's details (app/life-reset/[id].tsx): today and,
  * until noon, yesterday; a counter, a strength session's details or optional minutes where they apply; Social
  * Confidence's steps; and difficulty. Nothing here is needed to complete a habit: a swipe on the card is enough.
  */
