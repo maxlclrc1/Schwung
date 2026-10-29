@@ -351,7 +351,7 @@ export function PilotSetup() {
             eyebrow="Now the fun part"
             tint="peach"
             title="What would you like to grow?"
-            hint={`Two to four is a lovely start, up to ${P.MAX_HABITS}. You can add your own later.`}
+            hint="Two to four is a lovely start. You can add more, and your own, any time."
           >
             <View style={styles.habitBar}>
               <Stones count={picked.length} max={P.MAX_HABITS} />

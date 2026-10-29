@@ -92,7 +92,7 @@ export type PilotHabitId = string;
 export const isPilotHabit = (id: string): id is PilotHabitId => PILOT_HABITS.includes(id);
 
 /** The existing plan limit (SCHWUNG_LIFE_RESET_HABITS.md §6), kept for now. */
-export const MAX_HABITS = 6;
+export const MAX_HABITS = 30;
 
 /** "On a day all your habits fall on, about how long can you give them?" (minutes). */
 export const PILOT_TIME_OPTIONS = [20, 30, 45, 60, 90, 120, 180] as const;

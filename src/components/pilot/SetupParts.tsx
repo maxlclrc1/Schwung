@@ -55,9 +55,11 @@ export function Section({ title, hint, children }: { title: string; hint?: strin
   const { c } = useTheme();
   return (
     <View style={setupStyles.section}>
-      <T v="bodyStrong" accessibilityRole="header">
-        {title}
-      </T>
+      {title ? (
+        <T v="bodyStrong" accessibilityRole="header">
+          {title}
+        </T>
+      ) : null}
       {hint ? (
         <T v="caption" color={c.textDim}>
           {hint}
@@ -149,22 +151,26 @@ export function BaselineQuestions({
   needs,
   values: v,
   answers,
+  bare,
 }: {
   needs: P.Baseline[];
   values: BaselineAnswers;
   answers: P.PilotAnswers;
+  /** Without each question's own title (the screen asks it). */
+  bare?: boolean;
 }) {
   const { c } = useTheme();
+  const q = (title: string) => (bare ? '' : title);
   return (
     <>
       {needs.includes('phone') ? (
-        <Section title="Less Scrolling: how long are you on your phone a day?">
+        <Section title={q('Less Scrolling: how long are you on your phone a day?')}>
           <Chips items={PHONE} selected={(x) => v.phone === x} onPress={v.setPhone} />
         </Section>
       ) : null}
       {needs.includes('pullMinutes') ? (
         <Section
-          title="And on your main app (the one that pulls you in most)?"
+          title={q('And on your main app (the one that pulls you in most)?')}
           hint="Settings → Screen Time shows it, if you want the real number."
         >
           <Chips
@@ -175,7 +181,10 @@ export function BaselineQuestions({
         </Section>
       ) : null}
       {needs.includes('wake') ? (
-        <Section title="Sleep Routine: when do you usually get up?" hint="Your own time is the anchor; never earlier.">
+        <Section
+          title={q('Sleep Routine: when do you usually get up?')}
+          hint="Your own time is the anchor; never earlier."
+        >
           <Chips
             items={WAKE_TIMES.map((t) => ({ id: t, label: t }))}
             selected={(t) => v.wake?.kind === 'time' && v.wake.time === t}
@@ -192,12 +201,12 @@ export function BaselineQuestions({
         </Section>
       ) : null}
       {needs.includes('activeDays') ? (
-        <Section title="Daily Movement: on how many days a week are you active now?">
+        <Section title={q('Daily Movement: on how many days a week are you active now?')}>
           <Chips items={ACTIVE} selected={(x) => v.active === x} onPress={v.setActive} />
         </Section>
       ) : null}
       {needs.includes('skill') ? (
-        <Section title="Practice a Skill: which skill?">
+        <Section title={q('Practice a Skill: which skill?')}>
           <Chips
             items={SKILLS.map((x) => ({ id: x, label: x }))}
             selected={(x) => v.skill === x}
@@ -206,7 +215,7 @@ export function BaselineQuestions({
         </Section>
       ) : null}
       {needs.includes('strengthStart') ? (
-        <Section title="Strength Training: where are you starting from?">
+        <Section title={q('Strength Training: where are you starting from?')}>
           <Chips items={STARTS} selected={(x) => v.start === x} onPress={v.setStart} />
           {P.habitNotes('strength_log', answers).map((n) => (
             <T key={n} v="caption" color={c.textFaint}>

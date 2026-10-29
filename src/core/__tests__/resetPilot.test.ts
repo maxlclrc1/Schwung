@@ -161,12 +161,12 @@ describe('setup', () => {
     expect(P.setupProblems({ ...ADULT, age: 'u16' }, THREE)).toEqual(['Schwung is made for people 16 and older.']);
   });
 
-  it('keeps the six-habit maximum', () => {
-    const seven = ['focus_deepwork', 'focus_top3', 'mind_read', 'confidence_talk', 'home_tidy', 'social_reach_out']
+  it('allows every catalog habit at once (the maximum is 30)', () => {
+    const all = ['focus_deepwork', 'focus_top3', 'mind_read', 'confidence_talk', 'home_tidy', 'social_reach_out']
       .concat('sleep_wake')
       .map((habitId) => ({ habitId, intensity: 'starter' as const }));
-    expect(P.setupProblems(ADULT, seven)).toContain('Choose at most 6 habits for now.');
-    expect(P.setupProblems(ADULT, seven.slice(0, 6))).toEqual([]);
+    expect(P.MAX_HABITS).toBe(30);
+    expect(P.setupProblems(ADULT, all)).toEqual([]);
   });
 
   it('suggests a manageable start without choosing for the person', () => {
@@ -409,14 +409,14 @@ describe('adding a habit to a running program', () => {
     expect(add('sleep_wake', { wake: { kind: 'time', time: '07:00' } })).toEqual([]);
     expect(add('strength_log', { strengthStart: 'new', precautions: ['heart'] })[0]).toMatch(/clinician or midwife/);
     expect(P.addHabit(p, {}, { habitId: 'sleep_wake', intensity: 'starter' }, 10)).toBeNull();
-    // At most six habits.
-    let six = p;
-    for (const id of ['focus_top3', 'home_tidy', 'social_reach_out', 'confidence_talk', 'focus_deepwork'])
-      six = P.addHabit(six, {}, { habitId: id, intensity: 'starter' }, 10) ?? six;
-    expect(six.habits).toHaveLength(6);
+    // Well past six habits now (the maximum is 30).
+    let seven = p;
+    for (const id of ['focus_top3', 'home_tidy', 'social_reach_out', 'confidence_talk', 'focus_deepwork', 'move_walk'])
+      seven = P.addHabit(seven, { activeDays: '1_2' }, { habitId: id, intensity: 'starter' }, 10) ?? seven;
+    expect(seven.habits.length).toBeGreaterThanOrEqual(6);
     expect(
-      P.addProblems(six, { skill: 'Language' }, { habitId: 'skill_practice', intensity: 'starter' }, 10),
-    ).toContain('You have 6 habits, the most for now.');
+      P.addProblems(seven, { skill: 'Language' }, { habitId: 'skill_practice', intensity: 'starter' }, 10),
+    ).not.toContain(`You have ${P.MAX_HABITS} habits, the most for now.`);
   });
 
   it('checks the time with every habit at today’s level, and accepts more time a day', () => {
@@ -589,15 +589,16 @@ describe('the person’s own habits', () => {
     expect(new Set(scenes).size).toBe(3);
   });
 
-  it('are refused without a name, with a name already used, or past six habits', () => {
+  it('are refused without a name, with a name already used, or past 30 habits', () => {
     const p = one('mind_read');
     expect(P.customProblems(p, '  ', 7)).toEqual(['Give it a name.']);
     expect(P.customProblems(p, 'read daily', 7)).toEqual(['You already have a habit with that name.']);
     expect(P.customProblems(p, 'x'.repeat(41), 7)).toEqual(['Keep the name to 40 characters.']);
     expect(P.customProblems(p, 'Swim', 0)).toEqual(['Choose how many days a week.']);
-    let six = p;
-    for (const name of ['A', 'B', 'C', 'D', 'E']) six = P.addCustomHabit(six, { name, perWeek: 7 }, 1, 7)!.program;
-    expect(P.customProblems(six, 'F', 7)).toEqual(['You have 6 habits, the most for now.']);
+    let full = p;
+    for (let i = 1; i < P.MAX_HABITS; i++) full = P.addCustomHabit(full, { name: `H${i}`, perWeek: 7 }, 1, 7)!.program;
+    expect(full.habits).toHaveLength(P.MAX_HABITS);
+    expect(P.customProblems(full, 'One more', 7)).toEqual([`You have ${P.MAX_HABITS} habits, the most for now.`]);
   });
 
   it('can be removed, and survive a save and reload', () => {
