@@ -29,6 +29,8 @@ export type ResetPilotData = {
 type Actions = {
   /** Starts a program. Never over a running one (end it first). */
   start: (answers: P.PilotAnswers, choices: P.PilotChoice[]) => boolean;
+  /** Adds a habit from today (the set-up's rules); false if it can't join. */
+  addHabit: (extra: Partial<P.PilotAnswers>, choice: P.PilotChoice) => boolean;
   /** Ends the program and deletes its data. */
   end: () => void;
   /** Today, or yesterday while it can still be corrected (until noon). */
@@ -96,6 +98,15 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
           const program = P.createPilot(answers, choices, toDateKey(pilotNow()));
           if (!program) return false;
           set({ program });
+          return true;
+        },
+
+        addHabit: (extra, choice) => {
+          const { program } = get();
+          if (!program) return false;
+          const next = P.addHabit(program, extra, choice, pilotToday(get()));
+          if (!next) return false;
+          set({ program: next });
           return true;
         },
 

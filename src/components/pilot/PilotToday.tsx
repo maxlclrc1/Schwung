@@ -193,6 +193,14 @@ export function PilotToday() {
         </Animated.View>
 
         <View style={styles.footer}>
+          {program.habits.length < P.MAX_HABITS ? (
+            <Button
+              label="Add a habit"
+              kind="secondary"
+              icon={<Ionicons name="add" size={18} color={c.text} />}
+              onPress={() => router.push('/life-reset/add')}
+            />
+          ) : null}
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
             Swipe a card to complete it. Long-press for details and difficulty.
           </T>

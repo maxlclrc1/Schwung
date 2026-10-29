@@ -74,6 +74,7 @@ export default function RootLayout() {
           {/* Habits, Journey and Insights. */}
           <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="life-reset/add" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
       </ThemeTransitionProvider>

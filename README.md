@@ -43,6 +43,7 @@ src/
     life-reset/setup        set-up: about you, habits, only the questions they need, intensity, time, review
     (tabs)/                 Habits, Journey and Insights: one pager over the shared world
     life-reset/[id]         a habit's details, corrections and difficulty (modal)
+    life-reset/add          add one of the 11 to the running program (modal)
     settings                your program (end it), appearance, export, privacy, contact
   core/                   Pure, framework-free logic, unit-tested
     reset/                  the Life Reset: catalog (habits.ts), weekly scheduling, tracking, readiness,

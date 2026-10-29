@@ -80,6 +80,21 @@ carries on without any migration.
 
 No projects, journals, missions or check-ins.
 
+## Adding a habit
+
+**Habits → Add a habit** (shown while there are fewer than six) opens a sheet (`app/life-reset/add.tsx`):
+
+1. **Pick one** of the 11 not in the program yet; one that isn't available (an age or health rule) shows why.
+2. **Only its questions that haven't been answered** (set-up's wording: e.g. phone time for Less Scrolling); answers
+   already given are never asked again.
+3. **Its intensity** (the set-up's suggestion first) and a preview of its first target.
+4. **The time check** with every habit at the level it's at today; if it doesn't fit, it says so and lets you give
+   more time a day, or choose an easier intensity.
+
+"Add" joins it **from today at Foundation**, in catalog order. Earlier days are untouched: before it joined it
+didn't exist, so it's never a miss or a rest day there, its consistency counts from that day, and a weekly habit's
+first week asks a goal scaled to the days left (`addHabit`, `addProblems` in `core/reset/pilot.ts`, tested).
+
 ## The 11 habits
 
 | Habit             | Card says (Starter Foundation)                   | How often                   | Extra on the card              |
@@ -335,11 +350,14 @@ device.**
 
 ## Testing
 
-**Automated:** 290 tests in 19 suites, all passing; typecheck, lint and formatting are clean.
+**Automated:** 295 tests in 19 suites, all passing; typecheck, lint and formatting are clean.
 
 - **All 11 habits:** catalog order and ids, targets, frequencies, art in both themes, and the 16–17 Focus blocks.
 - **Setup:** only the needed baselines, kept answers, exclusions (phone time, wake time, precautions, age, joint pain),
   the 6-habit limit, suggestions and the time check; only the 11 habits, retired ones refused.
+- **Adding a habit:** only unanswered questions; the same refusals as set-up (already in it, not one of the 11,
+  unanswered question, eligibility, six habits, time at today's levels, with more time accepted); it joins from
+  that day without touching earlier days; daily and weekly tallies and recent days count from the day it joined.
 - **Completion:** completion and undo with no double XP; counters (Get It Done, Stay Connected); Social Confidence
   skips; strength sessions with details, edits and undo; optional minutes.
 - **Day rules:** the 80% rule (4 of 5 counts), full days, XP and levels.
@@ -365,6 +383,8 @@ device.**
 - **Saves:** an old V1 save on the phone is ignored and left byte-for-byte as it was; an older pilot save with the
   switching fields opens as the program; the appearance saves on its own key.
 - **Settings:** Your program (day, End the Life Reset), Appearance, Your data, About; nothing else.
+- **Adding a habit** to a five-habit program: six offered (none already in it), only its two questions asked, it
+  joins from today with earlier days untouched, shows on Habits and Insights, and "Add a habit" goes at six.
 - **Unchanged:** three-tab swipes both ways, card-swipe priority, 30 quick swipes, the theme switch, light and
   dark cards for all 11 habits, and the Insights charts.
 

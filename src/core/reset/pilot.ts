@@ -347,6 +347,59 @@ export function createPilot(a: PilotAnswers, choices: PilotChoice[], startKey: s
   };
 }
 
+// --- Adding a habit to a running program ---
+
+/** The habits a running program can still add (not in it yet), in catalog order. */
+export const addableHabits = (p: PilotProgram) => PILOT_HABITS.filter((id) => !p.habits.includes(id));
+
+/** The questions a habit needs that this program hasn't answered yet. */
+export const missingBaselines = (p: PilotProgram, id: string) =>
+  baselinesFor([id]).filter((b) => !answered(p.answers, b));
+
+/**
+ * Why a habit can't join this program today (one problem per line), or none. The set-up's rules: the 11 habits only,
+ * once each, at most MAX_HABITS, its questions answered, its eligibility, and the time check, now with every habit at
+ * the level it's at today. `extra` holds the new answers (its questions, or more time a day).
+ */
+export function addProblems(p: PilotProgram, extra: Partial<PilotAnswers>, choice: PilotChoice, day: number): string[] {
+  if (!isPilotHabit(choice.habitId)) return ['Choose from the Life Reset habits.'];
+  if (p.habits.includes(choice.habitId)) return [`${habitName(choice.habitId)} is already in your Life Reset.`];
+  const a = { ...p.answers, ...extra };
+  const out: string[] = [];
+  if (p.habits.length >= MAX_HABITS) out.push(`You have ${MAX_HABITS} habits, the most for now.`);
+  // Its questions and eligibility, worded as in set-up (set-up's own time check is replaced below).
+  out.push(...setupProblems(a, [choice]).filter((x) => !x.startsWith('These take') && !x.startsWith('Say how much')));
+  const total = busiestDayMinutes([
+    ...p.habits.map((id) => ({ habitId: id, level: levelFor(p, id, day) })),
+    { habitId: choice.habitId, level: foundation(choice.intensity) },
+  ]);
+  if (total > a.minutesPerDay)
+    out.push(
+      `With it, your habits take about ${total} min on a day they all fall on, more than the ${a.minutesPerDay} min you have. Choose an easier intensity or more time.`,
+    );
+  return [...new Set(out)];
+}
+
+/**
+ * The program with a habit added from `day`, at Foundation of the chosen intensity; null if it can't join. Earlier
+ * days are untouched: the habit simply didn't exist then (never a miss), and its weeks start on the day it joined.
+ */
+export function addHabit(
+  p: PilotProgram,
+  extra: Partial<PilotAnswers>,
+  choice: PilotChoice,
+  day: number,
+): PilotProgram | null {
+  if (addProblems(p, extra, choice, day).length) return null;
+  const habits = PILOT_HABITS.filter((id) => p.habits.includes(id) || id === choice.habitId);
+  return {
+    ...p,
+    answers: keptAnswers({ ...p.answers, ...extra }, habits),
+    habits,
+    progression: { ...p.progression, [choice.habitId]: newProgression(choice.habitId, choice.intensity, day) },
+  };
+}
+
 /** What a habit would ask at Foundation of an intensity, for the setup's review (target and how often). */
 export function previewTarget(habitId: PilotHabitId, intensity: Intensity, a: PilotAnswers) {
   const p: PilotProgram = {
@@ -369,6 +422,9 @@ export const ctxOf = (p: PilotProgram): WeeklyContext => ({
 
 export const levelFor = (p: PilotProgram, id: string, day: number): Level => levelOn(p.progression[id], day);
 const erasOf = (p: PilotProgram, id: string) => scheduleEras(p.progression[id]);
+
+/** Whether a habit is part of the program on a day (from the day it joined). */
+const activeOn = (p: PilotProgram, id: string, day: number) => scheduleOn(erasOf(p, id), day) !== null;
 
 /** Whether a habit is due every day, or counted by the week, on a day. */
 export function isDaily(p: PilotProgram, id: string, day: number): boolean {
@@ -726,8 +782,10 @@ export function weekTallyOf(p: PilotProgram, id: string, w: WeekSummary, today: 
   let done = 0;
   let eligible = 0;
   let weekly = false;
-  // Within a week, a habit is daily or weekly on a day by its schedule then (mixed habits change between phases).
+  // Within a week, a habit is daily or weekly on a day by its schedule then (mixed habits change between phases);
+  // days before it joined the program don't count at all.
   for (let d = w.firstDay; d <= last; d++) {
+    if (!activeOn(p, id, d)) continue;
     if (!isDaily(p, id, d)) {
       weekly = true;
       continue;
@@ -766,7 +824,10 @@ export function weekTally(p: PilotProgram, today: number): Tally {
   let done = 0;
   let eligible = 0;
   for (const id of p.habits) {
-    const days = Array.from({ length: Math.min(today, w.lastDay) - w.firstDay + 1 }, (_, i) => w.firstDay + i);
+    const days = Array.from({ length: Math.min(today, w.lastDay) - w.firstDay + 1 }, (_, i) => w.firstDay + i).filter(
+      (d) => activeOn(p, id, d),
+    );
+    if (!days.length) continue;
     if (days.every((d) => isDaily(p, id, d))) {
       eligible += days.length;
       done += days.filter((d) => isDone(p, id, d)).length;
@@ -783,6 +844,7 @@ export function weekTally(p: PilotProgram, today: number): Tally {
 export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
   const out: { day: number; state: 'done' | 'skipped' | 'missed' | 'rest' | 'today' }[] = [];
   for (let d = Math.max(1, today - n + 1); d <= Math.min(today, PROGRAM_DAYS); d++) {
+    if (!activeOn(p, id, d)) continue; // before it joined
     const t = trackOf(p, id, d);
     out.push({
       day: d,
