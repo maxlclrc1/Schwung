@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { canEditYesterday, dayNumber, toDateKey } from '../core/dates';
 import * as P from '../core/reset/pilot';
+import type { Reflection, ReflectionAnswer } from '../core/reset/reflections';
 import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
 import { channel, devTools, type Channel } from '../lib/flags';
@@ -57,6 +58,8 @@ type Actions = {
   setDevDayOffset: (n: number) => void;
   /** A ceremony has been seen through (or skipped): it never shows again in this Life Reset. */
   markCeremony: (kind: 'day1' | 'summit') => void;
+  /** A week's reflection: its answer (and the habits changed from it), or put off with no answer ("Not now"). */
+  reflect: (week: number, answer?: ReflectionAnswer, changed?: string[]) => void;
 };
 
 const initial: ResetPilotData = { program: null, devDayOffset: 0 };
@@ -158,6 +161,22 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
         harder: (id) => manual((p, day) => P.harder(p, id, day)),
 
         setDevDayOffset: (devDayOffset) => set({ devDayOffset: devTools() ? devDayOffset : 0 }),
+
+        reflect: (week, answer, changed) => {
+          const { program } = get();
+          if (!program) return;
+          const prev = program.reflections?.[week];
+          const entry: Reflection = {
+            week,
+            day: pilotToday(get()),
+            // Putting it off never erases an answer already given.
+            ...((answer ?? prev?.answer) ? { answer: answer ?? prev?.answer } : {}),
+            ...(changed?.length || prev?.changed?.length
+              ? { changed: [...new Set([...(prev?.changed ?? []), ...(changed ?? [])])] }
+              : {}),
+          };
+          set({ program: { ...program, reflections: { ...program.reflections, [week]: entry } } });
+        },
 
         markCeremony: (kind) => {
           const { program } = get();
