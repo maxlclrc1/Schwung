@@ -276,6 +276,7 @@ The Journey tab and its 66-day calendar show the program (`journeySource.ts`):
 
 **Slow image loading (the cause).** Artwork took about two seconds to appear on the Habits cards, the world behind
 the tabs, onboarding, the ceremonies, the collection and the 66-Day Story, again on every revisit.
+
 - **Cause:** React Native's `Image` never keeps a decoded image larger than about 2 MB in its cache, and every
   painting here is larger (a scene is 1290 × 800, a tile up to 1568 × 3584, a collectible 1024²). So each mount
   decoded the file again, and every card using a panorama crop decoded a whole tile of its own. In development each
