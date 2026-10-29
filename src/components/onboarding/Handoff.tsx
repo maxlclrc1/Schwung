@@ -3,15 +3,15 @@ import { useSyncExternalStore } from 'react';
 import { AccessibilityInfo, StyleSheet } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+import { ceremonyCover, setCeremonyState } from '../ceremony/state';
 import { cover } from './cover';
 import { Finale } from './Finale';
 
 /*
  * The hand-off from set-up into the app. The finale is drawn above the whole navigator (the root layout's
- * <FinaleHost />), so on Begin Day 1 the app navigates to Habits at once, underneath it. Once the Habits page has
- * laid out and drawn (todayReady), one value on the UI thread, `cover`, fades the finale away (its words first, the
- * mountain last, so it settles into the panorama behind the tabs) while the Habits content rises the last few
- * points into place. No blank frame, no cut, nothing waits on React once it starts.
+ * <FinaleHost />, over <CeremonyHost />). On Begin Day 1 the Day 1 ceremony is drawn beneath it, Habits is opened
+ * beneath both, and one value on the UI thread, `cover`, fades the finale away (its words first, the mountain
+ * last) into the ceremony, which later fades into Habits. No blank frame, no cut.
  */
 
 type State = { habits: string[] | null; saved: boolean; entering: 'begin' | 'skip' | null; ready: boolean };
@@ -27,12 +27,12 @@ const subscribe = (l: () => void) => {
 };
 const useHandoff = () => useSyncExternalStore(subscribe, () => state);
 
-const MS = { begin: 800, skip: 450, still: 250 };
-let fallback: ReturnType<typeof setTimeout> | null = null;
+const MS = { begin: 700, skip: 400, still: 250 };
 
 /** Set-up confirmed: the program is created; show the finale over everything. */
 export function showFinale(habits: string[]) {
   cover.set(1);
+  setCeremonyState({ finaleUp: true, day1FromFinale: false });
   update({ habits, saved: false, entering: null, ready: false });
 }
 
@@ -41,33 +41,31 @@ export function markSaved() {
   update({ saved: true });
 }
 
-/** Begin Day 1 (or Skip): go to Habits beneath the finale, then reveal it. Runs once. */
+/**
+ * Begin Day 1 (or Skip): the Day 1 ceremony comes up beneath the finale (CeremonyHost), Habits is opened beneath
+ * both, and the finale fades away into the ceremony. Runs once.
+ */
 function enter(kind: 'begin' | 'skip') {
   if (state.entering || !state.saved) return;
   update({ entering: kind });
+  ceremonyCover.set(1);
+  setCeremonyState({ finaleUp: false, day1FromFinale: true });
   if (router.canDismiss()) router.dismissAll();
   router.replace('/today');
-  // If the page never reports (it always should), reveal anyway rather than hold the finale up.
-  fallback = setTimeout(() => todayReady(), 1500);
-}
-
-/** The Habits page has laid out and drawn a frame: fade the finale away. */
-export function todayReady() {
-  if (!state.entering || state.ready) return;
-  if (fallback) clearTimeout(fallback);
-  fallback = null;
-  update({ ready: true });
-  const kind = state.entering;
-  void AccessibilityInfo.isReduceMotionEnabled()
-    .catch(() => false)
-    .then((still) => {
-      const duration = still ? MS.still : MS[kind];
-      cover.set(
-        withTiming(0, { duration, easing: Easing.out(Easing.quad) }, (finished) => {
-          if (finished) scheduleOnRN(done);
-        }),
-      );
-    });
+  // Two frames, so the ceremony is drawn beneath before the finale starts to clear.
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      void AccessibilityInfo.isReduceMotionEnabled()
+        .catch(() => false)
+        .then((still) => {
+          cover.set(
+            withTiming(0, { duration: still ? MS.still : MS[kind], easing: Easing.out(Easing.quad) }, (finished) => {
+              if (finished) scheduleOnRN(done);
+            }),
+          );
+        });
+    }),
+  );
 }
 
 function done() {

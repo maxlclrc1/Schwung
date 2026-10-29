@@ -22,7 +22,7 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
 import { cover } from '../onboarding/cover';
-import { todayReady } from '../onboarding/Handoff';
+import { ceremonyCover } from '../ceremony/state';
 import { Button, T } from '../ui';
 import { TodayHero } from './TodayHero';
 
@@ -99,15 +99,16 @@ export function PilotToday() {
 
   // Coming in from set-up's finale: the page rises the last few points as the finale fades (0 otherwise).
   const reduceMotion = useReducedMotion();
-  const arrive = useAnimatedStyle(() => ({ transform: [{ translateY: reduceMotion ? 0 : cover.value * 12 }] }));
-  // Laid out and drawn (two frames on): the finale may fade away now.
-  const onLayout = useCallback(() => requestAnimationFrame(() => requestAnimationFrame(todayReady)), []);
+  // Coming in from a ceremony too: the page rises as it fades.
+  const arrive = useAnimatedStyle(() => ({
+    transform: [{ translateY: reduceMotion ? 0 : Math.max(cover.value, ceremonyCover.value) * 12 }],
+  }));
 
   const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);
   const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
   return (
-    <ThemedView style={[styles.root, arrive]} onLayout={onLayout}>
+    <ThemedView style={[styles.root, arrive]}>
       <Animated.ScrollView
         scrollEnabled={!swiping}
         directionalLockEnabled

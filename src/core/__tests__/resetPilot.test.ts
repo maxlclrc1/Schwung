@@ -735,3 +735,22 @@ describe('saves and compatibility', () => {
     expect(P.sanitizePilotProgram(damaged)?.logs['2026-11-03']).toMatchObject({ completed: [], planned: [] });
   });
 });
+
+describe('the ceremonies', () => {
+  it('the summit is due only once the 66 days are done: Day 66 complete, or any day after, never twice', () => {
+    const p = pilot([{ habitId: 'mind_read', intensity: 'starter' }]);
+    expect(P.summitDue(p, 1)).toBe(false);
+    expect(P.summitDue(p, 65)).toBe(false);
+    expect(P.summitDue(p, 66)).toBe(false);
+    expect(P.summitDue(doneOn(p, 'mind_read', [66]), 66)).toBe(true);
+    // Consistency never decides it: nothing done at all, and it still comes after Day 66.
+    expect(P.summitDue(p, 67)).toBe(true);
+    expect(P.summitDue({ ...p, ceremonies: { summit: true } }, 70)).toBe(false);
+  });
+
+  it('keeps which ceremonies were seen through a save, and nothing else under that name', () => {
+    const p = { ...pilot(), ceremonies: { day1: true, summit: 'yes' } };
+    expect(P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))?.ceremonies).toEqual({ day1: true });
+    expect(P.sanitizePilotProgram(JSON.parse(JSON.stringify(pilot())))?.ceremonies).toBeUndefined();
+  });
+});
