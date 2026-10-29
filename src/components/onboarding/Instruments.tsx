@@ -53,7 +53,7 @@ function useStops(count: number, index: number | null, onChange: (i: number) => 
   const set = (i: number) => {
     const n = clamp(i, 0, count - 1);
     if (n === index) return;
-    haptic.tap();
+    haptic.tick();
     onChange(n);
   };
   const step = (d: 1 | -1) => set(index === null ? 0 : index + d);
@@ -337,7 +337,7 @@ export function TrailPicker<K extends string>({
     ],
   }));
   const pick = (i: number) => {
-    if (i !== index) haptic.tap();
+    if (i !== index) haptic.select();
     onPick(items[i].id);
   };
   const ridge = isDark ? 0.42 : 0.5;

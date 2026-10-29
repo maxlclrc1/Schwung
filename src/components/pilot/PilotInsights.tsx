@@ -181,7 +181,7 @@ function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: n
         label={saved ? `Update (saved: ${saved.minutesPerDay} min)` : 'Save this week'}
         onPress={() => {
           useResetPilot.getState().setScreenTime(value);
-          haptic.success();
+          haptic.confirm();
         }}
       />
     </ThemedView>

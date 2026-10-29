@@ -76,19 +76,19 @@ export function PilotAddHabit() {
   const timeProblem = problems.some((p) => p.startsWith('With it, your habits take'));
 
   const pick = (id: string) => {
-    haptic.tap();
+    haptic.select();
     setPicked(id);
     setLevel(null);
   };
   const ownProblems = mine ? P.customProblems(program, name, perWeek) : [];
   const addOwn = () => {
     if (!useResetPilot.getState().addCustomHabit({ name, note, perWeek })) return;
-    haptic.success();
+    haptic.confirm();
     router.back();
   };
   const add = () => {
     if (!choice || !useResetPilot.getState().addHabit(extra, choice)) return;
-    haptic.success();
+    haptic.confirm();
     router.back();
   };
 
@@ -244,7 +244,7 @@ export function PilotAddHabit() {
                 answers={answers}
                 chosen={intensity}
                 onChoose={(i) => {
-                  haptic.tap();
+                  haptic.select();
                   setLevel(i);
                 }}
                 own={own}

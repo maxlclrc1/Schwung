@@ -311,7 +311,7 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
               <Pressable
                 key={p.week}
                 onPress={() => {
-                  haptic.tap();
+                  haptic.select();
                   setPicked(p.week);
                 }}
                 accessibilityRole="button"
@@ -411,7 +411,7 @@ function HabitBar({
       {first ? null : <ThemedView style={[styles.divider, { backgroundColor: c.border }]} />}
       <Pressable
         onPress={() => {
-          haptic.tap();
+          haptic.select();
           setOpen((o) => !o);
         }}
         accessibilityRole="button"

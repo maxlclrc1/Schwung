@@ -74,8 +74,9 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
         pressed.set(withTiming(0, { duration: 240, easing: PRESS_OUT, reduceMotion: ReduceMotion.System }))
       }
       onPress={() => {
-        haptic.tap();
+        // The action first: if it confirms or succeeds, that haptic stands alone (lib/haptics).
         onPress();
+        haptic.select();
       }}
       // The disabled dim sits on the Pressable: on the animated view it was overridden by the press opacity.
       style={[style, disabled && styles.disabled]}

@@ -682,7 +682,7 @@ export function PilotSetup() {
         <View style={styles.footer}>
           <Pressable
             onPress={() => {
-              haptic.tap();
+              haptic.select();
               go(-1);
             }}
             disabled={!!launching}

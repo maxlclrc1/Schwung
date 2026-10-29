@@ -34,7 +34,7 @@ export function ThemeToggle() {
   return (
     <Pressable
       onPress={() => {
-        haptic.tap();
+        haptic.confirm();
         setThemePreference(isDark ? 'light' : 'dark');
       }}
       onPressIn={() => pressed.set(withTiming(1, { duration: 70 }))}

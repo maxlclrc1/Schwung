@@ -272,8 +272,8 @@ function HabitCardImpl({
 
   const toggle = () => {
     if (readOnly) return;
-    if (done) haptic.uncheck();
-    else haptic.check();
+    if (done) haptic.undo();
+    else haptic.confirm();
     onToggle(habitId);
   };
 
@@ -363,7 +363,7 @@ function HabitCardImpl({
       if (onLongPress) {
         gesture.current.timer = setTimeout(() => {
           gesture.current.mode = 'used';
-          haptic.heavy();
+          haptic.press();
           onLongPress(habitId);
         }, LONG_PRESS_MS);
       }
@@ -388,7 +388,7 @@ function HabitCardImpl({
       const past = (done ? -dx : dx) >= reach;
       if (past !== g.crossed) {
         g.crossed = past;
-        if (past) haptic.tap();
+        if (past) haptic.tick();
       }
     },
     onResponderRelease: (e: GestureResponderEvent) => {

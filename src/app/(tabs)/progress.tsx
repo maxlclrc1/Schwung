@@ -115,7 +115,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
           onPress={(e) => {
             const day = nearestDay(tapPoint(e), width, zoneHeight, 16);
             if (day === null || day > PROGRAM_DAYS) return;
-            haptic.tap();
+            haptic.select();
             setChosen(day === chosen || day === lastDay ? null : day);
           }}
           accessible

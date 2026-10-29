@@ -23,7 +23,7 @@ export function IconButton({
   return (
     <Pressable
       onPress={() => {
-        haptic.tap();
+        haptic.select();
         onPress();
       }}
       hitSlop={8}

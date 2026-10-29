@@ -85,7 +85,7 @@ function AppearancePicker() {
           <Pressable
             key={o.value}
             onPress={() => {
-              haptic.tap();
+              haptic.confirm();
               setThemePreference(o.value);
             }}
             accessibilityRole="radio"
@@ -138,8 +138,8 @@ function Row({
       onPress={
         onPress
           ? () => {
-              haptic.tap();
               onPress();
+              haptic.select();
             }
           : undefined
       }

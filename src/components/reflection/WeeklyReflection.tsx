@@ -88,7 +88,7 @@ export function WeeklyReflection({ week, initial }: { week: number; initial: Ref
 
   if (!program) return null;
   const choose = (a: ReflectionAnswer) => {
-    haptic.tap();
+    haptic.select();
     setAnswer(a);
     setReview(false);
     useResetPilot.getState().reflect(week, a);
@@ -292,7 +292,7 @@ function Adjust({
                       const s = useResetPilot.getState();
                       const blocked = w === 'easier' ? s.easier(id) : s.harder(id);
                       if (blocked) return;
-                      haptic.success();
+                      haptic.confirm();
                       s.reflect(week, undefined, [id]);
                       setDone(`Done. ${preview ?? ''}`.trim());
                     }}

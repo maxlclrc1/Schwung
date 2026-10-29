@@ -217,7 +217,7 @@ function Stage({
     <Animated.View layout={LinearTransition.duration(220).reduceMotion(sys)} style={styles.stage}>
       <Pressable
         onPress={() => {
-          haptic.tap();
+          haptic.select();
           setOpen((o) => !o);
         }}
         accessibilityRole="button"
@@ -281,7 +281,7 @@ function Stage({
             selected={d.day === selected}
             animate={animate.current}
             onPress={() => {
-              haptic.tap();
+              haptic.select();
               onSelect(d.day);
             }}
           />
