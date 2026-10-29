@@ -1,12 +1,15 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { worldFrame } from '../core/world';
 import { space, useTheme } from '../theme';
+import { ART_IMAGE } from './ThemedImage';
 import { ThemedView, useThemeProgress } from '../theme/transition';
 
-const ART = {
+/** The world painting behind single screens (welcome, onboarding, ceremonies); prefetched at launch (artPrefetch). */
+export const WORLD_ART = {
   dark: require('../../assets/world-dark.jpg'),
   light: require('../../assets/world-light.jpg'),
 };
@@ -45,9 +48,13 @@ export function WorldBackdrop({
       importantForAccessibility="no-hide-descendants"
       style={[styles.fill, { backgroundColor: c.bg }]}
     >
-      {/* Both themes stay mounted and crossfade with the theme. */}
-      <Animated.Image source={ART.dark} style={[image, darkArt]} resizeMode="cover" />
-      <Animated.Image source={ART.light} style={[image, lightArt]} resizeMode="cover" />
+      {/* Both themes stay mounted and crossfade with the theme (drawn from the shared decoded cache: ThemedImage). */}
+      <Animated.View style={[image, darkArt]}>
+        <Image {...ART_IMAGE} source={WORLD_ART.dark} style={styles.full} contentFit="cover" priority="high" />
+      </Animated.View>
+      <Animated.View style={[image, lightArt]}>
+        <Image {...ART_IMAGE} source={WORLD_ART.light} style={styles.full} contentFit="cover" priority="high" />
+      </Animated.View>
       {fadeTop ? (
         <LinearGradient
           colors={[c.bg, `${c.bg}00`]}
@@ -63,6 +70,7 @@ const TOP_FADE = 140;
 
 const styles = StyleSheet.create({
   fill: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 },
+  full: { width: '100%', height: '100%' },
 });
 
 /** How much onboarding's text-heavy screens veil the world: present, but well behind the words. */

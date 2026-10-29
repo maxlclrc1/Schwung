@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, View } from 'react-native';
 import { useTheme, type Colors } from '../../theme';
+import { ART_IMAGE } from '../ThemedImage';
 import { COLLECTIBLE_ART } from './art';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
@@ -27,10 +29,11 @@ export function CollectibleArt({ id, size, locked }: { id: string; size: number;
   if (art)
     return (
       <Image
+        {...ART_IMAGE}
         source={art}
         style={{ width: size, height: size, opacity: locked ? 0.5 : 1 }}
-        tintColor={locked ? c.border : undefined}
-        resizeMode="contain"
+        tintColor={locked ? c.border : null}
+        contentFit="contain"
         accessible={false}
       />
     );

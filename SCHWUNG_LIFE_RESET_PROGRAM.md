@@ -267,11 +267,26 @@ The Journey tab and its 66-day calendar show the program (`journeySource.ts`):
 - **Change: both themes of every painting stay mounted.** They're decoded once, when the painting first appears.
   - **Effect:** a switch never loads or decodes; the light version fades over the dark one as before.
   - **Gate:** it only waits for a painting that is still loading (a card that just appeared), now at most 300 ms.
-  - **Cost:** memory, about 65 MB for the six tiles at screen resolution and about 6 MB per card scene.
+  - **Cost:** memory, about 120 MB for the six tiles (full resolution, since the image-loading fix below) and about 4 MB per
+    scene image.
 - **Not changed:** a theme switch still re-renders every component that reads the theme. All three tabs stay
   mounted, so that's three pages of React work on the JS thread at the moment of the switch. Reducing it needs the
   colour system to move off React context (a larger change); it's the next suspect if the switch still feels late
   on a device.
+
+**Slow image loading (the cause).** Artwork took about two seconds to appear on the Habits cards, the world behind
+the tabs, onboarding, the ceremonies, the collection and the 66-Day Story, again on every revisit.
+- **Cause:** React Native's `Image` never keeps a decoded image larger than about 2 MB in its cache, and every
+  painting here is larger (a scene is 1290 × 800, a tile up to 1568 × 3584, a collectible 1024²). So each mount
+  decoded the file again, and every card using a panorama crop decoded a whole tile of its own. In development each
+  mount also fetched the file from the dev server.
+- **Change:** all bundled artwork is drawn with `expo-image` (`ART_IMAGE` in `ThemedImage.tsx`):
+  - `cachePolicy: 'memory-disk'`: decoded once, then every view draws the same cached bitmap;
+  - `allowDownscaling: false`: no per-view resized copy, and full resolution kept;
+  - no transition, so nothing fades in.
+- **Prefetch:** at launch, `components/artPrefetch.ts` decodes the person's own habit scenes and the world painting
+  ahead of time, then the collectibles, a few at a time and off the main thread.
+- **Not changed:** files, resolution, compression, crops, seams and trail positions.
 
 **Tab swiping lag (the cause).** Before this change, a swipe ran through two animation systems and the JS thread:
 

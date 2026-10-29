@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageRequireSource } from 'react-native';
 import type { Theme, TileName } from './worldTiles';
 
 /*
@@ -11,7 +11,7 @@ import type { Theme, TileName } from './worldTiles';
  *   mind_read: { light: require('../../assets/habits/mind_read-light.webp'),
  *                dark: require('../../assets/habits/mind_read-dark.webp') },
  */
-const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>> = {
+const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageRequireSource>>> = {
   // Pilots, from design/artwork-candidates/scene-<id>-<theme>-v1.png (1536 × 1024, trimmed from the bottom to the
   // card's 1.61 : 1 and scaled to 1290 × 800).
   mind_read: {
@@ -62,7 +62,7 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageSourcePropType>>>
 };
 
 /** The final scene for a habit in a theme, once it has one. */
-export function habitScene(habitId: string, theme: Theme): ImageSourcePropType | undefined {
+export function habitScene(habitId: string, theme: Theme): ImageRequireSource | undefined {
   return HABIT_SCENES[habitId]?.[theme];
 }
 

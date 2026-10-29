@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageRequireSource } from 'react-native';
 
 /*
  * The continuous world panorama as shipped: three tiles per theme, cut from the panorama assembled by
@@ -9,7 +9,7 @@ import type { ImageSourcePropType } from 'react-native';
  */
 export type Theme = 'light' | 'dark';
 export type TileName = 'habits' | 'journey' | 'fieldnotes';
-export type Tile = { x: number; width: number; source: ImageSourcePropType };
+export type Tile = { x: number; width: number; source: ImageRequireSource };
 
 export const TILE_HEIGHT = 3584;
 

@@ -119,7 +119,7 @@ const Tiles = memo(function Tiles({ scale }: { scale: number }) {
       <ThemedImage
         key={name}
         sources={{ dark: tile.source, light: TILES.light[name].source }}
-        resizeMode="stretch"
+        contentFit="fill"
         style={{
           position: 'absolute',
           left: tile.x * scale,
