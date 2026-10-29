@@ -140,8 +140,8 @@ export const WeeklyTrend = memo(function WeeklyTrend({ points }: { points: WeekP
                     style={[
                       styles.trendBar,
                       p.state === 'current'
-                        ? { height: h, borderWidth: 1.5, borderBottomWidth: 0, borderColor: c.accent }
-                        : { height: h, backgroundColor: c.accent },
+                        ? { height: h, borderWidth: 1.5, borderBottomWidth: 0, borderColor: c.mist }
+                        : { height: h, backgroundColor: c.mist },
                     ]}
                   />
                 )}
@@ -202,9 +202,9 @@ function CellMark({ state, partial }: { state: CellState; partial: number }) {
   const base = styles.cellMark;
   switch (state) {
     case 'full':
-      return <View style={[base, { backgroundColor: c.accent }]} />;
+      return <View style={[base, { backgroundColor: c.sage }]} />;
     case 'partial':
-      return <View style={[base, { backgroundColor: c.accent, opacity: 0.25 + 0.35 * partial }]} />;
+      return <View style={[base, { backgroundColor: c.sage, opacity: 0.25 + 0.35 * partial }]} />;
     case 'missed':
       return <View style={[base, styles.ring, { borderColor: c.textFaint }]} />;
     case 'skipped':
@@ -215,9 +215,9 @@ function CellMark({ state, partial }: { state: CellState; partial: number }) {
       return <View style={[base, styles.ring, { borderColor: c.border, borderStyle: 'dashed' }]} />;
     case 'today':
       return (
-        <View style={[base, styles.ring, { borderColor: c.accentInk, overflow: 'hidden' }]}>
+        <View style={[base, styles.ring, { borderColor: c.mistInk, overflow: 'hidden' }]}>
           {partial > 0 ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: c.accent, opacity: 0.25 + 0.35 * partial }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: c.sage, opacity: 0.25 + 0.35 * partial }]} />
           ) : null}
         </View>
       );

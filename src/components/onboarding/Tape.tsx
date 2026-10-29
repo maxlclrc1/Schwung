@@ -6,8 +6,6 @@ import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
   Easing,
-  FadeInDown,
-  FadeOutUp,
   ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
@@ -209,55 +207,6 @@ export function Tape({
   );
 }
 
-/**
- * Text whose characters each roll softly into place when they change (a digit slides up a few points as the old
- * one leaves), so a number being dialled reads as one moving thing. Fixed-width slots: nothing around it shifts.
- */
-export function RollingText({
-  text,
-  size,
-  color,
-  charWidth,
-}: {
-  text: string;
-  size: number;
-  color: string;
-  /** The width of one character slot (narrow characters such as ":" take half). */
-  charWidth: number;
-}) {
-  return (
-    <View style={styles.rolling} accessible accessibilityLabel={text}>
-      {text.split('').map((ch, i) => {
-        const narrow = ch === ':' || ch === '–' || ch === '+';
-        return (
-          <View
-            key={i}
-            style={{ width: narrow ? charWidth * 0.5 : charWidth, height: size * 1.12, overflow: 'hidden' }}
-          >
-            <Animated.Text
-              key={ch}
-              entering={ROLL_IN}
-              exiting={ROLL_OUT}
-              style={[
-                styles.rollChar,
-                { fontSize: size, lineHeight: size * 1.12, color, width: narrow ? charWidth * 0.5 : charWidth },
-              ]}
-            >
-              {ch}
-            </Animated.Text>
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-const ROLL_IN = FadeInDown.duration(220)
-  .easing(ease)
-  .withInitialValues({ opacity: 0, transform: [{ translateY: 14 }] })
-  .reduceMotion(ReduceMotion.System);
-const ROLL_OUT = FadeOutUp.duration(160).reduceMotion(ReduceMotion.System);
-
 /** Round − and + buttons, for one exact step. */
 export function StepRound({
   icon,
@@ -295,7 +244,7 @@ const styles = StyleSheet.create({
   needleWrap: { position: 'absolute', top: 0, bottom: 0, left: '50%', marginLeft: -1.5, alignItems: 'center' },
   needle: { width: 3, height: 40, borderBottomLeftRadius: 2, borderBottomRightRadius: 2 },
   needleCap: { width: 9, height: 9, borderRadius: 5, marginTop: -4 },
-  rolling: { flexDirection: 'row', justifyContent: 'center' },
-  rollChar: { position: 'absolute', left: 0, top: 0, fontWeight: '800', textAlign: 'center', letterSpacing: -1 },
   round: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
 });
+
+export { RollingText } from '../RollingText';
