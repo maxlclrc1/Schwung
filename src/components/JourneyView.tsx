@@ -75,8 +75,8 @@ export function JourneyView({
               const ok = dayQualifies(log);
               const ratio = dayRatio(log);
               const rest = !ok && !isToday && !future && !!source.rest?.(day);
-              const bg = future || rest ? 'transparent' : full ? c.accent : ok ? c.accentSoft : c.surface;
-              const fg = full ? c.onAccent : future ? c.textFaint : ok ? c.accentInk : c.textDim;
+              const bg = future || rest ? 'transparent' : full ? c.sage : ok ? c.sageSoft : c.surface;
+              const fg = full ? c.onTint : future ? c.textFaint : ok ? c.sageInk : c.textDim;
               const label = `Day ${day}${future ? '' : rest ? ', rest day' : `, ${Math.round(ratio * 100)}% done`}${isToday && onSelect ? ', today' : ''}${isPicked ? ', selected' : ''}`;
               const box = (
                 <ThemedView
@@ -89,7 +89,7 @@ export function JourneyView({
                       height: cell,
                       backgroundColor: bg,
                       borderColor: isToday
-                        ? c.accentInk
+                        ? c.indigoInk
                         : isPicked
                           ? c.text
                           : future || rest
@@ -103,7 +103,7 @@ export function JourneyView({
                     {day}
                   </T>
                   {!future && !ok && ratio > 0 ? (
-                    <View style={[styles.partial, { backgroundColor: c.accentInk, width: `${ratio * 70}%` }]} />
+                    <View style={[styles.partial, { backgroundColor: c.sageInk, width: `${ratio * 70}%` }]} />
                   ) : null}
                 </ThemedView>
               );
@@ -130,8 +130,8 @@ export function JourneyView({
       ))}
 
       <View style={styles.legend}>
-        <Legend color={c.accent} label="All done" />
-        <Legend color={c.accentSoft} label="80%+ (keeps streak)" />
+        <Legend color={c.sage} label="All done" />
+        <Legend color={c.sageSoft} label="80%+ (keeps streak)" />
         <Legend color={c.surface} label="Missed / partial" />
       </View>
     </ScrollView>

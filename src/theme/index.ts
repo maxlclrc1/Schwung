@@ -24,6 +24,20 @@ const dark = {
   accentLight: '#DDD3FE', // highlights in celebrations
   gold: '#F2B84B', // milestones only (ceremonies, finale): never an everyday accent
   danger: '#FF7A7A', // destructive actions
+  // Section accents from the world, each a fill, a soft tint and an ink for text (AA on bg and on its soft tint):
+  sage: '#8FB08C', // completion and consistency
+  sageSoft: 'rgba(143,176,140,0.16)',
+  sageInk: '#B2D0AF',
+  peach: '#E2A988', // XP and milestones
+  peachSoft: 'rgba(226,169,136,0.16)',
+  peachInk: '#F2C4A8',
+  mist: '#8EA6C6', // tracking and data
+  mistSoft: 'rgba(142,166,198,0.16)',
+  mistInk: '#B6C8E2',
+  indigo: '#7F7DD0', // the mountain's atmosphere
+  indigoSoft: 'rgba(130,128,214,0.18)',
+  indigoInk: '#BDBCF0',
+  onTint: '#14131C', // text and icons on a sage, peach, mist or indigo fill
 };
 
 const light: typeof dark = {
@@ -41,6 +55,19 @@ const light: typeof dark = {
   accentLight: '#C9B8F5',
   gold: '#A76A00',
   danger: '#C93B3B',
+  sage: '#557A58',
+  sageSoft: 'rgba(85,122,88,0.13)',
+  sageInk: '#466648',
+  peach: '#A8643F',
+  peachSoft: 'rgba(168,100,63,0.12)',
+  peachInk: '#8A4F31',
+  mist: '#5A7598',
+  mistSoft: 'rgba(90,117,152,0.13)',
+  mistInk: '#46607F',
+  indigo: '#4F4D9A',
+  indigoSoft: 'rgba(79,77,154,0.12)',
+  indigoInk: '#403E85',
+  onTint: '#FFFFFD',
 };
 
 export type Colors = typeof dark;

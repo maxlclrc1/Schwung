@@ -6,6 +6,7 @@ import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { IconButton, SettingsButton } from '../../components/HeaderButton';
+import { ThemeToggle } from '../../components/ThemeToggle';
 import { JourneyView } from '../../components/JourneyView';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
 import { usePagerBlock } from '../../components/TabPager';
@@ -60,6 +61,7 @@ function Header({ onCalendar }: { onCalendar?: () => void }) {
       {onCalendar ? (
         <IconButton name="calendar-outline" label="Your 66 days, as a calendar" onPress={onCalendar} />
       ) : null}
+      <ThemeToggle />
       <SettingsButton />
     </View>
   );
@@ -108,15 +110,15 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             accessible
             accessibilityLabel={`${stats.done} days done, ${stats.streak} day streak, best ${stats.best}`}
           >
-            <Stat n={stats.done} label="days done" />
+            <Stat n={stats.done} label="days done" color={c.sageInk} />
             <T v="caption" color={c.textFaint}>
               ·
             </T>
-            <Stat n={stats.streak} label="streak" />
+            <Stat n={stats.streak} label="streak" color={c.peachInk} />
             <T v="caption" color={c.textFaint}>
               ·
             </T>
-            <Stat n={stats.best} label="best" />
+            <Stat n={stats.best} label="best" color={c.indigoInk} />
           </ThemedView>
         </View>
 
@@ -162,7 +164,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
               style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
             >
               <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
-                <T v="caption" color={c.accentInk} style={styles.captionKicker} maxFontSizeMultiplier={1.3}>
+                <T v="caption" color={c.indigoInk} style={styles.captionKicker} maxFontSizeMultiplier={1.3}>
                   {summary.kicker}
                 </T>
                 <T v="caption" numberOfLines={1} style={styles.captionText} maxFontSizeMultiplier={1.3}>
@@ -173,8 +175,8 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             </Pressable>
             {chosen !== null ? (
               <Pressable onPress={() => setChosen(null)} accessibilityRole="button" style={styles.back} hitSlop={8}>
-                <Ionicons name="return-down-back" size={16} color={c.accentInk} />
-                <T v="caption" color={c.accentInk} style={{ fontWeight: '700' }}>
+                <Ionicons name="return-down-back" size={16} color={c.indigoInk} />
+                <T v="caption" color={c.indigoInk} style={{ fontWeight: '700' }}>
                   {today > PROGRAM_DAYS ? 'Summit' : 'Today'}
                 </T>
               </Pressable>
@@ -210,7 +212,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 Your 66 days
               </T>
               <Pressable onPress={() => setCalendar(false)} hitSlop={12} accessibilityRole="button">
-                <T v="bodyStrong" color={c.accentInk}>
+                <T v="bodyStrong" color={c.indigoInk}>
                   Done
                 </T>
               </Pressable>
@@ -235,11 +237,11 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
 }
 
 /** A number and its label, e.g. "7 days done". */
-function Stat({ n, label }: { n: number; label: string }) {
+function Stat({ n, label, color }: { n: number; label: string; color: string }) {
   const { c } = useTheme();
   return (
     <View style={styles.stat}>
-      <T v="caption" style={[styles.tabular, { fontWeight: '700' }]} maxFontSizeMultiplier={1.3}>
+      <T v="caption" color={color} style={[styles.tabular, { fontWeight: '800' }]} maxFontSizeMultiplier={1.3}>
         {n}
       </T>
       <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.3}>
@@ -300,7 +302,7 @@ function DayDetail({
                 <Ionicons
                   name={done ? 'checkmark-circle' : 'ellipse-outline'}
                   size={18}
-                  color={done ? c.accentInk : c.textFaint}
+                  color={done ? c.indigoInk : c.textFaint}
                 />
                 <T v="caption" color={done ? c.text : c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.4}>
                   {title(id)}
@@ -327,7 +329,7 @@ function DayDetail({
 const styles = StyleSheet.create({
   scroll: { paddingBottom: space.xxxl, gap: space.md },
   pad: { paddingHorizontal: space.lg, gap: space.md },
-  header: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 44 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
   card: { borderRadius: radius.lg, padding: space.md, gap: space.md },
   statsPill: {
     flexDirection: 'row',

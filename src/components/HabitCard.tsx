@@ -3,11 +3,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { memo, useEffect, useRef, type ReactNode } from 'react';
 import { type GestureResponderEvent, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
+  Easing,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -237,9 +239,31 @@ function HabitCardImpl({
   // The card's horizontal offset while dragged (pt), and the done look (0..1), which eases in and out.
   const tx = useSharedValue(0);
   const doneP = useSharedValue(done ? 1 : 0);
+  // Completing (never on open or a re-render): one soft sage ring breathes out from the check, and the check
+  // itself lands with a small overshoot-free pop.
+  const ring = useSharedValue(0);
+  const pop = useSharedValue(0);
+  const wasDone = useRef(done);
   useEffect(() => {
-    doneP.set(reduceMotion ? (done ? 1 : 0) : withTiming(done ? 1 : 0, { duration: 220 }));
-  }, [done, doneP, reduceMotion]);
+    doneP.set(
+      reduceMotion
+        ? done
+          ? 1
+          : 0
+        : withTiming(done ? 1 : 0, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
+    );
+    const completed = done && !wasDone.current;
+    wasDone.current = done;
+    if (!completed || reduceMotion) return;
+    ring.set(0);
+    ring.set(withTiming(1, { duration: 620, easing: Easing.out(Easing.cubic) }));
+    pop.set(
+      withSequence(
+        withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 260, easing: Easing.inOut(Easing.quad) }),
+      ),
+    );
+  }, [done, doneP, reduceMotion, ring, pop]);
 
   const settle = () => tx.set(reduceMotion ? withTiming(0, { duration: SETTLE_MS }) : withSpring(0, SPRING));
 
@@ -405,9 +429,19 @@ function HabitCardImpl({
     const k = interpolate(done ? 0 : tx.get(), [0, reach], [0, 0.5], 'clamp');
     return { opacity: Math.max(doneP.get(), k) * (isDark ? 0.24 : 0.16) };
   });
-  const doneRow = useAnimatedStyle(() => ({ opacity: doneP.get() }));
+  const doneRow = useAnimatedStyle(() => ({
+    opacity: doneP.get(),
+    transform: [{ translateY: (1 - doneP.get()) * 6 }],
+  }));
   const todoRow = useAnimatedStyle(() => ({ opacity: 1 - doneP.get() }));
-  const badge = useAnimatedStyle(() => ({ opacity: doneP.get(), transform: [{ scale: 0.7 + 0.3 * doneP.get() }] }));
+  const badge = useAnimatedStyle(() => ({
+    opacity: doneP.get(),
+    transform: [{ scale: 0.6 + 0.4 * doneP.get() + 0.14 * pop.get() }],
+  }));
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: ring.get() > 0 && ring.get() < 1 ? 0.55 * (1 - ring.get()) : 0,
+    transform: [{ scale: 1 + ring.get() * 1.6 }],
+  }));
 
   const title = display.title;
   const target = display.task;
@@ -442,7 +476,7 @@ function HabitCardImpl({
       style={[styles.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
     >
       <Scene habitId={habitId} scene={scene} width={width} height={height} />
-      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: c.accent }, washStyle]} />
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: c.sage }, washStyle]} />
       <Veil pick="veil" locations={[0.35, 0.62, 1]} style={StyleSheet.absoluteFill} />
       {/* A faint veil at the top, for the level label over the sky. */}
       <Veil pick="top" style={styles.topVeil} />
@@ -466,14 +500,20 @@ function HabitCardImpl({
           {levelName}
         </Ink>
       </View>
-      {/* Done: a check in the top-right corner. */}
+      {/* Done: a check in the top-right corner, with the ring that breathes out from it on completing. */}
       <Animated.View
         pointerEvents="none"
-        style={[styles.badge, { backgroundColor: c.accent }, badge]}
+        style={[styles.badge, styles.ring, { borderColor: c.sage }, ringStyle]}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden
+      />
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.badge, { backgroundColor: c.sage }, badge]}
         importantForAccessibility="no-hide-descendants"
         accessibilityElementsHidden
       >
-        <Ionicons name="checkmark" size={18} color={c.onAccent} />
+        <Ionicons name="checkmark" size={18} color={c.onTint} />
       </Animated.View>
 
       {/* What a swipe will do, appearing as the card moves: a check (complete) or an undo arrow. */}
@@ -483,11 +523,11 @@ function HabitCardImpl({
         importantForAccessibility="no-hide-descendants"
         accessibilityElementsHidden
       >
-        <View style={[styles.markCircle, { borderColor: c.accent, backgroundColor: ink.chip }]}>
-          <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={isDark ? c.text : c.accentInk} />
+        <View style={[styles.markCircle, { borderColor: c.sage, backgroundColor: ink.chip }]}>
+          <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={isDark ? c.text : c.sageInk} />
           {/* Fills in as the drag reaches the threshold. */}
-          <Animated.View style={[StyleSheet.absoluteFill, styles.markSolid, { backgroundColor: c.accent }, markFill]}>
-            <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={c.onAccent} />
+          <Animated.View style={[StyleSheet.absoluteFill, styles.markSolid, { backgroundColor: c.sage }, markFill]}>
+            <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={c.onTint} />
           </Animated.View>
         </View>
       </Animated.View>
@@ -518,14 +558,14 @@ function HabitCardImpl({
             </View>
             {readOnly ? null : (
               <CardButton onPress={toggle} style={[styles.check, { backgroundColor: ink.chip, borderColor: ink.edge }]}>
-                <Ionicons name="checkmark" size={22} color={isDark ? c.text : c.accentInk} />
+                <Ionicons name="checkmark" size={22} color={isDark ? c.text : c.sageInk} />
               </CardButton>
             )}
           </Animated.View>
           <Animated.View style={[styles.statusSide, styles.statusOver, doneRow]} pointerEvents={done ? 'auto' : 'none'}>
-            <View style={[styles.donePill, { backgroundColor: c.accent }]}>
-              <Ionicons name="checkmark" size={16} color={c.onAccent} />
-              <Animated.Text style={[styles.doneText, { color: c.onAccent }]} maxFontSizeMultiplier={1.3}>
+            <View style={[styles.donePill, { backgroundColor: c.sage }]}>
+              <Ionicons name="checkmark" size={16} color={c.onTint} />
+              <Animated.Text style={[styles.doneText, { color: c.onTint }]} maxFontSizeMultiplier={1.3}>
                 {display.doneText ?? 'Done for today'}
               </Animated.Text>
             </View>
@@ -568,6 +608,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  ring: { backgroundColor: 'transparent', borderWidth: 2 },
   mark: { position: 'absolute', top: 44 },
   markDone: { left: 24 },
   markUndo: { right: 24 },

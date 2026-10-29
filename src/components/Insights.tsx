@@ -9,6 +9,7 @@ import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import type { Tally } from '../core/charts';
 import { SettingsButton } from './HeaderButton';
+import { ThemeToggle } from './ThemeToggle';
 import { ProgressBar, T } from './ui';
 import { SCREEN_PX, worldAnchor } from './WorldLayer';
 import { LAKESIDE_BAND_TOP, TILE_HEIGHT } from './worldTiles';
@@ -39,6 +40,7 @@ export function InsightsPage({ children }: { children: ReactNode }) {
         <T v="heading" accessibilityRole="header" style={{ flex: 1 }}>
           Insights
         </T>
+        <ThemeToggle />
         <SettingsButton />
       </View>
       {/* A narrow window onto the lakeside, between the title and the numbers. */}
@@ -136,11 +138,11 @@ export function DayStrip({ days }: { days: { day: number; state: StripState }[] 
           style={[
             styles.mark,
             d.state === 'done'
-              ? { backgroundColor: c.accent }
+              ? { backgroundColor: c.sage }
               : d.state === 'missed' || d.state === 'skipped'
                 ? { borderWidth: 1.5, borderColor: c.textFaint }
                 : d.state === 'today'
-                  ? { borderWidth: 1.5, borderColor: c.accentInk }
+                  ? { borderWidth: 1.5, borderColor: c.mistInk }
                   : { backgroundColor: c.border, transform: [{ scale: 0.5 }] },
           ]}
         />
@@ -165,7 +167,7 @@ export function WeekBars({ weeks }: { weeks: { week: number; credited: number; g
             <ThemedView
               style={[
                 styles.barFill,
-                { backgroundColor: c.accent, height: `${Math.min(1, w.credited / w.goal) * 100}%` },
+                { backgroundColor: c.mist, height: `${Math.min(1, w.credited / w.goal) * 100}%` },
               ]}
             />
           </ThemedView>
@@ -212,12 +214,12 @@ export function HabitInsight({
           <T v="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
             {title}
           </T>
-          <T v="bodyStrong" color={p === null ? c.textFaint : c.accentInk} style={styles.tabular}>
+          <T v="bodyStrong" color={p === null ? c.textFaint : c.mistInk} style={styles.tabular}>
             {p === null ? '—' : `${p}%`}
           </T>
           <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textDim} />
         </View>
-        <ProgressBar value={p === null ? 0 : p / 100} height={6} />
+        <ProgressBar value={p === null ? 0 : p / 100} height={6} color={c.mist} />
         <T v="caption" color={c.textDim}>
           {subtitle}
         </T>
@@ -243,7 +245,7 @@ export function SectionTitle({ children }: { children: string }) {
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.md },
-  header: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 44 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
   habit: { paddingVertical: space.md },
   big: { flexDirection: 'row', alignItems: 'baseline', gap: space.md },

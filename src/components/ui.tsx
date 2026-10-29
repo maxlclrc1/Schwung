@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { Pressable, StyleProp, StyleSheet, TextProps, View, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { haptic } from '../lib/haptics';
 import { radius, space, type, useTheme } from '../theme';
@@ -53,9 +53,13 @@ type ButtonProps = {
 
 export function Button({ label, onPress, kind = 'primary', disabled, style, icon }: ButtonProps) {
   const { c } = useTheme();
-  // Press feedback by dimming, not scaling: scaled text is drawn from a stretched bitmap on iOS.
+  // Press feedback: a slight give (2%, too little for iOS's scaled-text bitmap to show) and a touch of dim, quick
+  // in and eased back out.
   const pressed = useSharedValue(0);
-  const anim = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.25 }));
+  const anim = useAnimatedStyle(() => ({
+    opacity: 1 - pressed.value * 0.12,
+    transform: [{ scale: 1 - pressed.value * 0.02 }],
+  }));
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
   const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? c.danger : kind === 'ghost' ? c.textDim : c.text;
   const fade = useThemedColors({ backgroundColor: bg });
@@ -65,8 +69,10 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
-      onPressIn={() => pressed.set(withTiming(1, { duration: 80 }))}
-      onPressOut={() => pressed.set(withTiming(0, { duration: 150 }))}
+      onPressIn={() => pressed.set(withTiming(1, { duration: 70, reduceMotion: ReduceMotion.System }))}
+      onPressOut={() =>
+        pressed.set(withTiming(0, { duration: 240, easing: PRESS_OUT, reduceMotion: ReduceMotion.System }))
+      }
       onPress={() => {
         haptic.tap();
         onPress();
@@ -90,7 +96,10 @@ export function ProgressBar({ value, height = 6, color }: { value: number; heigh
   const { c } = useTheme();
   const progress = useSharedValue(value);
   useEffect(() => {
-    progress.set(withTiming(Math.max(0, Math.min(1, value)), { duration: 250 }));
+    // Eases to its new value: a quick start that settles softly.
+    progress.set(
+      withTiming(Math.max(0, Math.min(1, value)), { duration: 520, easing: SETTLE, reduceMotion: ReduceMotion.System }),
+    );
   }, [value, progress]);
   const anim = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
   const fill = color ?? c.accent;
@@ -127,6 +136,9 @@ export function LevelPips({ level }: { level: 'easy' | 'medium' | 'hard' }) {
 }
 
 export const LEVEL_LABEL = { easy: 'Lv 1', medium: 'Lv 2', hard: 'Lv 3' } as const;
+
+const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
+const PRESS_OUT = Easing.out(Easing.cubic);
 
 const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },

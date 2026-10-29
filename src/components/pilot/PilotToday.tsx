@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import Animated, {
+  Easing,
   FadeInDown,
   FadeOut,
   LinearTransition,
@@ -23,6 +24,7 @@ import { CardButton, HabitCard } from '../HabitCard';
 import { SettingsButton } from '../HeaderButton';
 import { cover } from '../onboarding/cover';
 import { todayReady } from '../onboarding/Handoff';
+import { RollingText } from '../RollingText';
 import { ThemeToggle } from '../ThemeToggle';
 import { Button, ProgressBar, T } from '../ui';
 
@@ -135,6 +137,7 @@ export function PilotToday() {
         <ThemedView style={[styles.summary, { backgroundColor: c.surface }]}>
           <T
             v="bodyStrong"
+            color={full ? c.sageInk : c.text}
             accessibilityLabel={summaryLabel(
               done,
               program.habits.length,
@@ -148,12 +151,14 @@ export function PilotToday() {
                 ? `${done} of ${program.habits.length} done today`
                 : 'Nothing done yet today'}
           </T>
+          {/* Today's share done, filling in sage as cards are completed. */}
+          <ProgressBar value={full ? 1 : done / Math.max(1, program.habits.length)} height={6} color={c.sage} />
           <T v="caption" color={c.textDim}>
             Weekly habits count on the days you do them. Rest days are never missed days.
           </T>
           <ThemedView style={[styles.stats, { borderTopColor: c.border }]}>
             <View style={styles.statItem} accessible accessibilityLabel={`${streak} day streak`}>
-              <Ionicons name="flame" size={16} color={streak > 0 ? c.accentInk : c.textFaint} />
+              <Ionicons name="flame" size={16} color={streak > 0 ? c.peach : c.textFaint} />
               <T v="caption" style={{ fontWeight: '700' }}>
                 {streak > 0 ? `${streak}-day streak` : 'Streak starts today'}
               </T>
@@ -163,15 +168,20 @@ export function PilotToday() {
               accessible
               accessibilityLabel={`Level ${playerLevel(xp)}, ${xp} XP`}
             >
-              <T v="caption" style={{ fontWeight: '700' }}>
+              <T v="caption" color={c.peachInk} style={{ fontWeight: '800' }}>
                 Lv {playerLevel(xp)}
               </T>
               <View style={{ width: 40 }}>
-                <ProgressBar value={levelProgress(xp)} height={4} />
+                <ProgressBar value={levelProgress(xp)} height={4} color={c.peach} />
               </View>
-              <T v="caption" color={c.textDim}>
-                {xp} XP
-              </T>
+              {/* XP rolls up digit by digit as it's earned (and back on an undo). */}
+              <View style={styles.xp}>
+                <RollingText text={`${xp}`} size={14} charWidth={8.6} weight="700" color={c.textDim} />
+                <T v="caption" color={c.textDim}>
+                  {' '}
+                  XP
+                </T>
+              </View>
             </View>
           </ThemedView>
         </ThemedView>
@@ -233,12 +243,12 @@ export function PilotToday() {
       {celebrate ? (
         <View pointerEvents="none" style={styles.celebrateWrap}>
           <ThemedView
-            entering={FadeInDown.springify().damping(16)}
+            entering={FadeInDown.duration(380).easing(Easing.bezier(0.22, 1, 0.36, 1))}
             exiting={FadeOut.duration(250)}
-            style={[styles.celebrate, { backgroundColor: c.accent }]}
+            style={[styles.celebrate, { backgroundColor: c.sage }]}
           >
-            <Ionicons name="checkmark-done" size={22} color={c.onAccent} />
-            <T v="bodyStrong" color={c.onAccent}>
+            <Ionicons name="checkmark-done" size={22} color={c.onTint} />
+            <T v="bodyStrong" color={c.onTint}>
               Day complete · +{XP_FULL_DAY_BONUS} XP bonus
             </T>
           </ThemedView>
@@ -456,6 +466,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.lg, gap: space.lg },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.md },
   headerIcons: { flexDirection: 'row', gap: space.sm },
+  xp: { flexDirection: 'row', alignItems: 'center' },
   summary: { borderRadius: radius.lg, padding: space.lg, gap: space.sm },
   stats: {
     flexDirection: 'row',
