@@ -110,9 +110,9 @@ describe('the 66-day heatmap (Life Reset)', () => {
 
   it('tells full, partial, today and future days apart', () => {
     const cells = C.dayCells(p, 9);
-    // Day 1: both done. Day 3: only Focus (Read missed). Day 6, a Saturday: Read done, Focus rests (weekly), so the
-    // day is full. Day 9 is today, Day 10 hasn't come.
-    expect(states(cells, [1, 3, 6, 9, 10])).toEqual(['full', 'partial', 'full', 'today', 'future']);
+    // Day 1: both done. Day 3: only Focus (Read missed). Day 6, a Saturday: Read done, but Focus's week is still open
+    // (3 of 5), so the day isn't complete. Day 9 is today, Day 10 hasn't come.
+    expect(states(cells, [1, 3, 6, 9, 10])).toEqual(['full', 'partial', 'partial', 'today', 'future']);
     expect(cells[2]).toMatchObject({ done: ['focus_deepwork'], planned: ['focus_deepwork', 'mind_read'] });
   });
 
