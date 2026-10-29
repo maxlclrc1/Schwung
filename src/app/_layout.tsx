@@ -7,6 +7,7 @@ import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CeremonyHost } from '../components/ceremony/Ceremonies';
 import { FinaleHost } from '../components/onboarding/Handoff';
+import { RecoveryScreen } from '../components/RecoveryScreen';
 import { ReminderSync } from '../components/reminders/ReminderSync';
 import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
@@ -94,6 +95,8 @@ export default function RootLayout() {
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
         <CeremonyHost />
         <FinaleHost />
+        {/* A save that couldn't be fully read: over everything, until the person decides (store/recovery.ts). */}
+        <RecoveryScreen />
       </ThemeTransitionProvider>
     </SafeAreaProvider>
   );

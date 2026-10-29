@@ -168,8 +168,11 @@ describe('persistence and recovery', () => {
     clock.mockRestore();
   });
 
-  it('drops a damaged save rather than trusting it', () => {
-    expect(sanitizeResetPilot({ program: { v: 1, startedAt: 'x' } })).toEqual({ program: null });
+  it('never trusts a damaged save, and says what it couldn’t read', () => {
+    expect(sanitizeResetPilot({ program: { v: 1, startedAt: 'x' } })).toEqual({
+      program: null,
+      lost: ['The Life Reset itself (its start date or format)'],
+    });
     expect(sanitizeResetPilot('nope')).toEqual({});
     expect(sanitizeResetPilot({ program: null, devDayOffset: 3 })).toEqual({ program: null, devDayOffset: 3 });
   });

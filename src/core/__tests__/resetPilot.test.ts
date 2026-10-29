@@ -733,7 +733,11 @@ describe('saves and compatibility', () => {
     expect(P.sanitizePilotProgram({ ...p, startedAt: 'yesterday' })).toBeNull();
     expect(P.sanitizePilotProgram({ ...p, habits: ['move_strength_session'] })).toBeNull();
     const damaged = { ...p, logs: { ...p.logs, nope: { day: 1 }, '2026-11-03': { day: 2, completed: 'x' } } };
-    expect(P.sanitizePilotProgram(damaged)?.logs['2026-11-03']).toMatchObject({ completed: [], planned: [] });
+    // Read forgivingly, and never silently: the bad day record is named, and the strict reading refuses it.
+    const read = P.inspectPilotProgram(damaged);
+    expect(read.program?.logs['2026-11-03']).toMatchObject({ completed: [], planned: [] });
+    expect(read.lost).toEqual(['1 day record']);
+    expect(P.sanitizePilotProgram(damaged)).toBeNull();
   });
 });
 

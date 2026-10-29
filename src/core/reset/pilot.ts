@@ -1106,11 +1106,25 @@ function validState(s: unknown, id: string): s is ProgressionState {
 }
 
 /** A saved program, if it's well formed (damaged day records are repaired or dropped); otherwise null. */
-export function sanitizePilotProgram(x: unknown): PilotProgram | null {
-  if (!isObj(x) || x.v !== 1 || typeof x.startedAt !== 'string' || !DATE_KEY.test(x.startedAt)) return null;
+/**
+ * A saved program as far as it can be understood, and what couldn't be: the program with every part that's valid
+ * (each habit, its targets and history, the day records, reflections, the collection) and, in `lost`, a plain-words
+ * list of anything left out. A damaged habit is set aside, never quietly dropped: it's named in `lost`, and its
+ * records stay in the logs (the original save is kept whole for recovery by the store). `program` is null only
+ * when the program itself can't be read (no valid start date, answers or habits).
+ */
+export function inspectPilotProgram(x: unknown): { program: PilotProgram | null; lost: string[] } {
+  if (!isObj(x) || x.v !== 1 || typeof x.startedAt !== 'string' || !DATE_KEY.test(x.startedAt))
+    return { program: null, lost: ['The Life Reset itself (its start date or format)'] };
   const a = x.answers;
-  if (!isObj(a) || typeof a.age !== 'string' || typeof a.minutesPerDay !== 'number') return null;
-  if (!(a.precautions === 'unknown' || Array.isArray(a.precautions))) return null;
+  if (
+    !isObj(a) ||
+    typeof a.age !== 'string' ||
+    typeof a.minutesPerDay !== 'number' ||
+    !(a.precautions === 'unknown' || Array.isArray(a.precautions))
+  )
+    return { program: null, lost: ['Your set-up answers'] };
+  const lost: string[] = [];
   const custom: Record<string, CustomHabit> = {};
   for (const [id, c] of Object.entries(isObj(x.custom) ? x.custom : {}))
     if (
@@ -1133,21 +1147,33 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
         scene: c.scene,
       };
   const known = (id: string) => isPilotHabit(id) || id in custom;
-  const habits = strings(x.habits).filter(known);
-  if (!habits.length || !isObj(x.progression)) return null;
+  const label = (id: string) =>
+    id in custom ? custom[id].name : isPilotHabit(id) ? habitName(id) : 'One of your own habits';
+  const progressionIn = isObj(x.progression) ? x.progression : {};
+  const habits: string[] = [];
   const progression: Record<string, ProgressionState> = {};
-  for (const id of habits) {
-    const s = x.progression[id];
-    if (!validState(s, id)) return null;
-    progression[id] = s;
+  for (const id of strings(x.habits)) {
+    const s = progressionIn[id];
+    if (known(id) && validState(s, id)) {
+      habits.push(id);
+      progression[id] = s;
+    } else lost.push(`${label(id)}: its targets and progress`);
   }
-  // Removed habits keep their state (their past counts); a damaged one is dropped with its history.
-  for (const [id, s] of Object.entries(x.progression))
-    if (!(id in progression) && known(id) && validState(s, id)) progression[id] = s;
+  // Removed habits keep their state (their past counts); a damaged one is named, not dropped silently.
+  for (const [id, s] of Object.entries(progressionIn))
+    if (!(id in progression) && !strings(x.habits).includes(id)) {
+      if (known(id) && validState(s, id)) progression[id] = s;
+      else lost.push(`${label(id)} (a habit you removed): its past progress`);
+    }
   for (const id of Object.keys(custom)) if (!(id in progression)) delete custom[id];
+  if (!habits.length) return { program: null, lost: lost.length ? lost : ['Your habits'] };
   const logs: Record<string, DayLog> = {};
+  let badDays = 0;
   for (const [k, l] of Object.entries(isObj(x.logs) ? x.logs : {})) {
-    if (!DATE_KEY.test(k) || !isObj(l) || typeof l.day !== 'number') continue;
+    if (!DATE_KEY.test(k) || !isObj(l) || typeof l.day !== 'number') {
+      badDays++;
+      continue;
+    }
     logs[k] = {
       ...(l as Partial<DayLog>),
       day: l.day,
@@ -1156,7 +1182,12 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
       planned: strings(l.planned),
     } as DayLog;
   }
-  return {
+  if (badDays) lost.push(`${badDays} day record${badDays === 1 ? '' : 's'}`);
+  const reflections = sanitizeReflections(x.reflections);
+  if (isObj(x.reflections) && Object.keys(x.reflections).length > Object.keys(reflections ?? {}).length)
+    lost.push('Some weekly reflections');
+  const collection = sanitizeCollection(x.collection);
+  const program: PilotProgram = {
     v: 1,
     startedAt: x.startedAt,
     answers: a as PilotAnswers,
@@ -1165,8 +1196,8 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     logs,
     ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
     ...(Object.keys(custom).length ? { custom } : {}),
-    ...(sanitizeReflections(x.reflections) ? { reflections: sanitizeReflections(x.reflections) } : {}),
-    ...(sanitizeCollection(x.collection) ? { collection: sanitizeCollection(x.collection) } : {}),
+    ...(reflections ? { reflections } : {}),
+    ...(collection ? { collection } : {}),
     ...(isObj(x.comeback) && Number.isInteger(x.comeback.seen)
       ? { comeback: { seen: x.comeback.seen as number } }
       : {}),
@@ -1186,4 +1217,11 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
         }
       : {}),
   };
+  return { program, lost };
+}
+
+/** A saved program only if every part of it could be read (see inspectPilotProgram for the forgiving reading). */
+export function sanitizePilotProgram(x: unknown): PilotProgram | null {
+  const r = inspectPilotProgram(x);
+  return r.lost.length ? null : r.program;
 }
