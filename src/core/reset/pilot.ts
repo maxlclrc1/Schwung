@@ -146,6 +146,8 @@ export type PilotProgram = {
   ceremonies?: { day1?: boolean; summit?: boolean };
   /** Weekly reflections by program week (reflections.ts): answers kept on the phone, never acted on by themselves. */
   reflections?: Record<string, Reflection>;
+  /** The welcome back (comeback.ts): the first day of the last absence already welcomed. */
+  comeback?: { seen: number };
 };
 
 /**
@@ -1144,6 +1146,9 @@ export function sanitizePilotProgram(x: unknown): PilotProgram | null {
     ...(isObj(x.measures) ? { measures: x.measures as WeeklyMeasures } : {}),
     ...(Object.keys(custom).length ? { custom } : {}),
     ...(sanitizeReflections(x.reflections) ? { reflections: sanitizeReflections(x.reflections) } : {}),
+    ...(isObj(x.comeback) && Number.isInteger(x.comeback.seen)
+      ? { comeback: { seen: x.comeback.seen as number } }
+      : {}),
     ...(isObj(x.ceremonies)
       ? {
           ceremonies: {
