@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware';
 import { canEditYesterday, dayNumber, toDateKey } from '../core/dates';
 import * as P from '../core/reset/pilot';
 import type { Reflection, ReflectionAnswer } from '../core/reset/reflections';
@@ -7,7 +7,8 @@ import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
 import { channel, devTools, type Channel } from '../lib/flags';
 import { CROP_COUNT } from '../components/habitArt';
-import { deferredJSONStorage } from './storage';
+import { endRecovery, keepRaw, startRecovery, useRecovery } from './recovery';
+import { debouncedStorage, deferredJSONStorage } from './storage';
 
 /*
  * The Life Reset program's saved state: the app's one program. It began as the pilot's and keeps the pilot's key,
@@ -19,8 +20,28 @@ export function resetPilotKey(ch: Channel = channel(), dev: boolean = __DEV__): 
   return dev && ch === 'internal' ? 'schwung-reset-pilot-internal' : 'schwung-reset-pilot';
 }
 
-/** The save's version. */
+/** The save's version. Raise it only together with a step in SAVE_MIGRATIONS. */
 export const RESET_PILOT_VERSION = 1;
+
+/**
+ * How to bring an older save up to date: one step per version, from that version to the next, each pure and
+ * tested. A version with no way forward is never reset: it's kept and shown on the recovery screen.
+ * Version 0: saves made before versioning had the same shape as version 1.
+ */
+export const SAVE_MIGRATIONS: Record<number, (state: unknown) => unknown> = {
+  0: (state) => state,
+};
+
+/** Runs the steps from `from` up to the current version; throws if a step is missing. */
+export function migrateSave(state: unknown, from: number, to: number = RESET_PILOT_VERSION): unknown {
+  let s = state;
+  for (let v = from; v < to; v++) {
+    const step = SAVE_MIGRATIONS[v];
+    if (!step) throw new Error(`No migration from save version ${v}`);
+    s = step(s);
+  }
+  return s;
+}
 
 export type ResetPilotData = {
   program: P.PilotProgram | null;
@@ -81,6 +102,63 @@ export function pilotNow(offset: number = useResetPilot.getState().devDayOffset)
 export function pilotToday(s: Pick<ResetPilotData, 'program' | 'devDayOffset'> = useResetPilot.getState()): number {
   return s.program ? Math.max(1, dayNumber(s.program.startedAt, toDateKey(pilotNow(s.devDayOffset)))) : 0;
 }
+
+/** The text last read from the save, and where a copy of it is kept (for the recovery screen). */
+let lastRaw: string | null = null;
+let lastKept: string | null = null;
+let lastName = '';
+
+/**
+ * The Life Reset's storage, guarded: a save that can't be parsed, or comes from a newer Schwung, is kept as it is
+ * (a recovery copy first) and never handed on to be replaced; and while recovery is pending, no save is written.
+ */
+const deferred = deferredJSONStorage<ResetPilotData>();
+const guardedStorage: PersistStorage<ResetPilotData> = {
+  getItem: async (name) => {
+    const raw = await debouncedStorage.getItem(name);
+    lastRaw = raw;
+    lastKept = null;
+    if (raw === null) return null;
+    let value: StorageValue<ResetPilotData> | null = null;
+    try {
+      value = JSON.parse(raw) as StorageValue<ResetPilotData>;
+    } catch {
+      value = null;
+    }
+    const version = value && typeof value === 'object' ? value.version : undefined;
+    const unreadable = !value || typeof value !== 'object' || !('state' in value);
+    const newer = !unreadable && typeof version === 'number' && version > RESET_PILOT_VERSION;
+    const noWay =
+      !unreadable && !newer && typeof version === 'number' && version < RESET_PILOT_VERSION && !canMigrate(version);
+    lastName = name;
+    if (unreadable || newer || noWay) {
+      // Kept before anything else may happen to it (a new save replacing it).
+      lastKept = await keepRaw(name, raw);
+      startRecovery(
+        {
+          reason: newer ? 'newer' : 'unreadable',
+          recovered: null,
+          lost: newer ? [] : ['The whole saved Life Reset (it couldn’t be read)'],
+          raw,
+        },
+        lastKept,
+      );
+      return null;
+    }
+    return value;
+  },
+  setItem: (name, value) => {
+    // Held back while the person hasn't decided what to do with a save that couldn't be fully read.
+    if (useRecovery.getState().pending) return;
+    deferred.setItem(name, value);
+  },
+  removeItem: (name) => deferred.removeItem(name),
+};
+
+const canMigrate = (from: number) => {
+  for (let v = from; v < RESET_PILOT_VERSION; v++) if (!SAVE_MIGRATIONS[v]) return false;
+  return true;
+};
 
 export const useResetPilot = create<ResetPilotData & Actions>()(
   persist(
@@ -218,8 +296,29 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
     {
       name: resetPilotKey(),
       version: RESET_PILOT_VERSION,
-      storage: deferredJSONStorage<ResetPilotData>(),
-      merge: (persisted, current) => ({ ...current, ...sanitizeResetPilot(persisted) }),
+      storage: guardedStorage,
+      // The saved state as far as it can be understood. If anything couldn't be (a damaged habit, a whole program
+      // that can't be read), the app starts without a program and the recovery screen offers what was found; the
+      // original is kept (getItem) and saves are held back until the person decides.
+      merge: (persisted, current) => {
+        const read = sanitizeResetPilot(persisted);
+        if (read.lost?.length) {
+          startRecovery(
+            {
+              reason: read.program ? 'partial' : 'unreadable',
+              recovered: read.program ?? null,
+              lost: read.lost,
+              raw: lastRaw,
+            },
+            null,
+          );
+          // The original is copied into a recovery slot; saves are held back meanwhile, so nothing can replace it.
+          if (lastRaw !== null) void keepRaw(lastName, lastRaw).then((keptAt) => useRecovery.setState({ keptAt }));
+          return { ...current, ...(read.devDayOffset !== undefined ? { devDayOffset: read.devDayOffset } : {}) };
+        }
+        return { ...current, ...read };
+      },
+      migrate: (state, version) => migrateSave(state, version) as ResetPilotData,
       partialize: (s): ResetPilotData => ({
         program: s.program,
         devDayOffset: devTools() ? s.devDayOffset : 0,
@@ -229,12 +328,36 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
 );
 
 /** Keeps only well-formed parts of a save (a damaged program is dropped; an older save's extra fields are ignored). */
-export function sanitizeResetPilot(x: unknown): Partial<ResetPilotData> {
+export function sanitizeResetPilot(x: unknown): Partial<ResetPilotData> & { lost?: string[] } {
   if (!x || typeof x !== 'object' || Array.isArray(x)) return {};
   const p = x as Record<string, unknown>;
-  const out: Partial<ResetPilotData> = {};
-  const program = p.program === null || p.program === undefined ? null : P.sanitizePilotProgram(p.program);
-  out.program = program;
+  const out: Partial<ResetPilotData> & { lost?: string[] } = {};
+  if (p.program === null || p.program === undefined) out.program = null;
+  else {
+    const read = P.inspectPilotProgram(p.program);
+    out.program = read.program;
+    if (read.lost.length) out.lost = read.lost;
+  }
   if (typeof p.devDayOffset === 'number' && Number.isInteger(p.devDayOffset)) out.devDayOffset = p.devDayOffset;
   return out;
+}
+/** Recovery: continue with what could be recovered. Saves resume (the original stays in its recovery slot). */
+export function restoreFromRecovery(): boolean {
+  const { recovered, keptAt, pending } = useRecovery.getState();
+  if (!pending || !recovered || !keptAt) return false;
+  endRecovery();
+  useResetPilot.setState({ program: recovered });
+  return true;
+}
+
+/**
+ * Recovery: start over (after the person confirmed). Only once the original is safely kept in a recovery slot, so
+ * starting over never destroys the only copy.
+ */
+export function startOverFromRecovery(): boolean {
+  const { keptAt, pending } = useRecovery.getState();
+  if (!pending || !keptAt) return false;
+  endRecovery();
+  useResetPilot.setState({ program: null });
+  return true;
 }

@@ -39,6 +39,10 @@ remote push in the app code, and nothing leaves the phone except files the perso
 
 ### H1 — A damaged or unrecognized save is silently discarded, then overwritten (data loss)
 
+**Status: resolved** (Phase 2A): damaged, unreadable and newer-version saves are copied to write-once recovery
+slots before anything else, valid parts are recovered and lost parts named, saves are held back until the person
+chooses on a recovery screen (`src/store/recovery.ts`, `src/store/resetPilot.ts`, `src/components/RecoveryScreen.tsx`).
+
 **Type:** Potential risk (requires a corrupted, truncated or hand-edited save, or an app bug that writes an
 invalid program). **Must fix before submission.**
 
@@ -114,6 +118,9 @@ match ("Data Not Collected").
 add any missing reasons through `expo.ios.privacyManifests` in `app.json` (no tracking, no collected data types).
 
 ### M3 — A future save-version bump would discard every user's data
+
+**Status: resolved** (Phase 2A): explicit `SAVE_MIGRATIONS` with `migrateSave()`; a version with no way forward,
+or a newer one, is kept and shown on the recovery screen instead of reset.
 
 **Type:** Potential risk (no current bug). Fix before the next change to the saved format.
 
