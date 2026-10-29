@@ -12,7 +12,6 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { INTENSITIES, type Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
@@ -20,7 +19,6 @@ import { radius, space, useTheme } from '../../theme';
 import { habitScene } from '../habitArt';
 import { ThemedImage } from '../ThemedImage';
 import { T } from '../ui';
-import { WorldBackdrop } from '../World';
 import { PeakPicker, Press } from './Choices';
 import { rise, settle, useTints } from './kit';
 
@@ -312,54 +310,6 @@ function FanCard({
   );
 }
 
-/**
- * Into the app: the world clears, and Day 1 rises out of the fog with the habits it holds. Not the Day 1
- * ceremony: a moment, then the Habits tab. `onDone` runs once it has been seen.
- */
-export function DayOneTransition({ habits, onDone }: { habits: string[]; onDone: () => void }) {
-  const { c } = useTheme();
-  const t = useTints();
-  const insets = useSafeAreaInsets();
-  const reduce = useReducedMotion();
-  const drift = useSharedValue(0);
-  useEffect(() => {
-    const timer = setTimeout(onDone, reduce ? 1200 : 2600);
-    if (!reduce) drift.set(withTiming(1, { duration: 2600, easing: Easing.out(Easing.quad) }));
-    return () => clearTimeout(timer);
-  }, [onDone, reduce, drift]);
-  const world = useAnimatedStyle(() => ({ transform: [{ scale: 1.08 - drift.value * 0.06 }] }));
-  return (
-    <Animated.View
-      entering={FadeIn.duration(700).reduceMotion(sys)}
-      style={[StyleSheet.absoluteFill, { backgroundColor: c.bg }]}
-      accessibilityViewIsModal
-      accessibilityLiveRegion="polite"
-    >
-      <Animated.View style={[StyleSheet.absoluteFill, world]}>
-        <WorldBackdrop zoneTop={insets.top + space.xxxl} />
-      </Animated.View>
-      <View style={[styles.dayOne, { paddingBottom: insets.bottom + space.xxxl }]}>
-        <Animated.View entering={rise(500)} style={{ gap: space.xs }}>
-          <T v="overline" color={t.lavender.ink} style={{ letterSpacing: 3 }}>
-            Your Life Reset begins
-          </T>
-          <T v="display" style={styles.dayOneTitle} accessibilityRole="header">
-            Day 1
-          </T>
-          <T color={c.textDim}>of 66. One small step at a time.</T>
-        </Animated.View>
-        <Animated.View entering={FadeIn.delay(1050).duration(600).reduceMotion(sys)} style={styles.dayOneArt}>
-          {habits.map((id) => (
-            <View key={id} style={[styles.dayOneThumb, { borderColor: c.bg }]}>
-              <HabitArt id={id} width={44} height={44} />
-            </View>
-          ))}
-        </Animated.View>
-      </View>
-    </Animated.View>
-  );
-}
-
 const styles = StyleSheet.create({
   tile: { flex: 1, borderRadius: radius.lg, overflow: 'hidden' },
   ring: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: radius.lg, borderWidth: 2.5 },
@@ -384,8 +334,4 @@ const styles = StyleSheet.create({
   thumb: { width: 52, height: 52, borderRadius: 14, overflow: 'hidden' },
   fan: { alignItems: 'center' },
   fanCard: { position: 'absolute', left: '50%', top: 0, borderRadius: 18, borderWidth: 3, overflow: 'hidden' },
-  dayOne: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: space.xl, gap: space.xl },
-  dayOneTitle: { fontSize: 64, lineHeight: 68 },
-  dayOneArt: { flexDirection: 'row' },
-  dayOneThumb: { width: 48, height: 48, borderRadius: 24, borderWidth: 2, overflow: 'hidden', marginRight: -10 },
 });
