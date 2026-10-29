@@ -1,5 +1,5 @@
 import { dateForDay, PROGRAM_DAYS } from '../dates';
-import { dayQualifies, isFullDay, totalXp } from '../progression';
+import { dayQualifies, doneCount, XP_FULL_DAY_BONUS, XP_PER_HABIT } from '../progression';
 import type { DayLog } from '../types';
 import {
   isTeen,
@@ -683,11 +683,33 @@ export function timerBlocksFor(p: PilotProgram, id: string, day: number): number
 
 // --- Day rules: XP, streak, a full day ---
 
-/** XP exactly as everywhere else (10 a done habit on the day's list, +20 when the whole list is done). */
-export const pilotXp = (p: PilotProgram) => totalXp(p.logs);
+/**
+ * The habits a day asks for, for "Day complete": every daily habit, and each weekly habit whose week is still open
+ * and that can count that day (one whose goal is already met, or that can't count that day, is resting). A weekly
+ * habit done that day is included (it's done). Evaluated as of that day, from the saved days only.
+ */
+export function requiredOn(p: PilotProgram, day: number): string[] {
+  return allHabits(p).filter((id) => {
+    const st = stateOn(p, id, day);
+    return st === 'due' || st === 'open' || st === 'done';
+  });
+}
 
-/** A full day: something on the day's list, and all of it done. */
-export const dayFull = (p: PilotProgram, day: number) => isFullDay(logOf(p, day));
+/** A complete day: something asked of it, and all of it done (open weekly habits included). */
+export function dayFull(p: PilotProgram, day: number): boolean {
+  const required = requiredOn(p, day);
+  return required.length > 0 && required.every((id) => isDone(p, id, day));
+}
+
+/**
+ * XP: 10 for each done habit on the day's list, +20 for a complete day (dayFull). Computed from the saved days, so an
+ * undo takes it back and nothing is ever awarded twice.
+ */
+export const pilotXp = (p: PilotProgram) =>
+  Object.values(p.logs).reduce(
+    (xp, l) => xp + doneCount(l) * XP_PER_HABIT + (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0),
+    0,
+  );
 
 /**
  * How a day counts for the streak and the Journey: 'rest' when nothing was due (no daily habit, nothing done:

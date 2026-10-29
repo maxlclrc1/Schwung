@@ -52,7 +52,7 @@ export function dayCells(p: P.PilotProgram, today: number): DayCell[] {
     const dailyDue = ids.filter((id) => P.isDaily(p, id, d));
     // The day's list as the 80% rule sees it: daily habits, plus weekly ones done that day.
     const planned = log ? P.plannedOn(p, d, log.completed) : dailyDue;
-    const full = done.length > 0 && planned.length > 0 && planned.every((id) => done.includes(id));
+    const full = P.dayFull(p, d);
     const state: DayCell['state'] = full
       ? 'full'
       : d === today

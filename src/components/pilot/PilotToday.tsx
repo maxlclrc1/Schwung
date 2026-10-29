@@ -63,16 +63,20 @@ export function PilotToday() {
   const daily = program.habits.filter((id) => P.isDaily(program, id, today));
   const [changed, setChanged] = useState<string | null>(null);
 
-  // The Day complete moment, only on the change to a full day (never on open), gone as soon as it's undone.
+  // The Day complete moment: only when a completion on this screen turns today complete (never on open, a rerender or
+  // a change of day), at most once a day, and gone as soon as it's undone.
   const [celebrated, setCelebrated] = useState(false);
-  const wasFull = useRef(full);
+  const was = useRef({ day: today, full });
+  const celebratedDay = useRef<number | null>(full ? today : null);
   useEffect(() => {
-    if (full && !wasFull.current) {
+    const before = was.current;
+    was.current = { day: today, full };
+    if (full && before.day === today && !before.full && celebratedDay.current !== today) {
+      celebratedDay.current = today;
       haptic.success();
       setCelebrated(true);
     }
-    wasFull.current = full;
-  }, [full]);
+  }, [full, today]);
   const celebrate = celebrated && full;
   useEffect(() => {
     if (!celebrated) return;

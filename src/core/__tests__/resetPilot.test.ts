@@ -261,7 +261,8 @@ describe('completion, undo and counters', () => {
 describe('daily and weekly adherence', () => {
   it('lists daily habits every day and weekly ones only on a day they’re done', () => {
     let p = P.complete(pilot(), 'mind_read', 1).program;
-    expect([log(p, 1).planned, P.dayFull(p, 1)]).toEqual([['mind_read'], true]);
+    // The 80% list has only Read, but the day isn't complete while Focus's and Strength's weeks are open.
+    expect([log(p, 1).planned, P.dayFull(p, 1)]).toEqual([['mind_read'], false]);
     p = P.complete(p, 'focus_deepwork', 1).program;
     expect(log(p, 1).planned).toEqual(['focus_deepwork', 'mind_read']);
     p = P.complete(p, 'strength_log', 2).program;
@@ -443,6 +444,36 @@ describe('adding a habit to a running program', () => {
   });
 });
 
+describe('a complete day', () => {
+  // Read every day; Focus Time any 5 days a week; Day 1 is a Monday.
+  const two = () => pilot(THREE.slice(0, 2));
+
+  it('needs every daily habit and every weekly habit whose week is still open', () => {
+    let p = P.complete(two(), 'mind_read', 1).program;
+    expect(P.dayFull(p, 1)).toBe(false);
+    p = P.complete(p, 'focus_deepwork', 1).program;
+    expect(P.dayFull(p, 1)).toBe(true);
+    // Undo takes it back, and its bonus with it; doing it again never counts twice.
+    const undone = P.undo(p, 'focus_deepwork', 1).program;
+    expect([P.dayFull(undone, 1), P.pilotXp(undone)]).toEqual([false, 10]);
+    expect(P.pilotXp(p)).toBe(2 * 10 + 20);
+    expect(P.pilotXp(P.complete(p, 'focus_deepwork', 1).program)).toBe(P.pilotXp(p));
+  });
+
+  it('lets a weekly habit rest once its week’s goal is met', () => {
+    // Focus done Days 1–5 (its goal of 5 met): on Saturday Read alone completes the day.
+    const p = doneOn(doneOn(two(), 'focus_deepwork', [1, 2, 3, 4, 5]), 'mind_read', [6]);
+    expect(P.requiredOn(p, 6)).toEqual(['mind_read']);
+    expect(P.dayFull(p, 6)).toBe(true);
+  });
+
+  it('is read from the saved days, the same after a reload', () => {
+    const p = doneOn(two(), 'mind_read', [1]);
+    const back = P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))!;
+    expect([P.dayFull(back, 1), P.pilotXp(back)]).toEqual([false, 10]);
+  });
+});
+
 describe('removing a habit', () => {
   // Read and Movement every day; Movement done Days 1–5, Read Days 1–7. Movement is removed on Day 6.
   const two = () =>
@@ -470,7 +501,9 @@ describe('removing a habit', () => {
     // Days 1–7 all count (Movement done while it was there): the streak isn't rewritten.
     expect(P.journeyStats(p, 8)).toEqual({ done: 7, streak: 7, best: 7 });
     expect(P.totalCompleted(p)).toBe(P.totalCompleted(before));
-    expect(P.pilotXp(p)).toBe(P.pilotXp(before));
+    // Days 1–5 keep their XP; from Day 6 Movement isn't asked any more, so Days 6–7 (Read done) are complete.
+    expect(P.pilotXp(p)).toBe(7 * 10 + 5 * 10 + 7 * 20);
+    expect(P.pilotXp(before)).toBe(7 * 10 + 5 * 10 + 5 * 20);
     // Its opportunities stop when it left: Days 1–5, all done.
     expect(P.habitTally(p, 'move_walk', 8)).toEqual({ done: 5, eligible: 5 });
     expect(P.overallTally(p, 8)).toEqual({ done: 12, eligible: 12 });
