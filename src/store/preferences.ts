@@ -12,6 +12,10 @@ export type Preferences = {
   comebacks: boolean;
 };
 
+/** Where and in which format the preferences are saved (a restore writes them directly: store/restore.ts). */
+export const PREFERENCES_KEY = 'schwung-preferences';
+export const PREFERENCES_VERSION = 1;
+
 const THEMES: ThemePreference[] = ['system', 'light', 'dark'];
 
 export const usePreferences = create<
@@ -31,8 +35,8 @@ export const usePreferences = create<
       setReminders: (r) => set((s) => ({ reminders: sanitizeReminders({ ...s.reminders, ...r }) })),
     }),
     {
-      name: 'schwung-preferences',
-      version: 1,
+      name: PREFERENCES_KEY,
+      version: PREFERENCES_VERSION,
       storage: deferredJSONStorage<Preferences>(),
       // Anything unexpected falls back to following the phone, and reminders off.
       merge: (persisted, current) => {

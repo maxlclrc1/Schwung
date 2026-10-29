@@ -62,6 +62,7 @@ export default function Welcome() {
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
             About a minute. Everything stays on your phone.
           </T>
+          <Button label="Restore a backup" kind="ghost" onPress={() => router.push('/restore')} />
         </Animated.View>
       </ScrollView>
     </Screen>

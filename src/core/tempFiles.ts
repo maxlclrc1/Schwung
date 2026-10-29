@@ -1,12 +1,12 @@
 /*
- * Schwung's temporary files for sharing (data exports, recovery exports, 66-Day Story images) live in one
+ * Schwung's temporary files (data exports, recovery exports, 66-Day Story images, a backup being restored) live in one
  * app-managed folder in the cache, each named `<kind>-<time it was made>.<ext>`, so cleanup can tell exactly which
  * files are Schwung's own and how old they are. Nothing outside that folder (and its named predecessors) is ever
  * touched; images saved to Photos are copies in the photo library, never these files.
  */
 
 export const TEMP_DIR = 'schwung-exports';
-export const TEMP_KINDS = ['data', 'recovery', 'story'] as const;
+export const TEMP_KINDS = ['data', 'recovery', 'story', 'import'] as const;
 export type TempKind = (typeof TEMP_KINDS)[number];
 
 /** How long a shared file is kept for the app receiving it before it's cleaned up. */
@@ -21,7 +21,7 @@ export const tempName = (kind: TempKind, ext: string, now: number) => `${kind}-$
 
 /** The kind and creation time of one of Schwung's temporary files, or null for anything else. */
 export function parseTempName(name: string): { kind: TempKind; at: number } | null {
-  const m = /^(data|recovery|story)-(\d{10,})\.(json|txt|png)$/.exec(name);
+  const m = /^(data|recovery|story|import)-(\d{10,})\.(json|txt|png)$/.exec(name);
   return m ? { kind: m[1] as TempKind, at: Number(m[2]) } : null;
 }
 

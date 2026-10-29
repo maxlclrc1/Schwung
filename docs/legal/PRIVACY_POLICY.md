@@ -99,7 +99,8 @@ Reminders are optional and **off until you turn them on**. iOS asks for your per
 
 Because your data is on your device, you control it directly:
 
-- **Access and portability:** Settings → Privacy & Data → Export my data.
+- **Access and portability:** Settings → Privacy & Data → Export my data. To move to a new phone, choose that
+  file with Restore from backup; it's read on the phone and never uploaded.
 - **Correction:** edit your habits and settings in the app.
 - **Deletion:** Settings → Privacy & Data → Delete my data, or delete the app.
 - **Withdraw permissions:** turn off notifications or Photos access in iOS Settings at any time.

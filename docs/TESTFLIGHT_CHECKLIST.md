@@ -67,6 +67,10 @@ Check in the build (or the upload's validation report):
 - [ ] 66-Day Story: save to Photos (asks for add-only access; the painting is in the saved image); denying Photos
       shows a calm message; sharing opens the share sheet.
 - [ ] Export my data: the share sheet opens with a JSON file; cancelling leaves no files behind after the next launch.
+- [ ] Restore from backup (Settings → Privacy & Data, and the start screen): the Files picker opens; a non-Schwung
+      file is refused calmly; a real export shows its day, habits, days done, XP and dates; restoring over a
+      running Life Reset warns first; after restoring, force-quit and reopen: the restored program, XP, collection,
+      theme and reminders are all there.
 - [ ] Locked collectibles look like soft silhouettes; the unlock moment shows the full art.
 
 ## 5. Known limits (not blockers)
