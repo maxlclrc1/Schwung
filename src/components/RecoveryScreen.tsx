@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PROGRAM_DAYS, dayNumber, toDateKey } from '../core/dates';
+import { shareTemp, writeTemp } from '../lib/appFiles';
 import { haptic } from '../lib/haptics';
 import { keepRaw, useRecovery } from '../store/recovery';
 import { resetPilotKey, restoreFromRecovery, startOverFromRecovery } from '../store/resetPilot';
@@ -42,9 +41,8 @@ export function RecoveryScreen() {
     if (busy || !rec.raw) return;
     setBusy(true);
     try {
-      const file = new File(Paths.cache, `schwung-recovery-${toDateKey(new Date())}.txt`);
-      await file.write(rec.raw);
-      await Sharing.shareAsync(file.uri, {
+      const file = await writeTemp('recovery', 'txt', rec.raw);
+      await shareTemp(file, {
         mimeType: 'text/plain',
         UTI: 'public.plain-text',
         dialogTitle: 'Save your recovery data',

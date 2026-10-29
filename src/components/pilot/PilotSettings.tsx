@@ -1,4 +1,6 @@
 import type { Ionicons } from '@expo/vector-icons';
+import { removeAllTemps } from '../../lib/appFiles';
+import { flushStorage } from '../../store/storage';
 import { router } from 'expo-router';
 import type { ComponentType, ReactNode } from 'react';
 import { Alert } from 'react-native';
@@ -30,6 +32,13 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
         style: 'destructive',
         onPress: () => {
           useResetPilot.getState().end();
+          // Its temporary share files go with it (story images, exports); recovery copies and Photos are untouched.
+          try {
+            removeAllTemps();
+          } catch {
+            // Any left are removed on a later launch.
+          }
+          void flushStorage().catch(() => {});
           if (router.canDismiss()) router.dismissAll();
           router.replace('/');
         },

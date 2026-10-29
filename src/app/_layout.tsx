@@ -7,6 +7,7 @@ import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CeremonyHost } from '../components/ceremony/Ceremonies';
 import { FinaleHost } from '../components/onboarding/Handoff';
+import { cleanupTemps } from '../lib/appFiles';
 import { RecoveryScreen } from '../components/RecoveryScreen';
 import { ReminderSync } from '../components/reminders/ReminderSync';
 import { usePreferences } from '../store/preferences';
@@ -54,7 +55,10 @@ export default function RootLayout() {
   }, [c.bg]);
 
   useEffect(() => {
-    if (hydrated) void SplashScreen.hideAsync().catch(() => {});
+    if (!hydrated) return;
+    void SplashScreen.hideAsync().catch(() => {});
+    // Temporary share files left by a share that was cut off (lib/appFiles.ts); never saves or recovery copies.
+    cleanupTemps();
   }, [hydrated]);
 
   if (!hydrated) return null;
@@ -91,6 +95,7 @@ export default function RootLayout() {
             options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
           />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
         <CeremonyHost />

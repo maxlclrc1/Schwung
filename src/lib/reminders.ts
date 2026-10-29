@@ -89,3 +89,14 @@ export function syncReminders(
   queue = next.catch(() => {});
   return next;
 }
+
+/** Cancels every pending Schwung reminder ("Delete my data"). */
+export async function cancelAllReminders(): Promise<void> {
+  await queue.catch(() => {});
+  const pending = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    pending
+      .filter((n) => n.identifier.startsWith(PREFIX))
+      .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+  );
+}

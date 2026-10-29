@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library/legacy';
 import { router } from 'expo-router';
-import * as Sharing from 'expo-sharing';
 import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -19,6 +18,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { captureRef } from 'react-native-view-shot';
+import { adoptTemp, removeTemp, shareTemp } from '../../lib/appFiles';
 import { DAY_POINTS } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { storyFacts } from '../../core/reset/story';
@@ -93,7 +93,9 @@ export function StoryKeepsake() {
 
   if (!program || !facts) return null;
 
-  const capture = async () => captureRef(poster, { format: 'png', quality: 1, result: 'tmpfile' });
+  // Captured at full quality, then kept in Schwung's managed temporary folder (lib/appFiles.ts) until it's done.
+  const capture = async () =>
+    adoptTemp('story', await captureRef(poster, { format: 'png', quality: 1, result: 'tmpfile' }));
   const save = async () => {
     if (busy) return;
     setBusy(true);
@@ -104,7 +106,13 @@ export function StoryKeepsake() {
         setStatus('Photos access is off for Schwung. You can still share it, or allow it in Settings.');
         return;
       }
-      await MediaLibrary.saveToLibraryAsync(await capture());
+      const image = await capture();
+      try {
+        // Photos keeps its own copy; the temporary one goes at once.
+        await MediaLibrary.saveToLibraryAsync(image.uri);
+      } finally {
+        removeTemp(image);
+      }
       haptic.confirm();
       setStatus('Saved to your Photos.');
     } catch {
@@ -117,7 +125,7 @@ export function StoryKeepsake() {
     if (busy) return;
     setBusy(true);
     try {
-      await Sharing.shareAsync(await capture(), {
+      await shareTemp(await capture(), {
         mimeType: 'image/png',
         UTI: 'public.png',
         dialogTitle: 'My 66-day story',
