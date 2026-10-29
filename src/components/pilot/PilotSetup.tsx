@@ -19,11 +19,13 @@ import * as P from '../../core/reset/pilot';
 import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { useResetPilot } from '../../store/resetPilot';
+import { flushStorage } from '../../store/storage';
 import { radius, space, useTheme } from '../../theme';
 import { AgeDial, bandOf, YEARS_OF } from '../onboarding/AgeDial';
 import { IconTiles, Press, SoftChoice, Stairs, Stepper, Token } from '../onboarding/Choices';
-import { DayOneTransition, HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
+import { HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
 import { DayClock, hhmm, minutesOf } from '../onboarding/DayClock';
+import { Finale } from '../onboarding/Finale';
 import { PhoneMeter, TimeDial, TrailPicker } from '../onboarding/Instruments';
 import { CHAPTERS, DragLock, Question, rise, TrailProgress, useTints, type TintName } from '../onboarding/kit';
 import { Button, Screen, T } from '../ui';
@@ -119,6 +121,8 @@ export function PilotSetup() {
   const [dragging, setDragging] = useState(false);
   // Begin Day 1: the program is saved, and the way in plays before the Habits tab.
   const [launching, setLaunching] = useState<string[] | null>(null);
+  // The created program is on disk (the finale offers Day 1 only then).
+  const [saved, setSaved] = useState(false);
   const enter = useCallback(() => {
     if (router.canDismiss()) router.dismissAll();
     router.replace('/today');
@@ -163,6 +167,8 @@ export function PilotSetup() {
   const progress = chapter + (chapter === CHAPTERS.length - 1 ? 0 : inChapter.indexOf(step) / inChapter.length);
 
   const go = (d: 1 | -1) => {
+    // Once the reset is confirmed there is no going back through the questions (the finale is up).
+    if (launching) return;
     const i = index + d;
     if (i < 0) {
       if (router.canGoBack()) router.back();
@@ -195,13 +201,18 @@ export function PilotSetup() {
     setPicked((p) => (on ? p.filter((x) => x !== id) : [...p, id]));
   };
   const begin = () => {
-    // Shown before the save, so the saved program never sends set-up away before the way in has played.
-    setLaunching(P.PILOT_HABITS.filter((id) => picked.includes(id)));
-    if (!useResetPilot.getState().start(answers, choices)) {
-      setLaunching(null);
-      return;
-    }
+    // Once only: start() also refuses a second program, so a double tap can never make two.
+    if (launching) return;
+    if (!useResetPilot.getState().start(answers, choices)) return;
     haptic.success();
+    setLaunching(P.PILOT_HABITS.filter((id) => picked.includes(id)));
+    // Make sure it's on disk before Day 1 is offered; a failed write is kept and tried again.
+    const save = (tries: number): Promise<void> =>
+      flushStorage().catch(() =>
+        tries > 1 ? new Promise((r) => setTimeout(r, 400)).then(() => save(tries - 1)) : undefined,
+      );
+    // (A tick first, so the store's write of the new program has been queued.)
+    void new Promise((r) => setTimeout(r, 0)).then(() => save(3)).then(() => setSaved(true));
   };
 
   // Atmosphere: the world drifts a little further along with the story, and its light takes the chapter's tint.
@@ -690,7 +701,7 @@ export function PilotSetup() {
             )}
           </Pressable>
           <Button
-            label={step === 'review' ? 'Begin Day 1' : 'Continue'}
+            label={step === 'review' ? 'Confirm my reset' : 'Continue'}
             disabled={!canContinue || !!launching}
             onPress={step === 'review' ? begin : () => go(1)}
             icon={step === 'review' ? <Ionicons name="arrow-forward" size={20} color={c.onAccent} /> : undefined}
@@ -698,7 +709,7 @@ export function PilotSetup() {
           />
         </View>
       </Screen>
-      {launching ? <DayOneTransition habits={launching} onDone={enter} /> : null}
+      {launching ? <Finale habits={launching} saved={saved} onEnter={enter} /> : null}
     </GestureHandlerRootView>
   );
 }
