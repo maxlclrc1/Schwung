@@ -5,6 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { ReactNode } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { PilotSettings } from '../components/pilot/PilotSettings';
+import { RemindersSettings } from '../components/reminders/RemindersSettings';
 import { SheetHeader } from '../components/SheetHeader';
 import { Screen, T } from '../components/ui';
 import type { ThemePreference } from '../core/types';
@@ -41,6 +42,8 @@ export default function Settings() {
       <SheetHeader title="Settings" />
       <ScrollView contentContainerStyle={styles.scroll}>
         <PilotSettings Section={Section} Row={Row} />
+
+        <RemindersSettings />
 
         <Section title="Appearance">
           <AppearancePicker />
