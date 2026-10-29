@@ -1,5 +1,5 @@
 import { Image as ArtImage } from 'expo-image';
-import { Image, type ImageSourcePropType } from 'react-native';
+import { Image, Platform, type ImageSourcePropType } from 'react-native';
 import type { PilotProgram } from '../core/reset/pilot';
 import { COLLECTIBLE_ART } from './collection/art';
 import { habitScene } from './habitArt';
@@ -12,6 +12,25 @@ import { WORLD_ART } from './World';
  * first, then the collection's objects. The panorama tiles need nothing here: the world behind the tabs mounts
  * them at launch, and every card cropping a tile then draws from the same cached bitmap.
  */
+
+/**
+ * A ceiling for the decoded-image cache (iOS; it has none by default). It holds everything a session normally shows
+ * (the six panorama tiles, about 120 MB, the person's scenes, the world painting and the collectibles) with room to
+ * spare, so nothing a screen needs is evicted, but a long session can't grow it without bound. Paintings on screen
+ * are never dropped (the cache keeps them while in use), and iOS empties it on a memory warning.
+ */
+const MEMORY_CACHE_BYTES = 320 * 1024 * 1024;
+/** The disk copy only spares the dev server a request in development; bundled files are on disk already. */
+const DISK_CACHE_BYTES = 150 * 1024 * 1024;
+
+export function configureArtCache() {
+  if (Platform.OS !== 'ios') return;
+  try {
+    ArtImage.configureCache({ maxMemoryCost: MEMORY_CACHE_BYTES, maxDiskSize: DISK_CACHE_BYTES });
+  } catch {
+    // The defaults (no limit) still work.
+  }
+}
 
 function uri(source: ImageSourcePropType | undefined): string | undefined {
   if (source === undefined || typeof Image.resolveAssetSource !== 'function') return undefined;

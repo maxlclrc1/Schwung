@@ -1,6 +1,6 @@
 {
   "cli": {
-    "appVersionSource": "local"
+    "appVersionSource": "remote"
   },
   "build": {
     "internal": {
@@ -12,7 +12,8 @@
     "production": {
       "env": {
         "EXPO_PUBLIC_SCHWUNG_CHANNEL": "production"
-      }
+      },
+      "autoIncrement": true
     }
   }
 }
