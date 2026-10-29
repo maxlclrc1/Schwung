@@ -62,7 +62,7 @@ export function UnlockMoment({ item, more, onClose }: { item: Collectible; more:
             <View style={[styles.haloInner, { backgroundColor: c.peachSoft }]} />
           </Animated.View>
           <Animated.View style={object}>
-            <CollectibleArt id={item.id} size={128} locked={false} />
+            <CollectibleArt id={item.id} size={208} locked={false} />
           </Animated.View>
         </View>
         <Animated.View entering={rise(reduce ? 0 : 500)} style={{ gap: 4, alignItems: 'center' }}>
@@ -105,16 +105,16 @@ export function UnlockMoment({ item, more, onClose }: { item: Collectible; more:
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', justifyContent: 'center', padding: space.xl },
   card: { width: '100%', maxWidth: 400, borderRadius: 28, padding: space.xl, gap: space.md, alignItems: 'center' },
-  stage: { width: 180, height: 160, alignItems: 'center', justifyContent: 'center' },
+  stage: { width: 250, height: 230, alignItems: 'center', justifyContent: 'center' },
   halo: {
     position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  haloInner: { width: 120, height: 120, borderRadius: 60 },
+  haloInner: { width: 170, height: 170, borderRadius: 85 },
   center: { textAlign: 'center' },
   buttons: { flexDirection: 'row', gap: space.sm, alignSelf: 'stretch', marginTop: space.xs },
 });

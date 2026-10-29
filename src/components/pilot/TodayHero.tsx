@@ -104,7 +104,7 @@ export function TodayHero({
         </View>
         <View style={styles.chips}>
           <ThemedView
-            style={[styles.chip, { backgroundColor: streak > 0 ? c.peachSoft : c.surfaceHigh }]}
+            style={[styles.chip, styles.shrink, { backgroundColor: streak > 0 ? c.peachSoft : c.surfaceHigh }]}
             accessible
             accessibilityLabel={`${streak} day streak`}
           >
@@ -112,10 +112,11 @@ export function TodayHero({
             <T
               v="caption"
               color={streak > 0 ? c.peachInk : c.textDim}
-              style={styles.chipText}
+              style={[styles.chipText, styles.shrink]}
+              numberOfLines={1}
               maxFontSizeMultiplier={1.3}
             >
-              {streak > 0 ? `${streak}-day streak` : 'Streak starts today'}
+              {streak > 0 ? `${streak}-day streak` : 'No streak yet'}
             </T>
           </ThemedView>
           <Level xp={xp} />
@@ -187,7 +188,7 @@ function Level({ xp }: { xp: number }) {
   }, [xp]);
   const g = growth(xp);
   return (
-    <View>
+    <View style={{ flexShrink: 0 }}>
       {/* The title XP has earned, and the way to the next object; tap for the collection. */}
       <Pressable
         onPress={() => {
@@ -203,7 +204,7 @@ function Level({ xp }: { xp: number }) {
           <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
             {g.title}
           </T>
-          <View style={{ width: 36 }}>
+          <View style={{ width: 28 }}>
             <ProgressBar value={g.progress} height={4} color={c.accent} />
           </View>
           <RollingText text={`${xp}`} size={13} charWidth={8} weight="700" color={c.accentInk} />
@@ -250,7 +251,8 @@ const styles = StyleSheet.create({
   },
   count: { flexDirection: 'row', alignItems: 'baseline' },
   total: { fontSize: 13, fontWeight: '700' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  // Streak and level side by side: the streak gives way (ellipsis) before the level ever wraps below it.
+  chips: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -260,6 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
   },
   chipText: { fontWeight: '700' },
+  shrink: { flexShrink: 1 },
   gain: {
     position: 'absolute',
     right: 0,
