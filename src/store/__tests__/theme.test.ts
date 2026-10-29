@@ -43,7 +43,11 @@ describe('the theme preference', () => {
   it('is saved on its own, apart from the program', async () => {
     usePreferences.getState().setThemePreference('dark');
     await wait(400); // writes are coalesced for 250 ms
-    expect(JSON.parse((await AsyncStorage.getItem(KEY))!).state).toEqual({ themePreference: 'dark' });
+    expect(JSON.parse((await AsyncStorage.getItem(KEY))!).state).toEqual({
+      themePreference: 'dark',
+      // Reminders are saved alongside, off until turned on.
+      reminders: { enabled: false, hour: 9, minute: 0, showHabits: false },
+    });
     expect(useResetPilot.getState().program).toBeNull();
   });
 

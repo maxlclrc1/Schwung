@@ -7,6 +7,7 @@ import { Appearance } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CeremonyHost } from '../components/ceremony/Ceremonies';
 import { FinaleHost } from '../components/onboarding/Handoff';
+import { ReminderSync } from '../components/reminders/ReminderSync';
 import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
 import { useRootTheme, useThemePreference } from '../theme';
@@ -62,6 +63,7 @@ export default function RootLayout() {
       <ThemeTransitionProvider>
         <StatusBar style={isDark ? 'light' : 'dark'} />
         <NativeAppearance />
+        <ReminderSync />
         <Stack
           screenOptions={{
             headerShown: false,
