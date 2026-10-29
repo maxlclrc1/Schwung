@@ -23,6 +23,8 @@ export const EXPORT_CONTAINS = [
 
 export type ExportInput = {
   program: P.PilotProgram | null;
+  /** The version of the saved program's format (store/resetPilot.ts), so a restore knows how to read it. */
+  saveVersion: number;
   today: number;
   themePreference: ThemePreference;
   reminders: ReminderSettings;
@@ -39,6 +41,7 @@ export function buildExport(i: ExportInput) {
     schema: 'schwung-data-export',
     schemaVersion: EXPORT_SCHEMA_VERSION,
     exportedAt: i.now.toISOString(),
+    saveVersion: i.saveVersion,
     lifeReset: p
       ? {
           startedOn: p.startedAt,

@@ -30,9 +30,9 @@ export async function writeTemp(kind: TempKind, ext: 'json' | 'txt', text: strin
   return file;
 }
 
-/** Moves a file made elsewhere (a captured story image) into the managed folder. */
-export async function adoptTemp(kind: TempKind, uri: string): Promise<File> {
-  const target = new File(folder(), tempName(kind, 'png', Date.now()));
+/** Moves a file made elsewhere (a captured story image, a picked backup's copy) into the managed folder. */
+export async function adoptTemp(kind: TempKind, uri: string, ext: 'png' | 'json' = 'png'): Promise<File> {
+  const target = new File(folder(), tempName(kind, ext, Date.now()));
   await new File(uri).move(target);
   return target;
 }
@@ -83,4 +83,26 @@ export function removeAllTemps() {
   for (const e of d.list()) e.delete();
   for (const name of LEGACY_CACHE_FILES) removeTemp(new File(Paths.cache, name));
   if (d.list().length) throw new Error('Some temporary files remain');
+}
+
+export type PickedBackup = { canceled: true } | { canceled: false; text: string; bytes: number };
+
+/**
+ * Opens the iOS Files picker for a backup file. iOS hands over a copy (the original is never touched); it's moved
+ * into the managed folder, read only if it isn't too large, and deleted at once, read or not. Throws if it couldn't
+ * be read; a file left behind by an interrupted restore is removed by the next launch's cleanup.
+ */
+export async function pickBackupFile(maxBytes: number): Promise<PickedBackup> {
+  const picked = await File.pickFileAsync({ mimeTypes: ['application/json', 'text/plain'] });
+  if (picked.canceled || !picked.result) return { canceled: true };
+  let file = picked.result;
+  try {
+    file = await adoptTemp('import', file.uri, 'json');
+    const bytes = file.size ?? 0;
+    // Too large to be a backup: not read at all (the reader refuses it by its size).
+    const text = bytes > maxBytes ? '' : await file.text();
+    return { canceled: false, text, bytes };
+  } finally {
+    removeTemp(file);
+  }
 }

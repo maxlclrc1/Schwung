@@ -3,17 +3,14 @@ import { router } from 'expo-router';
 import { useState, type ComponentProps } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { buildExport, EXPORT_CONTAINS } from '../core/dataExport';
+import { EXPORT_CONTAINS } from '../core/dataExport';
+import { removeAllTemps } from '../lib/appFiles';
 import { PRIVACY_URL } from '../lib/constants';
+import { exportMyData } from '../lib/exportData';
 import { haptic } from '../lib/haptics';
 import { legalVisible } from '../lib/legal';
-import { removeAllTemps, shareTemp, writeTemp } from '../lib/appFiles';
 import { cancelAllReminders } from '../lib/reminders';
 import { deleteAllLocalData } from '../store/deleteData';
-import { usePreferences } from '../store/preferences';
-import { RECOVERY_SLOTS, recoveryKey } from '../store/recovery';
-import { pilotToday, resetPilotKey, useResetPilot } from '../store/resetPilot';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SheetHeader } from './SheetHeader';
@@ -37,25 +34,7 @@ export function PrivacyData() {
     setBusy(true);
     setNote(null);
     try {
-      const { program, devDayOffset } = useResetPilot.getState();
-      const prefs = usePreferences.getState();
-      const name = resetPilotKey();
-      const copies: string[] = [];
-      for (let slot = 1; slot <= RECOVERY_SLOTS; slot++) {
-        const raw = await AsyncStorage.getItem(recoveryKey(name, slot));
-        if (raw !== null) copies.push(raw);
-      }
-      const data = buildExport({
-        program,
-        today: program ? pilotToday({ program, devDayOffset }) : 0,
-        themePreference: prefs.themePreference,
-        reminders: prefs.reminders,
-        comebacks: prefs.comebacks,
-        recoveryCopies: copies,
-        now: new Date(),
-      });
-      const file = await writeTemp('data', 'json', JSON.stringify(data, null, 2));
-      await shareTemp(file, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: 'Export my data' });
+      await exportMyData();
       setStep('list');
     } catch {
       setNote('Your data couldn’t be exported just now. Nothing was changed; please try again.');
@@ -107,6 +86,13 @@ export function PrivacyData() {
                 label="Export my data"
                 hint="A copy of everything, as a file you choose where to send"
                 onPress={() => setStep('export')}
+              />
+              <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
+              <Row
+                icon="cloud-download-outline"
+                label="Restore from backup"
+                hint="Bring a Life Reset from an exported file"
+                onPress={() => router.push('/restore')}
               />
               <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
               <Row

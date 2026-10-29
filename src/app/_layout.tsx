@@ -102,6 +102,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
         <CeremonyHost />
