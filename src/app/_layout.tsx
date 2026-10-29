@@ -70,7 +70,11 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="welcome" />
-          <Stack.Screen name="life-reset/setup" options={{ animation: 'slide_from_right' }} />
+          {/* No swipe back: set-up's own Back walks through the questions, and its drags belong to its controls. */}
+          <Stack.Screen
+            name="life-reset/setup"
+            options={{ animation: 'slide_from_right', gestureEnabled: false, fullScreenGestureEnabled: false }}
+          />
           {/* Habits, Journey and Insights. */}
           <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
           <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />

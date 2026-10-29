@@ -31,7 +31,12 @@ export function Press({
   disabled?: boolean;
 } & Pick<
   ComponentProps<typeof Pressable>,
-  'accessibilityRole' | 'accessibilityState' | 'accessibilityLabel' | 'accessibilityHint'
+  | 'accessibilityRole'
+  | 'accessibilityState'
+  | 'accessibilityLabel'
+  | 'accessibilityHint'
+  | 'accessibilityElementsHidden'
+  | 'importantForAccessibility'
 >) {
   const down = useSharedValue(0);
   const dim = useAnimatedStyle(() => ({ opacity: 1 - down.value * 0.28 }));

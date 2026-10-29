@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { usePanGesture } from 'react-native-gesture-handler';
+import { scheduleOnRN } from 'react-native-worklets';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   Easing,
@@ -79,6 +81,41 @@ export const appear = (delay = 0) => FadeIn.duration(DURATION.scene).delay(delay
  */
 export const DragLock = createContext<(dragging: boolean) => void>(() => {});
 export const useDragLock = () => useContext(DragLock);
+
+/**
+ * A drawing's own drag (phone, dial): a gesture-handler pan that takes the touch the moment it lands, so neither
+ * the page's scroll nor any navigation gesture can have it until the finger lifts. Reports the touch point in the
+ * drawing's coordinates, on touch down (a tap chooses too) and as it moves.
+ */
+export function useDrawingDrag(onPoint: (x: number, y: number) => void) {
+  const lock = useDragLock();
+  const latest = useRef(onPoint);
+  useEffect(() => {
+    latest.current = onPoint;
+  });
+  const point = useCallback((x: number, y: number) => latest.current(x, y), []);
+  // Created once: a config that changed every render would be re-sent to the native handler each time.
+  const config = useMemo(
+    () => ({
+      minDistance: 0,
+      onBegin: (e: { x: number; y: number }) => {
+        'worklet';
+        scheduleOnRN(lock, true);
+        scheduleOnRN(point, e.x, e.y);
+      },
+      onUpdate: (e: { x: number; y: number }) => {
+        'worklet';
+        scheduleOnRN(point, e.x, e.y);
+      },
+      onFinalize: () => {
+        'worklet';
+        scheduleOnRN(lock, false);
+      },
+    }),
+    [lock, point],
+  );
+  return usePanGesture(config);
+}
 
 /** A question: a short line that carries the story, the question itself, and a little context. */
 export function Question({
