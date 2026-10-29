@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -13,7 +14,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { PROGRAM_DAYS } from '../../core/dates';
-import { levelProgress, playerLevel } from '../../core/progression';
+import { growth } from '../../core/reset/collection';
+import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { SettingsButton } from '../HeaderButton';
@@ -183,24 +185,33 @@ function Level({ xp }: { xp: number }) {
     const t = setTimeout(() => setGain(null), 1100);
     return () => clearTimeout(t);
   }, [xp]);
+  const g = growth(xp);
   return (
     <View>
-      <ThemedView
-        style={[styles.chip, { backgroundColor: c.accentSoft }]}
-        accessible
-        accessibilityLabel={`Level ${playerLevel(xp)}, ${xp} XP`}
+      {/* The title XP has earned, and the way to the next object; tap for the collection. */}
+      <Pressable
+        onPress={() => {
+          haptic.select();
+          router.push('/life-reset/collection');
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={`${g.title}, ${xp} XP. Open your collection`}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
-        <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
-          Lv {playerLevel(xp)}
-        </T>
-        <View style={{ width: 36 }}>
-          <ProgressBar value={levelProgress(xp)} height={4} color={c.accent} />
-        </View>
-        <RollingText text={`${xp}`} size={13} charWidth={8} weight="700" color={c.accentInk} />
-        <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
-          XP
-        </T>
-      </ThemedView>
+        <ThemedView style={[styles.chip, { backgroundColor: c.accentSoft }]}>
+          <Ionicons name="diamond-outline" size={13} color={c.accentInk} />
+          <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
+            {g.title}
+          </T>
+          <View style={{ width: 36 }}>
+            <ProgressBar value={g.progress} height={4} color={c.accent} />
+          </View>
+          <RollingText text={`${xp}`} size={13} charWidth={8} weight="700" color={c.accentInk} />
+          <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
+            XP
+          </T>
+        </ThemedView>
+      </Pressable>
       {gain ? (
         <Animated.View
           key={gain.key}

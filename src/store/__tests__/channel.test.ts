@@ -51,6 +51,7 @@ describe('one app: the Life Reset', () => {
       'index.tsx',
       'life-reset/[id].tsx',
       'life-reset/add.tsx',
+      'life-reset/collection.tsx',
       'life-reset/reflect.tsx',
       'life-reset/setup.tsx',
       'life-reset/story.tsx',
