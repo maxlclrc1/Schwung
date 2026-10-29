@@ -58,7 +58,7 @@ export function PilotHabit() {
     const blocked = f();
     if (blocked) setMessage(`Can’t change it: ${blocked}.`);
     else {
-      haptic.success();
+      haptic.confirm();
       const after = useResetPilot.getState().program;
       const next = after ? P.pendingText(after, id, today) : null;
       setMessage(next ? `Saved. ${next}.` : 'Saved: back to your current target.');
@@ -256,7 +256,7 @@ export function PilotHabit() {
                   const problem = s().removeHabit(id);
                   if (problem) setRemoveError(problem);
                   else {
-                    haptic.success();
+                    haptic.confirm();
                     if (router.canGoBack()) router.back();
                     else router.replace('/today');
                   }
@@ -287,7 +287,7 @@ function Choice({ label, on, onPress }: { label: string; on: boolean; onPress: (
   return (
     <Pressable
       onPress={() => {
-        haptic.tap();
+        haptic.select();
         onPress();
       }}
       accessibilityRole="button"

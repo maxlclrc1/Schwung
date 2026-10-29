@@ -128,7 +128,6 @@ export function CeremonyHost() {
     if (kind === 'milestone') useResetPilot.getState().markMilestone(milestoneDay ?? 0);
     else useResetPilot.getState().markCeremony(kind);
     void flushStorage().catch(() => {});
-    haptic.success();
     const done = () => {
       setActive(null);
       setCeremonyState({ day1FromFinale: false });
@@ -446,7 +445,7 @@ function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
       tl(stage.light, 1, 700, 2000);
       tl(stage.trail, 1, 1300, 1900, Easing.bezier(0.45, 0, 0.2, 1));
     }
-    const soft = setTimeout(() => haptic.uncheck(), reduce ? 300 : 1400);
+    const soft = setTimeout(() => haptic.land(), reduce ? 300 : 1400);
     const t = setTimeout(() => setReady(true), reduce ? 700 : 3100);
     return () => {
       clearTimeout(soft);
@@ -556,7 +555,7 @@ function MilestoneMoment({ day, onDone }: { day: number; onDone: (fast: boolean)
       tl(stage.trail, 1, 250, 1100, Easing.bezier(0.45, 0, 0.2, 1));
       tl(stage.light, 1, 1000, 900);
     }
-    const land = setTimeout(() => haptic.uncheck(), reduce ? 200 : 1250);
+    const land = setTimeout(() => haptic.success(), reduce ? 200 : 1250);
     const t = setTimeout(() => setReady(true), reduce ? 400 : 1500);
     return () => {
       clearTimeout(land);
@@ -667,7 +666,7 @@ function SummitCeremony({
         ),
       );
     }
-    const sunrise = setTimeout(() => haptic.uncheck(), reduce ? 300 : 3000);
+    const sunrise = setTimeout(() => haptic.success(), reduce ? 300 : 3000);
     const t = setTimeout(() => setPhase('summary'), reduce ? 600 : 3600);
     return () => {
       clearTimeout(sunrise);

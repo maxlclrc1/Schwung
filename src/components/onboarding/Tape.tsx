@@ -90,7 +90,7 @@ export function Tape({
       const { value: v, onChange: change, norm: n } = latest.current;
       const next = n(q);
       if (next === v) return;
-      if (next % tickEvery === 0) haptic.tap();
+      if (next % tickEvery === 0) haptic.tick();
       change(next);
     },
     [tickEvery],

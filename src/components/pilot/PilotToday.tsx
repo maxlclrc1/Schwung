@@ -86,8 +86,9 @@ export function PilotToday() {
     was.current = { day: today, full };
     if (full && before.day === today && !before.full && celebratedDay.current !== today) {
       celebratedDay.current = today;
-      haptic.success();
       setCelebrated(true);
+      // With the pill, a beat after the last card's own confirm (two moments, never one muddled buzz).
+      setTimeout(() => haptic.success(), 260);
     }
   }, [full, today]);
   const celebrate = celebrated && full;
@@ -303,7 +304,7 @@ function PilotCard({
       {counter !== null && !done ? (
         <CardButton
           onPress={() => {
-            haptic.tap();
+            haptic.select();
             useResetPilot.getState().count(habitId, 1);
           }}
           style={[styles.pill, { backgroundColor: chip, borderColor: edge }]}
@@ -405,7 +406,7 @@ function OfferCard({
           style={{ flex: 1 }}
           onPress={() => {
             useResetPilot.getState().accept(habitId, offer);
-            haptic.success();
+            haptic.confirm();
             onAccepted(`${name}: ${next}, from ${when}.`);
           }}
         />

@@ -42,8 +42,8 @@ export function RemindersSettings() {
   }, []);
 
   const turn = async (on: boolean) => {
-    haptic.tap();
     if (!on) {
+      haptic.confirm();
       setReminders({ enabled: false });
       return;
     }
@@ -51,11 +51,13 @@ export function RemindersSettings() {
     setPermission(p);
     if (p === 'granted') {
       setReminders({ enabled: true });
-      haptic.success();
+      haptic.confirm();
+    } else if (p === 'denied') {
+      haptic.warning();
     }
   };
   const shift = (by: number) => {
-    haptic.tap();
+    haptic.tick();
     const t = (((reminders.hour * 60 + reminders.minute + by) % 1440) + 1440) % 1440;
     setReminders({ hour: Math.floor(t / 60), minute: t % 60 });
   };
@@ -146,7 +148,7 @@ export function RemindersSettings() {
                   <Pressable
                     key={p.label}
                     onPress={() => {
-                      haptic.tap();
+                      haptic.select();
                       setReminders({ hour: p.hour, minute: p.minute });
                     }}
                     accessibilityRole="radio"
@@ -177,7 +179,7 @@ export function RemindersSettings() {
               <Switch
                 value={reminders.showHabits}
                 onValueChange={(v) => {
-                  haptic.tap();
+                  haptic.confirm();
                   setReminders({ showHabits: v });
                 }}
                 trackColor={{ true: c.accent, false: c.surfaceHigh }}

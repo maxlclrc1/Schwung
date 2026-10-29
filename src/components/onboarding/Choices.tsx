@@ -47,8 +47,8 @@ export function Press({
       onPressIn={() => down.set(withTiming(1, { duration: 60 }))}
       onPressOut={() => down.set(withTiming(0, { duration: 200 }))}
       onPress={() => {
-        haptic.tap();
         onPress();
+        haptic.select();
       }}
       style={style}
     >

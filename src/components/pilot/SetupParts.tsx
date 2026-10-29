@@ -85,7 +85,7 @@ export function Chips<K extends string | number>({
           label={x.label}
           on={selected(x.id)}
           onPress={() => {
-            haptic.tap();
+            haptic.select();
             onPress(x.id);
           }}
         />

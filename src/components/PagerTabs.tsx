@@ -240,7 +240,7 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
               return r ? [{ key: r.key, name, options: descriptors[r.key].options }] : [];
             })}
             onPress={(i, key) => {
-              haptic.tap();
+              haptic.select();
               const e = navigation.emit({ type: 'tabPress', target: key, canPreventDefault: true });
               if (!e.defaultPrevented && i !== focused) go(i);
             }}
