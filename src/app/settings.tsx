@@ -1,41 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import { router } from 'expo-router';
 import { ReactNode } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { PilotSettings } from '../components/pilot/PilotSettings';
 import { RemindersSettings } from '../components/reminders/RemindersSettings';
 import { SheetHeader } from '../components/SheetHeader';
 import { Screen, T } from '../components/ui';
 import type { ThemePreference } from '../core/types';
-import { APP_NAME, CONTACT_EMAIL, PRIVACY_URL } from '../lib/constants';
+import { APP_NAME, CONTACT_EMAIL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
 import { usePreferences } from '../store/preferences';
-import { useResetPilot } from '../store/resetPilot';
 import { radius, space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 export default function Settings() {
   const { c } = useTheme();
-
-  const exportJson = async () => {
-    try {
-      const file = new File(Paths.cache, `${APP_NAME.toLowerCase()}-export.json`);
-      const { program } = useResetPilot.getState();
-      const { themePreference } = usePreferences.getState();
-      await file.write(
-        JSON.stringify({ exportedAt: new Date().toISOString(), lifeReset: program, themePreference }, null, 2),
-      );
-      await Sharing.shareAsync(file.uri, {
-        mimeType: 'application/json',
-        UTI: 'public.json',
-        dialogTitle: 'Export my data',
-      });
-    } catch {
-      Alert.alert('Export failed', 'Something went wrong preparing your data. Please try again.');
-    }
-  };
 
   return (
     <Screen edges={['bottom']}>
@@ -49,12 +29,11 @@ export default function Settings() {
           <AppearancePicker />
         </Section>
 
-        <Section title="Your data">
-          <Row label="Export my data" icon="share-outline" onPress={exportJson} />
+        <Section title="Privacy & Data">
+          <Row label="Privacy & Data" icon="lock-closed-outline" onPress={() => router.push('/privacy')} />
         </Section>
 
         <Section title="About">
-          <Row label="Privacy policy" icon="open-outline" onPress={() => void Linking.openURL(PRIVACY_URL)} />
           <Row label="Contact" icon="mail-outline" onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
         </Section>
 

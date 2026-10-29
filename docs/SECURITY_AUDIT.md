@@ -136,6 +136,11 @@ known older versions, plus a test; only then bump the version.
 
 ### M4 — The export contains health answers and stays in the cache
 
+**Status: resolved** (Phase 2B): Settings → Privacy & Data shows what the export contains (health, sleep and
+activity information) and asks before exporting; exports are temporary files in an app-managed folder, removed
+after the share sheet closes and on later launches (`src/components/PrivacyData.tsx`, `src/core/dataExport.ts`,
+`src/lib/appFiles.ts`).
+
 **Type:** Verified. Recommended before submission.
 
 **Where:** `src/app/settings.tsx` — `exportJson()` writes `{ exportedAt, lifeReset: program, themePreference }` to
@@ -157,6 +162,8 @@ health answers.
 
 ### L1 — Old V1/V2 saves are never removed
 
+**Status: partly resolved** (Phase 2B): Delete my data removes them; they're still not removed automatically.
+
 **Type:** Verified (low impact: only test devices ran those versions).
 
 **Where:** the pre-Life-Reset app saved under `schwung-state` / `schwung-state-internal`
@@ -169,6 +176,10 @@ unreadable by the app and not removable from it.
 **Fix:** on start, `AsyncStorage.multiRemove(['schwung-state', 'schwung-state-internal'])` once (idempotent).
 
 ### L2 — "End the Life Reset" leaves some data behind
+
+**Status: resolved** (Phase 2B): ending a reset also removes its temporary share files; Delete my data removes
+every `schwung-` record (program, recovery copies, preferences except the theme, old V1/V2 and Field Notes
+saves), pending reminders and temporary files, and reports anything it couldn't remove (`src/store/deleteData.ts`).
 
 **Type:** Verified.
 

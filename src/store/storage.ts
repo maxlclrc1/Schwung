@@ -36,6 +36,11 @@ async function flush() {
   }
 }
 
+/** Drops pending (not yet written) values for these keys: used only by "Delete my data". */
+export function discardPending(keys: string[]) {
+  for (const k of keys) pending.delete(k);
+}
+
 /** Writes anything pending now; resolves once it is on disk (for moments that must not be lost). */
 export const flushStorage = flush;
 
