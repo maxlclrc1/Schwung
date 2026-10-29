@@ -4,6 +4,7 @@ Audited commit: `d83ad8d` (the latest on `main` at the time; it includes `a07887
 from this repository (Expo SDK 58, React Native 0.88, iOS first). No fixes are made in this phase.
 
 **Labels used below**
+
 - **Verified** — confirmed in the code (file and line given).
 - **Potential risk** — a real path in the code, but it depends on circumstances (corruption, a future change).
 - **Needs iPhone verification** — depends on the native build or iOS behaviour and can't be confirmed from source.
@@ -17,21 +18,21 @@ remote push in the app code, and nothing leaves the phone except files the perso
 
 ## Summary
 
-| # | Severity | Finding | Type | Before submission? |
-|---|---|---|---|---|
-| H1 | High | A damaged or unrecognized save is silently discarded, and the next save overwrites it | Potential risk | **Yes** |
-| H2 | High | Placeholder bundle ID, privacy policy URL and support email | Verified | **Yes** |
-| M1 | Medium | Remote push entitlement (`aps-environment`) added though push is never used | Needs iPhone verification | **Yes** (recommended) |
-| M2 | Medium | Privacy manifest (required-reason APIs) not declared for the app's own use | Needs iPhone verification | **Yes** |
-| M3 | Medium | A future save-version bump without a migration would discard every user's data | Potential risk | No (guard before the next format change) |
-| M4 | Medium | The data export includes health answers and is written to a cache file that isn't removed | Verified | Recommended |
-| L1 | Low | Old V1/V2 saves (`schwung-state*`) are never removed from testers' phones | Verified | No |
-| L2 | Low | Ending a reset keeps preferences, the export file and story images until iOS purges them | Verified | No |
-| L3 | Low | Changing the device clock lets past days be completed (XP and collectibles) | Verified | No |
-| L4 | Low | npm audit: 4 high / 5 low in build tooling, none in the shipped app | Verified | No |
-| L5 | Low | Data is protected by iOS defaults (not "complete" protection) and included in backups | Needs iPhone verification | No |
-| L6 | Low | Habit names in reminders are opt-in, but custom names can be personal | Verified | No |
-| — | Info | Things that are already right (logging, dev tools, network, age gate, health rules, photos) | Verified | — |
+| #   | Severity | Finding                                                                                     | Type                      | Before submission?                       |
+| --- | -------- | ------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------- |
+| H1  | High     | A damaged or unrecognized save is silently discarded, and the next save overwrites it       | Potential risk            | **Yes**                                  |
+| H2  | High     | Placeholder bundle ID, privacy policy URL and support email                                 | Verified                  | **Yes**                                  |
+| M1  | Medium   | Remote push entitlement (`aps-environment`) added though push is never used                 | Needs iPhone verification | **Yes** (recommended)                    |
+| M2  | Medium   | Privacy manifest (required-reason APIs) not declared for the app's own use                  | Needs iPhone verification | **Yes**                                  |
+| M3  | Medium   | A future save-version bump without a migration would discard every user's data              | Potential risk            | No (guard before the next format change) |
+| M4  | Medium   | The data export includes health answers and is written to a cache file that isn't removed   | Verified                  | Recommended                              |
+| L1  | Low      | Old V1/V2 saves (`schwung-state*`) are never removed from testers' phones                   | Verified                  | No                                       |
+| L2  | Low      | Ending a reset keeps preferences, the export file and story images until iOS purges them    | Verified                  | No                                       |
+| L3  | Low      | Changing the device clock lets past days be completed (XP and collectibles)                 | Verified                  | No                                       |
+| L4  | Low      | npm audit: 4 high / 5 low in build tooling, none in the shipped app                         | Verified                  | No                                       |
+| L5  | Low      | Data is protected by iOS defaults (not "complete" protection) and included in backups       | Needs iPhone verification | No                                       |
+| L6  | Low      | Habit names in reminders are opt-in, but custom names can be personal                       | Verified                  | No                                       |
+| —   | Info     | Things that are already right (logging, dev tools, network, age gate, health rules, photos) | Verified                  | —                                        |
 
 ---
 
@@ -47,6 +48,7 @@ chooses on a recovery screen (`src/store/recovery.ts`, `src/store/resetPilot.ts`
 invalid program). **Must fix before submission.**
 
 **Where**
+
 - `src/store/resetPilot.ts` — `sanitizeResetPilot()`:
   `const program = p.program === null || p.program === undefined ? null : P.sanitizePilotProgram(p.program);`
   If `sanitizePilotProgram` rejects the program (returns `null`), the store starts **without a program**.
@@ -67,9 +69,17 @@ test that a damaged program is kept for recovery.
 
 ### H2 — Placeholder App Store identity, privacy policy and support contact
 
+**Status: open, founder decision.** Recommended identifier: reverse-DNS of a domain the founder owns,
+`<reversed domain>.schwung` (for example `com.<yourcompany>.schwung`). It's permanent once published, so it needs the
+founder's approval and a matching App ID in the Apple Developer account. Insert it in `app.json`
+(`ios.bundleIdentifier`, and `android.package`); the internal build derives `<id>.internal` from it
+(`app.config.ts`). The privacy policy URL and support address go in `src/lib/constants.ts` (`PRIVACY_URL`,
+`CONTACT_EMAIL`) and in App Store Connect.
+
 **Type:** Verified. **Must fix before submission.**
 
 **Where**
+
 - `app.json` — `"bundleIdentifier": "com.example.schwung"` (and Android `"package": "com.example.schwung"`).
 - `src/lib/constants.ts` — `PRIVACY_URL = 'https://example.github.io/schwung/privacy'` (`// TODO`) and
   `CONTACT_EMAIL = 'hello@example.com'` (`// TODO`); both are linked from Settings → About.
@@ -89,6 +99,10 @@ both constants.
 
 ### M1 — Remote push entitlement added although only local notifications are used
 
+**Status: configured** (Phase 2C): `expo-notifications` runs with `enableRemoteNotifications: false`. A prebuild
+generates an empty `Schwung.entitlements` (no `aps-environment`) and no `UIBackgroundModes`. Still to confirm on a
+signed EAS build: no Push Notifications capability, and scheduled reminders still arrive.
+
 **Type:** Needs iPhone verification (inspect the built app's entitlements). **Recommended before submission.**
 
 **Where:** `app.json` → `"plugins": [..., "expo-notifications", ...]` with no options. In
@@ -102,6 +116,18 @@ capability widens the app's native surface, requires push provisioning, and invi
 no `aps-environment` entitlement while scheduled reminders still arrive.
 
 ### M2 — Privacy manifest for required-reason APIs not declared
+
+**Status: configured** (Phase 2C): `ios.privacyManifests` in `app.json` declares no tracking, no tracking domains,
+no collected data, and the reasons for the APIs used by the code shipped in the app:
+
+- file timestamps `C617.1` (files in the app's own container: AsyncStorage, temporary share files);
+- `UserDefaults` `CA92.1` (React Native, expo-constants, expo-notifications, expo-system-ui; this app only);
+- system boot time `35F9.1` (React Native's timing, elapsed time only).
+
+The installed SDKs ship their own manifests (expo-file-system and expo-media-library add `0A2A.1`, `3B52.1` and
+disk-space reasons); React Native's pod install merges them into the app's file (`privacy_file_aggregation_enabled`
+is on). Still to confirm on a signed EAS build: the final `PrivacyInfo.xcprivacy` in the `.app`, Xcode's privacy
+report, and no missing-reason warnings on upload.
 
 **Type:** Needs iPhone verification. **Must be resolved before submission** (App Store Connect rejects uploads
 missing required-reason declarations).
