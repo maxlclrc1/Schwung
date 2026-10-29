@@ -273,7 +273,7 @@ function HabitCardImpl({
   const toggle = () => {
     if (readOnly) return;
     if (done) haptic.undo();
-    else haptic.confirm();
+    else haptic.complete();
     onToggle(habitId);
   };
 
