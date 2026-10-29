@@ -246,7 +246,9 @@ const MOUNTAIN =
   'M0 240 L0 206 C 34 194, 76 160, 114 128 C 142 104, 172 56, 198 30 C 216 50, 238 92, 266 124 C 288 148, 306 166, 320 172 L320 240 Z';
 const SNOW =
   'M182 48 C 188 40, 194 34, 198 30 C 203 35, 209 42, 216 50 C 210 52, 206 48, 202 52 C 198 48, 192 54, 188 50 C 186 52, 184 50, 182 48 Z';
-const FAR = 'M0 240 L0 150 C 30 132, 60 120, 86 126 C 110 132, 120 112, 140 104 L 320 104 L320 240 Z';
+/** A softer range behind, rising and falling across the whole width (never a flat top). */
+const FAR =
+  'M0 240 L0 158 C 22 140, 48 124, 76 128 C 100 132, 118 112, 142 102 C 168 92, 186 110, 210 104 C 238 96, 262 84, 290 102 C 302 110, 312 116, 320 118 L320 240 Z';
 const MEADOW = 'M0 240 L0 226 C 60 212, 120 232, 180 224 C 240 216, 290 222, 320 214 L320 240 Z';
 const PINES: Pt[] = [
   [24, 214],
@@ -357,8 +359,11 @@ export function TrailPicker<K extends string>({
             pointerEvents="none"
           >
             <Path d={FAR} fill={t.mist.fill} fillOpacity={0.22} />
+            {/* Each layer is solid underneath its tint, so nothing behind shows through it. */}
+            <Path d={MOUNTAIN} fill={c.bg} />
             <Path d={MOUNTAIN} fill={t.sage.fill} fillOpacity={ridge} />
             <Path d={SNOW} fill="#FFFFFF" fillOpacity={isDark ? 0.8 : 0.95} />
+            <Path d={MEADOW} fill={c.bg} />
             <Path d={MEADOW} fill={t.sage.fill} fillOpacity={0.75} />
             {PINES.map(([x, y], i) => (
               <Path

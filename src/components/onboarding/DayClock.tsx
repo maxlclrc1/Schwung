@@ -126,11 +126,20 @@ export function DayClock({
                 <Ionicons name="moon" size={17} color={t.indigo.fill} />
               </View>
             </Animated.View>
+            {/* Solid hills (the sun and moon set behind them), each tinted over a solid base. */}
             <Svg width={w} height={SKY_H} style={StyleSheet.absoluteFill}>
+              <Path
+                d={`M0 ${hy + 8} C ${w * 0.16} ${hy - 26}, ${w * 0.3} ${hy - 10}, ${w * 0.42} ${hy - 2} C ${w * 0.56} ${hy + 6}, ${w * 0.72} ${hy - 34}, ${w} ${hy - 6} L ${w} ${SKY_H} L 0 ${SKY_H} Z`}
+                fill={c.bg}
+              />
               <Path
                 d={`M0 ${hy + 8} C ${w * 0.16} ${hy - 26}, ${w * 0.3} ${hy - 10}, ${w * 0.42} ${hy - 2} C ${w * 0.56} ${hy + 6}, ${w * 0.72} ${hy - 34}, ${w} ${hy - 6} L ${w} ${SKY_H} L 0 ${SKY_H} Z`}
                 fill={t.mist.fill}
                 fillOpacity={isDark ? 0.55 : 0.5}
+              />
+              <Path
+                d={`M0 ${hy + 24} C ${w * 0.22} ${hy + 6}, ${w * 0.46} ${hy + 30}, ${w * 0.7} ${hy + 14} C ${w * 0.84} ${hy + 6}, ${w * 0.94} ${hy + 10}, ${w} ${hy + 16} L ${w} ${SKY_H} L 0 ${SKY_H} Z`}
+                fill={c.bg}
               />
               <Path
                 d={`M0 ${hy + 24} C ${w * 0.22} ${hy + 6}, ${w * 0.46} ${hy + 30}, ${w * 0.7} ${hy + 14} C ${w * 0.84} ${hy + 6}, ${w * 0.94} ${hy + 10}, ${w} ${hy + 16} L ${w} ${SKY_H} L 0 ${SKY_H} Z`}
