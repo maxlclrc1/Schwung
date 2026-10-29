@@ -4,6 +4,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { ReactNode } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { HapticTest } from '../components/HapticTest';
 import { PilotSettings } from '../components/pilot/PilotSettings';
 import { RemindersSettings } from '../components/reminders/RemindersSettings';
 import { SheetHeader } from '../components/SheetHeader';
@@ -48,6 +49,8 @@ export default function Settings() {
         <Section title="Appearance">
           <AppearancePicker />
         </Section>
+
+        {__DEV__ ? <HapticTest /> : null}
 
         <Section title="Your data">
           <Row label="Export my data" icon="share-outline" onPress={exportJson} />
