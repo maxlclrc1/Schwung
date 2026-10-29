@@ -1,17 +1,17 @@
 # Collectible illustrations
 
-Drop the finished art here, named exactly (1024 × 1024 PNG, transparent background, same geometry in both themes):
+One painting per object, used in both light and dark themes: 1024 × 1024 WebP with a transparent background,
+the object trimmed and centred with even padding. Listed in `src/components/collection/art.ts`; a locked object is
+drawn as a silhouette of the same image.
 
-| Collectible | Dark theme | Light theme |
-|---|---|---|
-| The Compass | `compass-dark.png` | `compass-light.png` |
-| Pressed Edelweiss | `edelweiss-dark.png` | `edelweiss-light.png` |
-| The Trail Journal | `trail_journal-dark.png` | `trail_journal-light.png` |
-| The Mountain Lantern | `mountain_lantern-dark.png` | `mountain_lantern-light.png` |
-| The Climbing Rope | `climbing_rope-dark.png` | `climbing_rope-light.png` |
-| The Walking Staff | `walking_staff-dark.png` | `walking_staff-light.png` |
-| The Summit Pennant | `summit_pennant-dark.png` | `summit_pennant-light.png` |
+| Collectible | File |
+|---|---|
+| The Compass | `compass-dark.webp` |
+| Pressed Edelweiss | `edelweiss-dark.webp` |
+| The Trail Journal | `trail_journal-dark.webp` |
+| The Mountain Lantern | `mountain_lantern-dark.webp` |
+| The Climbing Rope | `climbing_rope-dark.webp` |
+| The Walking Staff | `walking_staff-dark.webp` |
+| The Summit Pennant | `summit_pennant-dark.webp` |
 
-Then list each pair in `src/components/collection/art.ts` (one line each; the commented template is there).
-Nothing else changes: the collection uses the art when it's listed, and its vector placeholder until then.
-Prompts: `design/XP_COLLECTIBLE_ART_PROMPTS.md`.
+To replace one, export it at the same size and name (original prompts: `design/XP_COLLECTIBLE_ART_PROMPTS.md`).
