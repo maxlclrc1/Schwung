@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { haptic } from '../lib/haptics';
 import { useTheme } from '../theme';
@@ -18,10 +18,8 @@ export function IconButton({
 }) {
   const { c } = useTheme();
   const pressed = useSharedValue(0);
-  const press = useAnimatedStyle(() => ({
-    opacity: 1 - pressed.value * 0.2,
-    transform: [{ scale: 1 - pressed.value * 0.08 }],
-  }));
+  // Only the round backing gives under the finger: the glyph is never scaled, so it stays sharp.
+  const backing = useAnimatedStyle(() => ({ transform: [{ scale: 1 - pressed.value * 0.1 }] }));
   return (
     <Pressable
       onPress={() => {
@@ -34,11 +32,12 @@ export function IconButton({
       onPressIn={() => pressed.set(withTiming(1, { duration: 70 }))}
       onPressOut={() => pressed.set(withTiming(0, { duration: 220, easing: Easing.out(Easing.cubic) }))}
     >
-      <Animated.View style={press}>
-        <ThemedView style={[styles.iconButton, { backgroundColor: c.surface }]}>
-          <Ionicons name={name} size={20} color={c.text} />
-        </ThemedView>
-      </Animated.View>
+      <View style={styles.iconButton}>
+        <Animated.View style={[StyleSheet.absoluteFill, backing]}>
+          <ThemedView style={[styles.circle, { backgroundColor: c.surface }]} />
+        </Animated.View>
+        <Ionicons name={name} size={20} color={c.text} />
+      </View>
     </Pressable>
   );
 }
@@ -48,5 +47,6 @@ export function SettingsButton() {
 }
 
 const styles = StyleSheet.create({
-  iconButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  iconButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  circle: { flex: 1, borderRadius: 20 },
 });

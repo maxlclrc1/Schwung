@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect } from 'react';
+import { createContext, ReactNode, startTransition, useContext, useEffect, useRef, useState } from 'react';
 import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import Animated, {
   Easing,
@@ -10,8 +10,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { animatedColors, ColorProp, THEME_FADE_MS } from './fade';
-import { requestScheme } from './gate';
-import { Colors, palettes, Scheme, useTheme, useThemeTarget } from './index';
+import { requestScheme, useThemeGate } from './gate';
+import { Colors, palettes, Scheme, SchemeContext, useRootTheme, useTheme, useThemeTarget } from './index';
 
 export { animatedColors, findToken, THEME_FADE_MS, themedPairs } from './fade';
 
@@ -29,25 +29,42 @@ const progressFor = (scheme: Scheme) => (scheme === 'light' ? 1 : 0);
 const ThemeProgress = createContext<SharedValue<number> | null>(null);
 
 export function ThemeTransitionProvider({ children }: { children: ReactNode }) {
-  const { scheme } = useTheme();
+  const initial = useRootTheme().scheme;
   const target = useThemeTarget();
   const reduceMotion = useReducedMotion();
-  const progress = useSharedValue(progressFor(scheme));
+  const progress = useSharedValue(progressFor(initial));
+  const [scheme, setScheme] = useState<Scheme>(initial);
+  const still = useRef(reduceMotion);
+  useEffect(() => {
+    still.current = reduceMotion;
+  }, [reduceMotion]);
 
-  // A new theme is shown (and faded to, below) once its paintings are ready (./gate).
+  // A new theme is shown once its paintings are ready (./gate).
   useEffect(() => {
     requestScheme(target);
   }, [target]);
 
+  // The switch itself, outside React: the UI thread fades every themed colour and painting at once (retargeting
+  // smoothly on rapid toggles); React re-renders afterwards, at low priority, for the few colours it draws itself.
   useEffect(() => {
-    const target = progressFor(scheme);
-    // Retargets smoothly from wherever it is, so rapid toggles never jump or flash.
-    progress.set(
-      reduceMotion ? target : withTiming(target, { duration: THEME_FADE_MS, easing: Easing.out(Easing.quad) }),
-    );
-  }, [scheme, reduceMotion, progress]);
+    let last: Scheme = initial;
+    return useThemeGate.subscribe((g) => {
+      const next = g.shown;
+      if (!next || next === last) return;
+      last = next;
+      const to = progressFor(next);
+      progress.set(still.current ? to : withTiming(to, { duration: THEME_FADE_MS, easing: Easing.out(Easing.quad) }));
+      startTransition(() => setScheme(next));
+    });
+    // Subscribed once; `initial` is only the starting point.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progress]);
 
-  return <ThemeProgress.Provider value={progress}>{children}</ThemeProgress.Provider>;
+  return (
+    <SchemeContext.Provider value={scheme}>
+      <ThemeProgress.Provider value={progress}>{children}</ThemeProgress.Provider>
+    </SchemeContext.Provider>
+  );
 }
 
 /** Keeps everything inside dark and still, whatever the app theme (ceremonies). */

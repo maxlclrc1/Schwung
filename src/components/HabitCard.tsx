@@ -242,6 +242,9 @@ function HabitCardImpl({
   // Completing (never on open or a re-render): one soft sage ring breathes out from the check, and the check
   // itself lands with a small overshoot-free pop.
   const ring = useSharedValue(0);
+  // A finger resting on the card: a faint shade (the card itself is never scaled, so nothing blurs).
+  const held = useSharedValue(0);
+  const hold = (on: boolean) => held.set(withTiming(on ? 1 : 0, { duration: on ? 80 : 200 }));
   const pop = useSharedValue(0);
   const wasDone = useRef(done);
   useEffect(() => {
@@ -322,6 +325,7 @@ function HabitCardImpl({
   };
   const beginSwipe = () => {
     clearTimer();
+    hold(false);
     const g = gesture.current;
     g.mode = 'swipe';
     g.crossed = false;
@@ -355,6 +359,7 @@ function HabitCardImpl({
         return true;
       }
       gesture.current.mode = 'press';
+      hold(true);
       if (onLongPress) {
         gesture.current.timer = setTimeout(() => {
           gesture.current.mode = 'used';
@@ -373,6 +378,7 @@ function HabitCardImpl({
         // Any real movement ends the long-press; a vertical one is left to the page.
         else if (Math.hypot(dxOf(e), dyOf(e)) > 8) {
           clearTimer();
+          hold(false);
           if (intent === 'scroll') g.mode = 'used';
         }
       }
@@ -387,6 +393,7 @@ function HabitCardImpl({
     },
     onResponderRelease: (e: GestureResponderEvent) => {
       clearTimer();
+      hold(false);
       const g = gesture.current;
       if (g.mode !== 'swipe') {
         g.mode = 'idle';
@@ -400,6 +407,7 @@ function HabitCardImpl({
     onResponderTerminationRequest: () => gesture.current.mode !== 'swipe',
     onResponderTerminate: () => {
       clearTimer();
+      hold(false);
       if (gesture.current.mode === 'swipe') endSwipe();
       gesture.current.mode = 'idle';
       settle();
@@ -438,6 +446,9 @@ function HabitCardImpl({
     opacity: doneP.get(),
     transform: [{ scale: 0.6 + 0.4 * doneP.get() + 0.14 * pop.get() }],
   }));
+  const heldStyle = useAnimatedStyle(() => ({ opacity: held.get() * (isDark ? 0.16 : 0.08) }));
+  // Done: a fine sage edge around the card.
+  const edgeStyle = useAnimatedStyle(() => ({ opacity: doneP.get() * 0.95 }));
   const ringStyle = useAnimatedStyle(() => ({
     opacity: ring.get() > 0 && ring.get() < 1 ? 0.55 * (1 - ring.get()) : 0,
     transform: [{ scale: 1 + ring.get() * 1.6 }],
@@ -500,6 +511,11 @@ function HabitCardImpl({
           {levelName}
         </Ink>
       </View>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.held, heldStyle]} />
+      <Animated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, styles.edge, { borderColor: c.sage }, edgeStyle]}
+      />
       {/* Done: a check in the top-right corner, with the ring that breathes out from it on completing. */}
       <Animated.View
         pointerEvents="none"
@@ -609,6 +625,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   ring: { backgroundColor: 'transparent', borderWidth: 2 },
+  held: { backgroundColor: '#000000' },
+  edge: { borderRadius: RADIUS, borderWidth: 2.5 },
   mark: { position: 'absolute', top: 44 },
   markDone: { left: 24 },
   markUndo: { right: 24 },
@@ -622,7 +640,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   markSolid: { borderRadius: MARK / 2, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 24, lineHeight: 29, fontWeight: '700', letterSpacing: -0.3 },
+  title: { fontSize: 25, lineHeight: 30, fontWeight: '800', letterSpacing: -0.5 },
   target: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
   status: { marginTop: 10, minHeight: 44, justifyContent: 'center' },
   statusSide: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },

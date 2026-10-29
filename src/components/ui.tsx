@@ -53,12 +53,12 @@ type ButtonProps = {
 
 export function Button({ label, onPress, kind = 'primary', disabled, style, icon }: ButtonProps) {
   const { c } = useTheme();
-  // Press feedback: a slight give (2%, too little for iOS's scaled-text bitmap to show) and a touch of dim, quick
-  // in and eased back out.
+  // Press feedback: the button's shape gives a little and eases back; its label is never scaled (a transformed
+  // text layer is redrawn as a blurry bitmap on iOS), it only dims a touch.
   const pressed = useSharedValue(0);
-  const anim = useAnimatedStyle(() => ({
-    opacity: 1 - pressed.value * 0.12,
-    transform: [{ scale: 1 - pressed.value * 0.02 }],
+  const anim = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.1 }));
+  const give = useAnimatedStyle(() => ({
+    transform: [{ scaleX: 1 - pressed.value * 0.03 }, { scaleY: 1 - pressed.value * 0.06 }],
   }));
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
   const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? c.danger : kind === 'ghost' ? c.textDim : c.text;
@@ -80,9 +80,8 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
       // The disabled dim sits on the Pressable: on the animated view it was overridden by the press opacity.
       style={[style, disabled && styles.disabled]}
     >
-      <Animated.View
-        style={[styles.button, { backgroundColor: bg }, kind === 'ghost' && { minHeight: 44 }, anim, fade]}
-      >
+      <Animated.View style={[styles.button, kind === 'ghost' && { minHeight: 44 }, anim]}>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.backing, { backgroundColor: bg }, give, fade]} />
         {icon}
         <T v="bodyStrong" color={fg}>
           {label}
@@ -142,6 +141,7 @@ const PRESS_OUT = Easing.out(Easing.cubic);
 
 const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },
+  backing: { borderRadius: radius.md },
   button: {
     minHeight: 56,
     borderRadius: radius.md,
