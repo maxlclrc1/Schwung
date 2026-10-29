@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BackHandler, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import Animated, {
@@ -25,7 +25,7 @@ import { AgeDial, bandOf, YEARS_OF } from '../onboarding/AgeDial';
 import { IconTiles, Press, SoftChoice, Stairs, Stepper, Token } from '../onboarding/Choices';
 import { HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
 import { DayClock, hhmm, minutesOf } from '../onboarding/DayClock';
-import { Finale } from '../onboarding/Finale';
+import { markSaved, showFinale } from '../onboarding/Handoff';
 import { PhoneMeter, TimeDial, TrailPicker } from '../onboarding/Instruments';
 import { CHAPTERS, DragLock, Question, rise, TrailProgress, useTints, type TintName } from '../onboarding/kit';
 import { Button, Screen, T } from '../ui';
@@ -119,14 +119,8 @@ export function PilotSetup() {
   const [start, setStart] = useState<P.StrengthStart | undefined>(undefined);
   const [own, setOwn] = useState(2);
   const [dragging, setDragging] = useState(false);
-  // Begin Day 1: the program is saved, and the way in plays before the Habits tab.
+  // Confirmed: the program is created and the finale (Handoff.tsx, above the navigator) takes it from here.
   const [launching, setLaunching] = useState<string[] | null>(null);
-  // The created program is on disk (the finale offers Day 1 only then).
-  const [saved, setSaved] = useState(false);
-  const enter = useCallback(() => {
-    if (router.canDismiss()) router.dismissAll();
-    router.replace('/today');
-  }, []);
 
   // Which way the story is moving, read by the page transitions as they run.
   const dir = useSharedValue(1);
@@ -205,14 +199,16 @@ export function PilotSetup() {
     if (launching) return;
     if (!useResetPilot.getState().start(answers, choices)) return;
     haptic.success();
-    setLaunching(P.PILOT_HABITS.filter((id) => picked.includes(id)));
+    const ids = P.PILOT_HABITS.filter((id) => picked.includes(id));
+    setLaunching(ids);
+    showFinale(ids);
     // Make sure it's on disk before Day 1 is offered; a failed write is kept and tried again.
     const save = (tries: number): Promise<void> =>
       flushStorage().catch(() =>
         tries > 1 ? new Promise((r) => setTimeout(r, 400)).then(() => save(tries - 1)) : undefined,
       );
     // (A tick first, so the store's write of the new program has been queued.)
-    void new Promise((r) => setTimeout(r, 0)).then(() => save(3)).then(() => setSaved(true));
+    void new Promise((r) => setTimeout(r, 0)).then(() => save(3)).then(markSaved);
   };
 
   // Atmosphere: the world drifts a little further along with the story, and its light takes the chapter's tint.
@@ -709,7 +705,6 @@ export function PilotSetup() {
           />
         </View>
       </Screen>
-      {launching ? <Finale habits={launching} saved={saved} onEnter={enter} /> : null}
     </GestureHandlerRootView>
   );
 }

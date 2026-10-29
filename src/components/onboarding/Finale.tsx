@@ -24,6 +24,7 @@ import { Button, T } from '../ui';
 import { WorldBackdrop } from '../World';
 import { Press } from './Choices';
 import { HabitArt } from './Habits';
+import { cover } from './cover';
 import { rise, useTints, type Tint } from './kit';
 
 /*
@@ -41,7 +42,18 @@ const AnimatedPath = Animated.createAnimatedComponent(Path);
 const ease = Easing.bezier(0.45, 0, 0.2, 1);
 const sys = ReduceMotion.System;
 
-export function Finale({ habits, saved, onEnter }: { habits: string[]; saved: boolean; onEnter: () => void }) {
+export function Finale({
+  habits,
+  saved,
+  entering,
+  onEnter,
+}: {
+  habits: string[];
+  saved: boolean;
+  /** Begin or Skip was pressed: the app is coming up beneath. */
+  entering: boolean;
+  onEnter: (kind: 'begin' | 'skip') => void;
+}) {
   const { c, isDark } = useTheme();
   const t = useTints();
   const insets = useSafeAreaInsets();
@@ -92,10 +104,12 @@ export function Finale({ habits, saved, onEnter }: { habits: string[]; saved: bo
     return () => clearTimeout(timer);
   }, [reduce]);
   useEffect(() => {
-    if (skipped && saved) onEnter();
+    if (skipped && saved) onEnter('skip');
   }, [skipped, saved, onEnter]);
 
   const veil = useAnimatedStyle(() => ({ opacity: mist.value }));
+  // On the way in, the words and controls go first; the mountain stays longest, melting into the panorama.
+  const words = useAnimatedStyle(() => ({ opacity: interpolate(cover.value, [0.55, 0.95], [0, 1], 'clamp') }));
   const world = useAnimatedStyle(() => ({
     transform: [{ scale: 1 + mist.value * 0.04 }, { translateY: mist.value * 10 }],
   }));
@@ -179,52 +193,54 @@ export function Finale({ habits, saved, onEnter }: { habits: string[]; saved: bo
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: c.bg }, veil]} />
       </View>
 
-      <Press
-        onPress={() => setSkipped(true)}
-        style={[styles.skip, { top: insets.top + space.sm }]}
-        accessibilityRole="button"
-        accessibilityLabel="Skip to Day 1"
-      >
-        <View style={[styles.skipPill, { backgroundColor: c.surface }]}>
-          <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
-            {skipped && !saved ? 'Saving…' : 'Skip'}
-          </T>
-        </View>
-      </Press>
-
-      <View style={[styles.words, { paddingBottom: insets.bottom + space.lg }]}>
-        <Animated.View entering={rise(reduce ? 0 : 250)}>
-          <T v="overline" color={t.lavender.ink} style={{ letterSpacing: 2.4 }}>
-            Your journey is taking shape
-          </T>
-        </Animated.View>
-        <Animated.View entering={rise(reduce ? 200 : 2050)}>
-          <T v="display" style={styles.title} accessibilityRole="header">
-            Your 66-day reset starts here.
-          </T>
-        </Animated.View>
-        <Animated.View entering={rise(reduce ? 300 : 2350)} style={styles.habits}>
-          {habits.map((id) => (
-            <View key={id} style={[styles.thumb, { borderColor: c.bg }]}>
-              <HabitArt id={id} width={36} height={36} />
-            </View>
-          ))}
-        </Animated.View>
-        <View style={styles.cta}>
-          {played && saved ? (
-            <Animated.View entering={rise(0)}>
-              <Shine disabled={reduce}>
-                <Button label="Begin Day 1" onPress={onEnter} />
-              </Shine>
-            </Animated.View>
-          ) : played ? (
-            // Only if the save is slow: say so plainly, and offer the way in the moment it's done.
-            <T v="caption" color={c.textDim} style={styles.center}>
-              Saving your reset on this phone…
+      <Animated.View style={[StyleSheet.absoluteFill, words]} pointerEvents={entering ? 'none' : 'box-none'}>
+        <Press
+          onPress={() => setSkipped(true)}
+          style={[styles.skip, { top: insets.top + space.sm }]}
+          accessibilityRole="button"
+          accessibilityLabel="Skip to Day 1"
+        >
+          <View style={[styles.skipPill, { backgroundColor: c.surface }]}>
+            <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
+              {skipped && !saved ? 'Saving…' : 'Skip'}
             </T>
-          ) : null}
+          </View>
+        </Press>
+
+        <View style={[styles.words, { paddingBottom: insets.bottom + space.lg }]}>
+          <Animated.View entering={rise(reduce ? 0 : 250)}>
+            <T v="overline" color={t.lavender.ink} style={{ letterSpacing: 2.4 }}>
+              Your journey is taking shape
+            </T>
+          </Animated.View>
+          <Animated.View entering={rise(reduce ? 200 : 2050)}>
+            <T v="display" style={styles.title} accessibilityRole="header">
+              Your 66-day reset starts here.
+            </T>
+          </Animated.View>
+          <Animated.View entering={rise(reduce ? 300 : 2350)} style={styles.habits}>
+            {habits.map((id) => (
+              <View key={id} style={[styles.thumb, { borderColor: c.bg }]}>
+                <HabitArt id={id} width={36} height={36} />
+              </View>
+            ))}
+          </Animated.View>
+          <View style={styles.cta}>
+            {played && saved ? (
+              <Animated.View entering={rise(0)}>
+                <Shine disabled={reduce}>
+                  <Button label="Begin Day 1" onPress={() => onEnter('begin')} />
+                </Shine>
+              </Animated.View>
+            ) : played ? (
+              // Only if the save is slow: say so plainly, and offer the way in the moment it's done.
+              <T v="caption" color={c.textDim} style={styles.center}>
+                Saving your reset on this phone…
+              </T>
+            ) : null}
+          </View>
         </View>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 }

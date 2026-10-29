@@ -2,7 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+  useAnimatedStyle,
+  useReducedMotion,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { levelProgress, playerLevel, XP_FULL_DAY_BONUS } from '../../core/progression';
@@ -15,6 +21,8 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { CardButton, HabitCard } from '../HabitCard';
 import { SettingsButton } from '../HeaderButton';
+import { cover } from '../onboarding/cover';
+import { todayReady } from '../onboarding/Handoff';
 import { ThemeToggle } from '../ThemeToggle';
 import { Button, ProgressBar, T } from '../ui';
 
@@ -89,11 +97,17 @@ export function PilotToday() {
     return () => clearTimeout(t);
   }, [changed]);
 
+  // Coming in from set-up's finale: the page rises the last few points as the finale fades (0 otherwise).
+  const reduceMotion = useReducedMotion();
+  const arrive = useAnimatedStyle(() => ({ transform: [{ translateY: reduceMotion ? 0 : cover.value * 12 }] }));
+  // Laid out and drawn (two frames on): the finale may fade away now.
+  const onLayout = useCallback(() => requestAnimationFrame(() => requestAnimationFrame(todayReady)), []);
+
   const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);
   const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
   return (
-    <ThemedView style={styles.root}>
+    <ThemedView style={[styles.root, arrive]} onLayout={onLayout}>
       <Animated.ScrollView
         scrollEnabled={!swiping}
         directionalLockEnabled
