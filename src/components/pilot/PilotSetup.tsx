@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BackHandler, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { BackHandler, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
   FadeIn,
@@ -19,14 +20,15 @@ import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/res
 import { haptic } from '../../lib/haptics';
 import { useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
-import { AgeWheel } from '../onboarding/AgeWheel';
+import { AgeDial, bandOf, YEARS_OF } from '../onboarding/AgeDial';
 import { IconTiles, Press, SoftChoice, Stairs, Stepper, Token } from '../onboarding/Choices';
 import { DayOneTransition, HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
-import { PhoneMeter, SunriseArc, TimeDial, TrailPicker } from '../onboarding/Instruments';
+import { DayClock, hhmm, minutesOf } from '../onboarding/DayClock';
+import { PhoneMeter, TimeDial, TrailPicker } from '../onboarding/Instruments';
 import { CHAPTERS, DragLock, Question, rise, TrailProgress, useTints, type TintName } from '../onboarding/kit';
 import { Button, Screen, T } from '../ui';
 import { OnboardingBackdrop } from '../World';
-import { ACTIVE, AGES, duration, HEALTH, PHONE, STARTS, WAKE_TIMES } from './SetupParts';
+import { ACTIVE, duration, HEALTH, PHONE, STARTS } from './SetupParts';
 
 type Step = 'age' | 'health' | 'habits' | P.Baseline | 'levels' | 'time' | 'review';
 
@@ -101,6 +103,8 @@ export function PilotSetup() {
   const running = useResetPilot((s) => s.program !== null);
   const [step, setStep] = useState<Step>('age');
   const [age, setAge] = useState<AgeBand | null>(null);
+  // The age itself is only shown here; the program keeps its band.
+  const [years, setYears] = useState<number | null>(null);
   const [health, setHealth] = useState<Precaution[] | 'unknown' | null>(null);
   const [picked, setPicked] = useState<P.PilotHabitId[]>([]);
   const [levels, setLevels] = useState<Partial<Record<string, Intensity>>>({});
@@ -278,20 +282,13 @@ export function PilotSetup() {
             hint="So every habit fits you. It takes about a minute."
             center
           >
-            <AgeWheel items={AGES} value={age} onChange={setAge} start={2} label="Your age" />
-            <View style={styles.note}>
-              {age === 'u16' ? (
-                <Animated.View entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}>
-                  <T color={c.danger} style={styles.centerText}>
-                    Schwung is made for people 16 and older.
-                  </T>
-                </Animated.View>
-              ) : (
-                <T v="caption" color={c.textFaint} style={styles.centerText}>
-                  Scroll or tap to choose
-                </T>
-              )}
-            </View>
+            <AgeDial
+              years={years ?? (age ? YEARS_OF[age] : null)}
+              onChange={(y) => {
+                setYears(y);
+                setAge(bandOf(y));
+              }}
+            />
           </Question>
         );
       case 'health':
@@ -432,13 +429,11 @@ export function PilotSetup() {
             eyebrow={P.habitName(ASKED_BY.wake)}
             tint="indigo"
             title="When does your day usually begin?"
-            hint="Slide the sun to your usual time. We never ask for earlier."
+            hint="Any hour of the day or night. Your own time is the anchor, never earlier."
           >
-            <SunriseArc
-              label="Usual wake-up time"
-              stops={WAKE_TIMES}
-              index={wake?.kind === 'time' ? WAKE_TIMES.indexOf(wake.time) : null}
-              onChange={(n) => setWake({ kind: 'time', time: WAKE_TIMES[n] })}
+            <DayClock
+              minutes={wake?.kind === 'time' ? minutesOf(wake.time) : null}
+              onChange={(m) => setWake({ kind: 'time', time: hhmm(m) })}
               muted={wake?.kind === 'varies' ? 'It varies' : wake?.kind === 'shift' ? 'Shifts' : undefined}
             />
             <View style={styles.pair}>
@@ -575,12 +570,34 @@ export function PilotSetup() {
         return (
           <Question eyebrow="Your 66-day reset" tint="indigo" title="It’s ready. This one is yours.">
             <HabitFan ids={choices.map((x) => x.habitId)} width={content} />
+            <View style={styles.facts}>
+              {[
+                {
+                  icon: 'leaf-outline' as const,
+                  text: `${choices.length} habit${choices.length === 1 ? '' : 's'}`,
+                  tint: tints.sage,
+                },
+                { icon: 'flag-outline' as const, text: '66 days', tint: tints.peach },
+                { icon: 'sunny-outline' as const, text: 'From today', tint: tints.lavender },
+              ].map((f, i) => (
+                <Animated.View
+                  key={f.text}
+                  entering={rise(620 + i * 90)}
+                  style={[styles.fact, { backgroundColor: f.tint.soft }]}
+                >
+                  <Ionicons name={f.icon} size={14} color={f.tint.ink} />
+                  <T v="caption" color={f.tint.ink} style={{ fontWeight: '700' }}>
+                    {f.text}
+                  </T>
+                </Animated.View>
+              ))}
+            </View>
             <View style={styles.list}>
               {choices.map((x, i) => {
                 const p = P.previewTarget(x.habitId, x.intensity, answers);
                 const dot = [tints.lavender, tints.peach, tints.sage, tints.mist, tints.indigo, tints.lavender][i];
                 return (
-                  <Animated.View key={x.habitId} entering={rise(700 + i * 80)} style={styles.reviewRow}>
+                  <Animated.View key={x.habitId} entering={rise(900 + i * 80)} style={styles.reviewRow}>
                     <View style={styles.reviewArt}>
                       <HabitArt id={x.habitId} width={44} height={44} />
                     </View>
@@ -599,7 +616,7 @@ export function PilotSetup() {
                 );
               })}
             </View>
-            <Animated.View entering={rise(700 + choices.length * 80)}>
+            <Animated.View entering={rise(900 + choices.length * 80)}>
               <T v="caption" color={c.textDim}>
                 About {total} min on a day they all fall on{minutes ? `, of the ${duration(minutes)} you have` : ''}.
                 Targets only change when you choose. A swipe marks a habit done.
@@ -616,7 +633,7 @@ export function PilotSetup() {
   })();
 
   return (
-    <View style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Screen
         backdrop={
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -629,9 +646,13 @@ export function PilotSetup() {
       >
         <View style={styles.top}>
           <TrailProgress at={progress} />
-          <T v="caption" color={tints[CHAPTERS[chapter].tint].ink} style={styles.chapter}>
-            {CHAPTERS[chapter].name}
-          </T>
+          <View style={styles.chapterBox}>
+            <Animated.View key={chapter} entering={reduce ? undefined : rise(0)}>
+              <T v="caption" color={tints[CHAPTERS[chapter].tint].ink} style={styles.chapter}>
+                {CHAPTERS[chapter].name}
+              </T>
+            </Animated.View>
+          </View>
         </View>
         <DragLock.Provider value={setDragging}>
           <View style={styles.stage}>
@@ -678,14 +699,24 @@ export function PilotSetup() {
         </View>
       </Screen>
       {launching ? <DayOneTransition habits={launching} onDone={enter} /> : null}
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
   wash: { opacity: 0.55 },
   top: { paddingHorizontal: space.xl, paddingTop: space.sm, gap: space.xs, flexDirection: 'row', alignItems: 'center' },
-  chapter: { fontWeight: '700', minWidth: 76, textAlign: 'right' },
+  chapterBox: { minWidth: 84, height: 20, overflow: 'hidden', alignItems: 'flex-end' },
+  chapter: { fontWeight: '700', textAlign: 'right' },
+  facts: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },
+  fact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+  },
   stage: { flex: 1 },
   scroll: {
     flexGrow: 1,
