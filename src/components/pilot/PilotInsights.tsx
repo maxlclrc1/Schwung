@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useShownProgram } from '../shownProgram';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -34,7 +35,7 @@ import { Button, T } from '../ui';
  */
 export function PilotInsights() {
   const { c } = useTheme();
-  const program = useResetPilot((s) => s.program)!;
+  const program = useShownProgram()!;
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = pilotToday({ program, devDayOffset: offset });
   const data = useMemo(

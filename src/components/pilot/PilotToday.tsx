@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -114,7 +114,8 @@ export function PilotToday() {
   // never during a ceremony or the onboarding finale, and only for those who haven't turned it off.
   const comebacks = usePreferences((s) => s.comebacks);
   const ceremony = useCeremonyState();
-  const cells = useMemo(() => C.dayCells(program, today), [program, today]);
+  // The days before today, judged once a day: a check-off today never changes them, so it never pays for this.
+  const cells = useMemo(() => C.dayCells(useResetPilot.getState().program!, today), [today]);
   const absence = absenceStart(cells, today);
   const due =
     comebacks && absence !== null && program.comeback?.seen !== absence && !ceremony.ceremonyUp && !ceremony.finaleUp;
@@ -256,6 +257,11 @@ const summaryLabel = (done: number, total: number, daily: string[]) =>
   `${done} of ${total} habits done today. ${daily.length ? `${daily.join(', ')} is due every day.` : ''}`;
 
 /** One habit as the usual card: its target, its week, and a counter or session details where it has them. */
+/**
+ * One habit's card. Its values are worked out here (cheap), and the card itself (HabitCard: the scene, the
+ * gestures, the animations) is a memoized view of plain values, so completing one habit re-renders only that
+ * card, never the others.
+ */
 function PilotCard({
   program,
   habitId,
@@ -271,18 +277,12 @@ function PilotCard({
   onDetails: (id: string) => void;
   onSwipe: (active: boolean) => void;
 }) {
-  const { isDark } = useTheme();
   const level = P.levelFor(program, habitId, today);
   const done = P.isDone(program, habitId, today);
   const week = P.weekProgress(program, habitId, today);
   const state = P.stateOn(program, habitId, today);
   const track = P.trackOf(program, habitId, today);
   const counter = P.counterTarget(program, habitId, today);
-  const strength = habitId === 'strength_log';
-  const ink = isDark ? '#F7F5FF' : '#1B1830';
-  const chip = isDark ? 'rgba(28,27,37,0.62)' : 'rgba(255,255,255,0.72)';
-  const edge = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(27,24,48,0.12)';
-
   const weekText =
     state === 'not-eligible'
       ? 'Not a workday · rest'
@@ -294,18 +294,81 @@ function PilotCard({
             : `${week.credited} of ${week.goal} this week`
         : 'Every day';
   const count = track.count ?? 0;
-  const counterText = counter !== null ? `${Math.min(count, counter)} of ${counter}` : null;
+  const session =
+    track.session?.type || track.session?.minutes
+      ? [track.session.type, track.session.minutes ? `${track.session.minutes} min` : null].filter(Boolean).join(' · ')
+      : null;
+  return (
+    <CardView
+      habitId={habitId}
+      scene={program.custom?.[habitId]?.scene}
+      done={done}
+      weekly={!!week}
+      weekText={weekText}
+      counterText={counter !== null ? `${Math.min(count, counter)} of ${counter}` : null}
+      skipped={!!track.skipped}
+      session={session}
+      title={P.nameOf(program, habitId)}
+      task={P.targetText(program, habitId, today)}
+      levelIndex={P.phaseIndex(level)}
+      levelLabel={P.levelLineFor(program, habitId, today)}
+      onToggle={onToggle}
+      onDetails={onDetails}
+      onSwipe={onSwipe}
+    />
+  );
+}
+
+const CardView = memo(function CardView({
+  habitId,
+  scene,
+  done,
+  weekly,
+  weekText,
+  counterText,
+  skipped,
+  session,
+  title,
+  task,
+  levelIndex,
+  levelLabel,
+  onToggle,
+  onDetails,
+  onSwipe,
+}: {
+  habitId: string;
+  scene: number | undefined;
+  done: boolean;
+  weekly: boolean;
+  weekText: string;
+  counterText: string | null;
+  skipped: boolean;
+  session: string | null;
+  title: string;
+  task: string;
+  levelIndex: number;
+  levelLabel: string;
+  onToggle: (id: string) => void;
+  onDetails: (id: string) => void;
+  onSwipe: (active: boolean) => void;
+}) {
+  const { isDark } = useTheme();
+  const strength = habitId === 'strength_log';
+  const ink = isDark ? '#F7F5FF' : '#1B1830';
+  const chip = isDark ? 'rgba(28,27,37,0.62)' : 'rgba(255,255,255,0.72)';
+  const edge = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(27,24,48,0.12)';
+  const addOne = () => useResetPilot.getState().count(habitId, 1);
 
   const accessory = (
     <View style={styles.accessory}>
       <T v="caption" color={ink} style={styles.week} numberOfLines={1}>
         {weekText}
       </T>
-      {counter !== null && !done ? (
+      {counterText !== null && !done ? (
         <CardButton
           onPress={() => {
             haptic.select();
-            useResetPilot.getState().count(habitId, 1);
+            addOne();
           }}
           style={[styles.pill, { backgroundColor: chip, borderColor: edge }]}
         >
@@ -315,7 +378,7 @@ function PilotCard({
           </T>
         </CardButton>
       ) : null}
-      {track.skipped && !done ? (
+      {skipped && !done ? (
         <T v="caption" color={ink} style={styles.week}>
           Skipped today
         </T>
@@ -327,11 +390,7 @@ function PilotCard({
         >
           <Ionicons name="create-outline" size={14} color={ink} />
           <T v="caption" color={ink} style={styles.pillText}>
-            {track.session?.type || track.session?.minutes
-              ? [track.session.type, track.session.minutes ? `${track.session.minutes} min` : null]
-                  .filter(Boolean)
-                  .join(' · ')
-              : 'Add details'}
+            {session ?? 'Add details'}
           </T>
         </CardButton>
       ) : null}
@@ -339,14 +398,12 @@ function PilotCard({
   );
 
   const actions =
-    counter !== null && !done
-      ? [{ name: 'count', label: `Add one (${counterText})`, run: () => useResetPilot.getState().count(habitId, 1) }]
-      : [];
+    counterText !== null && !done ? [{ name: 'count', label: `Add one (${counterText})`, run: addOne }] : [];
 
   return (
     <HabitCard
       habitId={habitId}
-      scene={program.custom?.[habitId]?.scene}
+      scene={scene}
       done={done}
       onToggle={onToggle}
       onLongPress={onDetails}
@@ -354,17 +411,17 @@ function PilotCard({
       accessory={accessory}
       actions={actions}
       display={{
-        title: P.nameOf(program, habitId),
-        task: P.targetText(program, habitId, today),
-        levelIndex: P.phaseIndex(level),
-        levelLabel: P.levelLineFor(program, habitId, today),
+        title,
+        task,
+        levelIndex,
+        levelLabel,
         summary: [weekText, counterText].filter(Boolean).join('. '),
-        hint: strength ? 'Swipe right to log a session' : week ? 'Swipe right if you did it today' : undefined,
+        hint: strength ? 'Swipe right to log a session' : weekly ? 'Swipe right if you did it today' : undefined,
         doneText: strength ? 'Session logged' : undefined,
       }}
     />
   );
-}
+});
 
 /** A readiness offer: step up to the next phase, or a step easier. Always the person's choice. */
 function OfferCard({
