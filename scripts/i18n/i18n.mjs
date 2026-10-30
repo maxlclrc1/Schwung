@@ -110,7 +110,9 @@ function problems(en, t, lang) {
     else {
       // Strings are joined to others at these edges (French may add its own space before ; : ! ?).
       if (/^\s/.test(ref) && !/^\s/.test(s)) out.push('lost the leading space English has');
-      if (/\s$/.test(ref) && !/\s$/.test(s)) out.push('lost the trailing space English has');
+      // CJK punctuation (、，。：) carries its own spacing.
+      if (/\s$/.test(ref) && !/[\s\u3000-\u303f\uff01-\uff1f]$/.test(s))
+        out.push('lost the trailing space English has');
       if (ref.split('\n').length !== s.split('\n').length) out.push('line breaks differ from English');
     }
   }

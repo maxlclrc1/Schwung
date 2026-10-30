@@ -1,7 +1,9 @@
 # Localization
 
 Schwung is prepared for 20 languages (`src/i18n/languages.ts`). **Phase 1** ships six: English (source), Turkish,
-Spanish, French, German and Brazilian Portuguese. Phase 2 adds the next languages; Phase 3 brings right-to-left
+Spanish, French, German and Brazilian Portuguese. Phase 2 adds Italian, Dutch, Indonesian, Japanese, Korean and
+Simplified Chinese (glossary for these in `scripts/i18n/glossary.json`; Traditional Chinese devices stay in English
+until zh-Hant is ready); Phase 3 brings right-to-left
 (Arabic, Hebrew).
 
 ## How it works

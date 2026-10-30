@@ -19,6 +19,12 @@ const CATALOGS: Record<string, Translation> = {
   fr: require('../locales/fr').fr,
   de: require('../locales/de').de,
   'pt-BR': require('../locales/pt-BR').ptBR,
+  it: require('../locales/it').it,
+  nl: require('../locales/nl').nl,
+  id: require('../locales/id').id,
+  ja: require('../locales/ja').ja,
+  ko: require('../locales/ko').ko,
+  'zh-Hans': require('../locales/zh-Hans').zhHans,
   /* eslint-enable @typescript-eslint/no-require-imports */
 };
 
@@ -165,7 +171,7 @@ describe('switching language', () => {
   });
 
   it('a language without a catalog shows English', () => {
-    setLanguage('ja');
+    setLanguage('sv');
     expect(language()).toBe('en');
     expect(t('nav.tabs.journey')).toBe('Journey');
   });
@@ -185,7 +191,13 @@ describe('languages and formats', () => {
     expect(matchLanguage('pt-BR')).toBe('pt-BR');
     expect(matchLanguage('es-MX')).toBe('es');
     expect(matchLanguage('tr_TR')).toBe('tr');
-    expect(matchLanguage('ja-JP')).toBeNull();
+    expect(matchLanguage('ja-JP')).toBe('ja');
+    expect(matchLanguage('zh-Hans-CN')).toBe('zh-Hans');
+    expect(matchLanguage('zh-CN')).toBe('zh-Hans');
+    expect(matchLanguage('zh-Hant-TW')).toBeNull();
+    expect(matchLanguage('zh-HK')).toBeNull();
+    expect(matchLanguage('in-ID')).toBe('id');
+    expect(matchLanguage('ar-EG')).toBeNull();
     expect(matchLanguage(undefined)).toBeNull();
   });
 
