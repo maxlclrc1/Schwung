@@ -53,7 +53,12 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "i18n:status": "node scripts/i18n/i18n.mjs status",
+    "i18n:tasks": "node scripts/i18n/i18n.mjs tasks",
+    "i18n:apply": "node scripts/i18n/i18n.mjs apply",
+    "i18n:check": "node scripts/i18n/i18n.mjs check",
+    "i18n:approve": "node scripts/i18n/i18n.mjs approve"
   },
   "private": true,
   "jest": {
