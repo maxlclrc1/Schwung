@@ -398,7 +398,11 @@ export const ja: Translation = {
       followDeviceNow: '現在：{language}',
       intro:
         'Schwungの表示言語はすぐに切り替わります。習慣、進み具合、自分でつけた習慣の名前は、そのまま変わりません。',
-      more: 'ほかの言語も準備中です。',
+
+      restartBody:
+        '表示の言語は切り替わりました。新しい読む方向にレイアウトを合わせるには、Schwungを再起動してください。データは失われません。',
+
+      restartNow: '今すぐ再起動',
     },
     program: {
       title: 'プログラム',

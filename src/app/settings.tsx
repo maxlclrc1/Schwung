@@ -17,6 +17,7 @@ import { ThemedView } from '../theme/transition';
 import { language } from '../i18n';
 import { LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
+import { flipX } from '../i18n/direction';
 
 export default function Settings() {
   const { c } = useTheme();
@@ -43,7 +44,7 @@ export default function Settings() {
               <T color={c.textDim} numberOfLines={1} style={{ flexShrink: 1 }}>
                 {pref === 'system' ? t('settings.language.followDevice') : lang?.native}
               </T>
-              <Ionicons name="chevron-forward" size={18} color={c.textFaint} />
+              <Ionicons name="chevron-forward" size={18} color={c.textFaint} style={flipX} />
             </View>
           </Row>
         </Section>

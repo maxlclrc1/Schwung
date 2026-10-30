@@ -386,7 +386,11 @@ export const ko: Translation = {
       followDevice: '기기 설정 따르기',
       followDeviceNow: '현재: {language}',
       intro: 'Schwung의 언어가 바로 바뀌어요. 습관, 진행 상황, 직접 지은 습관 이름은 그대로 유지돼요.',
-      more: '더 많은 언어가 준비 중이에요.',
+
+      restartBody:
+        '문구가 바뀌었어요. 새 읽기 방향에 맞게 레이아웃을 바꾸려면 Schwung을 다시 시작하세요. 잃는 것은 없어요.',
+
+      restartNow: '지금 다시 시작',
     },
     program: {
       title: '내 프로그램',

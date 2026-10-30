@@ -36,6 +36,7 @@ import { WorldBackdrop } from '../World';
 import { ceremonyCover, setCeremonyState, useCeremonyState } from './state';
 import { formatList, formatNumber, t as tr } from '../../i18n';
 import { useLanguage, useT } from '../../i18n/react';
+import { physical } from '../../i18n/direction';
 
 /*
  * The two ceremonies, two chapters of one story on Schwung's own mountain painting: Day 1, the first step at the
@@ -269,7 +270,7 @@ function MountainStage({
 
   return (
     <View
-      style={StyleSheet.absoluteFill}
+      style={[StyleSheet.absoluteFill, physical]}
       pointerEvents="none"
       accessible={false}
       importantForAccessibility="no-hide-descendants"

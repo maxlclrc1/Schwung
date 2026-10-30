@@ -33,6 +33,7 @@ import { OnboardingBackdrop } from '../World';
 import { ACTIVE, duration, HEALTH, PHONE, STARTS } from './SetupParts';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
+import { flipX } from '../../i18n/direction';
 
 type Step = 'age' | 'health' | 'habits' | P.Baseline | 'levels' | 'time' | 'review';
 
@@ -689,7 +690,7 @@ export function PilotSetup() {
           >
             {({ pressed }) => (
               <View style={[styles.back, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}>
-                <Ionicons name="chevron-back" size={24} color={c.text} />
+                <Ionicons name="chevron-back" size={24} color={c.text} style={flipX} />
               </View>
             )}
           </Pressable>
@@ -697,7 +698,11 @@ export function PilotSetup() {
             label={step === 'review' ? t('setup.q.confirm') : t('setup.q.continue')}
             disabled={!canContinue || !!launching}
             onPress={step === 'review' ? begin : () => go(1)}
-            icon={step === 'review' ? <Ionicons name="arrow-forward" size={20} color={c.onAccent} /> : undefined}
+            icon={
+              step === 'review' ? (
+                <Ionicons name="arrow-forward" size={20} color={c.onAccent} style={flipX} />
+              ) : undefined
+            }
             style={{ flex: 1 }}
           />
         </View>

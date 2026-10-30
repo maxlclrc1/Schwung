@@ -8,6 +8,7 @@ import { Press } from '../onboarding/Choices';
 import { useTints } from '../onboarding/kit';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
+import { flipX } from '../../i18n/direction';
 
 const sys = ReduceMotion.System;
 
@@ -39,7 +40,7 @@ export function ChooseNextCard() {
               {t('beyond.card.body')}
             </T>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={c.textFaint} />
+          <Ionicons name="chevron-forward" size={18} color={c.textFaint} style={flipX} />
         </ThemedView>
       </Press>
     </Animated.View>

@@ -6,6 +6,7 @@ import { useTheme } from '../theme';
 import { ThemedView, useThemeProgress } from '../theme/transition';
 import { ThemedImage } from './ThemedImage';
 import { LAKESIDE_BAND_TOP, type Theme, TILE_HEIGHT, type TileName, TILES } from './worldTiles';
+import { DIR, IS_RTL, physical } from '../i18n/direction';
 
 const TILE_NAMES = Object.keys(TILES.dark) as TileName[];
 
@@ -50,7 +51,7 @@ export function useOnPainting(index: number) {
     const off = index - worldCamera.get();
     return {
       opacity: Math.min(1, Math.max(0, 1 - Math.abs(off) * 3)),
-      transform: [{ translateX: -off * slip }],
+      transform: [{ translateX: -off * slip * DIR }],
     };
   });
 }
@@ -78,7 +79,9 @@ export function WorldLayer() {
       const scroll = i === 1 ? worldScroll[i].get() : 0;
       y += weight * (anchor - BAND_TOP_PX[i] * scale - scroll);
     }
-    return { transform: [{ translateX: -cam * STOP_PX * scale }, { translateY: y }] };
+    // Right-to-left the tabs run the other way across the same (unmirrored) painting.
+    const along = IS_RTL ? 2 - cam : cam;
+    return { transform: [{ translateX: -along * STOP_PX * scale }, { translateY: y }] };
   });
   const veil = useAnimatedStyle(() => {
     const cam = worldCamera.get();
@@ -94,7 +97,7 @@ export function WorldLayer() {
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[StyleSheet.absoluteFill, { backgroundColor: c.bg, overflow: 'hidden' }]}
+      style={[StyleSheet.absoluteFill, physical, { backgroundColor: c.bg, overflow: 'hidden' }]}
     >
       {/* The camera moves this view on the UI thread; the tiles inside never re-render for it. */}
       <Animated.View style={[styles.pano, pan]}>

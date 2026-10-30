@@ -415,7 +415,11 @@ export const fr: Translation = {
       followDeviceNow: 'Actuellement : {language}',
       intro:
         'Les textes de Schwung changent immédiatement. Vos habitudes, votre progression et les noms que vous avez donnés à vos propres habitudes restent exactement tels quels.',
-      more: 'D’autres langues arrivent bientôt.',
+
+      restartBody:
+        'Les textes ont changé. Redémarrez Schwung pour adapter la mise en page au nouveau sens de lecture. Rien n’est perdu.',
+
+      restartNow: 'Redémarrer maintenant',
     },
     program: {
       title: 'Votre programme',

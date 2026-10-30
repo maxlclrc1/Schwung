@@ -17,6 +17,7 @@ import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
 import { formatList } from '../i18n';
 import { useT } from '../i18n/react';
+import { flipX } from '../i18n/direction';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
 const sys = ReduceMotion.System;
@@ -203,7 +204,7 @@ function Row({
           </T>
         ) : null}
       </View>
-      <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
+      <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
     </Pressable>
   );
 }

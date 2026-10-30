@@ -403,7 +403,11 @@ export const es: Translation = {
       followDeviceNow: 'Ahora: {language}',
       intro:
         'Los textos de Schwung cambian al instante. Tus hábitos, tu progreso y los nombres que diste a tus propios hábitos se quedan tal cual.',
-      more: 'Pronto llegarán más idiomas.',
+
+      restartBody:
+        'Los textos ya han cambiado. Reinicia Schwung para girar el diseño según la nueva dirección de lectura. No se pierde nada.',
+
+      restartNow: 'Reiniciar ahora',
     },
     program: {
       title: 'Tu programa',

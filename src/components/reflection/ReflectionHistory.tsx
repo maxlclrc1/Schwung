@@ -8,6 +8,7 @@ import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
+import { flipX } from '../../i18n/direction';
 
 /** Journey: each finished week's reflection (tap to open it again), or the way to reflect on one not answered. */
 export function ReflectionHistory({ program, today }: { program: P.PilotProgram; today: number }) {
@@ -59,7 +60,7 @@ export function ReflectionHistory({ program, today }: { program: P.PilotProgram;
                   <T v="caption" color={r?.answer ? c.text : c.accentInk} style={{ fontWeight: '700' }}>
                     {r?.answer ? ANSWER_WORDS[r.answer] : t('reflection.history.reflect')}
                   </T>
-                  <Ionicons name="chevron-forward" size={14} color={c.textFaint} />
+                  <Ionicons name="chevron-forward" size={14} color={c.textFaint} style={flipX} />
                 </View>
               </Press>
             );

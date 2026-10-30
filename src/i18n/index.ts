@@ -47,6 +47,14 @@ const LOADERS: Partial<Record<LanguageCode, () => Translation>> = {
   ja: () => require('./locales/ja').ja,
   ko: () => require('./locales/ko').ko,
   'zh-Hans': () => require('./locales/zh-Hans').zhHans,
+  hi: () => require('./locales/hi').hi,
+  bn: () => require('./locales/bn').bn,
+  ur: () => require('./locales/ur').ur,
+  ar: () => require('./locales/ar').ar,
+  ru: () => require('./locales/ru').ru,
+  vi: () => require('./locales/vi').vi,
+  'zh-Hant': () => require('./locales/zh-Hant').zhHant,
+  th: () => require('./locales/th').th,
 };
 /* eslint-enable @typescript-eslint/no-require-imports */
 

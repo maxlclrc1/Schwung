@@ -13,12 +13,12 @@ export type LanguageCode =
   | 'pt-BR'
   | 'it'
   | 'nl'
-  | 'pl'
-  | 'sv'
+  | 'bn'
+  | 'ur'
   | 'ru'
-  | 'uk'
+  | 'vi'
   | 'ar'
-  | 'he'
+  | 'th'
   | 'hi'
   | 'id'
   | 'ja'
@@ -37,18 +37,18 @@ export const LANGUAGES: Language[] = [
   { code: 'pt-BR', native: 'Português (Brasil)', rtl: false, ready: true },
   { code: 'it', native: 'Italiano', rtl: false, ready: true },
   { code: 'nl', native: 'Nederlands', rtl: false, ready: true },
-  { code: 'pl', native: 'Polski', rtl: false, ready: false },
-  { code: 'sv', native: 'Svenska', rtl: false, ready: false },
-  { code: 'ru', native: 'Русский', rtl: false, ready: false },
-  { code: 'uk', native: 'Українська', rtl: false, ready: false },
-  { code: 'ar', native: 'العربية', rtl: true, ready: false },
-  { code: 'he', native: 'עברית', rtl: true, ready: false },
-  { code: 'hi', native: 'हिन्दी', rtl: false, ready: false },
+  { code: 'ru', native: 'Русский', rtl: false, ready: true },
+  { code: 'ar', native: 'العربية', rtl: true, ready: true },
+  { code: 'hi', native: 'हिन्दी', rtl: false, ready: true },
+  { code: 'bn', native: 'বাংলা', rtl: false, ready: true },
+  { code: 'ur', native: 'اردو', rtl: true, ready: true },
   { code: 'id', native: 'Bahasa Indonesia', rtl: false, ready: true },
   { code: 'ja', native: '日本語', rtl: false, ready: true },
   { code: 'ko', native: '한국어', rtl: false, ready: true },
   { code: 'zh-Hans', native: '简体中文', rtl: false, ready: true },
-  { code: 'zh-Hant', native: '繁體中文', rtl: false, ready: false },
+  { code: 'zh-Hant', native: '繁體中文', rtl: false, ready: true },
+  { code: 'vi', native: 'Tiếng Việt', rtl: false, ready: true },
+  { code: 'th', native: 'ไทย', rtl: false, ready: true },
 ];
 
 export const READY_LANGUAGES = LANGUAGES.filter((l) => l.ready);
@@ -71,7 +71,8 @@ export function matchLanguage(tag: string | null | undefined): LanguageCode | nu
     if (l?.ready) return l.code;
   }
   // Traditional Chinese (Hant, or Taiwan / Hong Kong / Macau) never falls back to Simplified.
-  if (lang === 'zh' && parts.slice(1).some((p) => /^(hant|tw|hk|mo)$/i.test(p))) return null;
+  if (lang === 'zh' && parts.slice(1).some((p) => /^(hant|tw|hk|mo)$/i.test(p)))
+    return byCode.get('zh-hant')?.ready ? 'zh-Hant' : null;
   const sameLanguage = READY_LANGUAGES.find((l) => l.code.toLowerCase().split('-')[0] === lang);
   return sameLanguage?.code ?? null;
 }

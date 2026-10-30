@@ -15,6 +15,7 @@ import { rise, useTints, type Tint } from '../onboarding/kit';
 import { Button, Screen, T } from '../ui';
 import { WorldBackdrop } from '../World';
 import { useT } from '../../i18n/react';
+import { flipX } from '../../i18n/direction';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
 
@@ -137,7 +138,7 @@ function Option({
           </T>
           <T color={c.textDim}>{body}</T>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={c.textFaint} />
+        <Ionicons name="chevron-forward" size={18} color={c.textFaint} style={flipX} />
       </ThemedView>
     </Press>
   );

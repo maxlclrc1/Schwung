@@ -27,6 +27,7 @@ import { HabitArt } from './Habits';
 import { cover } from './cover';
 import { rise, useTints, type Tint } from './kit';
 import { t as tr } from '../../i18n';
+import { physical } from '../../i18n/direction';
 
 /*
  * "Your journey is taking shape": the short scene between confirming the Life Reset and Day 1 (not the Day 1
@@ -134,7 +135,7 @@ export function Finale({
   return (
     <Animated.View
       entering={FadeIn.duration(260).reduceMotion(sys)}
-      style={[StyleSheet.absoluteFill, { backgroundColor: c.bg }]}
+      style={[StyleSheet.absoluteFill, physical, { backgroundColor: c.bg }]}
       accessibilityViewIsModal
     >
       <Animated.View style={[StyleSheet.absoluteFill, world]} pointerEvents="none">

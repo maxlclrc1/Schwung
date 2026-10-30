@@ -23,6 +23,7 @@ import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, formatPercent, t as tr } from '../i18n';
 import { useT } from '../i18n/react';
+import { physical } from '../i18n/direction';
 
 /*
  * Insights 2.0, drawn by hand (no chart library): a page in three questions. How am I doing? (a consistency ring and
@@ -244,7 +245,7 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
         </T>
       </View>
       <View style={styles.chartRow}>
-        <View style={{ width: w, height: CHART_H }}>
+        <View style={[physical, { width: w, height: CHART_H }]}>
           <Svg width={w} height={CHART_H}>
             {[0, 0.5, 1].map((g) => (
               <Line

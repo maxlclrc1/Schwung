@@ -16,6 +16,7 @@ import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { t as tr } from '../i18n';
 import { useT } from '../i18n/react';
+import { flipX, physical } from '../i18n/direction';
 
 const DOTS = trailDots(3);
 
@@ -69,7 +70,7 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
   const selectedDay = selected ? days[selected - 1] : null;
 
   return (
-    <View pointerEvents="none" style={{ width, height }}>
+    <View pointerEvents="none" style={[physical, { width, height }]}>
       {/* No darkening gradient: the painting's top-left sky is calm enough for the day text in both themes. */}
       {/* Trail: lit where the day it leads to was a successful day, dimmer where it was missed. */}
       {DOTS.map((d, i) => {
@@ -196,7 +197,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
   const py = (y: number) => y * height;
 
   return (
-    <View pointerEvents="none" style={{ width, height }}>
+    <View pointerEvents="none" style={[physical, { width, height }]}>
       {/* Phase names, the current one emphasized. */}
       {ASCENT_PHASES.map((p) => {
         const at = PHASE_LABEL_AT[p.n];
@@ -284,7 +285,7 @@ export function AscentCaption({
             <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={1} style={{ flexShrink: 1, fontWeight: '600' }}>
               {describeDay(selectedDay)}
             </T>
-            <Ionicons name="chevron-forward" size={14} color={c.textDim} />
+            <Ionicons name="chevron-forward" size={14} color={c.textDim} style={flipX} />
           </ThemedView>
         </Pressable>
       ) : (

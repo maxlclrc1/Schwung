@@ -25,6 +25,14 @@ const CATALOGS: Record<string, Translation> = {
   ja: require('../locales/ja').ja,
   ko: require('../locales/ko').ko,
   'zh-Hans': require('../locales/zh-Hans').zhHans,
+  hi: require('../locales/hi').hi,
+  bn: require('../locales/bn').bn,
+  ur: require('../locales/ur').ur,
+  ar: require('../locales/ar').ar,
+  ru: require('../locales/ru').ru,
+  vi: require('../locales/vi').vi,
+  'zh-Hant': require('../locales/zh-Hant').zhHant,
+  th: require('../locales/th').th,
   /* eslint-enable @typescript-eslint/no-require-imports */
 };
 
@@ -171,7 +179,7 @@ describe('switching language', () => {
   });
 
   it('a language without a catalog shows English', () => {
-    setLanguage('sv');
+    setLanguage('xx' as LanguageCode);
     expect(language()).toBe('en');
     expect(t('nav.tabs.journey')).toBe('Journey');
   });
@@ -180,7 +188,17 @@ describe('switching language', () => {
 describe('languages and formats', () => {
   it('names every language in its own language', () => {
     expect(LANGUAGES.map((l) => l.native)).toEqual(
-      expect.arrayContaining(['Deutsch', 'Français', 'Türkçe', 'Español', 'Português (Brasil)', '日本語']),
+      expect.arrayContaining([
+        'Deutsch',
+        'Français',
+        'Türkçe',
+        'Español',
+        'Português (Brasil)',
+        '日本語',
+        'العربية',
+        'اردو',
+        'ไทย',
+      ]),
     );
     expect(LANGUAGES).toHaveLength(20);
   });
@@ -194,10 +212,13 @@ describe('languages and formats', () => {
     expect(matchLanguage('ja-JP')).toBe('ja');
     expect(matchLanguage('zh-Hans-CN')).toBe('zh-Hans');
     expect(matchLanguage('zh-CN')).toBe('zh-Hans');
-    expect(matchLanguage('zh-Hant-TW')).toBeNull();
-    expect(matchLanguage('zh-HK')).toBeNull();
+    expect(matchLanguage('zh-Hant-TW')).toBe('zh-Hant');
+    expect(matchLanguage('zh-HK')).toBe('zh-Hant');
+    expect(matchLanguage('zh-TW')).toBe('zh-Hant');
     expect(matchLanguage('in-ID')).toBe('id');
-    expect(matchLanguage('ar-EG')).toBeNull();
+    expect(matchLanguage('ar-EG')).toBe('ar');
+    expect(matchLanguage('ur-PK')).toBe('ur');
+    expect(matchLanguage('sv-SE')).toBeNull();
     expect(matchLanguage(undefined)).toBeNull();
   });
 
@@ -205,6 +226,9 @@ describe('languages and formats', () => {
     expect([0, 1, 2].map((n) => pluralCategory('fr', n))).toEqual(['one', 'one', 'other']);
     expect([0, 1, 2].map((n) => pluralCategory('de', n))).toEqual(['other', 'one', 'other']);
     expect([1, 2, 5, 22].map((n) => pluralCategory('ru', n))).toEqual(['one', 'few', 'many', 'few']);
+    expect([0, 1, 2].map((n) => pluralCategory('bn', n))).toEqual(['one', 'one', 'other']);
+    expect([0, 1, 2].map((n) => pluralCategory('ur', n))).toEqual(['other', 'one', 'other']);
+    expect(pluralCategory('th', 1)).toBe('other');
     expect([0, 1, 2, 5, 11, 100].map((n) => pluralCategory('ar', n))).toEqual([
       'zero',
       'one',
