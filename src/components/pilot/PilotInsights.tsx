@@ -24,6 +24,7 @@ import {
   ScreenTimeHistory,
   TrendLine,
 } from '../InsightsViz';
+import { RecentInsights } from '../beyond/RecentInsights';
 import { Button, T } from '../ui';
 
 /**
@@ -105,6 +106,7 @@ export function PilotInsights() {
   return (
     <>
       <Chapter n="01" title="How am I doing?" tint={c.mist} />
+      {program.after ? <RecentInsights program={program} today={today} /> : null}
       <ConsistencyRing {...data} day={today} />
       {charts ? <TrendLine points={charts.trend} /> : null}
 

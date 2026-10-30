@@ -99,6 +99,13 @@ export default function RootLayout() {
             name="life-reset/story"
             options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
           />
+          {/* Beyond the summit: what's next, a New Ascent's set-up, and past journeys. */}
+          <Stack.Screen
+            name="life-reset/next"
+            options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+          />
+          <Stack.Screen name="life-reset/ascent" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="life-reset/journeys" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />

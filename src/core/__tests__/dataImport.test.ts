@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { buildExport } from '../dataExport';
+import { buildExport, EXPORT_SCHEMA_VERSION } from '../dataExport';
 import { MAX_BACKUP_BYTES, readBackup, summarizeBackup, type SaveFormat } from '../dataImport';
 import { DEFAULT_REMINDERS } from '../reminders';
 import * as P from '../reset/pilot';
@@ -30,6 +30,7 @@ const exported = (program: P.PilotProgram | null, extra: Record<string, unknown>
     ...buildExport({
       program,
       saveVersion: 1,
+      journeys: [],
       today: 2,
       themePreference: 'dark',
       reminders: { ...DEFAULT_REMINDERS, enabled: true, hour: 7, minute: 30 },
@@ -94,7 +95,10 @@ describe('Restore from backup: reading a file', () => {
 
   it('refuses newer and unsupported versions', () => {
     const p = progressed();
-    expect(readBackup(exported(p, { schemaVersion: 2 }), FORMAT)).toEqual({ ok: false, problem: 'newerVersion' });
+    expect(readBackup(exported(p, { schemaVersion: EXPORT_SCHEMA_VERSION + 1 }), FORMAT)).toEqual({
+      ok: false,
+      problem: 'newerVersion',
+    });
     expect(readBackup(exported(p, { saveVersion: 2 }), FORMAT)).toEqual({ ok: false, problem: 'newerVersion' });
     delete migrations[0];
     try {

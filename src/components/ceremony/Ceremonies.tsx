@@ -152,7 +152,10 @@ export function CeremonyHost() {
           program={program}
           today={today}
           onSeen={() => useResetPilot.getState().markCeremony('summit')}
-          onDone={(fast, story) => finish('summit', fast, story ? () => router.push('/life-reset/story') : undefined)}
+          // Then the 66-Day Story if chosen, and "What's next?" after it (or straight away), never over either.
+          onDone={(fast, story) =>
+            finish('summit', fast, () => router.push(story ? '/life-reset/story?from=summit' : '/life-reset/next'))
+          }
         />
       )}
     </Animated.View>
@@ -426,6 +429,8 @@ function Words({ children, scroll }: { children: ReactNode; scroll?: boolean }) 
 
 function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
   const { c } = useTheme();
+  // A New Ascent's Day 1 says which ascent it is.
+  const ascent = useResetPilot((s) => (s.program ? P.ascentOf(s.program) : 1));
   const reduce = useReducedMotion();
   const stage = useStage();
   const [ready, setReady] = useState(false);
@@ -468,7 +473,7 @@ function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
       <Words>
         <Animated.View entering={rise(reduce ? 0 : 1500)}>
           <T v="overline" color={c.peachInk} style={{ letterSpacing: 2.4 }}>
-            Day 1 of {PROGRAM_DAYS}
+            {ascent > 1 ? `Ascent ${ascent} · ` : ''}Day 1 of {PROGRAM_DAYS}
           </T>
         </Animated.View>
         <Animated.View entering={rise(reduce ? 100 : 1700)}>

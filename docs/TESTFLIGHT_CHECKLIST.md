@@ -73,6 +73,17 @@ Check in the build (or the upload's validation report):
       theme and reminders are all there.
 - [ ] Locked collectibles look like soft silhouettes; the unlock moment shows the full art.
 
+**Beyond the summit** (use a development build's day clock, or a test program started 66 days ago)
+
+- [ ] Day 66 complete: summit ceremony → 66-Day Story → "What's next?"; skipping the story goes straight to it.
+- [ ] Decide later: a small card on Habits; habits rest; no reminders arrive; streak isn't broken.
+- [ ] Keep My Momentum: Day 67+ can be ticked; XP and streak go on; Journey shows "Since the summit"; Insights
+      shows "Lately"; reminders return.
+- [ ] Begin a New Ascent: age and health must be confirmed; habits pre-selected at their levels; Day 1 ceremony
+      reads "Ascent 2"; lifetime XP and collection kept; Journey → Past journeys opens the old story.
+- [ ] Force-quit right after tapping Begin: reopening shows either the old Life Reset or Ascent 2 with the archive.
+- [ ] Export, Delete my data, then Restore: the current ascent and past journeys all come back.
+
 ## 5. Known limits (not blockers)
 
 - A tick made in the last quarter-second before the app is killed by a crash (not by leaving the app) can be lost;

@@ -192,7 +192,7 @@ export function readiness({ state, logs, ctx, today, yesterdayEditable = false }
 
   // Weekly habits: closed weeks that began on or after the current target, with a goal; newest last.
   const eras = scheduleEras(state);
-  const weeks = programWeeks(ctx.startKey, ctx.programDays)
+  const weeks = programWeeks(ctx.startKey, ctx.programDays, today)
     .filter((w) => w.firstDay >= since && w.lastDay <= lastFinal)
     .map((w) => weekSummary(state.habitId, eras, logs, ctx, w.firstDay, today, yesterdayEditable))
     .filter((w) => w.status !== 'no-goal' && w.status !== 'pending')

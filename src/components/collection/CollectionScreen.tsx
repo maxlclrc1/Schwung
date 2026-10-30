@@ -24,7 +24,8 @@ export function CollectionScreen() {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
   const program = useResetPilot((s) => s.program);
-  const xp = program ? P.pilotXp(program) : 0;
+  // Lifetime XP: earlier ascents' XP is carried in, never counted twice.
+  const xp = program ? P.lifetimeXp(program) : 0;
   const owned = program?.collection?.unlocked ?? [];
   const g = growth(xp);
   const latest = [...COLLECTIBLES].reverse().find((o) => owned.includes(o.id));

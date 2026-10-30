@@ -41,6 +41,8 @@ export function TodayHero({
   xp,
   phase,
   label,
+  momentum = false,
+  ascent = 1,
 }: {
   today: number;
   done: number;
@@ -52,17 +54,21 @@ export function TodayHero({
   phase: string;
   /** What a screen reader says for today's progress. */
   label: string;
+  /** Keep My Momentum: the days go on past 66. */
+  momentum?: boolean;
+  /** Which ascent this is (shown from the second). */
+  ascent?: number;
 }) {
   const { c } = useTheme();
   const left = Math.max(0, total - done);
-  const summit = today > PROGRAM_DAYS;
+  const summit = today > PROGRAM_DAYS && !momentum;
 
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
         <View style={{ flexShrink: 1 }}>
           <T v="overline" color={c.indigoInk} maxFontSizeMultiplier={1.3}>
-            Life Reset
+            {ascent > 1 ? `Life Reset · Ascent ${ascent}` : 'Life Reset'}
           </T>
           <Text
             style={[styles.day, { color: c.text }]}
@@ -71,7 +77,11 @@ export function TodayHero({
             accessibilityRole="header"
           >
             {summit ? 'Summit reached' : `Day ${today}`}
-            {summit ? null : <Text style={[styles.of, { color: c.textDim }]}>{` of ${PROGRAM_DAYS}`}</Text>}
+            {summit ? null : (
+              <Text style={[styles.of, { color: c.textDim }]}>
+                {today > PROGRAM_DAYS ? ' · beyond the summit' : ` of ${PROGRAM_DAYS}`}
+              </Text>
+            )}
           </Text>
           <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4}>
             {phase}

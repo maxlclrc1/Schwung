@@ -25,6 +25,7 @@ import { PROGRAM_DAYS } from '../../core/dates';
 import { storyFacts } from '../../core/reset/story';
 import { WORLD } from '../../core/world';
 import { haptic } from '../../lib/haptics';
+import type { PilotProgram } from '../../core/reset/pilot';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { rise } from '../onboarding/kit';
@@ -49,19 +50,24 @@ const short = (key: string) => {
   return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-export function StoryKeepsake() {
+/**
+ * `archived`: a past journey's story (Journey → Past journeys), read-only like any story. `onClose` replaces the
+ * usual way back (after the summit ceremony it leads on to "What's next?").
+ */
+export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; onClose?: () => void } = {}) {
   const { c, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const reduce = useReducedMotion();
-  const program = useResetPilot((s) => s.program);
+  const current = useResetPilot((s) => s.program);
+  const program = archived ?? current;
   const offset = useResetPilot((s) => s.devDayOffset);
   const poster = useRef<ComponentRef<typeof View>>(null);
   const [ready, setReady] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const today = program ? pilotToday({ program, devDayOffset: offset }) : 0;
+  const today = archived ? PROGRAM_DAYS : program ? pilotToday({ program, devDayOffset: offset }) : 0;
   const facts = useMemo(() => (program ? storyFacts(program, today) : null), [program, today]);
 
   // The poster: portrait 9:16, as wide as the screen allows.
@@ -164,7 +170,12 @@ export function StoryKeepsake() {
   return (
     <View style={[styles.screen, { backgroundColor: c.bg, paddingTop: insets.top + space.sm }]}>
       <View style={styles.bar}>
-        <Pressable onPress={() => router.back()} hitSlop={10} accessibilityRole="button" accessibilityLabel="Close">
+        <Pressable
+          onPress={() => (onClose ? onClose() : router.back())}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        >
           <View style={[styles.close, { backgroundColor: c.surface }]}>
             <Ionicons name="close" size={20} color={c.text} />
           </View>

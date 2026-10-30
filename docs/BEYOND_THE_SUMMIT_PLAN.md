@@ -1,6 +1,17 @@
 # Beyond the Summit — plan
 
-Status: **design only, not implemented.** Baseline `9883a53`.
+Status: **implemented** (on `4d45409`). Where the build differs from the design below:
+
+- `after.since` is a program **day number** (67, or the day of a later choice), not a date key.
+- While undecided, reminders simply rest (no "summit view is waiting" reminder).
+- A New Ascent opens from Day 67: the summit day itself still belongs to the first ascent.
+- A Life Reset ended after the summit can be kept in Past journeys with no program running; a later set-up then
+  carries lifetime XP and the collection (not the streak).
+- Insights adds a "Lately · the last four weeks" panel; its charts remain the 66-day climb's.
+
+Code: `core/reset/pilot.ts` (endDay, keepMomentum, beginAscent, lifetimeXp, sinceSummit), `store/journeys.ts`,
+`store/ascent.ts`, `store/commit.ts`, `components/beyond/`. Tests: `core/__tests__/beyondSummit.test.ts`,
+`store/__tests__/ascent.test.ts`.
 
 What happens after Day 66. The 66-day Life Reset stays exactly as it is: its Journey, the summit ceremony and the
 66-Day Story. After the summit the person chooses one of two continuations:

@@ -129,7 +129,11 @@ export const ConsistencyRing = memo(function ConsistencyRing({
         </T>
         <Fact dot={c.sage} label="This week" value={week.eligible ? `${week.done} of ${week.eligible}` : '—'} />
         <Fact dot={c.peach} label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
-        <Fact dot={c.indigo} label="Day" value={`${shownDay} of ${PROGRAM_DAYS}`} />
+        <Fact
+          dot={c.indigo}
+          label="Day"
+          value={day > PROGRAM_DAYS ? `${day} · past the summit` : `${shownDay} of ${PROGRAM_DAYS}`}
+        />
       </View>
     </ThemedView>
   );

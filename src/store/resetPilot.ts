@@ -7,6 +7,7 @@ import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
 import { channel, devTools, type Channel } from '../lib/flags';
 import { CROP_COUNT } from '../components/habitArt';
+import { useJourneys } from './journeys';
 import { endRecovery, keepRaw, startRecovery, useRecovery } from './recovery';
 import { debouncedStorage, deferredJSONStorage } from './storage';
 
@@ -21,15 +22,20 @@ export function resetPilotKey(ch: Channel = channel(), dev: boolean = __DEV__): 
 }
 
 /** The save's version. Raise it only together with a step in SAVE_MIGRATIONS. */
-export const RESET_PILOT_VERSION = 1;
+export const RESET_PILOT_VERSION = 2;
 
 /**
  * How to bring an older save up to date: one step per version, from that version to the next, each pure and
  * tested. A version with no way forward is never reset: it's kept and shown on the recovery screen.
  * Version 0: saves made before versioning had the same shape as version 1.
+ * Version 1 → 2 (Beyond the Summit): a program may carry `after` (Keep My Momentum) and `carry` (a New Ascent).
+ * Both are optional, so a version 1 program is already a valid version 2 one; the step makes that explicit. The
+ * bump is what protects people: an older Schwung meeting a version 2 save keeps it for recovery (a "newer" save)
+ * instead of misreading days past the summit.
  */
 export const SAVE_MIGRATIONS: Record<number, (state: unknown) => unknown> = {
   0: (state) => state,
+  1: (state) => state,
 };
 
 /** Runs the steps from `from` up to the current version; throws if a step is missing. */
@@ -83,6 +89,8 @@ type Actions = {
   reflect: (week: number, answer?: ReflectionAnswer, changed?: string[]) => void;
   /** An absence (by its first day) has been welcomed back: never again for it. */
   markComeback: (start: number) => void;
+  /** Beyond the summit: the same habits go on past Day 66 (docs/BEYOND_THE_SUMMIT_PLAN.md). */
+  keepMomentum: () => void;
   /** Objects reached by XP join the collection, for good (an undo never takes one back). */
   unlockCollectibles: (ids: string[]) => void;
   /** A milestone moment was seen through (or skipped); it and every earlier one never show again. */
@@ -189,8 +197,18 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
 
         start: (answers, choices) => {
           if (get().program) return false;
-          const program = P.createPilot(answers, choices, toDateKey(pilotNow()));
-          if (!program) return false;
+          const fresh = P.createPilot(answers, choices, toDateKey(pilotNow()));
+          if (!fresh) return false;
+          // After a Life Reset kept in Past journeys, a new one through set-up still carries what's the person's:
+          // lifetime XP and the collection (never the streak: it didn't begin the next day from a running one).
+          const last = useJourneys.getState().journeys.at(-1)?.program;
+          const program: P.PilotProgram = last
+            ? {
+                ...fresh,
+                carry: { ascent: P.ascentOf(last) + 1, xp: P.lifetimeXp(last), streak: 0 },
+                ...(last.collection ? { collection: last.collection } : {}),
+              }
+            : fresh;
           set({ program });
           return true;
         },
@@ -278,6 +296,12 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
           const add = ids.filter((id) => !have.includes(id));
           if (!add.length) return;
           set({ program: { ...program, collection: { unlocked: [...have, ...add] } } });
+        },
+
+        keepMomentum: () => {
+          const { program } = get();
+          if (!program || program.after) return;
+          set({ program: P.keepMomentum(program, Math.max(pilotToday(get()), 1)) });
         },
 
         markComeback: (start) => {

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { buildExport } from '../core/dataExport';
+import { journeysKey, useJourneys } from '../store/journeys';
 import { usePreferences } from '../store/preferences';
 import { RECOVERY_SLOTS, recoveryKey } from '../store/recovery';
 import { pilotToday, RESET_PILOT_VERSION, resetPilotKey, useResetPilot } from '../store/resetPilot';
@@ -12,15 +13,16 @@ import { shareTemp, writeTemp } from './appFiles';
 export async function exportMyData(): Promise<void> {
   const { program, devDayOffset } = useResetPilot.getState();
   const prefs = usePreferences.getState();
-  const name = resetPilotKey();
   const copies: string[] = [];
-  for (let slot = 1; slot <= RECOVERY_SLOTS; slot++) {
-    const raw = await AsyncStorage.getItem(recoveryKey(name, slot));
-    if (raw !== null) copies.push(raw);
-  }
+  for (const name of [resetPilotKey(), journeysKey()])
+    for (let slot = 1; slot <= RECOVERY_SLOTS; slot++) {
+      const raw = await AsyncStorage.getItem(recoveryKey(name, slot));
+      if (raw !== null) copies.push(raw);
+    }
   const data = buildExport({
     program,
     saveVersion: RESET_PILOT_VERSION,
+    journeys: useJourneys.getState().journeys,
     today: program ? pilotToday({ program, devDayOffset }) : 0,
     themePreference: prefs.themePreference,
     reminders: prefs.reminders,

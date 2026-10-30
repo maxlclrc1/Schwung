@@ -58,7 +58,7 @@ export type PlannedReminder = { id: string; date: Date; title: string; body: str
  */
 export function planReminders(
   s: ReminderSettings,
-  program: { startedAt: string } | null,
+  program: { startedAt: string; after?: unknown } | null,
   now: Date,
   opts: { todayComplete: boolean; habitNames: string[] },
 ): PlannedReminder[] {
@@ -72,6 +72,8 @@ export function planReminders(
     const key = toDateKey(date);
     const day = dayNumber(program.startedAt, key);
     if (day < 1) continue;
+    // Past the summit, reminders wait until the person chooses how to go on (Keep My Momentum, or a New Ascent).
+    if (day > 66 && !program.after) continue;
     out.push({ id: `schwung-reminder-${key}`, date, ...reminderText(key, day, s.showHabits ? opts.habitNames : null) });
   }
   return out;

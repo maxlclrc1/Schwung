@@ -9,6 +9,7 @@ import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../componen
 import { SettingsButton } from '../../components/HeaderButton';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { ExpeditionCalendar, JourneySummary } from '../../components/Expedition';
+import { PastJourneysLink, SinceSummit } from '../../components/beyond/SinceSummit';
 import { ReflectionHistory } from '../../components/reflection/ReflectionHistory';
 import { storyAvailable } from '../../core/reset/story';
 import { useJourneySource, type JourneySource } from '../../components/journeySource';
@@ -48,6 +49,7 @@ const JourneyPage = memo(function JourneyPage() {
           <Header />
           <View style={styles.emptyBody}>
             <T>Your 66 days will show here once you start your Life Reset.</T>
+            <PastJourneysLink />
           </View>
         </View>
       )}
@@ -207,6 +209,8 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 )}
               </Pressable>
             ) : null}
+            {program?.after ? <SinceSummit program={program} today={today} /> : null}
+            <PastJourneysLink />
             <View style={styles.expedition}>
               <T v="overline" color={c.textDim}>
                 The expedition
@@ -326,5 +330,5 @@ const styles = StyleSheet.create({
   habit: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   back: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   empty: { flex: 1, paddingHorizontal: space.lg },
-  emptyBody: { flex: 1, justifyContent: 'center' },
+  emptyBody: { flex: 1, justifyContent: 'center', gap: space.lg },
 });

@@ -72,6 +72,7 @@ import {
   weekSummaries,
   weekSummary,
   type DayState,
+  type ScheduleEra,
   type WeekSummary,
   type WeeklyContext,
 } from './weekly';
@@ -151,7 +152,20 @@ export type PilotProgram = {
   comeback?: { seen: number };
   /** The XP collection (collection.ts): objects unlocked, kept for good. */
   collection?: { unlocked: string[] };
+  /**
+   * Beyond the summit: set when the person chose Keep My Momentum. Tracking continues from program day `since`
+   * (Day 67, or the day they chose, if later); the days between the summit and the choice are a pause, never misses.
+   */
+  after?: { mode: 'momentum'; since: number };
+  /** Carried from earlier ascents (a New Ascent): what belongs to the person, not to one climb. */
+  carry?: Carry;
 };
+
+/** A finished Life Reset kept in Past journeys (store/journeys.ts): immutable once archived. */
+export type ArchivedJourney = { v: 1; id: string; archivedAt: string; program: PilotProgram };
+
+/** From earlier ascents: this one's number (2 for the second), their XP, and a streak that ran into Day 1. */
+export type Carry = { ascent: number; xp: number; streak: number };
 
 /** The milestone moments between the two ceremonies: a first foothold, Foundation complete, Momentum complete. */
 export const MILESTONE_DAYS = [7, 21, 44] as const;
@@ -177,6 +191,82 @@ export function milestoneDue(p: PilotProgram, today: number): number | null {
 export function summitDue(p: PilotProgram, today: number): boolean {
   if (p.ceremonies?.summit) return false;
   return today > PROGRAM_DAYS || (today === PROGRAM_DAYS && dayFull(p, PROGRAM_DAYS));
+}
+
+// --- Beyond the summit (docs/BEYOND_THE_SUMMIT_PLAN.md) ---
+
+/**
+ * The last day the program tracks: Day 66, or no end once the person keeps their momentum. Only tracking reads it;
+ * the ascent itself (the mountain, phases, milestones, ceremonies, the Story, reflections, level offers) stays 66 days.
+ */
+export const endDay = (p: PilotProgram) => (p.after ? Infinity : PROGRAM_DAYS);
+
+/** Past the summit with no continuation chosen yet: tracking (and reminders) wait for the person's choice. */
+export const awaitingChoice = (p: PilotProgram, today: number) => today > PROGRAM_DAYS && !p.after;
+
+/** Keep My Momentum from `today`: the days since the summit before today are a pause. */
+export function keepMomentum(p: PilotProgram, today: number): PilotProgram {
+  if (p.after) return p;
+  return { ...p, after: { mode: 'momentum', since: Math.max(PROGRAM_DAYS + 1, today) } };
+}
+
+/** Which ascent this is (1 for the first). */
+export const ascentOf = (p: PilotProgram) => p.carry?.ascent ?? 1;
+
+/** XP across every ascent: what earlier ones carried over plus this one's (never counted twice). */
+export const lifetimeXp = (p: PilotProgram) => (p.carry?.xp ?? 0) + pilotXp(p);
+
+/**
+ * The last day a finished program tracked: Day 66, or yesterday for one that kept its momentum (`today` is the day
+ * the New Ascent begins, in the finished program's days).
+ */
+const lastTracked = (p: PilotProgram, today: number) => (p.after ? Math.max(PROGRAM_DAYS, today - 1) : PROGRAM_DAYS);
+
+/** The streak a New Ascent begun `today` carries: the previous one's, only if it begins the day after it ended. */
+export function carriedStreak(prev: PilotProgram, today: number): number {
+  const last = lastTracked(prev, today);
+  return today <= last + 1 ? pilotStreak(prev, last) : 0;
+}
+
+/** What a New Ascent starts from: the previous habits, each at the intensity it reached (own habits as they are). */
+export function ascentDefaults(prev: PilotProgram, today: number): { choices: PilotChoice[]; custom: string[] } {
+  const day = Math.min(Math.max(1, today), lastTracked(prev, today));
+  return {
+    choices: prev.habits
+      .filter(isPilotHabit)
+      .map((habitId) => ({ habitId, intensity: levelFor(prev, habitId, day).intensity })),
+    custom: prev.habits.filter((id) => !!prev.custom?.[id]),
+  };
+}
+
+/**
+ * A New Ascent: a fresh 66-day program from today, made by the usual set-up rules (null if they refuse it), with the
+ * person's own habits kept as chosen, and what belongs to the person carried over: lifetime XP (so nothing is
+ * counted twice: the archive's XP is in `carry.xp`, the new program's logs start empty), the collection, the ascent
+ * number, and a streak that runs on only when it begins the day after the last one ended.
+ */
+export function beginAscent(
+  prev: PilotProgram,
+  a: PilotAnswers,
+  choices: PilotChoice[],
+  keepCustom: string[],
+  startKey: string,
+  prevToday: number,
+  views: number,
+): PilotProgram | null {
+  let next = createPilot(a, choices, startKey);
+  if (!next) return null;
+  for (const id of keepCustom) {
+    const c = prev.custom?.[id];
+    if (!c) continue;
+    const r = addCustomHabit(next, { name: c.name, ...(c.note ? { note: c.note } : {}), perWeek: c.perWeek }, 1, views);
+    if (r) next = r.program;
+  }
+  return {
+    ...next,
+    carry: { ascent: ascentOf(prev) + 1, xp: lifetimeXp(prev), streak: carriedStreak(prev, prevToday) },
+    ...(prev.collection ? { collection: prev.collection } : {}),
+  };
 }
 
 /** A habit the person made: a name, what counts (optional), how often, and its window onto the world. */
@@ -588,11 +678,36 @@ export function previewTarget(habitId: PilotHabitId, intensity: Intensity, a: Pi
 
 export const ctxOf = (p: PilotProgram): WeeklyContext => ({
   startKey: p.startedAt,
+  ...(p.after ? { programDays: endDay(p) } : {}),
   ...(p.answers.ownSessions !== undefined ? { ownSessions: p.answers.ownSessions } : {}),
 });
 
 export const levelFor = (p: PilotProgram, id: string, day: number): Level => levelOn(p.progression[id], day);
-const erasOf = (p: PilotProgram, id: string) => scheduleEras(p.progression[id]);
+const erasCache = new WeakMap<PilotProgram, Map<string, ScheduleEra[]>>();
+/**
+ * A habit's schedule over time. With Keep My Momentum chosen after Day 67, the days from 67 to the choice are out of
+ * the program (a pause), so the engine's own rules make them neither due nor missed. Cached per program: programs
+ * are immutable, and a long continuation asks for these often.
+ */
+function erasOf(p: PilotProgram, id: string): ScheduleEra[] {
+  let byId = erasCache.get(p);
+  if (!byId) erasCache.set(p, (byId = new Map()));
+  const hit = byId.get(id);
+  if (hit) return hit;
+  let eras = scheduleEras(p.progression[id]);
+  const since = p.after?.since;
+  if (since !== undefined && since > PROGRAM_DAYS + 1) {
+    const resume = scheduleOn(eras, since);
+    eras = [
+      ...eras.filter((e) => e.fromDay <= PROGRAM_DAYS),
+      { fromDay: PROGRAM_DAYS + 1, schedule: null },
+      { fromDay: since, schedule: resume },
+      ...eras.filter((e) => e.fromDay > since),
+    ];
+  }
+  byId.set(id, eras);
+  return eras;
+}
 
 /** Whether a habit is part of the program on a day (from the day it joined). */
 const activeOn = (p: PilotProgram, id: string, day: number) => scheduleOn(erasOf(p, id), day) !== null;
@@ -741,17 +856,23 @@ export function dayFull(p: PilotProgram, day: number): boolean {
  * XP: 10 for each done habit on the day's list, +20 for a complete day (dayFull). Computed from the saved days, so an
  * undo takes it back and nothing is ever awarded twice.
  */
-export const pilotXp = (p: PilotProgram) =>
-  Object.values(p.logs).reduce(
-    (xp, l) => xp + doneCount(l) * XP_PER_HABIT + (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0),
-    0,
-  );
+const xpCache = new WeakMap<PilotProgram, number>();
+export function pilotXp(p: PilotProgram): number {
+  const hit = xpCache.get(p);
+  if (hit !== undefined) return hit;
+  const xp = Object.values(p.logs).reduce((n, l) => n + dayXp(p, l), 0);
+  xpCache.set(p, xp);
+  return xp;
+}
+const dayXp = (p: PilotProgram, l: DayLog) => doneCount(l) * XP_PER_HABIT + (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0);
 
 /**
  * How a day counts for the streak and the Journey: 'rest' when nothing was due (no daily habit, nothing done:
  * weekly habits resting), else whether it met the existing 80% rule.
  */
 export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'missed' {
+  // Past the summit with nothing chosen yet: nothing is asked, so nothing is missed.
+  if (day > endDay(p)) return 'rest';
   const log = logOf(p, day);
   const dailyDue = allHabits(p).some((id) => isDaily(p, id, day));
   const planned = log ? plannedOn(p, day, log.completed) : dailyDue ? ['due'] : [];
@@ -769,9 +890,49 @@ export function pilotStreak(p: PilotProgram, today: number): number {
     const r = dayResult(p, d);
     if (r === 'rest') continue;
     if (r === 'counted') streak++;
-    else if (d !== today) break;
+    else if (d !== today) return streak;
   }
-  return streak;
+  // Unbroken back to Day 1: a streak carried from the previous ascent (only when this one began the next day) runs on.
+  return streak + (p.carry?.streak ?? 0);
+}
+
+/** Keep My Momentum, in numbers: the days since the summit (never the 66-day ascent's own). */
+export function sinceSummit(p: PilotProgram, today: number) {
+  const from = p.after?.since ?? PROGRAM_DAYS + 1;
+  let counted = 0;
+  let judged = 0;
+  let best = 0;
+  let run = 0;
+  for (let d = from; d <= today; d++) {
+    const r = dayResult(p, d);
+    if (r === 'rest') continue;
+    if (r === 'counted') {
+      counted++;
+      judged++;
+      run++;
+      best = Math.max(best, run);
+    } else if (d !== today) {
+      judged++;
+      run = 0;
+    }
+  }
+  let xp = 0;
+  for (const l of Object.values(p.logs)) if (l.day > PROGRAM_DAYS) xp += dayXp(p, l);
+  return { days: Math.max(0, today - from + 1), counted, judged, best, xp };
+}
+
+/** The last `n` days (to today): days that counted out of the days that asked something. For recent Insights. */
+export function recentDays80(p: PilotProgram, today: number, n = 28) {
+  let counted = 0;
+  let judged = 0;
+  for (let d = Math.max(1, today - n + 1); d <= today; d++) {
+    const r = dayResult(p, d);
+    if (r === 'counted') {
+      counted++;
+      judged++;
+    } else if (r === 'missed' && d !== today) judged++;
+  }
+  return { counted, judged, from: Math.max(1, today - n + 1) };
 }
 
 /** The best streak so far (rest days neutral), and the days that counted. */
@@ -812,7 +973,7 @@ function apply(p: PilotProgram, day: number, f: (logs: PilotProgram['logs'], at:
 }
 
 const inProgram = (p: PilotProgram, id: string, day: number) =>
-  p.habits.includes(id) && day >= 1 && day <= PROGRAM_DAYS;
+  p.habits.includes(id) && day >= 1 && day <= endDay(p) && activeOn(p, id, day);
 const none = (p: PilotProgram): PilotChange => ({ program: p, event: null });
 
 /** The swipe or the check button: done. Idempotent (no second XP, ever). */
@@ -969,7 +1130,7 @@ export const consistency = share;
  * Before noon yesterday is still editable, but it already counts here (a correction updates it).
  */
 export function habitTally(p: PilotProgram, id: string, today: number): Tally {
-  const last = Math.min(today, PROGRAM_DAYS);
+  const last = Math.min(today, endDay(p));
   return weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), last).reduce(
     (t, w) => {
       const x = weekTallyOf(p, id, w, today);
@@ -981,7 +1142,7 @@ export function habitTally(p: PilotProgram, id: string, today: number): Tally {
 
 /** One habit's opportunities in one program week (habitTally's rules; the weekly trend adds these up). */
 export function weekTallyOf(p: PilotProgram, id: string, w: WeekSummary, today: number): Tally {
-  const last = Math.min(w.lastDay, today, PROGRAM_DAYS);
+  const last = Math.min(w.lastDay, today, endDay(p));
   let done = 0;
   let eligible = 0;
   let weekly = false;
@@ -1024,7 +1185,7 @@ export function totalCompleted(p: PilotProgram): number {
  * possible) and done days count; for weekly habits, the week's goal is eligible and its credited days are done.
  */
 export function weekTally(p: PilotProgram, today: number): Tally {
-  const w = weekOf(p.startedAt, Math.min(today, PROGRAM_DAYS));
+  const w = weekOf(p.startedAt, Math.min(today, endDay(p)), endDay(p));
   let done = 0;
   let eligible = 0;
   for (const id of allHabits(p)) {
@@ -1047,7 +1208,7 @@ export function weekTally(p: PilotProgram, today: number): Tally {
 /** A habit's recent days, newest last: done, skipped, not done, or rest (a weekly habit's day off). */
 export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
   const out: { day: number; state: 'done' | 'skipped' | 'missed' | 'rest' | 'today' }[] = [];
-  for (let d = Math.max(1, today - n + 1); d <= Math.min(today, PROGRAM_DAYS); d++) {
+  for (let d = Math.max(1, today - n + 1); d <= Math.min(today, endDay(p)); d++) {
     if (!activeOn(p, id, d)) continue; // before it joined
     const t = trackOf(p, id, d);
     out.push({
@@ -1068,7 +1229,7 @@ export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
 
 /** A weekly habit's weeks so far (Strength Training: sessions a week). */
 export const habitWeeks = (p: PilotProgram, id: string, today: number): WeekSummary[] =>
-  weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), Math.min(today, PROGRAM_DAYS));
+  weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), Math.min(today, endDay(p)));
 
 // --- Loading saves ---
 
@@ -1187,6 +1348,17 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
   if (isObj(x.reflections) && Object.keys(x.reflections).length > Object.keys(reflections ?? {}).length)
     lost.push('Some weekly reflections');
   const collection = sanitizeCollection(x.collection);
+  const int = (v: unknown, min: number) => typeof v === 'number' && Number.isInteger(v) && v >= min;
+  const after =
+    isObj(x.after) && x.after.mode === 'momentum' && int(x.after.since, PROGRAM_DAYS + 1)
+      ? { mode: 'momentum' as const, since: x.after.since as number }
+      : undefined;
+  if (x.after !== undefined && !after) lost.push('Your choice after the summit (Keep My Momentum)');
+  const carry =
+    isObj(x.carry) && int(x.carry.ascent, 2) && int(x.carry.xp, 0) && int(x.carry.streak, 0)
+      ? { ascent: x.carry.ascent as number, xp: x.carry.xp as number, streak: x.carry.streak as number }
+      : undefined;
+  if (x.carry !== undefined && !carry) lost.push('What this ascent carried from earlier ones (XP and streak)');
   const program: PilotProgram = {
     v: 1,
     startedAt: x.startedAt,
@@ -1216,6 +1388,8 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
           },
         }
       : {}),
+    ...(after ? { after } : {}),
+    ...(carry ? { carry } : {}),
   };
   return { program, lost };
 }

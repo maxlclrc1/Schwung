@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEFAULT_REMINDERS } from '../core/reminders';
+import { useJourneys } from './journeys';
 import { usePreferences } from './preferences';
 import { endRecovery } from './recovery';
 import { useResetPilot } from './resetPilot';
@@ -8,7 +9,8 @@ import { discardPending } from './storage';
 /*
  * "Delete my data": removes everything personal Schwung keeps on the phone, and says exactly what it couldn't.
  *
- * Every Schwung save is under a `schwung-` key: the Life Reset (and its Expo Go variant), its recovery copies,
+ * Every Schwung save is under a `schwung-` key: the Life Reset (and its Expo Go variant), past journeys, their
+ * recovery copies,
  * preferences (reminder time, welcome-back choice), and old saves from earlier versions (`schwung-state*`,
  * `schwung-fieldnotes*`). All of them go. The theme (light, dark or system) isn't personal and is kept. Pending
  * reminders and Schwung's temporary share files are removed through the functions passed in (native modules).
@@ -43,6 +45,7 @@ export async function deleteAllLocalData(deps: {
   const theme = usePreferences.getState().themePreference;
   endRecovery();
   useResetPilot.setState({ program: null, devDayOffset: 0 });
+  useJourneys.setState({ journeys: [], held: false });
   usePreferences.setState({ themePreference: theme, reminders: DEFAULT_REMINDERS, comebacks: true });
 
   try {
