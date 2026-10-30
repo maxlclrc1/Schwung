@@ -13,13 +13,14 @@ import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { T } from '../ui';
+import { useT } from '../../i18n/react';
 
 const sys = ReduceMotion.System;
 const hhmm = (h: number, m: number) => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 const PRESETS = [
-  { label: 'Morning', hour: 8, minute: 0 },
-  { label: 'Midday', hour: 12, minute: 30 },
-  { label: 'Evening', hour: 19, minute: 0 },
+  { label: 'morning' as const, hour: 8, minute: 0 },
+  { label: 'midday' as const, hour: 12, minute: 30 },
+  { label: 'evening' as const, hour: 19, minute: 0 },
 ];
 
 /**
@@ -29,6 +30,7 @@ const PRESETS = [
  */
 export function RemindersSettings() {
   const { c } = useTheme();
+  const t = useT();
   const reminders = usePreferences((s) => s.reminders);
   const setReminders = usePreferences((s) => s.setReminders);
   const program = useResetPilot((s) => s.program);
@@ -77,7 +79,7 @@ export function RemindersSettings() {
   return (
     <Animated.View layout={LinearTransition.duration(220).reduceMotion(sys)} style={{ gap: space.sm }}>
       <T v="overline" color={c.textDim}>
-        Reminders
+        {t('settings.reminders.title')}
       </T>
       <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
         <View style={styles.head}>
@@ -85,9 +87,11 @@ export function RemindersSettings() {
             <Ionicons name={on ? 'notifications' : 'notifications-outline'} size={18} color={c.accentInk} />
           </View>
           <View style={{ flex: 1 }}>
-            <T v="bodyStrong">Daily reminder</T>
+            <T v="bodyStrong">{t('settings.reminders.daily')}</T>
             <T v="caption" color={c.textDim}>
-              {on ? `Every day at ${hhmm(reminders.hour, reminders.minute)}` : 'Off · a gentle nudge, once a day'}
+              {on
+                ? t('settings.reminders.everyDay', { time: hhmm(reminders.hour, reminders.minute) })
+                : t('settings.reminders.off')}
             </T>
           </View>
           <Switch
@@ -96,8 +100,8 @@ export function RemindersSettings() {
             trackColor={{ true: c.accent, false: c.surfaceHigh }}
             thumbColor="#FFFFFF"
             ios_backgroundColor={c.surfaceHigh}
-            accessibilityLabel="Daily reminder"
-            accessibilityHint={on ? 'Turns the daily reminder off' : 'Turns on one gentle reminder a day'}
+            accessibilityLabel={t('settings.reminders.daily')}
+            accessibilityHint={on ? t('settings.reminders.hintOff') : t('settings.reminders.hintOn')}
           />
         </View>
 
@@ -107,11 +111,11 @@ export function RemindersSettings() {
             style={[styles.note, { backgroundColor: c.peachSoft }]}
           >
             <T v="caption" color={c.text} style={{ flex: 1 }}>
-              Notifications are turned off for Schwung in your phone’s settings.
+              {t('settings.reminders.blocked')}
             </T>
             <Pressable onPress={openNotificationSettings} accessibilityRole="button" hitSlop={8}>
               <T v="caption" color={c.peachInk} style={{ fontWeight: '800' }}>
-                Open Settings
+                {t('settings.reminders.openSettings')}
               </T>
             </Pressable>
           </Animated.View>
@@ -128,19 +132,19 @@ export function RemindersSettings() {
               style={styles.time}
               accessible
               accessibilityRole="adjustable"
-              accessibilityLabel="Reminder time"
+              accessibilityLabel={t('settings.reminders.time')}
               accessibilityValue={{ text: hhmm(reminders.hour, reminders.minute) }}
               accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
               onAccessibilityAction={(e) => shift(e.nativeEvent.actionName === 'increment' ? 15 : -15)}
             >
-              <Round icon="remove" label="15 minutes earlier" onPress={() => shift(-15)} />
+              <Round icon="remove" label={t('settings.reminders.earlier')} onPress={() => shift(-15)} />
               <Animated.View
                 key={`${reminders.hour}:${reminders.minute}`}
                 entering={FadeIn.duration(160).reduceMotion(sys)}
               >
                 <T style={[styles.clock, { color: c.text }]}>{hhmm(reminders.hour, reminders.minute)}</T>
               </Animated.View>
-              <Round icon="add" label="15 minutes later" onPress={() => shift(15)} />
+              <Round icon="add" label={t('settings.reminders.later')} onPress={() => shift(15)} />
             </View>
             <View style={styles.presets}>
               {PRESETS.map((p) => {
@@ -154,12 +158,15 @@ export function RemindersSettings() {
                     }}
                     accessibilityRole="radio"
                     accessibilityState={{ checked: sel }}
-                    accessibilityLabel={`${p.label}, ${hhmm(p.hour, p.minute)}`}
+                    accessibilityLabel={t('settings.reminders.preset', {
+                      name: t(`settings.reminders.${p.label}`),
+                      time: hhmm(p.hour, p.minute),
+                    })}
                     style={{ flex: 1 }}
                   >
                     <ThemedView style={[styles.preset, { backgroundColor: sel ? c.accentSoft : c.surfaceHigh }]}>
                       <T v="caption" color={sel ? c.accentInk : c.text} style={{ fontWeight: '700' }}>
-                        {p.label}
+                        {t(`settings.reminders.${p.label}`)}
                       </T>
                       <T v="caption" color={sel ? c.accentInk : c.textDim} style={{ fontSize: 12 }}>
                         {hhmm(p.hour, p.minute)}
@@ -172,9 +179,9 @@ export function RemindersSettings() {
 
             <View style={styles.head}>
               <View style={{ flex: 1 }}>
-                <T>Mention my habits</T>
+                <T>{t('settings.reminders.mention')}</T>
                 <T v="caption" color={c.textDim}>
-                  Now and then, by name. Off keeps your lock screen private.
+                  {t('settings.reminders.mentionHint')}
                 </T>
               </View>
               <Switch
@@ -186,14 +193,14 @@ export function RemindersSettings() {
                 trackColor={{ true: c.accent, false: c.surfaceHigh }}
                 thumbColor="#FFFFFF"
                 ios_backgroundColor={c.surfaceHigh}
-                accessibilityLabel="Mention my habits in reminders"
+                accessibilityLabel={t('settings.reminders.mentionA11y')}
               />
             </View>
 
             {/* What will arrive, as it will look. */}
-            <View accessible accessibilityLabel={`Preview: ${preview.title} ${preview.body}`}>
+            <View accessible accessibilityLabel={t('settings.reminders.previewA11y', preview)}>
               <T v="caption" color={c.textFaint} style={{ marginBottom: space.xs }}>
-                Preview
+                {t('settings.reminders.preview')}
               </T>
               <ThemedView style={[styles.bubble, { backgroundColor: c.surfaceHigh }]}>
                 <Image source={require('../../../assets/icon.png')} style={styles.appIcon} cachePolicy="memory-disk" />
@@ -215,7 +222,7 @@ export function RemindersSettings() {
                 </View>
               </ThemedView>
               <T v="caption" color={c.textFaint} style={{ marginTop: space.sm }}>
-                No reminder on a day you’ve already completed. Never more than one a day.
+                {t('settings.reminders.rules')}
               </T>
             </View>
           </Animated.View>

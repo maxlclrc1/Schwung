@@ -1,3 +1,4 @@
+import { language, t } from '../i18n';
 import { dateForDay, weekdayOfDay } from './dates';
 
 /*
@@ -123,37 +124,44 @@ export const cellBase = (startKey: string, day: number) => ({
   weekday: mondayIndex(startKey, day),
 });
 
-const list = (ids: string[], name: (id: string) => string) => ids.map(name).join(', ');
+const list = (ids: string[], name: (id: string) => string) => ids.map(name).join(t('common.listSeparator'));
 
 /** What a heatmap day shows when it's inspected: its state in words, and what was done or skipped. */
 export function cellSummary(cell: DayCell, name: (id: string) => string): string {
   const n = cell.planned.length;
   const done = cell.done.length;
-  const skipped = cell.skipped.length ? ` Skipped: ${list(cell.skipped, name)}.` : '';
+  const skipped = cell.skipped.length ? t('progress.cell.skipped', { list: list(cell.skipped, name) }) : '';
+  const doneList = list(cell.done, name);
   switch (cell.state) {
     case 'full':
-      return `${done === 1 ? 'Done' : `All ${done} done`}: ${list(cell.done, name)}.`;
+      return done === 1
+        ? t('progress.cell.doneOne', { list: doneList })
+        : t('progress.cell.doneAll', { count: done, list: doneList });
     case 'partial':
-      return `${done} of ${n} done: ${list(cell.done, name)}.${skipped}`;
+      return t('progress.cell.partial', { done, planned: n, list: doneList, skipped });
     case 'today':
       return done
-        ? `Today, so far ${done} of ${n} done: ${list(cell.done, name)}.${skipped}`
-        : `Today, still open.${skipped}`;
+        ? t('progress.cell.todaySoFar', { done, planned: n, list: doneList, skipped })
+        : t('progress.cell.todayOpen', { skipped });
     case 'missed':
-      return `Recorded, but none of ${n === 1 ? 'the day’s habit' : `the day’s ${n} habits`} done.`;
+      return t('progress.cell.missed', { count: n });
     case 'skipped':
-      return `Nothing done.${skipped}`;
+      return t('progress.cell.skippedOnly', { skipped });
     case 'rest':
-      return 'A rest day: nothing was due.';
+      return t('progress.cell.rest');
     case 'unrecorded':
-      return 'No record: nothing was checked off that day.';
+      return t('progress.cell.unrecorded');
     case 'future':
-      return 'Not reached yet.';
+      return t('progress.cell.future');
   }
 }
 
 /** "Tue 3 Nov" for a date key, in the phone's language. */
 export function shortDate(key: string): string {
   const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  try {
+    return new Date(y, m - 1, d).toLocaleDateString(language(), { weekday: 'short', day: 'numeric', month: 'short' });
+  } catch {
+    return key;
+  }
 }

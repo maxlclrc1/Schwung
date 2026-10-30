@@ -8,13 +8,10 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { T } from '../ui';
+import { useT } from '../../i18n/react';
 
 const sys = ReduceMotion.System;
-const ANSWERS: { id: ReflectionAnswer; label: string }[] = [
-  { id: 'easier', label: 'Easier' },
-  { id: 'right', label: 'About right' },
-  { id: 'harder', label: 'Harder' },
-];
+const ANSWERS: ReflectionAnswer[] = ['easier', 'right', 'harder'];
 
 /**
  * On Habits, after a program week ends: a small invitation to reflect, never in the way of the cards. One tap
@@ -23,29 +20,34 @@ const ANSWERS: { id: ReflectionAnswer; label: string }[] = [
  */
 export function ReflectionInvite({ program, today }: { program: P.PilotProgram; today: number }) {
   const { c } = useTheme();
+  const t = useT();
   const week = dueReflection(program.reflections, today);
   if (!week) return null;
   return (
     <Animated.View entering={FadeIn.duration(300).reduceMotion(sys)} exiting={FadeOut.duration(180).reduceMotion(sys)}>
       <ThemedView style={[styles.card, { backgroundColor: c.surface, borderLeftColor: c.accent }]}>
         <T v="overline" color={c.accentInk}>
-          Week {week} is behind you
+          {t('reflection.invite.behind', { week })}
         </T>
         <T v="heading" accessibilityRole="header">
-          How did your habits feel this week?
+          {t('reflection.invite.question')}
         </T>
         <View style={styles.row}>
           {ANSWERS.map((a) => (
             <Press
-              key={a.id}
-              onPress={() => router.push(`/life-reset/reflect?week=${week}&answer=${a.id}`)}
+              key={a}
+              onPress={() => router.push(`/life-reset/reflect?week=${week}&answer=${a}`)}
               style={{ flex: 1 }}
               accessibilityRole="button"
-              accessibilityLabel={a.id === 'right' ? 'About right' : `${a.label} than expected`}
+              accessibilityLabel={
+                a === 'right'
+                  ? t('reflection.invite.right')
+                  : t(a === 'easier' ? 'reflection.invite.easierA11y' : 'reflection.invite.harderA11y')
+              }
             >
               <ThemedView style={[styles.answer, { backgroundColor: c.accentSoft }]}>
-                <T v="caption" color={c.accentInk} style={{ fontWeight: '700' }}>
-                  {a.label}
+                <T v="caption" color={c.accentInk} style={{ fontWeight: '700' }} numberOfLines={2}>
+                  {t(`reflection.invite.${a}`)}
                 </T>
               </ThemedView>
             </Press>
@@ -55,10 +57,10 @@ export function ReflectionInvite({ program, today }: { program: P.PilotProgram; 
           onPress={() => useResetPilot.getState().reflect(week)}
           style={styles.later}
           accessibilityRole="button"
-          accessibilityLabel="Not now. You can reflect later from Journey."
+          accessibilityLabel={t('reflection.invite.notNowA11y')}
         >
           <T v="caption" color={c.textDim} style={{ fontWeight: '600' }}>
-            Not now
+            {t('reflection.invite.notNow')}
           </T>
         </Press>
       </ThemedView>

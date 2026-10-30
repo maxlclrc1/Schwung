@@ -25,6 +25,8 @@ import { Press } from '../onboarding/Choices';
 import { rise } from '../onboarding/kit';
 import { SheetHeader } from '../SheetHeader';
 import { Button, Screen, T } from '../ui';
+import { t as tr } from '../../i18n';
+import { useT } from '../../i18n/react';
 
 /*
  * A week's reflection (app/life-reset/reflect.tsx): one question, three answers drawn as the shape of the climb
@@ -39,10 +41,17 @@ const sys = ReduceMotion.System;
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
+const option = (id: ReflectionAnswer, shape: string) => ({
+  id,
+  shape,
+  get label() {
+    return tr(`weekly.options.${id}`);
+  },
+});
 const OPTIONS: { id: ReflectionAnswer; label: string; shape: string }[] = [
-  { id: 'easier', label: 'Easier than expected', shape: 'M4 50 C 22 36, 36 30, 48 30 C 60 30, 74 36, 92 50 Z' },
-  { id: 'right', label: 'About right', shape: 'M4 50 L 30 26 L 38 31 L 50 14 L 92 50 Z' },
-  { id: 'harder', label: 'Harder than expected', shape: 'M4 50 L 26 34 L 34 37 L 50 4 L 66 30 L 74 26 L 92 50 Z' },
+  option('easier', 'M4 50 C 22 36, 36 30, 48 30 C 60 30, 74 36, 92 50 Z'),
+  option('right', 'M4 50 L 30 26 L 38 31 L 50 14 L 92 50 Z'),
+  option('harder', 'M4 50 L 26 34 L 34 37 L 50 4 L 66 30 L 74 26 L 92 50 Z'),
 ];
 
 const tintOf = (c: Colors, a: ReflectionAnswer) =>
@@ -52,14 +61,11 @@ const tintOf = (c: Colors, a: ReflectionAnswer) =>
       ? { fill: c.mist, soft: c.mistSoft, ink: c.mistInk }
       : { fill: c.peach, soft: c.peachSoft, ink: c.peachInk };
 
-const RESPONSE: Record<ReflectionAnswer, string> = {
-  easier: 'Lovely. When the steps feel light, you could take a slightly bigger one, only if you want to.',
-  right: 'That’s the sweet spot. Keep climbing at this pace.',
-  harder: 'Thank you for being honest. Harder weeks happen, and a lighter step still counts.',
-};
+const response = (a: ReflectionAnswer) => tr(`weekly.response.${a}`);
 
 export function WeeklyReflection({ week, initial }: { week: number; initial: ReflectionAnswer | null }) {
   const { c } = useTheme();
+  const t = useT();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
   const saved = program?.reflections?.[week]?.answer ?? null;
@@ -98,19 +104,20 @@ export function WeeklyReflection({ week, initial }: { week: number; initial: Ref
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title={`Week ${week}`} action="Close" />
+      <SheetHeader title={t('weekly.title', { week })} action={t('weekly.close')} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View entering={rise(0)} style={{ gap: space.sm }}>
           <T v="overline" color={c.accentInk}>
-            Days {from}–{to} · a quick check-in
+            {t('weekly.kicker', { from, to })}
           </T>
           <T style={[styles.question, { color: c.text }]} accessibilityRole="header">
-            How did your habits feel this week?
+            {t('weekly.question')}
           </T>
           {stats && stats.planned ? (
             <T color={c.textDim}>
-              You did {stats.done} of {stats.planned} habit check-ins
-              {stats.full ? `, with ${stats.full} complete day${stats.full === 1 ? '' : 's'}` : ''}.
+              {stats.full
+                ? t('weekly.didFull', { done: stats.done, planned: stats.planned, count: stats.full })
+                : t('weekly.did', { done: stats.done, planned: stats.planned })}
             </T>
           ) : null}
         </Animated.View>
@@ -132,21 +139,20 @@ export function WeeklyReflection({ week, initial }: { week: number; initial: Ref
               style={[styles.response, { backgroundColor: tintOf(c, answer).soft }]}
               accessibilityLiveRegion="polite"
             >
-              <T style={{ fontSize: 18, lineHeight: 25 }}>{RESPONSE[answer]}</T>
+              <T style={{ fontSize: 18, lineHeight: 25 }}>{response(answer)}</T>
             </ThemedView>
 
             {adjustable.length && (direction || review) ? (
               <View style={{ gap: space.sm }}>
                 <T v="bodyStrong">
                   {direction === 'harder'
-                    ? 'Want a slightly bigger step for one habit?'
+                    ? t('weekly.bigger')
                     : direction === 'easier'
-                      ? 'Want a lighter step for one habit?'
-                      : 'Your targets'}
+                      ? t('weekly.lighter')
+                      : t('weekly.targets')}
                 </T>
                 <T v="caption" color={c.textDim}>
-                  Nothing changes unless you confirm. Changes start from tomorrow (weekly habits from next Monday); your
-                  past days stay exactly as they are.
+                  {t('weekly.nothingChanges')}
                 </T>
                 {adjustable.map((id) => (
                   <Adjust key={id} program={program} id={id} today={today} way={direction} week={week} />
@@ -156,24 +162,24 @@ export function WeeklyReflection({ week, initial }: { week: number; initial: Ref
               <Press
                 onPress={() => setReview(true)}
                 accessibilityRole="button"
-                accessibilityLabel="Review my targets anyway"
+                accessibilityLabel={t('weekly.reviewA11y')}
               >
                 <T v="bodyStrong" color={c.accentInk}>
-                  Review my targets anyway
+                  {t('weekly.review')}
                 </T>
               </Press>
             ) : null}
             {program.habits.some((id) => program.custom?.[id]) ? (
               <T v="caption" color={c.textFaint}>
-                Your own habits stay just as you set them.
+                {t('weekly.ownStay')}
               </T>
             ) : null}
 
-            <Button label="Done" onPress={() => router.back()} />
+            <Button label={t('weekly.done')} onPress={() => router.back()} />
           </Animated.View>
         ) : (
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            There’s no wrong answer. It only helps you choose what comes next.
+            {t('weekly.noWrong')}
           </T>
         )}
       </ScrollView>
@@ -237,6 +243,7 @@ function Adjust({
   week: number;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const ways: ('easier' | 'harder')[] = way ? [way] : ['easier', 'harder'];
@@ -247,13 +254,19 @@ function Adjust({
         onPress={() => setOpen((o) => !o)}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={`${P.nameOf(program, id)}, ${P.levelLineFor(program, id, today)}. Review`}
+        accessibilityLabel={t('weekly.adjustA11y', {
+          habit: P.nameOf(program, id),
+          level: P.levelLineFor(program, id, today),
+        })}
       >
         <View style={styles.adjustHead}>
           <View style={{ flex: 1 }}>
             <T v="bodyStrong">{P.nameOf(program, id)}</T>
             <T v="caption" color={c.textDim}>
-              {P.levelLineFor(program, id, today)} · {P.targetText(program, id, today)}
+              {t('weekly.levelTarget', {
+                level: P.levelLineFor(program, id, today),
+                target: P.targetText(program, id, today),
+              })}
             </T>
           </View>
           <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textDim} />
@@ -270,7 +283,7 @@ function Adjust({
             </View>
           ) : pending ? (
             <T v="caption" color={c.textDim}>
-              Already changing: {pending}.
+              {t('weekly.alreadyChanging', { pending })}
             </T>
           ) : (
             ways.map((w) => {
@@ -278,7 +291,7 @@ function Adjust({
               if ('blocked' in r)
                 return (
                   <T key={w} v="caption" color={c.textDim}>
-                    {w === 'easier' ? 'Easier' : 'Harder'}: not available ({r.blocked}).
+                    {t(w === 'easier' ? 'weekly.easierBlocked' : 'weekly.harderBlocked', { reason: r.blocked })}
                   </T>
                 );
               const preview = P.pendingText(r.program, id, today);
@@ -286,7 +299,7 @@ function Adjust({
                 <View key={w} style={{ gap: space.xs }}>
                   <T v="caption">{preview}</T>
                   <Button
-                    label={w === 'easier' ? 'Make it easier' : 'Make it harder'}
+                    label={w === 'easier' ? t('weekly.makeEasier') : t('weekly.makeHarder')}
                     kind="secondary"
                     onPress={() => {
                       const s = useResetPilot.getState();
@@ -294,7 +307,7 @@ function Adjust({
                       if (blocked) return;
                       haptic.confirm();
                       s.reflect(week, undefined, [id]);
-                      setDone(`Done. ${preview ?? ''}`.trim());
+                      setDone(preview ? t('weekly.changed', { pending: preview }) : t('weekly.changedPlain'));
                     }}
                   />
                 </View>

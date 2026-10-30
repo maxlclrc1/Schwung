@@ -7,16 +7,18 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { T } from '../ui';
+import { useT } from '../../i18n/react';
 
 /** Journey: each finished week's reflection (tap to open it again), or the way to reflect on one not answered. */
 export function ReflectionHistory({ program, today }: { program: P.PilotProgram; today: number }) {
   const { c } = useTheme();
+  const t = useT();
   const weeks = Array.from({ length: lastFinishedWeek(today) }, (_, i) => i + 1);
   const color = { easier: c.sage, right: c.mist, harder: c.peach } as const;
   return (
     <View style={{ gap: space.sm }}>
       <T v="overline" color={c.textDim}>
-        Weekly reflections
+        {t('reflection.history.title')}
       </T>
       <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
         {weeks.length ? (
@@ -28,7 +30,12 @@ export function ReflectionHistory({ program, today }: { program: P.PilotProgram;
                 key={w}
                 onPress={() => router.push(`/life-reset/reflect?week=${w}`)}
                 accessibilityRole="button"
-                accessibilityLabel={`Week ${w}, days ${from} to ${to}: ${r?.answer ? ANSWER_WORDS[r.answer] : 'not reflected on yet'}${r?.changed?.length ? `, ${r.changed.length} target changed` : ''}`}
+                accessibilityLabel={`${t('reflection.history.row', {
+                  week: w,
+                  from,
+                  to,
+                  answer: r?.answer ? ANSWER_WORDS[r.answer] : t('reflection.history.notYet'),
+                })}${r?.changed?.length ? t('reflection.history.rowChanged', { count: r.changed.length }) : ''}`}
               >
                 <View
                   style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border }]}
@@ -43,16 +50,14 @@ export function ReflectionHistory({ program, today }: { program: P.PilotProgram;
                     ]}
                   />
                   <View style={{ flex: 1 }}>
-                    <T v="bodyStrong">Week {w}</T>
+                    <T v="bodyStrong">{t('reflection.history.week', { week: w })}</T>
                     <T v="caption" color={c.textDim}>
-                      Days {from}–{to}
-                      {r?.changed?.length
-                        ? ` · ${r.changed.length} target${r.changed.length === 1 ? '' : 's'} changed`
-                        : ''}
+                      {t('reflection.history.days', { from, to })}
+                      {r?.changed?.length ? t('reflection.history.changed', { count: r.changed.length }) : ''}
                     </T>
                   </View>
                   <T v="caption" color={r?.answer ? c.text : c.accentInk} style={{ fontWeight: '700' }}>
-                    {r?.answer ? ANSWER_WORDS[r.answer] : 'Reflect'}
+                    {r?.answer ? ANSWER_WORDS[r.answer] : t('reflection.history.reflect')}
                   </T>
                   <Ionicons name="chevron-forward" size={14} color={c.textFaint} />
                 </View>
@@ -61,7 +66,7 @@ export function ReflectionHistory({ program, today }: { program: P.PilotProgram;
           })
         ) : (
           <T v="caption" color={c.textDim}>
-            Your first reflection comes after Day 7: a quick check-in on how your habits felt.
+            {t('reflection.history.first')}
           </T>
         )}
       </ThemedView>

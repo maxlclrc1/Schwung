@@ -15,6 +15,8 @@ import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
+import { formatList } from '../i18n';
+import { useT } from '../i18n/react';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
 const sys = ReduceMotion.System;
@@ -25,6 +27,7 @@ const sys = ReduceMotion.System;
  */
 export function PrivacyData() {
   const { c } = useTheme();
+  const t = useT();
   const [step, setStep] = useState<'list' | 'export' | 'delete'>('list');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -37,7 +40,7 @@ export function PrivacyData() {
       await exportMyData();
       setStep('list');
     } catch {
-      setNote('Your data couldn’t be exported just now. Nothing was changed; please try again.');
+      setNote(t('settings.privacy.exportFailed'));
     } finally {
       setBusy(false);
     }
@@ -49,15 +52,18 @@ export function PrivacyData() {
     setNote(null);
     const result = await deleteAllLocalData({ cancelReminders: cancelAllReminders, removeTempFiles: removeAllTemps });
     setBusy(false);
-    if (!result.ok && result.failed.includes('Your saved progress and settings')) {
+    if (!result.ok && result.failed.includes('data')) {
       haptic.warning();
-      setNote('Your data couldn’t be deleted just now. Nothing was removed; please try again.');
+      setNote(t('settings.privacy.deleteFailed'));
       return;
     }
     haptic.confirm();
     if (!result.ok) {
       // The data itself is gone; say honestly what's still pending.
-      setNote(`Your data was deleted, but these couldn’t be removed yet: ${result.failed.join(', ')}.`);
+      const what = result.failed.map((f) =>
+        t(f === 'reminders' ? 'settings.privacy.failedReminders' : 'settings.privacy.failedTemp'),
+      );
+      setNote(t('settings.privacy.deletePartial', { list: formatList(what) }));
       return;
     }
     if (router.canDismiss()) router.dismissAll();
@@ -66,16 +72,13 @@ export function PrivacyData() {
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Privacy & Data" />
+      <SheetHeader title={t('settings.privacy.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.intro}>
           <View style={[styles.icon, { backgroundColor: c.sageSoft }]}>
             <Ionicons name="lock-closed-outline" size={22} color={c.sageInk} />
           </View>
-          <T color={c.textDim}>
-            Your habits and progress are stored on your device. Schwung doesn’t require an account or upload your
-            personal journey to a server.
-          </T>
+          <T color={c.textDim}>{t('settings.privacy.intro')}</T>
         </View>
 
         {step === 'list' ? (
@@ -83,22 +86,22 @@ export function PrivacyData() {
             <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
               <Row
                 icon="download-outline"
-                label="Export my data"
-                hint="A copy of everything, as a file you choose where to send"
+                label={t('settings.privacy.export')}
+                hint={t('settings.privacy.exportHint')}
                 onPress={() => setStep('export')}
               />
               <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
               <Row
                 icon="cloud-download-outline"
-                label="Restore from backup"
-                hint="Bring a Life Reset from an exported file"
+                label={t('settings.privacy.restore')}
+                hint={t('settings.privacy.restoreHint')}
                 onPress={() => router.push('/restore')}
               />
               <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
               <Row
                 icon="trash-outline"
-                label="Delete my data"
-                hint="Remove everything Schwung keeps on this phone"
+                label={t('settings.privacy.delete')}
+                hint={t('settings.privacy.deleteHint')}
                 danger
                 onPress={() => setStep('delete')}
               />
@@ -106,51 +109,54 @@ export function PrivacyData() {
               {legalVisible.privacyPolicy() ? (
                 <>
                   <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-                  <Row icon="open-outline" label="Privacy Policy" onPress={() => void Linking.openURL(PRIVACY_URL)} />
+                  <Row
+                    icon="open-outline"
+                    label={t('settings.privacy.policy')}
+                    onPress={() => void Linking.openURL(PRIVACY_URL)}
+                  />
                 </>
               ) : null}
             </ThemedView>
             <T v="caption" color={c.textFaint}>
-              Ending the Life Reset (in Settings) ends your current program. Delete my data removes all your personal
-              data from Schwung on this phone, including earlier saves and recovery copies.
+              {t('settings.privacy.footnote')}
             </T>
           </Animated.View>
         ) : step === 'export' ? (
           <Animated.View entering={FadeIn.duration(180).reduceMotion(sys)} style={{ gap: space.md }}>
             <T v="heading" accessibilityRole="header">
-              Export my data
+              {t('settings.privacy.exportTitle')}
             </T>
-            <T color={c.textDim}>The file is made on this phone and may contain sensitive information:</T>
+            <T color={c.textDim}>{t('settings.privacy.exportIntro')}</T>
             <ThemedView style={[styles.panel, { backgroundColor: c.surface, paddingVertical: space.md }]}>
-              {EXPORT_CONTAINS.map((line) => (
-                <View key={line} style={styles.bullet}>
+              {EXPORT_CONTAINS.map((key) => (
+                <View key={key} style={styles.bullet}>
                   <View style={[styles.dot, { backgroundColor: c.mist }]} />
-                  <T style={{ flex: 1 }}>{line}</T>
+                  <T style={{ flex: 1 }}>{t(`settings.privacy.contains.${key}`)}</T>
                 </View>
               ))}
             </ThemedView>
             <T v="caption" color={c.textDim}>
-              It’s a JSON file you can keep or send wherever you choose. Nothing is uploaded: only the place you pick in
-              the share sheet receives it.
+              {t('settings.privacy.exportShare')}
             </T>
-            <Button label="Export my data" onPress={() => void exportData()} disabled={busy} />
-            <Button label="Cancel" kind="ghost" onPress={() => setStep('list')} disabled={busy} />
+            <Button label={t('settings.privacy.export')} onPress={() => void exportData()} disabled={busy} />
+            <Button label={t('common.cancel')} kind="ghost" onPress={() => setStep('list')} disabled={busy} />
           </Animated.View>
         ) : (
           <Animated.View entering={FadeIn.duration(180).reduceMotion(sys)} style={{ gap: space.md }}>
             <T v="heading" accessibilityRole="header">
-              Delete my data?
+              {t('settings.privacy.deleteTitle')}
             </T>
-            <T color={c.textDim}>
-              This removes your Life Reset and its whole history, your own habits, set-up and health answers,
-              reflections, Screen Time entries, XP and collection, earlier and recovery saves, reminders and temporary
-              files. Images you saved to Photos stay in Photos.
-            </T>
+            <T color={c.textDim}>{t('settings.privacy.deleteBody')}</T>
             <T v="bodyStrong" color={c.danger}>
-              This can’t be undone. If you want a copy, export your data first.
+              {t('settings.privacy.deleteWarning')}
             </T>
-            <Button label="Delete my data" kind="danger" onPress={() => void deleteData()} disabled={busy} />
-            <Button label="Cancel" kind="ghost" onPress={() => setStep('list')} disabled={busy} />
+            <Button
+              label={t('settings.privacy.delete')}
+              kind="danger"
+              onPress={() => void deleteData()}
+              disabled={busy}
+            />
+            <Button label={t('common.cancel')} kind="ghost" onPress={() => setStep('list')} disabled={busy} />
           </Animated.View>
         )}
 

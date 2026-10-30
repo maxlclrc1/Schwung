@@ -1,3 +1,4 @@
+import { t, type TKey } from '../../i18n';
 /*
  * Growth & Collection: XP, the effort of every habit done (pilot.ts pilotXp, unchanged), now climbs a ladder of
  * titles, and each rung adds an alpine object to the person's collection. Separate from the 66-day Journey (it's
@@ -18,58 +19,34 @@ export type Collectible = {
   reflection: string;
 };
 
-export const START_TITLE = 'Wanderer';
+/** The title before the first object (read in the current language). */
+export const startTitle = () => t('progress.collection.startTitle');
+
+/** A collectible whose title, name and reflection are read in the current language. */
+function item(id: string, xp: number): Collectible {
+  return {
+    id,
+    xp,
+    get title() {
+      return t(`progress.collection.${id}.title` as TKey);
+    },
+    get name() {
+      return t(`progress.collection.${id}.name` as TKey);
+    },
+    get reflection() {
+      return t(`progress.collection.${id}.reflection` as TKey);
+    },
+  };
+}
 
 export const COLLECTIBLES: Collectible[] = [
-  {
-    id: 'compass',
-    xp: 60,
-    title: 'Explorer',
-    name: 'The Compass',
-    reflection: 'You chose a direction. Everything since has been finding your way along it.',
-  },
-  {
-    id: 'edelweiss',
-    xp: 180,
-    title: 'Trailblazer',
-    name: 'Pressed Edelweiss',
-    reflection: 'It only grows where it’s hard to reach. Kept here, like the first days that took real effort.',
-  },
-  {
-    id: 'trail_journal',
-    xp: 380,
-    title: 'Pathfinder',
-    name: 'The Trail Journal',
-    reflection: 'Small entries, day after day. Read back, they become a story about who you’re becoming.',
-  },
-  {
-    id: 'mountain_lantern',
-    xp: 700,
-    title: 'Ridgewalker',
-    name: 'The Mountain Lantern',
-    reflection: 'For the early starts and the long evenings: a steady light you carry yourself.',
-  },
-  {
-    id: 'climbing_rope',
-    xp: 1100,
-    title: 'Mountaineer',
-    name: 'The Climbing Rope',
-    reflection: 'Each strand holds a little; woven together, they hold you. Like habits, repeated.',
-  },
-  {
-    id: 'walking_staff',
-    xp: 1600,
-    title: 'Alpinist',
-    name: 'The Walking Staff',
-    reflection: 'Worn smooth where your hand rests. Proof of how far it has carried you, and you it.',
-  },
-  {
-    id: 'summit_pennant',
-    xp: 2300,
-    title: 'Summit Keeper',
-    name: 'The Summit Pennant',
-    reflection: 'Raised where few go. Not for the view: for every ordinary day that led here.',
-  },
+  item('compass', 60),
+  item('edelweiss', 180),
+  item('trail_journal', 380),
+  item('mountain_lantern', 700),
+  item('climbing_rope', 1100),
+  item('walking_staff', 1600),
+  item('summit_pennant', 2300),
 ];
 
 /** The title for an XP total, the object it last unlocked, and the next rung (null at the top). */
@@ -79,7 +56,7 @@ export function growth(xp: number) {
   const next = COLLECTIBLES.find((c) => xp < c.xp) ?? null;
   const from = current?.xp ?? 0;
   return {
-    title: current?.title ?? START_TITLE,
+    title: current?.title ?? startTitle(),
     rank: reached.length,
     current,
     next,

@@ -49,6 +49,8 @@ describe('the theme preference', () => {
       reminders: { enabled: false, hour: 9, minute: 0, showHabits: false },
       // The welcome back is on until turned off.
       comebacks: true,
+      // The language follows the phone until one is chosen.
+      language: 'system',
     });
     expect(useResetPilot.getState().program).toBeNull();
   });

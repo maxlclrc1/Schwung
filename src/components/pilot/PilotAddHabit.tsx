@@ -18,6 +18,8 @@ import { ThemedView } from '../../theme/transition';
 import { SheetHeader } from '../SheetHeader';
 import { Button, ProgressBar, Screen, T } from '../ui';
 import { BaselineQuestions, Chips, duration } from './SetupParts';
+import { t as tr } from '../../i18n';
+import { useT } from '../../i18n/react';
 
 /*
  * Add a habit to the running Life Reset (app/life-reset/add.tsx), as a short set-up of its own, one question a
@@ -33,20 +35,16 @@ const OWN = 'own';
 const sys = ReduceMotion.System;
 const OFTEN = [7, 6, 5, 4, 3, 2, 1].map((n) => ({
   n,
-  label: n === 7 ? 'Every day' : `${n} day${n === 1 ? '' : 's'} a week`,
+  get label() {
+    return n === 7 ? tr('add.everyDay') : tr('add.often', { count: n });
+  },
 }));
-const NEED_TITLE: Record<P.Baseline, string> = {
-  phone: 'How long are you on your phone a day?',
-  pullMinutes: 'And on the app that pulls you in most?',
-  wake: 'When do you usually get up?',
-  activeDays: 'How many days a week are you active now?',
-  skill: 'Which skill will you practise?',
-  strengthStart: 'Where are you starting from?',
-};
+const needTitle = (b: P.Baseline) => tr(`add.need.${b}`);
 
 export function PilotAddHabit() {
   const { c } = useTheme();
-  const t = useTints();
+  const t = useT();
+  const tn = useTints();
   const { width } = useWindowDimensions();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
@@ -70,7 +68,7 @@ export function PilotAddHabit() {
   if (!program) {
     return (
       <Screen edges={['bottom']}>
-        <SheetHeader title="Add a habit" />
+        <SheetHeader title={t('add.title')} />
       </Screen>
     );
   }
@@ -100,8 +98,9 @@ export function PilotAddHabit() {
         : null;
   const choice = picked && !mine && intensity ? { habitId: picked, intensity } : null;
   const problems = choice ? P.addProblems(program, extra, choice, today) : [];
-  const timeProblem = problems.find((p) => p.startsWith('With it, your habits take'));
+  const timeProblem = choice ? (P.addTimeProblem(program, extra, choice, today) ?? undefined) : undefined;
   const ownProblems = mine ? P.customProblems(program, name, perWeek) : [];
+  const atMost = t('engine.problems.atMost', { max: P.MAX_HABITS });
 
   // The questions this habit asks, in order (the time question only when it wouldn't fit, or was changed).
   const order: Step[] = !picked
@@ -155,36 +154,27 @@ export function PilotAddHabit() {
   };
 
   const tile = Math.floor((Math.min(width, 520) - space.xl * 2 - space.md) / 2);
-  const habitName = mine ? name.trim() || 'Your habit' : picked ? P.habitName(picked) : '';
+  const habitName = mine ? name.trim() || t('add.yourHabit') : picked ? P.habitName(picked) : '';
 
   const screen = (() => {
     if (step === 'pick')
       return full ? (
-        <Question eyebrow="Add a habit" tint="lavender" title="You have plenty on the go.">
-          <T color={c.textDim}>You have {P.MAX_HABITS} habits, the most for now. Remove one to make room.</T>
+        <Question eyebrow={t('add.title')} tint="lavender" title={t('add.fullTitle')}>
+          <T color={c.textDim}>{t('add.full', { max: P.MAX_HABITS })}</T>
         </Question>
       ) : (
-        <Question
-          eyebrow="Add a habit"
-          tint="peach"
-          title="What would you like to add?"
-          hint="It joins from today. Your other habits stay as they are."
-        >
-          <Press
-            onPress={() => pick(OWN)}
-            accessibilityRole="button"
-            accessibilityLabel="Your own habit. Name it, say what counts, and choose how often"
-          >
+        <Question eyebrow={t('add.title')} tint="peach" title={t('add.pickTitle')} hint={t('add.pickHint')}>
+          <Press onPress={() => pick(OWN)} accessibilityRole="button" accessibilityLabel={t('add.ownA11y')}>
             <ThemedView
-              style={[styles.own, { backgroundColor: c.surface, borderColor: mine ? t.lavender.fill : 'transparent' }]}
+              style={[styles.own, { backgroundColor: c.surface, borderColor: mine ? tn.lavender.fill : 'transparent' }]}
             >
-              <View style={[styles.ownIcon, { backgroundColor: t.lavender.soft }]}>
-                <Ionicons name="create-outline" size={20} color={t.lavender.ink} />
+              <View style={[styles.ownIcon, { backgroundColor: tn.lavender.soft }]}>
+                <Ionicons name="create-outline" size={20} color={tn.lavender.ink} />
               </View>
               <View style={{ flex: 1 }}>
-                <T v="bodyStrong">Your own habit</T>
+                <T v="bodyStrong">{t('add.own')}</T>
                 <T v="caption" color={c.textDim}>
-                  Name it, say what counts, and choose how often.
+                  {t('add.ownBody')}
                 </T>
               </View>
               <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
@@ -209,61 +199,46 @@ export function PilotAddHabit() {
       );
     if (step === 'name')
       return (
-        <Question
-          eyebrow="Your own habit"
-          tint="lavender"
-          title="What’s it called?"
-          hint="Short and yours: it goes on its card."
-        >
+        <Question eyebrow={t('add.own')} tint="lavender" title={t('add.nameTitle')} hint={t('add.nameHint')}>
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Stretch, Cook dinner, Journal"
+            placeholder={t('add.namePlaceholder')}
             placeholderTextColor={c.textFaint}
             maxLength={40}
             autoFocus
             returnKeyType="next"
             onSubmitEditing={() => canContinue && go(1)}
-            accessibilityLabel="Habit name"
+            accessibilityLabel={t('add.nameA11y')}
             style={[styles.input, { color: c.text, backgroundColor: c.surface, borderColor: c.border }]}
           />
-          {name.trim() && ownProblems.some((p) => !p.startsWith('You have')) ? (
+          {name.trim() && ownProblems.some((p) => p !== atMost) ? (
             <T v="caption" color={c.danger}>
-              {ownProblems.find((p) => !p.startsWith('You have'))}
+              {ownProblems.find((p) => p !== atMost)}
             </T>
           ) : null}
         </Question>
       );
     if (step === 'note')
       return (
-        <Question
-          eyebrow={habitName}
-          tint="lavender"
-          title="What counts as done?"
-          hint="Optional. It shows on the card, under the name."
-        >
+        <Question eyebrow={habitName} tint="lavender" title={t('add.noteTitle')} hint={t('add.noteHint')}>
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder="e.g. 10 minutes after work"
+            placeholder={t('add.notePlaceholder')}
             placeholderTextColor={c.textFaint}
             maxLength={80}
             autoFocus
             returnKeyType="next"
             onSubmitEditing={() => go(1)}
-            accessibilityLabel="What counts as done"
+            accessibilityLabel={t('add.noteA11y')}
             style={[styles.input, { color: c.text, backgroundColor: c.surface, borderColor: c.border }]}
           />
         </Question>
       );
     if (step === 'often')
       return (
-        <Question
-          eyebrow={habitName}
-          tint="sage"
-          title="How often?"
-          hint="A few days a week counts by the week: any days you choose, and a day without it is never missed."
-        >
+        <Question eyebrow={habitName} tint="sage" title={t('add.oftenTitle')} hint={t('add.oftenHint')}>
           <View style={styles.list} accessibilityRole="radiogroup">
             {OFTEN.map((o) => {
               const on = perWeek === o.n;
@@ -275,17 +250,20 @@ export function PilotAddHabit() {
                   accessibilityState={{ checked: on }}
                   accessibilityLabel={o.label}
                 >
-                  <ThemedView style={[styles.option, { backgroundColor: on ? t.sage.soft : c.surface }]}>
-                    <T v="bodyStrong" color={on ? t.sage.ink : c.text} style={{ flex: 1 }}>
+                  <ThemedView style={[styles.option, { backgroundColor: on ? tn.sage.soft : c.surface }]}>
+                    <T v="bodyStrong" color={on ? tn.sage.ink : c.text} style={{ flex: 1 }}>
                       {o.label}
                     </T>
                     <View
                       style={[
                         styles.radio,
-                        { borderColor: on ? t.sage.fill : c.border, backgroundColor: on ? t.sage.fill : 'transparent' },
+                        {
+                          borderColor: on ? tn.sage.fill : c.border,
+                          backgroundColor: on ? tn.sage.fill : 'transparent',
+                        },
                       ]}
                     >
-                      {on ? <Ionicons name="checkmark" size={14} color={t.sage.on} /> : null}
+                      {on ? <Ionicons name="checkmark" size={14} color={tn.sage.on} /> : null}
                     </View>
                   </ThemedView>
                 </Press>
@@ -296,7 +274,7 @@ export function PilotAddHabit() {
       );
     if (need)
       return (
-        <Question eyebrow={habitName} tint="mist" title={NEED_TITLE[need]}>
+        <Question eyebrow={habitName} tint="mist" title={needTitle(need)}>
           <BaselineQuestions
             needs={[need]}
             answers={answers}
@@ -320,12 +298,7 @@ export function PilotAddHabit() {
       );
     if (step === 'level' && picked)
       return (
-        <Question
-          eyebrow={habitName}
-          tint="sage"
-          title="How big should the first steps be?"
-          hint="Start small and it grows with you. You decide when to step up."
-        >
+        <Question eyebrow={habitName} tint="sage" title={t('add.levelsTitle')} hint={t('add.levelsHint')}>
           <StartCard
             id={picked}
             answers={answers}
@@ -338,7 +311,7 @@ export function PilotAddHabit() {
             }}
           >
             {picked === 'strength_log' && intensity === 'challenge' ? (
-              <Stepper label="Sessions a week you already do" value={own} min={2} max={7} onChange={setOwn} />
+              <Stepper label={t('add.ownSessions')} value={own} min={2} max={7} onChange={setOwn} />
             ) : null}
           </StartCard>
         </Question>
@@ -346,10 +319,10 @@ export function PilotAddHabit() {
     if (step === 'time')
       return (
         <Question
-          eyebrow="Your day"
+          eyebrow={t('add.yourDay')}
           tint="sage"
-          title="On a day all your habits fall on, how much time do you have?"
-          hint={`You said ${duration(program.answers.minutesPerDay)} at set-up.`}
+          title={t('add.timeTitle')}
+          hint={t('add.timeHint', { time: duration(program.answers.minutesPerDay) })}
         >
           <Chips
             items={P.PILOT_TIME_OPTIONS.map((m) => ({ id: m, label: duration(m) }))}
@@ -368,10 +341,10 @@ export function PilotAddHabit() {
     const issues = mine ? ownProblems : problems;
     return (
       <Question
-        eyebrow="Ready"
+        eyebrow={t('add.ready')}
         tint="indigo"
-        title={`Add ${habitName}?`}
-        hint="It joins from today, at its first level."
+        title={t('add.reviewTitle', { habit: habitName })}
+        hint={t('add.reviewHint')}
       >
         <View pointerEvents="none">
           <HabitCard
@@ -384,15 +357,20 @@ export function PilotAddHabit() {
               mine
                 ? {
                     title: habitName,
-                    task: note.trim() || (perWeek === 7 ? 'Every day' : `Any ${perWeek} days a week`),
+                    task: note.trim() || (perWeek === 7 ? t('add.everyDay') : t('add.anyDays', { count: perWeek })),
                     levelIndex: 0,
-                    levelLabel: 'Your habit',
+                    levelLabel: t('add.yourHabit'),
                   }
                 : {
                     title: habitName,
-                    task: preview ? `${preview.target} · ${preview.frequency}` : '',
+                    task: preview ? t('setup.intensity.preview', preview) : '',
                     levelIndex: 0,
-                    levelLabel: intensity ? `${P.INTENSITY_NAME[intensity]} · Foundation` : '',
+                    levelLabel: intensity
+                      ? t('add.foundationLevel', {
+                          intensity: P.intensityName(intensity),
+                          phase: P.phaseName('foundation'),
+                        })
+                      : '',
                   }
             }
           />
@@ -409,10 +387,10 @@ export function PilotAddHabit() {
   const issues = mine ? ownProblems : problems;
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Add a habit" action="Cancel" />
+      <SheetHeader title={t('add.title')} action={t('common.cancel')} />
       {picked ? (
         <View style={styles.progress}>
-          <ProgressBar value={(index + 1) / order.length} height={4} color={t.lavender.fill} />
+          <ProgressBar value={(index + 1) / order.length} height={4} color={tn.lavender.fill} />
         </View>
       ) : null}
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
@@ -429,7 +407,7 @@ export function PilotAddHabit() {
             }}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('add.back')}
           >
             {({ pressed }) => (
               <ThemedView style={[styles.back, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}>
@@ -438,10 +416,15 @@ export function PilotAddHabit() {
             )}
           </Pressable>
           {step === 'review' ? (
-            <Button label={`Add ${habitName}`} disabled={issues.length > 0} onPress={add} style={{ flex: 1 }} />
+            <Button
+              label={t('add.add', { habit: habitName })}
+              disabled={issues.length > 0}
+              onPress={add}
+              style={{ flex: 1 }}
+            />
           ) : (
             <Button
-              label={step === 'note' && !note.trim() ? 'Skip' : 'Continue'}
+              label={step === 'note' && !note.trim() ? t('add.skip') : t('add.continue')}
               disabled={!canContinue}
               onPress={() => go(1)}
               style={{ flex: 1 }}

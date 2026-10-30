@@ -10,6 +10,7 @@ import { CROP_COUNT } from '../components/habitArt';
 import { useJourneys } from './journeys';
 import { endRecovery, keepRaw, startRecovery, useRecovery } from './recovery';
 import { debouncedStorage, deferredJSONStorage } from './storage';
+import { t } from '../i18n';
 
 /*
  * The Life Reset program's saved state: the app's one program. It began as the pilot's and keeps the pilot's key,
@@ -146,7 +147,7 @@ const guardedStorage: PersistStorage<ResetPilotData> = {
         {
           reason: newer ? 'newer' : 'unreadable',
           recovered: null,
-          lost: newer ? [] : ['The whole saved Life Reset (it couldn’t be read)'],
+          lost: newer ? [] : [t('engine.lost.whole')],
           raw,
         },
         lastKept,

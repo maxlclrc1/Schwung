@@ -14,6 +14,7 @@ import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { T } from '../ui';
 import { settle, type Tint } from './kit';
+import { t as tr } from '../../i18n';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
 
@@ -261,7 +262,7 @@ function Stair({
       style={{ flex: 1 }}
       accessibilityRole="radio"
       accessibilityState={{ checked: on }}
-      accessibilityLabel={`${label}. ${detail}`}
+      accessibilityLabel={tr('setup.choices.a11yDetail', { label, detail })}
     >
       <View style={styles.stair}>
         <Animated.View style={[styles.marker, { backgroundColor: tint.fill, borderColor: c.bg }, marker]} />
@@ -349,7 +350,7 @@ function Peak({
       accessibilityRole="radio"
       accessibilityState={{ checked: on, disabled: !!blocked }}
       accessibilityLabel={label}
-      accessibilityHint={blocked ? `Not available: ${blocked}` : undefined}
+      accessibilityHint={blocked ? tr('setup.choices.notAvailable', { reason: blocked }) : undefined}
     >
       <View style={[styles.peak, { backgroundColor: on ? tint.soft : 'transparent' }]}>
         <Animated.View style={lift}>
@@ -422,7 +423,7 @@ export function Stepper({
       onPress={() => set(to)}
       disabled={off}
       accessibilityRole="button"
-      accessibilityLabel={icon === 'add' ? 'More' : 'Fewer'}
+      accessibilityLabel={icon === 'add' ? tr('setup.choices.more') : tr('setup.choices.fewer')}
       style={off ? { opacity: 0.3 } : undefined}
     >
       <View style={[styles.stepButton, { backgroundColor: c.surfaceHigh }]}>

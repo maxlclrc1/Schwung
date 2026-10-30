@@ -4,6 +4,7 @@ import * as P from '../../core/reset/pilot';
 import { syncReminders } from '../../lib/reminders';
 import { usePreferences } from '../../store/preferences';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
+import { language, subscribeLanguage } from '../../i18n';
 
 /**
  * Keeps the phone's pending reminders matching the setting and the program: on start, whenever the app comes back
@@ -25,6 +26,8 @@ export function ReminderSync() {
         reminders,
         program?.startedAt ?? null,
         !!program?.after,
+        // The words are planned in the current language: a switch plans them again.
+        language(),
         today,
         todayComplete,
         reminders.showHabits ? habitNames : 0,
@@ -45,11 +48,13 @@ export function ReminderSync() {
     const app = AppState.addEventListener('change', (s) => s === 'active' && sync(true));
     const prefs = usePreferences.subscribe((s, prev) => s.reminders !== prev.reminders && soon());
     const prog = useResetPilot.subscribe((s, prev) => s.program !== prev.program && soon());
+    const lang = subscribeLanguage(soon);
     return () => {
       clearTimeout(timer);
       app.remove();
       prefs();
       prog();
+      lang();
     };
   }, []);
   return null;

@@ -21,6 +21,7 @@ import { ThemedImage } from '../ThemedImage';
 import { T } from '../ui';
 import { PeakPicker, Press } from './Choices';
 import { rise, settle, useTints } from './kit';
+import { t as tr } from '../../i18n';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const sys = ReduceMotion.System;
@@ -117,8 +118,8 @@ export function HabitTile({
         onPress={onPress}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: selected, disabled: off || (full && !selected) }}
-        accessibilityLabel={`${P.habitName(id)}. ${P.habitDescription(id)}${suggested && !off ? '. Suggested' : ''}`}
-        accessibilityHint={off ? `Not available: ${reason}` : undefined}
+        accessibilityLabel={`${P.habitName(id)}. ${P.habitDescription(id)}${suggested && !off ? tr('setup.tile.suggestedA11y') : ''}`}
+        accessibilityHint={off ? tr('setup.choices.notAvailable', { reason: reason ?? '' }) : undefined}
       >
         <View style={{ width, height }}>
           <View style={[styles.tile, { opacity: off ? 0.38 : full && !selected ? 0.6 : 1 }]}>
@@ -129,7 +130,7 @@ export function HabitTile({
             {suggested && !off ? (
               <View style={[styles.badge, { backgroundColor: c.bg }]}>
                 <T v="overline" color={tint.ink} style={styles.badgeText}>
-                  Suggested
+                  {tr('setup.tile.suggested')}
                 </T>
               </View>
             ) : null}
@@ -138,7 +139,7 @@ export function HabitTile({
                 {P.habitName(id)}
               </T>
               <T v="caption" color={c.textDim} numberOfLines={2} style={styles.small}>
-                {off ? `Not for now: ${reason}` : P.habitDescription(id)}
+                {off ? tr('setup.tile.notForNow', { reason: reason ?? '' }) : P.habitDescription(id)}
               </T>
             </View>
           </View>
@@ -155,18 +156,18 @@ export function HabitTile({
 /** How many are chosen, as six small stones that fill in. */
 export function Stones({ count, max }: { count: number; max: number }) {
   const { c } = useTheme();
-  const t = useTints();
-  const colors = [t.lavender, t.peach, t.sage, t.mist, t.indigo, t.lavender];
+  const tn = useTints();
+  const colors = [tn.lavender, tn.peach, tn.sage, tn.mist, tn.indigo, tn.lavender];
   // Six stones at most; past six, the number says it.
   if (count > 6)
     return (
-      <T v="caption" color={t.lavender.ink} style={{ fontWeight: '700' }}>
+      <T v="caption" color={tn.lavender.ink} style={{ fontWeight: '700' }}>
         {count} chosen
       </T>
     );
   const stones = Math.min(max, 6);
   return (
-    <View style={styles.stones} accessible accessibilityLabel={`${count} chosen`}>
+    <View style={styles.stones} accessible accessibilityLabel={tr('setup.tile.chosen', { count })}>
       {Array.from({ length: stones }, (_, i) => (
         <View
           key={i}
@@ -198,7 +199,7 @@ export function StartCard({
   onRemove: () => void;
 }) {
   const { c } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const reason = P.habitExclusion(id, answers);
   const options = P.intensityOptions(id, answers);
   const preview = chosen && !reason ? P.previewTarget(id, chosen, answers) : null;
@@ -213,7 +214,7 @@ export function StartCard({
           {preview ? (
             <Animated.View key={chosen} entering={FadeIn.duration(240).reduceMotion(sys)}>
               <T v="caption" color={c.textDim}>
-                {preview.target} · {preview.frequency}
+                {tr('setup.intensity.preview', preview)}
               </T>
             </Animated.View>
           ) : null}
@@ -222,11 +223,15 @@ export function StartCard({
       {reason ? (
         <View style={{ gap: space.sm }}>
           <T v="caption" color={c.danger}>
-            Not available: {reason}.
+            {tr('setup.intensity.notAvailable', { reason })}
           </T>
-          <Press onPress={onRemove} accessibilityRole="button" accessibilityLabel={`Remove ${P.habitName(id)}`}>
-            <T v="bodyStrong" color={t.lavender.ink}>
-              Remove it
+          <Press
+            onPress={onRemove}
+            accessibilityRole="button"
+            accessibilityLabel={tr('setup.tile.remove', { habit: P.habitName(id) })}
+          >
+            <T v="bodyStrong" color={tn.lavender.ink}>
+              {tr('setup.tile.removeIt')}
             </T>
           </Press>
         </View>
@@ -235,12 +240,12 @@ export function StartCard({
           <PeakPicker
             options={INTENSITIES.map((i) => ({
               id: i,
-              label: P.INTENSITY_NAME[i],
+              label: P.intensityName(i),
               blocked: options.find((o) => o.intensity === i)?.reason ?? null,
             }))}
             value={chosen}
             onPick={onChoose}
-            tints={[t.sage, t.mist, t.peach]}
+            tints={[tn.sage, tn.mist, tn.peach]}
           />
           {children}
         </>

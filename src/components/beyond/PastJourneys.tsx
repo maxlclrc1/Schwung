@@ -11,9 +11,10 @@ import { ThemedView } from '../../theme/transition';
 import { rise, useTints } from '../onboarding/kit';
 import { SheetHeader } from '../SheetHeader';
 import { Screen, T } from '../ui';
+import { formatDate } from '../../i18n';
+import { useT } from '../../i18n/react';
 
-const longDate = (key: string) =>
-  new Date(`${key}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+const longDate = (key: string) => formatDate(key, 'long');
 
 /**
  * Journey → Past journeys: every finished ascent, newest first, kept exactly as it was. Each opens its 66-Day Story
@@ -21,19 +22,18 @@ const longDate = (key: string) =>
  */
 export function PastJourneys() {
   const { c } = useTheme();
+  const t = useT();
   const journeys = useJourneys((s) => s.journeys);
   const held = useJourneys((s) => s.held);
   const list = [...journeys].reverse();
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Past journeys" />
+      <SheetHeader title={t('beyond.past.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <T color={c.textDim}>
-          Each Life Reset you finished, kept as it was: its days, habits and XP, and its 66-day story.
-        </T>
+        <T color={c.textDim}>{t('beyond.past.intro')}</T>
         {held ? (
           <T v="caption" color={c.danger}>
-            Some past journeys couldn’t be read on this phone. They’re kept safely and included in Export my data.
+            {t('beyond.past.held')}
           </T>
         ) : null}
         {list.map((j, i) => (
@@ -43,7 +43,7 @@ export function PastJourneys() {
         ))}
         {!list.length && !held ? (
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            Your finished ascents will be kept here.
+            {t('beyond.past.empty')}
           </T>
         ) : null}
       </ScrollView>
@@ -53,26 +53,23 @@ export function PastJourneys() {
 
 function JourneyRow({ journey }: { journey: ArchivedJourney }) {
   const { c } = useTheme();
-  const t = useTints();
+  const tint = useTints();
+  const t = useT();
   const p = journey.program;
   const stats = P.journeyStats(p, PROGRAM_DAYS);
   const ascent = P.ascentOf(p);
   const remove = () =>
-    Alert.alert(
-      `Remove Ascent ${ascent}?`,
-      'Its days, habits and story are deleted from this phone. XP it earned stays in your lifetime total. This can’t be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            haptic.warning();
-            useJourneys.getState().remove(journey.id);
-          },
+    Alert.alert(t('beyond.past.removeTitle', { ascent }), t('beyond.past.removeBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('beyond.past.remove'),
+        style: 'destructive',
+        onPress: () => {
+          haptic.warning();
+          useJourneys.getState().remove(journey.id);
         },
-      ],
-    );
+      },
+    ]);
   return (
     <ThemedView style={[styles.card, { backgroundColor: c.surface }]}>
       <Pressable
@@ -81,18 +78,28 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
           router.push(`/life-reset/story?journey=${encodeURIComponent(journey.id)}`);
         }}
         accessibilityRole="button"
-        accessibilityLabel={`Ascent ${ascent}, from ${longDate(p.startedAt)}. ${stats.done} of ${PROGRAM_DAYS} days climbed. Open its story`}
+        accessibilityLabel={t('beyond.past.rowA11y', {
+          ascent,
+          date: longDate(p.startedAt),
+          done: stats.done,
+          total: PROGRAM_DAYS,
+        })}
         style={({ pressed }) => [styles.row, { opacity: pressed ? 0.75 : 1 }]}
       >
-        <View style={[styles.badge, { backgroundColor: t.indigo.soft }]}>
-          <T v="bodyStrong" color={t.indigo.ink}>
+        <View style={[styles.badge, { backgroundColor: tint.indigo.soft }]}>
+          <T v="bodyStrong" color={tint.indigo.ink}>
             {ascent}
           </T>
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <T v="bodyStrong">Ascent {ascent}</T>
+          <T v="bodyStrong">{t('beyond.past.ascent', { ascent })}</T>
           <T v="caption" color={c.textDim}>
-            From {longDate(p.startedAt)} · {stats.done} of {PROGRAM_DAYS} days · {P.pilotXp(p)} XP
+            {t('beyond.past.row', {
+              date: longDate(p.startedAt),
+              done: stats.done,
+              total: PROGRAM_DAYS,
+              xp: P.pilotXp(p),
+            })}
           </T>
           <T v="caption" color={c.textFaint} numberOfLines={1}>
             {p.habits.map((id) => P.nameOf(p, id)).join(' · ')}
@@ -102,7 +109,7 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
       </Pressable>
       <Pressable onPress={remove} accessibilityRole="button" hitSlop={8} style={styles.remove}>
         <T v="caption" color={c.textFaint}>
-          Remove
+          {t('beyond.past.remove')}
         </T>
       </Pressable>
     </ThemedView>

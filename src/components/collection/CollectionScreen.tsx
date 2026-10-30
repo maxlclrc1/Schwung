@@ -12,6 +12,8 @@ import { rise } from '../onboarding/kit';
 import { SheetHeader } from '../SheetHeader';
 import { ProgressBar, Screen, T } from '../ui';
 import { CollectibleArt } from './Collectible';
+import { useT } from '../../i18n/react';
+import type { TKey } from '../../i18n';
 
 const sys = ReduceMotion.System;
 
@@ -22,6 +24,7 @@ const sys = ReduceMotion.System;
  */
 export function CollectionScreen() {
   const { c } = useTheme();
+  const t = useT();
   const { width } = useWindowDimensions();
   const program = useResetPilot((s) => s.program);
   // Lifetime XP: earlier ascents' XP is carried in, never counted twice.
@@ -36,11 +39,11 @@ export function CollectionScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Your collection" />
+      <SheetHeader title={t('collection.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <Animated.View entering={rise(0)} style={styles.hero}>
           <T v="overline" color={c.peachInk}>
-            {xp} XP
+            {t('collection.xp', { xp })}
           </T>
           <T style={[styles.title, { color: c.text }]} accessibilityRole="header">
             {g.title}
@@ -48,8 +51,8 @@ export function CollectionScreen() {
           <ProgressBar value={g.progress} height={6} color={c.peach} />
           <T v="caption" color={c.textDim}>
             {g.next
-              ? `${g.next.xp - xp} XP to ${g.next.name} · ${g.next.title}`
-              : 'Every object is yours. XP keeps counting every habit you do.'}
+              ? t('collection.toNext', { xp: g.next.xp - xp, name: g.next.name, title: g.next.title })
+              : t('collection.complete')}
           </T>
         </Animated.View>
 
@@ -60,10 +63,12 @@ export function CollectionScreen() {
             <View style={{ flex: 1, gap: 4 }}>
               <T v="bodyStrong">{shown.name}</T>
               <T v="caption" color={shownOwned ? c.peachInk : c.textFaint} style={{ fontWeight: '700' }}>
-                {shownOwned ? `${shown.title} · ${shown.xp} XP` : `Unlocks at ${shown.xp} XP`}
+                {shownOwned
+                  ? t('collection.owned', { title: shown.title, xp: shown.xp })
+                  : t('collection.unlocksAt', { xp: shown.xp })}
               </T>
               <T v="caption" color={shownOwned ? c.text : c.textDim}>
-                {shownOwned ? shown.reflection : 'Keep doing your habits: every one done brings it closer.'}
+                {shownOwned ? shown.reflection : t('collection.keepGoing')}
               </T>
             </View>
           </ThemedView>
@@ -78,7 +83,11 @@ export function CollectionScreen() {
                   onPress={() => setPicked(o.id)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: picked === o.id }}
-                  accessibilityLabel={`${o.name}. ${mine ? `In your collection. ${o.reflection}` : `Unlocks at ${o.xp} XP`}`}
+                  accessibilityLabel={
+                    mine
+                      ? t('collection.tileOwnedA11y', { name: o.name, reflection: o.reflection })
+                      : t('collection.tileLockedA11y', { name: o.name, xp: o.xp })
+                  }
                 >
                   <ThemedView
                     style={[
@@ -92,13 +101,13 @@ export function CollectionScreen() {
                   >
                     <CollectibleArt id={o.id} size={tile * 0.58} locked={!mine} />
                     <T v="caption" numberOfLines={2} style={styles.tileName} color={mine ? c.text : c.textDim}>
-                      {o.name.replace(/^The /, '')}
+                      {t(`progress.collection.${o.id}.short` as TKey)}
                     </T>
                     {mine ? (
                       <Ionicons name="checkmark-circle" size={14} color={c.sage} />
                     ) : (
                       <T v="caption" color={c.textFaint} style={styles.tileXp}>
-                        {o.xp} XP
+                        {t('collection.xp', { xp: o.xp })}
                       </T>
                     )}
                   </ThemedView>

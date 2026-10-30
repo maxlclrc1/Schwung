@@ -11,6 +11,7 @@ import { resetPilotKey, restoreFromRecovery, startOverFromRecovery } from '../st
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { Button, T } from './ui';
+import { useT } from '../i18n/react';
 
 /**
  * Shown over everything when a saved Life Reset couldn't be fully understood (store/recovery.ts). Calm and
@@ -22,6 +23,7 @@ export function RecoveryScreen() {
   const insets = useSafeAreaInsets();
   const rec = useRecovery();
   const [note, setNote] = useState<string | null>(null);
+  const t = useT();
   const [busy, setBusy] = useState(false);
   if (!rec.pending) return null;
 
@@ -45,11 +47,11 @@ export function RecoveryScreen() {
       await shareTemp(file, {
         mimeType: 'text/plain',
         UTI: 'public.plain-text',
-        dialogTitle: 'Save your recovery data',
+        dialogTitle: t('settings.recovery.dialog'),
       });
-      setNote('Your recovery data was shared. A copy also stays on this phone.');
+      setNote(t('settings.recovery.shared'));
     } catch {
-      setNote('It couldn’t be exported just now. Nothing was lost: a copy stays safely on this phone.');
+      setNote(t('settings.recovery.exportFailed'));
     } finally {
       setBusy(false);
     }
@@ -57,42 +59,28 @@ export function RecoveryScreen() {
 
   const restore = async () => {
     if (!(await ensureKept())) {
-      setNote('A safe copy couldn’t be made yet, so nothing has been changed. Please try again.');
+      setNote(t('settings.recovery.notSafe'));
       return;
     }
     if (restoreFromRecovery()) haptic.confirm();
   };
 
   const startOver = () =>
-    Alert.alert(
-      'Start a new Life Reset?',
-      'The saved one stays on this phone as recovery data (you can export it any time), but the app will start fresh.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Start over',
-          style: 'destructive',
-          onPress: () =>
-            void ensureKept().then((kept) => {
-              if (!kept || !startOverFromRecovery())
-                setNote('A safe copy couldn’t be made yet, so nothing has been changed. Please try again.');
-            }),
-        },
-      ],
-    );
+    Alert.alert(t('settings.recovery.startOverTitle'), t('settings.recovery.startOverBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.recovery.startOver'),
+        style: 'destructive',
+        onPress: () =>
+          void ensureKept().then((kept) => {
+            if (!kept || !startOverFromRecovery()) setNote(t('settings.recovery.notSafe'));
+          }),
+      },
+    ]);
 
-  const title =
-    rec.reason === 'newer'
-      ? 'This Life Reset needs a newer Schwung'
-      : rec.reason === 'partial'
-        ? 'Some of your Life Reset couldn’t be read'
-        : 'Your saved Life Reset couldn’t be opened';
-  const body =
-    rec.reason === 'newer'
-      ? 'It was saved by a newer version of the app. Update Schwung from the App Store to open it. It’s kept safely on this phone until then.'
-      : rec.reason === 'partial'
-        ? 'Most of it is fine. You can carry on with everything that was recovered; the original is kept safely on this phone.'
-        : 'Something in the saved file was damaged. It’s kept exactly as it was, safely on this phone, so nothing has been deleted.';
+  const which = rec.reason === 'newer' ? 'Newer' : rec.reason === 'partial' ? 'Partial' : 'Unreadable';
+  const title = t(`settings.recovery.title${which}`);
+  const body = t(`settings.recovery.body${which}`);
 
   return (
     <Animated.View
@@ -117,18 +105,21 @@ export function RecoveryScreen() {
         {p ? (
           <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
             <T v="overline" color={c.sageInk}>
-              Recovered
+              {t('settings.recovery.recovered')}
             </T>
             <T>
-              Your Life Reset from Day 1{day ? ` (today is Day ${day})` : ''}, {p.habits.length} habit
-              {p.habits.length === 1 ? '' : 's'} and {doneDays} day{doneDays === 1 ? '' : 's'} of completed habits.
+              {t('settings.recovery.summary', {
+                today: day ? t('settings.recovery.todayIs', { day }) : '',
+                habits: t('common.habits', { count: p.habits.length }),
+                days: t('common.days', { count: doneDays }),
+              })}
             </T>
           </ThemedView>
         ) : null}
         {rec.lost.length && rec.reason !== 'newer' ? (
           <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
             <T v="overline" color={c.peachInk}>
-              Couldn’t be read
+              {t('settings.recovery.lost')}
             </T>
             {rec.lost.map((l) => (
               <T key={l} color={c.textDim}>
@@ -136,20 +127,20 @@ export function RecoveryScreen() {
               </T>
             ))}
             <T v="caption" color={c.textFaint}>
-              These stay in the recovery data, so nothing is thrown away.
+              {t('settings.recovery.lostNote')}
             </T>
           </ThemedView>
         ) : null}
 
         <View style={styles.actions}>
-          {p ? <Button label="Restore available progress" onPress={() => void restore()} disabled={busy} /> : null}
+          {p ? <Button label={t('settings.recovery.restore')} onPress={() => void restore()} disabled={busy} /> : null}
           <Button
-            label="Export recovery data"
+            label={t('settings.recovery.export')}
             kind="secondary"
             onPress={() => void exportRaw()}
             disabled={busy || !rec.raw}
           />
-          <Button label="Start over" kind="ghost" onPress={startOver} disabled={busy} />
+          <Button label={t('settings.recovery.startOver')} kind="ghost" onPress={startOver} disabled={busy} />
         </View>
         {note ? (
           <T v="caption" color={c.textDim} style={styles.center} accessibilityLiveRegion="polite">
@@ -157,7 +148,7 @@ export function RecoveryScreen() {
           </T>
         ) : (
           <T v="caption" color={c.textFaint} style={styles.center}>
-            {rec.keptAt ? 'A safe copy is kept on this phone.' : 'Keeping a safe copy…'}
+            {rec.keptAt ? t('settings.recovery.kept') : t('settings.recovery.keeping')}
           </T>
         )}
       </ScrollView>

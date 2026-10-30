@@ -32,6 +32,8 @@ import { rise } from '../onboarding/kit';
 import { ART_IMAGE } from '../ThemedImage';
 import { Button, T } from '../ui';
 import { WORLD_ART } from '../World';
+import { useT } from '../../i18n/react';
+import { formatDate, formatNumber } from '../../i18n';
 
 /*
  * The 66-Day Story (app/life-reset/story.tsx): a keepsake made at the summit, a portrait poster of Schwung's own
@@ -45,10 +47,7 @@ const sys = ReduceMotion.System;
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const short = (key: string) => {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-};
+const short = (key: string) => formatDate(key, 'short');
 
 /**
  * `archived`: a past journey's story (Journey → Past journeys), read-only like any story. `onClose` replaces the
@@ -56,6 +55,7 @@ const short = (key: string) => {
  */
 export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; onClose?: () => void } = {}) {
   const { c, isDark } = useTheme();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const reduce = useReducedMotion();
@@ -111,7 +111,7 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
       const p = await MediaLibrary.requestPermissionsAsync(true);
       if (!p.granted) {
         haptic.warning();
-        setStatus('Photos access is off for Schwung. You can still share it, or allow it in Settings.');
+        setStatus(t('story.photosOff'));
         return;
       }
       const image = await capture();
@@ -122,9 +122,9 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
         removeTemp(image);
       }
       haptic.confirm();
-      setStatus('Saved to your Photos.');
+      setStatus(t('story.saved'));
     } catch {
-      setStatus('It couldn’t be saved just now. Please try again.');
+      setStatus(t('story.saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -136,33 +136,38 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
       await shareTemp(await capture(), {
         mimeType: 'image/png',
         UTI: 'public.png',
-        dialogTitle: 'My 66-day story',
+        dialogTitle: t('story.dialog'),
       });
     } catch {
-      setStatus('Sharing isn’t available just now.');
+      setStatus(t('story.shareFailed'));
     } finally {
       setBusy(false);
     }
   };
 
   const stats = [
-    { value: `${facts.daysCompleted}`, unit: `of ${PROGRAM_DAYS}`, label: 'days completed', color: c.sageInk },
     {
-      value: `${facts.totalDone}`,
+      value: formatNumber(facts.daysCompleted),
+      unit: t('story.of', { total: PROGRAM_DAYS }),
+      label: t('story.daysCompleted'),
+      color: c.sageInk,
+    },
+    {
+      value: formatNumber(facts.totalDone),
       unit: '',
-      label: facts.totalDone === 1 ? 'habit done' : 'habits done',
+      label: t('story.habitsDone', { count: facts.totalDone }),
       color: c.mistInk,
     },
     {
-      value: `${facts.longestStreak}`,
+      value: formatNumber(facts.longestStreak),
       unit: '',
-      label: facts.longestStreak === 1 ? 'day, longest streak' : 'days, longest streak',
+      label: t('story.streak', { count: facts.longestStreak }),
       color: c.peachInk,
     },
     {
-      value: `${facts.habits}`,
+      value: formatNumber(facts.habits),
       unit: '',
-      label: facts.habits === 1 ? 'habit practised' : 'habits practised',
+      label: t('story.practised', { count: facts.habits }),
       color: c.indigoInk,
     },
   ];
@@ -174,14 +179,14 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
           onPress={() => (onClose ? onClose() : router.back())}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel="Close"
+          accessibilityLabel={t('story.close')}
         >
           <View style={[styles.close, { backgroundColor: c.surface }]}>
             <Ionicons name="close" size={20} color={c.text} />
           </View>
         </Pressable>
         <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
-          Your 66-day story
+          {t('story.title')}
         </T>
         <View style={{ width: 36 }} />
       </View>
@@ -196,7 +201,15 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
           style={[styles.poster, { width: W, height: H, backgroundColor: c.bg }]}
           accessible
           accessibilityRole="image"
-          accessibilityLabel={`Your 66-day story, ${short(facts.from)} to ${short(facts.to)}. ${facts.daysCompleted} of ${PROGRAM_DAYS} days completed, ${facts.totalDone} habits done, longest streak ${facts.longestStreak} days, ${facts.habits} habits practised.${facts.highlight ? ` ${facts.highlight}.` : ''}`}
+          accessibilityLabel={`${t('story.a11y', {
+            from: short(facts.from),
+            to: short(facts.to),
+            days: facts.daysCompleted,
+            total: PROGRAM_DAYS,
+            done: facts.totalDone,
+            streak: facts.longestStreak,
+            habits: facts.habits,
+          })}${facts.highlight ? ` ${facts.highlight}.` : ''}`}
         >
           <Animated.View style={[StyleSheet.absoluteFill, art]}>
             <Image
@@ -257,7 +270,7 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
           />
 
           <View style={styles.head}>
-            <Text style={[styles.brand, { color: c.text }]}>SCHWUNG · LIFE RESET</Text>
+            <Text style={[styles.brand, { color: c.text }]}>{t('story.brand')}</Text>
             <Text style={[styles.dates, { color: c.textDim }]}>
               {short(facts.from)} – {short(facts.to)}
             </Text>
@@ -265,10 +278,10 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
 
           <View style={styles.foot}>
             <Animated.View entering={rise(reduce ? 0 : 900)}>
-              <Text style={[styles.headline, { color: c.text }]}>66 days.{'\n'}One journey.</Text>
+              <Text style={[styles.headline, { color: c.text }]}>{t('story.headline')}</Text>
             </Animated.View>
             <Animated.View entering={rise(reduce ? 0 : 1150)}>
-              <Text style={[styles.message, { color: c.textDim }]}>Look how far you’ve come.</Text>
+              <Text style={[styles.message, { color: c.textDim }]}>{t('story.message')}</Text>
             </Animated.View>
             <View style={styles.stats}>
               {stats.map((s, i) => (
@@ -300,14 +313,14 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
             <Animated.View entering={rise(0)} style={{ gap: space.sm }}>
               <View style={styles.buttons}>
                 <Button
-                  label="Save image"
+                  label={t('story.save')}
                   icon={<Ionicons name="download-outline" size={18} color={c.onAccent} />}
                   onPress={() => void save()}
                   disabled={busy}
                   style={{ flex: 1 }}
                 />
                 <Button
-                  label="Share"
+                  label={t('story.share')}
                   kind="secondary"
                   icon={<Ionicons name="share-outline" size={18} color={c.text} />}
                   onPress={() => void share()}
@@ -321,8 +334,7 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
                 </T>
               ) : (
                 <T v="caption" color={c.textFaint} style={styles.center}>
-                  Saved and shared exactly as you see it. No habit names, and nothing leaves your phone unless you share
-                  it.
+                  {t('story.privacy')}
                 </T>
               )}
             </Animated.View>

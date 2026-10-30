@@ -11,9 +11,11 @@ import { worldFrame } from '../core/world';
 import { APP_NAME } from '../lib/constants';
 import { useResetPilot } from '../store/resetPilot';
 import { space, useTheme } from '../theme';
+import { useT } from '../i18n/react';
 
 export default function Welcome() {
   const { c } = useTheme();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   // The world scrolls with the page here (short phones may scroll), so the trailhead and painting never drift.
@@ -49,20 +51,20 @@ export default function Welcome() {
         <View style={styles.text}>
           <Animated.View entering={FadeInDown.delay(150).duration(500)} style={{ gap: space.sm }}>
             <T v="display" accessibilityRole="header">
-              Get your momentum back.
+              {t('welcome.headline')}
             </T>
-            <T color={c.textDim}>A few small habits a day, built around your life. They grow as you do.</T>
+            <T color={c.textDim}>{t('welcome.body')}</T>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(260).duration(500)}>
-            <T v="bodyStrong">Free. No account. No paywall.</T>
+            <T v="bodyStrong">{t('welcome.free')}</T>
           </Animated.View>
         </View>
         <Animated.View entering={FadeInDown.delay(380).duration(500)} style={{ gap: space.sm }}>
-          <Button label="Start my reset" onPress={() => router.push('/life-reset/setup')} />
+          <Button label={t('welcome.start')} onPress={() => router.push('/life-reset/setup')} />
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            About a minute. Everything stays on your phone.
+            {t('welcome.time')}
           </T>
-          <Button label="Restore a backup" kind="ghost" onPress={() => router.push('/restore')} />
+          <Button label={t('welcome.restore')} kind="ghost" onPress={() => router.push('/restore')} />
         </Animated.View>
       </ScrollView>
     </Screen>

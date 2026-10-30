@@ -1,3 +1,4 @@
+import { t, type TKey } from '../i18n';
 import { dayNumber, toDateKey } from './dates';
 
 /*
@@ -21,19 +22,16 @@ export type ReminderSettings = {
 
 export const DEFAULT_REMINDERS: ReminderSettings = { enabled: false, hour: 9, minute: 0, showHabits: false };
 
-const LINES: { title: string; body: string }[] = [
-  { title: 'A little momentum today?', body: 'One small step is plenty.' },
-  { title: 'Your next step is waiting.', body: 'Whenever you’re ready.' },
-  { title: 'The trail’s right where you left it.', body: 'A few minutes is all it takes.' },
-  { title: 'A good moment for a small step.', body: 'Your habits are ready when you are.' },
-  { title: 'Fresh air on the trail today.', body: 'Whatever today holds, a small step counts.' },
-  { title: 'Still climbing, one day at a time.', body: 'Today’s step can be a small one.' },
-  { title: 'The view gets better from here.', body: 'Open Schwung for today’s habits.' },
-];
+/** The rotating lines, in the current language (reminders are planned again when the language changes). */
+const LINE_COUNT = 7;
+const line = (i: number) => ({
+  title: t(`reminders.line.${i}.title` as TKey),
+  body: t(`reminders.line.${i}.body` as TKey),
+});
 
-/** The line that names a habit (only when the person asked for names). */
+/** The line that names a habit (only when the person asked for names). Their own habit names stay as written. */
 export function habitLine(name: string): { title: string; body: string } {
-  return { title: `Time for a little ${name}?`, body: 'One small step is plenty.' };
+  return { title: t('reminders.habitTitle', { habit: name }), body: t('reminders.habitBody') };
 }
 
 /** Today's words: rotating by date (so a day's line is stable), sometimes naming a habit if allowed. */
@@ -44,10 +42,10 @@ export function reminderText(
 ): { title: string; body: string } {
   const seed = Number(dateKey.replace(/-/g, '')) || 0;
   if (habitNames?.length && seed % 3 === 0) return habitLine(habitNames[Math.floor(seed / 3) % habitNames.length]);
-  const line = LINES[seed % LINES.length];
+  const words = line(seed % LINE_COUNT);
   return programDay >= 1 && programDay <= 66 && seed % 5 === 1
-    ? { title: `Day ${programDay} of your Life Reset.`, body: line.body }
-    : line;
+    ? { title: t('reminders.dayTitle', { day: programDay }), body: words.body }
+    : words;
 }
 
 export type PlannedReminder = { id: string; date: Date; title: string; body: string };

@@ -7,6 +7,7 @@ import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { useTints } from '../onboarding/kit';
 import { T } from '../ui';
+import { useT } from '../../i18n/react';
 
 const sys = ReduceMotion.System;
 
@@ -16,25 +17,26 @@ const sys = ReduceMotion.System;
  */
 export function ChooseNextCard() {
   const { c } = useTheme();
-  const t = useTints();
+  const tint = useTints();
+  const t = useT();
   return (
     <Animated.View entering={FadeIn.duration(300).reduceMotion(sys)} exiting={FadeOut.duration(180).reduceMotion(sys)}>
       <Press
         onPress={() => router.push('/life-reset/next')}
         accessibilityRole="button"
-        accessibilityLabel="You reached the summit. Your habits are resting. Choose what's next."
+        accessibilityLabel={t('beyond.card.a11y')}
       >
-        <ThemedView style={[styles.card, { backgroundColor: c.surface, borderLeftColor: t.peach.fill }]}>
-          <View style={[styles.icon, { backgroundColor: t.peach.soft }]}>
-            <Ionicons name="flag-outline" size={20} color={t.peach.ink} />
+        <ThemedView style={[styles.card, { backgroundColor: c.surface, borderLeftColor: tint.peach.fill }]}>
+          <View style={[styles.icon, { backgroundColor: tint.peach.soft }]}>
+            <Ionicons name="flag-outline" size={20} color={tint.peach.ink} />
           </View>
           <View style={{ flex: 1, gap: 2 }}>
-            <T v="overline" color={t.peach.ink}>
-              Beyond the summit
+            <T v="overline" color={tint.peach.ink}>
+              {t('beyond.card.kicker')}
             </T>
-            <T v="bodyStrong">Choose what’s next</T>
+            <T v="bodyStrong">{t('beyond.card.title')}</T>
             <T v="caption" color={c.textDim}>
-              Your habits and reminders rest until you do.
+              {t('beyond.card.body')}
             </T>
           </View>
           <Ionicons name="chevron-forward" size={18} color={c.textFaint} />

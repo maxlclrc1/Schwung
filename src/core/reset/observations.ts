@@ -1,3 +1,4 @@
+import { formatPercent, t, type TKey } from '../../i18n';
 import type { DayCell, Tally, WeekPoint } from '../charts';
 
 /*
@@ -8,8 +9,9 @@ import type { DayCell, Tally, WeekPoint } from '../charts';
 
 export type Observation = { id: string; text: string; tone: 'up' | 'steady' | 'down' | 'note' };
 
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 const pct = (share: number) => Math.round(share * 100);
+const pctText = (share: number) => formatPercent(pct(share) / 100);
 
 /** The last two finished weeks compared (needs both). */
 export function weekChange(points: WeekPoint[]): Observation | null {
@@ -17,10 +19,15 @@ export function weekChange(points: WeekPoint[]): Observation | null {
   if (closed.length < 2) return null;
   const [a, b] = closed.slice(-2);
   const d = pct(b.share!) - pct(a.share!);
-  const text =
-    Math.abs(d) < 5
-      ? `Week ${b.week} held steady at ${pct(b.share!)}%, close to Week ${a.week}’s ${pct(a.share!)}%.`
-      : `Week ${b.week} came in at ${pct(b.share!)}%, ${d > 0 ? 'up' : 'down'} from ${pct(a.share!)}% in Week ${a.week}.`;
+  const text = t(
+    Math.abs(d) < 5 ? 'progress.observation.steady' : d > 0 ? 'progress.observation.up' : 'progress.observation.down',
+    {
+      week: b.week,
+      pct: pctText(b.share!),
+      prev: a.week,
+      prevPct: pctText(a.share!),
+    },
+  );
   return { id: 'week', text, tone: Math.abs(d) < 5 ? 'steady' : d > 0 ? 'up' : 'down' };
 }
 
@@ -40,7 +47,11 @@ export function bestWeekday(cells: DayCell[]): Observation | null {
   if (best.full === 0) return null;
   return {
     id: 'weekday',
-    text: `${WEEKDAYS[best.w]}s have been your most complete days: ${best.full} of ${best.n} fully done.`,
+    text: t('progress.observation.weekday', {
+      days: t(`progress.weekdaysPlural.${best.w}` as TKey),
+      full: best.full,
+      count: best.n,
+    }),
     tone: 'note',
   };
 }
@@ -54,7 +65,12 @@ export function strongestHabit(habits: { name: string; tally: Tally }[]): Observ
   if (share < 0.5) return null;
   return {
     id: 'habit',
-    text: `${top.name} is your most consistent habit: ${top.tally.done} of ${top.tally.eligible} times (${pct(share)}%).`,
+    text: t('progress.observation.habit', {
+      habit: top.name,
+      done: top.tally.done,
+      eligible: top.tally.eligible,
+      pct: pctText(share),
+    }),
     tone: 'up',
   };
 }
@@ -65,7 +81,7 @@ export function weeklyGoals(bars: { name: string; met: number; judged: number }[
     .filter((b) => b.judged >= 2)
     .map((b) => ({
       id: `goal-${b.name}`,
-      text: `${b.name}: weekly goal met in ${b.met} of ${b.judged} finished weeks.`,
+      text: t('progress.observation.goals', { habit: b.name, met: b.met, judged: b.judged }),
       tone: b.met === b.judged ? 'up' : 'note',
     }));
 }
@@ -73,5 +89,5 @@ export function weeklyGoals(bars: { name: string; met: number; judged: number }[
 /** On the longest streak so far (worth saying from three days). */
 export function streakNote(streak: number, best: number): Observation | null {
   if (streak < 3 || streak < best) return null;
-  return { id: 'streak', text: `You’re on your longest streak so far: ${streak} days in a row.`, tone: 'up' };
+  return { id: 'streak', text: t('progress.observation.streak', { count: streak }), tone: 'up' };
 }

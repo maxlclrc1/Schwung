@@ -49,6 +49,7 @@ describe('one app: the Life Reset', () => {
       '(tabs)/today.tsx',
       '_layout.tsx',
       'index.tsx',
+      'language.tsx',
       'legal.tsx',
       'life-reset/[id].tsx',
       'life-reset/add.tsx',
@@ -77,11 +78,14 @@ describe('one app: the Life Reset', () => {
   it('has three tabs, Habits, Journey and Insights, as one pager over the world', () => {
     const layout = read('(tabs)/_layout.tsx');
     expect(layout).toContain('<WorldLayer />');
-    const order = [...layout.matchAll(/name="(\w+)" options=\{(\w+)\}/g)].map((m) => [m[1], m[2]]);
+    const order = [...layout.matchAll(/name="(\w+)" options=\{\{ title: t\('nav\.tabs\.(\w+)'\)/g)].map((m) => [
+      m[1],
+      m[2],
+    ]);
     expect(order).toEqual([
-      ['today', 'HABITS'],
-      ['progress', 'JOURNEY'],
-      ['insights', 'INSIGHTS'],
+      ['today', 'habits'],
+      ['progress', 'journey'],
+      ['insights', 'insights'],
     ]);
     // The pager: a UI-thread pan (worklets), off under a modal or with the keyboard up, and blocked by habit cards.
     const pager = fs.readFileSync(`${SRC}/components/PagerTabs.tsx`, 'utf8');
@@ -131,7 +135,7 @@ describe('one app: the Life Reset', () => {
     expect(settings).not.toMatch(/Restart program|Daily reminder|Developer/);
     expect(settings).toContain('<PilotSettings Section={Section} Row={Row} />');
     expect(fs.readFileSync(`${SRC}/components/pilot/PilotSettings.tsx`, 'utf8')).toContain(
-      'label="End the Life Reset"',
+      "label={t('settings.program.end')}",
     );
   });
 });

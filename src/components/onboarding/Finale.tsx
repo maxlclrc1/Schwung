@@ -26,6 +26,7 @@ import { Press } from './Choices';
 import { HabitArt } from './Habits';
 import { cover } from './cover';
 import { rise, useTints, type Tint } from './kit';
+import { t as tr } from '../../i18n';
 
 /*
  * "Your journey is taking shape": the short scene between confirming the Life Reset and Day 1 (not the Day 1
@@ -55,7 +56,7 @@ export function Finale({
   onEnter: (kind: 'begin' | 'skip') => void;
 }) {
   const { c, isDark } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const insets = useSafeAreaInsets();
   const { width: W } = useWindowDimensions();
   const reduce = useReducedMotion();
@@ -77,7 +78,7 @@ export function Finale({
     return { id, ...pts[day], at: along[day] / length };
   });
   const summit = pts[pts.length - 1];
-  const palette = [t.lavender, t.peach, t.sage, t.mist, t.indigo, t.peach];
+  const palette = [tn.lavender, tn.peach, tn.sage, tn.mist, tn.indigo, tn.peach];
 
   const mist = useSharedValue(1);
   const drawn = useSharedValue(reduce ? 1 : 0);
@@ -150,26 +151,26 @@ export function Finale({
           <View
             style={[
               styles.glowRing,
-              { width: 140, height: 140, borderRadius: 70, backgroundColor: t.peach.fill, opacity: 0.1 },
+              { width: 140, height: 140, borderRadius: 70, backgroundColor: tn.peach.fill, opacity: 0.1 },
             ]}
           />
           <View
             style={[
               styles.glowRing,
-              { width: 84, height: 84, borderRadius: 42, backgroundColor: t.peach.fill, opacity: 0.16 },
+              { width: 84, height: 84, borderRadius: 42, backgroundColor: tn.peach.fill, opacity: 0.16 },
             ]}
           />
           <View
             style={[
               styles.glowRing,
-              { width: 36, height: 36, borderRadius: 18, backgroundColor: t.peach.fill, opacity: 0.3 },
+              { width: 36, height: 36, borderRadius: 18, backgroundColor: tn.peach.fill, opacity: 0.3 },
             ]}
           />
         </Animated.View>
         <Svg width={W} height={zoneTop + zoneHeight + 20} style={StyleSheet.absoluteFill}>
           <AnimatedPath
             d={d}
-            stroke={t.peach.fill}
+            stroke={tn.peach.fill}
             strokeOpacity={0.35}
             strokeWidth={6}
             strokeLinecap="round"
@@ -180,7 +181,7 @@ export function Finale({
           />
           <AnimatedPathLine d={d} length={length} drawn={drawn} />
         </Svg>
-        <Light x={pts[0].x} y={pts[0].y} at={0} drawn={drawn} tint={t.lavender} start />
+        <Light x={pts[0].x} y={pts[0].y} at={0} drawn={drawn} tint={tn.lavender} start />
         {lights.map((l, i) => (
           <Light key={l.id} x={l.x} y={l.y} at={l.at} drawn={drawn} tint={palette[i % palette.length]} />
         ))}
@@ -198,24 +199,24 @@ export function Finale({
           onPress={() => setSkipped(true)}
           style={[styles.skip, { top: insets.top + space.sm }]}
           accessibilityRole="button"
-          accessibilityLabel="Skip to Day 1"
+          accessibilityLabel={tr('setup.finale.skipA11y')}
         >
           <View style={[styles.skipPill, { backgroundColor: c.surface }]}>
             <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
-              {skipped && !saved ? 'Saving…' : 'Skip'}
+              {skipped && !saved ? tr('setup.finale.saving') : tr('setup.finale.skip')}
             </T>
           </View>
         </Press>
 
         <View style={[styles.words, { paddingBottom: insets.bottom + space.lg }]}>
           <Animated.View entering={rise(reduce ? 0 : 250)}>
-            <T v="overline" color={t.lavender.ink} style={{ letterSpacing: 2.4 }}>
-              Your journey is taking shape
+            <T v="overline" color={tn.lavender.ink} style={{ letterSpacing: 2.4 }}>
+              {tr('setup.finale.kicker')}
             </T>
           </Animated.View>
           <Animated.View entering={rise(reduce ? 200 : 2050)}>
             <T v="display" style={styles.title} accessibilityRole="header">
-              Your 66-day reset starts here.
+              {tr('setup.finale.title')}
             </T>
           </Animated.View>
           <Animated.View entering={rise(reduce ? 300 : 2350)} style={styles.habits}>
@@ -229,13 +230,13 @@ export function Finale({
             {played && saved ? (
               <Animated.View entering={rise(0)}>
                 <Shine disabled={reduce}>
-                  <Button label="Begin Day 1" onPress={() => onEnter('begin')} />
+                  <Button label={tr('setup.finale.begin')} onPress={() => onEnter('begin')} />
                 </Shine>
               </Animated.View>
             ) : played ? (
               // Only if the save is slow: say so plainly, and offer the way in the moment it's done.
               <T v="caption" color={c.textDim} style={styles.center}>
-                Saving your reset on this phone…
+                {tr('setup.finale.slowSave')}
               </T>
             ) : null}
           </View>

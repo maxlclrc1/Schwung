@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+import { t } from '../../i18n';
 import { buildExport, EXPORT_CONTAINS, EXPORT_SCHEMA_VERSION } from '../dataExport';
 import { DEFAULT_REMINDERS } from '../reminders';
 import * as P from '../reset/pilot';
@@ -16,7 +17,7 @@ const start = () =>
 
 describe('Export my data', () => {
   it('says up front that it may hold health, sleep and activity information', () => {
-    const text = EXPORT_CONTAINS.join(' ');
+    const text = EXPORT_CONTAINS.map((k) => t(`settings.privacy.contains.${k}`)).join(' ');
     expect(text).toMatch(/health/i);
     expect(text).toMatch(/sleep/i);
     expect(text).toMatch(/activity/i);

@@ -34,6 +34,8 @@ import { Press } from '../onboarding/Choices';
 import { Button, T } from '../ui';
 import { WorldBackdrop } from '../World';
 import { ceremonyCover, setCeremonyState, useCeremonyState } from './state';
+import { formatList, formatNumber, t as tr } from '../../i18n';
+import { useLanguage, useT } from '../../i18n/react';
 
 /*
  * The two ceremonies, two chapters of one story on Schwung's own mountain painting: Day 1, the first step at the
@@ -389,17 +391,18 @@ function Light({
 
 function SkipButton({ onPress }: { onPress: () => void }) {
   const { c } = useTheme();
+  const t = useT();
   const insets = useSafeAreaInsets();
   return (
     <Press
       onPress={onPress}
       style={[styles.skip, { top: insets.top + space.sm }]}
       accessibilityRole="button"
-      accessibilityLabel="Skip"
+      accessibilityLabel={t('ceremony.skip')}
     >
       <View style={[styles.skipPill, { backgroundColor: c.surface }]}>
         <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
-          Skip
+          {t('ceremony.skip')}
         </T>
       </View>
     </Press>
@@ -429,6 +432,7 @@ function Words({ children, scroll }: { children: ReactNode; scroll?: boolean }) 
 
 function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
   const { c } = useTheme();
+  const t = useT();
   // A New Ascent's Day 1 says which ascent it is.
   const ascent = useResetPilot((s) => (s.program ? P.ascentOf(s.program) : 1));
   const reduce = useReducedMotion();
@@ -473,21 +477,23 @@ function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
       <Words>
         <Animated.View entering={rise(reduce ? 0 : 1500)}>
           <T v="overline" color={c.peachInk} style={{ letterSpacing: 2.4 }}>
-            {ascent > 1 ? `Ascent ${ascent} · ` : ''}Day 1 of {PROGRAM_DAYS}
+            {ascent > 1
+              ? t('ceremony.day1.kickerAscent', { ascent, total: PROGRAM_DAYS })
+              : t('ceremony.day1.kicker', { total: PROGRAM_DAYS })}
           </T>
         </Animated.View>
         <Animated.View entering={rise(reduce ? 100 : 1700)}>
           <T style={[styles.headline, { color: c.text }]} accessibilityRole="header">
-            Every ascent begins with a single step.
+            {t('ceremony.day1.headline')}
           </T>
         </Animated.View>
         <Animated.View entering={rise(reduce ? 200 : 2500)}>
-          <T style={[styles.sub, { color: c.textDim }]}>Today, you take yours.</T>
+          <T style={[styles.sub, { color: c.textDim }]}>{t('ceremony.day1.sub')}</T>
         </Animated.View>
         <View style={styles.cta}>
           {ready ? (
             <Animated.View entering={rise(0)}>
-              <Button label="Take my first step" onPress={() => done(false)} />
+              <Button label={t('ceremony.day1.begin')} onPress={() => done(false)} />
             </Animated.View>
           ) : null}
         </View>
@@ -504,38 +510,38 @@ function DayOneCeremony({ onDone }: { onDone: (fast: boolean) => void }) {
  * milestone, the new stretch draws on to this one, the camera starts a little higher each time, and the light at
  * the end is the chapter's own: a sage foothold, a peach base camp, then the way to the summit opening ahead.
  */
-const CHAPTERS: Record<
-  number,
-  { from: number; overline: string; title: string; line: string; tint: 'sage' | 'peach' | 'indigo'; cameraY: number }
-> = {
-  7: {
-    from: 1,
-    overline: 'Day 7 · Finding your footing',
-    title: 'You’ve taken your first steps.',
-    line: 'A rhythm is forming, one day at a time.',
-    tint: 'sage',
-    cameraY: 40,
+type Chapter = {
+  from: number;
+  overline: string;
+  title: string;
+  line: string;
+  tint: 'sage' | 'peach' | 'indigo';
+  cameraY: number;
+};
+/** A milestone's chapter; its words are read in the current language each time they're shown. */
+const milestone = (day: 7 | 21 | 44, from: number, tint: Chapter['tint'], cameraY: number): Chapter => ({
+  from,
+  tint,
+  cameraY,
+  get overline() {
+    return tr(`ceremony.milestone.${day}.overline`);
   },
-  21: {
-    from: 7,
-    overline: 'Day 21 · Foundation complete',
-    title: 'Look what you’ve started.',
-    line: 'The Foundation is laid. Momentum begins today.',
-    tint: 'peach',
-    cameraY: 20,
+  get title() {
+    return tr(`ceremony.milestone.${day}.title`);
   },
-  44: {
-    from: 21,
-    overline: 'Day 44 · Momentum complete',
-    title: 'You’ve come further than you think.',
-    line: 'The summit is in view. Mastery begins.',
-    tint: 'indigo',
-    cameraY: 0,
+  get line() {
+    return tr(`ceremony.milestone.${day}.line`);
   },
+});
+const CHAPTERS: Record<number, Chapter> = {
+  7: milestone(7, 1, 'sage', 40),
+  21: milestone(21, 7, 'peach', 20),
+  44: milestone(44, 21, 'indigo', 0),
 };
 
 function MilestoneMoment({ day, onDone }: { day: number; onDone: (fast: boolean) => void }) {
   const { c } = useTheme();
+  const t = useT();
   const reduce = useReducedMotion();
   const stage = useStage();
   const ch = CHAPTERS[day] ?? CHAPTERS[7];
@@ -599,7 +605,7 @@ function MilestoneMoment({ day, onDone }: { day: number; onDone: (fast: boolean)
         <View style={styles.cta}>
           {ready ? (
             <Animated.View entering={rise(0)}>
-              <Button label="Continue climbing" onPress={() => done(false)} />
+              <Button label={t('ceremony.milestone.continue')} onPress={() => done(false)} />
             </Animated.View>
           ) : null}
         </View>
@@ -625,6 +631,7 @@ function SummitCeremony({
   onDone: (fast: boolean, story?: boolean) => void;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const reduce = useReducedMotion();
   const stage = useStage();
   const [phase, setPhase] = useState<'rise' | 'summary'>('rise');
@@ -635,8 +642,10 @@ function SummitCeremony({
     onDone(fast, story);
   };
 
-  // Everything from the saved days.
+  // Everything from the saved days (the landmarks' names follow the language).
+  const lang = useLanguage();
   const summary = useMemo(() => {
+    void lang; // the landmarks' names are words: read again when the language changes
     const cells = C.dayCells(program, Math.max(today, PROGRAM_DAYS));
     const complete = cells.filter((d) => d.state === 'full').length;
     const stats = P.journeyStats(program, Math.max(today, PROGRAM_DAYS));
@@ -647,7 +656,7 @@ function SummitCeremony({
       .map((d) => LANDMARKS[d].name);
     const lights = cells.filter((d) => d.state === 'full').map((d) => ({ day: d.day, color: c.sage }));
     return { complete, total: P.totalCompleted(program), best: stats.best, habits, earned, lights };
-  }, [program, today, c.sage]);
+  }, [program, today, c.sage, lang]);
 
   useEffect(() => {
     if (reduce) {
@@ -687,20 +696,24 @@ function SummitCeremony({
   }, [phase, onSeen]);
 
   const rows: { value: string; label: string; color: string }[] = [
-    { value: `${summary.complete}`, label: `of ${PROGRAM_DAYS} days completed`, color: c.sageInk },
     {
-      value: `${summary.total}`,
-      label: summary.total === 1 ? 'habit completed in all' : 'habits completed in all',
+      value: formatNumber(summary.complete),
+      label: t('ceremony.summit.daysCompleted', { total: PROGRAM_DAYS }),
+      color: c.sageInk,
+    },
+    {
+      value: formatNumber(summary.total),
+      label: t('ceremony.summit.completed', { count: summary.total }),
       color: c.mistInk,
     },
     {
-      value: `${summary.best}`,
-      label: summary.best === 1 ? 'day, your longest streak' : 'days, your longest streak',
+      value: formatNumber(summary.best),
+      label: t('ceremony.summit.streak', { count: summary.best }),
       color: c.peachInk,
     },
     {
-      value: `${summary.habits.length}`,
-      label: `${summary.habits.length === 1 ? 'habit' : 'habits'} practised: ${summary.habits.join(', ')}`,
+      value: formatNumber(summary.habits.length),
+      label: t('ceremony.summit.practised', { count: summary.habits.length, list: formatList(summary.habits) }),
       color: c.indigoInk,
     },
   ];
@@ -718,12 +731,12 @@ function SummitCeremony({
       <Words scroll={phase === 'summary'}>
         <Animated.View entering={rise(reduce ? 0 : 2900)}>
           <T v="overline" color={c.peachInk} style={{ letterSpacing: 2.4 }}>
-            The summit · Day {PROGRAM_DAYS}
+            {t('ceremony.summit.kicker', { total: PROGRAM_DAYS })}
           </T>
         </Animated.View>
         <Animated.View entering={rise(reduce ? 100 : 3100)}>
           <T style={[styles.headline, { color: c.text }]} accessibilityRole="header">
-            Look how far you’ve come.
+            {t('ceremony.summit.headline')}
           </T>
         </Animated.View>
         {phase === 'summary' ? (
@@ -735,7 +748,7 @@ function SummitCeremony({
                   entering={rise(reduce ? 0 : 200 + i * 160)}
                   style={styles.row}
                   accessible
-                  accessibilityLabel={`${r.value} ${r.label}`}
+                  accessibilityLabel={t('ceremony.summit.rowA11y', { value: r.value, label: r.label })}
                 >
                   <T style={[styles.rowValue, { color: r.color }]}>{r.value}</T>
                   <T color={c.textDim} style={{ flex: 1 }}>
@@ -746,16 +759,13 @@ function SummitCeremony({
               {summary.earned.length ? (
                 <Animated.View entering={rise(reduce ? 0 : 200 + rows.length * 160)}>
                   <T v="caption" color={c.peachInk} style={{ fontWeight: '700' }}>
-                    Milestone days completed: {summary.earned.join(' · ')}
+                    {t('ceremony.summit.milestones', { list: summary.earned.join(' · ') })}
                   </T>
                 </Animated.View>
               ) : null}
             </View>
             <Animated.View entering={rise(reduce ? 0 : 1100)}>
-              <T style={[styles.sub, { color: c.textDim }]}>
-                Sixty-six days ago you chose to begin. Not every day went to plan, and you kept climbing anyway. These
-                habits are yours now.
-              </T>
+              <T style={[styles.sub, { color: c.textDim }]}>{t('ceremony.summit.message')}</T>
             </Animated.View>
             <Animated.View
               entering={FadeIn.delay(reduce ? 0 : 1500)
@@ -764,8 +774,8 @@ function SummitCeremony({
               style={styles.cta}
             >
               <View style={{ gap: space.xs }}>
-                <Button label="See my journey" onPress={() => done(false, true)} />
-                <Button label="Return to Schwung" kind="ghost" onPress={() => done(false)} />
+                <Button label={t('ceremony.summit.journey')} onPress={() => done(false, true)} />
+                <Button label={t('ceremony.summit.return')} kind="ghost" onPress={() => done(false)} />
               </View>
             </Animated.View>
           </>

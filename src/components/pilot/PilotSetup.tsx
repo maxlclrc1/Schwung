@@ -31,6 +31,8 @@ import { CHAPTERS, DragLock, Question, rise, TrailProgress, useTints, type TintN
 import { Button, Screen, T } from '../ui';
 import { OnboardingBackdrop } from '../World';
 import { ACTIVE, duration, HEALTH, PHONE, STARTS } from './SetupParts';
+import { t as tr } from '../../i18n';
+import { useT } from '../../i18n/react';
 
 type Step = 'age' | 'health' | 'habits' | P.Baseline | 'levels' | 'time' | 'review';
 
@@ -75,17 +77,8 @@ const SKILL_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> 
   'Sport skill': 'football-outline',
   Other: 'sparkles-outline',
 };
-const ACTIVE_DETAIL: Record<ActiveDays, string> = {
-  '0': 'Base camp',
-  '1_2': 'Now and then',
-  '3_4': 'Often',
-  '5p': 'Most days',
-};
-const STRENGTH_DETAIL: Record<P.StrengthStart, string> = {
-  new: 'Little or none yet',
-  sometimes: 'Now and then',
-  regular: 'Most weeks',
-};
+const activeDetail = (id: ActiveDays) => tr(`setup.activeDetail.${id}`);
+const strengthDetail = (id: P.StrengthStart) => tr(`setup.startDetail.${id}`);
 /** Phone hours, lowest first; "Not sure" is its own answer. */
 const PHONE_HOURS = PHONE.filter((x) => x.id !== 'unknown');
 const ease = Easing.bezier(0.22, 1, 0.36, 1);
@@ -98,6 +91,7 @@ const ease = Easing.bezier(0.22, 1, 0.36, 1);
  */
 export function PilotSetup() {
   const { c } = useTheme();
+  const t = useT();
   const tints = useTints();
   const { width } = useWindowDimensions();
   const reduce = useReducedMotion();
@@ -152,7 +146,8 @@ export function PilotSetup() {
   const total = P.busiestDayMinutes(
     choices.map((x) => ({ habitId: x.habitId, level: { intensity: x.intensity, phase: 'foundation' } })),
   );
-  const timeProblem = minutes !== null ? problems.find((p) => p.startsWith('These take')) : undefined;
+  const timeProblem =
+    minutes !== null && total > minutes ? t('engine.problems.tooLong', { total, available: minutes }) : undefined;
 
   const order: Step[] = ['age', 'health', 'habits', ...baselines, 'levels', 'time', 'review'];
   const index = Math.max(0, order.indexOf(step));
@@ -283,10 +278,10 @@ export function PilotSetup() {
       case 'age':
         return (
           <Question
-            eyebrow="Welcome to your reset"
+            eyebrow={t('setup.q.welcome')}
             tint="lavender"
-            title="First things first. How old are you?"
-            hint="So every habit fits you. It takes about a minute."
+            title={t('setup.q.ageTitle')}
+            hint={t('setup.q.ageHint')}
             center
           >
             <AgeDial
@@ -301,10 +296,10 @@ export function PilotSetup() {
       case 'health':
         return (
           <Question
-            eyebrow="You, today"
+            eyebrow={t('setup.q.youToday')}
             tint="peach"
-            title="Anything your body would like us to know?"
-            hint="We’ll keep every habit safe for you. It never leaves your phone."
+            title={t('setup.q.healthTitle')}
+            hint={t('setup.q.healthHint')}
           >
             <View style={styles.tokens}>
               {HEALTH.map((h) => (
@@ -326,7 +321,7 @@ export function PilotSetup() {
             <View style={styles.pair}>
               <View style={{ flex: 1 }}>
                 <SoftChoice
-                  label="None of these"
+                  label={t('setup.q.none')}
                   icon="leaf-outline"
                   tint={tint('sage')}
                   on={Array.isArray(health) && health.length === 0}
@@ -335,7 +330,7 @@ export function PilotSetup() {
               </View>
               <View style={{ flex: 1 }}>
                 <SoftChoice
-                  label="Rather not say"
+                  label={t('setup.q.ratherNot')}
                   icon="eye-off-outline"
                   tint={tint('mist')}
                   on={health === 'unknown'}
@@ -348,22 +343,22 @@ export function PilotSetup() {
       case 'habits':
         return (
           <Question
-            eyebrow="Now the fun part"
+            eyebrow={t('setup.q.funPart')}
             tint="peach"
-            title="What would you like to grow?"
-            hint="Two to four is a lovely start. You can add more, and your own, any time."
+            title={t('setup.q.habitsTitle')}
+            hint={t('setup.q.habitsHint')}
           >
             <View style={styles.habitBar}>
               <Stones count={picked.length} max={P.MAX_HABITS} />
               <Press
                 onPress={() => setPicked(P.SUGGESTED_START.filter((id) => !P.habitExclusion(id, answers)))}
                 accessibilityRole="button"
-                accessibilityLabel="Use the suggested three"
+                accessibilityLabel={t('setup.q.suggestA11y')}
               >
                 <View style={[styles.suggest, { backgroundColor: tints.lavender.soft }]}>
                   <Ionicons name="sparkles" size={14} color={tints.lavender.ink} />
                   <T v="caption" color={tints.lavender.ink} style={{ fontWeight: '700' }}>
-                    Suggest three
+                    {t('setup.q.suggest')}
                   </T>
                 </View>
               </Press>
@@ -392,18 +387,18 @@ export function PilotSetup() {
           <Question
             eyebrow={P.habitName(ASKED_BY.phone)}
             tint="mist"
-            title="How much of your day goes to your phone?"
-            hint="A rough guess is perfect."
+            title={t('setup.q.phoneTitle')}
+            hint={t('setup.q.phoneHint')}
           >
             <PhoneMeter
-              label="Phone time a day"
+              label={t('setup.q.phoneLabel')}
               stops={PHONE_HOURS.map((x) => x.label)}
               index={i >= 0 ? i : null}
               onChange={(n) => setPhone(PHONE_HOURS[n].id)}
             />
             <View style={styles.solo}>
               <SoftChoice
-                label="Not sure"
+                label={t('setup.q.notSure')}
                 icon="help-circle-outline"
                 tint={tint('mist')}
                 on={phone === 'unknown'}
@@ -418,13 +413,13 @@ export function PilotSetup() {
           <Question
             eyebrow={P.habitName(ASKED_BY.pullMinutes)}
             tint="mist"
-            title="And the one app that pulls you in most?"
-            hint="Settings → Screen Time shows it, if you’re curious."
+            title={t('setup.q.pullTitle')}
+            hint={t('setup.q.pullHint')}
           >
             <PhoneMeter
               app
-              label="Time a day on your main app"
-              stops={PULL_MINUTES_OPTIONS.map((m) => (m === 240 ? '4 h+' : duration(m)))}
+              label={t('setup.q.pullLabel')}
+              stops={PULL_MINUTES_OPTIONS.map((m) => (m === 240 ? t('setup.fourHoursPlus') : duration(m)))}
               index={pull === undefined ? null : PULL_MINUTES_OPTIONS.indexOf(pull)}
               onChange={(n) => setPull(PULL_MINUTES_OPTIONS[n])}
             />
@@ -435,18 +430,20 @@ export function PilotSetup() {
           <Question
             eyebrow={P.habitName(ASKED_BY.wake)}
             tint="indigo"
-            title="When does your day usually begin?"
-            hint="Any hour of the day or night. Your own time is the anchor, never earlier."
+            title={t('setup.q.wakeTitle')}
+            hint={t('setup.q.wakeHint')}
           >
             <DayClock
               minutes={wake?.kind === 'time' ? minutesOf(wake.time) : null}
               onChange={(m) => setWake({ kind: 'time', time: hhmm(m) })}
-              muted={wake?.kind === 'varies' ? 'It varies' : wake?.kind === 'shift' ? 'Shifts' : undefined}
+              muted={
+                wake?.kind === 'varies' ? t('setup.q.varies') : wake?.kind === 'shift' ? t('setup.q.shifts') : undefined
+              }
             />
             <View style={styles.pair}>
               <View style={{ flex: 1 }}>
                 <SoftChoice
-                  label="It varies a lot"
+                  label={t('setup.q.variesALot')}
                   icon="shuffle-outline"
                   tint={tint('indigo')}
                   on={wake?.kind === 'varies'}
@@ -455,7 +452,7 @@ export function PilotSetup() {
               </View>
               <View style={{ flex: 1 }}>
                 <SoftChoice
-                  label="I work shifts"
+                  label={t('setup.q.workShifts')}
                   icon="briefcase-outline"
                   tint={tint('indigo')}
                   on={wake?.kind === 'shift'}
@@ -470,16 +467,16 @@ export function PilotSetup() {
           <Question
             eyebrow={P.habitName(ASKED_BY.activeDays)}
             tint="sage"
-            title="How often do you move these days?"
-            hint="Days a week you’re active now. Every trail starts somewhere."
+            title={t('setup.q.activeTitle')}
+            hint={t('setup.q.activeHint')}
             center
           >
             <TrailPicker
-              label="Active days a week"
+              label={t('setup.q.activeLabel')}
               items={ACTIVE.map((x) => ({
                 id: x.id,
-                label: `${x.label} days`,
-                detail: ACTIVE_DETAIL[x.id],
+                label: t('setup.activeDays', { n: x.label }),
+                detail: activeDetail(x.id),
               }))}
               value={active}
               onPick={setActive}
@@ -488,9 +485,9 @@ export function PilotSetup() {
         );
       case 'skill':
         return (
-          <Question eyebrow={P.habitName(ASKED_BY.skill)} tint="lavender" title="Which skill is calling you?" center>
+          <Question eyebrow={P.habitName(ASKED_BY.skill)} tint="lavender" title={t('setup.q.skillTitle')} center>
             <IconTiles
-              items={SKILLS.map((x) => ({ id: x, label: x, icon: SKILL_ICON[x] ?? 'sparkles-outline' }))}
+              items={SKILLS.map((x) => ({ id: x, label: P.skillName(x), icon: SKILL_ICON[x] ?? 'sparkles-outline' }))}
               value={skill}
               onPick={setSkill}
               tint={tint('lavender')}
@@ -502,11 +499,11 @@ export function PilotSetup() {
           <Question
             eyebrow={P.habitName(ASKED_BY.strengthStart)}
             tint="sage"
-            title="Where are you starting from?"
-            hint="Strength training so far."
+            title={t('setup.q.strengthTitle')}
+            hint={t('setup.q.strengthHint')}
           >
             <Stairs
-              items={STARTS.map((x) => ({ id: x.id, label: x.label, detail: STRENGTH_DETAIL[x.id] }))}
+              items={STARTS.map((x) => ({ id: x.id, label: x.label, detail: strengthDetail(x.id) }))}
               value={start}
               onPick={setStart}
               tint={tint('sage')}
@@ -521,10 +518,10 @@ export function PilotSetup() {
       case 'levels':
         return (
           <Question
-            eyebrow="Your starting point"
+            eyebrow={t('setup.q.startingPoint')}
             tint="sage"
-            title="How big should the first steps be?"
-            hint="Start small and each habit grows with you. You decide when to step up."
+            title={t('setup.q.levelsTitle')}
+            hint={t('setup.q.levelsHint')}
           >
             <View style={styles.list}>
               {picked.map((id, i) => (
@@ -537,7 +534,7 @@ export function PilotSetup() {
                     onRemove={() => setPicked((p) => p.filter((x) => x !== id))}
                   >
                     {id === 'strength_log' && intensityOf(id) === 'challenge' ? (
-                      <Stepper label="Sessions a week you already do" value={own} min={2} max={7} onChange={setOwn} />
+                      <Stepper label={t('setup.q.ownSessions')} value={own} min={2} max={7} onChange={setOwn} />
                     ) : null}
                   </StartCard>
                 </Animated.View>
@@ -548,14 +545,14 @@ export function PilotSetup() {
       case 'time':
         return (
           <Question
-            eyebrow="Your starting point"
+            eyebrow={t('setup.q.startingPoint')}
             tint="sage"
-            title="How much time can you give on a busy day?"
-            hint="Your habits have to fit, even on the full days."
+            title={t('setup.q.timeTitle')}
+            hint={t('setup.q.timeHint')}
             center
           >
             <TimeDial
-              label="Time you have on a busy day"
+              label={t('setup.q.timeLabel')}
               stops={P.PILOT_TIME_OPTIONS.map(duration)}
               values={P.PILOT_TIME_OPTIONS}
               index={minutes === null ? null : (P.PILOT_TIME_OPTIONS as readonly number[]).indexOf(minutes)}
@@ -575,17 +572,17 @@ export function PilotSetup() {
         );
       case 'review':
         return (
-          <Question eyebrow="Your 66-day reset" tint="indigo" title="It’s ready. This one is yours.">
+          <Question eyebrow={t('setup.q.yourReset')} tint="indigo" title={t('setup.q.readyTitle')}>
             <HabitFan ids={choices.map((x) => x.habitId)} width={content} />
             <View style={styles.facts}>
               {[
                 {
                   icon: 'leaf-outline' as const,
-                  text: `${choices.length} habit${choices.length === 1 ? '' : 's'}`,
+                  text: t('setup.q.habitsFact', { count: choices.length }),
                   tint: tints.sage,
                 },
-                { icon: 'flag-outline' as const, text: '66 days', tint: tints.peach },
-                { icon: 'sunny-outline' as const, text: 'From today', tint: tints.lavender },
+                { icon: 'flag-outline' as const, text: t('setup.q.daysFact'), tint: tints.peach },
+                { icon: 'sunny-outline' as const, text: t('setup.q.fromToday'), tint: tints.lavender },
               ].map((f, i) => (
                 <Animated.View
                   key={f.text}
@@ -611,12 +608,12 @@ export function PilotSetup() {
                     <View style={{ flex: 1 }}>
                       <T v="bodyStrong">{P.habitName(x.habitId)}</T>
                       <T v="caption" color={c.textDim}>
-                        {p.target} · {p.frequency}
+                        {t('setup.intensity.preview', p)}
                       </T>
                     </View>
                     <View style={[styles.level, { backgroundColor: dot.soft }]}>
                       <T v="caption" color={dot.ink} style={{ fontWeight: '700' }}>
-                        {P.INTENSITY_NAME[x.intensity]}
+                        {P.intensityName(x.intensity)}
                       </T>
                     </View>
                   </Animated.View>
@@ -625,8 +622,8 @@ export function PilotSetup() {
             </View>
             <Animated.View entering={rise(900 + choices.length * 80)}>
               <T v="caption" color={c.textDim}>
-                About {total} min on a day they all fall on{minutes ? `, of the ${duration(minutes)} you have` : ''}.
-                Targets only change when you choose. A swipe marks a habit done.
+                {minutes ? t('setup.q.totalOf', { total, have: duration(minutes) }) : t('setup.q.total', { total })}
+                {t('setup.q.totalNote')}
               </T>
             </Animated.View>
             {problems.map((p) => (
@@ -688,7 +685,7 @@ export function PilotSetup() {
             disabled={!!launching}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('setup.q.back')}
           >
             {({ pressed }) => (
               <View style={[styles.back, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}>
@@ -697,7 +694,7 @@ export function PilotSetup() {
             )}
           </Pressable>
           <Button
-            label={step === 'review' ? 'Confirm my reset' : 'Continue'}
+            label={step === 'review' ? t('setup.q.confirm') : t('setup.q.continue')}
             disabled={!canContinue || !!launching}
             onPress={step === 'review' ? begin : () => go(1)}
             icon={step === 'review' ? <Ionicons name="arrow-forward" size={20} color={c.onAccent} /> : undefined}

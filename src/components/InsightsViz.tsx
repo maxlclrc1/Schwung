@@ -21,6 +21,8 @@ import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
+import { formatNumber, formatPercent, t as tr } from '../i18n';
+import { useT } from '../i18n/react';
 
 /*
  * Insights 2.0, drawn by hand (no chart library): a page in three questions. How am I doing? (a consistency ring and
@@ -35,7 +37,7 @@ const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 type Icon = ComponentProps<typeof Ionicons>['name'];
-const pctText = (share: number | null) => (share === null ? '—' : `${Math.round(share * 100)}%`);
+const pctText = (share: number | null) => (share === null ? '—' : formatPercent(Math.round(share * 100) / 100));
 
 /** 0 → 1 once on mount (a short delay, on the shared curve): the charts' one entrance. */
 function useEntrance(delay = 0, duration = 760) {
@@ -77,6 +79,7 @@ export const ConsistencyRing = memo(function ConsistencyRing({
   streak: number;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const share = overall.eligible ? overall.done / overall.eligible : null;
   const size = 132;
   const stroke = 12;
@@ -92,8 +95,8 @@ export const ConsistencyRing = memo(function ConsistencyRing({
         accessible
         accessibilityLabel={
           share === null
-            ? 'Consistency shows after your first day'
-            : `${pctText(share)} consistency: ${overall.done} of ${overall.eligible} habit opportunities done`
+            ? t('insights.ring.a11yNone')
+            : t('insights.ring.a11y', { pct: pctText(share), done: overall.done, eligible: overall.eligible })
         }
       >
         <Svg width={size} height={size}>
@@ -117,22 +120,34 @@ export const ConsistencyRing = memo(function ConsistencyRing({
             {pctText(share)}
           </T>
           <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.2}>
-            consistency
+            {t('insights.ring.consistency')}
           </T>
         </View>
       </View>
       <View style={styles.heroText}>
         <T v="bodyStrong" maxFontSizeMultiplier={1.3}>
           {share === null
-            ? 'Your consistency starts with your first day.'
-            : `${overall.done} of ${overall.eligible} habit opportunities done`}
+            ? t('insights.ring.first')
+            : t('insights.ring.done', { done: overall.done, eligible: overall.eligible })}
         </T>
-        <Fact dot={c.sage} label="This week" value={week.eligible ? `${week.done} of ${week.eligible}` : '—'} />
-        <Fact dot={c.peach} label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
+        <Fact
+          dot={c.sage}
+          label={t('insights.ring.thisWeek')}
+          value={week.eligible ? t('insights.ring.weekValue', { done: week.done, eligible: week.eligible }) : '—'}
+        />
+        <Fact
+          dot={c.peach}
+          label={t('insights.ring.streak')}
+          value={t('insights.ring.streakValue', { count: streak })}
+        />
         <Fact
           dot={c.indigo}
-          label="Day"
-          value={day > PROGRAM_DAYS ? `${day} · past the summit` : `${shownDay} of ${PROGRAM_DAYS}`}
+          label={t('insights.ring.day')}
+          value={
+            day > PROGRAM_DAYS
+              ? t('beyond.pastSummit', { day })
+              : t('insights.ring.dayValue', { day: shownDay, total: PROGRAM_DAYS })
+          }
         />
       </View>
     </ThemedView>
@@ -141,8 +156,9 @@ export const ConsistencyRing = memo(function ConsistencyRing({
 
 function Fact({ dot, label, value }: { dot: string; label: string; value: string }) {
   const { c } = useTheme();
+  const t = useT();
   return (
-    <View style={styles.fact} accessible accessibilityLabel={`${label}: ${value}`}>
+    <View style={styles.fact} accessible accessibilityLabel={t('insights.ring.factA11y', { label, value })}>
       <View style={[styles.factDot, { backgroundColor: dot }]} />
       <T v="caption" color={c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.3}>
         {label}
@@ -155,18 +171,17 @@ function Fact({ dot, label, value }: { dot: string; label: string; value: string
 }
 
 function weekWords(p: WeekPoint): string {
-  const range = p.days < 7 ? ` (${p.days} day${p.days === 1 ? '' : 's'})` : '';
+  const range = p.days < 7 ? tr('insights.week.range', { count: p.days }) : '';
+  const base = { week: p.week, range, done: p.done, eligible: p.eligible };
   switch (p.state) {
     case 'closed':
-      return `Week ${p.week}${range}: ${pctText(p.share)}, ${p.done} of ${p.eligible} done.`;
+      return tr('insights.week.closed', { ...base, pct: pctText(p.share) });
     case 'current':
-      return p.eligible
-        ? `Week ${p.week}, so far: ${p.done} of ${p.eligible} done. Today and open weekly goals aren’t counted yet.`
-        : `Week ${p.week}, so far: nothing to count yet.`;
+      return p.eligible ? tr('insights.week.current', base) : tr('insights.week.currentNone', base);
     case 'unrecorded':
-      return `Week ${p.week}${range}: no days recorded.`;
+      return tr('insights.week.unrecorded', base);
     case 'none':
-      return `Week ${p.week}${range}: nothing was due.`;
+      return tr('insights.week.none', base);
   }
 }
 
@@ -178,6 +193,7 @@ const CHART_H = 128;
  */
 export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint[] }) {
   const { c } = useTheme();
+  const t = useT();
   const { width } = useWindowDimensions();
   const reduce = useReducedMotion();
   const w = Math.min(width, 520) - space.lg * 4 - 30;
@@ -222,9 +238,9 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
   return (
     <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
       <View style={styles.panelHead}>
-        <T v="bodyStrong">Week by week</T>
+        <T v="bodyStrong">{t('insights.week.title')}</T>
         <T v="caption" color={c.mistInk} style={{ fontWeight: '700' }}>
-          {judged ? `${judged} finished week${judged === 1 ? '' : 's'}` : 'Your first week is under way'}
+          {judged ? t('insights.week.judged', { count: judged }) : t('insights.week.first')}
         </T>
       </View>
       <View style={styles.chartRow}>
@@ -355,7 +371,7 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
       ) : null}
       {judged === 0 ? (
         <T v="caption" color={c.textFaint}>
-          Weeks run Monday to Sunday. Your first week’s line starts once it ends.
+          {t('insights.week.note')}
         </T>
       ) : null}
     </ThemedView>
@@ -406,6 +422,7 @@ function HabitBar({
   order: number;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const share = row.tally.eligible ? row.tally.done / row.tally.eligible : null;
   const grow = useEntrance(150 + order * 70, 700);
@@ -420,10 +437,15 @@ function HabitBar({
         }}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityHint="Shows its history, target and difficulty"
-        accessibilityLabel={`${row.name}${strongest ? ', your strongest habit' : ''}. ${
-          share === null ? 'No days yet' : `${pctText(share)}, ${row.tally.done} of ${row.tally.eligible}`
-        }. ${row.kind}`}
+        accessibilityHint={t('insights.habit.hint')}
+        accessibilityLabel={t(strongest ? 'insights.habit.a11yStrongest' : 'insights.habit.a11y', {
+          name: row.name,
+          share:
+            share === null
+              ? t('insights.habit.noDays')
+              : t('insights.habit.share', { pct: pctText(share), done: row.tally.done, eligible: row.tally.eligible }),
+          kind: row.kind,
+        })}
         style={({ pressed }) => [styles.habitRow, { opacity: pressed ? 0.7 : 1 }]}
       >
         <View style={styles.habitTop}>
@@ -434,7 +456,7 @@ function HabitBar({
             <View style={[styles.badge, { backgroundColor: c.peachSoft }]}>
               <Ionicons name="star" size={11} color={c.peach} />
               <T v="caption" color={c.peachInk} style={styles.badgeText}>
-                Strongest
+                {t('insights.habit.strongest')}
               </T>
             </View>
           ) : null}
@@ -463,22 +485,31 @@ function HabitBar({
 /** Personal records as peach medallions: what was actually done, as counts (never minutes or hours). */
 export const RecordMedals = memo(function RecordMedals({ records }: { records: Records }) {
   const { c } = useTheme();
+  const t = useT();
   const medals: { icon: Icon; n: string; label: string }[] = [
     records.bestWeek
-      ? { icon: 'trophy', n: pctText(records.bestWeek.share), label: `best week · Week ${records.bestWeek.week}` }
-      : { icon: 'trophy-outline', n: '—', label: 'best week, after your first full week' },
+      ? {
+          icon: 'trophy',
+          n: pctText(records.bestWeek.share),
+          label: t('insights.records.bestWeek', { week: records.bestWeek.week }),
+        }
+      : { icon: 'trophy-outline', n: '—', label: t('insights.records.bestWeekLater') },
     {
       icon: 'flame',
-      n: `${records.bestStreak}`,
-      label: records.bestStreak === 1 ? 'day, longest streak' : 'days, longest streak',
+      n: formatNumber(records.bestStreak),
+      label: t('insights.records.streak', { count: records.bestStreak }),
     },
-    { icon: 'checkmark-done', n: `${records.total}`, label: records.total === 1 ? 'habit done' : 'habits done in all' },
+    {
+      icon: 'checkmark-done',
+      n: formatNumber(records.total),
+      label: t('insights.records.done', { count: records.total }),
+    },
     ...(records.readingDays !== null
       ? [
           {
             icon: 'book' as Icon,
-            n: `${records.readingDays}`,
-            label: records.readingDays === 1 ? 'reading day' : 'reading days',
+            n: formatNumber(records.readingDays),
+            label: t('insights.records.reading', { count: records.readingDays }),
           },
         ]
       : []),
@@ -486,15 +517,15 @@ export const RecordMedals = memo(function RecordMedals({ records }: { records: R
       ? [
           {
             icon: 'barbell' as Icon,
-            n: `${records.strengthSessions}`,
-            label: records.strengthSessions === 1 ? 'strength session' : 'strength sessions',
+            n: formatNumber(records.strengthSessions),
+            label: t('insights.records.strength', { count: records.strengthSessions }),
           },
         ]
       : []),
   ];
   return (
     <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
-      <T v="bodyStrong">Personal records</T>
+      <T v="bodyStrong">{t('insights.records.title')}</T>
       <View style={styles.medals}>
         {medals.map((m, i) => (
           <Animated.View
@@ -504,7 +535,7 @@ export const RecordMedals = memo(function RecordMedals({ records }: { records: R
               .reduceMotion(sys)}
             style={styles.medal}
             accessible
-            accessibilityLabel={`${m.n} ${m.label}`}
+            accessibilityLabel={t('insights.records.a11y', { value: m.n, label: m.label })}
           >
             <View style={[styles.medalDisc, { backgroundColor: c.peachSoft, borderColor: c.peach }]}>
               <Ionicons name={m.icon} size={18} color={c.peach} />
@@ -536,6 +567,7 @@ const TONE: Record<Observation['tone'], Icon> = {
 /** What the saved days show, one line each, in lavender; a quiet note until there's enough to say. */
 export function Observations({ items, day }: { items: Observation[]; day: number }) {
   const { c } = useTheme();
+  const t = useT();
   return (
     <ThemedView style={[styles.panel, styles.reflect, { backgroundColor: c.surface, borderLeftColor: c.accent }]}>
       {items.length ? (
@@ -565,9 +597,7 @@ export function Observations({ items, day }: { items: Observation[]; day: number
             <Ionicons name="leaf-outline" size={15} color={c.accentInk} />
           </View>
           <T color={c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.3}>
-            {day < 7
-              ? 'Patterns show here once there are a couple of weeks to look at. For now, every day you mark is the beginning of one.'
-              : 'Nothing stands out yet. Observations appear when your days show a clear pattern.'}
+            {day < 7 ? t('insights.observations.early') : t('insights.observations.none')}
           </T>
         </View>
       )}
@@ -586,6 +616,7 @@ export function ScreenTimeHistory({
   thisWeek: number;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const shown = readings.slice(-8);
   if (!shown.length) return null;
   const top = Math.max(limit, ...shown.map((r) => r.minutes)) * 1.15 || 1;
@@ -594,15 +625,13 @@ export function ScreenTimeHistory({
     <View
       style={{ gap: space.sm }}
       accessible
-      accessibilityLabel={
-        shown.map((r) => `Week ${r.week}: ${r.minutes} minutes a day`).join('. ') + `. Limit ${limit} minutes.`
-      }
+      accessibilityLabel={`${shown.map((r) => t('insights.screen.a11yWeek', { week: r.week, minutes: r.minutes })).join('. ')}. ${t('insights.screen.a11yLimit', { limit })}`}
     >
       <View style={[styles.screenBars, { height: H }]}>
         {limit > 0 ? (
           <View style={[styles.limit, { bottom: (limit / top) * H, borderColor: c.peach }]}>
             <T v="caption" color={c.peachInk} style={styles.limitText}>
-              limit {limit} min
+              {t('insights.screen.limitLine', { limit })}
             </T>
           </View>
         ) : null}

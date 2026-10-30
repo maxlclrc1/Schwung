@@ -33,6 +33,9 @@ import { WelcomeBack } from './WelcomeBack';
 import { UnlockMoment } from '../collection/UnlockMoment';
 import { ChooseNextCard } from '../beyond/ChooseNextCard';
 import { TodayHero } from './TodayHero';
+import { useT } from '../../i18n/react';
+import { formatList, t as tr } from '../../i18n';
+import { sessionName } from '../../core/reset/pilot';
 
 /*
  * The Habits tab: the program's habits as illustrated cards, with what to do, how much, whether it's done and the week's progress. The whole-card swipe
@@ -64,6 +67,7 @@ function useResetClock() {
 
 export function PilotToday() {
   const { c } = useTheme();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const program = useResetPilot((s) => s.program)!;
   const offset = useResetPilot((s) => s.devDayOffset);
@@ -170,7 +174,7 @@ export function PilotToday() {
           xp={xp}
           momentum={!!program.after}
           ascent={P.ascentOf(program)}
-          phase={program.after ? 'Keep My Momentum · your targets stay where you set them' : phaseLine(today)}
+          phase={program.after ? t('beyond.momentumPhase') : phaseLine(today)}
           label={summaryLabel(
             done,
             program.habits.length,
@@ -216,10 +220,14 @@ export function PilotToday() {
 
         <View style={styles.section}>
           <T v="overline" color={c.textDim}>
-            Today’s habits
+            {t('today.todaysHabits')}
           </T>
           <T v="caption" color={full ? c.sageInk : c.textDim} style={{ fontWeight: '700' }}>
-            {awaiting ? 'Resting' : full ? 'All done' : `${done} of ${program.habits.length}`}
+            {awaiting
+              ? t('today.resting')
+              : full
+                ? t('today.allDone')
+                : t('today.progress', { done, total: program.habits.length })}
           </T>
         </View>
         {/* Past the summit with nothing chosen yet: the habits rest (nothing is tracked) until the person chooses. */}
@@ -246,14 +254,14 @@ export function PilotToday() {
         <View style={styles.footer}>
           {program.habits.length < P.MAX_HABITS && !awaiting ? (
             <Button
-              label="Add a habit"
+              label={t('today.addHabit')}
               kind="secondary"
               icon={<Ionicons name="add" size={18} color={c.text} />}
               onPress={() => router.push('/life-reset/add')}
             />
           ) : null}
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            Swipe a card to complete it. Long-press for details and difficulty.
+            {t('today.swipeHelp')}
           </T>
           {__DEV__ && devTools() ? <PilotClock today={today} /> : null}
         </View>
@@ -269,7 +277,7 @@ export function PilotToday() {
           >
             <Ionicons name="checkmark-done" size={22} color={c.onTint} />
             <T v="bodyStrong" color={c.onTint}>
-              Day complete · +{XP_FULL_DAY_BONUS} XP bonus
+              {t('today.dayComplete', { xp: XP_FULL_DAY_BONUS })}
             </T>
           </ThemedView>
         </View>
@@ -279,14 +287,14 @@ export function PilotToday() {
 }
 
 function phaseLine(today: number): string {
-  if (today > PROGRAM_DAYS) return 'Your targets stay where they are.';
-  if (today >= PHASE_OPENS.mastery) return 'Mastery targets are open when you’re ready';
-  if (today >= PHASE_OPENS.momentum) return 'Momentum targets are open when you’re ready';
-  return 'Foundation';
+  if (today > PROGRAM_DAYS) return tr('today.phase.after');
+  if (today >= PHASE_OPENS.mastery) return tr('today.phase.mastery');
+  if (today >= PHASE_OPENS.momentum) return tr('today.phase.momentum');
+  return tr('today.phase.foundation');
 }
 
 const summaryLabel = (done: number, total: number, daily: string[]) =>
-  `${done} of ${total} habits done today. ${daily.length ? `${daily.join(', ')} is due every day.` : ''}`;
+  `${tr('today.summary', { done, total })}${daily.length ? tr('today.dueDaily', { list: formatList(daily) }) : ''}`;
 
 /** One habit as the usual card: its target, its week, and a counter or session details where it has them. */
 /**
@@ -317,18 +325,24 @@ function PilotCard({
   const counter = P.counterTarget(program, habitId, today);
   const weekText =
     state === 'not-eligible'
-      ? 'Not a workday · rest'
+      ? tr('today.card.notWorkday')
       : week
         ? week.goal === 0
-          ? 'A short week: no goal this week'
-          : week.credited >= week.goal
-            ? `${week.credited} of ${week.goal} this week · goal met`
-            : `${week.credited} of ${week.goal} this week`
-        : 'Every day';
+          ? tr('today.card.shortWeek')
+          : tr(week.credited >= week.goal ? 'today.card.weekMet' : 'today.card.week', {
+              done: week.credited,
+              goal: week.goal,
+            })
+        : tr('today.card.everyDay');
   const count = track.count ?? 0;
   const session =
     track.session?.type || track.session?.minutes
-      ? [track.session.type, track.session.minutes ? `${track.session.minutes} min` : null].filter(Boolean).join(' · ')
+      ? [
+          track.session.type ? sessionName(track.session.type) : null,
+          track.session.minutes ? tr('today.card.minutes', { minutes: track.session.minutes }) : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')
       : null;
   return (
     <CardView
@@ -337,7 +351,9 @@ function PilotCard({
       done={done}
       weekly={!!week}
       weekText={weekText}
-      counterText={counter !== null ? `${Math.min(count, counter)} of ${counter}` : null}
+      counterText={
+        counter !== null ? tr('today.card.counter', { done: Math.min(count, counter), goal: counter }) : null
+      }
       skipped={!!track.skipped}
       session={session}
       title={P.nameOf(program, habitId)}
@@ -385,6 +401,7 @@ const CardView = memo(function CardView({
   onSwipe: (active: boolean) => void;
 }) {
   const { isDark } = useTheme();
+  const t = useT();
   const strength = habitId === 'strength_log';
   const ink = isDark ? '#F7F5FF' : '#1B1830';
   const chip = isDark ? 'rgba(28,27,37,0.62)' : 'rgba(255,255,255,0.72)';
@@ -412,7 +429,7 @@ const CardView = memo(function CardView({
       ) : null}
       {skipped && !done ? (
         <T v="caption" color={ink} style={styles.week}>
-          Skipped today
+          {t('today.card.skipped')}
         </T>
       ) : null}
       {strength && done ? (
@@ -422,7 +439,7 @@ const CardView = memo(function CardView({
         >
           <Ionicons name="create-outline" size={14} color={ink} />
           <T v="caption" color={ink} style={styles.pillText}>
-            {session ?? 'Add details'}
+            {session ?? t('today.card.addDetails')}
           </T>
         </CardButton>
       ) : null}
@@ -430,7 +447,9 @@ const CardView = memo(function CardView({
   );
 
   const actions =
-    counterText !== null && !done ? [{ name: 'count', label: `Add one (${counterText})`, run: addOne }] : [];
+    counterText !== null && !done
+      ? [{ name: 'count', label: t('today.card.addOne', { count: counterText }), run: addOne }]
+      : [];
 
   return (
     <HabitCard
@@ -448,8 +467,8 @@ const CardView = memo(function CardView({
         levelIndex,
         levelLabel,
         summary: [weekText, counterText].filter(Boolean).join('. '),
-        hint: strength ? 'Swipe right to log a session' : weekly ? 'Swipe right if you did it today' : undefined,
-        doneText: strength ? 'Session logged' : undefined,
+        hint: strength ? t('today.card.strengthHint') : weekly ? t('today.card.weeklyHint') : undefined,
+        doneText: strength ? t('today.card.sessionLogged') : undefined,
       }}
     />
   );
@@ -470,9 +489,13 @@ function OfferCard({
   onAccepted: (text: string) => void;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const name = P.nameOf(program, habitId);
   const next = P.targetText(P.accept(program, habitId, offer, today), habitId, offer.effectiveDay);
-  const when = offer.effectiveDay === today + 1 ? 'tomorrow' : `next Monday (Day ${offer.effectiveDay})`;
+  const when =
+    offer.effectiveDay === today + 1
+      ? t('today.offer.tomorrow')
+      : t('today.offer.nextMonday', { day: offer.effectiveDay });
   const up = offer.kind === 'step-up';
   return (
     <ThemedView
@@ -482,25 +505,29 @@ function OfferCard({
       style={[styles.offer, { borderColor: c.accentInk, backgroundColor: c.accentSoft }]}
     >
       <T v="overline" color={c.accentInk}>
-        {up ? (offer.early ? 'Ahead of schedule' : 'You’ve been consistent') : 'Want it lighter?'}
+        {up ? (offer.early ? t('today.offer.early') : t('today.offer.consistent')) : t('today.offer.lighter')}
       </T>
-      <T v="bodyStrong">{up ? `${name} is ready for ${P.PHASE_NAME[offer.to.phase]}` : `Make ${name} a step easier`}</T>
+      <T v="bodyStrong">
+        {up
+          ? t('today.offer.ready', { habit: name, phase: P.phaseName(offer.to.phase) })
+          : t('today.offer.easier', { habit: name })}
+      </T>
       <T v="caption" color={c.textDim}>
-        {`From ${when}: ${next}. `}
-        {up ? 'Not now is fine: nothing changes and nothing is lost.' : 'You can make it harder again any time.'}
+        {t('today.offer.from', { when, target: next })}
+        {up ? t('today.offer.upNote') : t('today.offer.downNote')}
       </T>
       <View style={styles.offerButtons}>
         <Button
-          label={up ? 'Step up' : 'Make it easier'}
+          label={up ? t('today.offer.stepUp') : t('today.offer.makeEasier')}
           style={{ flex: 1 }}
           onPress={() => {
             useResetPilot.getState().accept(habitId, offer);
             haptic.confirm();
-            onAccepted(`${name}: ${next}, from ${when}.`);
+            onAccepted(t('today.offer.accepted', { habit: name, target: next, when }));
           }}
         />
         <Button
-          label="Not now"
+          label={t('common.notNow')}
           kind="secondary"
           style={{ flex: 1 }}
           onPress={() => useResetPilot.getState().decline(habitId, offer)}

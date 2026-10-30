@@ -22,6 +22,7 @@ import { SettingsButton } from '../HeaderButton';
 import { RollingText } from '../RollingText';
 import { ThemeToggle } from '../ThemeToggle';
 import { ProgressBar, T } from '../ui';
+import { useT } from '../../i18n/react';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
@@ -60,6 +61,7 @@ export function TodayHero({
   ascent?: number;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const left = Math.max(0, total - done);
   const summit = today > PROGRAM_DAYS && !momentum;
 
@@ -68,7 +70,7 @@ export function TodayHero({
       <View style={styles.header}>
         <View style={{ flexShrink: 1 }}>
           <T v="overline" color={c.indigoInk} maxFontSizeMultiplier={1.3}>
-            {ascent > 1 ? `Life Reset · Ascent ${ascent}` : 'Life Reset'}
+            {ascent > 1 ? t('today.hero.lifeResetAscent', { ascent }) : t('today.hero.lifeReset')}
           </T>
           <Text
             style={[styles.day, { color: c.text }]}
@@ -76,10 +78,10 @@ export function TodayHero({
             maxFontSizeMultiplier={1.3}
             accessibilityRole="header"
           >
-            {summit ? 'Summit reached' : `Day ${today}`}
+            {summit ? t('today.hero.summit') : t('today.hero.day', { day: today })}
             {summit ? null : (
               <Text style={[styles.of, { color: c.textDim }]}>
-                {today > PROGRAM_DAYS ? ' · beyond the summit' : ` of ${PROGRAM_DAYS}`}
+                {today > PROGRAM_DAYS ? t('beyond.beyondSummit') : t('today.hero.of', { total: PROGRAM_DAYS })}
               </Text>
             )}
           </Text>
@@ -102,13 +104,11 @@ export function TodayHero({
               entering={FadeIn.duration(220).reduceMotion(sys)}
             >
               <T v="heading" color={full ? c.sageInk : c.text} maxFontSizeMultiplier={1.3}>
-                {full ? 'Today is complete' : done ? `${left} to go today` : 'A fresh day'}
+                {full ? t('today.hero.complete') : done ? t('today.hero.toGo', { count: left }) : t('today.hero.fresh')}
               </T>
             </Animated.View>
             <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4}>
-              {full
-                ? 'Every habit done. See you tomorrow.'
-                : 'Weekly habits count on the days you do them. Rest days are never missed days.'}
+              {full ? t('today.hero.completeBody') : t('today.hero.body')}
             </T>
           </View>
         </View>
@@ -116,7 +116,7 @@ export function TodayHero({
           <ThemedView
             style={[styles.chip, styles.shrink, { backgroundColor: streak > 0 ? c.peachSoft : c.surfaceHigh }]}
             accessible
-            accessibilityLabel={`${streak} day streak`}
+            accessibilityLabel={t('today.hero.streakA11y', { count: streak })}
           >
             <Ionicons name="flame" size={15} color={streak > 0 ? c.peach : c.textFaint} />
             <T
@@ -126,7 +126,7 @@ export function TodayHero({
               numberOfLines={1}
               maxFontSizeMultiplier={1.3}
             >
-              {streak > 0 ? `${streak}-day streak` : 'No streak yet'}
+              {streak > 0 ? t('today.hero.streak', { count: streak }) : t('today.hero.noStreak')}
             </T>
           </ThemedView>
           <Level xp={xp} />
@@ -186,6 +186,7 @@ function Ring({ done, total, full }: { done: number; total: number; full: boolea
 /** The level chip: level, how far to the next, and XP rolling up, with a brief "+XP" when some is earned. */
 function Level({ xp }: { xp: number }) {
   const { c } = useTheme();
+  const t = useT();
   const [gain, setGain] = useState<{ n: number; key: number } | null>(null);
   const last = useRef(xp);
   useEffect(() => {
@@ -198,7 +199,7 @@ function Level({ xp }: { xp: number }) {
   }, [xp]);
   const g = growth(xp);
   return (
-    <View style={{ flexShrink: 0 }}>
+    <View style={{ flexShrink: 1, maxWidth: '62%' }}>
       {/* The title XP has earned, and the way to the next object; tap for the collection. */}
       <Pressable
         onPress={() => {
@@ -206,12 +207,18 @@ function Level({ xp }: { xp: number }) {
           router.push('/life-reset/collection');
         }}
         accessibilityRole="button"
-        accessibilityLabel={`${g.title}, ${xp} XP. Open your collection`}
+        accessibilityLabel={t('today.hero.levelA11y', { title: g.title, xp })}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
         <ThemedView style={[styles.chip, { backgroundColor: c.accentSoft }]}>
           <Ionicons name="diamond-outline" size={13} color={c.accentInk} />
-          <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
+          <T
+            v="caption"
+            color={c.accentInk}
+            style={[styles.chipText, styles.shrink]}
+            numberOfLines={1}
+            maxFontSizeMultiplier={1.3}
+          >
             {g.title}
           </T>
           <View style={{ width: 28 }}>
@@ -219,7 +226,7 @@ function Level({ xp }: { xp: number }) {
           </View>
           <RollingText text={`${xp}`} size={13} charWidth={8} weight="700" color={c.accentInk} />
           <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
-            XP
+            {t('today.hero.xp')}
           </T>
         </ThemedView>
       </Pressable>
@@ -233,7 +240,7 @@ function Level({ xp }: { xp: number }) {
           accessibilityLiveRegion="polite"
         >
           <T v="caption" color={c.onTint} style={styles.chipText}>
-            +{gain.n} XP
+            {t('today.hero.gain', { xp: gain.n })}
           </T>
         </Animated.View>
       ) : null}

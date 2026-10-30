@@ -14,6 +14,8 @@ import { PROGRAM_DAYS } from '../core/dates';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
+import { t as tr } from '../i18n';
+import { useT } from '../i18n/react';
 
 const DOTS = trailDots(3);
 
@@ -185,6 +187,7 @@ export const AscentScene = memo(AscentSceneImpl);
  */
 function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
   const { c, isDark } = useTheme();
+  const t = useT();
   const height = Math.round(width / ASCENT_ASPECT);
   const maintenance = today > PROGRAM_DAYS;
   const phase = phaseFor(Math.min(today, PROGRAM_DAYS));
@@ -222,7 +225,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
       {/* Where you are: kept to the top-left corner, clear of the upper switchbacks. */}
       <View style={[styles.where, { maxWidth: width * 0.4 }]}>
         <T v="overline" maxFontSizeMultiplier={1.15} color={c.indigoInk} numberOfLines={1}>
-          {maintenance ? 'Summit reached' : `Phase ${phase.n} of 3`}
+          {maintenance ? t('journeyTab.ascent.summit') : t('journeyTab.ascent.phaseOf', { n: phase.n })}
         </T>
         <View style={styles.dayLine}>
           <T
@@ -231,12 +234,11 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
             style={[styles.tabular, styles.dayText, maintenance && styles.dayTextSmall]}
             numberOfLines={1}
           >
-            {maintenance ? 'Maintenance' : `Day ${today}`}
+            {maintenance ? t('journeyTab.ascent.maintenance') : t('journeyTab.ascent.day', { day: today })}
           </T>
           {!maintenance ? (
             <T v="caption" maxFontSizeMultiplier={1.15} color={c.textDim} style={styles.tabular}>
-              {' '}
-              / {PROGRAM_DAYS}
+              {t('journeyTab.ascent.of', { total: PROGRAM_DAYS })}
             </T>
           ) : null}
         </View>
@@ -250,8 +252,8 @@ export const AscentLabels = memo(AscentLabelsImpl);
 /** What VoiceOver reads for the trail (the screen's tap target over it). */
 export function ascentLabel(days: AscentDay[], today: number): string {
   const done = days.filter((d) => d.status === 'done').length;
-  if (today > PROGRAM_DAYS) return `The Schwung Ascent. Summit reached. ${done} of ${PROGRAM_DAYS} days completed.`;
-  return `The Schwung Ascent. Day ${today} of ${PROGRAM_DAYS}, ${phaseFor(today).name} phase. ${done} days completed so far.`;
+  if (today > PROGRAM_DAYS) return tr('journeyTab.ascent.labelSummit', { done, total: PROGRAM_DAYS });
+  return tr('journeyTab.ascent.label', { day: today, total: PROGRAM_DAYS, phase: phaseFor(today).name, done });
 }
 
 /** Below the mountain, so it never covers a marker: the selected day (or a hint) and the way into Journey. */
@@ -265,6 +267,7 @@ export function AscentCaption({
   onOpenJourney: (day?: number) => void;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const done = days.filter((d) => d.status === 'done').length;
   const selectedDay = selected ? days[selected - 1] : null;
   return (
@@ -273,7 +276,7 @@ export function AscentCaption({
         <Pressable
           onPress={() => onOpenJourney(selectedDay.day)}
           accessibilityRole="button"
-          accessibilityLabel={`${describeDay(selectedDay)}. Open in journey`}
+          accessibilityLabel={t('journeyTab.ascent.openDay', { day: describeDay(selectedDay) })}
           style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
@@ -286,7 +289,7 @@ export function AscentCaption({
         </Pressable>
       ) : (
         <T v="caption" maxFontSizeMultiplier={1.3} color={c.textDim} numberOfLines={1} style={{ flexShrink: 1 }}>
-          {done} of {PROGRAM_DAYS} days climbed · tap a day
+          {t('journeyTab.ascent.climbed', { done, total: PROGRAM_DAYS })}
         </T>
       )}
       {/* While a day is selected, its caption is the way into Journey, so it gets the whole row. */}
@@ -294,14 +297,14 @@ export function AscentCaption({
         <Pressable
           onPress={() => onOpenJourney()}
           accessibilityRole="button"
-          accessibilityLabel="Open your journey"
+          accessibilityLabel={t('journeyTab.ascent.open')}
           hitSlop={8}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
             <Ionicons name="map-outline" size={14} color={c.accentInk} />
             <T v="caption" maxFontSizeMultiplier={1.3} color={c.accentInk} style={{ fontWeight: '700' }}>
-              Journey
+              {t('journeyTab.ascent.journey')}
             </T>
           </ThemedView>
         </Pressable>

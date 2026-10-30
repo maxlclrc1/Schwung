@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { PROGRAM_DAYS } from '../dates';
 
 /*
@@ -33,9 +34,15 @@ export function dueReflection(reflections: Record<string, Reflection> | undefine
 }
 
 export const ANSWER_WORDS: Record<ReflectionAnswer, string> = {
-  easier: 'Easier than expected',
-  right: 'About right',
-  harder: 'Harder than expected',
+  get easier() {
+    return t('progress.answer.easier');
+  },
+  get right() {
+    return t('progress.answer.right');
+  },
+  get harder() {
+    return t('progress.answer.harder');
+  },
 };
 
 /** Keeps only well-formed reflections from a save. */

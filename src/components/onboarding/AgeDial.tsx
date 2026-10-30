@@ -4,6 +4,7 @@ import { radius, space, useTheme } from '../../theme';
 import { T } from '../ui';
 import { useTints } from './kit';
 import { RollingText, StepRound, Tape } from './Tape';
+import { t as tr } from '../../i18n';
 
 export const AGE_MIN = 12;
 export const AGE_MAX = 90;
@@ -31,14 +32,7 @@ export const YEARS_OF: Record<AgeBand, number> = {
   '50_64': 56,
   '65p': 68,
 };
-const BAND_LABEL: Record<AgeBand, string> = {
-  u16: 'Under 16',
-  '16_17': '16–17',
-  '18_29': '18–29',
-  '30_49': '30–49',
-  '50_64': '50–64',
-  '65p': '65+',
-};
+const bandLabel = (b: AgeBand) => tr(`setup.age.${b}`);
 
 /**
  * The age, large, on a soft disc; a tape underneath to slide, − and + for one year. Nothing counts as chosen
@@ -46,7 +40,7 @@ const BAND_LABEL: Record<AgeBand, string> = {
  */
 export function AgeDial({ years, onChange }: { years: number | null; onChange: (y: number) => void }) {
   const { c } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const rest = 25;
   const band = years === null ? null : bandOf(years);
   const young = band === 'u16';
@@ -57,8 +51,8 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
       style={{ gap: space.lg }}
       accessible
       accessibilityRole="adjustable"
-      accessibilityLabel="Your age"
-      accessibilityValue={{ text: years === null ? 'Not chosen' : `${years}` }}
+      accessibilityLabel={tr('setup.ageDial.label')}
+      accessibilityValue={{ text: years === null ? tr('setup.ageDial.notChosen') : `${years}` }}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
       onAccessibilityAction={(e) =>
         set(years === null ? rest : years + (e.nativeEvent.actionName === 'increment' ? 1 : -1))
@@ -67,12 +61,12 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
       <View style={styles.stage}>
         <View
           pointerEvents="none"
-          style={[styles.disc, { backgroundColor: young ? 'transparent' : t.lavender.soft }]}
+          style={[styles.disc, { backgroundColor: young ? 'transparent' : tn.lavender.soft }]}
         />
         <View style={styles.number}>
           <StepRound
             icon="remove"
-            label="One year younger"
+            label={tr('setup.ageDial.younger')}
             disabled={years === AGE_MIN}
             onPress={() => set((years ?? rest + 1) - 1)}
           />
@@ -86,20 +80,20 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
           </View>
           <StepRound
             icon="add"
-            label="One year older"
+            label={tr('setup.ageDial.older')}
             disabled={years === AGE_MAX}
             onPress={() => set((years ?? rest - 1) + 1)}
           />
         </View>
         <View
-          style={[styles.chip, { backgroundColor: young ? 'transparent' : band ? t.lavender.soft : 'transparent' }]}
+          style={[styles.chip, { backgroundColor: young ? 'transparent' : band ? tn.lavender.soft : 'transparent' }]}
         >
-          <T v="caption" color={young ? c.danger : band ? t.lavender.ink : c.textFaint} style={{ fontWeight: '700' }}>
+          <T v="caption" color={young ? c.danger : band ? tn.lavender.ink : c.textFaint} style={{ fontWeight: '700' }}>
             {band
               ? young
-                ? 'Schwung is made for people 16 and older.'
-                : `${BAND_LABEL[band]} years`
-              : 'Slide the ruler to your age'}
+                ? tr('setup.ageDial.under16')
+                : tr('setup.ageDial.band', { band: bandLabel(band) })
+              : tr('setup.ageDial.slide')}
           </T>
         </View>
       </View>
@@ -115,7 +109,7 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
         value={years}
         rest={rest}
         onChange={set}
-        tint={t.lavender}
+        tint={tn.lavender}
       />
     </View>
   );

@@ -19,6 +19,7 @@ import { ThemedView } from '../../theme/transition';
 import { rise } from '../onboarding/kit';
 import { Button, T } from '../ui';
 import { CollectibleArt } from './Collectible';
+import { useT } from '../../i18n/react';
 
 const sys = ReduceMotion.System;
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
@@ -30,6 +31,7 @@ const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
  */
 export function UnlockMoment({ item, more, onClose }: { item: Collectible; more: number; onClose: () => void }) {
   const { c } = useTheme();
+  const t = useT();
   const reduce = useReducedMotion();
   const glow = useSharedValue(reduce ? 1 : 0);
   const lift = useSharedValue(reduce ? 1 : 0);
@@ -54,7 +56,7 @@ export function UnlockMoment({ item, more, onClose }: { item: Collectible; more:
       <Pressable
         style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(10,10,16,0.45)' }]}
         onPress={onClose}
-        accessibilityLabel="Close"
+        accessibilityLabel={t('common.close')}
       />
       <ThemedView style={[styles.card, { backgroundColor: c.surface }]} accessibilityLiveRegion="polite">
         <View style={styles.stage}>
@@ -67,13 +69,13 @@ export function UnlockMoment({ item, more, onClose }: { item: Collectible; more:
         </View>
         <Animated.View entering={rise(reduce ? 0 : 500)} style={{ gap: 4, alignItems: 'center' }}>
           <T v="overline" color={c.peachInk}>
-            New in your collection
+            {t('collection.newIn')}
           </T>
           <T v="heading" accessibilityRole="header" style={styles.center}>
             {item.name}
           </T>
           <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
-            You’re now {/^[AEIOU]/.test(item.title) ? 'an' : 'a'} {item.title}
+            {t('collection.nowTitle', { title: item.title })}
           </T>
         </Animated.View>
         <Animated.View entering={rise(reduce ? 0 : 700)}>
@@ -82,14 +84,14 @@ export function UnlockMoment({ item, more, onClose }: { item: Collectible; more:
           </T>
           {more ? (
             <T v="caption" color={c.textFaint} style={[styles.center, { marginTop: space.xs }]}>
-              And {more} more waiting in your collection.
+              {t('collection.more', { count: more })}
             </T>
           ) : null}
         </Animated.View>
         <Animated.View entering={rise(reduce ? 0 : 850)} style={styles.buttons}>
-          <Button label="Lovely" kind="secondary" onPress={onClose} style={{ flex: 1 }} />
+          <Button label={t('collection.lovely')} kind="secondary" onPress={onClose} style={{ flex: 1 }} />
           <Button
-            label="See collection"
+            label={t('collection.see')}
             onPress={() => {
               onClose();
               router.push('/life-reset/collection');

@@ -9,6 +9,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { T } from './ui';
 import { SCREEN_PX, worldAnchor } from './WorldLayer';
 import { LAKESIDE_BAND_TOP, TILE_HEIGHT } from './worldTiles';
+import { useT } from '../i18n/react';
 
 /*
  * Insights (the third tab, at the lakeside camp of the shared world): the main numbers at a glance, then each habit,
@@ -18,6 +19,7 @@ import { LAKESIDE_BAND_TOP, TILE_HEIGHT } from './worldTiles';
  */
 
 export function InsightsPage({ children }: { children: ReactNode }) {
+  const t = useT();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   // The lakeside band is near the bottom of the panorama: placed so the painting ends at the screen's bottom edge,
@@ -32,7 +34,7 @@ export function InsightsPage({ children }: { children: ReactNode }) {
     >
       <View style={styles.header}>
         <T v="heading" accessibilityRole="header" style={{ flex: 1 }}>
-          Insights
+          {t('insights.title')}
         </T>
         <ThemeToggle />
         <SettingsButton />
@@ -53,9 +55,10 @@ export type StripState = 'done' | 'skipped' | 'missed' | 'rest' | 'today';
 /** The last days as small marks: filled done, hollow missed, faint rest; today outlined. */
 export function DayStrip({ days }: { days: { day: number; state: StripState }[] }) {
   const { c } = useTheme();
+  const t = useT();
   const done = days.filter((d) => d.state === 'done').length;
   return (
-    <View style={styles.strip} accessible accessibilityLabel={`Last ${days.length} days: ${done} done`}>
+    <View style={styles.strip} accessible accessibilityLabel={t('insights.strip', { count: days.length, done })}>
       {days.map((d) => (
         <View
           key={d.day}
@@ -78,12 +81,15 @@ export function DayStrip({ days }: { days: { day: number; state: StripState }[] 
 /** A weekly habit's weeks: how much of each week's goal was met (the current week still open). */
 export function WeekBars({ weeks }: { weeks: { week: number; credited: number; goal: number }[] }) {
   const { c } = useTheme();
+  const t = useT();
   const shown = weeks.filter((w) => w.goal > 0).slice(-8);
   return (
     <View
       style={styles.bars}
       accessible
-      accessibilityLabel={shown.map((w) => `Week ${w.week}: ${w.credited} of ${w.goal}`).join('. ')}
+      accessibilityLabel={shown
+        .map((w) => t('insights.bars', { week: w.week, done: w.credited, goal: w.goal }))
+        .join('. ')}
     >
       {shown.map((w) => (
         <View key={w.week} style={styles.barCol}>

@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { PHASE_START } from '../progression';
 import type { Weekday } from '../dates';
 import type { DayLog } from '../types';
@@ -267,7 +268,7 @@ export function nextBoundary(s: ProgressionState, ctx: WeeklyContext, today: num
 /** Why a level can't be used for this person (null = it can). */
 export function checkLevel(habitId: string, from: Level, to: Level, c: Constraints = {}): string | null {
   const h = RESET_BY_ID[habitId];
-  if (!h) return 'not a Life Reset habit';
+  if (!h) return t('engine.blocked.notHabit');
   const target = h.targets[to.intensity][to.phase];
   if (c.profile) {
     const reason = resetExclusion(h, c.profile, to.intensity);
@@ -275,9 +276,9 @@ export function checkLevel(habitId: string, from: Level, to: Level, c: Constrain
   }
   const minutes = target.minutesPerDueDay;
   if (minutes !== null && c.availableMinutes !== undefined && (c.otherMinutes ?? 0) + minutes > c.availableMinutes)
-    return 'it doesn’t fit the time you have';
+    return t('engine.blocked.time');
   if (target.schedule.kind === 'workdays' && c.workdays && target.schedule.days > c.workdays.length)
-    return 'it needs more workdays than you have';
+    return t('engine.blocked.workdays');
   if (habitId === 'screen_app_limit' && c.pullBaseline !== undefined) {
     const limit = (l: Level) => {
       const a = h.targets[l.intensity][l.phase].amount;
@@ -287,7 +288,7 @@ export function checkLevel(habitId: string, from: Level, to: Level, c: Constrain
     const harder =
       INTENSITIES.indexOf(to.intensity) * 3 + PHASES.indexOf(to.phase) >
       INTENSITIES.indexOf(from.intensity) * 3 + PHASES.indexOf(from.phase);
-    if (harder && limit(to) >= limit(from)) return 'your limit is already as low as it goes for you';
+    if (harder && limit(to) >= limit(from)) return t('engine.blocked.lowest');
   }
   return null;
 }
@@ -362,7 +363,7 @@ export type ManualResult = { state: ProgressionState; level: Level } | { blocked
 export function makeEasier(s: ProgressionState, ctx: WeeklyContext, today: number, c: Constraints = {}): ManualResult {
   const from = levelOn(s, pendingChange(s, today)?.fromDay ?? today);
   const to = easierLevel(from);
-  if (!to) return { blocked: 'this is already the easiest target' };
+  if (!to) return { blocked: t('engine.blocked.easiest') };
   const reason = checkLevel(s.habitId, from, to, c);
   if (reason) return { blocked: reason };
   return { state: withEra(s, { ...to, fromDay: nextBoundary(s, ctx, today), reason: 'easier' }, today), level: to };
@@ -375,7 +376,7 @@ export function makeEasier(s: ProgressionState, ctx: WeeklyContext, today: numbe
 export function makeHarder(s: ProgressionState, ctx: WeeklyContext, today: number, c: Constraints = {}): ManualResult {
   const from = levelOn(s, pendingChange(s, today)?.fromDay ?? today);
   const to = harderLevel(from);
-  if (!to) return { blocked: 'this is already the hardest target' };
+  if (!to) return { blocked: t('engine.blocked.hardest') };
   const reason = checkLevel(s.habitId, from, to, c);
   if (reason) return { blocked: reason };
   return { state: withEra(s, { ...to, fromDay: nextBoundary(s, ctx, today), reason: 'harder' }, today), level: to };

@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CeremonyHost } from '../components/ceremony/Ceremonies';
 import { FinaleHost } from '../components/onboarding/Handoff';
 import { configureArtCache, prefetchArt } from '../components/artPrefetch';
+import { startLanguageSync } from '../i18n/device';
 import { cleanupTemps } from '../lib/appFiles';
 import { RecoveryScreen } from '../components/RecoveryScreen';
 import { ReminderSync } from '../components/reminders/ReminderSync';
@@ -48,6 +49,8 @@ function NativeAppearance() {
 }
 
 configureArtCache();
+// The language first, so the first frame is already in it (i18n/device.ts).
+startLanguageSync();
 
 export default function RootLayout() {
   const hydrated = useHydrated();
@@ -109,6 +112,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="language" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
