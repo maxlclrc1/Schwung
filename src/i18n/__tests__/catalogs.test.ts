@@ -107,6 +107,16 @@ describe('the catalogs', () => {
     });
   }
 
+  it('has no English change waiting for translation (npm run i18n:status)', () => {
+    const state = require('../../../scripts/i18n/state.json') as { en: Record<string, Leaf>; stale?: object };
+    const canon = (l: Leaf) => (typeof l === 'string' ? l : JSON.stringify(Object.entries(l).sort()));
+    const changed = Object.keys({ ...EN, ...state.en }).filter(
+      (k) => !(k in EN) || !(k in state.en) || canon(EN[k]) !== canon(state.en[k]),
+    );
+    expect(changed).toEqual([]);
+    expect(state.stale ?? {}).toEqual({});
+  });
+
   it('English matches the habit catalog’s own words', () => {
     for (const h of RESET_HABITS) {
       expect(P.habitName(h.id)).toBe(h.name);

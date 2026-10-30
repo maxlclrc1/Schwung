@@ -1,0 +1,156 @@
+{
+  "address": { "tr": "sen", "es": "tú", "fr": "vous", "de": "du", "pt-BR": "você" },
+  "terms": [
+    {
+      "en": "Schwung",
+      "note": "Brand: never translated.",
+      "tr": "Schwung",
+      "es": "Schwung",
+      "fr": "Schwung",
+      "de": "Schwung",
+      "pt-BR": "Schwung"
+    },
+    {
+      "en": "Life Reset",
+      "note": "Program name: kept in English.",
+      "tr": "Life Reset",
+      "es": "Life Reset",
+      "fr": "Life Reset",
+      "de": "Life Reset",
+      "pt-BR": "Life Reset"
+    },
+    { "en": "XP", "tr": "XP", "es": "XP", "fr": "XP", "de": "XP", "pt-BR": "XP" },
+    {
+      "en": "Habits",
+      "note": "Tab name.",
+      "tr": "Alışkanlıklar",
+      "es": "Hábitos",
+      "fr": "Habitudes",
+      "de": "Gewohnheiten",
+      "pt-BR": "Hábitos"
+    },
+    {
+      "en": "Journey",
+      "note": "Tab name.",
+      "tr": "Yolculuk",
+      "es": "Recorrido",
+      "fr": "Parcours",
+      "de": "Weg",
+      "pt-BR": "Jornada"
+    },
+    {
+      "en": "Insights",
+      "note": "Tab name.",
+      "tr": "İçgörüler",
+      "es": "Perspectivas",
+      "fr": "Tendances",
+      "de": "Einblicke",
+      "pt-BR": "Insights"
+    },
+    {
+      "en": "Foundation",
+      "note": "Phase 1.",
+      "tr": "Temel",
+      "es": "Base",
+      "fr": "Fondations",
+      "de": "Fundament",
+      "pt-BR": "Base"
+    },
+    {
+      "en": "Momentum",
+      "note": "Phase 2.",
+      "tr": "İvme",
+      "es": "Impulso",
+      "fr": "Élan",
+      "de": "Aufwind",
+      "pt-BR": "Impulso"
+    },
+    {
+      "en": "Mastery",
+      "note": "Phase 3.",
+      "tr": "Ustalık",
+      "es": "Maestría",
+      "fr": "Maîtrise",
+      "de": "Meisterschaft",
+      "pt-BR": "Maestria"
+    },
+    {
+      "en": "Starter",
+      "note": "Intensity.",
+      "tr": "Başlangıç",
+      "es": "Inicio",
+      "fr": "Initiation",
+      "de": "Einstieg",
+      "pt-BR": "Iniciante"
+    },
+    {
+      "en": "Challenge",
+      "note": "Intensity.",
+      "tr": "Zorlu",
+      "es": "Desafío",
+      "fr": "Défi",
+      "de": "Herausforderung",
+      "pt-BR": "Desafio"
+    },
+    {
+      "en": "Keep My Momentum",
+      "tr": "İvmemi Koru",
+      "es": "Mantener mi impulso",
+      "fr": "Garder mon élan",
+      "de": "Im Schwung bleiben",
+      "pt-BR": "Manter meu impulso"
+    },
+    {
+      "en": "Begin a New Ascent",
+      "tr": "Yeni Bir Tırmanışa Başla",
+      "es": "Comenzar un nuevo ascenso",
+      "fr": "Commencer une nouvelle ascension",
+      "de": "Neuen Aufstieg beginnen",
+      "pt-BR": "Começar uma nova subida"
+    },
+    { "en": "summit", "tr": "zirve", "es": "cumbre", "fr": "sommet", "de": "Gipfel", "pt-BR": "cume" },
+    { "en": "ascent", "tr": "tırmanış", "es": "ascenso", "fr": "ascension", "de": "Aufstieg", "pt-BR": "subida" },
+    { "en": "streak", "tr": "seri", "es": "racha", "fr": "série", "de": "Serie", "pt-BR": "sequência" },
+    {
+      "en": "rest day",
+      "tr": "dinlenme günü",
+      "es": "día de descanso",
+      "fr": "jour de repos",
+      "de": "Ruhetag",
+      "pt-BR": "dia de descanso"
+    },
+    {
+      "en": "collection",
+      "tr": "koleksiyon",
+      "es": "colección",
+      "fr": "collection",
+      "de": "Sammlung",
+      "pt-BR": "coleção"
+    },
+    {
+      "en": "weekly reflection",
+      "tr": "haftalık değerlendirme",
+      "es": "reflexión semanal",
+      "fr": "bilan de la semaine",
+      "de": "Wochenrückblick",
+      "pt-BR": "reflexão semanal"
+    },
+    {
+      "en": "Past journeys",
+      "tr": "Geçmiş yolculuklar",
+      "es": "Recorridos anteriores",
+      "fr": "Parcours passés",
+      "de": "Frühere Wege",
+      "pt-BR": "Jornadas anteriores"
+    },
+    {
+      "en": "Export my data",
+      "note": "Settings action, quoted in other text.",
+      "tr": "Verilerimi dışa aktar",
+      "es": "Exportar mis datos",
+      "fr": "Exporter mes données",
+      "de": "Meine Daten exportieren",
+      "pt-BR": "Exportar meus dados"
+    }
+  ]
+}

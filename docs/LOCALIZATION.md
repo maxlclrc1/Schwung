@@ -34,6 +34,26 @@ Spanish, French, German and Brazilian Portuguese. Phase 2 adds the next language
 - English catalog text matches the habit catalog's own data (names, descriptions, notes, social steps), so the two
   can't drift apart.
 
+## Workflow for new and changed strings (`scripts/i18n/`)
+
+English is the source of truth; translation happens offline, never in the app. `state.json` records the English each
+translation was made against, so only new, changed or missing strings are ever sent for translation.
+
+1. Change English in `src/i18n/locales/en/*.ts`.
+2. `npm run i18n:tasks` writes `scripts/i18n/tasks.json`: only the keys that need work, with the previous English,
+   placeholders, required plural forms, the files that use the key, matching glossary terms (`glossary.json`) and a
+   flag on health, safety, privacy and legal wording.
+3. Fill `translations.<lang>.text` (by a translator, or any tool outside the app) and set `source: "human"` for text a
+   person wrote or reviewed. Anything else is recorded as machine-made, awaiting review.
+4. `npm run i18n:apply` validates everything first (placeholders, plural forms, edge spaces, line breaks) and applies
+   all or nothing. Current translations are never replaced unless English changed (`--force` to override). Keys
+   English dropped are removed from every catalog.
+5. `npm run i18n:check` (and `npm test`) fails while any ready language is missing a key, has an outdated or invalid
+   translation, or English has changed since the last apply. `-- --strict` also fails on unreviewed sensitive text.
+6. After a person reviews: `npm run i18n:approve -- <lang|all> [key-prefix]`. `npm run i18n:status` shows the totals.
+
+The Phase 1 catalogs were machine-written, so every translation starts as awaiting review.
+
 ## Glossary
 
 | Concept                     | English                         | Türkçe                               | Español                            | Français                         | Deutsch                               | Português (BR)               |
