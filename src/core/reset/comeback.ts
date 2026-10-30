@@ -1,3 +1,4 @@
+import { t, type TKey } from '../../i18n';
 import type { DayCell } from '../charts';
 
 /*
@@ -30,14 +31,10 @@ export function absenceStart(cells: DayCell[], today: number): number | null {
   return run >= ABSENCE_DAYS ? start : null;
 }
 
-const LINES = [
-  { title: 'Your path is still here.', body: 'Welcome back. Pick up where you are: one small step today is plenty.' },
-  { title: 'Every step forward counts.', body: 'Good to see you. The trail continues from right here.' },
-  {
-    title: 'Welcome back. Pick up where you are.',
-    body: 'The mountain isn’t going anywhere, and neither is what you’ve built.',
-  },
-];
+const LINES = 3;
 
 /** The welcome's words, steady for a given absence. */
-export const comebackText = (start: number) => LINES[start % LINES.length];
+export const comebackText = (start: number) => ({
+  title: t(`progress.comeback.${start % LINES}.title` as TKey),
+  body: t(`progress.comeback.${start % LINES}.body` as TKey),
+});

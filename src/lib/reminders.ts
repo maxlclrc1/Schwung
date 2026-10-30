@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { AndroidImportance, IosAuthorizationStatus } from 'expo-notifications';
 import { Linking, Platform } from 'react-native';
 import { planReminders, type ReminderSettings } from '../core/reminders';
+import { t } from '../i18n';
 
 /*
  * Local reminders on the phone itself (expo-notifications): no account, no server, works offline. Every sync
@@ -75,7 +76,7 @@ export function syncReminders(
     if (!plan.length || (await reminderPermission()) !== 'granted') return;
     if (Platform.OS === 'android')
       await Notifications.setNotificationChannelAsync(CHANNEL, {
-        name: 'Daily reminder',
+        name: t('settings.reminders.daily'),
         importance: AndroidImportance.DEFAULT,
       }).catch(() => null);
     for (const r of plan)

@@ -84,7 +84,7 @@ describe('Delete my data', () => {
     const d = deps();
     const result = await deleteAllLocalData(d);
     expect(result.ok).toBe(false);
-    expect(result.failed).toEqual(['Your saved progress and settings']);
+    expect(result.failed).toEqual(['data']);
     expect(useResetPilot.getState().program).not.toBeNull();
     expect(await AsyncStorage.getItem('schwung-reset-pilot-recovery')).toBe('data for schwung-reset-pilot-recovery');
     expect(d.cancelReminders).not.toHaveBeenCalled();
@@ -99,7 +99,7 @@ describe('Delete my data', () => {
         throw new Error('busy');
       },
     });
-    expect(result).toEqual({ ok: false, failed: ['Scheduled reminders', 'Temporary share files'] });
+    expect(result).toEqual({ ok: false, failed: ['reminders', 'temp'] });
     expect(useResetPilot.getState().program).toBeNull();
   });
 

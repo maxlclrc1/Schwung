@@ -10,6 +10,7 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { SheetHeader } from '../SheetHeader';
 import { Button, Card, Screen, T } from '../ui';
+import { useT } from '../../i18n/react';
 
 /** Habits measured in minutes, where noting the minutes is offered (optional, never needed). */
 const TIMED = new Set(['focus_deepwork', 'mind_read', 'move_walk', 'home_tidy', 'skill_practice']);
@@ -22,6 +23,7 @@ const TIMED = new Set(['focus_deepwork', 'mind_read', 'move_walk', 'home_tidy', 
 export function PilotHabit() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { c } = useTheme();
+  const t = useT();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
   const [message, setMessage] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export function PilotHabit() {
   if (!program || !program.habits.includes(id)) {
     return (
       <Screen>
-        <SheetHeader title="Habit" />
+        <SheetHeader title={t('today.habit.fallback')} />
       </Screen>
     );
   }
@@ -56,12 +58,12 @@ export function PilotHabit() {
 
   const change = (f: () => string | null) => {
     const blocked = f();
-    if (blocked) setMessage(`Can’t change it: ${blocked}.`);
+    if (blocked) setMessage(t('today.habit.cantChange', { reason: blocked }));
     else {
       haptic.confirm();
       const after = useResetPilot.getState().program;
       const next = after ? P.pendingText(after, id, today) : null;
-      setMessage(next ? `Saved. ${next}.` : 'Saved: back to your current target.');
+      setMessage(next ? t('today.habit.saved', { pending: next }) : t('today.habit.savedBack'));
     }
   };
 
@@ -73,58 +75,69 @@ export function PilotHabit() {
           <T v="overline" color={c.accentInk}>
             {P.levelLineFor(program, id, today)}
           </T>
-          <T v="heading">{social ? 'Today’s step' : P.targetText(program, id, today)}</T>
+          <T v="heading">{social ? t('today.habit.todaysStep') : P.targetText(program, id, today)}</T>
           {social ? <T>{P.targetText(program, id, today)}</T> : null}
           <T color={c.textDim}>{P.frequencyText(program, id, today)}</T>
           {week ? (
             <T v="bodyStrong">
               {week.goal === 0
-                ? 'A short week: no goal this week.'
-                : `${week.credited} of ${week.goal} this week${week.credited >= week.goal ? ' · goal met' : ''}`}
+                ? t('today.habit.shortWeek')
+                : t(week.credited >= week.goal ? 'today.habit.weekMet' : 'today.habit.week', {
+                    done: week.credited,
+                    goal: week.goal,
+                  })}
             </T>
           ) : null}
           {week && week.goal > week.credited ? (
             <T v="caption" color={c.textDim}>
-              Any days you choose. A day without it is a rest day, never a missed one.
+              {t('today.habit.anyDays')}
             </T>
           ) : null}
           {pending ? (
             <T v="caption" color={c.accentInk}>
-              Coming up: {pending}.
+              {t('today.habit.comingUp', { pending })}
             </T>
           ) : null}
         </Card>
 
         <Card style={styles.gap}>
-          <T v="bodyStrong">Today</T>
+          <T v="bodyStrong">{t('today.habit.today')}</T>
           <T color={c.textDim}>
             {done
               ? strength
-                ? 'Session logged.'
-                : 'Done.'
+                ? t('today.habit.sessionLogged')
+                : t('today.habit.done')
               : track.skipped
-                ? 'Skipped today. That’s fine: it never counts as a failure.'
+                ? t('today.habit.skipped')
                 : strength
-                  ? 'No session logged today.'
-                  : 'Not done yet.'}
+                  ? t('today.habit.noSession')
+                  : t('today.habit.notYet')}
           </T>
           {counter !== null ? (
             <View style={styles.stepper}>
               <Step label="−1" onPress={() => s().count(id, -1)} />
               <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {Math.min(track.count ?? 0, counter)} of {counter}
+                {t('today.habit.of', { done: Math.min(track.count ?? 0, counter), goal: counter })}
               </T>
               <Step label="+1" onPress={() => s().count(id, 1)} />
             </View>
           ) : null}
           <Button
-            label={done ? (strength ? 'Undo session' : 'Undo') : strength ? 'Log a session' : 'Mark as done'}
+            label={
+              done
+                ? strength
+                  ? t('today.habit.undoSession')
+                  : t('today.habit.undo')
+                : strength
+                  ? t('today.habit.logSession')
+                  : t('today.habit.markDone')
+            }
             kind={done ? 'secondary' : 'primary'}
             onPress={() => s().toggle(id)}
           />
           {social && !done ? (
             <Button
-              label={track.skipped ? 'Don’t skip today' : 'Skip today'}
+              label={track.skipped ? t('today.habit.dontSkip') : t('today.habit.skip')}
               kind="ghost"
               onPress={() => s().setSkipped(id, !track.skipped)}
             />
@@ -132,10 +145,12 @@ export function PilotHabit() {
           {yesterday !== null ? (
             <View style={styles.yesterday}>
               <T v="caption" color={c.textDim} style={{ flex: 1 }}>
-                Yesterday: {P.isDone(program, id, yesterday) ? 'done' : 'not done'} (you can correct it until noon)
+                {P.isDone(program, id, yesterday) ? t('today.habit.yesterdayDone') : t('today.habit.yesterdayNotDone')}
               </T>
               <Choice
-                label={P.isDone(program, id, yesterday) ? 'Undo yesterday' : 'Done yesterday'}
+                label={
+                  P.isDone(program, id, yesterday) ? t('today.habit.undoYesterday') : t('today.habit.doneYesterday')
+                }
                 on={false}
                 onPress={() => s().toggle(id, yesterday)}
               />
@@ -145,10 +160,10 @@ export function PilotHabit() {
 
         {social ? (
           <Card style={styles.gap}>
-            <T v="bodyStrong">Any of these counts</T>
+            <T v="bodyStrong">{t('today.habit.anyCounts')}</T>
             {P.socialSteps(program, today).map((a) => (
               <T key={a.id} v="caption" color={c.textDim}>
-                · {a.text}
+                · {P.socialText(a)}
               </T>
             ))}
           </Card>
@@ -156,14 +171,14 @@ export function PilotHabit() {
 
         {TIMED.has(id) ? (
           <Card style={styles.gap}>
-            <T v="bodyStrong">Minutes (optional)</T>
+            <T v="bodyStrong">{t('today.habit.minutes')}</T>
             <T v="caption" color={c.textDim}>
-              Note how long it took, if you like. It never changes whether today is done.
+              {t('today.habit.minutesHint')}
             </T>
             <View style={styles.stepper}>
               <Step label="−5" onPress={() => s().setMinutes(id, amount && amount > 5 ? amount - 5 : null)} />
               <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {amount ? `${amount} min` : '—'}
+                {amount ? t('today.habit.min', { minutes: amount }) : '—'}
               </T>
               <Step label="+5" onPress={() => s().setMinutes(id, (amount ?? 0) + 5)} />
             </View>
@@ -172,17 +187,17 @@ export function PilotHabit() {
 
         {strength ? (
           <Card style={styles.gap}>
-            <T v="bodyStrong">Session details (optional)</T>
+            <T v="bodyStrong">{t('today.habit.session')}</T>
             <T v="caption" color={c.textDim}>
-              One session counts a day. Choosing a detail logs today’s session if it isn’t yet.
+              {t('today.habit.sessionHint')}
             </T>
             <View style={styles.chips}>
-              {SESSION_TYPES.map((t) => (
+              {SESSION_TYPES.map((type) => (
                 <Choice
-                  key={t}
-                  label={t[0].toUpperCase() + t.slice(1)}
-                  on={track.session?.type === t}
-                  onPress={() => s().setSession({ type: t })}
+                  key={type}
+                  label={P.sessionName(type)}
+                  on={track.session?.type === type}
+                  onPress={() => s().setSession({ type })}
                 />
               ))}
             </View>
@@ -192,13 +207,13 @@ export function PilotHabit() {
                 onPress={() => s().setSession({ minutes: Math.max(5, (track.session?.minutes ?? 30) - 5) })}
               />
               <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {track.session?.minutes ? `${track.session.minutes} min` : '—'}
+                {track.session?.minutes ? t('today.habit.min', { minutes: track.session.minutes }) : '—'}
               </T>
               <Step label="+5" onPress={() => s().setSession({ minutes: (track.session?.minutes ?? 25) + 5 })} />
             </View>
             {done && recoveryNote(program.logs, program.startedAt, today, id) ? (
               <T v="caption" color={c.textDim}>
-                You also trained yesterday. That’s fine; going lighter on back-to-back days can help recovery.
+                {t('today.habit.recovery')}
               </T>
             ) : null}
           </Card>
@@ -206,25 +221,25 @@ export function PilotHabit() {
 
         {own ? null : (
           <Card style={styles.gap}>
-            <T v="bodyStrong">Difficulty</T>
+            <T v="bodyStrong">{t('today.habit.difficulty')}</T>
             <T v="caption" color={c.textDim}>
-              Change it any time. Easier and harder start {week ? 'next Monday' : 'tomorrow'}, never partway through.
+              {week ? t('today.habit.difficultyHintWeek') : t('today.habit.difficultyHintDay')}
             </T>
             <View style={styles.stack}>
-              <Button label="Make it easier" kind="secondary" onPress={() => change(() => s().easier(id))} />
-              <Button label="Make it harder" kind="secondary" onPress={() => change(() => s().harder(id))} />
+              <Button label={t('today.habit.easier')} kind="secondary" onPress={() => change(() => s().easier(id))} />
+              <Button label={t('today.habit.harder')} kind="secondary" onPress={() => change(() => s().harder(id))} />
             </View>
             <T v="caption" color={c.textDim}>
-              How does it feel?
+              {t('today.habit.feel')}
             </T>
             <View style={styles.chips}>
               <Choice
-                label="Too easy"
+                label={t('today.habit.tooEasy')}
                 on={recentFeedback === 'too-easy'}
                 onPress={() => s().feedback(id, 'too-easy')}
               />
               <Choice
-                label="Too hard"
+                label={t('today.habit.tooHard')}
                 on={recentFeedback === 'too-hard'}
                 onPress={() => s().feedback(id, 'too-hard')}
               />
@@ -242,15 +257,15 @@ export function PilotHabit() {
             ))}
 
         <Card style={styles.gap}>
-          <T v="bodyStrong">Remove from my Life Reset</T>
+          <T v="bodyStrong">{t('today.habit.remove')}</T>
           <T v="caption" color={c.textDim}>
-            {P.isDone(program, id, today) ? 'It leaves from tomorrow (today stays done).' : 'It leaves from today.'} Its
-            past days stay in your Journey and Insights{own ? '' : ', and you can add it again any time'}.
+            {P.isDone(program, id, today) ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
+            {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
           </T>
           {removing ? (
             <View style={styles.stack}>
               <Button
-                label={`Remove ${name}`}
+                label={t('today.habit.removeName', { habit: name })}
                 kind="danger"
                 onPress={() => {
                   const problem = s().removeHabit(id);
@@ -262,10 +277,10 @@ export function PilotHabit() {
                   }
                 }}
               />
-              <Button label="Keep it" kind="ghost" onPress={() => setRemoving(false)} />
+              <Button label={t('today.habit.keepIt')} kind="ghost" onPress={() => setRemoving(false)} />
             </View>
           ) : (
-            <Button label="Remove this habit" kind="secondary" onPress={() => setRemoving(true)} />
+            <Button label={t('today.habit.removeThis')} kind="secondary" onPress={() => setRemoving(true)} />
           )}
           {removeError ? (
             <T v="caption" color={c.danger}>

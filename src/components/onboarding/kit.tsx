@@ -17,6 +17,7 @@ import Animated, {
 import { useState } from 'react';
 import { space, useTheme } from '../../theme';
 import { T } from '../ui';
+import { t as tr, type TKey } from '../../i18n';
 
 /*
  * The set-up's shared language: five soft tints from the world (lavender sky, sage meadow, misty blue valley,
@@ -154,12 +155,18 @@ export function Question({
   );
 }
 
+const chapter = (i: number, tint: TintName) => ({
+  tint,
+  get name() {
+    return tr(`setup.chapters.${i}` as TKey);
+  },
+});
 export const CHAPTERS: { name: string; tint: TintName }[] = [
-  { name: 'You', tint: 'lavender' },
-  { name: 'Your habits', tint: 'peach' },
-  { name: 'Your life', tint: 'mist' },
-  { name: 'Your start', tint: 'sage' },
-  { name: 'Your reset', tint: 'indigo' },
+  chapter(0, 'lavender'),
+  chapter(1, 'peach'),
+  chapter(2, 'mist'),
+  chapter(3, 'sage'),
+  chapter(4, 'indigo'),
 ];
 
 /**
@@ -188,7 +195,11 @@ export function TrailProgress({ at }: { at: number }) {
       onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)}
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel={`${CHAPTERS[chapter].name}, part ${chapter + 1} of ${CHAPTERS.length}`}
+      accessibilityLabel={tr('setup.chapterA11y', {
+        name: CHAPTERS[chapter].name,
+        n: chapter + 1,
+        total: CHAPTERS.length,
+      })}
     >
       <View style={[styles.trailBase, { backgroundColor: c.border }]} />
       <Animated.View style={[styles.trailLine, line]} />

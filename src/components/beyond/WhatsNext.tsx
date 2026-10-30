@@ -14,6 +14,7 @@ import { Press } from '../onboarding/Choices';
 import { rise, useTints, type Tint } from '../onboarding/kit';
 import { Button, Screen, T } from '../ui';
 import { WorldBackdrop } from '../World';
+import { useT } from '../../i18n/react';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
 
@@ -24,7 +25,8 @@ type Icon = ComponentProps<typeof Ionicons>['name'];
  */
 export function WhatsNext() {
   const { c } = useTheme();
-  const t = useTints();
+  const tint = useTints();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
@@ -56,39 +58,34 @@ export function WhatsNext() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={rise(0)} style={{ gap: space.sm }}>
-          <T v="overline" color={t.peach.ink}>
-            {P.ascentOf(program) > 1 ? `Ascent ${P.ascentOf(program)} · ` : ''}The summit · Day {PROGRAM_DAYS}
+          <T v="overline" color={tint.peach.ink}>
+            {P.ascentOf(program) > 1
+              ? t('beyond.next.kickerAscent', { ascent: P.ascentOf(program), total: PROGRAM_DAYS })
+              : t('beyond.next.kicker', { total: PROGRAM_DAYS })}
           </T>
           <T v="display" accessibilityRole="header">
-            What’s next?
+            {t('beyond.next.title')}
           </T>
-          <T color={c.textDim}>
-            {stats.done} of {PROGRAM_DAYS} days climbed. Your journey and its story are yours to keep, whichever way you
-            go.
-          </T>
+          <T color={c.textDim}>{t('beyond.next.body', { done: stats.done, total: PROGRAM_DAYS })}</T>
         </Animated.View>
 
         <View style={styles.options}>
           <Animated.View entering={rise(120)}>
             <Option
-              tint={t.sage}
+              tint={tint.sage}
               icon="trending-up-outline"
-              title="Keep My Momentum"
-              body="Your habits carry on, day after day, with their targets as they are. Streak and XP keep growing."
+              title={t('beyond.next.momentum')}
+              body={t('beyond.next.momentumBody')}
               onPress={keep}
               disabled={busy}
             />
           </Animated.View>
           <Animated.View entering={rise(220)}>
             <Option
-              tint={t.lavender}
+              tint={tint.lavender}
               icon="flag-outline"
-              title="Begin a New Ascent"
-              body={
-                ascentOpen
-                  ? 'A fresh 66 days, starting from your habits and levels. This journey is kept, with its story.'
-                  : 'A fresh 66 days from your habits and levels. It opens tomorrow, once your summit day is done.'
-              }
+              title={t('beyond.next.ascent')}
+              body={ascentOpen ? t('beyond.next.ascentBody') : t('beyond.next.ascentTomorrow')}
               onPress={() => router.push('/life-reset/ascent')}
               disabled={busy || !ascentOpen}
             />
@@ -96,9 +93,9 @@ export function WhatsNext() {
         </View>
 
         <Animated.View entering={rise(320)} style={{ gap: space.xs }}>
-          <Button label="Decide later" kind="ghost" onPress={close} disabled={busy} />
+          <Button label={t('beyond.next.later')} kind="ghost" onPress={close} disabled={busy} />
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            Your habits and reminders rest until you choose. Nothing is missed.
+            {t('beyond.next.laterBody')}
           </T>
         </Animated.View>
       </ScrollView>

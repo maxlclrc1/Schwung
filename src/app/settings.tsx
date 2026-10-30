@@ -14,61 +14,85 @@ import { legalVisible } from '../lib/legal';
 import { usePreferences } from '../store/preferences';
 import { radius, space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
+import { language } from '../i18n';
+import { LANGUAGES } from '../i18n/languages';
+import { useT } from '../i18n/react';
 
 export default function Settings() {
   const { c } = useTheme();
+  const t = useT();
+  const pref = usePreferences((s) => s.language);
+  const lang = LANGUAGES.find((l) => l.code === language());
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Settings" />
+      <SheetHeader title={t('settings.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <PilotSettings Section={Section} Row={Row} />
 
         <RemindersSettings />
 
-        <Section title="Appearance">
+        <Section title={t('settings.appearance')}>
           <AppearancePicker />
         </Section>
 
-        <Section title="Privacy & Data">
-          <Row label="Privacy & Data" icon="lock-closed-outline" onPress={() => router.push('/privacy')} />
+        <Section title={t('settings.language.title')}>
+          <Row label={t('settings.language.row')} onPress={() => router.push('/language')}>
+            <View style={styles.value}>
+              {/* The language in its own name; "Follow device" when following the phone. */}
+              <T color={c.textDim} numberOfLines={1} style={{ flexShrink: 1 }}>
+                {pref === 'system' ? t('settings.language.followDevice') : lang?.native}
+              </T>
+              <Ionicons name="chevron-forward" size={18} color={c.textFaint} />
+            </View>
+          </Row>
         </Section>
 
-        <Section title="About">
+        <Section title={t('settings.privacySection')}>
+          <Row label={t('settings.privacyRow')} icon="lock-closed-outline" onPress={() => router.push('/privacy')} />
+        </Section>
+
+        <Section title={t('settings.about')}>
           <Row
-            label="Wellness note"
+            label={t('settings.wellness')}
             icon="heart-outline"
             onPress={() => router.push({ pathname: '/legal', params: { doc: 'wellness' } })}
           />
           {legalVisible.terms() ? (
             <Row
-              label="Terms of Use"
+              label={t('settings.terms')}
               icon="document-text-outline"
               onPress={() => router.push({ pathname: '/legal', params: { doc: 'terms' } })}
             />
           ) : null}
           {legalVisible.contact() ? (
-            <Row label="Contact" icon="mail-outline" onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
+            <Row
+              label={t('settings.contact')}
+              icon="mail-outline"
+              onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
+            />
           ) : null}
         </Section>
 
         <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
           {APP_NAME} {Constants.expoConfig?.version ?? ''}
-          {'\n'}Free. No account. No tracking. Everything stays on this phone.
+          {'\n'}
+          {t('settings.tagline')}
         </T>
       </ScrollView>
     </Screen>
   );
 }
 
-const APPEARANCE: { value: ThemePreference; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { value: 'system', label: 'System', icon: 'phone-portrait-outline' },
-  { value: 'light', label: 'Light', icon: 'sunny-outline' },
-  { value: 'dark', label: 'Dark', icon: 'moon-outline' },
+const APPEARANCE: { value: ThemePreference; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'system', icon: 'phone-portrait-outline' },
+  { value: 'light', icon: 'sunny-outline' },
+  { value: 'dark', icon: 'moon-outline' },
 ];
 
 function AppearancePicker() {
   const { c } = useTheme();
+  const t = useT();
   const preference = useThemePreference();
   const setThemePreference = usePreferences((s) => s.setThemePreference);
   return (
@@ -84,13 +108,23 @@ function AppearancePicker() {
             }}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            accessibilityLabel={o.value === 'system' ? 'Match phone setting' : `${o.label} mode`}
+            accessibilityLabel={
+              o.value === 'system'
+                ? t('settings.theme.systemA11y')
+                : t('settings.theme.mode', { name: t(`settings.theme.${o.value}`) })
+            }
             style={{ flex: 1 }}
           >
             <ThemedView style={[styles.segmentItem, { backgroundColor: selected ? c.accentSoft : c.surface }]}>
               <Ionicons name={o.icon} size={18} color={selected ? c.accentInk : c.textDim} />
-              <T v="caption" color={selected ? c.accentInk : c.textDim} style={{ fontWeight: '700' }}>
-                {o.label}
+              <T
+                v="caption"
+                color={selected ? c.accentInk : c.textDim}
+                style={{ fontWeight: '700' }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {t(`settings.theme.${o.value}`)}
               </T>
             </ThemedView>
           </Pressable>
@@ -141,7 +175,9 @@ function Row({
       accessibilityRole={onPress ? 'button' : undefined}
       style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
     >
-      <T color={color}>{label}</T>
+      <T color={color} style={{ flexShrink: 1 }}>
+        {label}
+      </T>
       {children ?? (icon ? <Ionicons name={icon} size={20} color={destructive ? color : c.textFaint} /> : null)}
     </Pressable>
   );
@@ -150,7 +186,15 @@ function Row({
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
   section: { borderRadius: radius.lg, paddingHorizontal: space.lg },
-  row: { minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  row: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.md,
+    paddingVertical: space.xs,
+  },
+  value: { flexDirection: 'row', alignItems: 'center', gap: space.xs, flexShrink: 1 },
   segment: { flexDirection: 'row', gap: space.xs, paddingVertical: space.sm },
   segmentItem: {
     flex: 1,

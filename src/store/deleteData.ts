@@ -12,7 +12,8 @@ import { discardPending } from './storage';
  * Every Schwung save is under a `schwung-` key: the Life Reset (and its Expo Go variant), past journeys, their
  * recovery copies,
  * preferences (reminder time, welcome-back choice), and old saves from earlier versions (`schwung-state*`,
- * `schwung-fieldnotes*`). All of them go. The theme (light, dark or system) isn't personal and is kept. Pending
+ * `schwung-fieldnotes*`). All of them go. The theme and the language aren't personal and are kept (in memory, and
+ * saved again with the preferences). Pending
  * reminders and Schwung's temporary share files are removed through the functions passed in (native modules).
  * Nothing outside Schwung's own keys and folder is touched; images saved to Photos stay in Photos.
  *
@@ -22,13 +23,15 @@ import { discardPending } from './storage';
 
 export const PERSONAL_KEY_PREFIX = 'schwung-';
 
-export type DeleteResult = { ok: boolean; failed: string[] };
+/** What couldn't be removed: the saves themselves, scheduled reminders, temporary share files. */
+export type DeleteFailure = 'data' | 'reminders' | 'temp';
+export type DeleteResult = { ok: boolean; failed: DeleteFailure[] };
 
 export async function deleteAllLocalData(deps: {
   cancelReminders: () => Promise<void>;
   removeTempFiles: () => Promise<void> | void;
 }): Promise<DeleteResult> {
-  const failed: string[] = [];
+  const failed: DeleteFailure[] = [];
   let keys: string[];
   try {
     keys = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith(PERSONAL_KEY_PREFIX));
@@ -36,27 +39,27 @@ export async function deleteAllLocalData(deps: {
     discardPending(keys);
     await AsyncStorage.multiRemove(keys);
     const left = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith(PERSONAL_KEY_PREFIX));
-    if (left.length) return { ok: false, failed: ['Your saved progress and settings'] };
+    if (left.length) return { ok: false, failed: ['data'] };
   } catch {
-    return { ok: false, failed: ['Your saved progress and settings'] };
+    return { ok: false, failed: ['data'] };
   }
 
   // What's in memory follows: no program, no recovery, default reminders (off). The theme stays.
-  const theme = usePreferences.getState().themePreference;
+  const { themePreference: theme, language } = usePreferences.getState();
   endRecovery();
   useResetPilot.setState({ program: null, devDayOffset: 0 });
   useJourneys.setState({ journeys: [], held: false });
-  usePreferences.setState({ themePreference: theme, reminders: DEFAULT_REMINDERS, comebacks: true });
+  usePreferences.setState({ themePreference: theme, language, reminders: DEFAULT_REMINDERS, comebacks: true });
 
   try {
     await deps.cancelReminders();
   } catch {
-    failed.push('Scheduled reminders');
+    failed.push('reminders');
   }
   try {
     await deps.removeTempFiles();
   } catch {
-    failed.push('Temporary share files');
+    failed.push('temp');
   }
   return { ok: failed.length === 0, failed };
 }

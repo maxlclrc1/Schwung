@@ -1,3 +1,4 @@
+import { t, type TKey } from '../../i18n';
 import { dateForDay, PROGRAM_DAYS } from '../dates';
 import { dayQualifies, doneCount, XP_FULL_DAY_BONUS, XP_PER_HABIT } from '../progression';
 import type { DayLog } from '../types';
@@ -9,6 +10,7 @@ import {
   type Precaution,
   type Profile,
   type Wake,
+  TEEN_FOCUS_MAX_MIN,
 } from './profile';
 import {
   INTENSITIES,
@@ -22,6 +24,7 @@ import {
   strengthNotes,
   upBy,
   type Intensity,
+  type Phase,
   type Schedule,
   type SocialAction,
   type Target,
@@ -306,8 +309,18 @@ export function pilotProfile(a: PilotAnswers): Profile {
   };
 }
 
-export const habitName = (id: string) => RESET_BY_ID[id]?.name ?? id;
-export const habitDescription = (id: string) => RESET_BY_ID[id]?.description ?? '';
+/** A catalog habit's name and description in the current language (i18n); the catalog keeps the English. */
+export const habitName = (id: string) => (RESET_BY_ID[id] ? t(`engine.habit.${id}.name` as TKey) : id);
+export const habitDescription = (id: string) => (RESET_BY_ID[id] ? t(`engine.habit.${id}.description` as TKey) : '');
+export const intensityName = (i: Intensity) => t(`engine.intensity.${i}` as TKey);
+export const phaseName = (p: Phase) => t(`engine.phase.${p}` as TKey);
+/** A Social Confidence step, in words. */
+export const socialText = (a: SocialAction) => t(`engine.social.${a.id}` as TKey);
+/** A strength session type's label (stored as its English id). */
+export const sessionName = (type: string) =>
+  t(`today.session.${type === 'full body' ? 'fullBody' : type === 'other' ? 'anything' : type}` as TKey);
+/** A skill's label (stored answers keep the English id). */
+export const skillName = (skill: string) => (SKILLS.includes(skill) ? t(`engine.skills.${skill}` as TKey) : skill);
 export const INTENSITY_NAME: Record<Intensity, string> = {
   starter: 'Starter',
   standard: 'Standard',
@@ -391,9 +404,21 @@ export function suggestedIntensity(habitId: PilotHabitId, a: PilotAnswers): Inte
 
 /** Safety and guidance notes to show with a habit for this person (the catalog's, plus Strength's own). */
 export function habitNotes(habitId: PilotHabitId, a: PilotAnswers): string[] {
-  const h = RESET_BY_ID[habitId];
-  return habitId === 'strength_log' ? [...h.notes, ...strengthNotes(pilotProfile(a))] : h.notes;
+  const notes = (NOTE_KEYS[habitId] ?? []).map((k) => t(`engine.notes.${k}` as TKey, { max: TEEN_FOCUS_MAX_MIN }));
+  return habitId === 'strength_log' ? [...notes, ...strengthNotes(pilotProfile(a))] : notes;
 }
+
+/** Each habit's notes (habits.ts `notes`, in the same order), as catalog keys. */
+const NOTE_KEYS: Partial<Record<string, string[]>> = {
+  focus_deepwork: ['focusTeen'],
+  screen_app_limit: ['scrolling'],
+  confidence_talk: ['social'],
+  move_walk: ['movement'],
+  sleep_wake: ['sleep'],
+  skill_practice: ['skillTeen', 'skillSport'],
+  social_reach_out: ['reachOut'],
+  strength_log: ['strengthTracks', 'strengthRoutine', 'strengthStop'],
+};
 
 export const targetFor = (habitId: string, l: Level): Target => RESET_BY_ID[habitId].targets[l.intensity][l.phase];
 
@@ -401,48 +426,49 @@ export const targetFor = (habitId: string, l: Level): Target => RESET_BY_ID[habi
 export const minutesFor = (habitId: string, l: Level) =>
   RESET_BY_ID[habitId] ? (targetFor(habitId, l).minutesPerDueDay ?? 0) : 0;
 
-const BASELINE_PROBLEM: Record<Baseline, string> = {
-  phone: 'Less Scrolling: say how long you use your phone a day.',
-  pullMinutes: 'Less Scrolling: say how long a day you spend on your main app.',
-  wake: 'Sleep Routine: say when you usually get up.',
-  activeDays: 'Daily Movement: say how many days a week you’re active.',
-  skill: 'Practice a Skill: choose your skill.',
-  strengthStart: 'Strength Training: say where you’re starting from.',
-};
+const baselineProblem = (b: Baseline) => t(`engine.problems.baseline.${b}` as TKey);
 
-/** The checks for starting: one problem per line, or none. */
-export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[] {
+/** The checks for starting: one problem per line, or none (`timeCheck` false: without the time questions). */
+export function setupProblems(a: PilotAnswers, choices: PilotChoice[], timeCheck = true): string[] {
   const out: string[] = [];
-  if (a.age === 'u16') return ['Schwung is made for people 16 and older.'];
-  if (!choices.length) out.push('Choose at least one habit.');
-  if (choices.length > MAX_HABITS) out.push(`Choose at most ${MAX_HABITS} habits for now.`);
+  if (a.age === 'u16') return [t('engine.problems.under16')];
+  if (!choices.length) out.push(t('engine.problems.chooseOne'));
+  if (choices.length > MAX_HABITS) out.push(t('engine.problems.chooseAtMost', { max: MAX_HABITS }));
   const ids = new Set<string>();
   for (const c of choices) {
     if (!isPilotHabit(c.habitId)) {
-      out.push('Choose from the Life Reset habits.');
+      out.push(t('engine.problems.catalogOnly'));
       continue;
     }
     if (ids.has(c.habitId)) {
-      out.push('Each habit can be chosen once.');
+      out.push(t('engine.problems.once'));
       continue;
     }
     ids.add(c.habitId);
-    for (const b of BASELINES[c.habitId] ?? []) if (!answered(a, b)) out.push(BASELINE_PROBLEM[b]);
+    for (const b of BASELINES[c.habitId] ?? []) if (!answered(a, b)) out.push(baselineProblem(b));
     if ((BASELINES[c.habitId] ?? []).every((b) => answered(a, b))) {
       const reason = resetExclusion(RESET_BY_ID[c.habitId], pilotProfile(a), c.intensity);
-      if (reason) out.push(`${habitName(c.habitId)} at ${INTENSITY_NAME[c.intensity]}: ${reason}.`);
+      if (reason)
+        out.push(
+          t('engine.problems.excluded', {
+            habit: habitName(c.habitId),
+            intensity: intensityName(c.intensity),
+            reason,
+          }),
+        );
     }
   }
   if (ids.has('skill_practice') && a.skill !== undefined && !SKILLS.includes(a.skill))
-    out.push('Practice a Skill: choose your skill.');
+    out.push(baselineProblem('skill'));
   if (ids.has('screen_app_limit') && a.pullMinutes !== undefined && !(a.pullMinutes > 0 && a.pullMinutes <= 1440))
-    out.push('Less Scrolling: say how long a day you spend on your main app.');
+    out.push(baselineProblem('pullMinutes'));
   const strength = choices.find((c) => c.habitId === 'strength_log');
   const own = a.ownSessions;
   if (strength?.intensity === 'challenge' && !(own !== undefined && Number.isInteger(own) && own >= 2 && own <= 7))
-    out.push('Strength Training at Challenge: say how many sessions a week you already do (2–7).');
+    out.push(t('engine.problems.strengthOwn'));
+  if (!timeCheck) return [...new Set(out)];
   if (!PILOT_TIME_OPTIONS.includes(a.minutesPerDay as (typeof PILOT_TIME_OPTIONS)[number]))
-    out.push('Say how much time you have on a busy day.');
+    out.push(t('engine.problems.time'));
   else {
     // Only real Life Reset habits count (anything else is refused above, never looked up).
     const total = busiestDayMinutes(
@@ -450,10 +476,7 @@ export function setupProblems(a: PilotAnswers, choices: PilotChoice[]): string[]
         .filter((c) => isPilotHabit(c.habitId))
         .map((c) => ({ habitId: c.habitId, level: foundation(c.intensity) })),
     );
-    if (total > a.minutesPerDay)
-      out.push(
-        `These take about ${total} min on a day they all fall on, more than the ${a.minutesPerDay} min you have. Choose an easier intensity or fewer habits.`,
-      );
+    if (total > a.minutesPerDay) out.push(t('engine.problems.tooLong', { total, available: a.minutesPerDay }));
   }
   return [...new Set(out)];
 }
@@ -516,22 +539,31 @@ export const missingBaselines = (p: PilotProgram, id: string) =>
  * the level it's at today. `extra` holds the new answers (its questions, or more time a day).
  */
 export function addProblems(p: PilotProgram, extra: Partial<PilotAnswers>, choice: PilotChoice, day: number): string[] {
-  if (!isPilotHabit(choice.habitId)) return ['Choose from the Life Reset habits.'];
-  if (p.habits.includes(choice.habitId)) return [`${habitName(choice.habitId)} is already in your Life Reset.`];
+  if (!isPilotHabit(choice.habitId)) return [t('engine.problems.catalogOnly')];
+  if (p.habits.includes(choice.habitId)) return [t('engine.problems.alreadyIn', { habit: habitName(choice.habitId) })];
   const a = { ...p.answers, ...extra };
   const out: string[] = [];
-  if (p.habits.length >= MAX_HABITS) out.push(`You have ${MAX_HABITS} habits, the most for now.`);
+  if (p.habits.length >= MAX_HABITS) out.push(t('engine.problems.atMost', { max: MAX_HABITS }));
   // Its questions and eligibility, worded as in set-up (set-up's own time check is replaced below).
-  out.push(...setupProblems(a, [choice]).filter((x) => !x.startsWith('These take') && !x.startsWith('Say how much')));
+  out.push(...setupProblems(a, [choice], false));
+  const time = addTimeProblem(p, extra, choice, day);
+  if (time) out.push(time);
+  return [...new Set(out)];
+}
+
+/** Add a habit's time check alone: the problem when the habits wouldn't fit the time a day, or null. */
+export function addTimeProblem(
+  p: PilotProgram,
+  extra: Partial<PilotAnswers>,
+  choice: PilotChoice,
+  day: number,
+): string | null {
+  const a = { ...p.answers, ...extra };
   const total = busiestDayMinutes([
     ...p.habits.map((id) => ({ habitId: id, level: levelFor(p, id, day) })),
     { habitId: choice.habitId, level: foundation(choice.intensity) },
   ]);
-  if (total > a.minutesPerDay)
-    out.push(
-      `With it, your habits take about ${total} min on a day they all fall on, more than the ${a.minutesPerDay} min you have. Choose an easier intensity or more time.`,
-    );
-  return [...new Set(out)];
+  return total > a.minutesPerDay ? t('engine.problems.tooLongAdd', { total, available: a.minutesPerDay }) : null;
 }
 
 /**
@@ -592,12 +624,12 @@ export function nextScene(p: PilotProgram, views: number): number {
 export function customProblems(p: PilotProgram, name: string, perWeek: number): string[] {
   const out: string[] = [];
   const n = name.trim();
-  if (!n) out.push('Give it a name.');
-  else if (n.length > 40) out.push('Keep the name to 40 characters.');
+  if (!n) out.push(t('engine.problems.giveName'));
+  else if (n.length > 40) out.push(t('engine.problems.nameLength'));
   else if (p.habits.some((id) => nameOf(p, id).toLowerCase() === n.toLowerCase()))
-    out.push('You already have a habit with that name.');
-  if (!(Number.isInteger(perWeek) && perWeek >= 1 && perWeek <= 7)) out.push('Choose how many days a week.');
-  if (p.habits.length >= MAX_HABITS) out.push(`You have ${MAX_HABITS} habits, the most for now.`);
+    out.push(t('engine.problems.nameTaken'));
+  if (!(Number.isInteger(perWeek) && perWeek >= 1 && perWeek <= 7)) out.push(t('engine.problems.howOften'));
+  if (p.habits.length >= MAX_HABITS) out.push(t('engine.problems.atMost', { max: MAX_HABITS }));
   return out;
 }
 
@@ -639,8 +671,8 @@ export function addCustomHabit(
 
 /** Why a habit can't be removed, or null. */
 export function removeProblem(p: PilotProgram, id: string): string | null {
-  if (!p.habits.includes(id)) return 'It isn’t in your Life Reset.';
-  if (p.habits.length <= 1) return 'Keep at least one habit. To stop altogether, end the Life Reset in Settings.';
+  if (!p.habits.includes(id)) return t('engine.problems.notIn');
+  if (p.habits.length <= 1) return t('engine.problems.keepOne');
   return null;
 }
 
@@ -732,11 +764,15 @@ const logOf = (p: PilotProgram, day: number) => p.logs[dateForDay(p.startedAt, d
 export const isDone = (p: PilotProgram, id: string, day: number) => !!logOf(p, day)?.completed.includes(id);
 export const trackOf = (p: PilotProgram, id: string, day: number) => readTrack(logOf(p, day), id);
 
-const fmtMinutes = (m: number) => `${m} minute${m === 1 ? '' : 's'}`;
-const fmtDuration = (m: number) =>
-  m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${String(m % 60).padStart(2, '0')}` : ''}`;
+const fmtMinutes = (m: number) => t('engine.minutes', { count: m });
+export const fmtDuration = (m: number) =>
+  m < 60
+    ? t('engine.duration.min', { m })
+    : m % 60
+      ? t('engine.duration.hoursMinutes', { h: Math.floor(m / 60), mm: String(m % 60).padStart(2, '0') })
+      : t('engine.duration.hours', { h: m / 60 });
 const skillWords = (skill: string | undefined) =>
-  !skill || skill === 'Other' ? 'your skill' : skill === 'Sport skill' ? 'your sport skill' : skill.toLowerCase();
+  t(`engine.skillIn.${skill && SKILLS.includes(skill) ? skill : 'Other'}` as TKey);
 
 /** Less Scrolling's limit for a level, from the person's own main-app time. */
 export function scrollLimitFor(p: PilotProgram, l: Level): number {
@@ -768,47 +804,66 @@ export function targetText(p: PilotProgram, id: string, day: number): string {
   const own = p.custom?.[id];
   if (own) return own.note || frequencyText(p, id, day);
   const l = levelFor(p, id, day);
-  const t = targetFor(id, l);
-  const minutes = t.amount.kind === 'fixed' ? t.amount.value : 0;
+  const target = targetFor(id, l);
+  const minutes = target.amount.kind === 'fixed' ? target.amount.value : 0;
   const blocks = timerBlocksFor(p, id, day);
-  const time = blocks.length > 1 ? `${blocks.length} × ${fmtMinutes(blocks[0])}` : fmtMinutes(minutes);
+  const time =
+    blocks.length > 1 ? t('engine.blocks', { n: blocks.length, each: fmtMinutes(blocks[0]) }) : fmtMinutes(minutes);
   switch (id) {
     case 'strength_log': {
-      const n = t.amount.kind === 'own' ? (p.answers.ownSessions ?? 2) : minutes;
-      return `${n} session${n === 1 ? '' : 's'} a week${t.aboutMinutes ? `, about ${t.aboutMinutes} min` : ''}`;
+      const n = target.amount.kind === 'own' ? (p.answers.ownSessions ?? 2) : minutes;
+      const sessions = t('engine.target.strength', { count: n });
+      return target.aboutMinutes
+        ? t('engine.target.strengthAbout', { sessions, minutes: target.aboutMinutes })
+        : sessions;
     }
     case 'focus_deepwork':
-      return `Focus for ${time}, phone in another room`;
     case 'mind_read':
-      return `Read for ${time}`;
     case 'move_walk':
-      return `Move for ${time}, any way you like`;
     case 'home_tidy':
-      return `Tidy up for ${time}`;
+      return t(`engine.target.${id}` as TKey, { time });
     case 'skill_practice':
-      return `Practise ${skillWords(p.answers.skill)} for ${time}`;
+      return t('engine.target.skill_practice', { skill: skillWords(p.answers.skill), time });
     case 'screen_app_limit':
-      return `Keep your main app under ${fmtDuration(scrollLimitFor(p, l))} today`;
+      return t('engine.target.screen_app_limit', { limit: fmtDuration(scrollLimitFor(p, l)) });
     case 'sleep_wake':
-      return p.answers.wake?.kind === 'time' ? `Up by ${upBy(p.answers.wake.time, minutes)}` : 'Up at your usual time';
+      return p.answers.wake?.kind === 'time'
+        ? t('engine.target.sleepUpBy', { time: upBy(p.answers.wake.time, minutes) })
+        : t('engine.target.sleepUsual');
     case 'confidence_talk':
-      return socialStep(p, day).text;
+      return socialText(socialStep(p, day));
     case 'social_reach_out':
-      return `Reach out to ${minutes} ${minutes === 1 ? 'person' : 'people'}${t.calls ? ', one of them a call' : ''} (more than a like)`;
+      return t(target.calls ? 'engine.target.reachOutCall' : 'engine.target.reachOut', { count: minutes });
+    case 'focus_top3':
+      return getItDoneText(l, target);
     default:
-      return t.text;
+      return target.text;
   }
+}
+
+/** Get It Done's targets (habits.ts), in words: the #1 task, the top tasks, and a time for the #1. */
+function getItDoneText(l: Level, target: Target): string {
+  const count = target.amount.kind === 'fixed' ? target.amount.value : 1;
+  const before = target.firstBefore;
+  if (count === 1)
+    return before ? t('engine.target.getItDone.firstBefore', { time: before }) : t('engine.target.getItDone.first');
+  if (!before) return t('engine.target.getItDone.top', { count });
+  if (l.intensity === 'standard') return t('engine.target.getItDone.topFirstNoon', { count });
+  return before === '12:00'
+    ? t('engine.target.getItDone.topShortNoon', { count })
+    : t('engine.target.getItDone.topShortBefore', { count, time: before });
 }
 
 /** How often, in words. */
 export function frequencyText(p: PilotProgram, id: string, day: number): string {
   const own = p.custom?.[id];
-  if (own) return own.perWeek >= 7 ? 'Every day' : `Any ${own.perWeek} day${own.perWeek === 1 ? '' : 's'} a week`;
+  if (own)
+    return own.perWeek >= 7 ? t('engine.frequency.daily') : t('engine.frequency.anyDays', { count: own.perWeek });
   const s = targetFor(id, levelFor(p, id, day)).schedule;
-  if (s.kind === 'daily') return 'Every day';
-  if (s.kind === 'weekly') return `Any ${s.days} days a week`;
-  if (s.kind === 'sessions') return 'Any days you choose, one session a day at most';
-  return `Any ${s.days} workdays a week`;
+  if (s.kind === 'daily') return t('engine.frequency.daily');
+  if (s.kind === 'weekly') return t('engine.frequency.anyDays', { count: s.days });
+  if (s.kind === 'sessions') return t('engine.frequency.sessions');
+  return t('engine.frequency.workdays', { count: s.days });
 }
 
 export type WeekProgress = { credited: number; goal: number; status: string; daysLeft: number };
@@ -1102,17 +1157,18 @@ export const harder = (p: PilotProgram, id: string, today: number): ManualChange
 export function pendingText(p: PilotProgram, id: string, today: number): string | null {
   const e = pendingChange(p.progression[id], today);
   if (!e) return null;
-  const when = e.fromDay === today + 1 ? 'tomorrow' : `Day ${e.fromDay}`;
-  return `${INTENSITY_NAME[e.intensity]} ${PHASE_NAME[e.phase]} from ${when}: ${targetText(p, id, e.fromDay)}`;
+  const when = e.fromDay === today + 1 ? t('engine.tomorrow') : t('engine.dayN', { day: e.fromDay });
+  const level = t('engine.levelShort', { intensity: intensityName(e.intensity), phase: phaseName(e.phase) });
+  return t('engine.pending', { level, when, target: targetText(p, id, e.fromDay) });
 }
 
 /** The card's level line: "Standard · Foundation", or "Your habit" for one the person made. */
 export const levelLineFor = (p: PilotProgram, id: string, day: number) =>
-  p.custom?.[id] ? 'Your habit' : levelLabel(levelFor(p, id, day));
+  p.custom?.[id] ? t('engine.ownHabit') : levelLabel(levelFor(p, id, day));
 
 /** "Standard · Foundation", and the phase's position (0–2) for the card's three bars. */
 export function levelLabel(l: Level): string {
-  return `${INTENSITY_NAME[l.intensity]} · ${PHASE_NAME[l.phase]}`;
+  return t('engine.levelLine', { intensity: intensityName(l.intensity), phase: phaseName(l.phase) });
 }
 export const phaseIndex = (l: Level) => PHASES.indexOf(l.phase);
 
@@ -1276,7 +1332,7 @@ function validState(s: unknown, id: string): s is ProgressionState {
  */
 export function inspectPilotProgram(x: unknown): { program: PilotProgram | null; lost: string[] } {
   if (!isObj(x) || x.v !== 1 || typeof x.startedAt !== 'string' || !DATE_KEY.test(x.startedAt))
-    return { program: null, lost: ['The Life Reset itself (its start date or format)'] };
+    return { program: null, lost: [t('engine.lost.program')] };
   const a = x.answers;
   if (
     !isObj(a) ||
@@ -1284,7 +1340,7 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
     typeof a.minutesPerDay !== 'number' ||
     !(a.precautions === 'unknown' || Array.isArray(a.precautions))
   )
-    return { program: null, lost: ['Your set-up answers'] };
+    return { program: null, lost: [t('engine.lost.answers')] };
   const lost: string[] = [];
   const custom: Record<string, CustomHabit> = {};
   for (const [id, c] of Object.entries(isObj(x.custom) ? x.custom : {}))
@@ -1309,7 +1365,7 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
       };
   const known = (id: string) => isPilotHabit(id) || id in custom;
   const label = (id: string) =>
-    id in custom ? custom[id].name : isPilotHabit(id) ? habitName(id) : 'One of your own habits';
+    id in custom ? custom[id].name : isPilotHabit(id) ? habitName(id) : t('engine.lost.ownHabit');
   const progressionIn = isObj(x.progression) ? x.progression : {};
   const habits: string[] = [];
   const progression: Record<string, ProgressionState> = {};
@@ -1318,16 +1374,16 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
     if (known(id) && validState(s, id)) {
       habits.push(id);
       progression[id] = s;
-    } else lost.push(`${label(id)}: its targets and progress`);
+    } else lost.push(t('engine.lost.habit', { habit: label(id) }));
   }
   // Removed habits keep their state (their past counts); a damaged one is named, not dropped silently.
   for (const [id, s] of Object.entries(progressionIn))
     if (!(id in progression) && !strings(x.habits).includes(id)) {
       if (known(id) && validState(s, id)) progression[id] = s;
-      else lost.push(`${label(id)} (a habit you removed): its past progress`);
+      else lost.push(t('engine.lost.removedHabit', { habit: label(id) }));
     }
   for (const id of Object.keys(custom)) if (!(id in progression)) delete custom[id];
-  if (!habits.length) return { program: null, lost: lost.length ? lost : ['Your habits'] };
+  if (!habits.length) return { program: null, lost: lost.length ? lost : [t('engine.lost.habits')] };
   const logs: Record<string, DayLog> = {};
   let badDays = 0;
   for (const [k, l] of Object.entries(isObj(x.logs) ? x.logs : {})) {
@@ -1343,22 +1399,22 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
       planned: strings(l.planned),
     } as DayLog;
   }
-  if (badDays) lost.push(`${badDays} day record${badDays === 1 ? '' : 's'}`);
+  if (badDays) lost.push(t('engine.lost.days', { count: badDays }));
   const reflections = sanitizeReflections(x.reflections);
   if (isObj(x.reflections) && Object.keys(x.reflections).length > Object.keys(reflections ?? {}).length)
-    lost.push('Some weekly reflections');
+    lost.push(t('engine.lost.reflections'));
   const collection = sanitizeCollection(x.collection);
   const int = (v: unknown, min: number) => typeof v === 'number' && Number.isInteger(v) && v >= min;
   const after =
     isObj(x.after) && x.after.mode === 'momentum' && int(x.after.since, PROGRAM_DAYS + 1)
       ? { mode: 'momentum' as const, since: x.after.since as number }
       : undefined;
-  if (x.after !== undefined && !after) lost.push('Your choice after the summit (Keep My Momentum)');
+  if (x.after !== undefined && !after) lost.push(t('engine.lost.momentum'));
   const carry =
     isObj(x.carry) && int(x.carry.ascent, 2) && int(x.carry.xp, 0) && int(x.carry.streak, 0)
       ? { ascent: x.carry.ascent as number, xp: x.carry.xp as number, streak: x.carry.streak as number }
       : undefined;
-  if (x.carry !== undefined && !carry) lost.push('What this ascent carried from earlier ones (XP and streak)');
+  if (x.carry !== undefined && !carry) lost.push(t('engine.lost.carry'));
   const program: PilotProgram = {
     v: 1,
     startedAt: x.startedAt,

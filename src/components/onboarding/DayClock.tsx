@@ -7,6 +7,7 @@ import { radius, space, useTheme } from '../../theme';
 import { T } from '../ui';
 import { useTints } from './kit';
 import { RollingText, StepRound, Tape } from './Tape';
+import { t as tr } from '../../i18n';
 
 const DAY = 1440;
 const SKY_H = 188;
@@ -38,11 +39,11 @@ export const minutesOf = (t: string) => {
 
 /** A word for the kind of morning, so the choice feels seen. */
 function moodOf(m: number) {
-  if (m >= 240 && m < 360) return 'An early riser';
-  if (m >= 360 && m < 540) return 'A morning person';
-  if (m >= 540 && m < 720) return 'Slow, easy mornings';
-  if (m >= 720 && m < 1080) return 'Your day starts later';
-  return 'A night-time schedule';
+  if (m >= 240 && m < 360) return tr('setup.clock.early');
+  if (m >= 360 && m < 540) return tr('setup.clock.morning');
+  if (m >= 540 && m < 720) return tr('setup.clock.slow');
+  if (m >= 720 && m < 1080) return tr('setup.clock.later');
+  return tr('setup.clock.night');
 }
 
 /**
@@ -61,7 +62,7 @@ export function DayClock({
   muted?: string;
 }) {
   const { c, isDark } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const [w, setW] = useState(0);
   const rest = 7 * 60;
   const pos = useSharedValue(minutes ?? rest);
@@ -116,14 +117,14 @@ export function DayClock({
               ))}
             </Animated.View>
             <Animated.View style={[styles.body, sun]}>
-              <View style={[styles.glow, { backgroundColor: t.peach.fill }]} />
-              <View style={[styles.orb, { backgroundColor: t.peach.fill }]}>
-                <Ionicons name="sunny" size={20} color={t.peach.on} />
+              <View style={[styles.glow, { backgroundColor: tn.peach.fill }]} />
+              <View style={[styles.orb, { backgroundColor: tn.peach.fill }]}>
+                <Ionicons name="sunny" size={20} color={tn.peach.on} />
               </View>
             </Animated.View>
             <Animated.View style={[styles.body, moon]}>
               <View style={[styles.orb, { backgroundColor: isDark ? '#E9E6F7' : '#FFFFFF' }]}>
-                <Ionicons name="moon" size={17} color={t.indigo.fill} />
+                <Ionicons name="moon" size={17} color={tn.indigo.fill} />
               </View>
             </Animated.View>
             {/* Solid hills (the sun and moon set behind them), each tinted over a solid base. */}
@@ -134,7 +135,7 @@ export function DayClock({
               />
               <Path
                 d={`M0 ${hy + 8} C ${w * 0.16} ${hy - 26}, ${w * 0.3} ${hy - 10}, ${w * 0.42} ${hy - 2} C ${w * 0.56} ${hy + 6}, ${w * 0.72} ${hy - 34}, ${w} ${hy - 6} L ${w} ${SKY_H} L 0 ${SKY_H} Z`}
-                fill={t.mist.fill}
+                fill={tn.mist.fill}
                 fillOpacity={isDark ? 0.55 : 0.5}
               />
               <Path
@@ -143,7 +144,7 @@ export function DayClock({
               />
               <Path
                 d={`M0 ${hy + 24} C ${w * 0.22} ${hy + 6}, ${w * 0.46} ${hy + 30}, ${w * 0.7} ${hy + 14} C ${w * 0.84} ${hy + 6}, ${w * 0.94} ${hy + 10}, ${w} ${hy + 16} L ${w} ${SKY_H} L 0 ${SKY_H} Z`}
-                fill={t.sage.fill}
+                fill={tn.sage.fill}
                 fillOpacity={isDark ? 0.75 : 0.8}
               />
             </Svg>
@@ -152,13 +153,13 @@ export function DayClock({
       </View>
 
       <View style={styles.readout}>
-        <StepRound icon="remove" label="15 minutes earlier" onPress={() => set(shown - 15)} />
+        <StepRound icon="remove" label={tr('setup.clock.earlier')} onPress={() => set(shown - 15)} />
         <View
           style={styles.time}
           accessible
           accessibilityRole="adjustable"
-          accessibilityLabel="Usual wake-up time"
-          accessibilityValue={{ text: muted ?? (minutes === null ? 'Not chosen' : hhmm(minutes)) }}
+          accessibilityLabel={tr('setup.clock.label')}
+          accessibilityValue={{ text: muted ?? (minutes === null ? tr('setup.clock.notChosen') : hhmm(minutes)) }}
           accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
           onAccessibilityAction={(e) => set(shown + (e.nativeEvent.actionName === 'increment' ? 15 : -15))}
         >
@@ -169,11 +170,11 @@ export function DayClock({
           ) : (
             <RollingText text={hhmm(shown)} size={60} charWidth={38} color={minutes === null ? c.textFaint : c.text} />
           )}
-          <T v="caption" color={minutes === null || muted ? c.textFaint : t.indigo.ink} style={styles.mood}>
-            {muted ? 'No fixed time' : minutes === null ? 'Slide the day below' : moodOf(minutes)}
+          <T v="caption" color={minutes === null || muted ? c.textFaint : tn.indigo.ink} style={styles.mood}>
+            {muted ? tr('setup.clock.noFixed') : minutes === null ? tr('setup.clock.slideDay') : moodOf(minutes)}
           </T>
         </View>
-        <StepRound icon="add" label="15 minutes later" onPress={() => set(shown + 15)} />
+        <StepRound icon="add" label={tr('setup.clock.laterStep')} onPress={() => set(shown + 15)} />
       </View>
 
       <Tape
@@ -190,7 +191,7 @@ export function DayClock({
         rest={rest}
         onChange={set}
         tickEvery={15}
-        tint={t.indigo}
+        tint={tn.indigo}
         pos={pos}
       />
     </View>

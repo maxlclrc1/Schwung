@@ -23,6 +23,7 @@ import { T } from '../ui';
 import { Press } from './Choices';
 import { rise, settle, useDrawingDrag, useTints, type Tint } from './kit';
 import { StepRound } from './Tape';
+import { t as tr } from '../../i18n';
 
 /*
  * Illustrated answers: a phone that fills with the hours it takes, a trail up a mountain, and a dial for the time a
@@ -104,25 +105,25 @@ export function PhoneMeter({
   app?: boolean;
 }) {
   const { c, isDark } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const { set, step } = useStops(stops.length, index, onChange);
   const share = index === null ? 0 : (index + 1) / stops.length;
   const level = useSharedValue(share);
   useEffect(() => {
     level.set(settle(share, 460));
   }, [share, level]);
-  const fill = share > 0.66 ? t.peach.fill : share > 0.34 ? t.lavender.fill : t.mist.fill;
+  const fill = share > 0.66 ? tn.peach.fill : share > 0.34 ? tn.lavender.fill : tn.mist.fill;
   const rise_ = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - level.value) * (SCREEN_H + 14) }] }));
   const drag = useDrawingDrag((_, y) => set(Math.ceil(clamp(1 - y / PHONE_H, 0.001, 1) * stops.length) - 1));
-  const icons = [t.lavender, t.peach, t.sage, t.mist, t.indigo, t.peach, t.sage, t.lavender, t.mist];
+  const icons = [tn.lavender, tn.peach, tn.sage, tn.mist, tn.indigo, tn.peach, tn.sage, tn.lavender, tn.mist];
   const pings = index === null ? 0 : Math.round((index / (stops.length - 1)) * 6);
 
   return (
     <View style={styles.phoneRow}>
       <GestureDetector gesture={drag}>
         <View
-          {...adjustable(label, index === null ? 'Not chosen' : stops[index], step)}
-          style={[styles.phone, { backgroundColor: isDark ? '#2C2B4A' : t.indigo.fill }]}
+          {...adjustable(label, index === null ? tr('setup.meter.notChosen') : stops[index], step)}
+          style={[styles.phone, { backgroundColor: isDark ? '#2C2B4A' : tn.indigo.fill }]}
         >
           <View pointerEvents="none" style={[styles.screen, { backgroundColor: c.surface }]}>
             <View style={styles.status}>
@@ -135,8 +136,8 @@ export function PhoneMeter({
             </View>
             {app ? (
               <View style={styles.bigApp}>
-                <View style={[styles.appIconLarge, { backgroundColor: t.peach.fill }]}>
-                  <Ionicons name="play" size={24} color={t.peach.on} />
+                <View style={[styles.appIconLarge, { backgroundColor: tn.peach.fill }]}>
+                  <Ionicons name="play" size={24} color={tn.peach.on} />
                 </View>
                 {index !== null ? (
                   <Animated.View
@@ -177,7 +178,7 @@ export function PhoneMeter({
             <View style={styles.screenText}>
               <Readout text={index === null ? '—' : stops[index]} faint={index === null} size={34} />
               <T v="caption" color={c.textDim} style={{ textAlign: 'center' }}>
-                {index === null ? 'Drag up or down' : app ? 'on that app' : 'a day'}
+                {index === null ? tr('setup.meter.drag') : app ? tr('setup.meter.onApp') : tr('setup.meter.aDay')}
               </T>
             </View>
           </View>
@@ -310,7 +311,7 @@ export function TrailPicker<K extends string>({
   label: string;
 }) {
   const { c, isDark } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const [w, setW] = useState(0);
   const k = w / VIEW_W;
   const index = value === undefined ? null : items.findIndex((x) => x.id === value);
@@ -358,18 +359,18 @@ export function TrailPicker<K extends string>({
             style={StyleSheet.absoluteFill}
             pointerEvents="none"
           >
-            <Path d={FAR} fill={t.mist.fill} fillOpacity={0.22} />
+            <Path d={FAR} fill={tn.mist.fill} fillOpacity={0.22} />
             {/* Each layer is solid underneath its tint, so nothing behind shows through it. */}
             <Path d={MOUNTAIN} fill={c.bg} />
-            <Path d={MOUNTAIN} fill={t.sage.fill} fillOpacity={ridge} />
+            <Path d={MOUNTAIN} fill={tn.sage.fill} fillOpacity={ridge} />
             <Path d={SNOW} fill="#FFFFFF" fillOpacity={isDark ? 0.8 : 0.95} />
             <Path d={MEADOW} fill={c.bg} />
-            <Path d={MEADOW} fill={t.sage.fill} fillOpacity={0.75} />
+            <Path d={MEADOW} fill={tn.sage.fill} fillOpacity={0.75} />
             {PINES.map(([x, y], i) => (
               <Path
                 key={i}
                 d={`M${x} ${y - 16} L${x + 6} ${y} L${x - 6} ${y} Z`}
-                fill={t.sage.ink}
+                fill={tn.sage.ink}
                 fillOpacity={0.55}
               />
             ))}
@@ -391,7 +392,7 @@ export function TrailPicker<K extends string>({
             />
             <AnimatedPath
               d={TRAIL_D}
-              stroke={t.peach.fill}
+              stroke={tn.peach.fill}
               strokeWidth={3.5}
               strokeLinecap="round"
               fill="none"
@@ -410,15 +411,15 @@ export function TrailPicker<K extends string>({
               on={index === i}
               walked={walked}
               any={any}
-              tint={t.peach}
+              tint={tn.peach}
               side={LABEL_SIDE[i]}
               summit={i === items.length - 1}
               onPress={() => pick(i)}
             />
           ))}
           <Animated.View pointerEvents="none" style={[styles.hiker, hiker]}>
-            <View style={[styles.hikerBadge, { backgroundColor: t.indigo.fill, borderColor: c.surface }]}>
-              <Ionicons name="walk" size={16} color={t.indigo.on} />
+            <View style={[styles.hikerBadge, { backgroundColor: tn.indigo.fill, borderColor: c.surface }]}>
+              <Ionicons name="walk" size={16} color={tn.indigo.on} />
             </View>
           </Animated.View>
         </>
@@ -470,7 +471,7 @@ function Milestone({
         style={[styles.milestone, { left: x - 22, top: y - 22 }]}
         accessibilityRole="radio"
         accessibilityState={{ checked: on }}
-        accessibilityLabel={`${label}. ${detail}`}
+        accessibilityLabel={tr('setup.choices.a11yDetail', { label, detail })}
       >
         <View style={styles.milestoneHit}>
           <Animated.View style={[styles.milestoneDot, { borderColor: tint.fill }, reached]} />
@@ -536,7 +537,7 @@ export function TimeDial({
   label: string;
 }) {
   const { c } = useTheme();
-  const t = useTints();
+  const tn = useTints();
   const { set, step } = useStops(stops.length, index, onChange);
   const last = stops.length - 1;
   const size = 252;
@@ -577,14 +578,14 @@ export function TimeDial({
     if (rel > SWEEP) rel = rel > SWEEP + (360 - SWEEP) / 2 ? 0 : SWEEP;
     set(Math.round((rel / SWEEP) * last));
   });
-  const ring = index === null ? c.border : fits ? t.sage.fill : t.peach.fill;
+  const ring = index === null ? c.border : fits ? tn.sage.fill : tn.peach.fill;
   const marks = useMemo(() => [0, Math.floor(last / 2), last], [last]);
 
   return (
     <View style={styles.dialWrap}>
       <GestureDetector gesture={drag}>
         <View
-          {...adjustable(label, index === null ? 'Not chosen' : stops[index], step)}
+          {...adjustable(label, index === null ? tr('setup.meter.notChosen') : stops[index], step)}
           style={{ width: size, height: size }}
         >
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -605,7 +606,7 @@ export function TimeDial({
                 cx={mid}
                 cy={mid}
                 r={r}
-                stroke={t.peach.fill}
+                stroke={tn.peach.fill}
                 strokeOpacity={0.28}
                 strokeWidth={22}
                 strokeLinecap="round"
@@ -659,18 +660,18 @@ export function TimeDial({
               <View style={styles.fitRow}>
                 {index === null ? (
                   <T v="caption" color={c.textDim}>
-                    Turn the dial
+                    {tr('setup.meter.turn')}
                   </T>
                 ) : (
                   <Animated.View key={fits ? 'fits' : 'short'} entering={FadeIn.duration(200).reduceMotion(sys)}>
-                    <View style={[styles.fit, { backgroundColor: fits ? t.sage.soft : t.peach.soft }]}>
+                    <View style={[styles.fit, { backgroundColor: fits ? tn.sage.soft : tn.peach.soft }]}>
                       <Ionicons
                         name={fits ? 'checkmark' : 'time-outline'}
                         size={14}
-                        color={fits ? t.sage.ink : t.peach.ink}
+                        color={fits ? tn.sage.ink : tn.peach.ink}
                       />
-                      <T v="caption" color={fits ? t.sage.ink : t.peach.ink} style={{ fontWeight: '700' }}>
-                        {fits ? 'Your habits fit' : 'A little short'}
+                      <T v="caption" color={fits ? tn.sage.ink : tn.peach.ink} style={{ fontWeight: '700' }}>
+                        {fits ? tr('setup.meter.fit') : tr('setup.meter.short')}
                       </T>
                     </View>
                   </Animated.View>
@@ -681,16 +682,16 @@ export function TimeDial({
         </View>
       </GestureDetector>
       <View style={styles.dialFoot}>
-        <StepRound icon="remove" label="Less time" disabled={index === 0} onPress={() => step(-1)} />
+        <StepRound icon="remove" label={tr('setup.meter.less')} disabled={index === 0} onPress={() => step(-1)} />
         <View style={styles.needRow}>
-          <View style={[styles.needDot, { backgroundColor: t.peach.fill, opacity: 0.5 }]} />
+          <View style={[styles.needDot, { backgroundColor: tn.peach.fill, opacity: 0.5 }]} />
           <T v="caption" color={c.textDim}>
-            Your habits need about {need} min
+            {tr('setup.meter.need', { need })}
           </T>
         </View>
         <StepRound
           icon="add"
-          label="More time"
+          label={tr('setup.meter.more')}
           disabled={index === last}
           onPress={() => (index === null ? set(Math.floor(last / 2)) : step(1))}
         />

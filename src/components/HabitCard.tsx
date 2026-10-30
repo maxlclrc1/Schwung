@@ -22,6 +22,7 @@ import { useCardBlock } from './TabPager';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { ThemedImage } from './ThemedImage';
 import { TILE_HEIGHT, TILES, type Theme } from './worldTiles';
+import { useT } from '../i18n/react';
 
 type Props = {
   habitId: string;
@@ -228,6 +229,7 @@ function HabitCardImpl({
   actions,
 }: Props) {
   const { c, isDark } = useTheme();
+  const t = useT();
   const theme: Theme = isDark ? 'dark' : 'light';
   const ink = INK[theme];
   const reduceMotion = useReducedMotion();
@@ -479,12 +481,10 @@ function HabitCardImpl({
       aria-disabled={readOnly}
       accessible
       accessibilityLabel={`${title}${task ? `. ${task}` : ''}${levelText}`}
-      accessibilityHint={
-        readOnly ? undefined : done ? 'Double-tap to undo.' : 'Double-tap, or swipe the card to the right, to complete.'
-      }
+      accessibilityHint={readOnly ? undefined : done ? t('today.card.hintUndo') : t('today.card.hintDo')}
       accessibilityActions={[
         { name: 'activate' },
-        ...(onLongPress ? [{ name: 'longpress' }, { name: 'details', label: 'Details' }] : []),
+        ...(onLongPress ? [{ name: 'longpress' }, { name: 'details', label: t('today.card.details') }] : []),
         ...(actions ?? []).map((a) => ({ name: a.name, label: a.label })),
       ]}
       onAccessibilityAction={(e) => {
@@ -578,7 +578,7 @@ function HabitCardImpl({
             <View style={styles.hint}>
               <Ionicons name="chevron-forward" size={16} color={ink.target} />
               <Ink pick="target" style={styles.hintText}>
-                {readOnly ? 'Not done' : (display.hint ?? 'Swipe right to complete')}
+                {readOnly ? t('today.card.notDone') : (display.hint ?? t('today.card.swipe'))}
               </Ink>
             </View>
             {readOnly ? null : (
@@ -591,14 +591,14 @@ function HabitCardImpl({
             <View style={[styles.donePill, { backgroundColor: c.sage }]}>
               <Ionicons name="checkmark" size={16} color={c.onTint} />
               <Animated.Text style={[styles.doneText, { color: c.onTint }]} maxFontSizeMultiplier={1.3}>
-                {display.doneText ?? 'Done for today'}
+                {display.doneText ?? t('today.card.doneToday')}
               </Animated.Text>
             </View>
             {readOnly ? null : (
               <CardButton onPress={toggle} style={[styles.undo, { backgroundColor: ink.chip, borderColor: ink.edge }]}>
                 <Ionicons name="arrow-undo" size={15} color={ink.title} />
                 <Ink pick="title" style={styles.undoText}>
-                  Undo
+                  {t('today.card.undo')}
                 </Ink>
               </CardButton>
             )}

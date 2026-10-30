@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PagerTabs } from '../../components/PagerTabs';
 import { WorldLayer } from '../../components/WorldLayer';
 import { useTheme } from '../../theme';
+import { useT } from '../../i18n/react';
 
 // Habits is the home tab: going back from another tab (or from one opened directly) returns to it.
 export const unstable_settings = { anchor: 'today' };
@@ -27,21 +28,22 @@ function tabIcon(on: Icon, off: Icon) {
   return TabIcon;
 }
 
-const HABITS = { title: 'Habits', tabBarIcon: tabIcon('checkmark-circle', 'checkmark-circle-outline') };
-const JOURNEY = { title: 'Journey', tabBarIcon: mountainIcon('image-filter-hdr', 'image-filter-hdr-outline') };
-const INSIGHTS = { title: 'Insights', tabBarIcon: tabIcon('stats-chart', 'stats-chart-outline') };
+const HABITS_ICON = tabIcon('checkmark-circle', 'checkmark-circle-outline');
+const JOURNEY_ICON = mountainIcon('image-filter-hdr', 'image-filter-hdr-outline');
+const INSIGHTS_ICON = tabIcon('stats-chart', 'stats-chart-outline');
 
 /** Habits, Journey and Insights as bottom tabs, swiped between as one pager over the shared world (PagerTabs). */
 export default function TabsLayout() {
   const { c } = useTheme();
+  const t = useT();
   return (
     <GestureHandlerRootView style={[styles.fill, { backgroundColor: c.bg }]}>
       {/* One world behind all three tabs; the pages are transparent over it, and move with it. */}
       <WorldLayer />
       <PagerTabs>
-        <PagerTabs.Screen name="today" options={HABITS} />
-        <PagerTabs.Screen name="progress" options={JOURNEY} />
-        <PagerTabs.Screen name="insights" options={INSIGHTS} />
+        <PagerTabs.Screen name="today" options={{ title: t('nav.tabs.habits'), tabBarIcon: HABITS_ICON }} />
+        <PagerTabs.Screen name="progress" options={{ title: t('nav.tabs.journey'), tabBarIcon: JOURNEY_ICON }} />
+        <PagerTabs.Screen name="insights" options={{ title: t('nav.tabs.insights'), tabBarIcon: INSIGHTS_ICON }} />
       </PagerTabs>
     </GestureHandlerRootView>
   );

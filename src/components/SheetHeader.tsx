@@ -3,10 +3,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
+import { useT } from '../i18n/react';
 
 /** Header for modal sheets: grabber + title + Done. */
-export function SheetHeader({ title, action = 'Done' }: { title: string; action?: string }) {
+export function SheetHeader({ title, action }: { title: string; action?: string }) {
   const { c } = useTheme();
+  const t = useT();
   return (
     <View style={styles.wrap}>
       <ThemedView style={[styles.grabber, { backgroundColor: c.border }]} />
@@ -16,7 +18,7 @@ export function SheetHeader({ title, action = 'Done' }: { title: string; action?
         </T>
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button">
           <T v="bodyStrong" color={c.accentInk}>
-            {action}
+            {action ?? t('nav.done')}
           </T>
         </Pressable>
       </View>

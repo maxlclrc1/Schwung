@@ -18,6 +18,8 @@ import { haptic } from '../lib/haptics';
 import { radius, space, useTheme, type Colors } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
+import { formatNumber, t as tr } from '../i18n';
+import { useT } from '../i18n/react';
 
 /*
  * Below the mountain on Journey: the climb in numbers (the day, the days completed, the next milestone, and a
@@ -31,11 +33,7 @@ const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const MILESTONES = Object.keys(LANDMARKS).map(Number);
 
 /** What each stage of the climb is for, in the program's own terms (targets open by phase: reset/readiness.ts). */
-const PHASE_MEANING: Record<1 | 2 | 3, string> = {
-  1: 'Showing up. Every habit starts at its Foundation targets, small enough to keep.',
-  2: 'Momentum targets open from here, offered when you’ve been consistent. Taking them is always your choice.',
-  3: 'The last stretch to the summit. Mastery targets open, and the habits are becoming yours.',
-};
+const phaseMeaning = (n: 1 | 2 | 3) => tr(`journeyTab.meaning.${n}`);
 
 const phaseTint = (c: Colors, n: 1 | 2 | 3) =>
   n === 1
@@ -56,6 +54,7 @@ export const JourneySummary = memo(function JourneySummary({
   cells: DayCell[];
 }) {
   const { c } = useTheme();
+  const t = useT();
   const summit = today > PROGRAM_DAYS;
   const next = MILESTONES.find((d) => d > today);
   const nextName = next ? LANDMARKS[next].name : null;
@@ -63,16 +62,20 @@ export const JourneySummary = memo(function JourneySummary({
     <ThemedView style={[styles.summary, { backgroundColor: c.surface }]}>
       <View style={styles.figures}>
         <Figure
-          value={summit ? '66' : `${today}`}
-          unit={summit ? 'days climbed' : `day of ${PROGRAM_DAYS}`}
+          value={formatNumber(summit ? PROGRAM_DAYS : today)}
+          unit={summit ? t('journeyTab.summary.climbed') : t('journeyTab.summary.dayOf', { total: PROGRAM_DAYS })}
           color={c.indigoInk}
         />
         <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-        <Figure value={`${completed}`} unit={completed === 1 ? 'day complete' : 'days complete'} color={c.sageInk} />
+        <Figure
+          value={formatNumber(completed)}
+          unit={t('journeyTab.summary.complete', { count: completed })}
+          color={c.sageInk}
+        />
         <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
         <Figure
-          value={next ? `${next - today}` : '—'}
-          unit={next ? `days to ${nextName}` : 'summit reached'}
+          value={next ? formatNumber(next - today) : '—'}
+          unit={next ? t('journeyTab.summary.toNext', { name: nextName ?? '' }) : t('journeyTab.summary.reached')}
           color={c.peachInk}
         />
       </View>
@@ -83,8 +86,9 @@ export const JourneySummary = memo(function JourneySummary({
 
 function Figure({ value, unit, color }: { value: string; unit: string; color: string }) {
   const { c } = useTheme();
+  const t = useT();
   return (
-    <View style={styles.figure} accessible accessibilityLabel={`${value} ${unit}`}>
+    <View style={styles.figure} accessible accessibilityLabel={t('journeyTab.summary.a11y', { value, unit })}>
       <Animated.View key={value} entering={FadeIn.duration(260).reduceMotion(sys)}>
         <T style={[styles.figureValue, { color }]} maxFontSizeMultiplier={1.2}>
           {value}
@@ -201,6 +205,7 @@ function Stage({
   animate: { current: boolean };
 }) {
   const { c } = useTheme();
+  const t = useT();
   const tint = phaseTint(c, phase.n);
   const [open, setOpen] = useState(false);
   const length = phase.to - phase.from + 1;
@@ -222,8 +227,14 @@ function Stage({
         }}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={`${phase.name}, days ${phase.from} to ${phase.to}. ${complete} of ${length} complete.${current ? ' You are here.' : ''}`}
-        accessibilityHint="Shows what this stage is for"
+        accessibilityLabel={`${t('journeyTab.stage.a11y', {
+          phase: phase.name,
+          from: phase.from,
+          to: phase.to,
+          done: complete,
+          length,
+        })}${current ? t('journeyTab.stage.hereA11y') : ''}`}
+        accessibilityHint={t('journeyTab.stage.hint')}
       >
         {({ pressed }) => (
           <View style={[styles.stageHead, { opacity: pressed ? 0.7 : 1 }]}>
@@ -240,12 +251,12 @@ function Stage({
                 {current ? (
                   <View style={[styles.here, { backgroundColor: c.indigoSoft }]}>
                     <T v="caption" color={c.indigoInk} style={styles.hereText}>
-                      You are here
+                      {t('journeyTab.stage.here')}
                     </T>
                   </View>
                 ) : null}
                 <T v="caption" color={c.textFaint} style={{ marginLeft: 'auto' }}>
-                  Days {phase.from}–{phase.to}
+                  {t('journeyTab.stage.days', { from: phase.from, to: phase.to })}
                 </T>
               </View>
               <View style={[styles.stageTrack, { backgroundColor: tint.soft }]}>
@@ -262,11 +273,15 @@ function Stage({
           style={[styles.meaning, { backgroundColor: tint.soft }]}
         >
           <T v="caption" color={c.text}>
-            {PHASE_MEANING[phase.n]}
+            {phaseMeaning(phase.n)}
           </T>
           <T v="caption" color={tint.ink} style={{ fontWeight: '700' }}>
-            {complete} of {length} days complete
-            {ahead ? ` · opens on day ${phase.from}` : current ? ` · day ${today - phase.from + 1} of ${length}` : ''}
+            {t('journeyTab.stage.complete', { done: complete, length })}
+            {ahead
+              ? t('journeyTab.stage.opens', { day: phase.from })
+              : current
+                ? t('journeyTab.stage.dayOf', { day: today - phase.from + 1, length })
+                : ''}
           </T>
         </Animated.View>
       ) : null}
@@ -309,6 +324,7 @@ const Stone = memo(function Stone({
   onPress: () => void;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const d = size - 8;
   const full = cell.state === 'full';
   const partial = cell.state === 'partial' || (cell.state === 'today' && cell.done.length > 0);
@@ -332,7 +348,15 @@ const Stone = memo(function Stone({
       hitSlop={2}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={`Day ${cell.day}${milestone ? `, ${LANDMARKS[cell.day].name}` : ''}. ${stateWords(cell, today)}`}
+      accessibilityLabel={
+        milestone
+          ? t('journeyTab.cell.a11yMilestone', {
+              day: cell.day,
+              milestone: LANDMARKS[cell.day].name,
+              state: stateWords(cell, today),
+            })
+          : t('journeyTab.cell.a11y', { day: cell.day, state: stateWords(cell, today) })
+      }
       style={[styles.stoneHit, { width: size, height: size }]}
     >
       {selected ? (
@@ -374,22 +398,16 @@ const Stone = memo(function Stone({
 });
 
 function stateWords(cell: DayCell, today: boolean): string {
-  if (today) return cell.state === 'full' ? 'Today, complete.' : 'Today.';
+  if (today) return tr(cell.state === 'full' ? 'journeyTab.cell.todayComplete' : 'journeyTab.cell.today');
   switch (cell.state) {
     case 'full':
-      return 'Complete.';
     case 'partial':
-      return 'Partly done.';
     case 'missed':
-      return 'Nothing done.';
     case 'skipped':
-      return 'Skipped.';
     case 'rest':
-      return 'A rest day.';
     case 'unrecorded':
-      return 'No record.';
     case 'future':
-      return 'Still ahead.';
+      return tr(`journeyTab.cell.${cell.state}`);
     default:
       return '';
   }
@@ -398,14 +416,15 @@ function stateWords(cell: DayCell, today: boolean): string {
 /** The tapped day, from its own record. */
 function DayNote({ cell, today, name }: { cell: DayCell; today: number; name: (id: string) => string }) {
   const { c } = useTheme();
+  const t = useT();
   const milestone = LANDMARKS[cell.day];
   return (
     <Animated.View key={cell.day} entering={FadeIn.duration(180).reduceMotion(sys)} accessibilityLiveRegion="polite">
       <ThemedView style={[styles.note, { backgroundColor: c.surface }]}>
         <View style={styles.noteHead}>
           <T v="bodyStrong">
-            Day {cell.day}
-            {cell.day === today ? ' · Today' : ''}
+            {t('journeyTab.cell.day', { day: cell.day })}
+            {cell.day === today ? t('journeyTab.cell.todaySuffix') : ''}
           </T>
           <T v="caption" color={c.textDim}>
             {shortDate(cell.date)}
@@ -417,7 +436,7 @@ function DayNote({ cell, today, name }: { cell: DayCell; today: number; name: (i
           </T>
         ) : null}
         <T v="caption" color={c.textDim}>
-          {cell.state === 'future' ? 'Still ahead.' : cellSummary(cell, name)}
+          {cell.state === 'future' ? t('journeyTab.cell.future') : cellSummary(cell, name)}
         </T>
       </ThemedView>
     </Animated.View>

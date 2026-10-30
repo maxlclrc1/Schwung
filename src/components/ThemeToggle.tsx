@@ -6,6 +6,7 @@ import { haptic } from '../lib/haptics';
 import { usePreferences } from '../store/preferences';
 import { useTheme, useThemeTarget } from '../theme';
 import { ThemedView } from '../theme/transition';
+import { useT } from '../i18n/react';
 
 /**
  * Sun/moon button that flips between Light and Dark and remembers the choice (the saved theme preference).
@@ -18,7 +19,8 @@ export function ThemeToggle() {
   // The theme asked for: the icon answers the tap at once, and a second tap asks to go back.
   const isDark = useThemeTarget() === 'dark';
   const setThemePreference = usePreferences((s) => s.setThemePreference);
-  const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+  const t = useT();
+  const label = isDark ? t('nav.lightMode') : t('nav.darkMode');
 
   const dark = useSharedValue(isDark ? 1 : 0);
   const pressed = useSharedValue(0);

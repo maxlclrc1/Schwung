@@ -14,14 +14,7 @@ import type { ThemePreference } from './types';
 export const EXPORT_SCHEMA_VERSION = 2;
 
 /** What the confirmation says the file may contain, before anything is made. */
-export const EXPORT_CONTAINS = [
-  'Your habits, including any you created, and their targets',
-  'Your completion history and progress',
-  'Your set-up answers, including health precautions',
-  'Sleep (wake-up time) and activity information',
-  'Your weekly reflections, Screen Time entries and personal statistics',
-  'Your past journeys (earlier Life Resets), in full',
-];
+export const EXPORT_CONTAINS = ['habits', 'history', 'answers', 'sleep', 'reflections', 'journeys'] as const;
 
 export type ExportInput = {
   program: P.PilotProgram | null;

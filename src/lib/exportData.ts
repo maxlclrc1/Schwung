@@ -5,6 +5,7 @@ import { usePreferences } from '../store/preferences';
 import { RECOVERY_SLOTS, recoveryKey } from '../store/recovery';
 import { pilotToday, RESET_PILOT_VERSION, resetPilotKey, useResetPilot } from '../store/resetPilot';
 import { shareTemp, writeTemp } from './appFiles';
+import { t } from '../i18n';
 
 /**
  * "Export my data": builds the export (core/dataExport.ts) from what's on the phone now and opens the share sheet
@@ -31,5 +32,9 @@ export async function exportMyData(): Promise<void> {
     now: new Date(),
   });
   const file = await writeTemp('data', 'json', JSON.stringify(data, null, 2));
-  await shareTemp(file, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: 'Export my data' });
+  await shareTemp(file, {
+    mimeType: 'application/json',
+    UTI: 'public.json',
+    dialogTitle: t('settings.privacy.exportDialog'),
+  });
 }

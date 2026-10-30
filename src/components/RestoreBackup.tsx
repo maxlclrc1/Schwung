@@ -24,21 +24,14 @@ import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
+import { formatDate, t } from '../i18n';
+import { useT } from '../i18n/react';
 
 type Icon = ComponentProps<typeof Ionicons>['name'];
 const sys = ReduceMotion.System;
 
-const PROBLEM: Record<BackupProblem, string> = {
-  tooLarge: 'This file is too large to be a Schwung backup.',
-  notBackup: 'This isn’t a Schwung backup. Choose the file you made with Export my data.',
-  newerVersion: 'This backup was made by a newer version of Schwung. Update Schwung, then try again.',
-  unsupportedVersion: 'This backup’s format can’t be read by this version of Schwung.',
-  noLifeReset: 'This backup doesn’t contain a Life Reset.',
-  damaged: 'This backup is damaged or incomplete, so it can’t be restored.',
-};
-
-const longDate = (key: string) =>
-  new Date(`${key}T12:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+const problemText = (p: BackupProblem) => t(`settings.restore.problem.${p}`);
+const longDate = (key: string) => formatDate(key, 'long');
 
 /**
  * Restore from backup (Settings → Privacy & Data, or the start screen): choose a file made with Export my data,
@@ -47,6 +40,7 @@ const longDate = (key: string) =>
  */
 export function RestoreBackup() {
   const { c } = useTheme();
+  const t = useT();
   const current = useResetPilot((s) => s.program);
   const hasPast = useJourneys((s) => s.journeys.length > 0);
   const [backup, setBackup] = useState<Backup | null>(null);
@@ -64,12 +58,12 @@ export function RestoreBackup() {
       const read = readBackup(picked.text, { version: RESET_PILOT_VERSION, migrate: migrateSave }, picked.bytes);
       if (!read.ok) {
         haptic.warning();
-        setNote(PROBLEM[read.problem]);
+        setNote(problemText(read.problem));
         return;
       }
       setBackup(read.backup);
     } catch {
-      setNote('That file couldn’t be opened. Nothing was changed; please try again.');
+      setNote(t('settings.restore.openFailed'));
     } finally {
       setBusy(false);
     }
@@ -82,7 +76,7 @@ export function RestoreBackup() {
     try {
       await exportMyData();
     } catch {
-      setNote('Your current Life Reset couldn’t be exported just now. Nothing was changed.');
+      setNote(t('settings.restore.exportFailed'));
     } finally {
       setBusy(false);
     }
@@ -96,11 +90,7 @@ export function RestoreBackup() {
     setBusy(false);
     if (!result.ok) {
       haptic.warning();
-      setNote(
-        result.reason === 'safetyCopy'
-          ? 'Your current Life Reset couldn’t be kept safe first, so nothing was replaced. Export it, then try again.'
-          : 'The backup couldn’t be saved just now. Nothing was changed; please try again.',
-      );
+      setNote(result.reason === 'safetyCopy' ? t('settings.restore.safetyFailed') : t('settings.restore.saveFailed'));
       return;
     }
     haptic.confirm();
@@ -112,7 +102,7 @@ export function RestoreBackup() {
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Restore from backup" action={backup ? 'Cancel' : 'Done'} />
+      <SheetHeader title={t('settings.restore.title')} action={backup ? t('common.cancel') : t('nav.done')} />
       <ScrollView contentContainerStyle={styles.scroll}>
         {!backup ? (
           <Animated.View entering={FadeIn.duration(180).reduceMotion(sys)} style={{ gap: space.lg }}>
@@ -121,13 +111,16 @@ export function RestoreBackup() {
                 <Ionicons name="cloud-download-outline" size={22} color={c.accentInk} />
               </View>
               <T color={c.textDim} style={{ flex: 1 }}>
-                Bring your Life Reset to this phone. Choose the file you made with Export my data, from Files, iCloud
-                Drive or wherever you kept it.
+                {t('settings.restore.intro')}
               </T>
             </View>
-            <Button label={busy ? 'Opening…' : 'Choose backup file'} onPress={() => void choose()} disabled={busy} />
+            <Button
+              label={busy ? t('settings.restore.opening') : t('settings.restore.choose')}
+              onPress={() => void choose()}
+              disabled={busy}
+            />
             <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-              You’ll see what’s in it first. Nothing changes until you confirm.
+              {t('settings.restore.safe')}
             </T>
           </Animated.View>
         ) : (
@@ -179,27 +172,36 @@ function Preview({
   onOther: () => void;
 }) {
   const { c } = useTheme();
+  const t = useT();
   const made = exportedAt ? longDate(exportedAt.slice(0, 10)) : null;
   return (
     <Animated.View entering={FadeIn.duration(180).reduceMotion(sys)} style={{ gap: space.lg }}>
       <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
         <T v="overline" color={c.indigoInk}>
-          Life Reset in this backup
+          {t('settings.restore.inBackup')}
         </T>
         <T v="display" accessibilityRole="header">
-          {s.summit ? 'Summit reached' : s.momentum ? `Day ${s.day} · Momentum` : `Day ${s.day} of ${PROGRAM_DAYS}`}
+          {s.summit
+            ? t('settings.restore.summit')
+            : s.momentum
+              ? t('settings.restore.momentumDay', { day: s.day })
+              : t('settings.restore.day', { day: s.day, total: PROGRAM_DAYS })}
         </T>
         <View style={styles.stats}>
-          <Stat icon="leaf-outline" value={s.habits} label={s.habits === 1 ? 'habit' : 'habits'} />
-          <Stat icon="checkmark-done-outline" value={s.daysDone} label={s.daysDone === 1 ? 'day done' : 'days done'} />
-          <Stat icon="diamond-outline" value={s.xp} label="XP" />
-          <Stat icon="sparkles-outline" value={s.collectibles} label="collected" />
+          <Stat icon="leaf-outline" value={s.habits} label={t('settings.restore.habits', { count: s.habits })} />
+          <Stat
+            icon="checkmark-done-outline"
+            value={s.daysDone}
+            label={t('settings.restore.daysDone', { count: s.daysDone })}
+          />
+          <Stat icon="diamond-outline" value={s.xp} label={t('settings.restore.xp')} />
+          <Stat icon="sparkles-outline" value={s.collectibles} label={t('settings.restore.collected')} />
         </View>
         <T v="caption" color={c.textDim}>
-          Started {longDate(s.startedAt)}
-          {made ? ` · Backup made ${made}` : ''}
-          {s.reflections ? ` · ${s.reflections} weekly ${s.reflections === 1 ? 'reflection' : 'reflections'}` : ''}
-          {pastJourneys ? ` · ${pastJourneys} past ${pastJourneys === 1 ? 'journey' : 'journeys'}` : ''}
+          {t('settings.restore.started', { date: longDate(s.startedAt) })}
+          {made ? t('settings.restore.made', { date: made }) : ''}
+          {s.reflections ? t('settings.restore.reflections', { count: s.reflections }) : ''}
+          {pastJourneys ? t('settings.restore.journeys', { count: pastJourneys }) : ''}
         </T>
       </ThemedView>
 
@@ -208,29 +210,38 @@ function Preview({
           <View style={styles.warnHead}>
             <Ionicons name="alert-circle-outline" size={20} color={c.peachInk} />
             <T v="bodyStrong" color={c.peachInk} style={{ flex: 1 }}>
-              {current ? 'This replaces your current Life Reset' : 'This replaces your past journeys'}
+              {current ? t('settings.restore.replacesCurrent') : t('settings.restore.replacesPast')}
             </T>
           </View>
           <T color={c.peachInk}>
             {current
-              ? `On this phone you’re on ${current.summit ? 'the summit' : `day ${current.day}`} with ${current.habits} ${current.habits === 1 ? 'habit' : 'habits'} and ${current.xp} XP. `
+              ? t(current.summit ? 'settings.restore.currentSummit' : 'settings.restore.currentDay', {
+                  day: current.day,
+                  habits: t('common.habits', { count: current.habits }),
+                  xp: current.xp,
+                })
               : ''}
-            Restoring replaces {current ? 'it' : 'them'} with the backup
-            {current && hasPast ? ', past journeys included' : ''}; the two are never mixed. Export first if you’d like
-            a copy.
+            {current ? t('settings.restore.replacesIt') : t('settings.restore.replacesThem')}
+            {current && hasPast ? t('settings.restore.pastIncluded') : ''}
+            {t('settings.restore.neverMixed')}
           </T>
-          <Button label="Export current first" kind="secondary" onPress={onExportCurrent} disabled={busy} />
+          <Button
+            label={t('settings.restore.exportFirst')}
+            kind="secondary"
+            onPress={onExportCurrent}
+            disabled={busy}
+          />
         </ThemedView>
       ) : null}
 
       <View style={{ gap: space.sm }}>
         <Button
-          label={current || hasPast ? 'Replace with this backup' : 'Restore this Life Reset'}
+          label={current || hasPast ? t('settings.restore.replace') : t('settings.restore.restore')}
           kind={current || hasPast ? 'danger' : 'primary'}
           onPress={onRestore}
           disabled={busy}
         />
-        <Button label="Choose a different file" kind="ghost" onPress={onOther} disabled={busy} />
+        <Button label={t('settings.restore.different')} kind="ghost" onPress={onOther} disabled={busy} />
       </View>
     </Animated.View>
   );
@@ -238,11 +249,12 @@ function Preview({
 
 function Stat({ icon, value, label }: { icon: Icon; value: number; label: string }) {
   const { c } = useTheme();
+  const t = useT();
   return (
-    <View style={styles.stat} accessible accessibilityLabel={`${value} ${label}`}>
+    <View style={styles.stat} accessible accessibilityLabel={t('settings.restore.statA11y', { value, label })}>
       <Ionicons name={icon} size={16} color={c.textDim} />
       <T v="heading">{value}</T>
-      <T v="caption" color={c.textDim}>
+      <T v="caption" color={c.textDim} numberOfLines={2}>
         {label}
       </T>
     </View>

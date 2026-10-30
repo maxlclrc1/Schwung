@@ -16,6 +16,7 @@ import { rise, useTints } from '../onboarding/kit';
 import { AGES, Chip, Chips, HEALTH, IntensityCard, Section, setupStyles } from '../pilot/SetupParts';
 import { SheetHeader } from '../SheetHeader';
 import { Button, Screen, T } from '../ui';
+import { useT } from '../../i18n/react';
 
 /**
  * Begin a New Ascent: a short set-up from where the last one ended. The person reconfirms their age band and health
@@ -25,7 +26,8 @@ import { Button, Screen, T } from '../ui';
  */
 export function NewAscent() {
   const { c } = useTheme();
-  const t = useTints();
+  const tint = useTints();
+  const t = useT();
   const prev = useResetPilot((s) => s.program)!;
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = pilotToday({ program: prev, devDayOffset: offset });
@@ -52,7 +54,7 @@ export function NewAscent() {
   const choices: P.PilotChoice[] = Object.entries(levels)
     .filter((e): e is [P.PilotHabitId, Intensity] => e[1] !== null && P.isPilotHabit(e[0]))
     .map(([habitId, intensity]) => ({ habitId, intensity }));
-  const problems = age === 'u16' ? ['Schwung is made for people 16 and older.'] : P.setupProblems(answers, choices);
+  const problems = age === 'u16' ? [t('engine.problems.under16')] : P.setupProblems(answers, choices);
   const ready = confirmed && !!age && choices.length > 0 && problems.length === 0;
 
   const toggleHealth = (id: Precaution) => {
@@ -70,18 +72,14 @@ export function NewAscent() {
     const program = P.beginAscent(prev, answers, choices, custom, toDateKey(pilotNow(offset)), today, CROP_COUNT);
     if (!program) {
       setBusy(false);
-      setNote('That set-up can’t start as it is. Check the habits marked above.');
+      setNote(t('beyond.ascent.cantStart'));
       return;
     }
     const r = await startNewAscent(program);
     setBusy(false);
     if (!r.ok) {
       haptic.warning();
-      setNote(
-        r.reason === 'held'
-          ? 'Some saved data is waiting to be recovered, so nothing was changed.'
-          : 'The new ascent couldn’t be saved just now. Nothing was changed; please try again.',
-      );
+      setNote(r.reason === 'held' ? t('beyond.ascent.held') : t('beyond.ascent.failed'));
       return;
     }
     haptic.success();
@@ -92,21 +90,19 @@ export function NewAscent() {
 
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title="Begin a New Ascent" action="Cancel" />
+      <SheetHeader title={t('beyond.ascent.title')} action={t('common.cancel')} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Animated.View entering={rise(0)} style={{ gap: space.sm }}>
-          <T v="overline" color={t.lavender.ink}>
-            Ascent {next} · 66 days from today
+          <T v="overline" color={tint.lavender.ink}>
+            {t('beyond.ascent.kicker', { ascent: next })}
           </T>
-          <T color={c.textDim}>
-            Your journey so far is kept in Past journeys, with its story. Your lifetime XP and collection come with you.
-          </T>
+          <T color={c.textDim}>{t('beyond.ascent.intro')}</T>
         </Animated.View>
 
         <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
-          <Section title="Still right?" hint="These keep your targets safe. Change anything that has changed.">
+          <Section title={t('beyond.ascent.stillRight')} hint={t('beyond.ascent.stillRightHint')}>
             <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
-              Your age
+              {t('beyond.ascent.age')}
             </T>
             <Chips
               items={AGES}
@@ -117,7 +113,7 @@ export function NewAscent() {
               }}
             />
             <T v="caption" color={c.textDim} style={{ fontWeight: '700', marginTop: space.sm }}>
-              Anything to keep in mind?
+              {t('beyond.ascent.health')}
             </T>
             <View style={setupStyles.chips}>
               {HEALTH.map((h) => (
@@ -129,7 +125,7 @@ export function NewAscent() {
                 />
               ))}
               <Chip
-                label="Prefer not to say"
+                label={t('beyond.ascent.preferNot')}
                 on={health === 'unknown'}
                 onPress={() => {
                   setConfirmed(true);
@@ -139,7 +135,7 @@ export function NewAscent() {
             </View>
           </Section>
           <Chip
-            label={confirmed ? 'Confirmed' : 'Yes, these are still right'}
+            label={confirmed ? t('beyond.ascent.confirmed') : t('beyond.ascent.confirm')}
             on={confirmed}
             onPress={() => {
               haptic.select();
@@ -148,7 +144,7 @@ export function NewAscent() {
           />
         </ThemedView>
 
-        <Section title="Your habits" hint="Each starts at the level it reached. Change a level, or leave a habit out.">
+        <Section title={t('beyond.ascent.habits')} hint={t('beyond.ascent.habitsHint')}>
           {defaults.choices.map(({ habitId }) => {
             const on = levels[habitId] !== null;
             return (
@@ -165,7 +161,11 @@ export function NewAscent() {
                   />
                 ) : null}
                 <HabitToggle
-                  label={on ? `Leave out ${P.habitName(habitId)}` : `Keep ${P.habitName(habitId)}`}
+                  label={
+                    on
+                      ? t('beyond.ascent.leaveOut', { habit: P.habitName(habitId) })
+                      : t('beyond.ascent.keep', { habit: P.habitName(habitId) })
+                  }
                   on={on}
                   onPress={() =>
                     setLevels((l) => ({
@@ -184,18 +184,18 @@ export function NewAscent() {
               <View style={{ flex: 1 }}>
                 <T v="bodyStrong">{P.nameOf(prev, id)}</T>
                 <T v="caption" color={c.textDim}>
-                  Your habit
+                  {t('beyond.ascent.yourHabit')}
                 </T>
               </View>
               <Chip
-                label={custom.includes(id) ? 'Kept' : 'Left out'}
+                label={custom.includes(id) ? t('beyond.ascent.kept') : t('beyond.ascent.leftOut')}
                 on={custom.includes(id)}
                 onPress={() => setCustom((k) => (k.includes(id) ? k.filter((x) => x !== id) : [...k, id]))}
               />
             </ThemedView>
           ))}
           <T v="caption" color={c.textFaint}>
-            You can add more habits once you’ve begun.
+            {t('beyond.ascent.addLater')}
           </T>
         </Section>
 
@@ -210,13 +210,13 @@ export function NewAscent() {
         ) : null}
 
         <Button
-          label={busy ? 'Beginning…' : `Begin Ascent ${next}`}
+          label={busy ? t('beyond.ascent.beginning') : t('beyond.ascent.begin', { ascent: next })}
           onPress={() => void begin()}
           disabled={!ready || busy}
         />
         {!confirmed ? (
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            Confirm your answers above to begin.
+            {t('beyond.ascent.confirmFirst')}
           </T>
         ) : null}
         {note ? (

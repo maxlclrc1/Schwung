@@ -1,3 +1,4 @@
+import { formatPercent, t } from '../../i18n';
 import { LANDMARKS } from '../ascent';
 import { dateForDay, PROGRAM_DAYS } from '../dates';
 import * as C from './charts';
@@ -33,11 +34,11 @@ export function storyFacts(p: P.PilotProgram, today: number): StoryFacts {
     .filter((d) => complete.includes(d));
   const highlight =
     best && best.share >= 0.6
-      ? `Best week: Week ${best.week}, ${Math.round(best.share * 100)}% of habits done`
+      ? t('progress.story.bestWeek', { week: best.week, pct: formatPercent(Math.round(best.share * 100) / 100) })
       : records.bestStreak >= 7
-        ? `A ${records.bestStreak}-day run along the way`
+        ? t('progress.story.run', { count: records.bestStreak })
         : milestones.length
-          ? `${milestones.length} milestone day${milestones.length === 1 ? '' : 's'} completed`
+          ? t('progress.story.milestones', { count: milestones.length })
           : null;
   return {
     from: p.startedAt,

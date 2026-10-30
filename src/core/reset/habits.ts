@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { hasPrecaution, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN, type Profile } from './profile';
 
 /*
@@ -714,39 +715,32 @@ export const RESET_BY_ID: Record<string, ResetHabit> = Object.fromEntries(RESET_
 
 export function strengthNotes(p: Profile): string[] {
   const out: string[] = [];
-  if (hasPrecaution(p, 'joint')) out.push('Keep to what your physiotherapist or clinician has advised.');
-  if (isTeen(p))
-    out.push(
-      'Learn technique from a qualified coach or PE teacher first, build up gradually, avoid maximal lifts, and stop if anything hurts.',
-    );
-  if (p.age === '65p') out.push('A professional can also suggest balance and strength activities that suit you.');
+  if (hasPrecaution(p, 'joint')) out.push(t('engine.notes.strengthJoint'));
+  if (isTeen(p)) out.push(t('engine.notes.strengthTeen'));
+  if (p.age === '65p') out.push(t('engine.notes.strengthOlder'));
   return out;
 }
 
 /** Why this habit can't be taken by this person at this intensity (null = it can). */
 export function resetExclusion(h: ResetHabit, p: Profile, intensity: Intensity): string | null {
-  if (p.age === 'u16') return 'Schwung is made for people 16 and older';
-  if (!(isTeen(p) ? h.ages.teen : h.ages.adult).includes(intensity))
-    return 'this intensity isn’t offered to 16–17-year-olds';
+  if (p.age === 'u16') return t('engine.exclusion.under16');
+  if (!(isTeen(p) ? h.ages.teen : h.ages.adult).includes(intensity)) return t('engine.exclusion.teenIntensity');
   switch (h.id) {
     case 'move_walk':
-      if (hasPrecaution(p, 'walkingDifficult'))
-        return 'walking or standing for long is difficult for you (no reviewed alternative yet)';
-      if (hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy'))
-        return 'needs individual advice from your clinician or midwife (waiting for expert review)';
+      if (hasPrecaution(p, 'walkingDifficult')) return t('engine.exclusion.walking');
+      if (hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy')) return t('engine.exclusion.movementAdvice');
       return null;
     case 'sleep_wake':
-      return p.wake && p.wake.kind !== 'time' ? 'your wake time changes a lot or you work shifts' : null;
+      return p.wake && p.wake.kind !== 'time' ? t('engine.exclusion.wakeVaries') : null;
     case 'screen_app_limit':
       // Not offered under 2 hours of overall phone use (a day under 2 h has little to cut).
-      return p.phone === 'lt1' || p.phone === '1_2' ? 'you use your phone less than 2 hours a day' : null;
+      return p.phone === 'lt1' || p.phone === '1_2' ? t('engine.exclusion.lowPhone') : null;
     case 'strength_log':
       // The same conditions the held exercise programmes exclude, without using or releasing them.
-      if (precautionsUnknown(p)) return 'answer the health question first: a professional can advise what suits you';
+      if (precautionsUnknown(p)) return t('engine.exclusion.healthFirst');
       if (hasPrecaution(p, 'heart') || hasPrecaution(p, 'pregnancy') || hasPrecaution(p, 'walkingDifficult'))
-        return 'needs individual advice from your clinician or midwife first';
-      if (hasPrecaution(p, 'joint') && intensity === 'starter')
-        return 'with joint, back or injury pain, start with a routine your physiotherapist or clinician suggests';
+        return t('engine.exclusion.strengthAdvice');
+      if (hasPrecaution(p, 'joint') && intensity === 'starter') return t('engine.exclusion.strengthJoint');
       return null;
     default:
       return null;

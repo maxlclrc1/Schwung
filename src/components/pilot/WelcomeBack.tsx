@@ -12,6 +12,7 @@ import { Press } from '../onboarding/Choices';
 import { ThemedImage } from '../ThemedImage';
 import { Button, T } from '../ui';
 import { WORLD_ART } from '../World';
+import { useT } from '../../i18n/react';
 
 const BANNER = 120;
 /** The painting row the window opens at: the summit and the upper switchbacks. */
@@ -32,6 +33,7 @@ export function WelcomeBack({
   onClose: () => void;
 }) {
   const { c, isDark } = useTheme();
+  const t = useT();
   const { width } = useWindowDimensions();
   const setComebacks = usePreferences((s) => s.setComebacks);
   const [gone, setGone] = useState(false);
@@ -67,14 +69,19 @@ export function WelcomeBack({
           <LinearGradient colors={veil as [string, string]} locations={[0.45, 1]} style={StyleSheet.absoluteFill} />
           <View style={[styles.mark, { backgroundColor: c.sage, borderColor: c.surface }]} />
         </View>
-        <Press onPress={close} style={styles.close} accessibilityRole="button" accessibilityLabel="Dismiss">
+        <Press
+          onPress={close}
+          style={styles.close}
+          accessibilityRole="button"
+          accessibilityLabel={t('welcomeBack.dismiss')}
+        >
           <View style={[styles.closeDisc, { backgroundColor: c.surface }]}>
             <Ionicons name="close" size={16} color={c.textDim} />
           </View>
         </Press>
         <View style={styles.body}>
           <T v="overline" color={c.sageInk}>
-            Welcome back
+            {t('welcomeBack.title')}
           </T>
           <T v="heading" accessibilityRole="header">
             {words.title}
@@ -82,10 +89,10 @@ export function WelcomeBack({
           <T color={c.textDim}>{words.body}</T>
           {completeDays > 0 ? (
             <T v="caption" color={c.textDim}>
-              Your {completeDays} complete day{completeDays === 1 ? ' is' : 's are'} still on the mountain.
+              {t('welcomeBack.stillThere', { count: completeDays })}
             </T>
           ) : null}
-          <Button label="Continue my journey" onPress={close} style={{ marginTop: space.sm }} />
+          <Button label={t('welcomeBack.continue')} onPress={close} style={{ marginTop: space.sm }} />
           <Press
             onPress={() => {
               setComebacks(false);
@@ -93,10 +100,10 @@ export function WelcomeBack({
             }}
             style={styles.off}
             accessibilityRole="button"
-            accessibilityLabel="Don't show welcome-back messages again"
+            accessibilityLabel={t('welcomeBack.offA11y')}
           >
             <T v="caption" color={c.textFaint}>
-              Don’t show these again
+              {t('welcomeBack.off')}
             </T>
           </Press>
         </View>

@@ -5,6 +5,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { haptic } from '../lib/haptics';
 import { useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
+import { useT } from '../i18n/react';
 
 /** A round icon button for a screen's header. */
 export function IconButton({
@@ -43,7 +44,8 @@ export function IconButton({
 }
 
 export function SettingsButton() {
-  return <IconButton name="settings-outline" label="Settings" onPress={() => router.push('/settings')} />;
+  const t = useT();
+  return <IconButton name="settings-outline" label={t('nav.settings')} onPress={() => router.push('/settings')} />;
 }
 
 const styles = StyleSheet.create({

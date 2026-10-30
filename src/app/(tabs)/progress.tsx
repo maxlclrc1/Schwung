@@ -24,6 +24,8 @@ import { worldFrame } from '../../core/world';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
+import { t as tr } from '../../i18n';
+import { useT } from '../../i18n/react';
 
 /**
  * The Journey tab: the Ascent fills the screen, with the stats in one small line above it, the full 66-day calendar
@@ -35,6 +37,7 @@ export default function JourneyTab() {
 }
 
 const JourneyPage = memo(function JourneyPage() {
+  const t = useT();
   const insets = useSafeAreaInsets();
   const source = useJourneySource();
   const started = source.started;
@@ -48,7 +51,7 @@ const JourneyPage = memo(function JourneyPage() {
         <View style={[styles.empty, { paddingTop: insets.top + space.sm }]}>
           <Header />
           <View style={styles.emptyBody}>
-            <T>Your 66 days will show here once you start your Life Reset.</T>
+            <T>{t('journeyTab.empty')}</T>
             <PastJourneysLink />
           </View>
         </View>
@@ -58,10 +61,11 @@ const JourneyPage = memo(function JourneyPage() {
 });
 
 function Header() {
+  const t = useT();
   return (
     <View style={styles.header}>
       <T v="heading" accessibilityRole="header" numberOfLines={1} style={{ flex: 1 }}>
-        Your journey
+        {t('journeyTab.title')}
       </T>
       <ThemeToggle />
       <SettingsButton />
@@ -71,6 +75,7 @@ function Header() {
 
 function Ascent({ picked, source }: { picked: number | null; source: JourneySource }) {
   const { c } = useTheme();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { logs, today, start, title } = source;
@@ -147,7 +152,10 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
               onPress={() => setExpanded((e) => !e)}
               accessibilityRole="button"
               accessibilityState={{ expanded }}
-              accessibilityLabel={`${summary.kicker}: ${summary.full}. ${expanded ? 'Hide' : 'Show'} that day’s habits`}
+              accessibilityLabel={t(expanded ? 'journeyTab.captionA11yHide' : 'journeyTab.captionA11yShow', {
+                kicker: summary.kicker,
+                full: summary.full,
+              })}
               style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
             >
               <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
@@ -164,7 +172,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
               <Pressable onPress={() => setChosen(null)} accessibilityRole="button" style={styles.back} hitSlop={8}>
                 <Ionicons name="return-down-back" size={16} color={c.indigoInk} />
                 <T v="caption" color={c.indigoInk} style={{ fontWeight: '700' }}>
-                  {today > PROGRAM_DAYS ? 'Summit' : 'Today'}
+                  {today > PROGRAM_DAYS ? t('journeyTab.back.summit') : t('journeyTab.back.today')}
                 </T>
               </Pressable>
             ) : null}
@@ -191,7 +199,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                   router.push('/life-reset/story');
                 }}
                 accessibilityRole="button"
-                accessibilityLabel="Your 66-day story. Open it to save or share"
+                accessibilityLabel={t('journeyTab.storyA11y')}
               >
                 {({ pressed }) => (
                   <ThemedView style={[styles.story, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}>
@@ -199,9 +207,9 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                       <Ionicons name="image-outline" size={18} color={c.peachInk} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <T v="bodyStrong">Your 66-day story</T>
+                      <T v="bodyStrong">{t('journeyTab.story')}</T>
                       <T v="caption" color={c.textDim}>
-                        A keepsake of the whole climb, to save or share.
+                        {t('journeyTab.storyBody')}
                       </T>
                     </View>
                     <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
@@ -213,7 +221,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             <PastJourneysLink />
             <View style={styles.expedition}>
               <T v="overline" color={c.textDim}>
-                The expedition
+                {t('journeyTab.expedition')}
               </T>
               <ExpeditionCalendar
                 cells={cells}
@@ -233,19 +241,27 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
 
 /** The shown day in a few words (the phase is on the mountain), and in full for VoiceOver. */
 function daySummary(d: AscentDay | undefined, log: DayLog | undefined, isToday: boolean) {
-  const kicker = isToday ? 'Today' : d?.status === 'future' ? 'Ahead' : 'Past';
+  const kicker = tr(
+    isToday ? 'journeyTab.kicker.today' : d?.status === 'future' ? 'journeyTab.kicker.ahead' : 'journeyTab.kicker.past',
+  );
   if (!d) return { kicker, label: '', full: '' };
-  const label =
+  const key =
     d.status === 'future'
-      ? `Day ${d.day} · still ahead`
+      ? 'journeyTab.label.ahead'
       : isToday
         ? log
-          ? `Day ${d.day} · ${d.done} of ${d.planned} done so far`
-          : `Day ${d.day} · nothing yet`
+          ? 'journeyTab.label.soFar'
+          : 'journeyTab.label.nothingYet'
         : d.planned === 0
-          ? `Day ${d.day} · nothing logged`
-          : `Day ${d.day} · ${d.done} of ${d.planned} done`;
-  return { kicker, label, full: `${label.replace(`Day ${d.day}`, `Day ${d.day}, ${phaseFor(d.day).name} phase,`)}` };
+          ? 'journeyTab.label.nothing'
+          : 'journeyTab.label.done';
+  const params = { done: d.done, planned: d.planned };
+  const label = tr(key, { day: d.day, ...params });
+  const full = tr(key, {
+    day: tr('journeyTab.label.dayPhase', { day: d.day, phase: phaseFor(d.day).name }),
+    ...params,
+  });
+  return { kicker, label, full };
 }
 
 /** One day's habits, from that day's own record: done, not done, or rested. */
@@ -265,6 +281,7 @@ function DayDetail({
   when: 'past' | 'today' | 'ahead';
 }) {
   const { c } = useTheme();
+  const t = useT();
   const log = logForDay(logs, start, day);
   return (
     <ThemedView style={[styles.card, { backgroundColor: c.surface }]} accessibilityLiveRegion="polite">
@@ -277,7 +294,7 @@ function DayDetail({
                 key={id}
                 style={styles.habit}
                 accessible
-                accessibilityLabel={`${title(id)}, ${done ? 'done' : 'not done'}`}
+                accessibilityLabel={t(done ? 'journeyTab.habitDone' : 'journeyTab.habitNotDone', { habit: title(id) })}
               >
                 <Ionicons
                   name={done ? 'checkmark-circle' : 'ellipse-outline'}
@@ -294,12 +311,12 @@ function DayDetail({
       ) : (
         <T v="caption" color={c.textDim}>
           {when === 'ahead'
-            ? 'Still ahead.'
+            ? t('journeyTab.stillAhead')
             : when === 'today'
-              ? 'Nothing checked off yet today.'
+              ? t('journeyTab.nothingToday')
               : rest
-                ? 'A rest day: nothing was due.'
-                : 'Nothing was logged this day.'}
+                ? t('journeyTab.rest')
+                : t('journeyTab.nothingLogged')}
         </T>
       )}
     </ThemedView>

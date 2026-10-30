@@ -1,3 +1,4 @@
+import { t, type TKey } from '../i18n';
 import { PROGRAM_DAYS } from './dates';
 import { dayQualifies, doneCount, logForDay, Logs, PHASE_START } from './progression';
 
@@ -13,18 +14,39 @@ export const ASCENT_ASPECT = 3 / 2;
 
 export type AscentPhase = { n: 1 | 2 | 3; name: string; from: number; to: number };
 
+/** A phase whose name is read in the current language each time it's shown. */
+function phase(n: 1 | 2 | 3, from: number, to: number): AscentPhase {
+  return {
+    n,
+    from,
+    to,
+    get name() {
+      return t(`progress.phase.${n}` as TKey);
+    },
+  };
+}
+
+function landmark<I extends 'footsteps' | 'bonfire' | 'flag' | 'star'>(day: number, icon: I) {
+  return {
+    icon,
+    get name() {
+      return t(`progress.landmark.${day}` as TKey);
+    },
+  };
+}
+
 export const ASCENT_PHASES: AscentPhase[] = [
-  { n: 1, name: 'Foundation', from: 1, to: PHASE_START[2] - 1 },
-  { n: 2, name: 'Momentum', from: PHASE_START[2], to: PHASE_START[3] - 1 },
-  { n: 3, name: 'Mastery', from: PHASE_START[3], to: PROGRAM_DAYS },
+  phase(1, 1, PHASE_START[2] - 1),
+  phase(2, PHASE_START[2], PHASE_START[3] - 1),
+  phase(3, PHASE_START[3], PROGRAM_DAYS),
 ];
 
 /** Landmarks along the way. Visual only: ceremonies are decided elsewhere. */
 export const LANDMARKS: Record<number, { name: string; icon: 'footsteps' | 'bonfire' | 'flag' | 'star' }> = {
-  7: { name: 'First week', icon: 'footsteps' },
-  21: { name: 'Base camp', icon: 'bonfire' },
-  44: { name: 'High camp', icon: 'flag' },
-  66: { name: 'Summit', icon: 'star' },
+  7: landmark(7, 'footsteps'),
+  21: landmark(21, 'bonfire'),
+  44: landmark(44, 'flag'),
+  66: landmark(66, 'star'),
 };
 
 export type Point = { x: number; y: number };
@@ -180,9 +202,9 @@ export function nearestDay(
 
 /** Short, non-judgmental summary for a selected day. */
 export function describeDay(d: AscentDay): string {
-  const base = `Day ${d.day} · ${phaseFor(d.day).name}`;
-  if (d.status === 'future') return `${base} · still ahead`;
-  if (d.status === 'today') return `${base} · today`;
-  if (d.planned === 0) return `${base} · nothing logged`;
-  return `${base} · ${d.done} of ${d.planned} done`;
+  const base = t('progress.describeDay.base', { day: d.day, phase: phaseFor(d.day).name });
+  if (d.status === 'future') return t('progress.describeDay.ahead', { base });
+  if (d.status === 'today') return t('progress.describeDay.today', { base });
+  if (d.planned === 0) return t('progress.describeDay.nothing', { base });
+  return t('progress.describeDay.done', { base, done: d.done, planned: d.planned });
 }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
-import { COLLECTIBLES, growth, newlyReached, sanitizeCollection, START_TITLE } from '../reset/collection';
+import { COLLECTIBLES, growth, newlyReached, sanitizeCollection, startTitle } from '../reset/collection';
 import * as P from '../reset/pilot';
 
 describe('growth and the collection', () => {
   it('climbs titles by XP, with the way to the next object', () => {
-    expect(growth(0)).toMatchObject({ title: START_TITLE, rank: 0, next: { id: 'compass' } });
+    expect(growth(0)).toMatchObject({ title: startTitle(), rank: 0, next: { id: 'compass' } });
     expect(growth(30).progress).toBeCloseTo(0.5);
     expect(growth(60)).toMatchObject({ title: 'Explorer', rank: 1, next: { id: 'edelweiss' } });
     expect(growth(5000)).toMatchObject({ title: 'Summit Keeper', rank: COLLECTIBLES.length, next: null, progress: 1 });

@@ -26,6 +26,7 @@ import {
 } from '../InsightsViz';
 import { RecentInsights } from '../beyond/RecentInsights';
 import { Button, T } from '../ui';
+import { useLanguage, useT } from '../../i18n/react';
 
 /**
  * Insights for the Life Reset, as three questions. How am I doing? The consistency ring and the weeks as a line.
@@ -36,9 +37,11 @@ import { Button, T } from '../ui';
  */
 export function PilotInsights() {
   const { c } = useTheme();
+  const t = useT();
   const program = useShownProgram()!;
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = pilotToday({ program, devDayOffset: offset });
+  const lang = useLanguage();
   const data = useMemo(
     () => ({
       overall: P.overallTally(program, today),
@@ -57,6 +60,7 @@ export function PilotInsights() {
     const records = C.records(frozen, frozenToday, trend);
     const bars = C.habitBars(frozen, frozenToday);
     const name = (id: string) => P.nameOf(frozen, id);
+    void lang; // the observations are words: made again when the language changes
     const observations = [
       O.weekChange(trend),
       O.streakNote(P.pilotStreak(frozen, frozenToday), records.bestStreak),
@@ -69,16 +73,16 @@ export function PilotInsights() {
       ),
     ].filter((o): o is NonNullable<typeof o> => o !== null);
     return { trend, records, observations };
-  }, [frozen, frozenToday, shown]);
+  }, [frozen, frozenToday, shown, lang]);
 
   const rows: HabitRow[] = program.habits.map((id) => {
     const week = P.weekProgress(program, id, today);
     const line = P.levelLineFor(program, id, today);
     const kind = week
       ? week.goal === 0
-        ? `${line} · a short week, no goal`
-        : `${line} · ${week.credited} of ${week.goal} this week`
-      : `${line} · every day`;
+        ? t('insights.kind.shortWeek', { line })
+        : t('insights.kind.week', { line, done: week.credited, goal: week.goal })
+      : t('insights.kind.daily', { line });
     return {
       id,
       name: P.nameOf(program, id),
@@ -93,11 +97,7 @@ export function PilotInsights() {
           )}
           <T v="caption">{P.targetText(program, id, today)}</T>
           {id === 'strength_log' ? <StrengthWeeks program={program} today={today} /> : null}
-          <Button
-            label="Details, corrections & difficulty"
-            kind="secondary"
-            onPress={() => router.push(`/life-reset/${id}`)}
-          />
+          <Button label={t('insights.details')} kind="secondary" onPress={() => router.push(`/life-reset/${id}`)} />
         </>
       ),
     };
@@ -105,16 +105,16 @@ export function PilotInsights() {
 
   return (
     <>
-      <Chapter n="01" title="How am I doing?" tint={c.mist} />
+      <Chapter n="01" title={t('insights.chapter.doing')} tint={c.mist} />
       {program.after ? <RecentInsights program={program} today={today} /> : null}
       <ConsistencyRing {...data} day={today} />
       {charts ? <TrendLine points={charts.trend} /> : null}
 
-      <Chapter n="02" title="What’s working?" tint={c.sage} />
+      <Chapter n="02" title={t('insights.chapter.working')} tint={c.sage} />
       <HabitBoard rows={rows} />
       {charts ? <RecordMedals records={charts.records} /> : null}
 
-      <Chapter n="03" title="What can I learn?" tint={c.accent} />
+      <Chapter n="03" title={t('insights.chapter.learn')} tint={c.accent} />
       {charts ? <Observations items={charts.observations} day={today} /> : null}
       {program.habits.includes('screen_app_limit') ? <ScreenTimeCheck program={program} today={today} /> : null}
     </>
@@ -124,6 +124,7 @@ export function PilotInsights() {
 /** Strength Training: sessions logged each week, against the week's target. */
 function StrengthWeeks({ program, today }: { program: P.PilotProgram; today: number }) {
   const { c } = useTheme();
+  const t = useT();
   const weeks = P.habitWeeks(program, 'strength_log', today);
   return (
     <View style={{ gap: 2 }}>
@@ -132,8 +133,8 @@ function StrengthWeeks({ program, today }: { program: P.PilotProgram; today: num
         .reverse()
         .map((w) => (
           <T key={w.week} v="caption" color={c.textDim}>
-            Week {w.week}: {w.credited + w.extra} session{w.credited + w.extra === 1 ? '' : 's'}
-            {w.goal ? ` · target ${w.goal}` : ''}
+            {t('insights.strengthWeek', { week: w.week, count: w.credited + w.extra })}
+            {w.goal ? t('insights.strengthTarget', { goal: w.goal }) : ''}
           </T>
         ))}
     </View>
@@ -143,6 +144,7 @@ function StrengthWeeks({ program, today }: { program: P.PilotProgram; today: num
 /** Less Scrolling's optional weekly check: the person's own Screen Time reading, never checked by Schwung. */
 function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: number }) {
   const { c } = useTheme();
+  const t = useT();
   const saved = P.screenTimeFor(program, today);
   const [value, setValue] = useState(saved?.minutesPerDay ?? program.answers.pullMinutes ?? 60);
   const limit = P.scrollLimitFor(program, P.levelFor(program, 'screen_app_limit', today));
@@ -157,21 +159,20 @@ function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: n
           <Ionicons name="phone-portrait-outline" size={16} color={c.mistInk} />
         </View>
         <View style={{ flex: 1 }}>
-          <T v="bodyStrong">Screen Time, this week</T>
+          <T v="bodyStrong">{t('insights.screen.title')}</T>
           <T v="caption" color={c.textDim}>
-            Optional · your limit is {limit} min a day
+            {t('insights.screen.limit', { limit })}
           </T>
         </View>
       </View>
       <ScreenTimeHistory readings={readings} limit={limit} thisWeek={thisWeek} />
       <T v="caption" color={c.textDim}>
-        Settings → Screen Time shows your daily average for your main app. Enter it if you like: it stays on your phone
-        and never changes a day or your streak.
+        {t('insights.screen.how')}
       </T>
       <View style={styles.stepper}>
         <Button label="−15" kind="secondary" style={styles.step} onPress={() => setValue((v) => Math.max(0, v - 15))} />
         <T v="heading" style={styles.value}>
-          {value} min
+          {t('insights.screen.min', { minutes: value })}
         </T>
         <Button
           label="+15"
@@ -181,7 +182,7 @@ function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: n
         />
       </View>
       <Button
-        label={saved ? `Update (saved: ${saved.minutesPerDay} min)` : 'Save this week'}
+        label={saved ? t('insights.screen.update', { minutes: saved.minutesPerDay }) : t('insights.screen.save')}
         onPress={() => {
           useResetPilot.getState().setScreenTime(value);
           haptic.confirm();

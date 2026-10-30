@@ -9,6 +9,8 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { useTints } from '../onboarding/kit';
 import { T } from '../ui';
+import { useT } from '../../i18n/react';
+import { formatNumber } from '../../i18n';
 
 const STRIP = 28;
 
@@ -18,7 +20,8 @@ const STRIP = 28;
  */
 export function SinceSummit({ program, today }: { program: P.PilotProgram; today: number }) {
   const { c } = useTheme();
-  const t = useTints();
+  const tint = useTints();
+  const t = useT();
   const s = useMemo(() => P.sinceSummit(program, today), [program, today]);
   const streak = useMemo(() => P.pilotStreak(program, today), [program, today]);
   const from = program.after?.since ?? today;
@@ -35,19 +38,29 @@ export function SinceSummit({ program, today }: { program: P.PilotProgram; today
     <ThemedView
       style={[styles.panel, { backgroundColor: c.surface }]}
       accessible
-      accessibilityLabel={`Since the summit: ${s.days} ${s.days === 1 ? 'day' : 'days'}, ${s.counted} counted, a ${streak}-day streak, best run ${s.best}, ${s.xp} XP.`}
+      accessibilityLabel={t('beyond.since.a11y', {
+        days: s.days,
+        counted: s.counted,
+        streak,
+        best: s.best,
+        xp: s.xp,
+      })}
     >
       <View style={styles.head}>
-        <Ionicons name="trending-up-outline" size={18} color={t.sage.ink} />
-        <T v="overline" color={t.sage.ink} style={{ flex: 1 }}>
-          Since the summit · Keep My Momentum
+        <Ionicons name="trending-up-outline" size={18} color={tint.sage.ink} />
+        <T v="overline" color={tint.sage.ink} style={{ flex: 1 }}>
+          {t('beyond.since.title')}
         </T>
       </View>
       <View style={styles.stats}>
-        <Stat value={`${s.counted}`} label={`of ${s.judged || s.days} days counted`} color={t.sage.ink} />
-        <Stat value={`${streak}`} label="day streak" color={t.peach.ink} />
-        <Stat value={`${s.best}`} label="best run" color={t.mist.ink} />
-        <Stat value={`${s.xp}`} label="XP" color={t.lavender.ink} />
+        <Stat
+          value={formatNumber(s.counted)}
+          label={t('beyond.since.counted', { count: s.judged || s.days })}
+          color={tint.sage.ink}
+        />
+        <Stat value={formatNumber(streak)} label={t('beyond.since.streak')} color={tint.peach.ink} />
+        <Stat value={formatNumber(s.best)} label={t('beyond.since.best')} color={tint.mist.ink} />
+        <Stat value={formatNumber(s.xp)} label={t('beyond.since.xp')} color={tint.lavender.ink} />
       </View>
       {strip.length > 1 ? (
         <View style={styles.strip}>
@@ -57,10 +70,10 @@ export function SinceSummit({ program, today }: { program: P.PilotProgram; today
               style={[
                 styles.dot,
                 r === 'counted'
-                  ? { backgroundColor: t.sage.fill }
+                  ? { backgroundColor: tint.sage.fill }
                   : r === 'missed'
                     ? { backgroundColor: c.border }
-                    : { borderWidth: 1.5, borderColor: r === 'today' ? t.sage.fill : c.border },
+                    : { borderWidth: 1.5, borderColor: r === 'today' ? tint.sage.fill : c.border },
               ]}
             />
           ))}
@@ -87,7 +100,8 @@ function Stat({ value, label, color }: { value: string; label: string; color: st
 /** Journey → Past journeys (only once there is one). */
 export function PastJourneysLink() {
   const { c } = useTheme();
-  const t = useTints();
+  const tint = useTints();
+  const t = useT();
   const n = useJourneys((s) => s.journeys.length);
   if (!n) return null;
   return (
@@ -97,17 +111,17 @@ export function PastJourneysLink() {
         router.push('/life-reset/journeys');
       }}
       accessibilityRole="button"
-      accessibilityLabel={`Past journeys, ${n}. Their climbs and stories`}
+      accessibilityLabel={t('beyond.pastLink.a11y', { count: n })}
     >
       {({ pressed }) => (
         <ThemedView style={[styles.link, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}>
-          <View style={[styles.icon, { backgroundColor: t.indigo.soft }]}>
-            <Ionicons name="albums-outline" size={18} color={t.indigo.ink} />
+          <View style={[styles.icon, { backgroundColor: tint.indigo.soft }]}>
+            <Ionicons name="albums-outline" size={18} color={tint.indigo.ink} />
           </View>
           <View style={{ flex: 1 }}>
-            <T v="bodyStrong">Past journeys</T>
+            <T v="bodyStrong">{t('beyond.pastLink.title')}</T>
             <T v="caption" color={c.textDim}>
-              {n === 1 ? 'Your first ascent, kept as it was.' : `${n} ascents, each kept as it was.`}
+              {n === 1 ? t('beyond.pastLink.one') : t('beyond.pastLink.many', { count: n })}
             </T>
           </View>
           <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
