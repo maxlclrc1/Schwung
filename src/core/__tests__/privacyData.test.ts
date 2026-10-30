@@ -38,6 +38,7 @@ describe('Export my data', () => {
     };
     const out = buildExport({
       saveVersion: 1,
+      journeys: [],
       program: p,
       today: 9,
       themePreference: 'dark',
@@ -65,6 +66,7 @@ describe('Export my data', () => {
   it('still exports preferences and recovery copies without a program', () => {
     const out = buildExport({
       saveVersion: 1,
+      journeys: [],
       program: null,
       today: 0,
       themePreference: 'system',

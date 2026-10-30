@@ -24,6 +24,7 @@ export function ReminderSync() {
       const key = JSON.stringify([
         reminders,
         program?.startedAt ?? null,
+        !!program?.after,
         today,
         todayComplete,
         reminders.showHabits ? habitNames : 0,

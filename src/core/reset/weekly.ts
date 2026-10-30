@@ -30,7 +30,7 @@ export type WeeklyContext = {
   workdays?: Weekday[];
   /** Strength Training at Challenge: the sessions a week the person already does (kept as it is). */
   ownSessions?: number;
-  /** Last program day weeks are evaluated for (Day 66 by default). */
+  /** Last program day weeks are evaluated for (Day 66 by default; Infinity once the person keeps their momentum). */
   programDays?: number;
 };
 
@@ -47,10 +47,11 @@ export function weekOf(startKey: string, day: number, programDays = PROGRAM_DAYS
   return { week, firstDay: Math.max(1, first), lastDay: Math.min(programDays, first + 6) };
 }
 
-/** Every week of the program, in order. */
-export function programWeeks(startKey: string, programDays = PROGRAM_DAYS): Week[] {
+/** Every week of the program, in order, up to the week holding `until` (an open-ended program needs it). */
+export function programWeeks(startKey: string, programDays = PROGRAM_DAYS, until = programDays): Week[] {
   const out: Week[] = [];
-  for (let d = 1; d <= programDays; d = out[out.length - 1].lastDay + 1) out.push(weekOf(startKey, d, programDays));
+  const last = Math.min(programDays, until);
+  for (let d = 1; d <= last; d = out[out.length - 1].lastDay + 1) out.push(weekOf(startKey, d, programDays));
   return out;
 }
 
@@ -190,7 +191,7 @@ export function weekSummaries(
   yesterdayEditable = false,
 ): WeekSummary[] {
   const start = eras[0]?.fromDay ?? Infinity;
-  return programWeeks(ctx.startKey, ctx.programDays)
+  return programWeeks(ctx.startKey, ctx.programDays, today)
     .filter((w) => w.lastDay >= start && w.firstDay <= today)
     .map((w) => weekSummary(habitId, eras, logs, ctx, w.firstDay, today, yesterdayEditable));
 }

@@ -61,7 +61,7 @@ let queue: Promise<unknown> = Promise.resolve();
 /** Replaces Schwung's pending reminders with the current plan. Safe to call as often as anything changes. */
 export function syncReminders(
   settings: ReminderSettings,
-  program: { startedAt: string } | null,
+  program: { startedAt: string; after?: unknown } | null,
   opts: { todayComplete: boolean; habitNames: string[] },
 ): Promise<void> {
   const run = async () => {

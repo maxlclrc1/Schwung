@@ -25,6 +25,8 @@ export type BackupProblem =
 
 export type Backup = {
   program: P.PilotProgram;
+  /** Past journeys (earlier Life Resets); none in a version 1 file. */
+  journeys: P.ArchivedJourney[];
   /** When the backup was made (ISO time), if the file says. */
   exportedAt: string | null;
   /** The preferences worth carrying over; a missing or malformed one is left as it is on this phone. */
@@ -65,21 +67,49 @@ export function readBackup(text: string, format: SaveFormat, bytes: number = tex
   if (!isObj(data.lifeReset) || !('savedProgram' in data.lifeReset)) return fail('damaged');
 
   // The saved program, brought up to date exactly as a save on the phone would be.
-  let migrated: unknown;
-  try {
-    migrated = format.migrate({ program: data.lifeReset.savedProgram, devDayOffset: 0 }, saveVersion);
-  } catch {
-    return fail('unsupportedVersion');
+  const program = readProgram(data.lifeReset.savedProgram, saveVersion, format);
+  if (!program.ok) return program;
+  if (program.program.answers.age === 'u16') return fail('damaged');
+
+  // Past journeys (schema 2): every one in full, or the backup is refused.
+  const journeys: P.ArchivedJourney[] = [];
+  if (data.schemaVersion >= 2) {
+    if (!Array.isArray(data.pastJourneys)) return fail('damaged');
+    const ids = new Set<string>();
+    for (const j of data.pastJourneys) {
+      if (!isObj(j) || typeof j.id !== 'string' || !j.id || ids.has(j.id) || typeof j.archivedAt !== 'string')
+        return fail('damaged');
+      const read = readProgram(j.savedProgram, saveVersion, format);
+      if (!read.ok) return read;
+      ids.add(j.id);
+      journeys.push({ v: 1, id: j.id, archivedAt: j.archivedAt, program: read.program });
+    }
   }
-  if (!isObj(migrated)) return fail('damaged');
-  const read = P.inspectPilotProgram(migrated.program);
-  // All or nothing: a backup missing any part of its program is refused, never restored in part.
-  if (!read.program || read.lost.length) return fail('damaged');
-  if (read.program.answers.age === 'u16' || read.program.habits.length === 0) return fail('damaged');
 
   const exportedAt =
     typeof data.exportedAt === 'string' && !Number.isNaN(Date.parse(data.exportedAt)) ? data.exportedAt : null;
-  return { ok: true, backup: { program: read.program, exportedAt, preferences: readPreferences(data.preferences) } };
+  return {
+    ok: true,
+    backup: { program: program.program, journeys, exportedAt, preferences: readPreferences(data.preferences) },
+  };
+}
+
+/** One saved program, migrated and fully checked (all or nothing: never restored in part). */
+function readProgram(
+  saved: unknown,
+  saveVersion: number,
+  format: SaveFormat,
+): { ok: true; program: P.PilotProgram } | { ok: false; problem: BackupProblem } {
+  let migrated: unknown;
+  try {
+    migrated = format.migrate({ program: saved, devDayOffset: 0 }, saveVersion);
+  } catch {
+    return { ok: false, problem: 'unsupportedVersion' };
+  }
+  if (!isObj(migrated)) return { ok: false, problem: 'damaged' };
+  const read = P.inspectPilotProgram(migrated.program);
+  if (!read.program || read.lost.length || read.program.habits.length === 0) return { ok: false, problem: 'damaged' };
+  return { ok: true, program: read.program };
 }
 
 function readPreferences(x: unknown): Backup['preferences'] {
@@ -103,19 +133,23 @@ export type BackupSummary = {
   collectibles: number;
   reflections: number;
   startedAt: string;
+  ascent: number;
+  momentum: boolean;
 };
 
 /** What the preview shows: where this Life Reset stands today. */
 export function summarizeBackup(p: P.PilotProgram, todayKey: string): BackupSummary {
   const today = Math.max(1, dayNumber(p.startedAt, todayKey));
   return {
-    day: Math.min(today, PROGRAM_DAYS),
-    summit: today > PROGRAM_DAYS,
+    day: p.after ? today : Math.min(today, PROGRAM_DAYS),
+    summit: today > PROGRAM_DAYS && !p.after,
     habits: p.habits.length,
-    daysDone: P.journeyStats(p, today).done,
-    xp: P.pilotXp(p),
+    daysDone: P.journeyStats(p, today).done + (p.after ? P.sinceSummit(p, today).counted : 0),
+    xp: P.lifetimeXp(p),
     collectibles: p.collection?.unlocked.length ?? 0,
     reflections: Object.keys(p.reflections ?? {}).length,
     startedAt: p.startedAt,
+    ascent: P.ascentOf(p),
+    momentum: !!p.after,
   };
 }

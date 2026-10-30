@@ -18,6 +18,7 @@ import { haptic } from '../lib/haptics';
 import { askForReminders } from '../lib/reminders';
 import { usePreferences } from '../store/preferences';
 import { migrateSave, pilotNow, RESET_PILOT_VERSION, useResetPilot } from '../store/resetPilot';
+import { useJourneys } from '../store/journeys';
 import { restoreBackup } from '../store/restore';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
@@ -47,6 +48,7 @@ const longDate = (key: string) =>
 export function RestoreBackup() {
   const { c } = useTheme();
   const current = useResetPilot((s) => s.program);
+  const hasPast = useJourneys((s) => s.journeys.length > 0);
   const [backup, setBackup] = useState<Backup | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -131,6 +133,8 @@ export function RestoreBackup() {
         ) : (
           <Preview
             summary={summarizeBackup(backup.program, todayKey)}
+            pastJourneys={backup.journeys.length}
+            hasPast={hasPast}
             exportedAt={backup.exportedAt}
             current={current ? summarizeBackup(current, todayKey) : null}
             busy={busy}
@@ -155,6 +159,8 @@ export function RestoreBackup() {
 
 function Preview({
   summary: s,
+  pastJourneys,
+  hasPast,
   exportedAt,
   current,
   busy,
@@ -163,6 +169,8 @@ function Preview({
   onOther,
 }: {
   summary: BackupSummary;
+  pastJourneys: number;
+  hasPast: boolean;
   exportedAt: string | null;
   current: BackupSummary | null;
   busy: boolean;
@@ -179,7 +187,7 @@ function Preview({
           Life Reset in this backup
         </T>
         <T v="display" accessibilityRole="header">
-          {s.summit ? 'Summit reached' : `Day ${s.day} of ${PROGRAM_DAYS}`}
+          {s.summit ? 'Summit reached' : s.momentum ? `Day ${s.day} · Momentum` : `Day ${s.day} of ${PROGRAM_DAYS}`}
         </T>
         <View style={styles.stats}>
           <Stat icon="leaf-outline" value={s.habits} label={s.habits === 1 ? 'habit' : 'habits'} />
@@ -191,21 +199,25 @@ function Preview({
           Started {longDate(s.startedAt)}
           {made ? ` · Backup made ${made}` : ''}
           {s.reflections ? ` · ${s.reflections} weekly ${s.reflections === 1 ? 'reflection' : 'reflections'}` : ''}
+          {pastJourneys ? ` · ${pastJourneys} past ${pastJourneys === 1 ? 'journey' : 'journeys'}` : ''}
         </T>
       </ThemedView>
 
-      {current ? (
+      {current || hasPast ? (
         <ThemedView style={[styles.panel, { backgroundColor: c.peachSoft }]}>
           <View style={styles.warnHead}>
             <Ionicons name="alert-circle-outline" size={20} color={c.peachInk} />
             <T v="bodyStrong" color={c.peachInk} style={{ flex: 1 }}>
-              This replaces your current Life Reset
+              {current ? 'This replaces your current Life Reset' : 'This replaces your past journeys'}
             </T>
           </View>
           <T color={c.peachInk}>
-            On this phone you’re on {current.summit ? 'the summit' : `day ${current.day}`} with {current.habits}{' '}
-            {current.habits === 1 ? 'habit' : 'habits'} and {current.xp} XP. Restoring replaces it with the backup; the
-            two are never mixed. Export it first if you’d like a copy.
+            {current
+              ? `On this phone you’re on ${current.summit ? 'the summit' : `day ${current.day}`} with ${current.habits} ${current.habits === 1 ? 'habit' : 'habits'} and ${current.xp} XP. `
+              : ''}
+            Restoring replaces {current ? 'it' : 'them'} with the backup
+            {current && hasPast ? ', past journeys included' : ''}; the two are never mixed. Export first if you’d like
+            a copy.
           </T>
           <Button label="Export current first" kind="secondary" onPress={onExportCurrent} disabled={busy} />
         </ThemedView>
@@ -213,8 +225,8 @@ function Preview({
 
       <View style={{ gap: space.sm }}>
         <Button
-          label={current ? 'Replace with this backup' : 'Restore this Life Reset'}
-          kind={current ? 'danger' : 'primary'}
+          label={current || hasPast ? 'Replace with this backup' : 'Restore this Life Reset'}
+          kind={current || hasPast ? 'danger' : 'primary'}
           onPress={onRestore}
           disabled={busy}
         />

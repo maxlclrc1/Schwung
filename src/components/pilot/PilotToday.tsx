@@ -31,6 +31,7 @@ import { Button, T } from '../ui';
 import { ReflectionInvite } from '../reflection/ReflectionInvite';
 import { WelcomeBack } from './WelcomeBack';
 import { UnlockMoment } from '../collection/UnlockMoment';
+import { ChooseNextCard } from '../beyond/ChooseNextCard';
 import { TodayHero } from './TodayHero';
 
 /*
@@ -70,7 +71,9 @@ export function PilotToday() {
   const [swiping, setSwiping] = useState(false);
   const { yesterdayEditable } = useResetClock();
 
-  const xp = useMemo(() => P.pilotXp(program), [program]);
+  // Lifetime XP (earlier ascents included): the title, the collection and the chip all follow it.
+  const xp = useMemo(() => P.lifetimeXp(program), [program]);
+  const awaiting = P.awaitingChoice(program, today);
   const streak = useMemo(() => P.pilotStreak(program, today), [program, today]);
   const offer = useMemo(() => P.currentOffer(program, today, yesterdayEditable), [program, today, yesterdayEditable]);
   const full = P.dayFull(program, today);
@@ -165,13 +168,17 @@ export function PilotToday() {
           full={full}
           streak={streak}
           xp={xp}
-          phase={phaseLine(today)}
+          momentum={!!program.after}
+          ascent={P.ascentOf(program)}
+          phase={program.after ? 'Keep My Momentum · your targets stay where you set them' : phaseLine(today)}
           label={summaryLabel(
             done,
             program.habits.length,
             daily.map((id) => P.nameOf(program, id)),
           )}
         />
+
+        {awaiting ? <ChooseNextCard /> : null}
 
         {welcome !== null ? (
           <WelcomeBack
@@ -212,10 +219,17 @@ export function PilotToday() {
             Today’s habits
           </T>
           <T v="caption" color={full ? c.sageInk : c.textDim} style={{ fontWeight: '700' }}>
-            {full ? 'All done' : `${done} of ${program.habits.length}`}
+            {awaiting ? 'Resting' : full ? 'All done' : `${done} of ${program.habits.length}`}
           </T>
         </View>
-        <Animated.View layout={LinearTransition.duration(200)} style={styles.cards}>
+        {/* Past the summit with nothing chosen yet: the habits rest (nothing is tracked) until the person chooses. */}
+        <Animated.View
+          layout={LinearTransition.duration(200)}
+          style={[styles.cards, awaiting && { opacity: 0.45 }]}
+          pointerEvents={awaiting ? 'none' : 'auto'}
+          accessibilityElementsHidden={awaiting}
+          importantForAccessibility={awaiting ? 'no-hide-descendants' : 'auto'}
+        >
           {program.habits.map((id) => (
             <PilotCard
               key={id}
@@ -230,7 +244,7 @@ export function PilotToday() {
         </Animated.View>
 
         <View style={styles.footer}>
-          {program.habits.length < P.MAX_HABITS ? (
+          {program.habits.length < P.MAX_HABITS && !awaiting ? (
             <Button
               label="Add a habit"
               kind="secondary"

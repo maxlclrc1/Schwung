@@ -41,6 +41,7 @@ const pilot = (habit: 'mind_read' | 'home_tidy', startKey: string) =>
 
 const backup = (): Backup => ({
   program: { ...pilot('home_tidy', '2026-10-01'), collection: { unlocked: ['compass'] }, ceremonies: { day1: true } },
+  journeys: [],
   exportedAt: '2026-11-01T10:00:00.000Z',
   preferences: { themePreference: 'dark', reminders: { ...DEFAULT_REMINDERS, enabled: true }, comebacks: false },
 });
