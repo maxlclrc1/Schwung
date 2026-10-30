@@ -11,6 +11,7 @@ import { useTints } from '../onboarding/kit';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { formatNumber } from '../../i18n';
+import { flipX } from '../../i18n/direction';
 
 const STRIP = 28;
 
@@ -124,7 +125,7 @@ export function PastJourneysLink() {
               {n === 1 ? t('beyond.pastLink.one') : t('beyond.pastLink.many', { count: n })}
             </T>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
+          <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
         </ThemedView>
       )}
     </Pressable>

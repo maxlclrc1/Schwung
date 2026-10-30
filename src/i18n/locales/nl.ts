@@ -406,7 +406,11 @@ export const nl: Translation = {
       followDeviceNow: 'Nu: {language}',
       intro:
         'De teksten van Schwung veranderen meteen. Je gewoontes, voortgang en de namen die je je eigen gewoontes gaf, blijven precies zoals ze zijn.',
-      more: 'Er komen meer talen aan.',
+
+      restartBody:
+        'De teksten zijn veranderd. Start Schwung opnieuw om de indeling aan te passen aan de nieuwe leesrichting. Er gaat niets verloren.',
+
+      restartNow: 'Nu opnieuw starten',
     },
     program: {
       title: 'Je programma',

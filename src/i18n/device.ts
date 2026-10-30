@@ -1,7 +1,8 @@
 import { getLocales } from 'expo-localization';
 import { AppState } from 'react-native';
 import { usePreferences, type LanguagePreference } from '../store/preferences';
-import { setLanguage } from './index';
+import { applyDirection } from './direction';
+import { language, setLanguage } from './index';
 import { FALLBACK_LANGUAGE, matchLanguage, type LanguageCode } from './languages';
 
 /*
@@ -28,11 +29,28 @@ export const effectiveLanguage = (pref: LanguagePreference): LanguageCode =>
 
 let started = false;
 
+// Whether this launch still shows the other layout direction (a restart finishes the switch).
+let directionPending = false;
+const listeners = new Set<() => void>();
+function setDirectionPending(v: boolean) {
+  if (v === directionPending) return;
+  directionPending = v;
+  listeners.forEach((l) => l());
+}
+export const isDirectionPending = () => directionPending;
+export function subscribeDirection(l: () => void) {
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
+
 /** Once, at launch: follow the preference from now on. */
 export function startLanguageSync() {
   if (started) return;
   started = true;
-  const apply = () => setLanguage(effectiveLanguage(usePreferences.getState().language));
+  const apply = () => {
+    setLanguage(effectiveLanguage(usePreferences.getState().language));
+    setDirectionPending(applyDirection(language()));
+  };
   apply();
   usePreferences.subscribe((s, prev) => s.language !== prev.language && apply());
   usePreferences.persist.onFinishHydration(apply);

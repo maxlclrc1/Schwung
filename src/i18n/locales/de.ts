@@ -400,7 +400,11 @@ export const de: Translation = {
       followDeviceNow: 'Jetzt: {language}',
       intro:
         'Die Texte von Schwung wechseln sofort. Deine Gewohnheiten, dein Fortschritt und die Namen deiner eigenen Gewohnheiten bleiben genau, wie sie sind.',
-      more: 'Weitere Sprachen sind unterwegs.',
+
+      restartBody:
+        'Die Texte haben sich geändert. Starte Schwung neu, damit sich das Layout der neuen Leserichtung anpasst. Nichts geht verloren.',
+
+      restartNow: 'Jetzt neu starten',
     },
     program: {
       title: 'Dein Programm',

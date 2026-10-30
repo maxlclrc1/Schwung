@@ -19,6 +19,7 @@ import { radius, useTheme } from '../../theme';
 import { T } from '../ui';
 import { Press } from './Choices';
 import { useDragLock, type Tint } from './kit';
+import { physical } from '../../i18n/direction';
 
 /*
  * A measuring tape you slide under a fixed needle: precise (it follows the finger exactly, a step at a time),
@@ -168,7 +169,7 @@ export function Tape({
   return (
     <GestureDetector gesture={pan}>
       <View
-        style={[styles.tape, { backgroundColor: c.surface }]}
+        style={[styles.tape, physical, { backgroundColor: c.surface }]}
         onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)}
       >
         <Animated.View pointerEvents="none" style={[styles.strip, { width }, strip]}>

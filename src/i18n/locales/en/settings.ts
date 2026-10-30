@@ -17,7 +17,9 @@ export const settings = {
     followDeviceNow: 'Now: {language}',
     intro:
       'Schwung’s words change at once. Your habits, progress and the names you gave your own habits stay exactly as they are.',
-    more: 'More languages are on their way.',
+    restartBody:
+      'The words have changed. Restart Schwung to turn the layout to match the new reading direction. Nothing is lost.',
+    restartNow: 'Restart now',
   },
   program: {
     title: 'Your program',

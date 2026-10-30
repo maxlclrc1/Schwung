@@ -399,7 +399,11 @@ export const ptBR: Translation = {
       followDeviceNow: 'Agora: {language}',
       intro:
         'Os textos do Schwung mudam na hora. Seus hábitos, seu progresso e os nomes que você deu aos seus próprios hábitos continuam exatamente como estão.',
-      more: 'Mais idiomas estão a caminho.',
+
+      restartBody:
+        'Os textos já mudaram. Reinicie o Schwung para virar o layout de acordo com a nova direção de leitura. Nada se perde.',
+
+      restartNow: 'Reiniciar agora',
     },
     program: {
       title: 'Seu programa',

@@ -8,6 +8,7 @@ import { T } from '../ui';
 import { useTints } from './kit';
 import { RollingText, StepRound, Tape } from './Tape';
 import { t as tr } from '../../i18n';
+import { physical } from '../../i18n/direction';
 
 const DAY = 1440;
 const SKY_H = 188;
@@ -102,7 +103,7 @@ export function DayClock({
   return (
     <View style={{ gap: space.lg }}>
       <View
-        style={styles.sky}
+        style={[styles.sky, physical]}
         onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)}
         pointerEvents="none"
         accessible={false}

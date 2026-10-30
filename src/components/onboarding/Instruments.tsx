@@ -24,6 +24,7 @@ import { Press } from './Choices';
 import { rise, settle, useDrawingDrag, useTints, type Tint } from './kit';
 import { StepRound } from './Tape';
 import { t as tr } from '../../i18n';
+import { physical } from '../../i18n/direction';
 
 /*
  * Illustrated answers: a phone that fills with the hours it takes, a trail up a mountain, and a dial for the time a
@@ -345,7 +346,7 @@ export function TrailPicker<K extends string>({
 
   return (
     <View
-      style={{ height: VIEW_H * (k || 1) }}
+      style={[physical, { height: VIEW_H * (k || 1) }]}
       onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)}
       accessibilityRole="radiogroup"
       accessibilityLabel={label}
@@ -582,7 +583,7 @@ export function TimeDial({
   const marks = useMemo(() => [0, Math.floor(last / 2), last], [last]);
 
   return (
-    <View style={styles.dialWrap}>
+    <View style={[styles.dialWrap, physical]}>
       <GestureDetector gesture={drag}>
         <View
           {...adjustable(label, index === null ? tr('setup.meter.notChosen') : stops[index], step)}

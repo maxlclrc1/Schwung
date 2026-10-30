@@ -17,13 +17,13 @@ export const PLURAL_CATEGORIES: Record<LanguageCode, PluralCategory[]> = {
   'pt-BR': ['one', 'many', 'other'],
   it: ['one', 'many', 'other'],
   nl: ['one', 'other'],
-  pl: ['one', 'few', 'many', 'other'],
-  sv: ['one', 'other'],
   ru: ['one', 'few', 'many', 'other'],
-  uk: ['one', 'few', 'many', 'other'],
   ar: ['zero', 'one', 'two', 'few', 'many', 'other'],
-  he: ['one', 'two', 'other'],
   hi: ['one', 'other'],
+  bn: ['one', 'other'],
+  ur: ['one', 'other'],
+  vi: ['other'],
+  th: ['other'],
   id: ['other'],
   ja: ['other'],
   ko: ['other'],
@@ -51,11 +51,7 @@ export function pluralCategory(lang: LanguageCode, value: number): PluralCategor
     case 'es':
     case 'it':
       return n === 1 ? 'one' : n !== 0 && n % 1_000_000 === 0 ? 'many' : 'other';
-    case 'pl':
-      if (n === 1) return 'one';
-      return m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14) ? 'few' : 'many';
     case 'ru':
-    case 'uk':
       if (m10 === 1 && m100 !== 11) return 'one';
       return m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14) ? 'few' : 'many';
     case 'ar':
@@ -65,15 +61,16 @@ export function pluralCategory(lang: LanguageCode, value: number): PluralCategor
       if (m100 >= 3 && m100 <= 10) return 'few';
       if (m100 >= 11) return 'many';
       return 'other';
-    case 'he':
-      return n === 1 ? 'one' : n === 2 ? 'two' : 'other';
     case 'hi':
+    case 'bn':
       return n === 0 || n === 1 ? 'one' : 'other';
     case 'id':
     case 'ja':
     case 'ko':
     case 'zh-Hans':
     case 'zh-Hant':
+    case 'vi':
+    case 'th':
       return 'other';
     default:
       return n === 1 ? 'one' : 'other';

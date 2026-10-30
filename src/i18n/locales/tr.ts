@@ -396,7 +396,11 @@ export const tr: Translation = {
       followDeviceNow: 'Şu an: {language}',
       intro:
         'Schwung’un dili hemen değişir. Alışkanlıkların, ilerlemen ve kendi alışkanlıklarına verdiğin isimler olduğu gibi kalır.',
-      more: 'Daha fazla dil yolda.',
+
+      restartBody:
+        'Yazılar değişti. Düzeni yeni okuma yönüne göre çevirmek için Schwung’u yeniden başlat. Hiçbir şey kaybolmaz.',
+
+      restartNow: 'Şimdi yeniden başlat',
     },
     program: {
       title: 'Programın',

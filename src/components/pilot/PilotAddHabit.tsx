@@ -20,6 +20,7 @@ import { Button, ProgressBar, Screen, T } from '../ui';
 import { BaselineQuestions, Chips, duration } from './SetupParts';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
+import { flipX } from '../../i18n/direction';
 
 /*
  * Add a habit to the running Life Reset (app/life-reset/add.tsx), as a short set-up of its own, one question a
@@ -177,7 +178,7 @@ export function PilotAddHabit() {
                   {t('add.ownBody')}
                 </T>
               </View>
-              <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
+              <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
             </ThemedView>
           </Press>
           <View style={styles.grid}>
@@ -411,7 +412,7 @@ export function PilotAddHabit() {
           >
             {({ pressed }) => (
               <ThemedView style={[styles.back, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}>
-                <Ionicons name="chevron-back" size={22} color={c.text} />
+                <Ionicons name="chevron-back" size={22} color={c.text} style={flipX} />
               </ThemedView>
             )}
           </Pressable>

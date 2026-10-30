@@ -26,6 +26,7 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
+import { flipX } from '../../i18n/direction';
 
 /**
  * The Journey tab: the Ascent fills the screen, with the stats in one small line above it, the full 66-day calendar
@@ -212,7 +213,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                         {t('journeyTab.storyBody')}
                       </T>
                     </View>
-                    <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
+                    <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
                   </ThemedView>
                 )}
               </Pressable>

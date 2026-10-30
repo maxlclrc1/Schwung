@@ -382,7 +382,10 @@ export const zhHans: Translation = {
       followDevice: '跟随设备',
       followDeviceNow: '当前：{language}',
       intro: 'Schwung 的文字会立即切换。你的习惯、进度以及你为自己习惯起的名字都会保持原样。',
-      more: '更多语言即将推出。',
+
+      restartBody: '文字已经切换。重新启动 Schwung，让布局适应新的阅读方向。不会丢失任何内容。',
+
+      restartNow: '立即重新启动',
     },
     program: {
       title: '你的计划',

@@ -35,6 +35,7 @@ import { useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { cardDownAt, InPager, pagerOpen } from './TabPager';
 import { worldCamera } from './WorldLayer';
+import { DIR, IS_RTL, logical, physical } from '../i18n/direction';
 
 /*
  * The three tabs as one horizontal pager over the shared world (testing builds; the public release keeps its
@@ -187,14 +188,17 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
         'worklet';
         if (still.get()) return;
         const at = pagerIndex.get();
-        worldCamera.set(at - pageOffset(e.translationX, at, pageCount.get()) / pageWidth.get());
+        // Right-to-left, the next tab lies to the left: "forward" is a swipe to the right.
+        worldCamera.set(at - pageOffset(e.translationX * DIR, at, pageCount.get()) / pageWidth.get());
       },
       onDeactivate: (e: { translationX: number; velocityX: number; canceled: boolean }) => {
         'worklet';
         const at = pagerIndex.get();
         const w = pageWidth.get();
         // Gesture-handler velocities are in pt/s; the pager's rules use pt/ms.
-        const target = e.canceled ? at : pageTarget(e.translationX, e.velocityX / 1000, w, at, pageCount.get());
+        const target = e.canceled
+          ? at
+          : pageTarget(e.translationX * DIR, (e.velocityX * DIR) / 1000, w, at, pageCount.get());
         pagerIndex.set(target);
         // The tab bar shows the new tab at once (a tiny update); the navigator's state, which re-renders more,
         // follows once the slide has landed, so no React work competes with it. An interrupted slide hands over.
@@ -204,7 +208,7 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
           scheduleOnRN(land, target);
         } else
           worldCamera.set(
-            withSpring(target, { ...SPRING, velocity: -e.velocityX / w }, (finished) => {
+            withSpring(target, { ...SPRING, velocity: (-e.velocityX * DIR) / w }, (finished) => {
               if (finished) scheduleOnRN(land, target);
             }),
           );
@@ -214,19 +218,23 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
   );
   const pan = usePanGesture(config);
 
-  const row = useAnimatedStyle(() => ({ transform: [{ translateX: -worldCamera.get() * width }] }));
+  // Pages sit side by side in a physical (left-to-right) row; right-to-left, the first tab is the rightmost page.
+  const last = count - 1;
+  const row = useAnimatedStyle(() => ({
+    transform: [{ translateX: -(IS_RTL ? last - worldCamera.get() : worldCamera.get()) * width }],
+  }));
 
   return (
     <NavigationContent>
       <InPager value>
         <View style={styles.fill}>
           <GestureDetector gesture={pan}>
-            <View style={[styles.fill, styles.clip, WEB_PAN_Y]}>
+            <View style={[styles.fill, styles.clip, physical, WEB_PAN_Y]}>
               <Animated.View style={[styles.row, { width: width * count }, row]}>
                 {names.map((name, i) => {
                   const route = routeOf(name);
                   return route ? (
-                    <Page key={route.key} left={i * width} width={width} shown={i === focused}>
+                    <Page key={route.key} left={(IS_RTL ? last - i : i) * width} width={width} shown={i === focused}>
                       {descriptors[route.key].render()}
                     </Page>
                   ) : null;
@@ -268,7 +276,7 @@ const Page = memo(function Page({
 }) {
   return (
     <View
-      style={[styles.page, { left, width }]}
+      style={[styles.page, logical, { left, width }]}
       accessibilityElementsHidden={!shown}
       importantForAccessibility={shown ? 'auto' : 'no-hide-descendants'}
     >

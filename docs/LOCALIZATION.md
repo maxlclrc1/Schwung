@@ -1,10 +1,10 @@
 # Localization
 
-Schwung is prepared for 20 languages (`src/i18n/languages.ts`). **Phase 1** ships six: English (source), Turkish,
-Spanish, French, German and Brazilian Portuguese. Phase 2 adds Italian, Dutch, Indonesian, Japanese, Korean and
-Simplified Chinese (glossary for these in `scripts/i18n/glossary.json`; Traditional Chinese devices stay in English
-until zh-Hant is ready); Phase 3 brings right-to-left
-(Arabic, Hebrew).
+Schwung speaks 20 languages (`src/i18n/languages.ts`), all bundled: English (source), Turkish, Spanish, French,
+German, Brazilian Portuguese (Phase 1); Italian, Dutch, Indonesian, Japanese, Korean, Simplified Chinese (Phase 2);
+Hindi, Bengali, Urdu, Arabic, Russian, Vietnamese, Traditional Chinese, Thai (Phase 3). Arabic and Urdu are
+right-to-left. Complex scripts (Devanagari, Bengali, Arabic/Nastaliq, Thai, CJK) use the system fonts; no fonts are
+bundled.
 
 ## How it works
 
@@ -83,9 +83,26 @@ metaphors (trail, summit, base camp, climb) are kept where they read naturally i
 **Safety wording** (health precautions, strength notes, eligibility reasons, "stop and get medical help") is
 translated literally in meaning, never softened or embellished.
 
+## Right-to-left (`src/i18n/direction.ts`)
+
+- Arabic and Urdu mirror the layout: rows, start/end spacing, text alignment, the tab bar and the swipe between tabs
+  (the first tab is on the right), and icons that point (chevrons, arrows, via `flipX`).
+- Drawn geometry keeps its left-to-right frame inside `physical` views: the painted world (the tabs pan across the same,
+  unmirrored painting, in the other order), the trail and its markers, the Insights chart, the set-up dials and tape,
+  the ceremonies, the story image, and a habit card's art. Artwork is never flipped.
+- A habit card's swipe stays physical: swipe right to complete, left to undo (the translated hints say so).
+- **Restart limitation:** React Native fixes the layout direction when the app starts (`I18nManager`). Words switch at
+  once; when the switch crosses directions (e.g. English ↔ Arabic), Settings → Language offers _Restart now_
+  (`reloadAppAsync`, nothing is lost), and otherwise the mirrored layout arrives with the next launch. The same applies
+  when the phone's language changes under Follow device.
+- iOS uses the app's own direction (`allowRTL`/`forceRTL`), so a phone set to Arabic still gets a left-to-right layout
+  when English is chosen in Schwung (after a restart). On the very first launch, the phone's own direction applies until
+  the next launch.
+- The web build stays left-to-right.
+
 ## Adding a language
 
 1. Mark it `ready` in `languages.ts` and add its loader in `src/i18n/index.ts`.
 2. Copy a complete catalog, translate, and run the checks above (missing keys are listed by name).
 3. Add it to `supportedLocales` for `expo-localization` in `app.json` (iOS per-app language).
-4. For right-to-left languages (Phase 3): enable RTL in the `expo-localization` plugin and review mirrored layouts.
+4. For a right-to-left language: set `rtl: true` (direction follows automatically) and review mirrored screens.

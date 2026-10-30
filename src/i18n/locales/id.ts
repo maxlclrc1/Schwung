@@ -406,7 +406,11 @@ export const id: Translation = {
       followDeviceNow: 'Sekarang: {language}',
       intro:
         'Teks di Schwung langsung berubah. Kebiasaanmu, progresmu, dan nama yang kamu berikan pada kebiasaan buatanmu tetap persis seperti semula.',
-      more: 'Bahasa lain segera hadir.',
+
+      restartBody:
+        'Teksnya sudah berubah. Mulai ulang Schwung agar tata letak mengikuti arah baca yang baru. Tidak ada yang hilang.',
+
+      restartNow: 'Mulai ulang sekarang',
     },
     program: {
       title: 'Programmu',

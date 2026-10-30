@@ -34,6 +34,7 @@ import { Button, T } from '../ui';
 import { WORLD_ART } from '../World';
 import { useT } from '../../i18n/react';
 import { formatDate, formatNumber } from '../../i18n';
+import { physical } from '../../i18n/direction';
 
 /*
  * The 66-Day Story (app/life-reset/story.tsx): a keepsake made at the summit, a portrait poster of Schwung's own
@@ -211,7 +212,7 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
             habits: facts.habits,
           })}${facts.highlight ? ` ${facts.highlight}.` : ''}`}
         >
-          <Animated.View style={[StyleSheet.absoluteFill, art]}>
+          <Animated.View style={[StyleSheet.absoluteFill, physical, art]}>
             <Image
               {...ART_IMAGE}
               source={isDark ? WORLD_ART.dark : WORLD_ART.light}

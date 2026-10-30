@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { reloadAppAsync } from 'expo';
+import { useSyncExternalStore } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { deviceLanguage } from '../i18n/device';
+import { deviceLanguage, isDirectionPending, subscribeDirection } from '../i18n/device';
 import { LANGUAGES, READY_LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
 import { haptic } from '../lib/haptics';
@@ -8,11 +10,12 @@ import { usePreferences, type LanguagePreference } from '../store/preferences';
 import { radius, space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SheetHeader } from './SheetHeader';
-import { Screen, T } from './ui';
+import { Button, Screen, T } from './ui';
 
 /**
  * Settings → Language: follow the phone, or choose one. Each language is named in its own language (Deutsch,
  * Français, Türkçe), never translated. A change applies at once, everywhere; nothing about the program changes.
+ * Between a right-to-left and a left-to-right language the layout turns around with the next launch: offered here.
  */
 export function LanguagePicker() {
   const { c } = useTheme();
@@ -20,6 +23,7 @@ export function LanguagePicker() {
   const pref = usePreferences((s) => s.language);
   const setLanguage = usePreferences((s) => s.setLanguage);
   const device = LANGUAGES.find((l) => l.code === deviceLanguage());
+  const restart = useSyncExternalStore(subscribeDirection, isDirectionPending);
   const choose = (l: LanguagePreference) => {
     haptic.select();
     setLanguage(l);
@@ -29,6 +33,12 @@ export function LanguagePicker() {
       <SheetHeader title={t('settings.language.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
         <T color={c.textDim}>{t('settings.language.intro')}</T>
+        {restart ? (
+          <ThemedView style={[styles.restart, { backgroundColor: c.surface }]}>
+            <T color={c.text}>{t('settings.language.restartBody')}</T>
+            <Button label={t('settings.language.restartNow')} onPress={() => void reloadAppAsync()} />
+          </ThemedView>
+        ) : null}
         <ThemedView style={[styles.panel, { backgroundColor: c.surface }]} accessibilityRole="radiogroup">
           <Option
             label={t('settings.language.followDevice')}
@@ -43,9 +53,6 @@ export function LanguagePicker() {
             </View>
           ))}
         </ThemedView>
-        <T v="caption" color={c.textFaint}>
-          {t('settings.language.more')}
-        </T>
       </ScrollView>
     </Screen>
   );
@@ -94,5 +101,6 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.lg },
   panel: { borderRadius: radius.lg, paddingHorizontal: space.lg },
   rule: { height: StyleSheet.hairlineWidth },
+  restart: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
   row: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
 });

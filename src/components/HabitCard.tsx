@@ -23,6 +23,7 @@ import { GestureDetector } from 'react-native-gesture-handler';
 import { ThemedImage } from './ThemedImage';
 import { TILE_HEIGHT, TILES, type Theme } from './worldTiles';
 import { useT } from '../i18n/react';
+import { flipX, physical } from '../i18n/direction';
 
 type Props = {
   habitId: string;
@@ -495,7 +496,9 @@ function HabitCardImpl({
       }}
       style={[styles.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
     >
-      <Scene habitId={habitId} scene={scene} width={width} height={height} />
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, physical]}>
+        <Scene habitId={habitId} scene={scene} width={width} height={height} />
+      </View>
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: c.sage }, washStyle]} />
       <Veil pick="veil" locations={[0.35, 0.62, 1]} style={StyleSheet.absoluteFill} />
       {/* A faint veil at the top, for the level label over the sky. */}
@@ -542,20 +545,23 @@ function HabitCardImpl({
       </Animated.View>
 
       {/* What a swipe will do, appearing as the card moves: a check (complete) or an undo arrow. */}
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.mark, done ? styles.markUndo : styles.markDone, markStyle]}
-        importantForAccessibility="no-hide-descendants"
-        accessibilityElementsHidden
-      >
-        <View style={[styles.markCircle, { borderColor: c.sage, backgroundColor: ink.chip }]}>
-          <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={isDark ? c.text : c.sageInk} />
-          {/* Fills in as the drag reaches the threshold. */}
-          <Animated.View style={[StyleSheet.absoluteFill, styles.markSolid, { backgroundColor: c.sage }, markFill]}>
-            <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={c.onTint} />
-          </Animated.View>
-        </View>
-      </Animated.View>
+      {/* The swipe is physical (right completes), so its marks keep their sides in a right-to-left layout. */}
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, physical]}>
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.mark, done ? styles.markUndo : styles.markDone, markStyle]}
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+        >
+          <View style={[styles.markCircle, { borderColor: c.sage, backgroundColor: ink.chip }]}>
+            <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={isDark ? c.text : c.sageInk} />
+            {/* Fills in as the drag reaches the threshold. */}
+            <Animated.View style={[StyleSheet.absoluteFill, styles.markSolid, { backgroundColor: c.sage }, markFill]}>
+              <Ionicons name={done ? 'arrow-undo' : 'checkmark'} size={28} color={c.onTint} />
+            </Animated.View>
+          </View>
+        </Animated.View>
+      </View>
 
       <View style={styles.body}>
         <Ink pick="title" style={styles.title} lines={2}>
@@ -576,7 +582,7 @@ function HabitCardImpl({
         <View style={styles.status} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
           <Animated.View style={[styles.statusSide, todoRow]} pointerEvents={done ? 'none' : 'auto'}>
             <View style={styles.hint}>
-              <Ionicons name="chevron-forward" size={16} color={ink.target} />
+              <Ionicons name="chevron-forward" size={16} color={ink.target} style={flipX} />
               <Ink pick="target" style={styles.hintText}>
                 {readOnly ? t('today.card.notDone') : (display.hint ?? t('today.card.swipe'))}
               </Ink>

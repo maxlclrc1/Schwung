@@ -91,7 +91,7 @@ describe('one app: the Life Reset', () => {
     const pager = fs.readFileSync(`${SRC}/components/PagerTabs.tsx`, 'utf8');
     expect(pager).toContain('enabled: pagerOpen,');
     expect(pager.match(/'worklet';/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(pager).toContain('pageTarget(e.translationX, e.velocityX / 1000, w, at, pageCount.get())');
+    expect(pager).toContain('pageTarget(e.translationX * DIR, (e.velocityX * DIR) / 1000, w, at, pageCount.get())');
     expect(pager).toContain('<InPager value>');
     // Created once (never re-sent to the native handler on a render), activated only by its own checks, and never
     // waiting on another gesture: a card's gesture only stamps its touch and fails at once.

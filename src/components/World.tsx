@@ -7,6 +7,7 @@ import { worldFrame } from '../core/world';
 import { space, useTheme } from '../theme';
 import { ART_IMAGE } from './ThemedImage';
 import { ThemedView, useThemeProgress } from '../theme/transition';
+import { physical } from '../i18n/direction';
 
 /** The world painting behind single screens (welcome, onboarding, ceremonies); prefetched at launch (artPrefetch). */
 export const WORLD_ART = {
@@ -46,7 +47,7 @@ export function WorldBackdrop({
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[styles.fill, { backgroundColor: c.bg }]}
+      style={[styles.fill, physical, { backgroundColor: c.bg }]}
     >
       {/* Both themes stay mounted and crossfade with the theme (drawn from the shared decoded cache: ThemedImage). */}
       <Animated.View style={[image, darkArt]}>

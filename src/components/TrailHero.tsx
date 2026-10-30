@@ -5,6 +5,7 @@ import { ASCENT_ASPECT, DAY_POINTS, LANDMARKS, trailDots } from '../core/ascent'
 import { PROGRAM_DAYS } from '../core/dates';
 import { useTheme } from '../theme';
 import { TodayOrb } from './Ascent';
+import { physical } from '../i18n/direction';
 
 const DOTS = trailDots(3);
 
@@ -28,7 +29,7 @@ export function TrailHero({ width }: { width: number }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       pointerEvents="none"
-      style={{ width, height }}
+      style={[physical, { width, height }]}
     >
       {DOTS.map((d, i) => (
         <View
