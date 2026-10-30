@@ -1,5 +1,17 @@
 {
-  "address": { "tr": "sen", "es": "tú", "fr": "vous", "de": "du", "pt-BR": "você" },
+  "address": {
+    "tr": "sen",
+    "es": "tú",
+    "fr": "vous",
+    "de": "du",
+    "pt-BR": "você",
+    "it": "tu",
+    "nl": "je",
+    "id": "kamu",
+    "ja": "です/ます",
+    "ko": "해요체",
+    "zh-Hans": "你"
+  },
   "terms": [
     {
       "en": "Schwung",
@@ -8,7 +20,13 @@
       "es": "Schwung",
       "fr": "Schwung",
       "de": "Schwung",
-      "pt-BR": "Schwung"
+      "pt-BR": "Schwung",
+      "it": "Schwung",
+      "id": "Schwung",
+      "zh-Hans": "Schwung",
+      "nl": "Schwung",
+      "ja": "Schwung",
+      "ko": "Schwung"
     },
     {
       "en": "Life Reset",
@@ -17,9 +35,28 @@
       "es": "Life Reset",
       "fr": "Life Reset",
       "de": "Life Reset",
-      "pt-BR": "Life Reset"
+      "pt-BR": "Life Reset",
+      "it": "Life Reset",
+      "id": "Life Reset",
+      "zh-Hans": "Life Reset",
+      "nl": "Life Reset",
+      "ja": "Life Reset",
+      "ko": "Life Reset"
     },
-    { "en": "XP", "tr": "XP", "es": "XP", "fr": "XP", "de": "XP", "pt-BR": "XP" },
+    {
+      "en": "XP",
+      "tr": "XP",
+      "es": "XP",
+      "fr": "XP",
+      "de": "XP",
+      "pt-BR": "XP",
+      "it": "XP",
+      "id": "XP",
+      "zh-Hans": "XP",
+      "nl": "XP",
+      "ja": "XP",
+      "ko": "XP"
+    },
     {
       "en": "Habits",
       "note": "Tab name.",
@@ -27,7 +64,13 @@
       "es": "Hábitos",
       "fr": "Habitudes",
       "de": "Gewohnheiten",
-      "pt-BR": "Hábitos"
+      "pt-BR": "Hábitos",
+      "it": "Abitudini",
+      "id": "Kebiasaan",
+      "zh-Hans": "习惯",
+      "nl": "Gewoontes",
+      "ja": "習慣",
+      "ko": "습관"
     },
     {
       "en": "Journey",
@@ -36,7 +79,13 @@
       "es": "Recorrido",
       "fr": "Parcours",
       "de": "Weg",
-      "pt-BR": "Jornada"
+      "pt-BR": "Jornada",
+      "it": "Percorso",
+      "id": "Perjalanan",
+      "zh-Hans": "旅程",
+      "nl": "Reis",
+      "ja": "道のり",
+      "ko": "여정"
     },
     {
       "en": "Insights",
@@ -45,7 +94,13 @@
       "es": "Perspectivas",
       "fr": "Tendances",
       "de": "Einblicke",
-      "pt-BR": "Insights"
+      "pt-BR": "Insights",
+      "it": "Andamento",
+      "id": "Wawasan",
+      "zh-Hans": "洞察",
+      "nl": "Inzichten",
+      "ja": "インサイト",
+      "ko": "인사이트"
     },
     {
       "en": "Foundation",
@@ -54,7 +109,13 @@
       "es": "Base",
       "fr": "Fondations",
       "de": "Fundament",
-      "pt-BR": "Base"
+      "pt-BR": "Base",
+      "it": "Basi",
+      "id": "Fondasi",
+      "zh-Hans": "基础",
+      "nl": "Fundament",
+      "ja": "基礎",
+      "ko": "기초"
     },
     {
       "en": "Momentum",
@@ -63,7 +124,13 @@
       "es": "Impulso",
       "fr": "Élan",
       "de": "Aufwind",
-      "pt-BR": "Impulso"
+      "pt-BR": "Impulso",
+      "it": "Slancio",
+      "id": "Momentum",
+      "zh-Hans": "动力",
+      "nl": "Vaart",
+      "ja": "勢い",
+      "ko": "모멘텀"
     },
     {
       "en": "Mastery",
@@ -72,7 +139,13 @@
       "es": "Maestría",
       "fr": "Maîtrise",
       "de": "Meisterschaft",
-      "pt-BR": "Maestria"
+      "pt-BR": "Maestria",
+      "it": "Padronanza",
+      "id": "Penguasaan",
+      "zh-Hans": "精通",
+      "nl": "Meesterschap",
+      "ja": "熟達",
+      "ko": "숙련"
     },
     {
       "en": "Starter",
@@ -81,7 +154,13 @@
       "es": "Inicio",
       "fr": "Initiation",
       "de": "Einstieg",
-      "pt-BR": "Iniciante"
+      "pt-BR": "Iniciante",
+      "it": "Inizio",
+      "id": "Pemula",
+      "zh-Hans": "入门",
+      "nl": "Instap",
+      "ja": "スターター",
+      "ko": "입문"
     },
     {
       "en": "Challenge",
@@ -90,7 +169,13 @@
       "es": "Desafío",
       "fr": "Défi",
       "de": "Herausforderung",
-      "pt-BR": "Desafio"
+      "pt-BR": "Desafio",
+      "it": "Sfida",
+      "id": "Tantangan",
+      "zh-Hans": "挑战",
+      "nl": "Uitdaging",
+      "ja": "チャレンジ",
+      "ko": "도전"
     },
     {
       "en": "Keep My Momentum",
@@ -98,7 +183,13 @@
       "es": "Mantener mi impulso",
       "fr": "Garder mon élan",
       "de": "Im Schwung bleiben",
-      "pt-BR": "Manter meu impulso"
+      "pt-BR": "Manter meu impulso",
+      "it": "Mantieni il mio slancio",
+      "id": "Jaga Momentumku",
+      "zh-Hans": "保持我的动力",
+      "nl": "In de vaart blijven",
+      "ja": "勢いを保つ",
+      "ko": "모멘텀 이어가기"
     },
     {
       "en": "Begin a New Ascent",
@@ -106,18 +197,69 @@
       "es": "Comenzar un nuevo ascenso",
       "fr": "Commencer une nouvelle ascension",
       "de": "Neuen Aufstieg beginnen",
-      "pt-BR": "Começar uma nova subida"
+      "pt-BR": "Começar uma nova subida",
+      "it": "Inizia una nuova ascesa",
+      "id": "Mulai Pendakian Baru",
+      "zh-Hans": "开始新的攀登",
+      "nl": "Nieuwe beklimming beginnen",
+      "ja": "新しい登山を始める",
+      "ko": "새 등반 시작하기"
     },
-    { "en": "summit", "tr": "zirve", "es": "cumbre", "fr": "sommet", "de": "Gipfel", "pt-BR": "cume" },
-    { "en": "ascent", "tr": "tırmanış", "es": "ascenso", "fr": "ascension", "de": "Aufstieg", "pt-BR": "subida" },
-    { "en": "streak", "tr": "seri", "es": "racha", "fr": "série", "de": "Serie", "pt-BR": "sequência" },
+    {
+      "en": "summit",
+      "tr": "zirve",
+      "es": "cumbre",
+      "fr": "sommet",
+      "de": "Gipfel",
+      "pt-BR": "cume",
+      "it": "vetta",
+      "id": "puncak",
+      "zh-Hans": "山顶",
+      "nl": "top",
+      "ja": "山頂",
+      "ko": "정상"
+    },
+    {
+      "en": "ascent",
+      "tr": "tırmanış",
+      "es": "ascenso",
+      "fr": "ascension",
+      "de": "Aufstieg",
+      "pt-BR": "subida",
+      "it": "ascesa",
+      "id": "pendakian",
+      "zh-Hans": "攀登",
+      "nl": "beklimming",
+      "ja": "登山",
+      "ko": "등반"
+    },
+    {
+      "en": "streak",
+      "tr": "seri",
+      "es": "racha",
+      "fr": "série",
+      "de": "Serie",
+      "pt-BR": "sequência",
+      "it": "serie",
+      "id": "runtunan",
+      "zh-Hans": "连续纪录",
+      "nl": "reeks",
+      "ja": "連続記録",
+      "ko": "연속 기록"
+    },
     {
       "en": "rest day",
       "tr": "dinlenme günü",
       "es": "día de descanso",
       "fr": "jour de repos",
       "de": "Ruhetag",
-      "pt-BR": "dia de descanso"
+      "pt-BR": "dia de descanso",
+      "it": "giorno di riposo",
+      "id": "hari istirahat",
+      "zh-Hans": "休息日",
+      "nl": "rustdag",
+      "ja": "休息日",
+      "ko": "쉬는 날"
     },
     {
       "en": "collection",
@@ -125,7 +267,13 @@
       "es": "colección",
       "fr": "collection",
       "de": "Sammlung",
-      "pt-BR": "coleção"
+      "pt-BR": "coleção",
+      "it": "collezione",
+      "id": "koleksi",
+      "zh-Hans": "收藏",
+      "nl": "verzameling",
+      "ja": "コレクション",
+      "ko": "컬렉션"
     },
     {
       "en": "weekly reflection",
@@ -133,7 +281,13 @@
       "es": "reflexión semanal",
       "fr": "bilan de la semaine",
       "de": "Wochenrückblick",
-      "pt-BR": "reflexão semanal"
+      "pt-BR": "reflexão semanal",
+      "it": "riflessione settimanale",
+      "id": "refleksi mingguan",
+      "zh-Hans": "每周回顾",
+      "nl": "weekterugblik",
+      "ja": "週のふり返り",
+      "ko": "주간 돌아보기"
     },
     {
       "en": "Past journeys",
@@ -141,7 +295,13 @@
       "es": "Recorridos anteriores",
       "fr": "Parcours passés",
       "de": "Frühere Wege",
-      "pt-BR": "Jornadas anteriores"
+      "pt-BR": "Jornadas anteriores",
+      "it": "Percorsi passati",
+      "id": "Perjalanan sebelumnya",
+      "zh-Hans": "过往旅程",
+      "nl": "Eerdere reizen",
+      "ja": "これまでの道のり",
+      "ko": "지난 여정"
     },
     {
       "en": "Export my data",
@@ -150,7 +310,13 @@
       "es": "Exportar mis datos",
       "fr": "Exporter mes données",
       "de": "Meine Daten exportieren",
-      "pt-BR": "Exportar meus dados"
+      "pt-BR": "Exportar meus dados",
+      "it": "Esporta i miei dati",
+      "id": "Ekspor dataku",
+      "zh-Hans": "导出我的数据",
+      "nl": "Mijn gegevens exporteren",
+      "ja": "データをエクスポート",
+      "ko": "내 데이터 내보내기"
     }
   ]
 }

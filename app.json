@@ -59,7 +59,7 @@
       [
         "expo-localization",
         {
-          "supportedLocales": ["en", "tr", "es", "fr", "de", "pt-BR"],
+          "supportedLocales": ["en", "tr", "es", "fr", "de", "pt-BR", "it", "nl", "id", "ja", "ko", "zh-Hans"],
           "supportsRTL": false
         }
       ],
