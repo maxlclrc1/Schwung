@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { GestureResponderEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -195,6 +195,8 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
   const pill = isDark ? 'rgba(17,17,22,0.62)' : 'rgba(255,255,255,0.78)';
   const px = (x: number) => x * width;
   const py = (y: number) => y * height;
+  // Each label's width once laid out, so a long phase name (or a narrow phone) never runs off the art's edge.
+  const [widths, setWidths] = useState<Record<number, number>>({});
 
   return (
     <View pointerEvents="none" style={[physical, { width, height }]}>
@@ -209,10 +211,18 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
         return (
           <View
             key={p.n}
+            onLayout={(e) => {
+              const w = Math.round(e.nativeEvent.layout.width);
+              if (w !== widths[p.n]) setWidths((x) => ({ ...x, [p.n]: w }));
+            }}
             style={[
               styles.phase,
               styles.phaseRow,
-              { left: px(at.x), top: py(at.y), backgroundColor: current ? tint : pill },
+              {
+                left: Math.max(0, Math.min(px(at.x), width - (widths[p.n] ?? 0) - space.sm)),
+                top: py(at.y),
+                backgroundColor: current ? tint : pill,
+              },
             ]}
           >
             {current ? null : <View style={[styles.phaseDot, { backgroundColor: tint }]} />}

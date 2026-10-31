@@ -666,7 +666,16 @@ const styles = StyleSheet.create({
   chapter: { marginTop: space.xl, gap: 2 },
   chapterRule: { width: 28, height: 3, borderRadius: 2, marginBottom: space.sm },
   chapterTitle: { fontSize: 28, lineHeight: 34 },
-  hero: { borderRadius: 28, padding: space.lg, flexDirection: 'row', alignItems: 'center', gap: space.lg },
+  // Ring and facts side by side; on a narrow phone the facts move below the ring instead of squeezing words apart.
+  hero: {
+    borderRadius: 28,
+    padding: space.lg,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: space.lg,
+  },
   ringCenter: {
     position: 'absolute',
     left: 0,
@@ -677,7 +686,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   ringValue: { fontSize: 32, lineHeight: 36, fontWeight: '800', letterSpacing: -0.8, fontVariant: ['tabular-nums'] },
-  heroText: { flex: 1, gap: space.sm },
+  heroText: { flexGrow: 1, flexShrink: 1, flexBasis: 160, minWidth: 160, gap: space.sm },
   fact: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   factDot: { width: 8, height: 8, borderRadius: 4 },
   factValue: { fontWeight: '700', fontVariant: ['tabular-nums'] },

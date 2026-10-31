@@ -58,7 +58,11 @@
     "i18n:tasks": "node scripts/i18n/i18n.mjs tasks",
     "i18n:apply": "node scripts/i18n/i18n.mjs apply",
     "i18n:check": "node scripts/i18n/i18n.mjs check",
-    "i18n:approve": "node scripts/i18n/i18n.mjs approve"
+    "i18n:approve": "node scripts/i18n/i18n.mjs approve",
+    "qa:build": "expo export -p web --output-dir .qa/web",
+    "qa:fixtures": "QA_FIXTURES_OUT=.qa/fixtures.json jest scripts/qa",
+    "qa": "node scripts/qa/run.mjs",
+    "qa:full": "node scripts/qa/run.mjs --matrix=full"
   },
   "private": true,
   "jest": {
