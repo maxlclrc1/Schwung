@@ -646,7 +646,16 @@ export function addCustomHabit(
 ): { program: PilotProgram; id: string } | null {
   if (customProblems(p, def.name, def.perWeek).length) return null;
   const custom = p.custom ?? {};
-  const id = `custom_${Object.keys(custom).length + 1}`;
+  // A new number, after every one ever used: a save repaired after damage can be missing an earlier habit of the
+  // person's own (its days stay in the logs), and counting the ones left would reuse, and overwrite, a habit's id.
+  const used = [
+    ...Object.keys(custom),
+    ...Object.keys(p.progression),
+    ...Object.values(p.logs).flatMap((l) => l.completed),
+  ]
+    .filter(isCustomId)
+    .map((x) => Number(x.slice(7)));
+  const id = `custom_${Math.max(0, ...used) + 1}`;
   const scene = nextScene(p, views);
   const note = def.note?.trim().slice(0, 80);
   const schedule: Schedule = def.perWeek >= 7 ? { kind: 'daily' } : { kind: 'weekly', days: def.perWeek };
@@ -897,7 +906,10 @@ export function timerBlocksFor(p: PilotProgram, id: string, day: number): number
 export function requiredOn(p: PilotProgram, day: number): string[] {
   return allHabits(p).filter((id) => {
     const st = stateOn(p, id, day);
-    return st === 'due' || st === 'open' || st === 'done';
+    // A week too short for a goal (a weekend start, a habit added on a Sunday) asks for nothing: its completions are
+    // extras, so it never stands between the day and Day complete.
+    if (st === 'open') return (weekProgress(p, id, day)?.goal ?? 0) > 0;
+    return st === 'due' || st === 'done';
   });
 }
 
