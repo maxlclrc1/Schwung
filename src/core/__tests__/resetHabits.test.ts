@@ -300,10 +300,10 @@ describe('Strength Training: tracking only', () => {
     expect(resetExclusion(strength, joint, 'starter')).not.toBeNull();
     expect(resetExclusion(strength, joint, 'standard')).toBeNull();
     expect(strengthNotes(joint)).toHaveLength(1);
+    // 18+ only: the 16–17 rules stay in the catalog, but no intensity is open to anyone under 18.
     expect(strength.ages.teen).toEqual(['starter', 'standard']);
-    expect(resetExclusion(strength, TEEN, 'starter')).toBeNull();
-    expect(resetExclusion(strength, TEEN, 'standard')).toBeNull();
-    expect(resetExclusion(strength, TEEN, 'challenge')).not.toBeNull();
+    for (const i of INTENSITIES)
+      expect(resetExclusion(strength, TEEN, i)).toBe('Schwung is made for people 18 and older');
     expect(strengthNotes(TEEN)).toHaveLength(1);
     expect(strengthNotes({ ...ADULT, age: '65p' })).toHaveLength(1);
   });
@@ -318,9 +318,10 @@ describe('Strength Training: tracking only', () => {
 });
 
 describe('safety: existing exclusions preserved', () => {
-  it('never offers anything under 16', () => {
+  it('never offers anything under 18', () => {
     for (const h of RESET_HABITS)
-      for (const i of INTENSITIES) expect(resetExclusion(h, { ...ADULT, age: 'u16' }, i)).not.toBeNull();
+      for (const i of INTENSITIES)
+        for (const age of ['u16', '16_17'] as const) expect(resetExclusion(h, { ...ADULT, age }, i)).not.toBeNull();
   });
 
   it('uses Walk’s and Steady wake-up’s V2 rules', () => {
@@ -339,11 +340,11 @@ describe('safety: existing exclusions preserved', () => {
     expect(resetExclusion(h, ADULT, 'standard')).toBeNull(); // social media is the pull here
   });
 
-  it('lets a plain adult and a 16–17-year-old take every other habit at every allowed intensity', () => {
+  it('lets a plain adult take every other habit at every allowed intensity, in every adult age band', () => {
     for (const h of RESET_HABITS)
-      for (const p of [ADULT, TEEN])
-        for (const i of (p === TEEN ? h.ages.teen : h.ages.adult) as Intensity[])
-          expect([h.id, p.age, i, resetExclusion(h, p, i)]).toEqual([h.id, p.age, i, null]);
+      for (const age of ['18_29', '30_49', '50_64', '65p'] as const)
+        for (const i of h.ages.adult as Intensity[])
+          expect([h.id, age, i, resetExclusion(h, { ...ADULT, age }, i)]).toEqual([h.id, age, i, null]);
   });
 });
 

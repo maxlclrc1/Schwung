@@ -72,7 +72,6 @@ export const fr: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17 ans : blocs de {max} min maximum (affiché 2 × 45 min en Défi Maîtrise).',
       scrolling:
         'C’est votre propre suivi : Schwung ne voit pas votre Temps d’écran. Réglages → Temps d’écran affiche le vrai chiffre si vous le voulez.',
       social:
@@ -80,7 +79,6 @@ export const fr: Translation = {
       movement: 'Si vous bougez déjà plus longtemps, gardez votre propre durée : elle n’est jamais réduite.',
       sleep:
         'Votre heure de lever est le point d’ancrage : jamais plus tôt, jamais moins de sommeil. Aucune règle de coucher ni de téléphone n’est ajoutée.',
-      skillTeen: '16–17 ans : blocs de {max} min maximum.',
       skillSport: 'Les savoir-faire sportifs relèvent de votre propre pratique : Schwung ne prescrit pas d’exercices.',
       reachOut: 'Jamais d’invitation à contacter une personne qui vous a fait du mal.',
       strengthTracks:
@@ -173,7 +171,6 @@ export const fr: Translation = {
         skill: 'Pratiquer un savoir-faire : choisissez votre savoir-faire.',
         strengthStart: 'Renforcement musculaire : indiquez votre point de départ.',
       },
-      under16: 'Schwung est conçu pour les personnes de 16 ans et plus.',
       chooseOne: 'Choisissez au moins une habitude.',
       chooseAtMost: 'Choisissez au maximum {max} habitudes pour l’instant.',
       catalogOnly: 'Choisissez parmi les habitudes du Life Reset.',
@@ -193,9 +190,10 @@ export const fr: Translation = {
       howOften: 'Choisissez combien de jours par semaine.',
       notIn: 'Elle ne fait pas partie de votre Life Reset.',
       keepOne: 'Gardez au moins une habitude. Pour tout arrêter, terminez le Life Reset dans Réglages.',
+
+      under18: 'Schwung est conçu pour les personnes de 18 ans et plus.',
     },
     exclusion: {
-      under16: 'Schwung est conçu pour les personnes de 16 ans et plus',
       teenIntensity: 'cette intensité n’est pas proposée aux 16–17 ans',
       walking: 'marcher ou rester debout longtemps vous est difficile (pas encore d’alternative validée)',
       movementAdvice:
@@ -207,6 +205,8 @@ export const fr: Translation = {
       strengthAdvice: 'nécessite d’abord un avis personnalisé de votre médecin ou sage-femme',
       strengthJoint:
         'en cas de douleur articulaire, de dos ou de blessure, commencez par un programme proposé par votre kinésithérapeute ou votre médecin',
+
+      under18: 'Schwung est conçu pour les personnes de 18 ans et plus',
     },
     blocked: {
       easiest: 'c’est déjà l’objectif le plus facile',
@@ -579,6 +579,21 @@ export const fr: Translation = {
       export: 'Exporter les données de récupération',
       kept: 'Une copie sûre est conservée sur ce téléphone.',
       keeping: 'Copie de sécurité en cours…',
+    },
+
+    ageLimit: {
+      title: 'Schwung est désormais destiné aux personnes de 18 ans et plus',
+      body: 'Votre Life Reset a été commencé avec un âge de moins de 18 ans, il est donc en pause. Rien n’a été supprimé : votre progression, vos parcours passés et votre collection restent sur ce téléphone. Vous pouvez exporter une copie de vos données ou les supprimer à tout moment.',
+
+      data: 'Exporter ou supprimer mes données',
+
+      adult: 'J’ai 18 ans ou plus',
+
+      confirmTitle: 'Avez-vous 18 ans ou plus ?',
+
+      confirmBody: 'Votre Life Reset reprend là où vous l’avez laissé.',
+
+      confirm: 'Oui, j’ai 18 ans ou plus',
     },
   },
   collection: {
@@ -1012,7 +1027,7 @@ export const fr: Translation = {
     bars: 'Semaine {week} : {done} sur {goal}',
   },
   setup: {
-    age: { u16: 'Moins de 16', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
+    age: { u16: 'Moins de 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
     health: {
       joint: 'Douleur articulaire, de dos ou de blessure',
       walkingDifficult: 'Marcher ou rester debout longtemps m’est difficile',
@@ -1112,9 +1127,10 @@ export const fr: Translation = {
       notChosen: 'Non choisi',
       younger: 'Un an de moins',
       older: 'Un an de plus',
-      under16: 'Schwung est conçu pour les personnes de 16 ans et plus.',
       band: '{band} ans',
       slide: 'Faites glisser la règle jusqu’à votre âge',
+
+      under18: 'Schwung est conçu pour les personnes de 18 ans et plus.',
     },
     clock: {
       early: 'Lève-tôt',

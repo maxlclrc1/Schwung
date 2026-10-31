@@ -63,13 +63,11 @@ export const zhHans: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17岁：每段最多{max}分钟（在挑战·精通级别显示为2 × 45分钟）。',
       scrolling:
         '由你自己核对：Schwung 无法看到你的屏幕使用时间。如果你想知道真实数字，可以在“设置 → 屏幕使用时间”中查看。',
       social: '只涉及日常场景。每一步都可以替换或跳过；跳过一步从来不算失败。',
       movement: '如果你已经活动得更久，就保留你自己的数字：它永远不会被调低。',
       sleep: '以你自己的起床时间为基准：永远不会更早，也永远不会减少睡眠。不会添加就寝时间或手机使用规则。',
-      skillTeen: '16–17岁：每段最多{max}分钟。',
       skillSport: '运动技能由你自己练习：Schwung 不会规定训练内容。',
       reachOut: '绝不会提示你联系伤害过你的人。',
       strengthTracks: 'Schwung 会记录你的训练次数。它不会替你选择动作、组数、次数或重量。',
@@ -157,7 +155,6 @@ export const zhHans: Translation = {
         skill: '练习技能：请选择你的技能。',
         strengthStart: '力量训练：请说明你的起点。',
       },
-      under16: 'Schwung 面向16岁及以上的人。',
       chooseOne: '请至少选择一个习惯。',
       chooseAtMost: '目前最多选择{max}个习惯。',
       catalogOnly: '请从 Life Reset 习惯中选择。',
@@ -177,9 +174,10 @@ export const zhHans: Translation = {
       howOften: '请选择每周几天。',
       notIn: '它不在你的 Life Reset 中。',
       keepOne: '请至少保留一个习惯。如果想完全停止，请在“设置”中结束 Life Reset。',
+
+      under18: 'Schwung 面向18岁及以上的人。',
     },
     exclusion: {
-      under16: 'Schwung 面向16岁及以上的人',
       teenIntensity: '这个强度不向16–17岁的人提供',
       walking: '长时间行走或站立对你来说有困难（暂无经过审核的替代方案）',
       movementAdvice: '需要你的临床医生或助产士的个人建议（等待专家审核）',
@@ -188,6 +186,8 @@ export const zhHans: Translation = {
       healthFirst: '请先回答健康问题：专业人士可以建议适合你的方式',
       strengthAdvice: '需要先获得你的临床医生或助产士的个人建议',
       strengthJoint: '有关节、背部或受伤疼痛时，请从你的物理治疗师或临床医生建议的训练计划开始',
+
+      under18: 'Schwung 面向18岁及以上的人',
     },
     blocked: {
       easiest: '这已经是最轻松的目标了',
@@ -533,6 +533,21 @@ export const zhHans: Translation = {
       export: '导出恢复数据',
       kept: '这部手机上保留着一份安全副本。',
       keeping: '正在保留安全副本…',
+    },
+
+    ageLimit: {
+      title: 'Schwung 现在面向18岁及以上的人',
+      body: '你的 Life Reset 开始时填写的年龄未满18岁，所以已暂停。没有删除任何内容：你的进度、过往旅程和收藏都保留在这部手机上。你可以随时导出数据副本或删除数据。',
+
+      data: '导出或删除我的数据',
+
+      adult: '我已满18岁',
+
+      confirmTitle: '你已满18岁吗？',
+
+      confirmBody: '你的 Life Reset 会从上次停下的地方继续。',
+
+      confirm: '是的，我已满18岁',
     },
   },
   collection: {
@@ -949,7 +964,7 @@ export const zhHans: Translation = {
   },
   setup: {
     age: {
-      u16: '16岁以下',
+      u16: '18岁以下',
       '16_17': '16–17岁',
       '18_29': '18–29岁',
       '30_49': '30–49岁',
@@ -1053,9 +1068,10 @@ export const zhHans: Translation = {
       notChosen: '未选择',
       younger: '小一岁',
       older: '大一岁',
-      under16: 'Schwung 面向16岁及以上的人。',
       band: '{band}岁',
       slide: '滑动标尺选择你的年龄',
+
+      under18: 'Schwung 面向18岁及以上的人。',
     },
     clock: {
       early: '早起的人',

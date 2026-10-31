@@ -19,6 +19,12 @@ export type Profile = {
 };
 
 export const isTeen = (p: Pick<Profile, 'age'>) => p.age === '16_17';
+/**
+ * Schwung is for people 18 and older. Under 18 is either band: 'u16' (set-up's "Under 18" since the minimum age
+ * became 18) or '16_17' (only in programs started when it was 16; such a program is kept, but not used).
+ */
+export const MIN_AGE = 18;
+export const isMinor = (age: AgeBand) => age === 'u16' || age === '16_17';
 export const precautionsUnknown = (p: Pick<Profile, 'precautions'>) => p.precautions === 'unknown';
 export const hasPrecaution = (p: Pick<Profile, 'precautions'>, t: Precaution) =>
   p.precautions !== 'unknown' && p.precautions.includes(t);

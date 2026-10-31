@@ -28,13 +28,11 @@ export const engine = {
     },
   },
   notes: {
-    focusTeen: '16–17: blocks of at most {max} min (shown as 2 × 45 min at Challenge Mastery).',
     scrolling:
       'Your own check: Schwung can’t see your Screen Time. Settings → Screen Time shows the real number if you want it.',
     social: 'Everyday situations only. Every step can be swapped or skipped; skipping one is never a failure.',
     movement: 'If you already move for longer, keep your own number: it’s never lowered.',
     sleep: 'Your own wake time is the anchor: never earlier, and never less sleep. No bedtime or phone rule is added.',
-    skillTeen: '16–17: blocks of at most {max} min.',
     skillSport: 'Sport skills are your own practice: Schwung doesn’t prescribe drills.',
     reachOut: 'Never a prompt to contact someone who harmed you.',
     strengthTracks: 'Schwung tracks your sessions. It doesn’t choose your exercises, sets, repetitions or weights.',
@@ -127,7 +125,7 @@ export const engine = {
       skill: 'Practice a Skill: choose your skill.',
       strengthStart: 'Strength Training: say where you’re starting from.',
     },
-    under16: 'Schwung is made for people 16 and older.',
+    under18: 'Schwung is made for people 18 and older.',
     chooseOne: 'Choose at least one habit.',
     chooseAtMost: 'Choose at most {max} habits for now.',
     catalogOnly: 'Choose from the Life Reset habits.',
@@ -149,7 +147,7 @@ export const engine = {
     keepOne: 'Keep at least one habit. To stop altogether, end the Life Reset in Settings.',
   },
   exclusion: {
-    under16: 'Schwung is made for people 16 and older',
+    under18: 'Schwung is made for people 18 and older',
     teenIntensity: 'this intensity isn’t offered to 16–17-year-olds',
     walking: 'walking or standing for long is difficult for you (no reviewed alternative yet)',
     movementAdvice: 'needs individual advice from your clinician or midwife (waiting for expert review)',

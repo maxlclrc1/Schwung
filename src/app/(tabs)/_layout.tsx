@@ -1,10 +1,13 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Redirect } from 'expo-router';
 import { type ColorValue, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PagerTabs } from '../../components/PagerTabs';
 import { WorldLayer } from '../../components/WorldLayer';
 import { useTheme } from '../../theme';
 import { useT } from '../../i18n/react';
+import { ageRestricted } from '../../core/reset/pilot';
+import { useResetPilot } from '../../store/resetPilot';
 
 // Habits is the home tab: going back from another tab (or from one opened directly) returns to it.
 export const unstable_settings = { anchor: 'today' };
@@ -36,6 +39,9 @@ const INSIGHTS_ICON = tabIcon('stats-chart', 'stats-chart-outline');
 export default function TabsLayout() {
   const { c } = useTheme();
   const t = useT();
+  // A program started under 18 isn't used: its notice offers export and deletion instead.
+  const restricted = useResetPilot((s) => !!s.program && ageRestricted(s.program));
+  if (restricted) return <Redirect href="/age-limit" />;
   return (
     <GestureHandlerRootView style={[styles.fill, { backgroundColor: c.bg }]}>
       {/* One world behind all three tabs; the pages are transparent over it, and move with it. */}

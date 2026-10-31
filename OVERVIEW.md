@@ -9,7 +9,7 @@ account, no paywall, no ads and no tracking; everything stays on the phone and w
 
 1. **Start screen:** the painted mountain, "Get your momentum back.", and "Start my reset".
 2. **Set-up** (about a minute):
-   - **About you:** age (16+) and an optional health question.
+   - **About you:** age (18+) and an optional health question.
    - **Habits:** two to six of the 11 (Focus Time, Less Scrolling, Get It Done, Read Daily, Social Confidence,
      Daily Movement, Sleep Routine, Tidy Up, Practice a Skill, Stay Connected, Strength Training), with a
      suggested three. Age, eligibility and health-precaution rules apply.

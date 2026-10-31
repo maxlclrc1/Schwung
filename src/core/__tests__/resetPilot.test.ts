@@ -3,6 +3,7 @@ import { habitScene, placeholderCrop } from '../../components/habitArt';
 import { dateForDay } from '../dates';
 import { totalXp } from '../progression';
 import { HELD_EXERCISE_PROGRAMMES, RESET_HABITS } from '../reset/habits';
+import { COLLECTIBLES } from '../reset/collection';
 import * as P from '../reset/pilot';
 import { readTrack } from '../reset/tracking';
 
@@ -83,8 +84,9 @@ describe('all 11 habits', () => {
     expect(often('strength_log')).toBe('Any days you choose, one session a day at most');
   });
 
-  it('keep the 16–17 focus block limit in what the card says', () => {
-    const teen = one('focus_deepwork', 'challenge', { ...ADULT, age: '16_17' });
+  it('keep the 16–17 focus block limit in what the card says (a program started at 16–17, before 18+)', () => {
+    const started = one('focus_deepwork', 'challenge');
+    const teen = { ...started, answers: { ...started.answers, age: '16_17' as const } };
     const mastery: P.PilotProgram = {
       ...teen,
       progression: {
@@ -149,16 +151,14 @@ describe('setup', () => {
       expect(P.habitExclusion('move_walk', { ...ADULT, precautions })).not.toBeNull();
       expect(P.habitExclusion('strength_log', { ...ADULT, precautions })).not.toBeNull();
     }
-    // Strength needs the health question answered; joint pain rules out Starter; 16–17 can't take Challenge.
+    // Strength needs the health question answered; joint pain rules out Starter.
     expect(P.habitExclusion('strength_log', { ...ADULT, precautions: 'unknown' })).toMatch(/health question/);
     const joint = P.intensityOptions('strength_log', { ...ADULT, precautions: ['joint'] });
     expect(joint.map((o) => !!o.reason)).toEqual([true, false, false]);
-    const teen = P.intensityOptions('strength_log', { ...ADULT, age: '16_17' });
-    expect(teen.map((o) => !!o.reason)).toEqual([false, false, true]);
-    // Everything else is open to everyone 16+.
+    // Everything else is open to every adult, whatever the health answer.
     for (const id of ['focus_deepwork', 'focus_top3', 'mind_read', 'confidence_talk', 'home_tidy', 'skill_practice'])
-      expect(P.habitExclusion(id, { ...ADULT, age: '16_17', precautions: 'unknown' })).toBeNull();
-    expect(P.setupProblems({ ...ADULT, age: 'u16' }, THREE)).toEqual(['Schwung is made for people 16 and older.']);
+      for (const age of ['18_29', '65p'] as const)
+        expect(P.habitExclusion(id, { ...ADULT, age, precautions: 'unknown' })).toBeNull();
   });
 
   it('allows every catalog habit at once (the maximum is 30)', () => {
@@ -174,7 +174,8 @@ describe('setup', () => {
     expect(P.suggestedIntensity('mind_read', ADULT)).toBe('starter');
     expect(P.suggestedIntensity('move_walk', { ...ADULT, activeDays: '3_4' })).toBe('standard');
     expect(P.suggestedIntensity('move_walk', { ...ADULT, activeDays: '5p' })).toBe('challenge');
-    expect(P.suggestedIntensity('strength_log', { ...ADULT, strengthStart: 'regular', age: '16_17' })).toBe('standard');
+    expect(P.suggestedIntensity('strength_log', { ...ADULT, strengthStart: 'regular' })).toBe('challenge');
+    expect(P.suggestedIntensity('strength_log', { ...ADULT, strengthStart: 'regular', age: '16_17' })).toBeNull();
     expect(P.suggestedIntensity('strength_log', { ...ADULT, precautions: ['joint'], strengthStart: 'new' })).toBe(
       'standard',
     );
@@ -188,6 +189,47 @@ describe('setup', () => {
       target: 'Focus for 15 minutes, phone in another room',
       frequency: 'Any 4 days a week',
     });
+  });
+});
+
+describe('minimum age 18', () => {
+  const UNDER = ['u16', '16_17'] as const;
+
+  it('refuses anyone under 18 before any health or habit question counts, and never makes the program', () => {
+    for (const age of UNDER) {
+      expect(P.setupProblems({ ...ADULT, age }, THREE)).toEqual(['Schwung is made for people 18 and older.']);
+      expect(P.createPilot({ ...ADULT, age }, THREE, MON)).toBeNull();
+      // Even with nothing else answered: the age check comes first.
+      expect(P.setupProblems({ age, precautions: 'unknown', minutesPerDay: 0 }, [])).toEqual([
+        'Schwung is made for people 18 and older.',
+      ]);
+    }
+  });
+
+  it('lets every adult age band start', () => {
+    for (const age of ['18_29', '30_49', '50_64', '65p'] as const)
+      expect(P.createPilot({ ...ADULT, age }, THREE, MON)).not.toBeNull();
+  });
+
+  it('keeps a program started at 16–17 whole, paused until the person says they’re 18 or older', () => {
+    let adult = doneOn(pilot(), 'mind_read', [1, 2, 3]);
+    adult = { ...adult, collection: { unlocked: [COLLECTIBLES[0].id] } };
+    const teen: P.PilotProgram = { ...adult, answers: { ...adult.answers, age: '16_17' } };
+    // Read back exactly as saved: nothing dropped, nothing lost, no recovery.
+    const read = P.inspectPilotProgram(JSON.parse(JSON.stringify(teen)));
+    expect(read.lost).toEqual([]);
+    expect(read.program).toEqual(teen);
+    expect([P.ageRestricted(teen), P.ageRestricted(adult)]).toEqual([true, false]);
+    // A New Ascent or a new habit can't use the under-18 answers.
+    expect(P.addProblems(teen, {}, { habitId: 'home_tidy', intensity: 'starter' }, 4)).toContain(
+      'Schwung is made for people 18 and older.',
+    );
+    // "I'm 18 or older": only the age band changes; days, XP and the collection stay as they were.
+    const back = P.confirmAdult(teen);
+    expect(P.ageRestricted(back)).toBe(false);
+    expect({ ...back, answers: { ...back.answers, age: '16_17' } }).toEqual(teen);
+    expect([P.pilotXp(back), back.collection]).toEqual([P.pilotXp(teen), teen.collection]);
+    expect(P.confirmAdult(adult)).toBe(adult);
   });
 });
 

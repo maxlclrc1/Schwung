@@ -1,5 +1,5 @@
 import { t } from '../../i18n';
-import { hasPrecaution, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN, type Profile } from './profile';
+import { hasPrecaution, isMinor, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN, type Profile } from './profile';
 
 /*
  * The 66-Day Life Reset habit catalog (SCHWUNG_LIFE_RESET_HABITS.md): the 11 habits every program chooses from.
@@ -363,7 +363,7 @@ export const RESET_HABITS: ResetHabit[] = [
     },
     personalization: [],
     ages: { adult: ALL, teen: ALL },
-    notes: [`16–17: blocks of at most ${TEEN_FOCUS_MAX_MIN} min (shown as 2 × 45 min at Challenge Mastery).`],
+    notes: [],
     availability: pending(),
   },
   {
@@ -618,10 +618,7 @@ export const RESET_HABITS: ResetHabit[] = [
     },
     personalization: [{ key: 'skill', required: true, options: SKILLS }],
     ages: { adult: ALL, teen: ALL },
-    notes: [
-      `16–17: blocks of at most ${TEEN_FOCUS_MAX_MIN} min.`,
-      'Sport skills are your own practice: Schwung doesn’t prescribe drills.',
-    ],
+    notes: ['Sport skills are your own practice: Schwung doesn’t prescribe drills.'],
     availability: pending('Light and dark scenes (until then, a crop of the world)'),
   },
   {
@@ -723,7 +720,7 @@ export function strengthNotes(p: Profile): string[] {
 
 /** Why this habit can't be taken by this person at this intensity (null = it can). */
 export function resetExclusion(h: ResetHabit, p: Profile, intensity: Intensity): string | null {
-  if (p.age === 'u16') return t('engine.exclusion.under16');
+  if (isMinor(p.age)) return t('engine.exclusion.under18');
   if (!(isTeen(p) ? h.ages.teen : h.ages.adult).includes(intensity)) return t('engine.exclusion.teenIntensity');
   switch (h.id) {
     case 'move_walk':

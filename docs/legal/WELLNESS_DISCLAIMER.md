@@ -31,11 +31,11 @@ habit is formed, and taking longer is normal.
 Schwung can't help in an emergency. If you're in crisis or think you may be in danger, contact your local emergency
 number or a crisis service near you.
 
-Schwung is for people 16 and older.
+Schwung is for people 18 and older.
 
 ---
 
-**Unchanged safeguards in the app:** the under-16 stop at set-up, the optional health-precautions question
+**Safeguards in the app:** the under-18 stop at set-up, the optional health-precautions question
 (skipping it is treated as "unknown", never as "no limitations"), gentler targets and "keep to what your clinician
-has advised" notes for people with precautions, shorter focus blocks for 16–17-year-olds, and rest days that never
+has advised" notes for people with precautions, and rest days that never
 count as missed.

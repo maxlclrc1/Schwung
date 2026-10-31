@@ -63,14 +63,12 @@ export const ko: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17세: 한 블록은 최대 {max}분이에요 (도전 숙련에서는 2 × 45분으로 표시돼요).',
       scrolling:
         '스스로 확인하는 거예요. Schwung은 스크린 타임을 볼 수 없어요. 실제 수치가 궁금하다면 설정 → 스크린 타임에서 확인할 수 있어요.',
       social: '일상적인 상황만 다뤄요. 모든 스텝은 바꾸거나 건너뛸 수 있고, 건너뛰어도 절대 실패가 아니에요.',
       movement: '이미 더 오래 움직이고 있다면 내 수치를 그대로 유지하세요. 절대 낮아지지 않아요.',
       sleep:
         '내 기상 시간이 기준이에요. 더 이르게 하지 않고, 잠을 줄이지도 않아요. 취침 시간이나 휴대폰 규칙은 추가되지 않아요.',
-      skillTeen: '16–17세: 한 블록은 최대 {max}분이에요.',
       skillSport: '스포츠 기술은 스스로 하는 연습이에요. Schwung은 훈련 방법을 정해 주지 않아요.',
       reachOut: '나에게 상처를 준 사람에게 연락하라고 권하는 일은 절대 없어요.',
       strengthTracks: 'Schwung은 세션을 기록해요. 운동 종목, 세트, 반복 횟수, 무게는 정하지 않아요.',
@@ -160,7 +158,6 @@ export const ko: Translation = {
         skill: '기술 연습: 기술을 골라 주세요.',
         strengthStart: '근력 운동: 지금 어디서 시작하는지 알려 주세요.',
       },
-      under16: 'Schwung은 16세 이상을 위한 앱이에요.',
       chooseOne: '습관을 하나 이상 골라 주세요.',
       chooseAtMost: '지금은 습관을 최대 {max}개까지 고를 수 있어요.',
       catalogOnly: 'Life Reset 습관 중에서 골라 주세요.',
@@ -180,9 +177,10 @@ export const ko: Translation = {
       howOften: '일주일에 며칠 할지 골라 주세요.',
       notIn: 'Life Reset에 없는 습관이에요.',
       keepOne: '습관을 하나 이상 남겨 주세요. 완전히 그만두려면 설정에서 Life Reset을 끝내세요.',
+
+      under18: 'Schwung은 18세 이상을 위한 앱이에요.',
     },
     exclusion: {
-      under16: 'Schwung은 16세 이상을 위한 앱이에요',
       teenIntensity: '이 강도는 16–17세에게는 제공되지 않아요',
       walking: '오래 걷거나 서 있기가 어려워요 (아직 검토된 대안이 없어요)',
       movementAdvice: '담당 의료진이나 조산사의 개별 조언이 필요해요 (전문가 검토 대기 중)',
@@ -191,6 +189,8 @@ export const ko: Translation = {
       healthFirst: '먼저 건강 질문에 답해 주세요. 나에게 맞는 것은 전문가가 조언해 줄 수 있어요',
       strengthAdvice: '먼저 담당 의료진이나 조산사의 개별 조언이 필요해요',
       strengthJoint: '관절, 허리 또는 부상 통증이 있다면 물리치료사나 담당 의료진이 권하는 루틴으로 시작하세요',
+
+      under18: 'Schwung은 18세 이상을 위한 앱이에요',
     },
     blocked: {
       easiest: '이미 가장 쉬운 목표예요',
@@ -543,6 +543,21 @@ export const ko: Translation = {
       export: '복구 데이터 내보내기',
       kept: '안전한 사본이 이 휴대폰에 보관되어 있어요.',
       keeping: '안전한 사본을 보관하는 중…',
+    },
+
+    ageLimit: {
+      title: '이제 Schwung은 18세 이상을 위한 앱이에요',
+      body: '이 Life Reset은 18세 미만의 나이로 시작되어 일시 중지되었어요. 삭제된 것은 없어요. 진행 상황, 지난 여정, 컬렉션은 이 휴대폰에 그대로 있어요. 언제든지 데이터 사본을 내보내거나 삭제할 수 있어요.',
+
+      data: '내 데이터 내보내기 또는 삭제',
+
+      adult: '18세 이상이에요',
+
+      confirmTitle: '18세 이상인가요?',
+
+      confirmBody: 'Life Reset이 멈췄던 곳에서 이어져요.',
+
+      confirm: '네, 18세 이상이에요',
     },
   },
   collection: {
@@ -963,7 +978,7 @@ export const ko: Translation = {
   },
   setup: {
     age: {
-      u16: '16세 미만',
+      u16: '18세 미만',
       '16_17': '16–17세',
       '18_29': '18–29세',
       '30_49': '30–49세',
@@ -1067,9 +1082,10 @@ export const ko: Translation = {
       notChosen: '선택 안 함',
       younger: '한 살 적게',
       older: '한 살 많게',
-      under16: 'Schwung은 16세 이상을 위한 앱이에요.',
       band: '{band}세',
       slide: '눈금자를 밀어 나이를 선택하세요',
+
+      under18: 'Schwung은 18세 이상을 위한 앱이에요.',
     },
     clock: {
       early: '일찍 일어나는 편',

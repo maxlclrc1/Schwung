@@ -41,7 +41,7 @@ export const WELLNESS: LegalDoc = {
       heading: 'If you need support',
       body: [
         'Schwung can’t help in an emergency. If you’re in crisis or think you may be in danger, contact your local emergency number or a crisis service near you.',
-        'Schwung is for people 16 and older.',
+        'Schwung is for people 18 and older.',
       ],
     },
   ],
@@ -58,7 +58,7 @@ export const TERMS: LegalDoc = {
     },
     {
       heading: 'Eligibility',
-      body: ['Schwung is for people 16 and older.'],
+      body: ['Schwung is for people 18 and older.'],
     },
     {
       heading: 'What Schwung is',

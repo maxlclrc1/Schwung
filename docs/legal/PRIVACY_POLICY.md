@@ -131,8 +131,10 @@ We can't access or delete data that exists only on your device; you can do that 
 
 ## 10. Age
 
-Schwung is intended for people **16 and older**. During set-up the app asks for an age band and doesn't let someone
-under 16 continue. If you believe a person under 16 has sent us personal data, contact us and we'll delete it.
+Schwung is intended for people **18 and older**. During set-up the app asks for an age band (never a date of birth)
+and doesn't let someone under 18 continue. A Life Reset started under 18 before the minimum age was raised stays on
+the phone but is paused: it can be exported or deleted at any time. If you believe a person under 18 has sent us
+personal data, contact us and we'll delete it.
 
 ## 11. Security
 

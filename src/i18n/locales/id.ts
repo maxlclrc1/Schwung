@@ -69,7 +69,6 @@ export const id: Translation = {
       },
     },
     notes: {
-      focusTeen: 'Usia 16–17: blok maksimal {max} menit (ditampilkan sebagai 2 × 45 menit di Tantangan Penguasaan).',
       scrolling:
         'Ini pengecekanmu sendiri: Schwung tidak bisa melihat Durasi Layar kamu. Pengaturan → Durasi Layar menunjukkan angka sebenarnya kalau kamu mau.',
       social:
@@ -77,7 +76,6 @@ export const id: Translation = {
       movement: 'Kalau kamu sudah bergerak lebih lama, pakai angkamu sendiri: angka itu tidak pernah diturunkan.',
       sleep:
         'Jam bangunmu sendiri jadi patokannya: tidak pernah lebih pagi, dan tidak pernah tidur lebih sedikit. Tidak ada aturan jam tidur atau ponsel yang ditambahkan.',
-      skillTeen: 'Usia 16–17: blok maksimal {max} menit.',
       skillSport: 'Keterampilan olahraga adalah latihanmu sendiri: Schwung tidak menentukan latihan teknik.',
       reachOut: 'Tidak akan pernah ada ajakan untuk menghubungi orang yang pernah menyakitimu.',
       strengthTracks:
@@ -169,7 +167,6 @@ export const id: Translation = {
         skill: 'Latih Keterampilan: pilih keterampilanmu.',
         strengthStart: 'Latihan Kekuatan: isi titik awalmu.',
       },
-      under16: 'Schwung dibuat untuk orang berusia 16 tahun ke atas.',
       chooseOne: 'Pilih minimal satu kebiasaan.',
       chooseAtMost: 'Untuk sekarang, pilih maksimal {max} kebiasaan.',
       catalogOnly: 'Pilih dari kebiasaan Life Reset.',
@@ -189,9 +186,10 @@ export const id: Translation = {
       howOften: 'Pilih berapa hari seminggu.',
       notIn: 'Kebiasaan ini tidak ada di Life Reset kamu.',
       keepOne: 'Sisakan minimal satu kebiasaan. Untuk berhenti sepenuhnya, akhiri Life Reset di Pengaturan.',
+
+      under18: 'Schwung dibuat untuk orang berusia 18 tahun ke atas.',
     },
     exclusion: {
-      under16: 'Schwung dibuat untuk orang berusia 16 tahun ke atas',
       teenIntensity: 'intensitas ini tidak tersedia untuk usia 16–17 tahun',
       walking: 'berjalan atau berdiri lama sulit bagimu (belum ada alternatif yang sudah ditinjau)',
       movementAdvice: 'perlu saran pribadi dari dokter atau bidanmu (menunggu tinjauan ahli)',
@@ -201,6 +199,8 @@ export const id: Translation = {
       strengthAdvice: 'perlu saran pribadi dari dokter atau bidanmu terlebih dahulu',
       strengthJoint:
         'jika ada nyeri sendi, punggung, atau cedera, mulailah dengan rutinitas yang disarankan fisioterapis atau doktermu',
+
+      under18: 'Schwung dibuat untuk orang berusia 18 tahun ke atas',
     },
     blocked: {
       easiest: 'ini sudah target yang paling ringan',
@@ -565,6 +565,21 @@ export const id: Translation = {
       export: 'Ekspor data pemulihan',
       kept: 'Salinan aman disimpan di ponsel ini.',
       keeping: 'Menyimpan salinan aman…',
+    },
+
+    ageLimit: {
+      title: 'Schwung kini untuk orang berusia 18 tahun ke atas',
+      body: 'Life Reset-mu dimulai dengan usia di bawah 18 tahun, jadi sekarang dijeda. Tidak ada yang dihapus: kemajuanmu, perjalanan sebelumnya, dan koleksimu tetap ada di ponsel ini. Kamu bisa mengekspor salinan datamu atau menghapusnya kapan saja.',
+
+      data: 'Ekspor atau hapus dataku',
+
+      adult: 'Aku berusia 18 tahun atau lebih',
+
+      confirmTitle: 'Apakah kamu berusia 18 tahun atau lebih?',
+
+      confirmBody: 'Life Reset-mu berlanjut dari tempat kamu berhenti.',
+
+      confirm: 'Ya, aku berusia 18 tahun atau lebih',
     },
   },
   collection: {
@@ -1001,7 +1016,7 @@ export const id: Translation = {
   },
   setup: {
     age: {
-      u16: 'Di bawah 16',
+      u16: 'Di bawah 18',
       '16_17': '16–17',
       '18_29': '18–29',
       '30_49': '30–49',
@@ -1107,9 +1122,10 @@ export const id: Translation = {
       notChosen: 'Belum dipilih',
       younger: 'Satu tahun lebih muda',
       older: 'Satu tahun lebih tua',
-      under16: 'Schwung dibuat untuk orang berusia 16 tahun ke atas.',
       band: '{band} tahun',
       slide: 'Geser penggaris ke usiamu',
+
+      under18: 'Schwung dibuat untuk orang berusia 18 tahun ke atas.',
     },
     clock: {
       early: 'Bangun pagi-pagi sekali',

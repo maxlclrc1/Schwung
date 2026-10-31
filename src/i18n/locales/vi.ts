@@ -69,7 +69,6 @@ export const vi: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17 tuổi: mỗi khối tối đa {max} phút (ở mức Thử thách · Thành thạo hiển thị là 2 × 45 phút).',
       scrolling:
         'Bạn tự kiểm tra: Schwung không thể xem Thời gian sử dụng của bạn. Cài đặt → Thời gian sử dụng sẽ cho bạn con số thật nếu bạn muốn.',
       social:
@@ -77,7 +76,6 @@ export const vi: Translation = {
       movement: 'Nếu bạn đã vận động lâu hơn, hãy giữ con số của bạn: nó không bao giờ bị giảm.',
       sleep:
         'Giờ thức dậy của chính bạn là mốc neo: không bao giờ sớm hơn, và không bao giờ ngủ ít hơn. Không thêm quy định nào về giờ đi ngủ hay điện thoại.',
-      skillTeen: '16–17 tuổi: mỗi khối tối đa {max} phút.',
       skillSport: 'Kỹ năng thể thao là việc luyện tập của riêng bạn: Schwung không đưa ra bài tập.',
       reachOut: 'Không bao giờ là lời nhắc liên lạc với người đã làm hại bạn.',
       strengthTracks:
@@ -168,7 +166,6 @@ export const vi: Translation = {
         skill: 'Luyện một kỹ năng: chọn kỹ năng của bạn.',
         strengthStart: 'Tập sức mạnh: cho biết bạn đang bắt đầu từ đâu.',
       },
-      under16: 'Schwung dành cho người từ 16 tuổi trở lên.',
       chooseOne: 'Hãy chọn ít nhất một thói quen.',
       chooseAtMost: 'Hiện tại hãy chọn tối đa {max} thói quen.',
       catalogOnly: 'Hãy chọn từ các thói quen của Life Reset.',
@@ -188,9 +185,10 @@ export const vi: Translation = {
       howOften: 'Hãy chọn số ngày mỗi tuần.',
       notIn: 'Nó không có trong Life Reset của bạn.',
       keepOne: 'Hãy giữ ít nhất một thói quen. Để dừng hẳn, hãy kết thúc Life Reset trong Cài đặt.',
+
+      under18: 'Schwung dành cho người từ 18 tuổi trở lên.',
     },
     exclusion: {
-      under16: 'Schwung dành cho người từ 16 tuổi trở lên',
       teenIntensity: 'mức này không dành cho người 16–17 tuổi',
       walking: 'bạn gặp khó khăn khi đi bộ hoặc đứng lâu (chưa có phương án thay thế đã được thẩm định)',
       movementAdvice: 'cần lời khuyên riêng từ bác sĩ hoặc nữ hộ sinh của bạn (đang chờ chuyên gia thẩm định)',
@@ -200,6 +198,8 @@ export const vi: Translation = {
       strengthAdvice: 'trước tiên cần lời khuyên riêng từ bác sĩ hoặc nữ hộ sinh của bạn',
       strengthJoint:
         'nếu đau khớp, đau lưng hoặc đau do chấn thương, hãy bắt đầu với giáo án do nhà vật lý trị liệu hoặc bác sĩ của bạn gợi ý',
+
+      under18: 'Schwung dành cho người từ 18 tuổi trở lên',
     },
     blocked: {
       easiest: 'đây đã là mục tiêu dễ nhất',
@@ -559,6 +559,21 @@ export const vi: Translation = {
       export: 'Xuất dữ liệu khôi phục',
       kept: 'Một bản sao an toàn được giữ trên điện thoại này.',
       keeping: 'Đang giữ một bản sao an toàn…',
+    },
+
+    ageLimit: {
+      title: 'Schwung giờ dành cho người từ 18 tuổi trở lên',
+      body: 'Life Reset của bạn được bắt đầu với độ tuổi dưới 18, nên hiện đang tạm dừng. Không có gì bị xóa: tiến độ, những hành trình trước và bộ sưu tập của bạn vẫn ở trên điện thoại này. Bạn có thể xuất một bản sao dữ liệu hoặc xóa chúng bất cứ lúc nào.',
+
+      data: 'Xuất hoặc xóa dữ liệu của tôi',
+
+      adult: 'Tôi từ 18 tuổi trở lên',
+
+      confirmTitle: 'Bạn từ 18 tuổi trở lên phải không?',
+
+      confirmBody: 'Life Reset của bạn tiếp tục từ chỗ bạn đã dừng.',
+
+      confirm: 'Vâng, tôi từ 18 tuổi trở lên',
     },
   },
   collection: {
@@ -986,7 +1001,7 @@ export const vi: Translation = {
     bars: 'Tuần {week}: {done}/{goal}',
   },
   setup: {
-    age: { u16: 'Dưới 16', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
+    age: { u16: 'Dưới 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
     health: {
       joint: 'Đau khớp, đau lưng hoặc đau do chấn thương',
       walkingDifficult: 'Tôi gặp khó khăn khi đi bộ hoặc đứng lâu',
@@ -1085,9 +1100,10 @@ export const vi: Translation = {
       notChosen: 'Chưa chọn',
       younger: 'Nhỏ hơn một tuổi',
       older: 'Lớn hơn một tuổi',
-      under16: 'Schwung dành cho người từ 16 tuổi trở lên.',
       band: '{band} tuổi',
       slide: 'Trượt thước đến tuổi của bạn',
+
+      under18: 'Schwung dành cho người từ 18 tuổi trở lên.',
     },
     clock: {
       early: 'Người dậy sớm',

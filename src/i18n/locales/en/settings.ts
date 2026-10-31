@@ -64,6 +64,15 @@ export const settings = {
     preview: 'Preview',
     rules: 'No reminder on a day you’ve already completed. Never more than one a day.',
   },
+  ageLimit: {
+    title: 'Schwung is now for people 18 and older',
+    body: 'Your Life Reset was started with an age under 18, so it’s paused. Nothing has been deleted: your progress, past journeys and collection stay on this phone. You can export a copy of your data or delete it at any time.',
+    data: 'Export or delete my data',
+    adult: 'I’m 18 or older',
+    confirmTitle: 'Are you 18 or older?',
+    confirmBody: 'Your Life Reset carries on where you left it.',
+    confirm: 'Yes, I’m 18 or older',
+  },
   privacy: {
     title: 'Privacy & Data',
     intro:

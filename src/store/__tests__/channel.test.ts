@@ -48,6 +48,7 @@ describe('one app: the Life Reset', () => {
       '(tabs)/progress.tsx',
       '(tabs)/today.tsx',
       '_layout.tsx',
+      'age-limit.tsx',
       'choose-language.tsx',
       'index.tsx',
       'language.tsx',
@@ -70,7 +71,7 @@ describe('one app: the Life Reset', () => {
 
   it('opens on the program, or on the start screen, which leads into set-up', () => {
     expect(read('index.tsx')).toContain(
-      "<Redirect href={started ? '/today' : languageChosen ? '/welcome' : '/choose-language'} />",
+      "href={restricted ? '/age-limit' : started ? '/today' : languageChosen ? '/welcome' : '/choose-language'}",
     );
     const welcome = read('welcome.tsx');
     expect(welcome).toContain('if (started) return <Redirect href="/today" />;');
