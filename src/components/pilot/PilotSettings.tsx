@@ -11,6 +11,7 @@ import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { useTheme } from '../../theme';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
+import { usePreferences } from '../../store/preferences';
 
 type SectionC = ComponentType<{ title: string; children: ReactNode }>;
 type RowC = ComponentType<{
@@ -40,6 +41,8 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
       // Any left are removed on a later launch.
     }
     void flushStorage().catch(() => {});
+    // A fresh start opens on the language again (index.tsx).
+    usePreferences.setState({ languageChosen: false });
     if (router.canDismiss()) router.dismissAll();
     router.replace('/');
   };
