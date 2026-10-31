@@ -13,6 +13,8 @@ export type Preferences = {
   comebacks: boolean;
   /** The app's language: the phone's (when Schwung has it, else English), or one chosen in Settings → Language. */
   language: LanguagePreference;
+  /** A language was chosen on purpose (first launch or Settings), so the first-launch language step is skipped. */
+  languageChosen?: boolean;
 };
 
 export type LanguagePreference = 'system' | LanguageCode;
@@ -32,6 +34,8 @@ export const usePreferences = create<
     setReminders: (r: Partial<ReminderSettings>) => void;
     setComebacks: (on: boolean) => void;
     setLanguage: (l: LanguagePreference) => void;
+    /** First launch: the shown language (the phone's, or one tapped) is the one to use. */
+    confirmLanguage: () => void;
   }
 >()(
   persist(
@@ -40,7 +44,8 @@ export const usePreferences = create<
       reminders: DEFAULT_REMINDERS,
       comebacks: true,
       language: 'system',
-      setLanguage: (language) => set({ language: readLanguage(language) }),
+      setLanguage: (language) => set({ language: readLanguage(language), languageChosen: true }),
+      confirmLanguage: () => set({ languageChosen: true }),
       setThemePreference: (themePreference) => set({ themePreference }),
       setComebacks: (comebacks) => set({ comebacks }),
       setReminders: (r) => set((s) => ({ reminders: sanitizeReminders({ ...s.reminders, ...r }) })),
@@ -59,6 +64,7 @@ export const usePreferences = create<
           reminders: sanitizeReminders(p?.reminders),
           comebacks: p?.comebacks !== false,
           language: readLanguage(p?.language),
+          languageChosen: p?.languageChosen === true || readLanguage(p?.language) !== 'system',
         };
       },
       partialize: (s): Preferences => ({
@@ -66,6 +72,7 @@ export const usePreferences = create<
         reminders: s.reminders,
         comebacks: s.comebacks,
         language: s.language,
+        languageChosen: s.languageChosen,
       }),
     },
   ),

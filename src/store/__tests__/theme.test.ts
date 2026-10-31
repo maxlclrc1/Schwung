@@ -51,6 +51,7 @@ describe('the theme preference', () => {
       comebacks: true,
       // The language follows the phone until one is chosen.
       language: 'system',
+      languageChosen: false,
     });
     expect(useResetPilot.getState().program).toBeNull();
   });

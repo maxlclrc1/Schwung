@@ -61,6 +61,7 @@ export async function restoreBackup(backup: Backup): Promise<RestoreResult> {
     comebacks: backup.preferences.comebacks ?? p.comebacks,
     // The language stays this phone's choice (a backup from another phone may have been in another language).
     language: p.language,
+    languageChosen: p.languageChosen,
   };
   const ok = await commitTogether(
     [
