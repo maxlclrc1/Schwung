@@ -129,11 +129,19 @@ describe('Begin a New Ascent', () => {
     expect(P.lifetimeXp(third)).toBe(P.pilotXp(prev) + P.pilotXp(later));
   });
 
-  it('carries the streak only when it begins the day after the last one ended', () => {
+  it('carries the streak from where tracking last ran, unchanged by a Decide later pause', () => {
     const prev = summited();
     const streak = P.pilotStreak(prev, PROGRAM_DAYS);
     expect(P.carriedStreak(prev, 67)).toBe(streak);
-    expect(P.carriedStreak(prev, 69)).toBe(0);
+    // Decided later: the days after the summit are a pause, never missed, never counted, however many.
+    expect(P.carriedStreak(prev, 69)).toBe(streak);
+    expect(P.carriedStreak(prev, 400)).toBe(streak);
+    const paused = P.beginAscent(prev, answers, P.ascentDefaults(prev, 75).choices, [], dateForDay(START, 75), 75, 7)!;
+    expect(paused.carry).toMatchObject({ streak, xp: P.lifetimeXp(prev) });
+    // Then the normal rules: Day 1 unfinished keeps it, Day 1 done adds one, a missed Day 1 ends it on Day 2.
+    expect(P.pilotStreak(paused, 1)).toBe(streak);
+    expect(P.pilotStreak(P.complete(paused, 'mind_read', 1).program, 1)).toBe(streak + 1);
+    expect(P.pilotStreak(paused, 2)).toBe(0);
     // After Keep My Momentum, the previous one ended yesterday.
     const kept = climb(P.keepMomentum(prev, 67), 67, 90);
     expect(P.carriedStreak(kept, 91)).toBe(P.pilotStreak(kept, 90));
