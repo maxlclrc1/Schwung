@@ -296,10 +296,10 @@ const MILESTONE_PTS: Pt[] = [LEGS[0][0], LEGS[0][3], LEGS[1][3], LEGS[2][3]];
 /** Where each milestone's words sit, beside it, in the same coordinates. */
 const LABEL_SIDE: ('left' | 'right')[] = ['right', 'left', 'left', 'left'];
 /**
- * Labels that grow upward from their milestone (their foot level with it) rather than down: the second milestone sits
- * just above the first, so its words, once they wrap (long languages, larger text), would run into the first's.
+ * Labels that grow upward from their milestone (their foot level with it) rather than down: the middle milestones sit
+ * just above the ones below them, so their words, once they wrap (long languages, larger text), would run into those.
  */
-const LABEL_UP = [false, true, false, false];
+const LABEL_UP = [false, true, true, false];
 
 /**
  * A trail up a small mountain with a milestone for each answer, base camp to summit. Choosing one walks a hiker up

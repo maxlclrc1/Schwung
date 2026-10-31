@@ -42,7 +42,7 @@ export const it: Translation = {
     ownHabit: 'La tua abitudine',
     habit: {
       focus_deepwork: {
-        name: 'Tempo di concentrazione',
+        name: 'Tempo di concen\u00ADtrazione',
         description: 'Lavora su una cosa sola, con il telefono in un’altra stanza',
       },
       screen_app_limit: {
