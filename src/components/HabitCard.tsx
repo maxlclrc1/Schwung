@@ -16,6 +16,7 @@ import Animated, {
 import { swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../core/swipe';
 import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
+import { useDepth } from '../theme/depth';
 import { useThemeProgress } from '../theme/transition';
 import { cropAt, habitScene, placeholderCrop } from './habitArt';
 import { useCardBlock } from './TabPager';
@@ -232,6 +233,7 @@ function HabitCardImpl({
   actions,
 }: Props) {
   const { c, isDark } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const theme: Theme = isDark ? 'dark' : 'light';
   const ink = INK[theme];
@@ -496,7 +498,7 @@ function HabitCardImpl({
         else if ((name === 'longpress' || name === 'details') && onLongPress) onLongPress(habitId);
         else actions?.find((a) => a.name === name)?.run();
       }}
-      style={[styles.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
+      style={[styles.card, depth.card, WEB_TOUCH, { minHeight: height, backgroundColor: c.surface }, cardStyle]}
     >
       <View pointerEvents="none" style={[StyleSheet.absoluteFill, physical]}>
         <Scene habitId={habitId} scene={scene} width={width} height={height} />

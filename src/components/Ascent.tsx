@@ -12,6 +12,7 @@ import Animated, {
 import { ASCENT_ASPECT, ASCENT_PHASES, AscentDay, describeDay, LANDMARKS, phaseFor, trailDots } from '../core/ascent';
 import { PROGRAM_DAYS } from '../core/dates';
 import { radius, space, useTheme } from '../theme';
+import { useDepth } from '../theme/depth';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { t as tr } from '../i18n';
@@ -193,6 +194,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
   const maintenance = today > PROGRAM_DAYS;
   const phase = phaseFor(Math.min(today, PROGRAM_DAYS));
   const pill = isDark ? 'rgba(17,17,22,0.62)' : 'rgba(255,255,255,0.78)';
+  const depth = useDepth();
   const px = (x: number) => x * width;
   const py = (y: number) => y * height;
   // Each label's width once laid out, so a long phase name (or a narrow phone) never runs off the art's edge.
@@ -218,6 +220,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
             style={[
               styles.phase,
               styles.phaseRow,
+              depth.raised,
               {
                 left: Math.max(0, Math.min(px(at.x), width - (widths[p.n] ?? 0) - space.sm)),
                 top: py(at.y),
@@ -242,7 +245,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
           <T
             v="heading"
             maxFontSizeMultiplier={1.15}
-            style={[styles.tabular, styles.dayText, maintenance && styles.dayTextSmall]}
+            style={[styles.tabular, styles.dayText, depth.hero, maintenance && styles.dayTextSmall]}
             numberOfLines={1}
           >
             {maintenance ? t('journeyTab.ascent.maintenance') : t('journeyTab.ascent.day', { day: today })}

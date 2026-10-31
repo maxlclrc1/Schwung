@@ -16,6 +16,7 @@ import { cellSummary, shortDate, type DayCell } from '../core/charts';
 import { PROGRAM_DAYS } from '../core/dates';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme, type Colors } from '../theme';
+import { useDepth } from '../theme/depth';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, t as tr } from '../i18n';
@@ -54,12 +55,13 @@ export const JourneySummary = memo(function JourneySummary({
   cells: DayCell[];
 }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const summit = today > PROGRAM_DAYS;
   const next = MILESTONES.find((d) => d > today);
   const nextName = next ? LANDMARKS[next].name : null;
   return (
-    <ThemedView style={[styles.summary, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.summary, depth.card, { backgroundColor: c.surface }]}>
       <View style={styles.figures}>
         <Figure
           value={formatNumber(summit ? PROGRAM_DAYS : today)}
@@ -86,11 +88,12 @@ export const JourneySummary = memo(function JourneySummary({
 
 function Figure({ value, unit, color }: { value: string; unit: string; color: string }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   return (
     <View style={styles.figure} accessible accessibilityLabel={t('journeyTab.summary.a11y', { value, unit })}>
       <Animated.View key={value} entering={FadeIn.duration(260).reduceMotion(sys)}>
-        <T style={[styles.figureValue, { color }]} maxFontSizeMultiplier={1.2}>
+        <T style={[styles.figureValue, depth.hero, { color }]} maxFontSizeMultiplier={1.2}>
           {value}
         </T>
       </Animated.View>

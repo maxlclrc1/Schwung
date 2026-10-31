@@ -23,6 +23,7 @@ import * as C from '../../core/reset/charts';
 import { worldFrame } from '../../core/world';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
+import { useDepth } from '../../theme/depth';
 import { ThemedView } from '../../theme/transition';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
@@ -76,6 +77,7 @@ function Header() {
 
 function Ascent({ picked, source }: { picked: number | null; source: JourneySource }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -159,7 +161,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
               })}
               style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
             >
-              <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
+              <ThemedView style={[styles.caption, depth.raised, { backgroundColor: c.surface }]}>
                 <T v="caption" color={c.indigoInk} style={styles.captionKicker} maxFontSizeMultiplier={1.3}>
                   {summary.kicker}
                 </T>
@@ -203,7 +205,9 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 accessibilityLabel={t('journeyTab.storyA11y')}
               >
                 {({ pressed }) => (
-                  <ThemedView style={[styles.story, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}>
+                  <ThemedView
+                    style={[styles.story, depth.card, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}
+                  >
                     <View style={[styles.storyIcon, { backgroundColor: c.peachSoft }]}>
                       <Ionicons name="image-outline" size={18} color={c.peachInk} />
                     </View>
@@ -279,10 +283,11 @@ function DayDetail({
   when: 'past' | 'today' | 'ahead';
 }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const log = logForDay(logs, start, day);
   return (
-    <ThemedView style={[styles.card, { backgroundColor: c.surface }]} accessibilityLiveRegion="polite">
+    <ThemedView style={[styles.card, depth.card, { backgroundColor: c.surface }]} accessibilityLiveRegion="polite">
       {log && log.planned.length ? (
         <View style={styles.habits}>
           {log.planned.map((id) => {
