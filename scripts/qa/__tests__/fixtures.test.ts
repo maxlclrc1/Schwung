@@ -31,7 +31,10 @@ describe('visual QA fixtures', () => {
   const out = process.env.QA_FIXTURES_OUT;
   (out ? it : it.skip)('are written for the runner', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('fs') as { mkdirSync: (p: string, o: object) => void; writeFileSync: (p: string, d: string) => void };
+    const fs = require('fs') as {
+      mkdirSync: (p: string, o: object) => void;
+      writeFileSync: (p: string, d: string) => void;
+    };
     fs.mkdirSync(out!.replace(/\/[^/]*$/, ''), { recursive: true });
     // Per language: the set-up's button labels (the runner walks the steps by them) and the layout direction.
     const languages = READY_LANGUAGES.map((l) => ({
