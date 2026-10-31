@@ -69,10 +69,12 @@ describe('one app: the Life Reset', () => {
   });
 
   it('opens on the program, or on the start screen, which leads into set-up', () => {
-    expect(read('index.tsx')).toContain("<Redirect href={started ? '/today' : '/welcome'} />");
+    expect(read('index.tsx')).toContain(
+      "<Redirect href={started ? '/today' : languageChosen ? '/welcome' : '/choose-language'} />",
+    );
     const welcome = read('welcome.tsx');
     expect(welcome).toContain('if (started) return <Redirect href="/today" />;');
-    expect(welcome).toContain("router.push(languageChosen ? '/life-reset/setup' : '/choose-language')");
+    expect(welcome).toContain("router.push('/life-reset/setup')");
     expect(read('(tabs)/today.tsx')).toContain('if (!started) return <Redirect href="/welcome" />;');
   });
 

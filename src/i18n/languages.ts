@@ -26,29 +26,36 @@ export type LanguageCode =
   | 'zh-Hans'
   | 'zh-Hant';
 
-export type Language = { code: LanguageCode; native: string; rtl: boolean; ready: boolean };
+export type Language = {
+  code: LanguageCode;
+  native: string;
+  rtl: boolean;
+  ready: boolean;
+  /** "Choose your language", in the language itself (the first-launch screen shows them all at once). */
+  choose: string;
+};
 
 export const LANGUAGES: Language[] = [
-  { code: 'en', native: 'English', rtl: false, ready: true },
-  { code: 'tr', native: 'Türkçe', rtl: false, ready: true },
-  { code: 'es', native: 'Español', rtl: false, ready: true },
-  { code: 'fr', native: 'Français', rtl: false, ready: true },
-  { code: 'de', native: 'Deutsch', rtl: false, ready: true },
-  { code: 'pt-BR', native: 'Português (Brasil)', rtl: false, ready: true },
-  { code: 'it', native: 'Italiano', rtl: false, ready: true },
-  { code: 'nl', native: 'Nederlands', rtl: false, ready: true },
-  { code: 'ru', native: 'Русский', rtl: false, ready: true },
-  { code: 'ar', native: 'العربية', rtl: true, ready: true },
-  { code: 'hi', native: 'हिन्दी', rtl: false, ready: true },
-  { code: 'bn', native: 'বাংলা', rtl: false, ready: true },
-  { code: 'ur', native: 'اردو', rtl: true, ready: true },
-  { code: 'id', native: 'Bahasa Indonesia', rtl: false, ready: true },
-  { code: 'ja', native: '日本語', rtl: false, ready: true },
-  { code: 'ko', native: '한국어', rtl: false, ready: true },
-  { code: 'zh-Hans', native: '简体中文', rtl: false, ready: true },
-  { code: 'zh-Hant', native: '繁體中文', rtl: false, ready: true },
-  { code: 'vi', native: 'Tiếng Việt', rtl: false, ready: true },
-  { code: 'th', native: 'ไทย', rtl: false, ready: true },
+  { code: 'en', native: 'English', rtl: false, ready: true, choose: 'Choose your language' },
+  { code: 'tr', native: 'Türkçe', rtl: false, ready: true, choose: 'Dilini seç' },
+  { code: 'es', native: 'Español', rtl: false, ready: true, choose: 'Elige tu idioma' },
+  { code: 'fr', native: 'Français', rtl: false, ready: true, choose: 'Choisissez votre langue' },
+  { code: 'de', native: 'Deutsch', rtl: false, ready: true, choose: 'Wähle deine Sprache' },
+  { code: 'pt-BR', native: 'Português (Brasil)', rtl: false, ready: true, choose: 'Escolha seu idioma' },
+  { code: 'it', native: 'Italiano', rtl: false, ready: true, choose: 'Scegli la tua lingua' },
+  { code: 'nl', native: 'Nederlands', rtl: false, ready: true, choose: 'Kies je taal' },
+  { code: 'ru', native: 'Русский', rtl: false, ready: true, choose: 'Выбери язык' },
+  { code: 'ar', native: 'العربية', rtl: true, ready: true, choose: 'اختر لغتك' },
+  { code: 'hi', native: 'हिन्दी', rtl: false, ready: true, choose: 'अपनी भाषा चुनें' },
+  { code: 'bn', native: 'বাংলা', rtl: false, ready: true, choose: 'আপনার ভাষা বেছে নিন' },
+  { code: 'ur', native: 'اردو', rtl: true, ready: true, choose: 'اپنی زبان منتخب کریں' },
+  { code: 'id', native: 'Bahasa Indonesia', rtl: false, ready: true, choose: 'Pilih bahasamu' },
+  { code: 'ja', native: '日本語', rtl: false, ready: true, choose: '言語を選んでください' },
+  { code: 'ko', native: '한국어', rtl: false, ready: true, choose: '언어를 선택하세요' },
+  { code: 'zh-Hans', native: '简体中文', rtl: false, ready: true, choose: '选择你的语言' },
+  { code: 'zh-Hant', native: '繁體中文', rtl: false, ready: true, choose: '選擇你的語言' },
+  { code: 'vi', native: 'Tiếng Việt', rtl: false, ready: true, choose: 'Chọn ngôn ngữ của bạn' },
+  { code: 'th', native: 'ไทย', rtl: false, ready: true, choose: 'เลือกภาษาของคุณ' },
 ];
 
 export const READY_LANGUAGES = LANGUAGES.filter((l) => l.ready);

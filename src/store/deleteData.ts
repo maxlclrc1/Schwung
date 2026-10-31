@@ -49,7 +49,14 @@ export async function deleteAllLocalData(deps: {
   endRecovery();
   useResetPilot.setState({ program: null, devDayOffset: 0 });
   useJourneys.setState({ journeys: [], held: false });
-  usePreferences.setState({ themePreference: theme, language, reminders: DEFAULT_REMINDERS, comebacks: true });
+  usePreferences.setState({
+    themePreference: theme,
+    language,
+    // The next start opens on the language again (the choice above stays selected there).
+    languageChosen: false,
+    reminders: DEFAULT_REMINDERS,
+    comebacks: true,
+  });
 
   try {
     await deps.cancelReminders();
