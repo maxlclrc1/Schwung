@@ -16,6 +16,85 @@ remote push in the app code, and nothing leaves the phone except files the perso
 
 ---
 
+## Phase 3 — beta security audit (re-check of everything above, 2026-10-31)
+
+Re-audited from `01caf48` (minimum age 18+) with restore, past journeys and the age notice in scope.
+No critical issues and no release-blocking vulnerabilities in the shipped app.
+
+**Fixed in this phase**
+
+- **Dependencies:** `npm audit fix` (no `--force`) moved Expo to the latest SDK 58 patch (`expo` 58.0.22,
+  `@expo/cli` 58.1.18), which clears all 3 high findings (`node-forge` 1.4.0 → 1.4.2; `zod` 3 → 4.6.7, now only under
+  the lint plugin; `@expo/cli`). `npx expo install --fix` then aligned the five packages that patch expects
+  (`react-native` 0.88.1, `expo-router` 58.0.29, `expo-linking` 58.0.15, `expo-system-ui` 58.0.7,
+  `react-native-screens` 4.30.1). All are patch releases inside SDK 58, and the iOS bundle builds. They include
+  native code, so the next EAS build is the first one to carry them (needs iPhone verification).
+- **Restore validation:** a backup file is untrusted input. The strict check refused damaged structure but still
+  accepted an age band, health precaution or daily time that Schwung could never have saved (a hand-edited
+  `"age": "adult"`, `"precautions": ["bogus"]` or `"minutesPerDay": -30`). These decide what's safe and allowed,
+  so such a file (or a past journey inside it) is now refused as damaged (`src/core/dataImport.ts`,
+  `validAnswers`). Saves already on the phone keep their forgiving reading, so nobody's progress is affected. A
+  16–17 backup still restores whole, and opens paused on the age notice like any 16–17 program.
+- **iOS network policy:** `NSAppTransportSecurity` is now explicit in `app.json` (`NSAllowsArbitraryLoads: false`,
+  `NSAllowsLocalNetworking: true` for a development build's bundler). `expo config --type introspect` showed
+  arbitrary loads allowed, which is only its offline fallback template, but the setting is now guaranteed either
+  way. The app makes no network requests.
+- **Guard test:** `src/lib/__tests__/appConfig.test.ts` pins the shipped configuration: no usage descriptions
+  beyond adding to Photos, no photo reading, no remote push, no arbitrary loads, no tracking or collected data,
+  and only the channel in `eas.json`.
+
+**Re-verified (no change needed)**
+
+- **Network and secrets:** no `fetch`, sockets, analytics or crash reporting in `src/`; `artPrefetch.ts` only warms
+  bundled images. No secrets in the repository or build profiles. The only console output is behind `__DEV__`
+  (a haptics failure and missing translation keys, never personal data).
+- **Backups and temporary files:** exports, story images and picked backups live only in one cache folder,
+  removed after sharing, on launch if abandoned, and by End the Life Reset and Delete my data. A picked backup is
+  size-checked (5 MB) before it's read and deleted at once. Restore copies the Life Reset and journeys it replaces
+  into recovery slots first and writes everything in one commit. Parsing is JSON only; prototype keys can't reach
+  any object (every key is checked by name or date).
+- **Delete my data:** removes every `schwung-` key (saves, journeys, recovery copies, preferences, old V1/V2
+  saves), confirms nothing is left, cancels Schwung's scheduled reminders and removes the temporary folder, and
+  says what couldn't be removed. Images already saved to Photos stay there by design.
+- **Developer tools:** the time-travel clock needs both `__DEV__` and the development channel, so no internal or
+  release build has it (`src/lib/flags.ts`).
+- **Age 18+:** set-up, eligibility, New Ascent and restore all follow `isMinor`; only the age band is stored.
+
+**SecureStore or extra encryption: not recommended now.** Everything Schwung keeps (habits, health precautions,
+age band, reflections) is already in the app's sandbox under iOS data protection (encrypted at rest, and in
+encrypted backups). SecureStore (the Keychain) is built for small secrets; a whole Life Reset doesn't fit it, and
+encrypting AsyncStorage with a Keychain key would add a new way to lose everything (a lost or unreadable key
+makes every save and recovery copy unreadable, and the Keychain doesn't always move with a backup). With no
+accounts, tokens or network, there's no secret to protect that iOS doesn't already protect. Reconsider only if
+Schwung adds sync or accounts.
+
+**Outstanding (no fix in this phase)**
+
+| Item                                                                                                                             | Runtime or dev-only                                                                    | Why it stays                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 13 moderate `npm audit --omit=dev` (`glob`, `minimatch` via `@expo/config`, `@expo/fingerprint`, `expo-sharing`'s config plugin) | Build-time only (config and prebuild run on the developer's machine, never in the app) | Only fix offered is a downgrade to SDK 51; wait for Expo                                      |
+| 1 low `deepmerge` (prototype poisoning, now only under Jest)                                                                     | Development only (tests)                                                               | Same                                                                                          |
+| 30 more moderate in the full tree (Jest, ESLint, `typescript-eslint`)                                                            | Development only                                                                       | Same: forced fixes are major downgrades                                                       |
+| L3 device clock, L5 default file protection, L6 habit names in reminders                                                         | Runtime, self-only                                                                     | Unchanged from above; acceptable for beta                                                     |
+| Android: `READ_MEDIA_*` permissions from `expo-media-library`, `INTERNET` from React Native                                      | Runtime (Android only)                                                                 | iOS is the target; block them only after testing that saving the story still works on Android |
+
+**Release blockers (before the App Store, not before an internal TestFlight beta)**
+
+1. **H2:** placeholder bundle identifier (`com.example.schwung`), privacy policy URL and support contact (founder
+   decision).
+2. **Legal review:** the policies in `docs/legal/` and `src/core/legal.ts` are drafts (now 18+); the App Store age
+   rating and the privacy nutrition label ("Data Not Collected") must match them.
+
+**Needs iPhone verification on the next EAS build**
+
+- The generated `Info.plist` has `NSAllowsArbitraryLoads` false and only the Photos add-only description; no
+  `aps-environment` entitlement; the privacy manifest is merged into `PrivacyInfo.xcprivacy`.
+- The patched native modules (React Native 0.88.1, screens, router) run normally, including reminders, the share
+  sheet, saving the story to Photos and restore from Files.
+- After Delete my data, Notification Center has no pending Schwung reminders, and the app opens fresh.
+
+---
+
 ## Summary
 
 | #   | Severity | Finding                                                                                     | Type                      | Before submission?                       |
@@ -246,7 +325,7 @@ award), and ceremonies, milestones and collectibles are stored once, so nothing 
 the iPhone app, which uses no network. Risk to users is negligible.
 
 **Fix:** update when Expo publishes patched SDK 58 releases (`npx expo install --fix`); don't force-upgrade
-outside the SDK.
+outside the SDK. **Status: resolved for the highs** (Phase 3): none remain; the rest are build-time moderates.
 
 ### L5 — iOS file protection and backups use the defaults
 
@@ -291,12 +370,12 @@ words and could be personal.
 - **Logging:** the only `console` call is `console.warn` behind `__DEV__` in `src/lib/haptics.ts`, with no
   personal data.
 - **Loading saved data:** every field is validated on load (`sanitizePilotProgram`, `sanitizeReflections`,
-  `sanitizeCollection`, `sanitizeReminders`); malformed values are dropped rather than trusted. There is no import
-  feature, so tampered files can't be brought in. (See H1 for the over-strict case.)
+  `sanitizeCollection`, `sanitizeReminders`); malformed values are dropped rather than trusted. Restore from backup refuses
+  anything it can't fully check (see Phase 3). (See H1 for the over-strict case.)
 - **Save reliability:** writes are coalesced, flushed when the app goes to the background, kept and retried
   automatically after a failure (`src/store/storage.ts`), and the program is confirmed on disk before Day 1 is
   offered. Interrupted writes rely on AsyncStorage's own file handling (Needs iPhone verification under force-quit).
-- **Age 16+:** set-up refuses under-16s (`setupProblems` returns only "Schwung is made for people 16 and older.").
+- **Age 18+:** set-up refuses under-18s (`setupProblems` returns only "Schwung is made for people 18 and older.").
   Set the App Store age rating to match.
 - **Health precautions** exclude unsafe habits and intensities (`habitExclusion`, `intensityOptions`), and Strength
   shows clinician notes. Only the answers the chosen habits need are kept (`keptAnswers`); precautions are kept

@@ -2,6 +2,7 @@ import { EXPORT_SCHEMA_VERSION } from './dataExport';
 import { dayNumber, PROGRAM_DAYS } from './dates';
 import { sanitizeReminders, type ReminderSettings } from './reminders';
 import * as P from './reset/pilot';
+import type { AgeBand, Precaution } from './reset/profile';
 import type { ThemePreference } from './types';
 
 /*
@@ -19,6 +20,32 @@ export const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
 const SAVE_VERSION_BEFORE_FIELD = 1;
 
 const THEMES: ThemePreference[] = ['system', 'light', 'dark'];
+const AGE_BANDS: readonly AgeBand[] = ['u16', '16_17', '18_29', '30_49', '50_64', '65p'];
+const PRECAUTIONS: readonly Precaution[] = [
+  'joint',
+  'walkingDifficult',
+  'heart',
+  'pregnancy',
+  'fluidLimit',
+  'sleepCondition',
+];
+
+/**
+ * The answers that decide what's safe and allowed (age band, health precautions, daily time) must be ones
+ * Schwung itself could have saved: a file with any other value was edited or damaged, and is refused. (Saves
+ * already on the phone keep their own forgiving reading, so this never touches anyone's progress.)
+ */
+function validAnswers(a: P.PilotAnswers): boolean {
+  const m = a.minutesPerDay;
+  return (
+    AGE_BANDS.includes(a.age) &&
+    (a.precautions === 'unknown' ||
+      (a.precautions.every((x) => PRECAUTIONS.includes(x)) && new Set(a.precautions).size === a.precautions.length)) &&
+    Number.isFinite(m) &&
+    m > 0 &&
+    m <= 24 * 60
+  );
+}
 
 export type BackupProblem =
   'tooLarge' | 'notBackup' | 'newerVersion' | 'unsupportedVersion' | 'noLifeReset' | 'damaged';
@@ -108,7 +135,8 @@ function readProgram(
   }
   if (!isObj(migrated)) return { ok: false, problem: 'damaged' };
   const read = P.inspectPilotProgram(migrated.program);
-  if (!read.program || read.lost.length || read.program.habits.length === 0) return { ok: false, problem: 'damaged' };
+  if (!read.program || read.lost.length || read.program.habits.length === 0 || !validAnswers(read.program.answers))
+    return { ok: false, problem: 'damaged' };
   return { ok: true, program: read.program };
 }
 
