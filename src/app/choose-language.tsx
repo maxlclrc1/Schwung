@@ -1,6 +1,6 @@
 import { reloadAppAsync } from 'expo';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -31,14 +31,16 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
-import { deviceLanguage, isDirectionPending, subscribeDirection } from '../i18n/device';
+import { deviceLanguage, isDirectionPending } from '../i18n/device';
 import { physical } from '../i18n/direction';
-import { READY_LANGUAGES, type Language } from '../i18n/languages';
-import { useLanguage, useT } from '../i18n/react';
+import { language, tIn } from '../i18n';
+import { READY_LANGUAGES, type Language, type LanguageCode } from '../i18n/languages';
+import { useT } from '../i18n/react';
+import { scriptAdjust } from '../i18n/script';
 import { haptic } from '../lib/haptics';
 import { APP_NAME } from '../lib/constants';
 import { usePreferences } from '../store/preferences';
-import { radius, space, useTheme } from '../theme';
+import { radius, space, type, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 /*
@@ -60,19 +62,19 @@ export default function ChooseLanguage() {
   const t = useT();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
-  const shown = useLanguage();
   const setLanguage = usePreferences((s) => s.setLanguage);
   const confirmLanguage = usePreferences((s) => s.confirmLanguage);
-  const chosen = usePreferences((s) => s.languageChosen === true);
-  const restart = useSyncExternalStore(subscribeDirection, isDirectionPending);
 
+  // The language on the wheel is previewed here only (title, ring, Continue); the app switches once, on Continue,
+  // so turning the wheel never re-renders the rest of the app or the painting behind.
+  const [selected, setSelected] = useState<LanguageCode>(() => language());
+  const [asking, setAsking] = useState(false);
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [wheelH, setWheelH] = useState(0);
-  // Where the wheel starts: the language shown when the screen opened (kept, while the wheel moves on).
   const [startIndex] = useState(() =>
     Math.max(
       0,
-      READY_LANGUAGES.findIndex((l) => l.code === shown),
+      READY_LANGUAGES.findIndex((l) => l.code === language()),
     ),
   );
   const current = useRef(startIndex);
@@ -81,7 +83,7 @@ export default function ChooseLanguage() {
   const burst = useSharedValue(1);
 
   // Keep the wheel on the chosen language whenever its height changes: at the start (contentOffset alone isn't
-  // applied on Android or the web), and when the restart note appears below it for a right-to-left language.
+  // applied on Android or the web), and when the restart note appears below it.
   useEffect(() => {
     if (wheelH > 0) scroll.current?.scrollTo({ y: current.current * ROW, animated: false });
   }, [wheelH, scroll]);
@@ -90,31 +92,41 @@ export default function ChooseLanguage() {
     y.set(e.contentOffset.y);
   });
 
-  const select = (i: number) => {
-    const l = READY_LANGUAGES[i];
-    if (!l || i === current.current) return;
-    current.current = i;
-    haptic.select();
-    // The phone's own language stays "Follow device", so a later change of the phone's language carries over.
-    setLanguage(l.code === deviceLanguage() ? 'system' : l.code);
-    if (!reduce) {
-      burst.set(0);
-      burst.set(withTiming(1, { duration: 1600, easing: Easing.out(Easing.quad) }));
-    }
-  };
+  const select = useCallback(
+    (i: number) => {
+      const l = READY_LANGUAGES[i];
+      if (!l || i === current.current) return;
+      current.current = i;
+      haptic.select();
+      setSelected(l.code);
+      if (!reduce) {
+        burst.set(0);
+        burst.set(withTiming(1, { duration: 1600, easing: Easing.out(Easing.quad) }));
+      }
+    },
+    [burst, reduce],
+  );
   const settle = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
     select(Math.round(e.nativeEvent.contentOffset.y / ROW));
-  const tap = (i: number) => {
-    scroll.current?.scrollTo({ y: i * ROW, animated: !reduce });
-    select(i);
-  };
+  const tap = useCallback(
+    (i: number) => {
+      scroll.current?.scrollTo({ y: i * ROW, animated: !reduce });
+      select(i);
+    },
+    [scroll, reduce, select],
+  );
 
+  const enter = () => router.replace('/welcome');
   const go = () => {
+    // The phone's own language stays "Follow device", so a later change of the phone's language carries over.
+    setLanguage(selected === deviceLanguage() ? 'system' : selected);
     confirmLanguage();
-    router.replace('/welcome');
+    // Between left-to-right and right-to-left the layout turns with a restart: offered before going on.
+    if (isDirectionPending()) setAsking(true);
+    else enter();
   };
 
-  // A soft halo eases out from the chosen language and fades: no flash, nothing darkened.
+  // A soft halo eases out from the chosen language and fades.
   const ring = useAnimatedStyle(() => ({
     opacity: interpolate(burst.value, [0, 0.25, 1], [0, 0.5, 0], Extrapolation.CLAMP),
     transform: [
@@ -126,30 +138,18 @@ export default function ChooseLanguage() {
     transform: [{ scale: interpolate(burst.value, [0, 0.35, 1], [1, 1.03, 1], Extrapolation.CLAMP) }],
   }));
 
-  const phrase = READY_LANGUAGES.find((l) => l.code === shown)?.choose ?? READY_LANGUAGES[0].choose;
-  const onBox = (e: LayoutChangeEvent) => {
+  const phrase = READY_LANGUAGES.find((l) => l.code === selected)?.choose ?? READY_LANGUAGES[0].choose;
+  const onBox = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
-    setBox({ w: width, h: height });
-  };
+    setBox((b) => (b.w === width && b.h === height ? b : { w: width, h: height }));
+  }, []);
 
   return (
     <View style={[styles.fill, { backgroundColor: c.bg }]}>
-      <Animated.View entering={FadeIn.duration(800)} style={StyleSheet.absoluteFill} pointerEvents="none">
-        <WorldBackdrop zoneTop={insets.top + BAND} />
-        <ThemedView style={[StyleSheet.absoluteFill, styles.veil, { backgroundColor: c.bg }]} />
-      </Animated.View>
+      <Backdrop zoneTop={insets.top + BAND} />
 
       <View style={[styles.fill, physical, { marginTop: insets.top, marginBottom: insets.bottom }]} onLayout={onBox}>
-        {box.w > 0 ? (
-          <View
-            style={StyleSheet.absoluteFill}
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          >
-            <Ring w={box.w} h={box.h} shown={shown} reduce={reduce} />
-          </View>
-        ) : null}
+        {box.w > 0 ? <Ring w={box.w} h={box.h} selected={selected} reduce={reduce} /> : null}
 
         <Animated.View
           entering={reduce ? undefined : FadeInDown.delay(200).duration(600)}
@@ -163,16 +163,17 @@ export default function ChooseLanguage() {
             {/* A split-flap turn to the chosen language, like a departures board. */}
             <View style={styles.titleBox}>
               <Animated.View
-                key={shown}
+                key={selected}
                 entering={reduce ? undefined : FlipInXUp.duration(760).easing(Easing.out(Easing.cubic))}
                 exiting={reduce ? undefined : FlipOutXDown.duration(420)}
               >
                 <T
                   v="title"
                   accessibilityRole="header"
+                  accessibilityLanguage={selected}
                   numberOfLines={2}
                   maxFontSizeMultiplier={1.3}
-                  style={styles.title}
+                  style={[styles.title, scriptAdjust(selected, [type.title, styles.title])]}
                 >
                   {phrase}
                 </T>
@@ -202,7 +203,7 @@ export default function ChooseLanguage() {
                   accessibilityRole="radiogroup"
                 >
                   {READY_LANGUAGES.map((l, i) => (
-                    <WheelItem key={l.code} l={l} i={i} y={y} on={l.code === shown} onPress={() => tap(i)} />
+                    <WheelItem key={l.code} l={l} i={i} y={y} on={l.code === selected} onTap={tap} />
                   ))}
                 </Animated.ScrollView>
               </>
@@ -210,22 +211,16 @@ export default function ChooseLanguage() {
           </View>
 
           <View style={styles.foot}>
-            {restart && chosen ? (
+            {asking ? (
               <Animated.View entering={FadeInDown.duration(300)} style={{ gap: space.sm }}>
                 <T v="caption" color={c.textDim} style={styles.center}>
                   {t('settings.language.restartBody')}
                 </T>
-                <Button
-                  label={t('settings.language.restartNow')}
-                  onPress={() => {
-                    confirmLanguage();
-                    void reloadAppAsync();
-                  }}
-                />
-                <Button label={t('common.continue')} kind="ghost" onPress={go} />
+                <Button label={t('settings.language.restartNow')} onPress={() => void reloadAppAsync()} />
+                <Button label={t('common.continue')} kind="ghost" onPress={enter} />
               </Animated.View>
             ) : (
-              <Button label={t('common.continue')} onPress={go} />
+              <Button label={tIn(selected, 'common.continue')} onPress={go} />
             )}
           </View>
         </Animated.View>
@@ -234,19 +229,30 @@ export default function ChooseLanguage() {
   );
 }
 
+/** The painting behind, faded in once; memoized so nothing on this screen ever redraws it. */
+const Backdrop = memo(function Backdrop({ zoneTop }: { zoneTop: number }) {
+  const { c } = useTheme();
+  return (
+    <Animated.View entering={FadeIn.duration(800)} style={StyleSheet.absoluteFill} pointerEvents="none">
+      <WorldBackdrop zoneTop={zoneTop} />
+      <ThemedView style={[StyleSheet.absoluteFill, styles.veil, { backgroundColor: c.bg }]} />
+    </Animated.View>
+  );
+});
+
 /** One language on the wheel: full size and bright at the centre, smaller, fainter and turned away above and below. */
-function WheelItem({
+const WheelItem = memo(function WheelItem({
   l,
   i,
   y,
   on,
-  onPress,
+  onTap,
 }: {
   l: Language;
   i: number;
   y: SharedValue<number>;
   on: boolean;
-  onPress: () => void;
+  onTap: (i: number) => void;
 }) {
   const { c } = useTheme();
   const style = useAnimatedStyle(() => {
@@ -263,7 +269,7 @@ function WheelItem({
   });
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => onTap(i)}
       accessibilityRole="radio"
       accessibilityState={{ selected: on }}
       accessibilityLabel={l.native}
@@ -275,14 +281,14 @@ function WheelItem({
           numberOfLines={1}
           adjustsFontSizeToFit
           color={on ? c.accentInk : c.text}
-          style={[styles.itemText, on && styles.itemOn]}
+          style={[styles.itemText, scriptAdjust(l.code, styles.itemText), on && styles.itemOn]}
         >
           {l.native}
         </T>
       </Animated.View>
     </Pressable>
   );
-}
+});
 
 /** The ring's centre line: a rounded rectangle just outside the frame, walked clockwise from the top-left. */
 type Track = { x0: number; y0: number; x1: number; y1: number; r: number; length: number };
@@ -330,18 +336,54 @@ function pointAt(t: Track, s: number) {
 const WHOLE = new Set(['ar', 'ur', 'hi', 'bn', 'th']);
 const glyphsOf = (l: Language) => (WHOLE.has(l.code) ? [l.native] : Array.from(l.native));
 
+/** Every letter (or whole word) on the ring, each measured once. */
+const UNITS = READY_LANGUAGES.flatMap((l) => glyphsOf(l).map((g, i) => ({ id: `${l.code}:${i}`, g })));
+
+/**
+ * Where each letter sits along a ring `length` long: as many full rounds of all twenty names as fit, the space
+ * between names shared out evenly. Empty until every letter is measured.
+ */
+function layoutRing(widths: Record<string, number>, length: number) {
+  const out: { key: string; g: string; code: string; width: number; at: number }[] = [];
+  if (!UNITS.every((u) => widths[u.id] !== undefined)) return out;
+  const nameWidth = (l: Language) => glyphsOf(l).reduce((sum, _, i) => sum + widths[`${l.code}:${i}`], 0);
+  const names = READY_LANGUAGES.reduce((sum, l) => sum + nameWidth(l), 0);
+  const rounds = Math.max(1, Math.floor(length / (names + READY_LANGUAGES.length * MIN_GAP)));
+  const gap = (length - rounds * names) / (rounds * READY_LANGUAGES.length);
+  let at = 0;
+  for (let k = 0; k < rounds; k++)
+    for (const l of READY_LANGUAGES) {
+      glyphsOf(l).forEach((g, i) => {
+        const width = widths[`${l.code}:${i}`];
+        out.push({ key: `${k}:${l.code}:${i}`, g, code: l.code, width, at: at + width / 2 });
+        at += width;
+      });
+      at += gap;
+    }
+  return out;
+}
+
 /**
  * The twenty languages, each in its own name, travelling clockwise around the frame as one unbroken ring, like a
  * ticker band around a building. Each letter follows the track on its own, so a name bends smoothly around the
  * rounded corners instead of turning as a block. Evenly spaced (repeated as often as the frame allows), the chosen
  * language lit; every letter is measured once, so names never overlap.
  */
-function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; reduce: boolean }) {
+const Ring = memo(function Ring({
+  w,
+  h,
+  selected,
+  reduce,
+}: {
+  w: number;
+  h: number;
+  selected: string;
+  reduce: boolean;
+}) {
   const { c } = useTheme();
   const [widths, setWidths] = useState<Record<string, number>>({});
-  const all = READY_LANGUAGES.flatMap((l) => glyphsOf(l).map((g, i) => ({ id: `${l.code}:${i}`, g })));
-  const measured = all.every((u) => widths[u.id] !== undefined);
-  const track = trackOf(w, h);
+  const measured = UNITS.every((u) => widths[u.id] !== undefined);
+  const track = useMemo(() => trackOf(w, h), [w, h]);
   const travel = useSharedValue(0);
 
   useEffect(() => {
@@ -354,31 +396,19 @@ function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; re
     return () => cancelAnimation(travel);
   }, [track.length, reduce, travel]);
 
-  // As many full rounds of all twenty as fit, the space between names shared out evenly.
-  const glyphs: { key: string; g: string; code: string; width: number; at: number }[] = [];
-  if (measured) {
-    const nameWidth = (l: Language) => glyphsOf(l).reduce((sum, _, i) => sum + widths[`${l.code}:${i}`], 0);
-    const names = READY_LANGUAGES.reduce((sum, l) => sum + nameWidth(l), 0);
-    const rounds = Math.max(1, Math.floor(track.length / (names + READY_LANGUAGES.length * MIN_GAP)));
-    const gap = (track.length - rounds * names) / (rounds * READY_LANGUAGES.length);
-    let at = 0;
-    for (let k = 0; k < rounds; k++)
-      for (const l of READY_LANGUAGES) {
-        glyphsOf(l).forEach((g, i) => {
-          const width = widths[`${l.code}:${i}`];
-          glyphs.push({ key: `${k}:${l.code}:${i}`, g, code: l.code, width, at: at + width / 2 });
-          at += width;
-        });
-        at += gap;
-      }
-  }
+  const glyphs = useMemo(() => layoutRing(widths, track.length), [widths, track.length]);
 
   return (
-    <View style={StyleSheet.absoluteFill}>
+    <View
+      style={StyleSheet.absoluteFill}
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
       {/* Measured once, unseen. */}
       {!measured ? (
         <View style={styles.measure}>
-          {all.map((u) => (
+          {UNITS.map((u) => (
             <Text
               key={u.id}
               style={styles.ticker}
@@ -399,16 +429,16 @@ function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; re
           travel={travel}
           at={it.at}
           width={it.width}
-          color={it.code === shown ? c.accentInk : c.textFaint}
+          color={it.code === selected ? c.accentInk : c.textFaint}
         >
           {it.g}
         </RingGlyph>
       ))}
     </View>
   );
-}
+});
 
-function RingGlyph({
+const RingGlyph = memo(function RingGlyph({
   track,
   travel,
   at,
@@ -434,7 +464,7 @@ function RingGlyph({
       <Text style={[styles.ticker, { color }]}>{children}</Text>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
