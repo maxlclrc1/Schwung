@@ -234,7 +234,7 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
       })}
 
       {/* Where you are: kept to the top-left corner, clear of the upper switchbacks. */}
-      <View style={[styles.where, { maxWidth: width * 0.4 }]}>
+      <View style={[styles.where, { maxWidth: width * 0.5 }]}>
         <T v="overline" maxFontSizeMultiplier={1.15} color={c.indigoInk} numberOfLines={1}>
           {maintenance ? t('journeyTab.ascent.summit') : t('journeyTab.ascent.phaseOf', { n: phase.n })}
         </T>

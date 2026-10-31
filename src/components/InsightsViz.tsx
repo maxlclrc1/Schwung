@@ -469,8 +469,10 @@ function HabitBar({
         <View style={[styles.track, { backgroundColor: c.sageSoft }]}>
           <Animated.View style={[styles.trackFill, { backgroundColor: c.sage }, fill]} />
         </View>
-        <T v="caption" color={c.textDim} numberOfLines={2}>
-          {row.tally.eligible ? `${row.tally.done} of ${row.tally.eligible} · ` : ''}
+        <T v="caption" color={c.textDim}>
+          {row.tally.eligible
+            ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · `
+            : ''}
           {row.kind}
         </T>
       </Pressable>
@@ -545,7 +547,7 @@ export const RecordMedals = memo(function RecordMedals({ records }: { records: R
               <T style={[styles.medalValue, { color: c.text }]} maxFontSizeMultiplier={1.2}>
                 {m.n}
               </T>
-              <T v="caption" color={c.textDim} numberOfLines={2} maxFontSizeMultiplier={1.3}>
+              <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.3}>
                 {m.label}
               </T>
             </View>
@@ -722,7 +724,16 @@ const styles = StyleSheet.create({
   trackFill: { height: 8, borderRadius: 4 },
   habitDetails: { gap: space.sm, paddingBottom: space.md },
   medals: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space.lg },
-  medal: { width: '50%', flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingRight: space.sm },
+  // Two to a row, one to a row on a narrow phone (so a long word never breaks).
+  medal: {
+    flexBasis: '50%',
+    flexGrow: 1,
+    minWidth: 150,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingRight: space.sm,
+  },
   medalDisc: {
     width: 40,
     height: 40,

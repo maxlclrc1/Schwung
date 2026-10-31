@@ -121,7 +121,7 @@ export function HabitTile({
         accessibilityLabel={`${P.habitName(id)}. ${P.habitDescription(id)}${suggested && !off ? tr('setup.tile.suggestedA11y') : ''}`}
         accessibilityHint={off ? tr('setup.choices.notAvailable', { reason: reason ?? '' }) : undefined}
       >
-        <View style={{ width, height }}>
+        <View style={{ width, minHeight: height }}>
           <View style={[styles.tile, { opacity: off ? 0.38 : full && !selected ? 0.6 : 1 }]}>
             <Animated.View style={[StyleSheet.absoluteFill, art]}>
               <HabitArt id={id} width={width} height={height} />
@@ -138,7 +138,7 @@ export function HabitTile({
               <T v="bodyStrong" numberOfLines={2} style={{ lineHeight: 21 }}>
                 {P.habitName(id)}
               </T>
-              <T v="caption" color={c.textDim} numberOfLines={2} style={styles.small}>
+              <T v="caption" color={c.textDim} style={styles.small}>
                 {off ? tr('setup.tile.notForNow', { reason: reason ?? '' }) : P.habitDescription(id)}
               </T>
             </View>
@@ -324,9 +324,10 @@ function FanCard({
 }
 
 const styles = StyleSheet.create({
-  tile: { flex: 1, borderRadius: radius.lg, overflow: 'hidden' },
+  // The words sit at the foot of the picture; a long description (some languages, large text) makes the tile taller.
+  tile: { flex: 1, borderRadius: radius.lg, overflow: 'hidden', justifyContent: 'flex-end' },
   ring: { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: radius.lg, borderWidth: 2.5 },
-  tileText: { position: 'absolute', left: space.md, right: space.md, bottom: space.md, gap: 2 },
+  tileText: { padding: space.md, paddingTop: 72, gap: 2 },
   small: { fontSize: 12, lineHeight: 16 },
   badge: {
     position: 'absolute',

@@ -625,7 +625,8 @@ const MARK = 60;
 const styles = StyleSheet.create({
   card: { borderRadius: RADIUS, overflow: 'hidden', justifyContent: 'flex-end' },
   fill: { flex: 1 },
-  body: { padding: PAD, gap: 4 },
+  // Clear of the level label in the top corner, however tall the words grow (long names, large text).
+  body: { padding: PAD, paddingTop: 40, gap: 4 },
   levelRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   levelTop: { position: 'absolute', top: 14, left: PAD },
   topVeil: { position: 'absolute', left: 0, right: 0, top: 0, height: 64 },
