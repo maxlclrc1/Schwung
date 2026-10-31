@@ -76,7 +76,7 @@ export function TodayHero({
           </T>
           <Text
             style={[styles.day, dayScript, { color: c.text }]}
-            numberOfLines={1}
+            numberOfLines={2}
             maxFontSizeMultiplier={1.3}
             accessibilityRole="header"
           >
@@ -201,7 +201,7 @@ function Level({ xp }: { xp: number }) {
   }, [xp]);
   const g = growth(xp);
   return (
-    <View style={{ flexShrink: 1, maxWidth: '62%' }}>
+    <View style={styles.shrink}>
       {/* The title XP has earned, and the way to the next object; tap for the collection. */}
       <Pressable
         onPress={() => {
@@ -270,8 +270,8 @@ const styles = StyleSheet.create({
   },
   count: { flexDirection: 'row', alignItems: 'baseline' },
   total: { fontSize: 13, fontWeight: '700' },
-  // Streak and level side by side: the streak gives way (ellipsis) before the level ever wraps below it.
-  chips: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  // Streak and level side by side, the level wrapping below when both don't fit (narrow phones, long words).
+  chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# visual QA (scripts/qa): web build, fixtures, screenshots and reports
+.qa/
