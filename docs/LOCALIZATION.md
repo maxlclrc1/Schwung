@@ -20,8 +20,8 @@ bundled.
   a language chosen explicitly. Each language is listed in its own name. The choice is saved with the preferences,
   kept by Delete my data, and never taken from a restored backup.
 - **First launch:** the app opens on its own language screen (`src/app/choose-language.tsx`) after installing, and
-  again after a Life Reset is ended or the data deleted. "Choose your language" runs clockwise around the frame in
-  all 20 languages (a ticker band; the chosen one lights up), and the languages turn on a wheel in their own names,
+  again after a Life Reset is ended or the data deleted. the 20 language names travel clockwise around the frame as
+  one unbroken ring (a ticker band; the chosen one lights up), and the languages turn on a wheel in their own names,
   the phone's language (else English) first. Settling on one switches every word at once, with a split-flap turn of
   the title and a ring from the wheel. Continue leads to the mountain welcome. Picking the phone's own language keeps
   Follow device; `languageChosen` in the preferences records the choice (Settings → Language sets it too). Crossing
