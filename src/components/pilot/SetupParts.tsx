@@ -16,7 +16,6 @@ import { useT } from '../../i18n/react';
 
 export const AGES: { id: AgeBand; label: string }[] = labelled('setup.age', [
   'u16',
-  '16_17',
   '18_29',
   '30_49',
   '50_64',

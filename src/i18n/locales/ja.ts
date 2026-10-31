@@ -63,7 +63,6 @@ export const ja: Translation = {
       },
     },
     notes: {
-      focusTeen: '16〜17歳：1ブロック最大{max}分（チャレンジの熟達では2 × 45分と表示されます）。',
       scrolling:
         '自分でのチェックです。Schwungはスクリーンタイムを見ることができません。実際の数字を知りたい場合は、設定 → スクリーンタイムで確認できます。',
       social: '日常の場面だけです。どのステップも入れ替えやスキップができ、スキップは決して失敗ではありません。',
@@ -71,7 +70,6 @@ export const ja: Translation = {
         'すでにもっと長く体を動かしているなら、自分の数字をそのまま続けてください。下げられることはありません。',
       sleep:
         '自分の起床時刻が基準です。それより早くなることも、睡眠が減ることもありません。就寝時刻やスマホのルールは追加されません。',
-      skillTeen: '16〜17歳：1ブロック最大{max}分。',
       skillSport: 'スポーツのスキルは自分なりの練習です。Schwungは練習メニューを指示しません。',
       reachOut: 'あなたを傷つけた人に連絡するよう促すことは決してありません。',
       strengthTracks: 'Schwungはセッションを記録します。種目、セット数、回数、重量を選ぶことはありません。',
@@ -161,7 +159,6 @@ export const ja: Translation = {
         skill: 'スキルを磨く：スキルを選んでください。',
         strengthStart: '筋トレ：今のスタート地点を入力してください。',
       },
-      under16: 'Schwungは16歳以上の方向けです。',
       chooseOne: '習慣を1つ以上選んでください。',
       chooseAtMost: '今は習慣を{max}個まで選べます。',
       catalogOnly: 'Life Resetの習慣から選んでください。',
@@ -181,9 +178,10 @@ export const ja: Translation = {
       howOften: '週に何日にするかを選んでください。',
       notIn: 'Life Resetに入っていません。',
       keepOne: '習慣は1つ以上残してください。すべてやめる場合は、設定でLife Resetを終了してください。',
+
+      under18: 'Schwungは18歳以上の方向けです。',
     },
     exclusion: {
-      under16: 'Schwungは16歳以上の方向けです',
       teenIntensity: 'この強度は16〜17歳の方には提供していません',
       walking: '長く歩いたり立ったりするのが難しいため（確認済みの代わりの方法はまだありません）',
       movementAdvice: '医療者または助産師による個別のアドバイスが必要です（専門家の確認待ち）',
@@ -192,6 +190,8 @@ export const ja: Translation = {
       healthFirst: '先に健康に関する質問に答えてください。自分に合うものは専門家が助言できます',
       strengthAdvice: '先に医療者または助産師による個別のアドバイスが必要です',
       strengthJoint: '関節・腰の痛みやけがの痛みがある場合は、理学療法士または医療者が勧めるメニューから始めてください',
+
+      under18: 'Schwungは18歳以上の方向けです',
     },
     blocked: {
       easiest: 'すでにいちばんやさしい目標です',
@@ -558,6 +558,21 @@ export const ja: Translation = {
       export: '復旧データをエクスポート',
       kept: '安全なコピーがこのスマホに保管されています。',
       keeping: '安全なコピーを保管しています…',
+    },
+
+    ageLimit: {
+      title: 'Schwungは18歳以上の方向けになりました',
+      body: 'このLife Resetは18歳未満の年齢で始められたため、一時停止しています。何も削除されていません。進み具合、これまでの旅、コレクションはこの端末に残っています。データのコピーの書き出しや削除はいつでもできます。',
+
+      data: 'データを書き出す・削除する',
+
+      adult: '18歳以上です',
+
+      confirmTitle: '18歳以上ですか？',
+
+      confirmBody: 'Life Resetは前回の続きから再開します。',
+
+      confirm: 'はい、18歳以上です',
     },
   },
   collection: {
@@ -977,7 +992,7 @@ export const ja: Translation = {
   },
   setup: {
     age: {
-      u16: '16歳未満',
+      u16: '18歳未満',
       '16_17': '16〜17歳',
       '18_29': '18〜29歳',
       '30_49': '30〜49歳',
@@ -1081,9 +1096,10 @@ export const ja: Translation = {
       notChosen: '未選択',
       younger: '1歳下',
       older: '1歳上',
-      under16: 'Schwungは16歳以上の方向けです。',
       band: '{band}歳',
       slide: '定規をスライドして年齢を選ぶ',
+
+      under18: 'Schwungは18歳以上の方向けです。',
     },
     clock: {
       early: '早起き',

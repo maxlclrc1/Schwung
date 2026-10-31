@@ -80,7 +80,8 @@ function useMinuteClock() {
 export function CeremonyHost() {
   useMinuteClock();
   const shared = useCeremonyState();
-  const program = useResetPilot((s) => s.program);
+  // A program started under 18 isn't used (pilot.ts ageRestricted): no ceremonies over its notice.
+  const program = useResetPilot((s) => (s.program && !P.ageRestricted(s.program) ? s.program : null));
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = program ? pilotToday({ program, devDayOffset: offset }) : 0;
   const seen = program?.ceremonies ?? {};

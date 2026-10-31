@@ -3,6 +3,7 @@ import { dateForDay, PROGRAM_DAYS } from '../dates';
 import { dayQualifies, doneCount, XP_FULL_DAY_BONUS, XP_PER_HABIT } from '../progression';
 import type { DayLog } from '../types';
 import {
+  isMinor,
   isTeen,
   type ActiveDays,
   type AgeBand,
@@ -169,6 +170,16 @@ export type ArchivedJourney = { v: 1; id: string; archivedAt: string; program: P
 
 /** From earlier ascents: this one's number (2 for the second), their XP, and a streak that ran into Day 1. */
 export type Carry = { ascent: number; xp: number; streak: number };
+
+/**
+ * A program started with an age under 18 (when the minimum was 16): kept whole, never changed or deleted, but not
+ * used (no tracking, ceremonies or reminders) until the person says they're 18 or older, or exports or deletes it.
+ */
+export const ageRestricted = (p: PilotProgram) => isMinor(p.answers.age);
+
+/** "I'm 18 or older" on a restricted program: the same program, with an adult age band; anything else unchanged. */
+export const confirmAdult = (p: PilotProgram): PilotProgram =>
+  ageRestricted(p) ? { ...p, answers: { ...p.answers, age: '18_29' } } : p;
 
 /** The milestone moments between the two ceremonies: a first foothold, Foundation complete, Momentum complete. */
 export const MILESTONE_DAYS = [7, 21, 44] as const;
@@ -418,12 +429,11 @@ export function habitNotes(habitId: PilotHabitId, a: PilotAnswers): string[] {
 
 /** Each habit's notes (habits.ts `notes`, in the same order), as catalog keys. */
 const NOTE_KEYS: Partial<Record<string, string[]>> = {
-  focus_deepwork: ['focusTeen'],
   screen_app_limit: ['scrolling'],
   confidence_talk: ['social'],
   move_walk: ['movement'],
   sleep_wake: ['sleep'],
-  skill_practice: ['skillTeen', 'skillSport'],
+  skill_practice: ['skillSport'],
   social_reach_out: ['reachOut'],
   strength_log: ['strengthTracks', 'strengthRoutine', 'strengthStop'],
 };
@@ -439,7 +449,7 @@ const baselineProblem = (b: Baseline) => t(`engine.problems.baseline.${b}` as TK
 /** The checks for starting: one problem per line, or none (`timeCheck` false: without the time questions). */
 export function setupProblems(a: PilotAnswers, choices: PilotChoice[], timeCheck = true): string[] {
   const out: string[] = [];
-  if (a.age === 'u16') return [t('engine.problems.under16')];
+  if (isMinor(a.age)) return [t('engine.problems.under18')];
   if (!choices.length) out.push(t('engine.problems.chooseOne'));
   if (choices.length > MAX_HABITS) out.push(t('engine.problems.chooseAtMost', { max: MAX_HABITS }));
   const ids = new Set<string>();

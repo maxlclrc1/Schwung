@@ -63,13 +63,11 @@ export const zhHant: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17歲：每段最多{max}分鐘（在挑戰·精通等級顯示為2 × 45分鐘）。',
       scrolling:
         '由你自己確認：Schwung 無法看到你的螢幕使用時間。如果你想知道實際數字，可以到「設定 → 螢幕使用時間」查看。',
       social: '只涉及日常情境。每一步都可以替換或略過；略過一步從來不算失敗。',
       movement: '如果你已經活動得更久，就保留你自己的數字：它永遠不會被調低。',
       sleep: '以你自己的起床時間為基準：永遠不會更早，也永遠不會減少睡眠。不會加入就寢時間或手機使用規則。',
-      skillTeen: '16–17歲：每段最多{max}分鐘。',
       skillSport: '運動技能由你自己練習：Schwung 不會規定訓練內容。',
       reachOut: '絕不會提示你聯絡傷害過你的人。',
       strengthTracks: 'Schwung 會記錄你的訓練次數。它不會替你選擇動作、組數、次數或重量。',
@@ -157,7 +155,6 @@ export const zhHant: Translation = {
         skill: '練習技能：請選擇你的技能。',
         strengthStart: '肌力訓練：請說明你的起點。',
       },
-      under16: 'Schwung 是為16歲以上的人設計的。',
       chooseOne: '請至少選擇一個習慣。',
       chooseAtMost: '目前最多選擇{max}個習慣。',
       catalogOnly: '請從 Life Reset 習慣中選擇。',
@@ -177,9 +174,10 @@ export const zhHant: Translation = {
       howOften: '請選擇每週幾天。',
       notIn: '它不在你的 Life Reset 中。',
       keepOne: '請至少保留一個習慣。如果想完全停止，請在「設定」中結束 Life Reset。',
+
+      under18: 'Schwung 是為18歲以上的人設計的。',
     },
     exclusion: {
-      under16: 'Schwung 是為16歲以上的人設計的',
       teenIntensity: '這個強度不提供給16–17歲的人',
       walking: '長時間走路或站立對你來說有困難（目前還沒有經過審核的替代方案）',
       movementAdvice: '需要你的醫療人員或助產師給你個人建議（等待專家審核）',
@@ -188,6 +186,8 @@ export const zhHant: Translation = {
       healthFirst: '請先回答健康問題：專業人員可以建議適合你的方式',
       strengthAdvice: '需要先取得你的醫療人員或助產師給你的個人建議',
       strengthJoint: '有關節、背部或受傷疼痛時，請從你的物理治療師或醫療人員建議的訓練課表開始',
+
+      under18: 'Schwung 是為18歲以上的人設計的',
     },
     blocked: {
       easiest: '這已經是最輕鬆的目標了',
@@ -532,6 +532,21 @@ export const zhHant: Translation = {
       export: '匯出復原資料',
       kept: '這支手機上保留著一份安全副本。',
       keeping: '正在保留安全副本⋯',
+    },
+
+    ageLimit: {
+      title: 'Schwung 現在是為18歲以上的人設計的',
+      body: '你的 Life Reset 開始時填寫的年齡未滿18歲，所以已暫停。沒有刪除任何內容：你的進度、過往旅程和收藏都保留在這支手機上。你可以隨時匯出資料副本或刪除資料。',
+
+      data: '匯出或刪除我的資料',
+
+      adult: '我已滿18歲',
+
+      confirmTitle: '你已滿18歲嗎？',
+
+      confirmBody: '你的 Life Reset 會從上次停下的地方繼續。',
+
+      confirm: '是的，我已滿18歲',
     },
   },
   collection: {
@@ -948,7 +963,7 @@ export const zhHant: Translation = {
   },
   setup: {
     age: {
-      u16: '16歲以下',
+      u16: '18歲以下',
       '16_17': '16–17歲',
       '18_29': '18–29歲',
       '30_49': '30–49歲',
@@ -1052,9 +1067,10 @@ export const zhHant: Translation = {
       notChosen: '未選擇',
       younger: '小一歲',
       older: '大一歲',
-      under16: 'Schwung 是為16歲以上的人設計的。',
       band: '{band}歲',
       slide: '滑動尺規選擇你的年齡',
+
+      under18: 'Schwung 是為18歲以上的人設計的。',
     },
     clock: {
       early: '早起的人',

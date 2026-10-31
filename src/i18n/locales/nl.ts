@@ -66,7 +66,6 @@ export const nl: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17: blokken van maximaal {max} min (bij Uitdaging Meesterschap weergegeven als 2 × 45 min).',
       scrolling:
         'Dit check je zelf: Schwung kan je Schermtijd niet zien. Instellingen → Schermtijd toont het echte getal als je dat wilt.',
       social:
@@ -74,7 +73,6 @@ export const nl: Translation = {
       movement: 'Beweeg je al langer, houd dan je eigen getal aan: dat wordt nooit verlaagd.',
       sleep:
         'Je eigen opsta-tijd is het anker: nooit vroeger, en nooit minder slaap. Er komt geen bedtijd- of telefoonregel bij.',
-      skillTeen: '16–17: blokken van maximaal {max} min.',
       skillSport: 'Sportvaardigheden oefen je op je eigen manier: Schwung schrijft geen oefeningen voor.',
       reachOut: 'Nooit een aansporing om contact op te nemen met iemand die je pijn heeft gedaan.',
       strengthTracks: 'Schwung houdt je sessies bij. Het kiest niet je oefeningen, sets, herhalingen of gewichten.',
@@ -166,7 +164,6 @@ export const nl: Translation = {
         skill: 'Een vaardigheid oefenen: kies je vaardigheid.',
         strengthStart: 'Krachttraining: geef aan waar je begint.',
       },
-      under16: 'Schwung is gemaakt voor mensen van 16 en ouder.',
       chooseOne: 'Kies minstens één gewoonte.',
       chooseAtMost: 'Kies voorlopig maximaal {max} gewoontes.',
       catalogOnly: 'Kies uit de Life Reset-gewoontes.',
@@ -186,9 +183,10 @@ export const nl: Translation = {
       howOften: 'Kies hoeveel dagen per week.',
       notIn: 'Het zit niet in je Life Reset.',
       keepOne: 'Houd minstens één gewoonte. Wil je helemaal stoppen, beëindig dan de Life Reset in Instellingen.',
+
+      under18: 'Schwung is gemaakt voor mensen van 18 en ouder.',
     },
     exclusion: {
-      under16: 'Schwung is gemaakt voor mensen van 16 en ouder',
       teenIntensity: 'deze intensiteit wordt niet aangeboden aan 16- en 17-jarigen',
       walking: 'lang lopen of staan is moeilijk voor je (nog geen beoordeeld alternatief)',
       movementAdvice:
@@ -199,6 +197,8 @@ export const nl: Translation = {
       strengthAdvice: 'vraagt eerst om persoonlijk advies van je behandelaar of verloskundige',
       strengthJoint:
         'bij gewrichts-, rug- of blessurepijn begin je met een schema dat je fysiotherapeut of behandelaar voorstelt',
+
+      under18: 'Schwung is gemaakt voor mensen van 18 en ouder',
     },
     blocked: {
       easiest: 'dit is al het makkelijkste doel',
@@ -566,6 +566,21 @@ export const nl: Translation = {
       export: 'Herstelgegevens exporteren',
       kept: 'Er blijft een veilige kopie op deze telefoon.',
       keeping: 'Veilige kopie bewaren…',
+    },
+
+    ageLimit: {
+      title: 'Schwung is nu voor mensen van 18 en ouder',
+      body: 'Je Life Reset is gestart met een leeftijd onder de 18, daarom staat hij op pauze. Er is niets verwijderd: je voortgang, eerdere tochten en je verzameling blijven op deze telefoon. Je kunt altijd een kopie van je gegevens exporteren of ze verwijderen.',
+
+      data: 'Mijn gegevens exporteren of verwijderen',
+
+      adult: 'Ik ben 18 of ouder',
+
+      confirmTitle: 'Ben je 18 of ouder?',
+
+      confirmBody: 'Je Life Reset gaat verder waar je gebleven was.',
+
+      confirm: 'Ja, ik ben 18 of ouder',
     },
   },
   collection: {
@@ -992,7 +1007,7 @@ export const nl: Translation = {
     bars: 'Week {week}: {done} van {goal}',
   },
   setup: {
-    age: { u16: 'Jonger dan 16', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
+    age: { u16: 'Jonger dan 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
     health: {
       joint: 'Gewrichts-, rug- of blessurepijn',
       walkingDifficult: 'Lang lopen of staan is moeilijk voor me',
@@ -1090,9 +1105,10 @@ export const nl: Translation = {
       notChosen: 'Niet gekozen',
       younger: 'Een jaar jonger',
       older: 'Een jaar ouder',
-      under16: 'Schwung is gemaakt voor mensen van 16 en ouder.',
       band: '{band} jaar',
       slide: 'Schuif de liniaal naar je leeftijd',
+
+      under18: 'Schwung is gemaakt voor mensen van 18 en ouder.',
     },
     clock: {
       early: 'Een vroege vogel',

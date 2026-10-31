@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { PULL_MINUTES_OPTIONS, SKILLS, type Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
-import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/reset/profile';
+import { isMinor, type ActiveDays, type AgeBand, type PhoneHours, type Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { useResetPilot } from '../../store/resetPilot';
 import { flushStorage } from '../../store/storage';
@@ -247,7 +247,7 @@ export function PilotSetup() {
 
   const canContinue =
     step === 'age'
-      ? age !== null && age !== 'u16'
+      ? age !== null && !isMinor(age)
       : step === 'health'
         ? health !== null
         : step === 'habits'

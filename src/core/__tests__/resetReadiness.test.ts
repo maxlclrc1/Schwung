@@ -468,11 +468,9 @@ describe('manual easier and harder', () => {
 });
 
 describe('constraints', () => {
-  it('respects age: 16–17 can’t move Strength Training to Challenge', () => {
+  it('respects age: under 18 can’t move to any level', () => {
     const s = newProgression(STRENGTH, 'standard', 45, 'mastery');
-    expect(makeHarder(s, ctx, 50, { profile: TEEN })).toEqual({
-      blocked: 'this intensity isn’t offered to 16–17-year-olds',
-    });
+    expect(makeHarder(s, ctx, 50, { profile: TEEN })).toEqual({ blocked: 'Schwung is made for people 18 and older' });
     expect(makeHarder(s, ctx, 50, { profile: ADULT })).toMatchObject({ level: { intensity: 'challenge' } });
   });
 

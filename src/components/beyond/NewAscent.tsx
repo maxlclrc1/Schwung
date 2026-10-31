@@ -5,7 +5,7 @@ import Animated from 'react-native-reanimated';
 import { toDateKey } from '../../core/dates';
 import type { Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
-import type { AgeBand, Precaution } from '../../core/reset/profile';
+import { isMinor, type AgeBand, type Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { startNewAscent } from '../../store/ascent';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
@@ -54,7 +54,7 @@ export function NewAscent() {
   const choices: P.PilotChoice[] = Object.entries(levels)
     .filter((e): e is [P.PilotHabitId, Intensity] => e[1] !== null && P.isPilotHabit(e[0]))
     .map(([habitId, intensity]) => ({ habitId, intensity }));
-  const problems = age === 'u16' ? [t('engine.problems.under16')] : P.setupProblems(answers, choices);
+  const problems = age && isMinor(age) ? [t('engine.problems.under18')] : P.setupProblems(answers, choices);
   const ready = confirmed && !!age && choices.length > 0 && problems.length === 0;
 
   const toggleHealth = (id: Precaution) => {

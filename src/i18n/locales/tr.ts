@@ -66,7 +66,6 @@ export const tr: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17 yaş: en fazla {max} dk’lık bloklar (Zorlu Ustalık’ta 2 × 45 dk olarak gösterilir).',
       scrolling:
         'Bu kendi kontrolün: Schwung Ekran Süreni göremez. Gerçek sayıyı istersen Ayarlar → Ekran Süresi’nde bulabilirsin.',
       social:
@@ -74,7 +73,6 @@ export const tr: Translation = {
       movement: 'Zaten daha uzun süre hareket ediyorsan kendi sayını koru: asla düşürülmez.',
       sleep:
         'Kendi kalkış saatin çıpadır: asla daha erken değil, asla daha az uyku değil. Yatma saati ya da telefon kuralı eklenmez.',
-      skillTeen: '16–17 yaş: en fazla {max} dk’lık bloklar.',
       skillSport: 'Spor becerileri senin kendi çalışmandır: Schwung antrenman önermez.',
       reachOut: 'Sana zarar vermiş biriyle iletişime geçmen asla önerilmez.',
       strengthTracks:
@@ -167,7 +165,6 @@ export const tr: Translation = {
         skill: 'Beceri Çalış: becerini seç.',
         strengthStart: 'Kuvvet Antrenmanı: nereden başladığını söyle.',
       },
-      under16: 'Schwung 16 yaş ve üzeri için tasarlandı.',
       chooseOne: 'En az bir alışkanlık seç.',
       chooseAtMost: 'Şimdilik en fazla {max} alışkanlık seç.',
       catalogOnly: 'Life Reset alışkanlıklarından seç.',
@@ -187,9 +184,10 @@ export const tr: Translation = {
       howOften: 'Haftada kaç gün olduğunu seç.',
       notIn: 'Bu, Life Reset’inde yok.',
       keepOne: 'En az bir alışkanlık tut. Tamamen bırakmak için Life Reset’i Ayarlar’dan bitir.',
+
+      under18: 'Schwung 18 yaş ve üzeri için tasarlandı.',
     },
     exclusion: {
-      under16: 'Schwung 16 yaş ve üzeri için tasarlandı',
       teenIntensity: 'bu seviye 16–17 yaşındakilere sunulmuyor',
       walking: 'uzun süre yürümek ya da ayakta durmak senin için zor (henüz incelenmiş bir alternatif yok)',
       movementAdvice: 'doktorundan ya da ebenden kişisel tavsiye gerektirir (uzman incelemesi bekleniyor)',
@@ -199,6 +197,8 @@ export const tr: Translation = {
       strengthAdvice: 'önce doktorundan ya da ebenden kişisel tavsiye gerektirir',
       strengthJoint:
         'eklem, sırt ya da sakatlık ağrısı varsa fizyoterapistinin ya da doktorunun önerdiği bir programla başla',
+
+      under18: 'Schwung 18 yaş ve üzeri için tasarlandı',
     },
     blocked: {
       easiest: 'bu zaten en kolay hedef',
@@ -555,6 +555,21 @@ export const tr: Translation = {
       export: 'Kurtarma verilerini dışa aktar',
       kept: 'Bu telefonda güvenli bir kopya saklanıyor.',
       keeping: 'Güvenli bir kopya saklanıyor…',
+    },
+
+    ageLimit: {
+      title: 'Schwung artık 18 yaş ve üzeri için',
+      body: 'Life Reset’in 18 yaş altı bir yaşla başlatıldı, bu yüzden duraklatıldı. Hiçbir şey silinmedi: ilerlemen, geçmiş yolculukların ve koleksiyonun bu telefonda kalıyor. Verilerinin bir kopyasını dışa aktarabilir ya da onları istediğin zaman silebilirsin.',
+
+      data: 'Verilerimi dışa aktar veya sil',
+
+      adult: '18 yaşında veya daha büyüğüm',
+
+      confirmTitle: '18 yaşında veya daha büyük müsün?',
+
+      confirmBody: 'Life Reset’in kaldığın yerden devam eder.',
+
+      confirm: 'Evet, 18 yaşında veya daha büyüğüm',
     },
   },
   collection: {
@@ -982,7 +997,7 @@ export const tr: Translation = {
     bars: 'Hafta {week}: {done} / {goal}',
   },
   setup: {
-    age: { u16: '16 yaş altı', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
+    age: { u16: '18 yaş altı', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
     health: {
       joint: 'Eklem, sırt ya da sakatlık ağrısı',
       walkingDifficult: 'Uzun süre yürümek ya da ayakta durmak benim için zor',
@@ -1081,9 +1096,10 @@ export const tr: Translation = {
       notChosen: 'Seçilmedi',
       younger: 'Bir yaş küçük',
       older: 'Bir yaş büyük',
-      under16: 'Schwung 16 yaş ve üzeri için tasarlandı.',
       band: '{band} yaş',
       slide: 'Cetveli yaşına kaydır',
+
+      under18: 'Schwung 18 yaş ve üzeri için tasarlandı.',
     },
     clock: {
       early: 'Erkenci kuş',

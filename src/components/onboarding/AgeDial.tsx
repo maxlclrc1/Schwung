@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import type { AgeBand } from '../../core/reset/profile';
+import { isMinor, MIN_AGE, type AgeBand } from '../../core/reset/profile';
 import { radius, space, useTheme } from '../../theme';
 import { T } from '../ui';
 import { useTints } from './kit';
@@ -9,19 +9,9 @@ import { t as tr } from '../../i18n';
 export const AGE_MIN = 12;
 export const AGE_MAX = 90;
 
-/** The band the program keeps (only the band is saved, never the age itself). */
+/** The band the program keeps (only the band is saved, never the age itself). Under 18 can't start (MIN_AGE). */
 export function bandOf(years: number): AgeBand {
-  return years < 16
-    ? 'u16'
-    : years < 18
-      ? '16_17'
-      : years < 30
-        ? '18_29'
-        : years < 50
-          ? '30_49'
-          : years < 65
-            ? '50_64'
-            : '65p';
+  return years < MIN_AGE ? 'u16' : years < 30 ? '18_29' : years < 50 ? '30_49' : years < 65 ? '50_64' : '65p';
 }
 /** An age inside a band, for coming back to a band already chosen. */
 export const YEARS_OF: Record<AgeBand, number> = {
@@ -43,7 +33,7 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
   const tn = useTints();
   const rest = 25;
   const band = years === null ? null : bandOf(years);
-  const young = band === 'u16';
+  const young = band !== null && isMinor(band);
   const set = (y: number) => onChange(Math.max(AGE_MIN, Math.min(AGE_MAX, y)));
 
   return (
@@ -91,7 +81,7 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
           <T v="caption" color={young ? c.danger : band ? tn.lavender.ink : c.textFaint} style={{ fontWeight: '700' }}>
             {band
               ? young
-                ? tr('setup.ageDial.under16')
+                ? tr('setup.ageDial.under18')
                 : tr('setup.ageDial.band', { band: bandLabel(band) })
               : tr('setup.ageDial.slide')}
           </T>

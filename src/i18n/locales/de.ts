@@ -58,7 +58,6 @@ export const de: Translation = {
       },
     },
     notes: {
-      focusTeen: '16–17: Blöcke von höchstens {max} Min. (bei Herausforderung · Meisterschaft als 2 × 45 Min.).',
       scrolling:
         'Deine eigene Kontrolle: Schwung sieht deine Bildschirmzeit nicht. Einstellungen → Bildschirmzeit zeigt dir den echten Wert, wenn du ihn wissen willst.',
       social:
@@ -66,7 +65,6 @@ export const de: Translation = {
       movement: 'Wenn du dich schon länger bewegst, behalte deinen eigenen Wert: Er wird nie gesenkt.',
       sleep:
         'Deine eigene Aufstehzeit ist der Anker: nie früher und nie weniger Schlaf. Es kommt keine Schlafens- oder Handyregel dazu.',
-      skillTeen: '16–17: Blöcke von höchstens {max} Min.',
       skillSport: 'Sportliche Fähigkeiten übst du auf deine Art: Schwung schreibt keine Übungen vor.',
       reachOut: 'Nie ein Anstoß, jemanden zu kontaktieren, der dir geschadet hat.',
       strengthTracks:
@@ -162,7 +160,6 @@ export const de: Translation = {
         skill: 'Eine Fähigkeit üben: Wähl deine Fähigkeit.',
         strengthStart: 'Krafttraining: Sag, wo du startest.',
       },
-      under16: 'Schwung ist für Menschen ab 16 Jahren.',
       chooseOne: 'Wähl mindestens eine Gewohnheit.',
       chooseAtMost: 'Wähl vorerst höchstens {max} Gewohnheiten.',
       catalogOnly: 'Wähl aus den Life-Reset-Gewohnheiten.',
@@ -182,9 +179,10 @@ export const de: Translation = {
       howOften: 'Wähl, an wie vielen Tagen pro Woche.',
       notIn: 'Sie ist nicht in deinem Life Reset.',
       keepOne: 'Behalte mindestens eine Gewohnheit. Um ganz aufzuhören, beende den Life Reset in den Einstellungen.',
+
+      under18: 'Schwung ist für Menschen ab 18 Jahren.',
     },
     exclusion: {
-      under16: 'Schwung ist für Menschen ab 16 Jahren',
       teenIntensity: 'diese Stufe gibt es für 16- bis 17-Jährige nicht',
       walking: 'langes Gehen oder Stehen fällt dir schwer (noch keine geprüfte Alternative)',
       movementAdvice:
@@ -195,6 +193,8 @@ export const de: Translation = {
       strengthAdvice: 'braucht zuerst individuellen Rat deiner Ärztin, deines Arztes oder deiner Hebamme',
       strengthJoint:
         'bei Gelenk-, Rücken- oder Verletzungsschmerzen beginne mit einem Programm, das deine Physiotherapie oder Ärztin bzw. dein Arzt vorschlägt',
+
+      under18: 'Schwung ist für Menschen ab 18 Jahren',
     },
     blocked: {
       easiest: 'das ist schon das leichteste Ziel',
@@ -566,6 +566,21 @@ export const de: Translation = {
       export: 'Wiederherstellungsdaten exportieren',
       kept: 'Eine sichere Kopie liegt auf diesem Handy.',
       keeping: 'Sichere Kopie wird erstellt…',
+    },
+
+    ageLimit: {
+      title: 'Schwung ist jetzt für Menschen ab 18 Jahren',
+      body: 'Dein Life Reset wurde mit einem Alter unter 18 begonnen, deshalb ist er pausiert. Nichts wurde gelöscht: Dein Fortschritt, deine bisherigen Wege und deine Sammlung bleiben auf diesem Telefon. Du kannst jederzeit eine Kopie deiner Daten exportieren oder sie löschen.',
+
+      data: 'Meine Daten exportieren oder löschen',
+
+      adult: 'Ich bin 18 oder älter',
+
+      confirmTitle: 'Bist du 18 oder älter?',
+
+      confirmBody: 'Dein Life Reset geht dort weiter, wo du aufgehört hast.',
+
+      confirm: 'Ja, ich bin 18 oder älter',
     },
   },
   collection: {
@@ -1000,7 +1015,7 @@ export const de: Translation = {
     bars: 'Woche {week}: {done} von {goal}',
   },
   setup: {
-    age: { u16: 'Unter 16', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
+    age: { u16: 'Unter 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
     health: {
       joint: 'Gelenk-, Rücken- oder Verletzungsschmerzen',
       walkingDifficult: 'Langes Gehen oder Stehen fällt mir schwer',
@@ -1098,9 +1113,10 @@ export const de: Translation = {
       notChosen: 'Nicht gewählt',
       younger: 'Ein Jahr jünger',
       older: 'Ein Jahr älter',
-      under16: 'Schwung ist für Menschen ab 16 Jahren.',
       band: '{band} Jahre',
       slide: 'Schieb das Lineal auf dein Alter',
+
+      under18: 'Schwung ist für Menschen ab 18 Jahren.',
     },
     clock: {
       early: 'Ein Frühaufsteher',

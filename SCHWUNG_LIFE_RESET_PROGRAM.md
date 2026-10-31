@@ -52,7 +52,12 @@ carries on without any migration.
 
 ## Setup (stepped, about a minute)
 
-1. **About you:** age (under 16 is refused) and the precautions question (None, or Skip = unknown).
+1. **About you:** age (under 18 is refused: only an age band is kept, never a date of birth) and the precautions
+   question (None, or Skip = unknown).
+   - **Minimum age 18** (raised from 16). A Life Reset started at 16–17 before then is kept whole but paused
+     (`ageRestricted` in pilot.ts): it opens on a notice with Export or delete my data, and "I'm 18 or older",
+     which carries it on with an adult age band. No tracking, ceremonies or reminders until then. The 16–17 rules
+     stay in the catalog (unused for new programs).
 2. **Habits:** all 11, each with a line describing it.
    - **Unavailable habits:** shown disabled with the reason, from the existing eligibility rules.
    - **Limit:** up to 6 (the existing limit).
@@ -71,7 +76,7 @@ carries on without any migration.
 4. **How hard to start:** Starter, Standard or Challenge per habit.
    - **Suggestions:** Starter by default; Movement from active days, Strength from its starting point, Less Scrolling
      from main-app time.
-   - **Blocked intensities:** greyed out (for example, 16–17 can't pick Strength Challenge).
+   - **Blocked intensities:** greyed out (for example, joint pain rules out Strength Starter).
    - **Preview:** each habit shows its target.
    - **Time:** the time available (20 min to 3 h), with the time check on a day all habits fall on.
    - **Exclusions:** a habit excluded by a baseline answer (say, shift work for Sleep Routine) says why and can be

@@ -96,6 +96,8 @@ type Actions = {
   unlockCollectibles: (ids: string[]) => void;
   /** A milestone moment was seen through (or skipped); it and every earlier one never show again. */
   markMilestone: (day: number) => void;
+  /** A program started under 18 (pilot.ts ageRestricted): the person says they're 18 or older now. */
+  confirmAdult: () => void;
 };
 
 const initial: ResetPilotData = { program: null, devDayOffset: 0 };
@@ -303,6 +305,11 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
           const { program } = get();
           if (!program || program.after) return;
           set({ program: P.keepMomentum(program, Math.max(pilotToday(get()), 1)) });
+        },
+
+        confirmAdult: () => {
+          const { program } = get();
+          if (program && P.ageRestricted(program)) set({ program: P.confirmAdult(program) });
         },
 
         markComeback: (start) => {

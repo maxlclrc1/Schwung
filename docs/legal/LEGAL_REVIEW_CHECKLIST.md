@@ -34,8 +34,9 @@ published or relied on until the items below are settled.
       happens only on the user's device, and whether explicit consent or extra notices are needed.
 - [ ] **KVKK (Türkiye):** whether an aydınlatma metni (information notice) in Turkish and VERBİS registration are
       required; the cross-border transfer position for support emails.
-- [ ] **Age eligibility (16+):** whether 16 is right in every target country (digital-consent ages vary from 13 to
-      16 in the EU; COPPA in the US applies under 13), and whether 16–17-year-olds need parental involvement.
+- [ ] **Age eligibility (18+):** that 18 is right in every target country (the age of majority is higher in a few),
+      that a self-declared age band is enough (no verification, no date of birth), and the handling of Life Resets
+      started at 16–17 before the minimum was raised (paused, kept, exportable and deletable).
 - [ ] **Wellness claims:** that the app, its descriptions and the App Store listing stay outside medical-device
       rules (EU MDR, FDA general-wellness policy) and make no guaranteed-outcome claims.
 - [ ] **Terms of Use:** governing law and courts; liability cap; Apple's minimum terms (or use Apple's standard

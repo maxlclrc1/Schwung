@@ -89,6 +89,8 @@ export default function RootLayout() {
           <Stack.Screen name="welcome" />
           {/* The language, first: after installing, and after a Life Reset ends or the data is deleted. */}
           <Stack.Screen name="choose-language" options={{ animation: 'fade' }} />
+          {/* A program started under 18: kept, with export and deletion (pilot.ts ageRestricted). */}
+          <Stack.Screen name="age-limit" options={{ animation: 'fade', gestureEnabled: false }} />
           {/* No swipe back: set-up's own Back walks through the questions, and its drags belong to its controls. */}
           <Stack.Screen
             name="life-reset/setup"

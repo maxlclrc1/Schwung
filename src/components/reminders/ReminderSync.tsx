@@ -18,7 +18,9 @@ export function ReminderSync() {
     let last = '';
     const sync = (force = false) => {
       const { reminders } = usePreferences.getState();
-      const { program } = useResetPilot.getState();
+      // A program started under 18 isn't used (pilot.ts ageRestricted): no reminders for it.
+      const stored = useResetPilot.getState().program;
+      const program = stored && !P.ageRestricted(stored) ? stored : null;
       const today = program ? pilotToday() : 0;
       const todayComplete = !!program && today >= 1 && P.dayFull(program, today);
       const habitNames = program ? program.habits.map((id) => P.nameOf(program, id)) : [];

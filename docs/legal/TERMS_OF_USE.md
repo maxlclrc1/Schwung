@@ -10,8 +10,8 @@ Schwung you agree to them. If you don't agree, please don't use the app.
 
 ## 1. Eligibility
 
-Schwung is for people **16 and older**. If you're under the age of majority where you live, please use it with the
-knowledge of a parent or guardian.
+Schwung is for people **18 and older**. If the age of majority where you live is higher than 18, please use it with
+the knowledge of a parent or guardian.
 
 ## 2. What Schwung is
 

@@ -1,6 +1,6 @@
 /** Set-up (the onboarding story), its controls, the finale, and Add a habit. */
 export const setup = {
-  age: { u16: 'Under 16', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
+  age: { u16: 'Under 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },
   health: {
     joint: 'Joint, back or injury pain',
     walkingDifficult: 'Walking or standing for long is difficult for me',
@@ -91,7 +91,7 @@ export const setup = {
     notChosen: 'Not chosen',
     younger: 'One year younger',
     older: 'One year older',
-    under16: 'Schwung is made for people 16 and older.',
+    under18: 'Schwung is made for people 18 and older.',
     band: '{band} years',
     slide: 'Slide the ruler to your age',
   },

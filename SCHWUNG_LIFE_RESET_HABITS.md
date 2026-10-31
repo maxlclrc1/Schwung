@@ -481,7 +481,7 @@ Existing Swap and Remove stay.
 
 ## 6. Onboarding (outline; designed in its own step)
 
-1. Age (unchanged, 16+).
+1. Age (18+; raised from 16, see SCHWUNG_LIFE_RESET_PROGRAM.md).
 2. "What do you want to work on?": pick up to two (Focus, Phone, Getting things done, Reading, Confidence, Movement,
    Sleep, Organisation, A skill, Relationships, Strength).
 3. **Suggested habits** for those areas (2–4), each with its card preview; the person adds, removes and swaps.
@@ -563,7 +563,7 @@ Each step is separately committed and tested.
   - Less Scrolling isn't offered under 2 h of overall phone use (App time's existing rule).
   - Focus and practice blocks respect the 16–17 cap of 60 min.
   - Supporting habits keep their own age, precaution and add-only rules.
-  - Under-16s are never eligible.
+  - Under-18s are never eligible (the 16–17 rules below are kept for programs started before the change).
 - **No silent commitments:** no habit adds a bedtime, phone rule or activity the person didn't choose.
 - **Strength Training:** tracking only. Exclusions follow the precautions above; it releases nothing that's held.
 - **No prohibited content:** no cold exposure, water quotas, restrictive eating, forced early waking, unsafe social
