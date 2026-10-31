@@ -75,6 +75,13 @@ export function setLanguage(code: LanguageCode) {
   listeners.forEach((f) => f());
 }
 
+/** `key` in `code`, without switching the app's language (the first-launch screen previews each language). */
+export function tIn(code: LanguageCode, key: TKey, params?: TParams): string {
+  const load = LOADERS[code];
+  const leaf = (load ? lookup(load(), key) : undefined) ?? lookup(en, key);
+  return leaf === undefined ? key : resolve(leaf, load ? code : FALLBACK_LANGUAGE, params);
+}
+
 export function subscribeLanguage(f: () => void): () => void {
   listeners.add(f);
   return () => listeners.delete(f);
