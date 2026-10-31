@@ -225,10 +225,14 @@ export const lifetimeXp = (p: PilotProgram) => (p.carry?.xp ?? 0) + pilotXp(p);
  */
 const lastTracked = (p: PilotProgram, today: number) => (p.after ? Math.max(PROGRAM_DAYS, today - 1) : PROGRAM_DAYS);
 
-/** The streak a New Ascent begun `today` carries: the previous one's, only if it begins the day after it ended. */
+/**
+ * The streak a New Ascent begun `today` carries: the previous one's as it stood when its tracking last ran. After
+ * Keep My Momentum that's yesterday (a missed day since breaks it, as usual). While the person decided later, the
+ * days after the summit are a pause, so the streak at Day 66 carries unchanged however long they took: paused days
+ * neither add to it nor break it.
+ */
 export function carriedStreak(prev: PilotProgram, today: number): number {
-  const last = lastTracked(prev, today);
-  return today <= last + 1 ? pilotStreak(prev, last) : 0;
+  return pilotStreak(prev, lastTracked(prev, today));
 }
 
 /** What a New Ascent starts from: the previous habits, each at the intensity it reached (own habits as they are). */

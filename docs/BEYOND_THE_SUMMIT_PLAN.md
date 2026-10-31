@@ -96,8 +96,10 @@ type ArchivedJourney = { v: 1; id: string; archivedAt: string; program: PilotPro
    - `ascent`: previous + 1, shown as "Ascent 2";
    - `xp`: the lifetime XP so far. **Lifetime XP** = `carry.xp + pilotXp(program)`; collectibles and titles follow
      lifetime XP, so nothing earned is lost. `collection.unlocked` is copied over;
-   - `streak`: carried only if Day 1 is the day after the previous program's last counted day. Otherwise the new
-     streak starts at 0. The best streak ever is shown from the archive.
+   - `streak`: the previous program's streak where its tracking last ran: yesterday after Keep My Momentum (a
+     missed day since breaks it, as usual), or Day 66 after **Decide later**, unchanged however many days passed.
+     Paused days are neither missed nor counted and add no XP. From Day 1 the normal streak rules apply. The best
+     streak ever is shown from the archive.
 4. **The Day 1 ceremony** plays as usual (unchanged), with "Ascent 2" in its line.
 
 **Past journeys:** Journey tab → "Past journeys". Each opens read-only: its mountain, numbers and its 66-Day Story
