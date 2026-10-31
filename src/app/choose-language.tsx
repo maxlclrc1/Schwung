@@ -15,8 +15,6 @@ import Animated, {
   Easing,
   FadeIn,
   FadeInDown,
-  FlipInXUp,
-  FlipOutXDown,
   interpolate,
   Extrapolation,
   useAnimatedRef,
@@ -47,7 +45,7 @@ import { ThemedView } from '../theme/transition';
  * The first screen after installing (and after a Life Reset is ended or the data deleted): which language Schwung
  * speaks. The twenty languages, each in its own name, travel clockwise around the frame as one unbroken ring, like a
  * ticker band around a building; the chosen one lights up in it. Inside, the languages turn on a wheel, each in its
- * own name; settling on one switches every word at once, flips the title over to it and sends a ring out from the
+ * own name; settling on one switches every word at once, changes the title and sends a ring out from the
  * wheel. Continue leads to the mountain welcome. Between a left-to-right and a right-to-left language the layout
  * turns with a restart, offered here.
  */
@@ -134,9 +132,6 @@ export default function ChooseLanguage() {
       { scaleY: interpolate(burst.value, [0, 1], [1, 1.5]) },
     ],
   }));
-  const glow = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(burst.value, [0, 0.35, 1], [1, 1.03, 1], Extrapolation.CLAMP) }],
-  }));
 
   const phrase = READY_LANGUAGES.find((l) => l.code === selected)?.choose ?? READY_LANGUAGES[0].choose;
   const onBox = useCallback((e: LayoutChangeEvent) => {
@@ -160,24 +155,17 @@ export default function ChooseLanguage() {
             <T v="overline" color={c.accentInk} style={styles.brand}>
               {APP_NAME}
             </T>
-            {/* A split-flap turn to the chosen language, like a departures board. */}
             <View style={styles.titleBox}>
-              <Animated.View
-                key={selected}
-                entering={reduce ? undefined : FlipInXUp.duration(760).easing(Easing.out(Easing.cubic))}
-                exiting={reduce ? undefined : FlipOutXDown.duration(420)}
+              <T
+                v="title"
+                accessibilityRole="header"
+                accessibilityLanguage={selected}
+                numberOfLines={2}
+                maxFontSizeMultiplier={1.3}
+                style={[styles.title, scriptAdjust(selected, [type.title, styles.title])]}
               >
-                <T
-                  v="title"
-                  accessibilityRole="header"
-                  accessibilityLanguage={selected}
-                  numberOfLines={2}
-                  maxFontSizeMultiplier={1.3}
-                  style={[styles.title, scriptAdjust(selected, [type.title, styles.title])]}
-                >
-                  {phrase}
-                </T>
-              </Animated.View>
+                {phrase}
+              </T>
             </View>
           </View>
 
@@ -186,9 +174,7 @@ export default function ChooseLanguage() {
               <>
                 <View pointerEvents="none" style={[styles.bandBox, { top: wheelH / 2 - ROW / 2 }]}>
                   <Animated.View style={[StyleSheet.absoluteFill, styles.ring, { borderColor: c.accent }, ring]} />
-                  <Animated.View style={[StyleSheet.absoluteFill, glow]}>
-                    <ThemedView style={[StyleSheet.absoluteFill, styles.pill, { backgroundColor: c.accentSoft }]} />
-                  </Animated.View>
+                  <View style={[StyleSheet.absoluteFill, styles.pill, { backgroundColor: c.accentSoft }]} />
                 </View>
                 <Animated.ScrollView
                   ref={scroll}
