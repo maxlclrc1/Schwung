@@ -23,7 +23,7 @@ export function RollingText({
   text: string;
   size: number;
   color: string;
-  /** The width of one character slot (narrow characters such as ":" take half). */
+  /** The width of one character slot (narrow characters such as ":" take half; "+" is as wide as a digit). */
   charWidth: number;
   weight?: TextStyle['fontWeight'];
   /** Depth for a hero number (theme/depth.ts `hero`). */
@@ -32,7 +32,7 @@ export function RollingText({
   return (
     <View style={styles.rolling} accessible accessibilityLabel={text}>
       {text.split('').map((ch, i) => {
-        const narrow = ch === ':' || ch === '–' || ch === '+' || ch === ' ';
+        const narrow = ch === ':' || ch === '–' || ch === ' ';
         const w = narrow ? charWidth * 0.5 : charWidth;
         return (
           <View key={i} style={{ width: w, height: size * 1.12, overflow: 'hidden' }}>
