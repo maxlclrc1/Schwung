@@ -43,8 +43,8 @@ import { ThemedView } from '../theme/transition';
 
 /*
  * The first screen after installing (and after a Life Reset is ended or the data deleted): which language Schwung
- * speaks. "Choose your language" runs around the frame in all twenty languages, like a ticker band around a
- * building, flowing clockwise; the chosen one lights up in it. Inside, the languages turn on a wheel, each in its
+ * speaks. The twenty languages, each in its own name, travel clockwise around the frame as one unbroken ring, like a
+ * ticker band around a building; the chosen one lights up in it. Inside, the languages turn on a wheel, each in its
  * own name; settling on one switches every word at once, flips the title over to it and sends a ring out from the
  * wheel. Continue leads to the mountain welcome. Between a left-to-right and a right-to-left language the layout
  * turns with a restart, offered here.
@@ -52,7 +52,8 @@ import { ThemedView } from '../theme/transition';
 
 const BAND = 30; // the ticker band around the frame
 const ROW = 58; // one language on the wheel
-const SEP = '   ·   ';
+const CORNER = radius.lg + 6; // the frame's corner
+const MIN_GAP = 28; // the least space between two names on the ring
 
 export default function ChooseLanguage() {
   const { c } = useTheme();
@@ -144,47 +145,7 @@ export default function ChooseLanguage() {
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
           >
-            {/* Clockwise: along the top to the right, down the right side, along the bottom to the left, up the left. */}
-            <Band
-              x={box.w / 2}
-              y={BAND / 2}
-              length={box.w}
-              rotate={0}
-              flow={1}
-              shown={shown}
-              reduce={reduce}
-              delay={0}
-            />
-            <Band
-              x={box.w - BAND / 2}
-              y={box.h / 2}
-              length={box.h - 2 * BAND}
-              rotate={90}
-              flow={1}
-              shown={shown}
-              reduce={reduce}
-              delay={7}
-            />
-            <Band
-              x={box.w / 2}
-              y={box.h - BAND / 2}
-              length={box.w}
-              rotate={0}
-              flow={-1}
-              shown={shown}
-              reduce={reduce}
-              delay={3}
-            />
-            <Band
-              x={BAND / 2}
-              y={box.h / 2}
-              length={box.h - 2 * BAND}
-              rotate={-90}
-              flow={1}
-              shown={shown}
-              reduce={reduce}
-              delay={11}
-            />
+            <Ring w={box.w} h={box.h} shown={shown} reduce={reduce} />
           </View>
         ) : null}
 
@@ -321,67 +282,149 @@ function WheelItem({
   );
 }
 
-/**
- * One side of the ticker band: "Choose your language" in every language, flowing without end; the chosen language's
- * line glows. Drawn as a horizontal strip, turned to run down or up the sides.
- */
-function Band({
-  x,
-  y,
-  length,
-  rotate,
-  flow,
-  shown,
-  reduce,
-  delay,
-}: {
-  x: number;
-  y: number;
-  length: number;
-  rotate: number;
-  flow: 1 | -1;
-  shown: string;
-  reduce: boolean;
-  /** Where in the sequence this side starts, so the four sides don't read the same words side by side. */
-  delay: number;
-}) {
-  const { c } = useTheme();
-  const [w, setW] = useState(0);
-  const offset = useSharedValue(0);
-  useEffect(() => {
-    if (!w || reduce) return;
-    // About 34 points a second: calm enough to read, steady like a ticker.
-    const ms = (w / 34) * 1000;
-    offset.set(flow === 1 ? -w : 0);
-    offset.set(withRepeat(withTiming(flow === 1 ? 0 : -w, { duration: ms, easing: Easing.linear }), -1, false));
-    return () => cancelAnimation(offset);
-  }, [w, flow, reduce, offset]);
-  const move = useAnimatedStyle(() => ({ transform: [{ translateX: offset.value }] }));
+/** The ring's centre line: a rounded rectangle just outside the frame, walked clockwise from the top-left. */
+type Track = { x0: number; y0: number; x1: number; y1: number; r: number; length: number };
 
-  const order = [...READY_LANGUAGES.slice(delay), ...READY_LANGUAGES.slice(0, delay)];
-  const line = (
-    <Text style={[styles.ticker, { color: c.textFaint }]} onLayout={(e) => !w && setW(e.nativeEvent.layout.width)}>
-      {order.map((l) => (
-        <Text key={l.code} style={l.code === shown ? { color: c.accentInk } : null}>
-          {l.choose}
-          {SEP}
-        </Text>
-      ))}
-    </Text>
-  );
+function trackOf(w: number, h: number): Track {
+  const x0 = BAND / 2;
+  const y0 = BAND / 2;
+  const x1 = w - BAND / 2;
+  const y1 = h - BAND / 2;
+  const r = CORNER + BAND / 2;
+  const length = 2 * (x1 - x0 - 2 * r) + 2 * (y1 - y0 - 2 * r) + 2 * Math.PI * r;
+  return { x0, y0, x1, y1, r, length };
+}
+
+/** Where along the track `s` points lie, and which way the text there faces (degrees, 0 along the top). */
+function pointAt(t: Track, s: number) {
+  'worklet';
+  const { x0, y0, x1, y1, r } = t;
+  const arc = (Math.PI * r) / 2;
+  const top = x1 - x0 - 2 * r;
+  const side = y1 - y0 - 2 * r;
+  const corner = (cx: number, cy: number, from: number, u: number) => {
+    const a = ((from + 90 * u) * Math.PI) / 180;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a), angle: from + 90 + 90 * u };
+  };
+  let d = ((s % t.length) + t.length) % t.length;
+  if (d < top) return { x: x0 + r + d, y: y0, angle: 0 };
+  d -= top;
+  if (d < arc) return corner(x1 - r, y0 + r, -90, d / arc);
+  d -= arc;
+  if (d < side) return { x: x1, y: y0 + r + d, angle: 90 };
+  d -= side;
+  if (d < arc) return corner(x1 - r, y1 - r, 0, d / arc);
+  d -= arc;
+  if (d < top) return { x: x1 - r - d, y: y1, angle: 180 };
+  d -= top;
+  if (d < arc) return corner(x0 + r, y1 - r, 90, d / arc);
+  d -= arc;
+  if (d < side) return { x: x0, y: y1 - r - d, angle: 270 };
+  d -= side;
+  return corner(x0 + r, y0 + r, 180, d / arc);
+}
+
+/**
+ * The twenty languages, each in its own name, travelling clockwise around the frame as one unbroken ring, like a
+ * ticker band around a building: evenly spaced (repeated as often as the frame's size allows), turning with the
+ * corners, the chosen language lit. Each name is measured once, so none ever overlaps the next.
+ */
+function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; reduce: boolean }) {
+  const { c } = useTheme();
+  const [widths, setWidths] = useState<Record<string, number>>({});
+  const measured = READY_LANGUAGES.every((l) => widths[l.code] !== undefined);
+  const track = trackOf(w, h);
+  const travel = useSharedValue(0);
+
+  useEffect(() => {
+    if (reduce) return;
+    // About 30 points a second: calm enough to read, steady like a ticker.
+    travel.set(0);
+    travel.set(
+      withRepeat(withTiming(track.length, { duration: (track.length / 30) * 1000, easing: Easing.linear }), -1, false),
+    );
+    return () => cancelAnimation(travel);
+  }, [track.length, reduce, travel]);
+
+  // Lay the names out along the ring: as many full rounds of all twenty as fit, the space shared out evenly.
+  const items: { key: string; code: string; native: string; width: number; at: number }[] = [];
+  if (measured) {
+    const names = READY_LANGUAGES.reduce((sum, l) => sum + widths[l.code], 0);
+    const rounds = Math.max(1, Math.floor(track.length / (names + READY_LANGUAGES.length * MIN_GAP)));
+    const gap = (track.length - rounds * names) / (rounds * READY_LANGUAGES.length);
+    let at = 0;
+    for (let k = 0; k < rounds; k++)
+      for (const l of READY_LANGUAGES) {
+        const width = widths[l.code];
+        items.push({ key: `${k}-${l.code}`, code: l.code, native: l.native, width, at: at + width / 2 });
+        at += width + gap;
+      }
+  }
+
   return (
-    <View
-      style={[
-        styles.band,
-        { width: length, left: x - length / 2, top: y - BAND / 2, transform: [{ rotate: `${rotate}deg` }] },
-      ]}
-    >
-      <Animated.View style={[styles.strip, move]}>
-        {line}
-        {line}
-        {line}
-      </Animated.View>
+    <View style={StyleSheet.absoluteFill}>
+      {/* Measured once, unseen. */}
+      {!measured ? (
+        <View style={styles.measure}>
+          {READY_LANGUAGES.map((l) => (
+            <Text
+              key={l.code}
+              style={styles.ticker}
+              onLayout={(e) => {
+                // A little spare, so no name is ever cut short.
+                const width = Math.ceil(e.nativeEvent.layout.width) + 6;
+                setWidths((m) => (m[l.code] === width ? m : { ...m, [l.code]: width }));
+              }}
+            >
+              {l.native}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+      {items.map((it) => (
+        <RingName
+          key={it.key}
+          track={track}
+          travel={travel}
+          at={it.at}
+          width={it.width}
+          lit={it.code === shown}
+          color={c}
+        >
+          {it.native}
+        </RingName>
+      ))}
     </View>
+  );
+}
+
+function RingName({
+  track,
+  travel,
+  at,
+  width,
+  lit,
+  color,
+  children,
+}: {
+  track: Track;
+  travel: SharedValue<number>;
+  at: number;
+  width: number;
+  lit: boolean;
+  color: { textFaint: string; accentInk: string };
+  children: string;
+}) {
+  const style = useAnimatedStyle(() => {
+    const p = pointAt(track, at + travel.value);
+    return {
+      transform: [{ translateX: p.x - width / 2 }, { translateY: p.y - BAND / 2 }, { rotate: `${p.angle}deg` }],
+    };
+  });
+  return (
+    <Animated.View style={[styles.ringName, { width }, style]}>
+      <Text style={[styles.ticker, { color: lit ? color.accentInk : color.textFaint }]}>{children}</Text>
+    </Animated.View>
   );
 }
 
@@ -394,7 +437,7 @@ const styles = StyleSheet.create({
     bottom: BAND,
     left: BAND,
     right: BAND,
-    borderRadius: radius.lg + 6,
+    borderRadius: CORNER,
     borderWidth: StyleSheet.hairlineWidth * 2,
     overflow: 'hidden',
     paddingTop: space.xl,
@@ -413,7 +456,15 @@ const styles = StyleSheet.create({
   itemOn: { fontWeight: '800' },
   foot: { padding: space.lg, paddingTop: space.sm },
   center: { textAlign: 'center' },
-  band: { position: 'absolute', height: BAND, overflow: 'hidden', justifyContent: 'center' },
-  strip: { flexDirection: 'row', width: 40000, alignItems: 'center' },
+  measure: { position: 'absolute', opacity: 0, flexDirection: 'row', width: 4000, alignItems: 'flex-start' },
+  ringName: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    height: BAND,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
   ticker: { fontSize: 13, lineHeight: 18, fontWeight: '700' },
 });
