@@ -19,6 +19,12 @@ bundled.
 - Settings → Language: **Follow device** (the first of the phone's preferred languages Schwung has, else English) or
   a language chosen explicitly. Each language is listed in its own name. The choice is saved with the preferences,
   kept by Delete my data, and never taken from a restored backup.
+- **First launch:** the Welcome screen has a globe button (Settings → Language), and Start my reset opens a one-time
+  language step (`src/app/choose-language.tsx`) before set-up's first question: all 20 languages in their own names,
+  the phone's language (else English) selected, every word switching at once. Picking the phone's own language keeps
+  Follow device. It's skipped once a language has been chosen on purpose (`languageChosen` in the preferences, also
+  set by Settings → Language), so returning people never see it. Crossing between left-to-right and right-to-left
+  offers the restart there; set-up begins after it.
 - **What is never translated:** the person's own habit names and notes (shown exactly as typed), stored ids, keys,
   saved data and file names. Saved answers keep their English ids (`'Instrument'`, `'full body'`) and are labelled at
   display time.

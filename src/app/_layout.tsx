@@ -87,6 +87,8 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="welcome" />
+          {/* First launch only: the language, before set-up's first question. */}
+          <Stack.Screen name="choose-language" options={{ animation: 'slide_from_right' }} />
           {/* No swipe back: set-up's own Back walks through the questions, and its drags belong to its controls. */}
           <Stack.Screen
             name="life-reset/setup"

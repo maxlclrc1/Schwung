@@ -48,6 +48,7 @@ describe('one app: the Life Reset', () => {
       '(tabs)/progress.tsx',
       '(tabs)/today.tsx',
       '_layout.tsx',
+      'choose-language.tsx',
       'index.tsx',
       'language.tsx',
       'legal.tsx',
@@ -71,7 +72,7 @@ describe('one app: the Life Reset', () => {
     expect(read('index.tsx')).toContain("<Redirect href={started ? '/today' : '/welcome'} />");
     const welcome = read('welcome.tsx');
     expect(welcome).toContain('if (started) return <Redirect href="/today" />;');
-    expect(welcome).toContain("router.push('/life-reset/setup')");
+    expect(welcome).toContain("router.push(languageChosen ? '/life-reset/setup' : '/choose-language')");
     expect(read('(tabs)/today.tsx')).toContain('if (!started) return <Redirect href="/welcome" />;');
   });
 

@@ -1,6 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -9,8 +10,10 @@ import { Button, Screen, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
 import { worldFrame } from '../core/world';
 import { APP_NAME } from '../lib/constants';
+import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
 import { space, useTheme } from '../theme';
+import { ThemedView } from '../theme/transition';
 import { useT } from '../i18n/react';
 
 export default function Welcome() {
@@ -22,6 +25,8 @@ export default function Welcome() {
   const [zoneTop, setZoneTop] = useState(insets.top + space.sm);
   const { zoneHeight } = worldFrame(width, zoneTop);
   const started = useResetPilot((s) => s.program !== null);
+  // A language not yet chosen on purpose gets its own step before set-up's first question.
+  const languageChosen = usePreferences((s) => s.languageChosen === true);
 
   // A running program never sees the start screen again.
   if (started) return <Redirect href="/today" />;
@@ -45,7 +50,19 @@ export default function Welcome() {
             <T v="overline" color={c.accentInk} style={styles.brand}>
               {APP_NAME}
             </T>
-            <ThemeToggle />
+            <View style={styles.controls}>
+              <Pressable
+                onPress={() => router.push('/language')}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('settings.language.title')}
+              >
+                <ThemedView style={[styles.globe, { backgroundColor: c.surface }]}>
+                  <Ionicons name="globe-outline" size={20} color={c.accentInk} />
+                </ThemedView>
+              </Pressable>
+              <ThemeToggle />
+            </View>
           </View>
         </View>
         <View style={styles.text}>
@@ -60,7 +77,10 @@ export default function Welcome() {
           </Animated.View>
         </View>
         <Animated.View entering={FadeInDown.delay(380).duration(500)} style={{ gap: space.sm }}>
-          <Button label={t('welcome.start')} onPress={() => router.push('/life-reset/setup')} />
+          <Button
+            label={t('welcome.start')}
+            onPress={() => router.push(languageChosen ? '/life-reset/setup' : '/choose-language')}
+          />
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
             {t('welcome.time')}
           </T>
@@ -85,6 +105,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   brand: { letterSpacing: 3 },
+  controls: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  globe: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   // Pushes the CTA to the bottom; the fog shows between the mountain and the words.
   text: { flex: 1, justifyContent: 'flex-end', gap: space.lg },
 });
