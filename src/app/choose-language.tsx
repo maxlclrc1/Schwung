@@ -80,10 +80,11 @@ export default function ChooseLanguage() {
   const y = useSharedValue(startIndex * ROW);
   const burst = useSharedValue(1);
 
-  // Start on the shown language (contentOffset alone isn't applied on Android or the web).
+  // Keep the wheel on the chosen language whenever its height changes: at the start (contentOffset alone isn't
+  // applied on Android or the web), and when the restart note appears below it for a right-to-left language.
   useEffect(() => {
-    if (wheelH > 0) scroll.current?.scrollTo({ y: startIndex * ROW, animated: false });
-  }, [wheelH, startIndex, scroll]);
+    if (wheelH > 0) scroll.current?.scrollTo({ y: current.current * ROW, animated: false });
+  }, [wheelH, scroll]);
 
   const onScroll = useAnimatedScrollHandler((e) => {
     y.set(e.contentOffset.y);
@@ -98,7 +99,7 @@ export default function ChooseLanguage() {
     setLanguage(l.code === deviceLanguage() ? 'system' : l.code);
     if (!reduce) {
       burst.set(0);
-      burst.set(withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }));
+      burst.set(withTiming(1, { duration: 1600, easing: Easing.out(Easing.quad) }));
     }
   };
   const settle = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
@@ -113,15 +114,16 @@ export default function ChooseLanguage() {
     router.replace('/welcome');
   };
 
+  // A soft halo eases out from the chosen language and fades: no flash, nothing darkened.
   const ring = useAnimatedStyle(() => ({
-    opacity: interpolate(burst.value, [0, 0.15, 1], [0, 0.7, 0]),
+    opacity: interpolate(burst.value, [0, 0.25, 1], [0, 0.5, 0], Extrapolation.CLAMP),
     transform: [
-      { scaleX: interpolate(burst.value, [0, 1], [1, 1.35]) },
-      { scaleY: interpolate(burst.value, [0, 1], [1, 2.4]) },
+      { scaleX: interpolate(burst.value, [0, 1], [1, 1.06]) },
+      { scaleY: interpolate(burst.value, [0, 1], [1, 1.5]) },
     ],
   }));
   const glow = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(burst.value, [0, 0.2, 1], [1, 1.06, 1], Extrapolation.CLAMP) }],
+    transform: [{ scale: interpolate(burst.value, [0, 0.35, 1], [1, 1.03, 1], Extrapolation.CLAMP) }],
   }));
 
   const phrase = READY_LANGUAGES.find((l) => l.code === shown)?.choose ?? READY_LANGUAGES[0].choose;
@@ -162,8 +164,8 @@ export default function ChooseLanguage() {
             <View style={styles.titleBox}>
               <Animated.View
                 key={shown}
-                entering={reduce ? undefined : FlipInXUp.duration(420)}
-                exiting={reduce ? undefined : FlipOutXDown.duration(260)}
+                entering={reduce ? undefined : FlipInXUp.duration(760).easing(Easing.out(Easing.cubic))}
+                exiting={reduce ? undefined : FlipOutXDown.duration(420)}
               >
                 <T
                   v="title"
@@ -251,7 +253,7 @@ function WheelItem({
     const d = (y.value - i * ROW) / ROW;
     const a = Math.abs(d);
     return {
-      opacity: interpolate(a, [0, 1, 3], [1, 0.62, 0.25], Extrapolation.CLAMP),
+      opacity: interpolate(a, [0, 1, 3], [1, 0.72, 0.4], Extrapolation.CLAMP),
       transform: [
         { perspective: 700 },
         { rotateX: `${interpolate(d, [-3, 0, 3], [50, 0, -50], Extrapolation.CLAMP)}deg` },
@@ -324,15 +326,21 @@ function pointAt(t: Track, s: number) {
   return corner(x0 + r, y0 + r, 180, d / arc);
 }
 
+/** Scripts whose letters join or stack (Arabic, Urdu, Devanagari, Bengali, Thai) travel as whole words. */
+const WHOLE = new Set(['ar', 'ur', 'hi', 'bn', 'th']);
+const glyphsOf = (l: Language) => (WHOLE.has(l.code) ? [l.native] : Array.from(l.native));
+
 /**
  * The twenty languages, each in its own name, travelling clockwise around the frame as one unbroken ring, like a
- * ticker band around a building: evenly spaced (repeated as often as the frame's size allows), turning with the
- * corners, the chosen language lit. Each name is measured once, so none ever overlaps the next.
+ * ticker band around a building. Each letter follows the track on its own, so a name bends smoothly around the
+ * rounded corners instead of turning as a block. Evenly spaced (repeated as often as the frame allows), the chosen
+ * language lit; every letter is measured once, so names never overlap.
  */
 function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; reduce: boolean }) {
   const { c } = useTheme();
   const [widths, setWidths] = useState<Record<string, number>>({});
-  const measured = READY_LANGUAGES.every((l) => widths[l.code] !== undefined);
+  const all = READY_LANGUAGES.flatMap((l) => glyphsOf(l).map((g, i) => ({ id: `${l.code}:${i}`, g })));
+  const measured = all.every((u) => widths[u.id] !== undefined);
   const track = trackOf(w, h);
   const travel = useSharedValue(0);
 
@@ -346,18 +354,22 @@ function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; re
     return () => cancelAnimation(travel);
   }, [track.length, reduce, travel]);
 
-  // Lay the names out along the ring: as many full rounds of all twenty as fit, the space shared out evenly.
-  const items: { key: string; code: string; native: string; width: number; at: number }[] = [];
+  // As many full rounds of all twenty as fit, the space between names shared out evenly.
+  const glyphs: { key: string; g: string; code: string; width: number; at: number }[] = [];
   if (measured) {
-    const names = READY_LANGUAGES.reduce((sum, l) => sum + widths[l.code], 0);
+    const nameWidth = (l: Language) => glyphsOf(l).reduce((sum, _, i) => sum + widths[`${l.code}:${i}`], 0);
+    const names = READY_LANGUAGES.reduce((sum, l) => sum + nameWidth(l), 0);
     const rounds = Math.max(1, Math.floor(track.length / (names + READY_LANGUAGES.length * MIN_GAP)));
     const gap = (track.length - rounds * names) / (rounds * READY_LANGUAGES.length);
     let at = 0;
     for (let k = 0; k < rounds; k++)
       for (const l of READY_LANGUAGES) {
-        const width = widths[l.code];
-        items.push({ key: `${k}-${l.code}`, code: l.code, native: l.native, width, at: at + width / 2 });
-        at += width + gap;
+        glyphsOf(l).forEach((g, i) => {
+          const width = widths[`${l.code}:${i}`];
+          glyphs.push({ key: `${k}:${l.code}:${i}`, g, code: l.code, width, at: at + width / 2 });
+          at += width;
+        });
+        at += gap;
       }
   }
 
@@ -366,44 +378,41 @@ function Ring({ w, h, shown, reduce }: { w: number; h: number; shown: string; re
       {/* Measured once, unseen. */}
       {!measured ? (
         <View style={styles.measure}>
-          {READY_LANGUAGES.map((l) => (
+          {all.map((u) => (
             <Text
-              key={l.code}
+              key={u.id}
               style={styles.ticker}
               onLayout={(e) => {
-                // A little spare, so no name is ever cut short.
-                const width = Math.ceil(e.nativeEvent.layout.width) + 6;
-                setWidths((m) => (m[l.code] === width ? m : { ...m, [l.code]: width }));
+                const width = e.nativeEvent.layout.width;
+                setWidths((m) => (m[u.id] === width ? m : { ...m, [u.id]: width }));
               }}
             >
-              {l.native}
+              {u.g}
             </Text>
           ))}
         </View>
       ) : null}
-      {items.map((it) => (
-        <RingName
+      {glyphs.map((it) => (
+        <RingGlyph
           key={it.key}
           track={track}
           travel={travel}
           at={it.at}
           width={it.width}
-          lit={it.code === shown}
-          color={c}
+          color={it.code === shown ? c.accentInk : c.textFaint}
         >
-          {it.native}
-        </RingName>
+          {it.g}
+        </RingGlyph>
       ))}
     </View>
   );
 }
 
-function RingName({
+function RingGlyph({
   track,
   travel,
   at,
   width,
-  lit,
   color,
   children,
 }: {
@@ -411,8 +420,7 @@ function RingName({
   travel: SharedValue<number>;
   at: number;
   width: number;
-  lit: boolean;
-  color: { textFaint: string; accentInk: string };
+  color: string;
   children: string;
 }) {
   const style = useAnimatedStyle(() => {
@@ -422,8 +430,8 @@ function RingName({
     };
   });
   return (
-    <Animated.View style={[styles.ringName, { width }, style]}>
-      <Text style={[styles.ticker, { color: lit ? color.accentInk : color.textFaint }]}>{children}</Text>
+    <Animated.View style={[styles.ringName, { width: width + 2 }, style]}>
+      <Text style={[styles.ticker, { color }]}>{children}</Text>
     </Animated.View>
   );
 }
