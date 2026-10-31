@@ -18,6 +18,7 @@ export function RollingText({
   color,
   charWidth,
   weight = '800',
+  lift,
 }: {
   text: string;
   size: number;
@@ -25,6 +26,8 @@ export function RollingText({
   /** The width of one character slot (narrow characters such as ":" take half). */
   charWidth: number;
   weight?: TextStyle['fontWeight'];
+  /** Depth for a hero number (theme/depth.ts `hero`). */
+  lift?: TextStyle;
 }) {
   return (
     <View style={styles.rolling} accessible accessibilityLabel={text}>
@@ -42,6 +45,7 @@ export function RollingText({
                 styles.rollChar,
                 { fontSize: size, lineHeight: size * 1.12, color, width: w, fontWeight: weight },
                 size >= 30 && styles.tight,
+                lift,
               ]}
             >
               {ch}

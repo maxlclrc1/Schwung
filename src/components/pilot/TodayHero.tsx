@@ -17,6 +17,7 @@ import { PROGRAM_DAYS } from '../../core/dates';
 import { growth } from '../../core/reset/collection';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
+import { useDepth } from '../../theme/depth';
 import { ThemedView } from '../../theme/transition';
 import { SettingsButton } from '../HeaderButton';
 import { RollingText } from '../RollingText';
@@ -63,6 +64,7 @@ export function TodayHero({
 }) {
   const { c } = useTheme();
   const dayScript = useScriptAdjust(styles.day);
+  const depth = useDepth();
   const t = useT();
   const left = Math.max(0, total - done);
   const summit = today > PROGRAM_DAYS && !momentum;
@@ -75,7 +77,7 @@ export function TodayHero({
             {ascent > 1 ? t('today.hero.lifeResetAscent', { ascent }) : t('today.hero.lifeReset')}
           </T>
           <Text
-            style={[styles.day, dayScript, { color: c.text }]}
+            style={[styles.day, depth.hero, dayScript, { color: c.text }]}
             maxFontSizeMultiplier={1.3}
             accessibilityRole="header"
           >
@@ -96,7 +98,7 @@ export function TodayHero({
         </View>
       </View>
 
-      <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
+      <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface }]}>
         <View style={styles.top} accessible accessibilityLabel={label}>
           <Ring done={done} total={total} full={full} />
           <View style={styles.status}>
@@ -115,7 +117,12 @@ export function TodayHero({
         </View>
         <View style={styles.chips}>
           <ThemedView
-            style={[styles.chip, styles.shrink, { backgroundColor: streak > 0 ? c.peachSoft : c.surfaceHigh }]}
+            style={[
+              styles.chip,
+              styles.shrink,
+              depth.raised,
+              { backgroundColor: streak > 0 ? c.peachSoft : c.surfaceHigh },
+            ]}
             accessible
             accessibilityLabel={t('today.hero.streakA11y', { count: streak })}
           >
@@ -140,6 +147,7 @@ export function TodayHero({
 /** Today's ring: fills in sage as habits are done, turning into a check when the day is complete. */
 function Ring({ done, total, full }: { done: number; total: number; full: boolean }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const size = 76;
   const stroke = 8;
   const r = (size - stroke) / 2;
@@ -175,7 +183,7 @@ function Ring({ done, total, full }: { done: number; total: number; full: boolea
           </Animated.View>
         ) : (
           <View style={styles.count}>
-            <RollingText text={`${done}`} size={22} charWidth={14} weight="800" color={c.text} />
+            <RollingText text={`${done}`} size={22} charWidth={14} weight="800" color={c.text} lift={depth.hero} />
             <Text style={[styles.total, { color: c.textDim }]}>/{total}</Text>
           </View>
         )}
@@ -187,6 +195,7 @@ function Ring({ done, total, full }: { done: number; total: number; full: boolea
 /** The level chip: level, how far to the next, and XP rolling up, with a brief "+XP" when some is earned. */
 function Level({ xp }: { xp: number }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const [gain, setGain] = useState<{ n: number; key: number } | null>(null);
   const last = useRef(xp);
@@ -211,7 +220,7 @@ function Level({ xp }: { xp: number }) {
         accessibilityLabel={t('today.hero.levelA11y', { title: g.title, xp })}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
       >
-        <ThemedView style={[styles.chip, { backgroundColor: c.accentSoft }]}>
+        <ThemedView style={[styles.chip, depth.raised, { backgroundColor: c.accentSoft }]}>
           <Ionicons name="diamond-outline" size={13} color={c.accentInk} />
           <T v="caption" color={c.accentInk} style={[styles.chipText, styles.shrink]} maxFontSizeMultiplier={1.3}>
             {g.title}

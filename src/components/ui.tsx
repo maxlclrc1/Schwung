@@ -5,6 +5,7 @@ import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { useScriptAdjust } from '../i18n/script';
 import { haptic } from '../lib/haptics';
 import { radius, space, type, useTheme } from '../theme';
+import { useDepth } from '../theme/depth';
 import { ThemedView, useThemedColors } from '../theme/transition';
 
 type Variant = keyof typeof type;
@@ -15,7 +16,10 @@ export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Varia
   // Palette colors fade with the theme; anything else (ceremony, overlays) is used as-is.
   const fade = useThemedColors({ color: col });
   const script = useScriptAdjust([type[v], style]);
-  return <Animated.Text {...rest} style={[type[v], { color: col }, style, script, fade]} />;
+  // The big headings carry a whisper of depth; everything smaller stays flat.
+  const depth = useDepth();
+  const lift = v === 'display' || v === 'title' ? depth.title : null;
+  return <Animated.Text {...rest} style={[type[v], lift, { color: col }, style, script, fade]} />;
 }
 
 export function Screen({
@@ -62,6 +66,9 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
   const give = useAnimatedStyle(() => ({
     transform: [{ scaleX: 1 - pressed.value * 0.03 }, { scaleY: 1 - pressed.value * 0.06 }],
   }));
+  // Pressed in, the button settles onto the page: its cast shadow fades (opacity only, no shadow redrawn).
+  const settle = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.75 }));
+  const depth = useDepth();
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
   const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? c.danger : kind === 'ghost' ? c.textDim : c.text;
   const fade = useThemedColors({ backgroundColor: bg });
@@ -84,7 +91,19 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
       style={[style, disabled && styles.disabled]}
     >
       <Animated.View style={[styles.button, kind === 'ghost' && { minHeight: 44 }, anim]}>
-        <Animated.View style={[StyleSheet.absoluteFill, styles.backing, { backgroundColor: bg }, give, fade]} />
+        {kind === 'primary' && !disabled ? (
+          <Animated.View style={[StyleSheet.absoluteFill, styles.backing, depth.drop, give, settle]} />
+        ) : null}
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            styles.backing,
+            { backgroundColor: bg },
+            kind === 'primary' ? depth.face : kind === 'secondary' ? depth.faceQuiet : null,
+            give,
+            fade,
+          ]}
+        />
         {icon}
         <T v="bodyStrong" color={fg} style={styles.label}>
           {label}
@@ -106,17 +125,21 @@ export function ProgressBar({ value, height = 6, color }: { value: number; heigh
   const anim = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
   const fill = color ?? c.accent;
   const fillFade = useThemedColors({ backgroundColor: fill });
+  const depth = useDepth();
   return (
-    <ThemedView style={{ height, borderRadius: height, backgroundColor: c.surfaceHigh, overflow: 'hidden' }}>
-      <Animated.View style={[{ height, borderRadius: height, backgroundColor: fill }, anim, fillFade]} />
+    <ThemedView
+      style={[{ height, borderRadius: height, backgroundColor: c.surfaceHigh, overflow: 'hidden' }, depth.inset]}
+    >
+      <Animated.View style={[{ height, borderRadius: height, backgroundColor: fill }, depth.sheen, anim, fillFade]} />
     </ThemedView>
   );
 }
 
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c } = useTheme();
+  const depth = useDepth();
   return (
-    <ThemedView style={[{ backgroundColor: c.surface, borderRadius: radius.lg, padding: space.lg }, style]}>
+    <ThemedView style={[{ backgroundColor: c.surface, borderRadius: radius.lg, padding: space.lg }, depth.card, style]}>
       {children}
     </ThemedView>
   );

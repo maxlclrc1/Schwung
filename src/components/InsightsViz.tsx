@@ -19,6 +19,7 @@ import { PROGRAM_DAYS } from '../core/dates';
 import type { Observation } from '../core/reset/observations';
 import { haptic } from '../lib/haptics';
 import { radius, space, useTheme } from '../theme';
+import { useDepth } from '../theme/depth';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, formatPercent, t as tr } from '../i18n';
@@ -80,6 +81,7 @@ export const ConsistencyRing = memo(function ConsistencyRing({
   streak: number;
 }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const share = overall.eligible ? overall.done / overall.eligible : null;
   const size = 132;
@@ -90,7 +92,7 @@ export const ConsistencyRing = memo(function ConsistencyRing({
   const arc = useAnimatedProps(() => ({ strokeDashoffset: circ * (1 - (share ?? 0) * shown.value) }));
   const shownDay = Math.min(day, PROGRAM_DAYS);
   return (
-    <ThemedView style={[styles.hero, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.hero, depth.card, { backgroundColor: c.surface }]}>
       <View
         style={{ width: size, height: size }}
         accessible
@@ -117,7 +119,10 @@ export const ConsistencyRing = memo(function ConsistencyRing({
           />
         </Svg>
         <View style={styles.ringCenter}>
-          <T style={[styles.ringValue, { color: share === null ? c.textFaint : c.text }]} maxFontSizeMultiplier={1.2}>
+          <T
+            style={[styles.ringValue, depth.hero, { color: share === null ? c.textFaint : c.text }]}
+            maxFontSizeMultiplier={1.2}
+          >
             {pctText(share)}
           </T>
           <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.2}>
@@ -194,6 +199,7 @@ const CHART_H = 128;
  */
 export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint[] }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const { width } = useWindowDimensions();
   const reduce = useReducedMotion();
@@ -237,7 +243,7 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
   const prev = current !== null && prevIdx >= 0 ? current - 1 - prevIdx : null;
 
   return (
-    <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface }]}>
       <View style={styles.panelHead}>
         <T v="bodyStrong">{t('insights.week.title')}</T>
         <T v="caption" color={c.mistInk} style={{ fontWeight: '700' }}>
@@ -396,6 +402,7 @@ export type HabitRow = {
  */
 export function HabitBoard({ rows }: { rows: HabitRow[] }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const share = (t: Tally) => (t.eligible ? t.done / t.eligible : -1);
   const sorted = [...rows].sort((a, b) => share(b.tally) - share(a.tally));
   const strongest =
@@ -403,7 +410,7 @@ export function HabitBoard({ rows }: { rows: HabitRow[] }) {
       ? sorted[0].id
       : null;
   return (
-    <ThemedView style={[styles.panel, { backgroundColor: c.surface, paddingVertical: space.sm }]}>
+    <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface, paddingVertical: space.sm }]}>
       {sorted.map((r, i) => (
         <HabitBar key={r.id} row={r} strongest={r.id === strongest} first={i === 0} order={i} />
       ))}
@@ -488,6 +495,7 @@ function HabitBar({
 /** Personal records as peach medallions: what was actually done, as counts (never minutes or hours). */
 export const RecordMedals = memo(function RecordMedals({ records }: { records: Records }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   const medals: { icon: Icon; n: string; label: string }[] = [
     records.bestWeek
@@ -527,7 +535,7 @@ export const RecordMedals = memo(function RecordMedals({ records }: { records: R
       : []),
   ];
   return (
-    <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface }]}>
       <T v="bodyStrong">{t('insights.records.title')}</T>
       <View style={styles.medals}>
         {medals.map((m, i) => (
@@ -544,7 +552,7 @@ export const RecordMedals = memo(function RecordMedals({ records }: { records: R
               <Ionicons name={m.icon} size={18} color={c.peach} />
             </View>
             <View style={{ flex: 1 }}>
-              <T style={[styles.medalValue, { color: c.text }]} maxFontSizeMultiplier={1.2}>
+              <T style={[styles.medalValue, depth.hero, { color: c.text }]} maxFontSizeMultiplier={1.2}>
                 {m.n}
               </T>
               <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.3}>
@@ -570,9 +578,12 @@ const TONE: Record<Observation['tone'], Icon> = {
 /** What the saved days show, one line each, in lavender; a quiet note until there's enough to say. */
 export function Observations({ items, day }: { items: Observation[]; day: number }) {
   const { c } = useTheme();
+  const depth = useDepth();
   const t = useT();
   return (
-    <ThemedView style={[styles.panel, styles.reflect, { backgroundColor: c.surface, borderLeftColor: c.accent }]}>
+    <ThemedView
+      style={[styles.panel, styles.reflect, depth.card, { backgroundColor: c.surface, borderLeftColor: c.accent }]}
+    >
       {items.length ? (
         items.map((o, i) => (
           <Animated.View
