@@ -54,7 +54,8 @@ export function RollingText({
 }
 
 const styles = StyleSheet.create({
-  rolling: { flexDirection: 'row', justifyContent: 'center' },
+  // Digits read left to right in every language (a right-to-left row would reverse them).
+  rolling: { flexDirection: 'row', justifyContent: 'center', direction: 'ltr' },
   rollChar: { position: 'absolute', left: 0, top: 0, textAlign: 'center', fontVariant: ['tabular-nums'] },
   tight: { letterSpacing: -1 },
 });

@@ -844,7 +844,7 @@ export const vi: Translation = {
       nothingYet: 'Ngày {day} · chưa có gì',
       nothing: 'Ngày {day} · không ghi nhận gì',
       done: 'Ngày {day} · xong {done}/{planned}',
-      dayPhase: '{day}, giai đoạn {phase},',
+      dayPhase: '{label}. Giai đoạn {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Hiện thói quen của ngày đó',
     captionA11yHide: '{kicker}: {full}. Ẩn thói quen của ngày đó',

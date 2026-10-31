@@ -23,6 +23,7 @@ import { RollingText } from '../RollingText';
 import { ThemeToggle } from '../ThemeToggle';
 import { ProgressBar, T } from '../ui';
 import { useT } from '../../i18n/react';
+import { useScriptAdjust } from '../../i18n/script';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
@@ -61,6 +62,7 @@ export function TodayHero({
   ascent?: number;
 }) {
   const { c } = useTheme();
+  const dayScript = useScriptAdjust(styles.day);
   const t = useT();
   const left = Math.max(0, total - done);
   const summit = today > PROGRAM_DAYS && !momentum;
@@ -73,7 +75,7 @@ export function TodayHero({
             {ascent > 1 ? t('today.hero.lifeResetAscent', { ascent }) : t('today.hero.lifeReset')}
           </T>
           <Text
-            style={[styles.day, { color: c.text }]}
+            style={[styles.day, dayScript, { color: c.text }]}
             numberOfLines={1}
             maxFontSizeMultiplier={1.3}
             accessibilityRole="header"

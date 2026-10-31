@@ -835,7 +835,7 @@ export const ja: Translation = {
       nothingYet: '{day}日目 · まだ記録なし',
       nothing: '{day}日目 · 記録なし',
       done: '{day}日目 · {planned}個中{done}個達成',
-      dayPhase: '{phase}の段階、{day}',
+      dayPhase: '{label}。{phase}の段階。',
     },
     captionA11yShow: '{kicker}：{full}。その日の習慣を表示',
     captionA11yHide: '{kicker}：{full}。その日の習慣を隠す',

@@ -101,7 +101,7 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
               xp: P.pilotXp(p),
             })}
           </T>
-          <T v="caption" color={c.textFaint} numberOfLines={1}>
+          <T v="caption" color={c.textFaint} numberOfLines={2}>
             {p.habits.map((id) => P.nameOf(p, id)).join(' · ')}
           </T>
         </View>

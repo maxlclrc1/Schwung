@@ -839,7 +839,7 @@ export const ur: Translation = {
       nothingYet: 'دن {day} · ابھی کچھ نہیں',
       nothing: 'دن {day} · کچھ درج نہیں',
       done: 'دن {day} · {planned} میں سے {done} مکمل',
-      dayPhase: '{day}، {phase} مرحلہ،',
+      dayPhase: '{label}۔ {phase} مرحلہ۔',
     },
     captionA11yShow: '{kicker}: {full}۔ اس دن کی عادتیں دکھائیں',
     captionA11yHide: '{kicker}: {full}۔ اس دن کی عادتیں چھپائیں',

@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { Pressable, StyleProp, StyleSheet, TextProps, View, ViewStyle } from 'react-native';
 import Animated, { Easing, ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
+import { useScriptAdjust } from '../i18n/script';
 import { haptic } from '../lib/haptics';
 import { radius, space, type, useTheme } from '../theme';
 import { ThemedView, useThemedColors } from '../theme/transition';
@@ -13,7 +14,8 @@ export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Varia
   const col = color ?? c.text;
   // Palette colors fade with the theme; anything else (ceremony, overlays) is used as-is.
   const fade = useThemedColors({ color: col });
-  return <Animated.Text {...rest} style={[type[v], { color: col }, style, fade]} />;
+  const script = useScriptAdjust([type[v], style]);
+  return <Animated.Text {...rest} style={[type[v], { color: col }, style, script, fade]} />;
 }
 
 export function Screen({
@@ -84,7 +86,7 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
       <Animated.View style={[styles.button, kind === 'ghost' && { minHeight: 44 }, anim]}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.backing, { backgroundColor: bg }, give, fade]} />
         {icon}
-        <T v="bodyStrong" color={fg}>
+        <T v="bodyStrong" color={fg} style={styles.label}>
           {label}
         </T>
       </Animated.View>
@@ -143,6 +145,8 @@ const PRESS_OUT = Easing.out(Easing.cubic);
 const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },
   backing: { borderRadius: radius.md },
+  // Long labels (German, French, Russian…) wrap inside the button instead of running past its edges.
+  label: { flexShrink: 1, textAlign: 'center' },
   button: {
     minHeight: 56,
     borderRadius: radius.md,

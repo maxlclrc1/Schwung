@@ -410,7 +410,7 @@ const CardView = memo(function CardView({
 
   const accessory = (
     <View style={styles.accessory}>
-      <T v="caption" color={ink} style={styles.week} numberOfLines={1}>
+      <T v="caption" color={ink} style={styles.week} numberOfLines={2}>
         {weekText}
       </T>
       {counterText !== null && !done ? (

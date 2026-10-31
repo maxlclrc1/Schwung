@@ -497,12 +497,12 @@ function Milestone({
           <T
             v="bodyStrong"
             color={on ? tint.ink : c.text}
-            numberOfLines={1}
+            numberOfLines={2}
             style={{ textAlign: side === 'left' ? 'right' : 'left' }}
           >
             {label}
           </T>
-          <T v="caption" color={c.textDim} numberOfLines={1} style={{ textAlign: side === 'left' ? 'right' : 'left' }}>
+          <T v="caption" color={c.textDim} numberOfLines={2} style={{ textAlign: side === 'left' ? 'right' : 'left' }}>
             {detail}
           </T>
         </View>

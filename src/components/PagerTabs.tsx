@@ -36,6 +36,7 @@ import { ThemedView } from '../theme/transition';
 import { cardDownAt, InPager, pagerOpen } from './TabPager';
 import { worldCamera } from './WorldLayer';
 import { DIR, IS_RTL, logical, physical } from '../i18n/direction';
+import { useScriptAdjust } from '../i18n/script';
 
 /*
  * The three tabs as one horizontal pager over the shared world (testing builds; the public release keeps its
@@ -296,6 +297,7 @@ function TabBar({
   const { c } = useTheme();
   const index = useSyncExternalStore(subscribeHighlight, highlighted);
   const insets = useSafeAreaInsets();
+  const labelScript = useScriptAdjust(styles.label);
   return (
     <ThemedView
       accessibilityRole="tablist"
@@ -323,7 +325,13 @@ function TabBar({
             style={styles.tab}
           >
             {r.options.tabBarIcon?.({ focused, color, size: 24 })}
-            <Text style={[styles.label, { color }]} maxFontSizeMultiplier={1.3} numberOfLines={1}>
+            <Text
+              style={[styles.label, labelScript, { color }]}
+              maxFontSizeMultiplier={1.3}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
               {r.options.title ?? r.name}
             </Text>
           </Pressable>
@@ -339,7 +347,7 @@ const styles = StyleSheet.create({
   row: { flex: 1 },
   page: { position: 'absolute', top: 0, bottom: 0 },
   bar: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, paddingTop: 6 },
+  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, paddingTop: 6, paddingHorizontal: 4 },
   label: { fontSize: 11, lineHeight: 14, fontWeight: '600' },
 });
 

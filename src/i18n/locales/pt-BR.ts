@@ -843,7 +843,7 @@ export const ptBR: Translation = {
       nothingYet: 'Dia {day} · nada ainda',
       nothing: 'Dia {day} · nada registrado',
       done: 'Dia {day} · {done} de {planned} feitos',
-      dayPhase: '{day}, fase {phase},',
+      dayPhase: '{label}. Fase {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Mostrar os hábitos desse dia',
     captionA11yHide: '{kicker}: {full}. Ocultar os hábitos desse dia',

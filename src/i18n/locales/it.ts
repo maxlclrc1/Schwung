@@ -281,11 +281,11 @@ export const it: Translation = {
     comeback: {
       0: {
         title: 'Il tuo sentiero è ancora qui.',
-        body: 'Bentornato. Riparti da dove sei: un piccolo passo oggi è più che sufficiente.',
+        body: 'Che bello rivederti. Riparti da dove sei: un piccolo passo oggi è più che sufficiente.',
       },
       1: { title: 'Ogni passo avanti conta.', body: 'Che bello rivederti. Il sentiero continua proprio da qui.' },
       2: {
-        title: 'Bentornato. Riparti da dove sei.',
+        title: 'Che bello rivederti. Riparti da dove sei.',
         body: 'La montagna non va da nessuna parte, e nemmeno ciò che hai costruito.',
       },
     },
@@ -422,7 +422,7 @@ export const it: Translation = {
       none: 'Non hai ancora iniziato il tuo Life Reset.',
       momentum: 'Mantieni il mio slancio · Giorno {day}.',
       momentumAscent: 'Mantieni il mio slancio · Giorno {day} · Ascesa {ascent}.',
-      summit: 'Vetta raggiunta. Scegli cosa viene dopo quando sei pronto.',
+      summit: 'Vetta raggiunta. Scegli cosa viene dopo quando vuoi.',
       running: 'Il Life Reset di 66 giorni · Giorno {day} di {total}.',
       runningAscent: 'Il Life Reset di 66 giorni · Giorno {day} di {total} · Ascesa {ascent}.',
       whatsNext: 'E adesso?',
@@ -597,7 +597,7 @@ export const it: Translation = {
   },
   welcomeBack: {
     dismiss: 'Chiudi',
-    title: 'Bentornato',
+    title: 'Che bello rivederti',
     stillThere: {
       one: 'Il tuo {count} giorno completo è ancora sulla montagna.',
       other: 'I tuoi {count} giorni completi sono ancora sulla montagna.',
@@ -747,8 +747,8 @@ export const it: Translation = {
     },
     phase: {
       after: 'I tuoi obiettivi restano dove sono.',
-      mastery: 'Gli obiettivi di Padronanza sono disponibili quando sei pronto',
-      momentum: 'Gli obiettivi di Slancio sono disponibili quando sei pronto',
+      mastery: 'Gli obiettivi di Padronanza sono disponibili quando vuoi',
+      momentum: 'Gli obiettivi di Slancio sono disponibili quando vuoi',
       foundation: 'Basi',
     },
     summary: '{done} abitudini su {total} fatte oggi. ',
@@ -863,7 +863,7 @@ export const it: Translation = {
       nothingYet: 'Giorno {day} · ancora niente',
       nothing: 'Giorno {day} · niente registrato',
       done: 'Giorno {day} · {done} di {planned} fatte',
-      dayPhase: '{day}, fase {phase},',
+      dayPhase: '{label}. Fase {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Mostra le abitudini di quel giorno',
     captionA11yHide: '{kicker}: {full}. Nascondi le abitudini di quel giorno',

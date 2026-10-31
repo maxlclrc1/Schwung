@@ -88,7 +88,7 @@ export const fr: Translation = {
       strengthRoutine:
         'Si vous n’avez pas encore de programme, commencez par celui d’un coach qualifié, d’un professeur d’EPS, d’un kinésithérapeute ou des recommandations de renforcement de votre service de santé national.',
       strengthStop:
-        'Arrêtez-vous et consultez un médecin si vous avez une douleur à la poitrine, si vous vous sentez près de vous évanouir ou si vous êtes bien plus essoufflé que d’habitude.',
+        'Arrêtez-vous et demandez une aide médicale si vous avez une douleur à la poitrine, si vous vous sentez près de vous évanouir ou si vous manquez de souffle bien plus que d’habitude.',
       strengthJoint: 'Respectez les conseils de votre kinésithérapeute ou de votre médecin.',
       strengthTeen:
         'Apprenez d’abord la technique avec un coach qualifié ou un professeur d’EPS, progressez petit à petit, évitez les charges maximales et arrêtez-vous en cas de douleur.',
@@ -345,7 +345,7 @@ export const fr: Translation = {
   reminders: {
     line: {
       0: { title: 'Un peu d’élan aujourd’hui ?', body: 'Un petit pas suffit.' },
-      1: { title: 'Votre prochain pas vous attend.', body: 'Quand vous serez prêt.' },
+      1: { title: 'Votre prochain pas vous attend.', body: 'Quand vous voulez.' },
       2: { title: 'Le sentier est là où vous l’avez laissé.', body: 'Quelques minutes suffisent.' },
       3: { title: 'Un bon moment pour un petit pas.', body: 'Vos habitudes sont prêtes quand vous l’êtes.' },
       4: {
@@ -426,7 +426,7 @@ export const fr: Translation = {
       none: 'Vous n’avez pas encore commencé votre Life Reset.',
       momentum: 'Garder mon élan · Jour {day}.',
       momentumAscent: 'Garder mon élan · Jour {day} · Ascension {ascent}.',
-      summit: 'Sommet atteint. Choisissez la suite quand vous serez prêt.',
+      summit: 'Sommet atteint. Choisissez la suite quand vous le souhaitez.',
       running: 'Le Life Reset de 66 jours · Jour {day} sur {total}.',
       runningAscent: 'Le Life Reset de 66 jours · Jour {day} sur {total} · Ascension {ascent}.',
       whatsNext: 'Et maintenant ?',
@@ -752,8 +752,8 @@ export const fr: Translation = {
     },
     phase: {
       after: 'Vos objectifs restent tels quels.',
-      mastery: 'Les objectifs Maîtrise sont ouverts quand vous êtes prêt',
-      momentum: 'Les objectifs Élan sont ouverts quand vous êtes prêt',
+      mastery: 'Les objectifs Maîtrise sont ouverts quand vous le souhaitez',
+      momentum: 'Les objectifs Élan sont ouverts quand vous le souhaitez',
       foundation: 'Fondations',
     },
     summary: '{done} habitudes sur {total} faites aujourd’hui. ',
@@ -792,7 +792,7 @@ export const fr: Translation = {
       tomorrow: 'demain',
       nextMonday: 'lundi prochain (jour {day})',
       early: 'En avance',
-      consistent: 'Vous avez été régulier',
+      consistent: 'Belle régularité',
       lighter: 'Envie de plus léger ?',
       ready: '{habit} est prête pour {phase}',
       easier: 'Rendre {habit} un cran plus facile',
@@ -838,7 +838,7 @@ export const fr: Translation = {
       session: 'Détails de la séance (facultatif)',
       sessionHint: 'Une séance compte par jour. Choisir un détail note la séance du jour si ce n’est pas déjà fait.',
       recovery:
-        'Vous vous êtes aussi entraîné hier. Pas de souci ; y aller plus doucement deux jours de suite peut aider à récupérer.',
+        'Hier aussi, vous avez fait une séance. Pas de souci ; y aller plus doucement deux jours de suite peut aider à récupérer.',
       difficulty: 'Difficulté',
       difficultyHintWeek:
         'Modifiable à tout moment. Plus facile et plus difficile commencent lundi prochain, jamais en cours de route.',
@@ -869,7 +869,7 @@ export const fr: Translation = {
       nothingYet: 'Jour {day} · rien pour l’instant',
       nothing: 'Jour {day} · rien d’enregistré',
       done: 'Jour {day} · {done} sur {planned} faites',
-      dayPhase: '{day}, phase {phase},',
+      dayPhase: '{label}. Phase {phase}.',
     },
     captionA11yShow: '{kicker} : {full}. Afficher les habitudes de ce jour',
     captionA11yHide: '{kicker} : {full}. Masquer les habitudes de ce jour',
@@ -899,7 +899,7 @@ export const fr: Translation = {
     },
     meaning: {
       1: 'Être au rendez-vous. Chaque habitude commence avec ses objectifs Fondations, assez petits pour tenir.',
-      2: 'Les objectifs Élan s’ouvrent à partir d’ici, proposés quand vous avez été régulier. Les accepter reste toujours votre choix.',
+      2: 'Les objectifs Élan s’ouvrent à partir d’ici, proposés quand vous êtes régulier dans vos habitudes. Les accepter reste toujours votre choix.',
       3: 'La dernière ligne droite vers le sommet. Les objectifs Maîtrise s’ouvrent, et les habitudes deviennent les vôtres.',
     },
     summary: {
@@ -1271,7 +1271,7 @@ export const fr: Translation = {
       },
       44: {
         overline: 'Jour 44 · Élan accompli',
-        title: 'Vous êtes allé plus loin que vous ne le pensez.',
+        title: 'Le chemin parcouru est plus long que vous ne le pensez.',
         line: 'Le sommet est en vue. La Maîtrise commence.',
       },
       continue: 'Continuer l’ascension',

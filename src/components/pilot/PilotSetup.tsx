@@ -714,7 +714,7 @@ export function PilotSetup() {
 const styles = StyleSheet.create({
   wash: { opacity: 0.55 },
   top: { paddingHorizontal: space.xl, paddingTop: space.sm, gap: space.xs, flexDirection: 'row', alignItems: 'center' },
-  chapterBox: { minWidth: 84, height: 20, overflow: 'hidden', alignItems: 'flex-end' },
+  chapterBox: { minWidth: 84, minHeight: 20, flexShrink: 1, overflow: 'hidden', alignItems: 'flex-end' },
   chapter: { fontWeight: '700', textAlign: 'right' },
   facts: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },
   fact: {

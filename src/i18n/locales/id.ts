@@ -857,7 +857,7 @@ export const id: Translation = {
       nothingYet: 'Hari ke-{day} · belum ada',
       nothing: 'Hari ke-{day} · tidak ada catatan',
       done: 'Hari ke-{day} · {done} dari {planned} selesai',
-      dayPhase: '{day}, fase {phase},',
+      dayPhase: '{label}. Fase {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Tampilkan kebiasaan hari itu',
     captionA11yHide: '{kicker}: {full}. Sembunyikan kebiasaan hari itu',

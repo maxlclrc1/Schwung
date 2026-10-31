@@ -273,11 +273,11 @@ export const es: Translation = {
     comeback: {
       0: {
         title: 'Tu camino sigue aquí.',
-        body: 'Bienvenido de nuevo. Retoma desde donde estás: un pequeño paso hoy es suficiente.',
+        body: 'Qué bien verte de nuevo. Retoma desde donde estás: un pequeño paso hoy es suficiente.',
       },
       1: { title: 'Cada paso adelante cuenta.', body: 'Qué bien verte. El sendero continúa justo desde aquí.' },
       2: {
-        title: 'Bienvenido de nuevo. Retoma desde donde estás.',
+        title: 'Qué bien verte de nuevo. Retoma desde donde estás.',
         body: 'La montaña no se va a ninguna parte, y lo que has construido tampoco.',
       },
     },
@@ -337,7 +337,7 @@ export const es: Translation = {
   reminders: {
     line: {
       0: { title: '¿Un poco de impulso hoy?', body: 'Un pequeño paso es suficiente.' },
-      1: { title: 'Tu próximo paso te espera.', body: 'Cuando estés listo.' },
+      1: { title: 'Tu próximo paso te espera.', body: 'Cuando quieras.' },
       2: { title: 'El sendero sigue donde lo dejaste.', body: 'Bastan unos minutos.' },
       3: { title: 'Buen momento para un pequeño paso.', body: 'Tus hábitos están listos cuando tú lo estés.' },
       4: { title: 'Aire fresco en el sendero hoy.', body: 'Pase lo que pase hoy, un pequeño paso cuenta.' },
@@ -583,7 +583,7 @@ export const es: Translation = {
   },
   welcomeBack: {
     dismiss: 'Descartar',
-    title: 'Bienvenido de nuevo',
+    title: 'Qué bien verte de nuevo',
     stillThere: {
       one: 'Tu {count} día completo sigue en la montaña.',
       other: 'Tus {count} días completos siguen en la montaña.',
@@ -846,7 +846,7 @@ export const es: Translation = {
       nothingYet: 'Día {day} · nada aún',
       nothing: 'Día {day} · nada registrado',
       done: 'Día {day} · {done} de {planned} hechos',
-      dayPhase: '{day}, fase {phase},',
+      dayPhase: '{label}. Fase {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Mostrar los hábitos de ese día',
     captionA11yHide: '{kicker}: {full}. Ocultar los hábitos de ese día',
@@ -1008,7 +1008,7 @@ export const es: Translation = {
     chapters: { 0: 'Tú', 1: 'Tus hábitos', 2: 'Tu vida', 3: 'Tu punto de partida', 4: 'Tu reset' },
     chapterA11y: '{name}, parte {n} de {total}',
     q: {
-      welcome: 'Bienvenido a tu reset',
+      welcome: 'Te damos la bienvenida a tu reset',
       ageTitle: 'Lo primero es lo primero. ¿Cuántos años tienes?',
       ageHint: 'Para que cada hábito se ajuste a ti. Lleva más o menos un minuto.',
       youToday: 'Tú, hoy',

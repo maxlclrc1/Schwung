@@ -13,7 +13,7 @@ export function SheetHeader({ title, action }: { title: string; action?: string 
     <View style={styles.wrap}>
       <ThemedView style={[styles.grabber, { backgroundColor: c.border }]} />
       <View style={styles.row}>
-        <T v="heading" numberOfLines={1} style={{ flex: 1 }}>
+        <T v="heading" numberOfLines={2} style={{ flex: 1 }}>
           {title}
         </T>
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button">

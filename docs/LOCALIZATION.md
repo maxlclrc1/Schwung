@@ -106,3 +106,22 @@ translated literally in meaning, never softened or embellished.
 2. Copy a complete catalog, translate, and run the checks above (missing keys are listed by name).
 3. Add it to `supportedLocales` for `expo-localization` in `app.json` (iOS per-app language).
 4. For a right-to-left language: set `rtl: true` (direction follows automatically) and review mirrored screens.
+
+## Layout audit (UI & clipping) and what still needs a device
+
+Fixed in code: sheet titles, buttons, journey captions, past-journey rows, Insights habit names, habit-card week
+lines and set-up dial labels wrap instead of truncating; the set-up chapter label grows with text size; tab labels
+scale down slightly rather than cut; the reminders "notifications off" note wraps its link below; rolling numbers stay
+left-to-right; tall and joined scripts (Urdu, Arabic, Hindi, Bengali, Thai, Vietnamese) get taller line heights and no
+letter spacing (`src/i18n/script.ts`).
+
+Checked only on the web build at 320 pt (welcome, Settings, Language in de, fr, ja, ru, th, ur). Needs a real iPhone
+(smallest size and largest accessibility text) and an Android phone, in English, German, French, Thai, Arabic, Urdu,
+Japanese and Chinese: onboarding (dials, tape, habit tiles, finale), Habits cards and the hero, Journey (mountain
+labels, captions, calendar), Insights charts, all ceremonies (Days 1, 7, 21, 44, 66), the 66-Day Story image, What's
+next / New Ascent / Past journeys, collection and unlock moment, weekly reflection, reminders, Privacy & Data, restore
+and recovery, alerts. Arabic and Urdu additionally: mirrored navigation and the restart prompt.
+
+Needs native-speaker review beyond the general backlog: Hindi and Urdu masculine verb forms; Spanish "activo" and
+similar adjectives; Russian story/summit wording; the reworded safety notes in Arabic (now direct instructions),
+French ("demandez une aide médicale"), Thai and Traditional Chinese ("clinician" as healthcare professional).
