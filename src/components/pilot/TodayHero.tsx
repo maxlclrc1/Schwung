@@ -202,7 +202,12 @@ function Level({ xp }: { xp: number }) {
   useEffect(() => {
     const d = xp - last.current;
     last.current = xp;
-    if (d <= 0) return;
+    if (d === 0) return;
+    // XP taken back (an undo) also takes back the "+XP" still showing: changing XP cancelled its timer.
+    if (d < 0) {
+      setGain(null);
+      return;
+    }
     setGain({ n: d, key: Date.now() });
     const t = setTimeout(() => setGain(null), 1100);
     return () => clearTimeout(t);
