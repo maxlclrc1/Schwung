@@ -7,8 +7,8 @@ The visual QA tool finds clipped, truncated, overflowing and overlapping text an
 ```bash
 npm run qa:build      # web export to .qa/web (after app changes)
 npm run qa:fixtures   # saved states to .qa/fixtures.json (after program/fixture changes)
-npm run qa            # quick matrix: 11 core screens × 20 languages × 2 settings ≈ 440 cases, ~5 min
-npm run qa:full       # full matrix: 30 screens × 20 languages × 8 settings ≈ 4,800 cases, ~1 h
+npm run qa            # quick matrix: 11 core screens × 20 languages × 2 settings ≈ 440 cases, ~8 min (4 workers)
+npm run qa:full       # full matrix: 30 screens × 20 languages × 8 settings ≈ 4,800 cases, ~1.5 h
 ```
 
 Open `.qa/report/index.html`. It shows:

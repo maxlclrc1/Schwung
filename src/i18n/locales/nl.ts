@@ -46,7 +46,7 @@ export const nl: Translation = {
       focus_top3: { name: 'Afmaken', description: 'Schrijf de belangrijkste taken van vandaag op en maak ze af' },
       mind_read: { name: 'Dagelijks lezen', description: 'Lees een boek of e-book, of luister een luisterboek' },
       confidence_talk: {
-        name: 'Sociaal zelfvertrouwen',
+        name: 'Sociaal zelf\u00ADvertrouwen',
         description: 'Zet de sociale stap van vandaag: wissel of sla hem over wanneer je wilt',
       },
       move_walk: {
@@ -61,7 +61,7 @@ export const nl: Translation = {
         description: 'Stuur een bericht aan of bel mensen om wie je geeft (meer dan een like)',
       },
       strength_log: {
-        name: 'Krachttraining',
+        name: 'Kracht\u00ADtraining',
         description: 'Log een krachtsessie uit een schema dat je volgt of kiest',
       },
     },
@@ -195,7 +195,7 @@ export const nl: Translation = {
         'vraagt om persoonlijk advies van je behandelaar of verloskundige (wacht op beoordeling door experts)',
       wakeVaries: 'je opsta-tijd wisselt sterk of je werkt in ploegendienst',
       lowPhone: 'je gebruikt je telefoon minder dan 2 uur per dag',
-      healthFirst: 'beantwoord eerst de gezondheidsvraag: een professional kan adviseren wat bij je past',
+      healthFirst: 'beantwoord eerst de gezondheids\u00ADvraag: een professional kan adviseren wat bij je past',
       strengthAdvice: 'vraagt eerst om persoonlijk advies van je behandelaar of verloskundige',
       strengthJoint:
         'bij gewrichts-, rug- of blessurepijn begin je met een schema dat je fysiotherapeut of behandelaar voorstelt',
