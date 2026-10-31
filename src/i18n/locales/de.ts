@@ -858,7 +858,7 @@ export const de: Translation = {
       nothingYet: 'Tag {day} · noch nichts',
       nothing: 'Tag {day} · nichts eingetragen',
       done: 'Tag {day} · {done} von {planned} erledigt',
-      dayPhase: '{day}, Phase {phase},',
+      dayPhase: '{label}. Phase {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Gewohnheiten des Tages zeigen',
     captionA11yHide: '{kicker}: {full}. Gewohnheiten des Tages ausblenden',

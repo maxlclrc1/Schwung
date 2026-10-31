@@ -807,7 +807,7 @@ export const zhHans: Translation = {
       nothingYet: '第{day}天 · 还没有完成',
       nothing: '第{day}天 · 没有记录',
       done: '第{day}天 · 已完成{done}/{planned}',
-      dayPhase: '{day}（{phase}阶段）',
+      dayPhase: '{label}。{phase}阶段。',
     },
     captionA11yShow: '{kicker}：{full}。显示那天的习惯',
     captionA11yHide: '{kicker}：{full}。隐藏那天的习惯',

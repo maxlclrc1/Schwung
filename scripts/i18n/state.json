@@ -774,7 +774,7 @@
     "journeyTab.label.nothingYet": "Day {day} · nothing yet",
     "journeyTab.label.nothing": "Day {day} · nothing logged",
     "journeyTab.label.done": "Day {day} · {done} of {planned} done",
-    "journeyTab.label.dayPhase": "{day}, {phase} phase,",
+    "journeyTab.label.dayPhase": "{label}. {phase} phase.",
     "journeyTab.captionA11yShow": "{kicker}: {full}. Show that day’s habits",
     "journeyTab.captionA11yHide": "{kicker}: {full}. Hide that day’s habits",
     "journeyTab.back.summit": "Summit",

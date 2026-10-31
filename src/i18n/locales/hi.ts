@@ -841,7 +841,7 @@ export const hi: Translation = {
       nothingYet: 'दिन {day} · अभी कुछ नहीं',
       nothing: 'दिन {day} · कुछ दर्ज नहीं',
       done: 'दिन {day} · {planned} में से {done} पूरी',
-      dayPhase: '{day}, {phase} चरण,',
+      dayPhase: '{label}। {phase} चरण।',
     },
     captionA11yShow: '{kicker}: {full}। उस दिन की आदतें दिखाएँ',
     captionA11yHide: '{kicker}: {full}। उस दिन की आदतें छिपाएँ',

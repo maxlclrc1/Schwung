@@ -820,7 +820,7 @@ export const ko: Translation = {
       nothingYet: '{day}일째 · 아직 없음',
       nothing: '{day}일째 · 기록 없음',
       done: '{day}일째 · {planned}개 중 {done}개 완료',
-      dayPhase: '{phase} 단계, {day}',
+      dayPhase: '{label}. {phase} 단계.',
     },
     captionA11yShow: '{kicker}: {full}. 그날의 습관 보기',
     captionA11yHide: '{kicker}: {full}. 그날의 습관 숨기기',

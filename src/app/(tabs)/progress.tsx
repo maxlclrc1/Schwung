@@ -65,7 +65,7 @@ function Header() {
   const t = useT();
   return (
     <View style={styles.header}>
-      <T v="heading" accessibilityRole="header" numberOfLines={1} style={{ flex: 1 }}>
+      <T v="heading" accessibilityRole="header" numberOfLines={2} style={{ flex: 1 }}>
         {t('journeyTab.title')}
       </T>
       <ThemeToggle />
@@ -163,7 +163,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 <T v="caption" color={c.indigoInk} style={styles.captionKicker} maxFontSizeMultiplier={1.3}>
                   {summary.kicker}
                 </T>
-                <T v="caption" numberOfLines={1} style={styles.captionText} maxFontSizeMultiplier={1.3}>
+                <T v="caption" numberOfLines={2} style={styles.captionText} maxFontSizeMultiplier={1.3}>
                   {summary.label}
                 </T>
                 <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={c.textDim} />
@@ -258,10 +258,7 @@ function daySummary(d: AscentDay | undefined, log: DayLog | undefined, isToday: 
           : 'journeyTab.label.done';
   const params = { done: d.done, planned: d.planned };
   const label = tr(key, { day: d.day, ...params });
-  const full = tr(key, {
-    day: tr('journeyTab.label.dayPhase', { day: d.day, phase: phaseFor(d.day).name }),
-    ...params,
-  });
+  const full = tr('journeyTab.label.dayPhase', { label, phase: phaseFor(d.day).name });
   return { kicker, label, full };
 }
 

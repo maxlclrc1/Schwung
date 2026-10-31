@@ -930,7 +930,7 @@ export const ru: Translation = {
       nothingYet: 'День {day} · пока ничего',
       nothing: 'День {day} · ничего не отмечено',
       done: 'День {day} · выполнено {done} из {planned}',
-      dayPhase: '{day}, фаза «{phase}»,',
+      dayPhase: '{label}. Фаза «{phase}».',
     },
     captionA11yShow: '{kicker}: {full}. Показать привычки этого дня',
     captionA11yHide: '{kicker}: {full}. Скрыть привычки этого дня',

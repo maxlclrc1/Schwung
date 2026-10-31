@@ -838,7 +838,7 @@ export const bn: Translation = {
       nothingYet: 'দিন {day} · এখনো কিছু নয়',
       nothing: 'দিন {day} · কিছু লেখা হয়নি',
       done: 'দিন {day} · {planned}টির মধ্যে {done}টি সম্পন্ন',
-      dayPhase: '{day}, {phase} পর্ব,',
+      dayPhase: '{label}। {phase} পর্ব।',
     },
     captionA11yShow: '{kicker}: {full}। সেদিনের অভ্যাসগুলো দেখান',
     captionA11yHide: '{kicker}: {full}। সেদিনের অভ্যাসগুলো লুকান',

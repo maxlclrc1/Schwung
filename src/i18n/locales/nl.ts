@@ -850,7 +850,7 @@ export const nl: Translation = {
       nothingYet: 'Dag {day} · nog niets',
       nothing: 'Dag {day} · niets gelogd',
       done: 'Dag {day} · {done} van {planned} gedaan',
-      dayPhase: '{day}, fase {phase},',
+      dayPhase: '{label}. Fase {phase}.',
     },
     captionA11yShow: '{kicker}: {full}. Toon de gewoontes van die dag',
     captionA11yHide: '{kicker}: {full}. Verberg de gewoontes van die dag',

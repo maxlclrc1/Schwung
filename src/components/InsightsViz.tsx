@@ -450,7 +450,7 @@ function HabitBar({
         style={({ pressed }) => [styles.habitRow, { opacity: pressed ? 0.7 : 1 }]}
       >
         <View style={styles.habitTop}>
-          <T v="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
+          <T v="bodyStrong" numberOfLines={2} style={{ flexShrink: 1 }}>
             {row.name}
           </T>
           {strongest ? (

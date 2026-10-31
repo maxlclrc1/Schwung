@@ -24,6 +24,7 @@ import { ThemedImage } from './ThemedImage';
 import { TILE_HEIGHT, TILES, type Theme } from './worldTiles';
 import { useT } from '../i18n/react';
 import { flipX, physical } from '../i18n/direction';
+import { useScriptAdjust } from '../i18n/script';
 
 type Props = {
   habitId: string;
@@ -186,8 +187,9 @@ function Ink({
   const color = useAnimatedStyle(() => ({
     color: interpolateColor(progress.get(), [0, 1], [INK.dark[pick], INK.light[pick]]),
   }));
+  const script = useScriptAdjust(style);
   return (
-    <Animated.Text style={[style, color]} numberOfLines={lines} maxFontSizeMultiplier={1.5}>
+    <Animated.Text style={[style, script, color]} numberOfLines={lines} maxFontSizeMultiplier={1.5}>
       {children}
     </Animated.Text>
   );

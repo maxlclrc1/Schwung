@@ -282,14 +282,14 @@ export function AscentCaption({
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
             <ThemedView style={[styles.captionDot, { borderColor: c.text }]} />
-            <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={1} style={{ flexShrink: 1, fontWeight: '600' }}>
+            <T v="caption" maxFontSizeMultiplier={1.3} numberOfLines={2} style={{ flexShrink: 1, fontWeight: '600' }}>
               {describeDay(selectedDay)}
             </T>
             <Ionicons name="chevron-forward" size={14} color={c.textDim} style={flipX} />
           </ThemedView>
         </Pressable>
       ) : (
-        <T v="caption" maxFontSizeMultiplier={1.3} color={c.textDim} numberOfLines={1} style={{ flexShrink: 1 }}>
+        <T v="caption" maxFontSizeMultiplier={1.3} color={c.textDim} numberOfLines={2} style={{ flexShrink: 1 }}>
           {t('journeyTab.ascent.climbed', { done, total: PROGRAM_DAYS })}
         </T>
       )}

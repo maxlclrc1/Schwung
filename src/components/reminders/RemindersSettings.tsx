@@ -110,7 +110,7 @@ export function RemindersSettings() {
             entering={FadeIn.duration(200).reduceMotion(sys)}
             style={[styles.note, { backgroundColor: c.peachSoft }]}
           >
-            <T v="caption" color={c.text} style={{ flex: 1 }}>
+            <T v="caption" color={c.text} style={styles.noteText}>
               {t('settings.reminders.blocked')}
             </T>
             <Pressable onPress={openNotificationSettings} accessibilityRole="button" hitSlop={8}>
@@ -249,7 +249,16 @@ const styles = StyleSheet.create({
   panel: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   bell: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  note: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.md },
+  note: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.md,
+  },
+  // The text takes the full width and the link wraps below it when the two don't fit side by side (long languages).
+  noteText: { flexGrow: 1, flexShrink: 1, flexBasis: 180 },
   rule: { height: StyleSheet.hairlineWidth },
   time: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   clock: { fontSize: 44, lineHeight: 50, fontWeight: '800', letterSpacing: -1, fontVariant: ['tabular-nums'] },

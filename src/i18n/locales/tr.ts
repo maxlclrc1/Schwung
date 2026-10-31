@@ -839,7 +839,7 @@ export const tr: Translation = {
       nothingYet: 'Gün {day} · henüz bir şey yok',
       nothing: 'Gün {day} · kayıt yok',
       done: 'Gün {day} · {planned} alışkanlıktan {done} tamam',
-      dayPhase: '{day}, {phase} aşaması,',
+      dayPhase: '{label}. {phase} aşaması.',
     },
     captionA11yShow: '{kicker}: {full}. O günün alışkanlıklarını göster',
     captionA11yHide: '{kicker}: {full}. O günün alışkanlıklarını gizle',

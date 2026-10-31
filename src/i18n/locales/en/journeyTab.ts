@@ -9,8 +9,8 @@ export const journeyTab = {
     nothingYet: 'Day {day} · nothing yet',
     nothing: 'Day {day} · nothing logged',
     done: 'Day {day} · {done} of {planned} done',
-    /** For VoiceOver, `{day}` in the lines above becomes this. */
-    dayPhase: '{day}, {phase} phase,',
+    /** For VoiceOver: one of the lines above, with the day's phase after it. */
+    dayPhase: '{label}. {phase} phase.',
   },
   captionA11yShow: '{kicker}: {full}. Show that day’s habits',
   captionA11yHide: '{kicker}: {full}. Hide that day’s habits',
