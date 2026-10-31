@@ -25,7 +25,11 @@ const CHOICES: P.PilotChoice[] = [
   { habitId: 'sleep_wake', intensity: 'starter' },
 ];
 /** Custom names stay exactly as typed (not translated): a long one tests wrapping in every language. */
-const CUSTOM = { name: 'Evening stretch with the kids before bed', note: 'Ten minutes on the living room floor', perWeek: 3 };
+const CUSTOM = {
+  name: 'Evening stretch with the kids before bed',
+  note: 'Ten minutes on the living room floor',
+  perWeek: 3,
+};
 
 /** A program on `day` (today), with most earlier days done, every moment before today already seen. */
 export function programOn(day: number, opts: { misses?: number[]; seen?: boolean } = {}): P.PilotProgram {
@@ -96,7 +100,13 @@ export function scenes(): QaScene[] {
   const momentum = P.keepMomentum(programOn(80), 67);
   const absent = programOn(20, { misses: [4, 9, 16, 17, 18, 19] });
   return [
-    { id: 'choose-language', group: 'Start', route: '/', state: { pilot: null, prefs: { languageChosen: false } }, core: true },
+    {
+      id: 'choose-language',
+      group: 'Start',
+      route: '/',
+      state: { pilot: null, prefs: { languageChosen: false } },
+      core: true,
+    },
     { id: 'welcome', group: 'Start', route: '/welcome', state: { pilot: null }, core: true },
     { id: 'setup', group: 'Onboarding', route: '/life-reset/setup', state: { pilot: null }, flow: 'setup', core: true },
     { id: 'today', group: 'Habits', route: '/today', state: { pilot: day12 }, core: true },
