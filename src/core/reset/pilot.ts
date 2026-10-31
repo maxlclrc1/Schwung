@@ -262,8 +262,12 @@ export function beginAscent(
   for (const id of keepCustom) {
     const c = prev.custom?.[id];
     if (!c) continue;
-    const r = addCustomHabit(next, { name: c.name, ...(c.note ? { note: c.note } : {}), perWeek: c.perWeek }, 1, views);
-    if (r) next = r.program;
+    // Kept as they were, even when a catalog habit now has the same name; one that can't be kept stops the ascent,
+    // never dropped quietly.
+    const def = { name: c.name, ...(c.note ? { note: c.note } : {}), perWeek: c.perWeek };
+    const r = addCustomHabit(next, def, 1, views, true);
+    if (!r) return null;
+    next = r.program;
   }
   return {
     ...next,
@@ -621,12 +625,12 @@ export function nextScene(p: PilotProgram, views: number): number {
 }
 
 /** Why the person's own habit can't be added (one problem per line), or none. */
-export function customProblems(p: PilotProgram, name: string, perWeek: number): string[] {
+export function customProblems(p: PilotProgram, name: string, perWeek: number, keepName = false): string[] {
   const out: string[] = [];
   const n = name.trim();
   if (!n) out.push(t('engine.problems.giveName'));
   else if (n.length > 40) out.push(t('engine.problems.nameLength'));
-  else if (p.habits.some((id) => nameOf(p, id).toLowerCase() === n.toLowerCase()))
+  else if (!keepName && p.habits.some((id) => nameOf(p, id).toLowerCase() === n.toLowerCase()))
     out.push(t('engine.problems.nameTaken'));
   if (!(Number.isInteger(perWeek) && perWeek >= 1 && perWeek <= 7)) out.push(t('engine.problems.howOften'));
   if (p.habits.length >= MAX_HABITS) out.push(t('engine.problems.atMost', { max: MAX_HABITS }));
@@ -643,8 +647,10 @@ export function addCustomHabit(
   def: { name: string; note?: string; perWeek: number },
   day: number,
   views: number,
+  /** A New Ascent keeping a habit the person already has: its name stays even if it now matches another's. */
+  keepName = false,
 ): { program: PilotProgram; id: string } | null {
-  if (customProblems(p, def.name, def.perWeek).length) return null;
+  if (customProblems(p, def.name, def.perWeek, keepName).length) return null;
   const custom = p.custom ?? {};
   // A new number, after every one ever used: a save repaired after damage can be missing an earlier habit of the
   // person's own (its days stay in the logs), and counting the ones left would reuse, and overwrite, a habit's id.
