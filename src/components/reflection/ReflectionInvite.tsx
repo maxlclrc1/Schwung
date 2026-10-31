@@ -46,7 +46,7 @@ export function ReflectionInvite({ program, today }: { program: P.PilotProgram; 
               }
             >
               <ThemedView style={[styles.answer, { backgroundColor: c.accentSoft }]}>
-                <T v="caption" color={c.accentInk} style={{ fontWeight: '700' }} numberOfLines={2}>
+                <T v="caption" color={c.accentInk} style={{ fontWeight: '700', textAlign: 'center' }}>
                   {t(`reflection.invite.${a}`)}
                 </T>
               </ThemedView>

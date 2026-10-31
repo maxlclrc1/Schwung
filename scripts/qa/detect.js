@@ -17,6 +17,8 @@ function qaDetect(pos = { atTop: true, atBottom: true }) {
   const TALL = /[؀-ۿݐ-ݿऀ-ॿঀ-৿฀-๿]/;
   // Scripts that break lines only between words (so a break inside a word is a problem).
   const SPACED = /[\p{Script=Latin}\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Arabic}\p{Script=Devanagari}\p{Script=Bengali}]/u;
+  // Scripts that may break anywhere (Chinese, Japanese, Korean, Thai): text with any of them is not judged for it.
+  const ANYWHERE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}]/u;
   const main = document.querySelector('[data-qa-main]');
   const cache = new Map();
   const styles = new Map();
@@ -170,7 +172,7 @@ function qaDetect(pos = { atTop: true, atBottom: true }) {
     }
 
     // A line break inside a word (in a script that breaks between words).
-    if (rects.length > 1 && text.length < 400 && SPACED.test(text) && !/^[\s\S]*https?:/.test(text)) {
+    if (rects.length > 1 && text.length < 400 && SPACED.test(text) && !ANYWHERE.test(text) && !/https?:/.test(text)) {
       const node = [...el.childNodes].find((k) => k.nodeType === 3 && k.textContent.trim());
       const s = node?.textContent ?? '';
       const at = (i) => {

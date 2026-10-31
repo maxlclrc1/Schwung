@@ -76,7 +76,6 @@ export function TodayHero({
           </T>
           <Text
             style={[styles.day, dayScript, { color: c.text }]}
-            numberOfLines={2}
             maxFontSizeMultiplier={1.3}
             accessibilityRole="header"
           >

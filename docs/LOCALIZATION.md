@@ -116,6 +116,10 @@ translated literally in meaning, never softened or embellished.
 
 ## Layout audit (UI & clipping) and what still needs a device
 
+Automated: `npm run qa` (every language, core screens, 320 pt and large text) and `npm run qa:full` (every screen and
+setting) find clipped, truncated, overflowing and overlapping text and controls on the web build and write an HTML
+report with outlined screenshots. How it works and what a web run cannot tell: `scripts/qa/README.md`.
+
 Fixed in code: sheet titles, buttons, journey captions, past-journey rows, Insights habit names, habit-card week
 lines and set-up dial labels wrap instead of truncating; the set-up chapter label grows with text size; tab labels
 scale down slightly rather than cut; the reminders "notifications off" note wraps its link below; rolling numbers stay

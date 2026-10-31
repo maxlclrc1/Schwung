@@ -94,7 +94,7 @@ function Figure({ value, unit, color }: { value: string; unit: string; color: st
           {value}
         </T>
       </Animated.View>
-      <T v="caption" color={c.textDim} numberOfLines={2} style={styles.figureUnit} maxFontSizeMultiplier={1.2}>
+      <T v="caption" color={c.textDim} style={styles.figureUnit} maxFontSizeMultiplier={1.2}>
         {unit}
       </T>
     </View>
