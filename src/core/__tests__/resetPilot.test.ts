@@ -467,6 +467,17 @@ describe('a complete day', () => {
     expect(P.dayFull(p, 6)).toBe(true);
   });
 
+  it('is never held back by a weekly habit whose week is too short for a goal', () => {
+    // Started on a Sunday: Focus Time (5 a week) has no goal in the 1-day first week, so Read alone completes Day 1.
+    const p = P.complete(pilot(THREE.slice(0, 2), ADULT, '2026-11-08'), 'mind_read', 1).program;
+    expect(P.weekProgress(p, 'focus_deepwork', 1)?.goal).toBe(0);
+    expect(P.requiredOn(p, 1)).toEqual(['mind_read']);
+    expect([P.dayFull(p, 1), P.pilotXp(p)]).toEqual([true, 10 + 20]);
+    // Doing it anyway is an extra: it's on the day's list, and the day stays complete.
+    const extra = P.complete(p, 'focus_deepwork', 1).program;
+    expect([P.dayFull(extra, 1), P.pilotXp(extra)]).toEqual([true, 2 * 10 + 20]);
+  });
+
   it('is read from the saved days, the same after a reload', () => {
     const p = doneOn(two(), 'mind_read', [1]);
     const back = P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))!;
@@ -610,6 +621,21 @@ describe('the person’s own habits', () => {
     expect(P.habitTally(back, 'custom_1', 8)).toEqual({ done: 1, eligible: 2 });
     // A made-up habit id with no definition is never trusted.
     expect(P.sanitizePilotProgram({ ...JSON.parse(JSON.stringify(p)), habits: ['custom_9'] })).toBeNull();
+  });
+
+  it('never reuses an id after a repaired save lost one of them', () => {
+    let p = P.createPilot({ ...ADULT }, [{ habitId: 'mind_read', intensity: 'starter' }], MON)!;
+    p = P.addCustomHabit(p, { name: 'One', perWeek: 7 }, 1, 12)!.program;
+    p = P.addCustomHabit(p, { name: 'Two', perWeek: 7 }, 1, 12)!.program;
+    p = P.complete(p, 'custom_2', 1).program;
+    const raw = JSON.parse(JSON.stringify(p));
+    raw.custom.custom_1.perWeek = 99; // damaged: set aside on reading
+    const kept = P.inspectPilotProgram(raw).program!;
+    expect(kept.habits).toEqual(['mind_read', 'custom_2']);
+    const r = P.addCustomHabit(kept, { name: 'Three', perWeek: 7 }, 3, 12)!;
+    expect(r.id).toBe('custom_3');
+    expect(r.program.custom?.custom_2?.name).toBe('Two');
+    expect([P.isDone(r.program, 'custom_2', 1), P.isDone(r.program, 'custom_3', 1)]).toEqual([true, false]);
   });
 });
 
