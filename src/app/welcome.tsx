@@ -9,6 +9,7 @@ import { Button, Screen, T } from '../components/ui';
 import { WorldBackdrop } from '../components/World';
 import { worldFrame } from '../core/world';
 import { APP_NAME } from '../lib/constants';
+import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
 import { space, useTheme } from '../theme';
 import { useT } from '../i18n/react';
@@ -22,9 +23,12 @@ export default function Welcome() {
   const [zoneTop, setZoneTop] = useState(insets.top + space.sm);
   const { zoneHeight } = worldFrame(width, zoneTop);
   const started = useResetPilot((s) => s.program !== null);
+  const languageChosen = usePreferences((s) => s.languageChosen === true);
 
   // A running program never sees the start screen again.
   if (started) return <Redirect href="/today" />;
+  // However the start screen is reached, the language comes first until one is chosen (choose-language.tsx).
+  if (!languageChosen) return <Redirect href="/choose-language" />;
 
   return (
     <Screen edges={['bottom']}>
