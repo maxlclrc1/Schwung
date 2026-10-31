@@ -110,8 +110,9 @@ const styles = StyleSheet.create({
   disc: { position: 'absolute', top: 0, width: 140, height: 140, borderRadius: 70 },
   number: { flexDirection: 'row', alignItems: 'center', gap: space.lg, minHeight: 112 },
   digits: { minWidth: 120, alignItems: 'center' },
+  // Clear of the disc (140 tall from the top), so the band label never sits on its edge.
   chip: {
-    marginTop: space.sm,
+    marginTop: space.xl,
     paddingHorizontal: space.md,
     paddingVertical: 6,
     borderRadius: radius.pill,
