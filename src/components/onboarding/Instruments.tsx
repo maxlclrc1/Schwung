@@ -295,6 +295,11 @@ const TRAIL_D = LEGS.map(
 const MILESTONE_PTS: Pt[] = [LEGS[0][0], LEGS[0][3], LEGS[1][3], LEGS[2][3]];
 /** Where each milestone's words sit, beside it, in the same coordinates. */
 const LABEL_SIDE: ('left' | 'right')[] = ['right', 'left', 'left', 'left'];
+/**
+ * Labels that grow upward from their milestone (their foot level with it) rather than down: the second milestone sits
+ * just above the first, so its words, once they wrap (long languages, larger text), would run into the first's.
+ */
+const LABEL_UP = [false, true, false, false];
 
 /**
  * A trail up a small mountain with a milestone for each answer, base camp to summit. Choosing one walks a hiker up
@@ -414,6 +419,8 @@ export function TrailPicker<K extends string>({
               any={any}
               tint={tn.peach}
               side={LABEL_SIDE[i]}
+              up={LABEL_UP[i]}
+              width={w}
               summit={i === items.length - 1}
               onPress={() => pick(i)}
             />
@@ -440,6 +447,8 @@ function Milestone({
   any,
   tint,
   side,
+  up,
+  width,
   summit,
   onPress,
 }: {
@@ -453,11 +462,15 @@ function Milestone({
   any: SharedValue<number>;
   tint: Tint;
   side: 'left' | 'right';
+  up: boolean;
+  /** The picker's width: each label takes the room on its side (up to a limit), so it wraps less. */
+  width: number;
   summit: boolean;
   onPress: () => void;
 }) {
   const { c } = useTheme();
   const at = TRAIL.at[i];
+  const room = Math.max(96, Math.min(170, side === 'right' ? width - x - 24 : x - 24));
   const reached = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
       interpolate(walked.value, [at - 6, at], [0, 1], 'clamp') * any.value,
@@ -487,8 +500,9 @@ function Milestone({
         onPress={onPress}
         style={[
           styles.milestoneLabel,
-          { top: y - 20 },
-          side === 'right' ? { left: x + 20 } : { left: x - 20 - 124, alignItems: 'flex-end' },
+          { width: room },
+          up ? { bottom: VIEW_H * (width / VIEW_W) - y - 20, justifyContent: 'flex-end' } : { top: y - 20 },
+          side === 'right' ? { left: x + 20 } : { left: x - 20 - room, alignItems: 'flex-end' },
         ]}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
@@ -759,7 +773,7 @@ const styles = StyleSheet.create({
   milestoneHit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   milestoneDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 3 },
   flag: { position: 'absolute', top: -12, left: 22 },
-  milestoneLabel: { position: 'absolute', width: 124 },
+  milestoneLabel: { position: 'absolute' },
   labelPill: { paddingHorizontal: space.sm, paddingVertical: 2, borderRadius: radius.sm },
   dialWrap: { alignItems: 'center', gap: space.md },
   knob: {

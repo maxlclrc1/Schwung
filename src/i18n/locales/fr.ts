@@ -42,7 +42,7 @@ export const fr: Translation = {
     ownHabit: 'Votre habitude',
     habit: {
       focus_deepwork: {
-        name: 'Temps de concentration',
+        name: 'Temps de concen\u00ADtration',
         description: 'Travaillez sur une seule chose, téléphone dans une autre pièce',
       },
       screen_app_limit: {
@@ -67,7 +67,7 @@ export const fr: Translation = {
         description: 'Écrivez ou appelez des personnes qui comptent pour vous (plus qu’un « j’aime »)',
       },
       strength_log: {
-        name: 'Renforcement musculaire',
+        name: 'Renfor\u00ADcement musculaire',
         description: 'Notez une séance de renforcement issue d’un programme que vous suivez ou choisissez',
       },
     },

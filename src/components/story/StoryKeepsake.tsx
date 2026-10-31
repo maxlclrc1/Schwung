@@ -27,6 +27,7 @@ import { WORLD } from '../../core/world';
 import { haptic } from '../../lib/haptics';
 import type { PilotProgram } from '../../core/reset/pilot';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
+import { useScriptAdjust } from '../../i18n/script';
 import { radius, space, useTheme } from '../../theme';
 import { rise } from '../onboarding/kit';
 import { ART_IMAGE } from '../ThemedImage';
@@ -57,6 +58,7 @@ const short = (key: string) => formatDate(key, 'short');
 export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; onClose?: () => void } = {}) {
   const { c, isDark } = useTheme();
   const t = useT();
+  const headlineScript = useScriptAdjust(styles.headline);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const reduce = useReducedMotion();
@@ -279,7 +281,7 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
 
           <View style={styles.foot}>
             <Animated.View entering={rise(reduce ? 0 : 900)}>
-              <Text style={[styles.headline, { color: c.text }]}>{t('story.headline')}</Text>
+              <Text style={[styles.headline, headlineScript, { color: c.text }]}>{t('story.headline')}</Text>
             </Animated.View>
             <Animated.View entering={rise(reduce ? 0 : 1150)}>
               <Text style={[styles.message, { color: c.textDim }]}>{t('story.message')}</Text>

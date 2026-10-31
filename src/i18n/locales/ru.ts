@@ -49,7 +49,7 @@ export const ru: Translation = {
       focus_top3: { name: 'Сделать главное', description: 'Запиши главные задачи дня и выполни их' },
       mind_read: { name: 'Чтение каждый день', description: 'Читай книгу, электронную книгу или слушай аудиокнигу' },
       confidence_talk: {
-        name: 'Уверенность в общении',
+        name: 'Уверен\u00ADность в общении',
         description: 'Сделай социальный шаг на сегодня: его всегда можно заменить или пропустить',
       },
       move_walk: { name: 'Движение каждый день', description: 'Двигайся как хочешь: ходьба, велосипед, танцы, спорт' },
@@ -784,7 +784,7 @@ export const ru: Translation = {
     hero: {
       lifeReset: 'Life Reset',
       lifeResetAscent: 'Life Reset · Восхождение {ascent}',
-      summit: 'Вершина достигнута',
+      summit: 'Вершина дости\u00ADгнута',
       day: 'День {day}',
       of: ' из {total}',
       complete: 'Сегодня всё выполнено',
