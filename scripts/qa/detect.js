@@ -142,9 +142,19 @@ function qaDetect(pos = { atTop: true, atBottom: true }) {
   const texts = [];
   for (const el of els) {
     if (!shown(el)) continue;
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const rects = [...range.getClientRects()].filter((r) => r.width > 0.5 && r.height > 0.5);
+    // The glyphs' boxes, word by word: a space at the end of a wrapped line hangs past the box invisibly, so
+    // whitespace is left out.
+    const rects = [];
+    for (const node of el.childNodes) {
+      if (node.nodeType !== 3) continue;
+      const str = node.textContent;
+      for (const m of str.matchAll(/\S+/g)) {
+        const range = document.createRange();
+        range.setStart(node, m.index);
+        range.setEnd(node, m.index + m[0].length);
+        for (const r of range.getClientRects()) if (r.width > 0.5 && r.height > 0.5) rects.push(r);
+      }
+    }
     if (!rects.length) continue;
     const u = union(rects);
     const { view, seen } = windowsOf(el);
@@ -170,6 +180,12 @@ function qaDetect(pos = { atTop: true, atBottom: true }) {
       if (u.right > Math.max(er.right, pr.right) + 4 || u.left < Math.min(er.left, pr.left) - 4)
         add('overflow-x', text, u, 'text wider than its box');
     }
+
+    // Marks above capitals (İ, Ä, É, Й) above a tight line box: drawn on the web, clipped on iOS.
+    const fs = parseFloat(cs.fontSize);
+    const lh = parseFloat(cs.lineHeight);
+    if (fs && lh && lh / fs < 1.18 && /\p{Lu}[\u0300-\u0315\u0340-\u0344\u0346\u034A-\u034C\u0350-\u0352\u0357\u035B\u0363-\u036F]/u.test(text.normalize('NFD').replace(/İ/g, 'I\u0307')))
+      add('tight-accents', text, er, `line height ${(lh / fs).toFixed(2)}× the font size: marks on capitals clip on iOS`);
 
     // A line break inside a word (in a script that breaks between words).
     if (rects.length > 1 && text.length < 400 && SPACED.test(text) && !ANYWHERE.test(text) && !/https?:/.test(text)) {

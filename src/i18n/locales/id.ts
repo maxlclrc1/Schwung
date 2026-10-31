@@ -49,7 +49,7 @@ export const id: Translation = {
       focus_top3: { name: 'Tuntaskan', description: 'Tulis tugas utama hari ini dan selesaikan' },
       mind_read: { name: 'Membaca Setiap Hari', description: 'Baca buku, e-book, atau buku audio' },
       confidence_talk: {
-        name: 'Percaya Diri Bersosialisasi',
+        name: 'Percaya Diri Ber\u00ADsosiali\u00ADsasi',
         description: 'Lakukan langkah sosial hari ini: tukar atau lewati kapan saja',
       },
       move_walk: {
@@ -58,7 +58,7 @@ export const id: Translation = {
       },
       sleep_wake: { name: 'Rutinitas Tidur', description: 'Bangun paling lambat di jam pilihanmu, setiap hari' },
       home_tidy: { name: 'Beres-beres', description: 'Rapikan kamar, meja, atau dapurmu' },
-      skill_practice: { name: 'Latih Keterampilan', description: 'Latih keterampilan yang kamu pilih' },
+      skill_practice: { name: 'Latih Ke\u00ADterampilan', description: 'Latih keterampilan yang kamu pilih' },
       social_reach_out: {
         name: 'Tetap Terhubung',
         description: 'Kirim pesan atau telepon orang yang kamu sayangi (lebih dari sekadar like)',
@@ -617,7 +617,7 @@ export const id: Translation = {
       'Disimpan dan dibagikan persis seperti yang kamu lihat. Tanpa nama kebiasaan, dan tidak ada yang keluar dari ponselmu kecuali kamu membagikannya.',
   },
   welcome: {
-    headline: 'Dapatkan kembali momentummu.',
+    headline: 'Dapatkan kembali momentum\u00ADmu.',
     body: 'Beberapa kebiasaan kecil sehari, disesuaikan dengan hidupmu. Semuanya tumbuh bersamamu.',
     free: 'Gratis. Tanpa akun. Tanpa langganan berbayar.',
     start: 'Mulai reset-ku',

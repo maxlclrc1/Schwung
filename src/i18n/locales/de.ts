@@ -27,7 +27,7 @@ export const de: Translation = {
     weekdayInitial: { 1: 'M', 2: 'D', 3: 'M', 4: 'D', 5: 'F', 6: 'S', 0: 'S' },
   },
   engine: {
-    intensity: { starter: 'Einstieg', standard: 'Standard', challenge: 'Herausforderung' },
+    intensity: { starter: 'Einstieg', standard: 'Standard', challenge: 'Heraus\u00ADforderung' },
     phase: { foundation: 'Fundament', momentum: 'Aufwind', mastery: 'Meisterschaft' },
     levelLine: '{intensity} · {phase}',
     levelShort: '{intensity} · {phase}',
@@ -42,10 +42,10 @@ export const de: Translation = {
         description: 'Mach den sozialen Schritt des Tages: tausch oder überspring ihn jederzeit',
       },
       move_walk: {
-        name: 'Tägliche Bewegung',
+        name: 'Tägliche Be\u00ADwegung',
         description: 'Beweg dich, wie du magst: gehen, Rad fahren, tanzen, Sport',
       },
-      sleep_wake: { name: 'Schlafrhythmus', description: 'Steh jeden Tag zu deiner Zeit auf' },
+      sleep_wake: { name: 'Schlaf\u00ADrhythmus', description: 'Steh jeden Tag zu deiner Zeit auf' },
       home_tidy: { name: 'Aufräumen', description: 'Räum dein Zimmer, deinen Schreibtisch oder die Küche auf' },
       skill_practice: { name: 'Eine Fähigkeit üben', description: 'Übe die Fähigkeit, die du gewählt hast' },
       social_reach_out: {
@@ -121,7 +121,7 @@ export const de: Translation = {
       strengthAbout: '{sessions}, je etwa {minutes} Min.',
       focus_deepwork: '{time} Fokus, das Handy in einem anderen Raum',
       mind_read: '{time} lesen',
-      move_walk: '{time} Bewegung, ganz wie du magst',
+      move_walk: '{time} Be\u00ADwegung, ganz wie du magst',
       home_tidy: '{time} aufräumen',
       skill_practice: '{time} {skill} üben',
       screen_app_limit: 'Heute unter {limit} in deiner Haupt-App',

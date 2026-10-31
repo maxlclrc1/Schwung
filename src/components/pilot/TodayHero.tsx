@@ -213,13 +213,7 @@ function Level({ xp }: { xp: number }) {
       >
         <ThemedView style={[styles.chip, { backgroundColor: c.accentSoft }]}>
           <Ionicons name="diamond-outline" size={13} color={c.accentInk} />
-          <T
-            v="caption"
-            color={c.accentInk}
-            style={[styles.chipText, styles.shrink]}
-            numberOfLines={1}
-            maxFontSizeMultiplier={1.3}
-          >
+          <T v="caption" color={c.accentInk} style={[styles.chipText, styles.shrink]} maxFontSizeMultiplier={1.3}>
             {g.title}
           </T>
           <View style={{ width: 28 }}>
@@ -277,6 +271,7 @@ const styles = StyleSheet.create({
     gap: 6,
     minHeight: 34,
     paddingHorizontal: space.md,
+    paddingVertical: 4,
     borderRadius: radius.pill,
   },
   chipText: { fontWeight: '700' },

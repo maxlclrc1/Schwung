@@ -64,7 +64,7 @@ export const es: Translation = {
         description: 'Escribe o llama a personas que te importan (más que un “me gusta”)',
       },
       strength_log: {
-        name: 'Entrenamiento de fuerza',
+        name: 'Entrena\u00ADmiento de fuerza',
         description: 'Registra una sesión de fuerza de una rutina que sigues o eliges',
       },
     },

@@ -13,6 +13,7 @@ const KINDS = {
   'overflow-x': 'Wider than its box',
   'offscreen-x': 'Past the screen edge',
   'word-broken': 'Line break inside a word',
+  'tight-accents': 'Accented capitals in a tight line (clip on iOS)',
   obscured: 'Covered by something on top',
   overlap: 'Text over text',
   'overlap-controls': 'Controls on the same spot',

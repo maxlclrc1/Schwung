@@ -353,8 +353,8 @@ function Peak({
       accessibilityHint={blocked ? tr('setup.choices.notAvailable', { reason: blocked }) : undefined}
     >
       <View style={[styles.peak, { backgroundColor: on ? tint.soft : 'transparent' }]}>
-        <Animated.View style={lift}>
-          <Svg width={82} height={48} viewBox="0 0 82 48">
+        <Animated.View style={[styles.peakArt, lift]}>
+          <Svg width="100%" height="100%" viewBox="0 0 82 48">
             <AnimatedPath
               d={shape.ridge}
               fill={tint.fill}
@@ -367,7 +367,7 @@ function Peak({
             {shape.snow ? <AnimatedPath d={shape.snow} fill="#FFFFFF" animatedProps={snow} /> : null}
           </Svg>
         </Animated.View>
-        <T v="caption" color={on ? tint.ink : c.textDim} style={{ fontWeight: on ? '700' : '600' }}>
+        <T v="caption" color={on ? tint.ink : c.textDim} style={[styles.peakLabel, { fontWeight: on ? '700' : '600' }]}>
           {label}
         </T>
       </View>
@@ -480,7 +480,17 @@ const styles = StyleSheet.create({
   marker: { alignSelf: 'center', width: 18, height: 18, borderRadius: 9, borderWidth: 3, marginBottom: space.sm },
   center: { textAlign: 'center' },
   peaks: { flexDirection: 'row', gap: space.xs },
-  peak: { alignItems: 'center', gap: space.xs, paddingTop: space.sm, paddingBottom: space.sm, borderRadius: radius.md },
+  peak: {
+    alignItems: 'center',
+    gap: space.xs,
+    paddingTop: space.sm,
+    paddingBottom: space.sm,
+    paddingHorizontal: 2,
+    borderRadius: radius.md,
+  },
+  // The drawing scales down with its column on a narrow phone (82 × 48 at most); the name wraps beneath it.
+  peakArt: { width: '100%', maxWidth: 82, aspectRatio: 82 / 48 },
+  peakLabel: { textAlign: 'center' },
   soft: {
     flexDirection: 'row',
     alignItems: 'center',

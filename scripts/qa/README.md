@@ -71,7 +71,8 @@ The detector is `detect.js`. It reads the page's own geometry, never pixels. It 
 | `clipped-script` | The same, for Arabic, Urdu, Devanagari, Bengali or Thai text, where the cause is usually the line height. |
 | `overflow-x` | Text wider than the box it sits in. |
 | `offscreen-x` | Text running past the edge of the screen. |
-| `word-broken` | A line break inside a word, in a script that only breaks lines between words. Chinese, Japanese, Korean and Thai are exempt. |
+| `word-broken` | A line break inside a word, in a script that only breaks lines between words. Chinese, Japanese, Korean and Thai are exempt. A break at a soft hyphen doesn't count. |
+| `tight-accents` | Capitals with marks above (İ, Ä, É, Й) in a line height under 1.18× the font size. The web draws the marks; iOS clips them. |
 | `obscured` | Text covered by something opaque on top: a header, a bar or another control. |
 | `overlap` | Two pieces of text drawn on the same glyph lines. |
 | `overlap-controls` | Two controls on the same spot. |
@@ -89,7 +90,18 @@ To avoid false alarms, it skips the following:
 
 On the web, a scroll view sometimes grows taller than the screen instead of scrolling. In that case the runner moves it up a screenful at a time and checks each position.
 
+Text is measured word by word, so a space hanging at the end of a wrapped line (invisible) never counts as overflow.
+
 To exclude a view by hand, give it `dataSet={{ qa: 'ignore' }}`.
+
+### Known findings that are not bugs
+
+- **Labels with `adjustsFontSizeToFit`** (the Light / Dark / System switch in Settings) are reported as `truncated` in long words (Russian "Системная"). On a phone the text shrinks to fit; the web ignores that property and shows an ellipsis.
+
+### Fixes that keep the design
+
+- **Long single words in narrow places** (the 130pt onboarding habit tiles at 320pt, the three level peaks): a soft hyphen (`\u00AD`) at the natural break in the translation, such as `Schlaf\u00ADrhythmus`. It's invisible unless the line breaks there, where it shows a hyphen, on iOS, Android and the web alike. Font sizes stay as designed.
+- **Marks on capitals:** `src/i18n/script.ts` gives display and title styles at least 1.2× line height in languages whose capitals carry marks.
 
 ## Limits: what a web run cannot tell
 
