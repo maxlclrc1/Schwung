@@ -151,6 +151,19 @@ describe('Begin a New Ascent', () => {
     expect(Object.values(next.custom ?? {}).map((c) => c.name)).toEqual(['Stretch']);
     expect(P.beginAscent(own.program, { ...answers, age: 'u16' }, d.choices, [], '2026-03-12', 67, 7)).toBeNull();
   });
+
+  it('never quietly drops an own habit, even one named like a catalog habit added later', () => {
+    // Made before Daily Movement joined, with Daily Movement's own name; both ran side by side.
+    const p = P.addCustomHabit(fresh(), { name: P.habitName('move_walk'), note: 'Ten minutes', perWeek: 7 }, 1, 7)!;
+    const both = P.addHabit(p.program, { activeDays: '1_2' }, { habitId: 'move_walk', intensity: 'starter' }, 2)!;
+    const prev = climb(both, 1, PROGRAM_DAYS);
+    const d = P.ascentDefaults(prev, 67);
+    const next = P.beginAscent(prev, { ...answers, activeDays: '1_2' }, d.choices, d.custom, '2026-03-12', 67, 7)!;
+    expect(next.habits).toContain('move_walk');
+    expect(Object.values(next.custom ?? {})).toEqual([
+      { name: P.habitName('move_walk'), note: 'Ten minutes', perWeek: 7, scene: 0 },
+    ]);
+  });
 });
 
 describe('Saving and reading the new fields', () => {
