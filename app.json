@@ -12,7 +12,11 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.example.schwung",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true
+        }
       },
       "privacyManifests": {
         "NSPrivacyTracking": false,

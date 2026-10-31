@@ -132,6 +132,41 @@ describe('Restore from backup: reading a file', () => {
     }
   });
 
+  it('refuses answers Schwung could never have saved: unknown age band, precaution or daily time', () => {
+    const p = progressed();
+    const answers: unknown[] = [
+      { ...p.answers, age: 'adult' },
+      { ...p.answers, age: 18 },
+      { ...p.answers, precautions: ['heart', 'bogus'] },
+      { ...p.answers, precautions: ['heart', 'heart'] },
+      { ...p.answers, minutesPerDay: 0 },
+      { ...p.answers, minutesPerDay: -30 },
+      { ...p.answers, minutesPerDay: 100000 },
+    ];
+    for (const a of answers) {
+      const data = JSON.parse(exported(p));
+      data.lifeReset.savedProgram.answers = a;
+      expect(readBackup(JSON.stringify(data), FORMAT)).toEqual({ ok: false, problem: 'damaged' });
+      // The same for a past journey inside an otherwise good backup.
+      const withJourney = JSON.parse(exported(p));
+      withJourney.pastJourneys = [{ id: 'j1', archivedAt: '2026-11-01T00:00:00Z', savedProgram: { ...p, answers: a } }];
+      expect(readBackup(JSON.stringify(withJourney), FORMAT)).toEqual({ ok: false, problem: 'damaged' });
+    }
+    // Skipped precautions and every real answer still restore.
+    const ok = JSON.parse(exported(p));
+    ok.lifeReset.savedProgram.answers = { ...p.answers, precautions: 'unknown' };
+    expect(readBackup(JSON.stringify(ok), FORMAT).ok).toBe(true);
+  });
+
+  it('restores a 16–17 backup whole, but paused behind the age notice (never tracked until confirmed 18+)', () => {
+    const p = progressed();
+    const r = readBackup(exported({ ...p, answers: { ...p.answers, age: '16_17' } }), FORMAT);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(P.ageRestricted(r.backup.program)).toBe(true);
+    expect(P.lifetimeXp(r.backup.program)).toBe(P.lifetimeXp(p));
+  });
+
   it('treats content as data only: unknown fields and prototype keys change nothing', () => {
     const p = progressed();
     const data = JSON.parse(exported(p));
