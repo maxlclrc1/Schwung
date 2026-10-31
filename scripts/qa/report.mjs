@@ -12,6 +12,7 @@ const KINDS = {
   'clipped-script': 'Clipped glyphs (complex script)',
   'overflow-x': 'Wider than its box',
   'offscreen-x': 'Past the screen edge',
+  'word-broken': 'Line break inside a word',
   obscured: 'Covered by something on top',
   overlap: 'Text over text',
   'overlap-controls': 'Controls on the same spot',

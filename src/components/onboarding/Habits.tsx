@@ -135,7 +135,7 @@ export function HabitTile({
               </View>
             ) : null}
             <View style={styles.tileText}>
-              <T v="bodyStrong" numberOfLines={2} style={{ lineHeight: 21 }}>
+              <T v="bodyStrong" style={{ lineHeight: 21 }}>
                 {P.habitName(id)}
               </T>
               <T v="caption" color={c.textDim} style={styles.small}>
