@@ -1,4 +1,4 @@
-import { Image, type ImageContentFit } from 'expo-image';
+import { Image, type ImageContentFit, type ImageContentPosition } from 'expo-image';
 import { useEffect, useId, useState } from 'react';
 import type { ImageRequireSource, ImageStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -38,10 +38,13 @@ export function ThemedImage({
   sources,
   style,
   contentFit = 'cover',
+  contentPosition,
 }: {
   sources: Record<Scheme, ImageRequireSource>;
   style: ImageStyle;
   contentFit?: ImageContentFit;
+  /** Which part stays in view when `cover` crops (e.g. 'top', where a scene's subject is painted). */
+  contentPosition?: ImageContentPosition;
 }) {
   const progress = useThemeProgress();
   // Whether the dark version has painted, kept in a shared value for the worklet below. Read from React state
@@ -72,6 +75,7 @@ export function ThemedImage({
         {...ART_IMAGE}
         source={sources.dark}
         contentFit={contentFit}
+        contentPosition={contentPosition}
         priority="high"
         onLoad={onDarkPainted}
         // A broken image never holds a switch up.
@@ -85,6 +89,7 @@ export function ThemedImage({
           {...ART_IMAGE}
           source={sources.light}
           contentFit={contentFit}
+          contentPosition={contentPosition}
           priority="high"
           onLoad={onLoad('light')}
           onError={onLoad('light')}
