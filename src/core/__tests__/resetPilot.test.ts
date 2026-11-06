@@ -109,10 +109,8 @@ describe('all 11 habits', () => {
     expect(P.timerBlocksFor({ ...mastery, answers: ADULT }, 'skill_practice', 1)).toEqual([90]);
   });
 
-  it('use their own artwork in both themes, except the three new habits still waiting for theirs', () => {
-    const waiting = ['eat_well', 'mind_meditation', 'outdoor_time'];
-    for (const id of waiting) expect(habitScene(id, 'light')).toBeUndefined();
-    const own = P.PILOT_HABITS.filter((id) => !waiting.includes(id));
+  it('use their own artwork in both themes, all 11 of them', () => {
+    const own = [...P.PILOT_HABITS];
     for (const theme of ['light', 'dark'] as const) {
       for (const id of own) expect(habitScene(id, theme)).toBeTruthy();
     }

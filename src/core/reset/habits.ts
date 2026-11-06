@@ -293,7 +293,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Make a meal a balanced one, your way',
     category: 'nutrition',
     existingId: null,
-    art: null,
+    art: 'eat_well',
     frequency: 'daily',
     targets: (() => {
       const cell = (text: string, meals: number): Record<Phase, Target> =>
@@ -320,7 +320,7 @@ export const RESET_HABITS: ResetHabit[] = [
       'A balanced meal mixes a few food groups, for example vegetables or fruit, something filling like grains, bread, rice or potatoes, and a protein such as beans, eggs, fish, meat or tofu. Any cuisine and any way of eating counts.',
       'Nothing to count or weigh, no foods to avoid: just a meal you’re glad you ate.',
     ],
-    availability: pending('Nutrition review of the wording', 'Light and dark scenes (until then, a crop of the world)'),
+    availability: pending('Nutrition review of the wording'),
   },
   {
     id: 'screen_app_limit',
@@ -440,7 +440,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'A few quiet minutes of meditation, guided or on your own',
     category: 'mindfulness',
     existingId: null,
-    art: null,
+    art: 'mind_meditation',
     frequency: 'daily',
     targets: minutesTargets(
       { starter: [2, 2, 2], standard: [5, 5, 5], challenge: [10, 10, 10] },
@@ -455,7 +455,7 @@ export const RESET_HABITS: ResetHabit[] = [
     personalization: [],
     ages: { adult: ALL, teen: ALL },
     notes: ['Any meditation you choose to do counts: guided, an app, breathing or simply sitting quietly.'],
-    availability: pending('Light and dark scenes (until then, a crop of the world)'),
+    availability: pending(),
   },
   {
     id: 'move_walk',
@@ -530,7 +530,7 @@ export const RESET_HABITS: ResetHabit[] = [
     description: 'Time outside that you choose for yourself',
     category: 'outdoors',
     existingId: null,
-    art: null,
+    art: 'outdoor_time',
     frequency: 'daily',
     targets: minutesTargets(
       { starter: [5, 5, 5], standard: [10, 10, 10], challenge: [20, 20, 20] },
@@ -544,7 +544,7 @@ export const RESET_HABITS: ResetHabit[] = [
       'Time you choose for yourself counts: a park, sitting outside, a walk you wanted to take. No exercise needed.',
       'Getting to work or school and running errands don’t count, unless you add some outdoor time for yourself.',
     ],
-    availability: pending('Light and dark scenes (until then, a crop of the world)'),
+    availability: pending(),
   },
   {
     id: 'skill_practice',

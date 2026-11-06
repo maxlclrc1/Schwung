@@ -11,8 +11,6 @@ import type { Theme, TileName } from './worldTiles';
  *   mind_read: { light: require('../../assets/habits/mind_read-light.webp'),
  *                dark: require('../../assets/habits/mind_read-dark.webp') },
  */
-// Waiting for their scenes (light and dark, painted to match the scenes below): eat_well (Eat Well),
-// mind_meditation (Meditation) and outdoor_time (Time Outdoors). Until then their cards show a crop of the world.
 const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageRequireSource>>> = {
   // Pilots, from design/artwork-candidates/scene-<id>-<theme>-v1.png (1536 × 1024, trimmed from the bottom to the
   // card's 1.61 : 1 and scaled to 1290 × 800).
@@ -44,6 +42,20 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageRequireSource>>> 
   skill_practice: {
     light: require('../../assets/habits/skill_practice-light.webp'),
     dark: require('../../assets/habits/skill_practice-dark.webp'),
+  },
+  // The catalog refinement's three, from scene-<id>-<theme>-v1.png: a 1400 × 868 window from y 110 (the subjects sit
+  // low in these masters) scaled to 1290 × 800; dark deepened toward the set's indigo, light given the mist grade.
+  mind_meditation: {
+    light: require('../../assets/habits/mind_meditation-light.webp'),
+    dark: require('../../assets/habits/mind_meditation-dark.webp'),
+  },
+  eat_well: {
+    light: require('../../assets/habits/eat_well-light.webp'),
+    dark: require('../../assets/habits/eat_well-dark.webp'),
+  },
+  outdoor_time: {
+    light: require('../../assets/habits/outdoor_time-light.webp'),
+    dark: require('../../assets/habits/outdoor_time-dark.webp'),
   },
   social_reach_out: {
     light: require('../../assets/habits/social_reach_out-light.webp'),
