@@ -537,11 +537,7 @@ export const RESET_HABITS: ResetHabit[] = [
       () => DAILY,
       (m) => `${m} min`,
     ),
-    completion: {
-      kind: 'timer',
-      criterion: 'Swipe when you’ve been outside, or let the timer finish',
-      timer: { optional: true, completesAtZero: true },
-    },
+    completion: { kind: 'check', criterion: 'Swipe when you’ve had your time outside' },
     personalization: [],
     ages: { adult: ALL, teen: ALL },
     notes: [

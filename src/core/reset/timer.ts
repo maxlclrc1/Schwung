@@ -66,7 +66,6 @@ export const TIMER_GRACE_MIN: Record<string, number> = {
   mind_meditation: 60,
   mind_read: 120,
   skill_practice: 120,
-  outdoor_time: 60,
   move_walk: 30,
 };
 export const DEFAULT_TIMER_GRACE_MIN = 60;

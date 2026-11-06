@@ -154,14 +154,15 @@ describe('counters', () => {
 });
 
 describe('timers', () => {
-  it('exist only for the five timed habits', () => {
+  it('exist only for the four timed habits', () => {
     expect(Object.keys(RESET_BY_ID).filter(hasTimer).sort()).toEqual([
       'mind_meditation',
       'mind_read',
       'move_walk',
-      'outdoor_time',
       'skill_practice',
     ]);
+    // Time Outdoors is a plain check: no timer.
+    expect(createTimer('outdoor_time', 1, RESET_BY_ID.outdoor_time.targets.standard.foundation)).toBeNull();
     expect(createTimer('focus_top3', 1, RESET_BY_ID.focus_top3.targets.standard.foundation)).toBeNull();
     expect(createTimer('strength_log', 1, RESET_BY_ID.strength_log.targets.standard.foundation)).toBeNull();
   });
@@ -332,11 +333,11 @@ describe('midnight', () => {
   });
 
   it('never credits an unplaceable stretch on a timer saved without a boundary', () => {
-    let t = start(createTimer('outdoor_time', 1, RESET_BY_ID.outdoor_time.targets.standard.foundation)!, T0, 1); // 10 min
+    let t = start(createTimer('mind_meditation', 1, RESET_BY_ID.mind_meditation.targets.challenge.foundation)!, T0, 1); // 10 min
     t = pause(t, T0 + 4 * MIN, 1);
     t = resume(t, T0 + 5 * MIN, 1);
     const r = saveTimer({}, at(2), t, T0 + 24 * 60 * MIN); // reopened the next day
-    const track = readTrack(r.logs[dateForDay(MON, 1)], 'outdoor_time');
+    const track = readTrack(r.logs[dateForDay(MON, 1)], 'mind_meditation');
     expect([track.timer?.status, track.minutes, r.event]).toEqual(['day-ended', 4, null]);
   });
 });
