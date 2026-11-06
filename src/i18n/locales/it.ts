@@ -806,11 +806,11 @@ export const it: Translation = {
       doneToday: 'Fatta per oggi',
       undo: 'Annulla',
 
-      partialMinutes: 'Fatto in parte · {minutes} min',
+      partialMinutes: 'Completata in parte · {minutes} min',
 
-      effort: 'Impegno fatto',
+      effort: 'Completata in parte',
 
-      logProgress: 'Registra progressi',
+      logProgress: 'Segna come completata in parte',
     },
     session: { fullBody: 'Corpo intero', upper: 'Parte superiore', lower: 'Parte inferiore', anything: 'Altro' },
     offer: {
@@ -875,14 +875,18 @@ export const it: Translation = {
       keepIt: 'Tienila',
       removeThis: 'Rimuovi questa abitudine',
 
-      partial: 'Fatto in parte.',
+      partial: 'Completata in parte.',
 
-      logProgress: 'Registra progressi',
+      logProgress: 'Ne hai fatto una parte?',
 
       progressHint:
-        'Ne hai fatto una parte? Registrala per +{xp} XP. I progressi parziali non contano per la tua serie.',
+        'Segnala come completata in parte per +{xp} XP. Solo il completamento pieno conta per la tua serie.',
 
-      effort: 'Mi sono impegnato',
+      effort: 'Segna come completata in parte',
+
+      removePartial: 'Rimuovi completamento parziale',
+
+      partialMinutes: 'Minuti fatti (facoltativo)',
     },
   },
   journeyTab: {

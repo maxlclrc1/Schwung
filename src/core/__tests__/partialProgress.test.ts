@@ -16,6 +16,7 @@ const ADULT: P.PilotAnswers = {
   wake: { kind: 'time', time: '07:00' },
   activeDays: '1_2',
   skill: 'Language',
+  strengthStart: 'sometimes',
 };
 const pilot = (choices: P.PilotChoice[]) => {
   const p = P.createPilot(ADULT, choices, MON);
@@ -43,31 +44,36 @@ describe('Partial progress: XP', () => {
     expect(xp(P.setProgress(undone, 'sleep_wake', 1, null).program)).toBe(0);
   });
 
-  it('timed habits log minutes; reaching the target completes it once, and a correction below takes it back', () => {
+  it('timed habits log minutes as a detail: always 5 XP, never a completion by themselves', () => {
     let p = one('mind_read');
     const { kind, target } = P.progressKind(p, 'mind_read', 1);
     expect(kind).toBe('minutes');
     expect(target).toBeGreaterThan(1);
-    p = P.setProgress(p, 'mind_read', 1, target! - 1).program;
-    expect([xp(p), P.isDone(p, 'mind_read', 1), readTrack(log(p, 1), 'mind_read').progress]).toEqual([
-      5,
-      false,
-      { value: target! - 1 },
-    ]);
-    const reached = P.setProgress(p, 'mind_read', 1, target! + 30);
-    expect(reached.event).toEqual({ kind: 'completed', first: true });
-    expect(xp(reached.program)).toBe(10 + 20);
-    // More minutes after completing never add XP.
-    expect(xp(P.setProgress(reached.program, 'mind_read', 1, target! + 60).program)).toBe(30);
-    // Correcting below the target undoes a completion progress made…
-    const corrected = P.setProgress(reached.program, 'mind_read', 1, 5).program;
-    expect([xp(corrected), P.isDone(corrected, 'mind_read', 1)]).toEqual([5, false]);
-    // …but never one the person swiped.
-    const swiped = P.complete(one('mind_read'), 'mind_read', 1).program;
+    p = P.setProgress(p, 'mind_read', 1, 5).program;
+    expect([xp(p), P.isDone(p, 'mind_read', 1)]).toEqual([5, false]);
+    // Reaching (or passing) the target's minutes is still partial: completing is the person's swipe.
+    const more = P.setProgress(p, 'mind_read', 1, target! + 30);
+    expect([more.event, xp(more.program), P.isDone(more.program, 'mind_read', 1)]).toEqual([null, 5, false]);
+    const swiped = P.complete(more.program, 'mind_read', 1).program;
+    expect(xp(swiped)).toBe(10 + 20);
+    // Minutes noted on a swiped completion never undo it or add XP.
     const noted = P.setProgress(swiped, 'mind_read', 1, 5).program;
     expect([xp(noted), P.isDone(noted, 'mind_read', 1)]).toEqual([30, true]);
-    // Removing the minutes from a swiped completion keeps it completed.
     expect(P.isDone(P.setProgress(noted, 'mind_read', 1, null).program, 'mind_read', 1)).toBe(true);
+  });
+
+  it('Mark as partially completed works on every kind of habit, for 5 XP, and can be removed', () => {
+    for (const id of ['sleep_wake', 'mind_read', 'eat_well', 'strength_log']) {
+      const p = one(id);
+      const on = P.setPartial(p, id, 1, true).program;
+      expect([id, xp(on), P.isDone(on, id, 1)]).toEqual([id, 5, false]);
+      // Twice is still once.
+      expect(xp(P.setPartial(on, id, 1, true).program)).toBe(5);
+      expect(xp(P.setPartial(on, id, 1, false).program)).toBe(0);
+      // A completed habit isn't marked partial.
+      const done = P.complete(p, id, 1).program;
+      expect(P.setPartial(done, id, 1, true).program).toBe(done);
+    }
   });
 
   it('counter habits log the amount on the counter itself', () => {

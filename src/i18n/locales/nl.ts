@@ -794,11 +794,11 @@ export const nl: Translation = {
       doneToday: 'Klaar voor vandaag',
       undo: 'Ongedaan maken',
 
-      partialMinutes: 'Deels gedaan · {minutes} min',
+      partialMinutes: 'Deels voltooid · {minutes} min',
 
-      effort: 'Moeite gedaan',
+      effort: 'Deels voltooid',
 
-      logProgress: 'Voortgang noteren',
+      logProgress: 'Markeren als deels voltooid',
     },
     session: { fullBody: 'Hele lichaam', upper: 'Bovenlichaam', lower: 'Onderlichaam', anything: 'Anders' },
     offer: {
@@ -863,13 +863,17 @@ export const nl: Translation = {
       keepIt: 'Houden',
       removeThis: 'Deze gewoonte verwijderen',
 
-      partial: 'Deels gedaan.',
+      partial: 'Deels voltooid.',
 
-      logProgress: 'Voortgang noteren',
+      logProgress: 'Een deel gedaan?',
 
-      progressHint: 'Een deel gedaan? Noteer het voor +{xp} XP. Gedeeltelijke voortgang telt niet mee voor je reeks.',
+      progressHint: 'Markeer het als deels voltooid voor +{xp} XP. Alleen volledig voltooien telt mee voor je reeks.',
 
-      effort: 'Ik heb moeite gedaan',
+      effort: 'Markeren als deels voltooid',
+
+      removePartial: 'Deels voltooid verwijderen',
+
+      partialMinutes: 'Gedane minuten (optioneel)',
     },
   },
   journeyTab: {

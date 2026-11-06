@@ -758,11 +758,11 @@ export const th: Translation = {
       doneToday: 'วันนี้ทำแล้ว',
       undo: 'เลิกทำ',
 
-      partialMinutes: 'ทำไปบางส่วน · {minutes} นาที',
+      partialMinutes: 'ทำสำเร็จบางส่วน · {minutes} นาที',
 
-      effort: 'ได้พยายามแล้ว',
+      effort: 'ทำสำเร็จบางส่วน',
 
-      logProgress: 'บันทึกความคืบหน้า',
+      logProgress: 'ทำเครื่องหมายว่าสำเร็จบางส่วน',
     },
     session: { fullBody: 'ทั้งตัว', upper: 'ช่วงบน', lower: 'ช่วงล่าง', anything: 'อื่น ๆ' },
     offer: {
@@ -826,13 +826,17 @@ export const th: Translation = {
       keepIt: 'เก็บไว้',
       removeThis: 'นำนิสัยนี้ออก',
 
-      partial: 'ทำไปบางส่วน',
+      partial: 'ทำสำเร็จบางส่วน',
 
-      logProgress: 'บันทึกความคืบหน้า',
+      logProgress: 'ทำไปบางส่วนแล้วใช่ไหม',
 
-      progressHint: 'ทำไปบางส่วนแล้วใช่ไหม บันทึกไว้รับ +{xp} XP ความคืบหน้าบางส่วนไม่นับในสถิติต่อเนื่อง',
+      progressHint: 'ทำเครื่องหมายว่าสำเร็จบางส่วนเพื่อรับ +{xp} XP เฉพาะการทำสำเร็จครบเท่านั้นที่นับในสถิติต่อเนื่อง',
 
-      effort: 'ฉันได้พยายามแล้ว',
+      effort: 'ทำเครื่องหมายว่าสำเร็จบางส่วน',
+
+      removePartial: 'ลบการสำเร็จบางส่วน',
+
+      partialMinutes: 'นาทีที่ทำ (ไม่บังคับ)',
     },
   },
   journeyTab: {

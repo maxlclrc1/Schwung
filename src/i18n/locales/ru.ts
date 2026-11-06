@@ -871,11 +871,11 @@ export const ru: Translation = {
       doneToday: 'На сегодня выполнено',
       undo: 'Отменить',
 
-      partialMinutes: 'Частично · {minutes} мин',
+      partialMinutes: 'Выполнено частично · {minutes} мин',
 
-      effort: 'Было усилие',
+      effort: 'Выполнено частично',
 
-      logProgress: 'Отметить прогресс',
+      logProgress: 'Отметить как частично выполненное',
     },
     session: { fullBody: 'Всё тело', upper: 'Верх тела', lower: 'Низ тела', anything: 'Другое' },
     offer: {
@@ -942,13 +942,17 @@ export const ru: Translation = {
       keepIt: 'Оставить',
       removeThis: 'Убрать эту привычку',
 
-      partial: 'Сделано частично.',
+      partial: 'Выполнено частично.',
 
-      logProgress: 'Отметить прогресс',
+      logProgress: 'Сделал часть?',
 
-      progressHint: 'Сделал часть? Отметь это и получи +{xp} XP. Частичный прогресс не идёт в серию.',
+      progressHint: 'Отметь как частично выполненное и получи +{xp} XP. В серию идёт только полное выполнение.',
 
-      effort: 'Я постарался',
+      effort: 'Отметить как частично выполненное',
+
+      removePartial: 'Убрать частичное выполнение',
+
+      partialMinutes: 'Сделано минут (необязательно)',
     },
   },
   journeyTab: {

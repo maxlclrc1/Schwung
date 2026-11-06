@@ -787,11 +787,11 @@ export const ptBR: Translation = {
       doneToday: 'Feito por hoje',
       undo: 'Desfazer',
 
-      partialMinutes: 'Feito em parte · {minutes} min',
+      partialMinutes: 'Concluído em parte · {minutes} min',
 
-      effort: 'Houve esforço',
+      effort: 'Concluído em parte',
 
-      logProgress: 'Registrar progresso',
+      logProgress: 'Marcar como concluído em parte',
     },
     session: { fullBody: 'Corpo inteiro', upper: 'Membros superiores', lower: 'Membros inferiores', anything: 'Outro' },
     offer: {
@@ -858,13 +858,18 @@ export const ptBR: Translation = {
       keepIt: 'Manter',
       removeThis: 'Remover este hábito',
 
-      partial: 'Feito em parte.',
+      partial: 'Concluído em parte.',
 
-      logProgress: 'Registrar progresso',
+      logProgress: 'Fez uma parte?',
 
-      progressHint: 'Fez uma parte? Registre e ganhe +{xp} XP. Progresso parcial não conta para sua sequência.',
+      progressHint:
+        'Marque como concluído em parte e ganhe +{xp} XP. Só a conclusão completa conta para sua sequência.',
 
-      effort: 'Fiz um esforço',
+      effort: 'Marcar como concluído em parte',
+
+      removePartial: 'Remover conclusão parcial',
+
+      partialMinutes: 'Minutos feitos (opcional)',
     },
   },
   journeyTab: {

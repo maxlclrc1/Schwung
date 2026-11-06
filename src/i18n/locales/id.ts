@@ -790,11 +790,11 @@ export const id: Translation = {
       doneToday: 'Selesai untuk hari ini',
       undo: 'Batalkan',
 
-      partialMinutes: 'Sebagian · {minutes} mnt',
+      partialMinutes: 'Selesai sebagian · {minutes} mnt',
 
-      effort: 'Sudah berusaha',
+      effort: 'Selesai sebagian',
 
-      logProgress: 'Catat progres',
+      logProgress: 'Tandai selesai sebagian',
     },
     session: {
       fullBody: 'Seluruh tubuh',
@@ -866,13 +866,17 @@ export const id: Translation = {
       keepIt: 'Pertahankan',
       removeThis: 'Hapus kebiasaan ini',
 
-      partial: 'Sebagian selesai.',
+      partial: 'Selesai sebagian.',
 
-      logProgress: 'Catat progres',
+      logProgress: 'Sudah sebagian?',
 
-      progressHint: 'Sudah sebagian? Catat untuk +{xp} XP. Progres sebagian tidak dihitung untuk runtunanmu.',
+      progressHint: 'Tandai selesai sebagian untuk +{xp} XP. Hanya selesai penuh yang dihitung untuk runtunanmu.',
 
-      effort: 'Aku sudah berusaha',
+      effort: 'Tandai selesai sebagian',
+
+      removePartial: 'Hapus selesai sebagian',
+
+      partialMinutes: 'Menit yang dilakukan (opsional)',
     },
   },
   journeyTab: {

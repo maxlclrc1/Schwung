@@ -761,9 +761,9 @@ export const ko: Translation = {
 
       partialMinutes: '일부 완료 · {minutes}분',
 
-      effort: '노력했어요',
+      effort: '일부 완료',
 
-      logProgress: '진행 기록',
+      logProgress: '일부 완료로 표시',
     },
     session: { fullBody: '전신', upper: '상체', lower: '하체', anything: '기타' },
     offer: {
@@ -830,11 +830,15 @@ export const ko: Translation = {
 
       partial: '일부 완료.',
 
-      logProgress: '진행 기록',
+      logProgress: '일부만 했나요?',
 
-      progressHint: '일부만 했나요? 기록하면 +{xp} XP. 일부 진행은 연속 기록에 포함되지 않아요.',
+      progressHint: '일부 완료로 표시하면 +{xp} XP. 연속 기록에는 완료만 포함돼요.',
 
-      effort: '노력했어요',
+      effort: '일부 완료로 표시',
+
+      removePartial: '일부 완료 취소',
+
+      partialMinutes: '한 시간(분, 선택)',
     },
   },
   journeyTab: {

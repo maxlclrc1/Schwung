@@ -777,9 +777,9 @@ export const ja: Translation = {
 
       partialMinutes: '一部完了 · {minutes}分',
 
-      effort: '取り組みました',
+      effort: '一部完了',
 
-      logProgress: '進捗を記録',
+      logProgress: '一部完了にする',
     },
     session: { fullBody: '全身', upper: '上半身', lower: '下半身', anything: 'その他' },
     offer: {
@@ -846,11 +846,15 @@ export const ja: Translation = {
 
       partial: '一部完了。',
 
-      logProgress: '進捗を記録',
+      logProgress: '一部できましたか？',
 
-      progressHint: '一部できましたか？記録すると+{xp} XP。一部の進捗は連続記録には数えられません。',
+      progressHint: '一部完了にすると+{xp} XP。連続記録に数えられるのは完了だけです。',
 
-      effort: '取り組んだ',
+      effort: '一部完了にする',
+
+      removePartial: '一部完了を取り消す',
+
+      partialMinutes: 'できた時間（任意）',
     },
   },
   journeyTab: {
