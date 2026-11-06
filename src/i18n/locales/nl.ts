@@ -41,20 +41,14 @@ export const nl: Translation = {
     levelShort: '{intensity} {phase}',
     ownHabit: 'Je eigen gewoonte',
     habit: {
-      focus_deepwork: { name: 'Focustijd', description: 'Werk aan één ding, je telefoon in een andere kamer' },
       screen_app_limit: { name: 'Minder scrollen', description: 'Blijf met je belangrijkste app onder je daglimiet' },
       focus_top3: { name: 'Afmaken', description: 'Schrijf de belangrijkste taken van vandaag op en maak ze af' },
       mind_read: { name: 'Dagelijks lezen', description: 'Lees een boek of e-book, of luister een luisterboek' },
-      confidence_talk: {
-        name: 'Sociaal zelf\u00ADvertrouwen',
-        description: 'Zet de sociale stap van vandaag: wissel of sla hem over wanneer je wilt',
-      },
       move_walk: {
         name: 'Dagelijks bewegen',
         description: 'Beweeg zoals jij wilt: wandelen, fietsen, dansen, sporten',
       },
       sleep_wake: { name: 'Slaapritme', description: 'Elke dag op tegen jouw tijd' },
-      home_tidy: { name: 'Opruimen', description: 'Ruim je kamer, bureau of keuken op' },
       skill_practice: { name: 'Een vaardigheid oefenen', description: 'Oefen de vaardigheid die je hebt gekozen' },
       social_reach_out: {
         name: 'Contact houden',
@@ -64,12 +58,19 @@ export const nl: Translation = {
         name: 'Kracht\u00ADtraining',
         description: 'Log een krachtsessie uit een schema dat je volgt of kiest',
       },
+
+      eat_well: { name: 'Goed Eten', description: 'Maak van een maaltijd een gebalanceerde, op jouw manier' },
+
+      mind_meditation: {
+        name: 'Meditatie',
+        description: 'Een paar rustige minuten meditatie, begeleid of op eigen houtje',
+      },
+
+      outdoor_time: { name: 'Tijd Buiten', description: 'Tijd buiten die je zelf kiest' },
     },
     notes: {
       scrolling:
         'Dit check je zelf: Schwung kan je Schermtijd niet zien. Instellingen → Schermtijd toont het echte getal als je dat wilt.',
-      social:
-        'Alleen alledaagse situaties. Elke stap kun je wisselen of overslaan; een stap overslaan is nooit mislukken.',
       movement: 'Beweeg je al langer, houd dan je eigen getal aan: dat wordt nooit verlaagd.',
       sleep:
         'Je eigen opsta-tijd is het anker: nooit vroeger, en nooit minder slaap. Er komt geen bedtijd- of telefoonregel bij.',
@@ -85,20 +86,20 @@ export const nl: Translation = {
         'Leer eerst de techniek van een gekwalificeerde trainer of gymdocent, bouw geleidelijk op, vermijd maximale lifts en stop als iets pijn doet.',
       strengthOlder: 'Een professional kan ook balans- en krachtoefeningen voorstellen die bij je passen.',
       strengthRecovery: 'Rustdagen helpen je herstellen. Heb je andere spieren getraind?',
-    },
-    social: {
-      sc_day_followup: 'Vraag iemand hoe zijn of haar dag gaat en stel één vervolgvraag',
-      sc_thank_by_name: 'Bedank iemand bij naam voor iets specifieks',
-      sc_hello_first: 'Zeg als eerste hallo tegen iemand die je vaak ziet',
-      sc_group_chat_opinion: 'Reageer in een groepsapp met je eigen mening, niet alleen met een reactie-emoji',
-      sc_rarely_talk: 'Begin een gesprek met een klasgenoot of collega met wie je zelden praat',
-      sc_ask_question: 'Stel een vraag in de les, in een vergadering of in een winkel',
-      sc_group_opinion: 'Deel je mening in een groepsgesprek',
-      sc_compliment_aloud: 'Geef iemand hardop een specifiek compliment',
-      sc_speak_up: 'Neem één keer het woord in de les, een vergadering of een groep',
-      sc_suggest_plan: 'Stel een vriend(in) iets voor (koffie, een wandeling, samen studeren)',
-      sc_introduce: 'Stel jezelf voor aan iemand nieuw op school, op je werk of bij een club',
-      sc_disagree: 'Ben het beleefd oneens als je iets anders ziet',
+
+      eatBalanced:
+        'Een gebalanceerde maaltijd combineert een paar voedselgroepen, bijvoorbeeld groente of fruit, iets vullends zoals granen, brood, rijst of aardappelen, en een eiwit zoals bonen, eieren, vis, vlees of tofu. Elke keuken en elke manier van eten telt.',
+
+      eatNoRules:
+        'Niets om te tellen of te wegen, geen eten om te vermijden: gewoon een maaltijd waar je blij van wordt.',
+
+      meditation: 'Elke meditatie die je kiest telt: begeleid, met een app, ademhaling of gewoon rustig zitten.',
+
+      outdoorsCounts:
+        'Tijd die je zelf kiest telt: een park, buiten zitten, een wandeling die je wilde maken. Sporten is niet nodig.',
+
+      outdoorsNotCounted:
+        'Naar je werk of school gaan en boodschappen doen tellen niet, tenzij je er bewust wat tijd buiten voor jezelf aan toevoegt.',
     },
     skills: {
       Language: 'Taal',
@@ -124,10 +125,8 @@ export const nl: Translation = {
     target: {
       strength: { one: '{count} sessie per week', other: '{count} sessies per week' },
       strengthAbout: '{sessions}, ongeveer {minutes} min',
-      focus_deepwork: '{time} focussen, je telefoon in een andere kamer',
       mind_read: '{time} lezen',
       move_walk: '{time} bewegen, zoals jij wilt',
-      home_tidy: '{time} opruimen',
       skill_practice: 'Besteed {time} aan {skill}',
       screen_app_limit: 'Blijf vandaag met je belangrijkste app onder {limit}',
       sleepUpBy: 'Uiterlijk om {time} op',
@@ -147,6 +146,17 @@ export const nl: Translation = {
         topFirstNoon: 'Maak je top {count} af, je #1 vóór 12 uur',
         topShortNoon: 'Top {count}, je #1 vóór 12 uur',
         topShortBefore: 'Top {count}, je #1 vóór {time}',
+      },
+
+      mind_meditation: 'Mediteer {time}',
+
+      outdoor_time: 'Breng {time} buiten door, omdat je dat wilt',
+
+      eatWell: {
+        starter: 'Eet groente of fruit bij één maaltijd',
+        standard: 'Eet één gebalanceerde maaltijd',
+
+        challenge: 'Eet twee gebalanceerde maaltijden',
       },
     },
     frequency: {
@@ -805,7 +815,6 @@ export const nl: Translation = {
       cantChange: 'Kan niet worden gewijzigd: {reason}.',
       saved: 'Bewaard. {pending}.',
       savedBack: 'Bewaard: terug naar je huidige doel.',
-      todaysStep: 'De stap van vandaag',
       shortWeek: 'Een korte week: deze week geen doel.',
       weekMet: '{done} van {goal} deze week · doel gehaald',
       week: '{done} van {goal} deze week',
@@ -822,13 +831,10 @@ export const nl: Translation = {
       undo: 'Ongedaan maken',
       logSession: 'Sessie loggen',
       markDone: 'Markeren als gedaan',
-      dontSkip: 'Vandaag niet overslaan',
-      skip: 'Vandaag overslaan',
       yesterdayDone: 'Gisteren: gedaan (je kunt het tot 12 uur corrigeren)',
       yesterdayNotDone: 'Gisteren: niet gedaan (je kunt het tot 12 uur corrigeren)',
       undoYesterday: 'Gisteren ongedaan maken',
       doneYesterday: 'Gisteren gedaan',
-      anyCounts: 'Elk van deze telt',
       minutes: 'Minuten (optioneel)',
       minutesHint: 'Noteer hoe lang het duurde, als je wilt. Het verandert nooit of vandaag gedaan is.',
       min: '{minutes} min',

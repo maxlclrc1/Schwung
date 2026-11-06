@@ -41,23 +41,17 @@ export const id: Translation = {
     levelShort: '{intensity} {phase}',
     ownHabit: 'Kebiasaanmu',
     habit: {
-      focus_deepwork: { name: 'Waktu Fokus', description: 'Kerjakan satu hal, ponsel di ruangan lain' },
       screen_app_limit: {
         name: 'Kurangi Scrolling',
         description: 'Jaga aplikasi utamamu di bawah batas harianmu',
       },
       focus_top3: { name: 'Tuntaskan', description: 'Tulis tugas utama hari ini dan selesaikan' },
       mind_read: { name: 'Membaca Setiap Hari', description: 'Baca buku, e-book, atau buku audio' },
-      confidence_talk: {
-        name: 'Percaya Diri Ber\u00ADsosiali\u00ADsasi',
-        description: 'Lakukan langkah sosial hari ini: tukar atau lewati kapan saja',
-      },
       move_walk: {
         name: 'Gerak Harian',
         description: 'Bergerak dengan cara apa pun yang kamu pilih: jalan kaki, bersepeda, menari, olahraga',
       },
       sleep_wake: { name: 'Rutinitas Tidur', description: 'Bangun paling lambat di jam pilihanmu, setiap hari' },
-      home_tidy: { name: 'Beres-beres', description: 'Rapikan kamar, meja, atau dapurmu' },
       skill_practice: { name: 'Latih Ke\u00ADterampilan', description: 'Latih keterampilan yang kamu pilih' },
       social_reach_out: {
         name: 'Tetap Terhubung',
@@ -67,12 +61,16 @@ export const id: Translation = {
         name: 'Latihan Kekuatan',
         description: 'Catat sesi latihan kekuatan dari rutinitas yang kamu ikuti atau pilih',
       },
+
+      eat_well: { name: 'Makan Baik', description: 'Jadikan satu makanan seimbang, dengan caramu' },
+
+      mind_meditation: { name: 'Meditasi', description: 'Beberapa menit tenang bermeditasi, dipandu atau sendiri' },
+
+      outdoor_time: { name: 'Waktu di Luar', description: 'Waktu di luar yang kamu pilih untuk dirimu' },
     },
     notes: {
       scrolling:
         'Ini pengecekanmu sendiri: Schwung tidak bisa melihat Durasi Layar kamu. Pengaturan → Durasi Layar menunjukkan angka sebenarnya kalau kamu mau.',
-      social:
-        'Hanya situasi sehari-hari. Setiap langkah bisa ditukar atau dilewati; melewatkan satu langkah tidak pernah berarti gagal.',
       movement: 'Kalau kamu sudah bergerak lebih lama, pakai angkamu sendiri: angka itu tidak pernah diturunkan.',
       sleep:
         'Jam bangunmu sendiri jadi patokannya: tidak pernah lebih pagi, dan tidak pernah tidur lebih sedikit. Tidak ada aturan jam tidur atau ponsel yang ditambahkan.',
@@ -90,20 +88,21 @@ export const id: Translation = {
       strengthOlder:
         'Seorang profesional juga bisa menyarankan aktivitas keseimbangan dan kekuatan yang cocok untukmu.',
       strengthRecovery: 'Hari istirahat membantumu pulih. Apakah kamu melatih otot yang berbeda?',
-    },
-    social: {
-      sc_day_followup: 'Tanyakan kabar hari seseorang dan ajukan satu pertanyaan lanjutan',
-      sc_thank_by_name: 'Ucapkan terima kasih kepada seseorang dengan menyebut namanya, untuk hal yang spesifik',
-      sc_hello_first: 'Sapa duluan seseorang yang sering kamu temui',
-      sc_group_chat_opinion: 'Balas obrolan grup dengan pendapatmu sendiri, bukan sekadar reaksi',
-      sc_rarely_talk: 'Mulai obrolan dengan teman sekelas atau rekan kerja yang jarang kamu ajak bicara',
-      sc_ask_question: 'Ajukan pertanyaan di kelas, rapat, atau toko',
-      sc_group_opinion: 'Sampaikan pendapat dalam obrolan kelompok',
-      sc_compliment_aloud: 'Berikan pujian yang spesifik kepada seseorang secara langsung',
-      sc_speak_up: 'Bicara sekali di kelas, rapat, atau kelompok',
-      sc_suggest_plan: 'Ajak teman membuat rencana (ngopi, jalan-jalan, belajar bareng)',
-      sc_introduce: 'Perkenalkan dirimu kepada orang baru di sekolah, kantor, atau klub',
-      sc_disagree: 'Sampaikan ketidaksetujuan dengan sopan saat pandanganmu berbeda',
+
+      eatBalanced:
+        'Makanan seimbang memadukan beberapa kelompok makanan, misalnya sayur atau buah, sesuatu yang mengenyangkan seperti biji-bijian, roti, nasi atau kentang, dan protein seperti kacang-kacangan, telur, ikan, daging atau tahu. Masakan apa pun dan cara makan apa pun dihitung.',
+
+      eatNoRules:
+        'Tidak ada yang perlu dihitung atau ditimbang, tidak ada makanan yang harus dihindari: cukup makanan yang membuatmu senang.',
+
+      meditation:
+        'Meditasi apa pun yang kamu pilih dihitung: dipandu, lewat aplikasi, latihan napas atau sekadar duduk tenang.',
+
+      outdoorsCounts:
+        'Waktu yang kamu pilih untuk dirimu dihitung: taman, duduk di luar, jalan kaki yang memang kamu inginkan. Tidak perlu olahraga.',
+
+      outdoorsNotCounted:
+        'Perjalanan ke tempat kerja atau sekolah dan urusan sehari-hari tidak dihitung, kecuali kamu menambahkan waktu di luar untuk dirimu sendiri.',
     },
     skills: {
       Language: 'Bahasa',
@@ -129,10 +128,8 @@ export const id: Translation = {
     target: {
       strength: { other: '{count} sesi seminggu' },
       strengthAbout: '{sessions}, sekitar {minutes} menit',
-      focus_deepwork: 'Fokus selama {time}, ponsel di ruangan lain',
       mind_read: 'Membaca selama {time}',
       move_walk: 'Bergerak selama {time}, dengan cara apa pun',
-      home_tidy: 'Beres-beres selama {time}',
       skill_practice: 'Berlatih {skill} selama {time}',
       screen_app_limit: 'Jaga aplikasi utamamu di bawah {limit} hari ini',
       sleepUpBy: 'Bangun paling lambat {time}',
@@ -150,6 +147,17 @@ export const id: Translation = {
         topFirstNoon: 'Selesaikan {count} tugas utamamu, nomor 1 sebelum tengah hari',
         topShortNoon: '{count} teratas, nomor 1 sebelum tengah hari',
         topShortBefore: '{count} teratas, nomor 1 sebelum {time}',
+      },
+
+      mind_meditation: 'Bermeditasi selama {time}',
+
+      outdoor_time: 'Habiskan {time} di luar, atas pilihanmu',
+
+      eatWell: {
+        starter: 'Makan buah atau sayur di satu waktu makan',
+        standard: 'Makan satu makanan seimbang',
+
+        challenge: 'Makan dua makanan seimbang',
       },
     },
     frequency: {
@@ -810,7 +818,6 @@ export const id: Translation = {
       cantChange: 'Tidak bisa diubah: {reason}.',
       saved: 'Tersimpan. {pending}.',
       savedBack: 'Tersimpan: kembali ke target saat ini.',
-      todaysStep: 'Langkah hari ini',
       shortWeek: 'Minggu yang pendek: tidak ada target minggu ini.',
       weekMet: '{done} dari {goal} minggu ini · target tercapai',
       week: '{done} dari {goal} minggu ini',
@@ -828,13 +835,10 @@ export const id: Translation = {
       undo: 'Batalkan',
       logSession: 'Catat sesi',
       markDone: 'Tandai selesai',
-      dontSkip: 'Jangan lewati hari ini',
-      skip: 'Lewati hari ini',
       yesterdayDone: 'Kemarin: selesai (bisa kamu koreksi sampai tengah hari)',
       yesterdayNotDone: 'Kemarin: belum selesai (bisa kamu koreksi sampai tengah hari)',
       undoYesterday: 'Batalkan kemarin',
       doneYesterday: 'Selesai kemarin',
-      anyCounts: 'Salah satu dari ini sudah dihitung',
       minutes: 'Menit (opsional)',
       minutesHint: 'Catat berapa lama waktunya, kalau mau. Ini tidak pernah mengubah apakah hari ini selesai.',
       min: '{minutes} mnt',

@@ -11,8 +11,7 @@ import {
   SCROLLING_RULES,
   scrollingLimit,
   scrollingRecommended,
-  SOCIAL_ACTIONS,
-  SOCIAL_RULES,
+  RETIRED_HABITS,
   STRENGTH_RULES,
   strengthNotes,
   upBy,
@@ -57,28 +56,39 @@ const table = (h: ResetHabit) => INTENSITIES.map((i) => PHASES.map((p) => h.targ
 describe('Life Reset habit catalog: the 11 approved habits', () => {
   it('has the 11 habits, in order, with stable ids', () => {
     expect(RESET_HABITS.map((h) => [h.id, h.name])).toEqual([
-      ['focus_deepwork', 'Focus Time'],
+      ['eat_well', 'Eat Well'],
       ['screen_app_limit', 'Less Scrolling'],
       ['focus_top3', 'Get It Done'],
       ['mind_read', 'Read Daily'],
-      ['confidence_talk', 'Social Confidence'],
+      ['mind_meditation', 'Meditation'],
       ['move_walk', 'Daily Movement'],
       ['sleep_wake', 'Sleep Routine'],
-      ['home_tidy', 'Tidy Up'],
+      ['outdoor_time', 'Time Outdoors'],
       ['skill_practice', 'Practice a Skill'],
       ['social_reach_out', 'Stay Connected'],
       ['strength_log', 'Strength Training'],
     ]);
   });
 
-  it('keeps the eight ids it grew from, and three new ones', () => {
+  it('keeps the six ids it grew from, and five new ones', () => {
     for (const h of RESET_HABITS) if (h.existingId) expect(h.existingId).toBe(h.id);
-    expect(RESET_HABITS.filter((h) => h.existingId).length).toBe(8);
+    expect(RESET_HABITS.filter((h) => h.existingId).length).toBe(6);
     expect(RESET_HABITS.filter((h) => !h.existingId).map((h) => h.id)).toEqual([
-      'home_tidy',
+      'eat_well',
+      'mind_meditation',
+      'outdoor_time',
       'skill_practice',
       'strength_log',
     ]);
+  });
+
+  it('never reuses a replaced habit’s id, and no catalog id looks like a habit of the person’s own', () => {
+    expect(Object.keys(RETIRED_HABITS).sort()).toEqual(['confidence_talk', 'focus_deepwork', 'home_tidy']);
+    for (const h of RESET_HABITS) {
+      expect(RETIRED_HABITS[h.id]).toBeUndefined();
+      expect(/^custom_\d+$/.test(h.id)).toBe(false);
+    }
+    for (const id of Object.keys(RETIRED_HABITS)) expect(habitScene(id, 'light')).toBeUndefined();
   });
 
   it('gives every habit a name, an actionable description, a category, ages, a completion and an inactive status', () => {
@@ -98,8 +108,12 @@ describe('Life Reset habit catalog: the 11 approved habits', () => {
       expect(habitScene(h.art, 'light')).toBeDefined();
       expect(habitScene(h.art, 'dark')).toBeDefined();
     }
-    // Every habit has its own scene.
-    expect(RESET_HABITS.filter((h) => !h.art)).toEqual([]);
+    // Every habit has its own scene, except the three new ones still waiting for theirs.
+    expect(RESET_HABITS.filter((h) => !h.art).map((h) => h.id)).toEqual([
+      'eat_well',
+      'mind_meditation',
+      'outdoor_time',
+    ]);
     for (const h of RESET_HABITS) if (h.art) expect(h.art).toBe(h.id);
   });
 });
@@ -107,11 +121,12 @@ describe('Life Reset habit catalog: the 11 approved habits', () => {
 describe('the exact approved targets', () => {
   it('match the specification tables', () => {
     const t = (id: string) => table(RESET_BY_ID[id]);
-    expect(t('focus_deepwork')).toEqual([
-      ['15 min, phone in another room', '20 min, phone in another room', '30 min, phone in another room'],
-      ['25 min, phone in another room', '40 min, phone in another room', '50 min, phone in another room'],
-      ['45 min, phone in another room', '60 min, phone in another room', '90 min, phone in another room'],
+    expect(t('eat_well')).toEqual([
+      ['Fruit or vegetables in one meal', 'Fruit or vegetables in one meal', 'Fruit or vegetables in one meal'],
+      ['One balanced meal', 'One balanced meal', 'One balanced meal'],
+      ['Two balanced meals', 'Two balanced meals', 'Two balanced meals'],
     ]);
+    expect(INTENSITIES.map((i) => num(RESET_BY_ID.eat_well.targets[i].foundation))).toEqual([1, 1, 2]);
     expect(t('focus_top3')).toEqual([
       ['Finish your #1 task', 'Finish your #1 task before 15:00', 'Finish your top 2 tasks'],
       ['Finish your top 2 tasks', 'Finish your top 3 tasks', 'Finish your top 3, your #1 before noon'],
@@ -127,10 +142,10 @@ describe('the exact approved targets', () => {
       [10, 15, 20],
       [20, 30, 40],
     ]);
-    expect(t('confidence_talk')).toEqual([
-      ['3 days a week, Level 1', '4 days a week, Level 1', '4 days a week, Level 2'],
-      ['4 days a week, Level 1', '5 days a week, Level 2', '5 days a week, Level 3'],
-      ['5 days a week, Level 2', '6 days a week, Level 2–3', 'Daily, Level 3'],
+    expect(t('mind_meditation')).toEqual([
+      ['2 min', '2 min', '2 min'],
+      ['5 min', '5 min', '5 min'],
+      ['10 min', '10 min', '10 min'],
     ]);
     expect(t('move_walk')).toEqual([
       ['10 min of movement you choose', '15 min of movement you choose', '20 min of movement you choose'],
@@ -142,11 +157,14 @@ describe('the exact approved targets', () => {
       [45, 30, 20],
       [30, 20, 15],
     ]);
-    expect(t('home_tidy')).toEqual([
-      ['5 min', '8 min', '10 min'],
-      ['10 min', '12 min', '15 min'],
-      ['15 min', '20 min', '25 min'],
+    expect(t('outdoor_time')).toEqual([
+      ['5 min', '5 min', '5 min'],
+      ['10 min', '10 min', '10 min'],
+      ['20 min', '20 min', '20 min'],
     ]);
+    for (const id of ['eat_well', 'mind_meditation', 'outdoor_time'])
+      for (const i of INTENSITIES)
+        for (const p of PHASES) expect(RESET_BY_ID[id].targets[i][p].schedule).toEqual({ kind: 'daily' });
     expect(t('skill_practice')).toEqual([
       ['10 min', '15 min', '20 min'],
       ['20 min', '30 min', '40 min'],
@@ -240,7 +258,7 @@ describe('the exact approved targets', () => {
       for (const i of INTENSITIES)
         for (const p of PHASES) {
           const t = h.targets[i][p];
-          if (t.unit === 'minutes' && (h.id === 'focus_deepwork' || h.id === 'skill_practice'))
+          if (t.unit === 'minutes' && h.id === 'skill_practice')
             expect(num(t) / (t.blocks ?? 1)).toBeLessThanOrEqual(TEEN_FOCUS_MAX_MIN);
         }
   });
@@ -348,36 +366,29 @@ describe('safety: existing exclusions preserved', () => {
   });
 });
 
-describe('Social Confidence actions', () => {
-  it('are concrete, ordinary actions: four per level, with known-people options at every level', () => {
-    expect(SOCIAL_ACTIONS).toHaveLength(12);
-    expect(new Set(SOCIAL_ACTIONS.map((a) => a.id)).size).toBe(12);
-    for (const level of [1, 2, 3] as const) {
-      const at = SOCIAL_ACTIONS.filter((a) => a.level === level);
-      expect(at).toHaveLength(4);
-      // Anyone can always skip an action involving someone new and still have choices.
-      expect(at.filter((a) => a.with === 'known').length).toBeGreaterThanOrEqual(3);
-    }
-    for (const a of SOCIAL_ACTIONS) expect(Object.keys(a).sort()).toEqual(['id', 'level', 'text', 'with']);
+describe('Meditation, Eat Well and Time Outdoors wording', () => {
+  const words = (id: string) => [RESET_BY_ID[id].description, ...RESET_BY_ID[id].notes].join(' ');
+
+  it('makes no medical or therapeutic claims for Meditation, and counts guided practice', () => {
+    expect(words('mind_meditation')).toMatch(/guided/);
+    expect(words('mind_meditation')).not.toMatch(
+      /anxiety|stress|depress|heal|cure|therap|treat|medical|blood pressure/i,
+    );
   });
 
-  it('never require strangers, unsafe settings, disclosure, ratings or a ladder; skipping is never failure', () => {
-    expect(SOCIAL_RULES).toEqual({
-      selectable: true,
-      swappable: true,
-      skippable: true,
-      skipIsFailure: false,
-      strangersRequired: false,
-      disclosureRequired: false,
-      discomfortRatings: false,
-      ladderToWrite: false,
-    });
-    const unsafe =
-      /stranger|online|internet|app\b|alone|night|dat(e|ing)|alcohol|drink|party|bar\b|phone number|address|personal|secret|rate|rating|discomfort|anxiety|fail/i;
-    for (const a of SOCIAL_ACTIONS) expect([a.text, unsafe.test(a.text)]).toEqual([a.text, false]);
-    for (const p of PHASES)
-      for (const i of INTENSITIES)
-        for (const l of RESET_BY_ID.confidence_talk.targets[i][p].levels ?? []) expect([1, 2, 3]).toContain(l);
+  it('keeps Eat Well inclusive: what a balanced meal is, any cuisine or way of eating, nothing to count or avoid', () => {
+    const w = words('eat_well');
+    expect(w).toMatch(/balanced meal/);
+    expect(w).toMatch(/Any cuisine and any way of eating/);
+    expect(w).toMatch(/Nothing to count or weigh, no foods to avoid/);
+    expect(w).not.toMatch(/weight loss|lose weight|junk|bad food|good food|unhealthy|cheat|guilt|diet plan/i);
+    expect(RESET_BY_ID.eat_well.personalization).toEqual([]);
+  });
+
+  it('counts only outdoor time the person chooses, never commutes or errands, and needs no exercise', () => {
+    const w = words('outdoor_time');
+    expect(w).toMatch(/No exercise needed/);
+    expect(w).toMatch(/work or school and running errands don’t count, unless you add some outdoor time/);
   });
 });
 

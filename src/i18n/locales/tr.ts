@@ -41,20 +41,14 @@ export const tr: Translation = {
     levelShort: '{intensity} {phase}',
     ownHabit: 'Senin alışkanlığın',
     habit: {
-      focus_deepwork: { name: 'Odak Zamanı', description: 'Tek bir işe odaklan, telefon başka odada' },
       screen_app_limit: { name: 'Daha Az Kaydırma', description: 'Ana uygulamanı günlük sınırının altında tut' },
       focus_top3: { name: 'Bitir Gitsin', description: 'Bugünün en önemli işlerini yaz ve bitir' },
       mind_read: { name: 'Her Gün Oku', description: 'Kitap, e-kitap ya da sesli kitap oku' },
-      confidence_talk: {
-        name: 'Sosyal Özgüven',
-        description: 'Bugünün sosyal adımını at: istediğin an değiştir ya da atla',
-      },
       move_walk: {
         name: 'Günlük Hareket',
         description: 'Dilediğin gibi hareket et: yürü, bisiklete bin, dans et, spor yap',
       },
       sleep_wake: { name: 'Uyku Düzeni', description: 'Her gün belirlediğin saatte kalk' },
-      home_tidy: { name: 'Toparlan', description: 'Odanı, masanı ya da mutfağını topla' },
       skill_practice: { name: 'Beceri Çalış', description: 'Seçtiğin beceriyi çalış' },
       social_reach_out: {
         name: 'Bağlantıda Kal',
@@ -64,12 +58,19 @@ export const tr: Translation = {
         name: 'Kuvvet Antrenmanı',
         description: 'Takip ettiğin ya da seçtiğin bir programdan bir kuvvet seansını kaydet',
       },
+
+      eat_well: { name: 'İyi Beslen', description: 'Bir öğününü kendi tarzınla dengeli yap' },
+
+      mind_meditation: {
+        name: 'Meditasyon',
+        description: 'Rehberli ya da kendi başına, birkaç sessiz dakika meditasyon',
+      },
+
+      outdoor_time: { name: 'Açık Havada Zaman', description: 'Kendin için seçtiğin dışarıda geçen zaman' },
     },
     notes: {
       scrolling:
         'Bu kendi kontrolün: Schwung Ekran Süreni göremez. Gerçek sayıyı istersen Ayarlar → Ekran Süresi’nde bulabilirsin.',
-      social:
-        'Yalnızca gündelik durumlar. Her adım değiştirilebilir ya da atlanabilir; birini atlamak asla başarısızlık değildir.',
       movement: 'Zaten daha uzun süre hareket ediyorsan kendi sayını koru: asla düşürülmez.',
       sleep:
         'Kendi kalkış saatin çıpadır: asla daha erken değil, asla daha az uyku değil. Yatma saati ya da telefon kuralı eklenmez.',
@@ -86,20 +87,21 @@ export const tr: Translation = {
         'Tekniği önce nitelikli bir antrenörden ya da beden eğitimi öğretmeninden öğren, yavaş yavaş artır, maksimum kaldırışlardan kaçın ve bir yerin ağrırsa dur.',
       strengthOlder: 'Bir uzman sana uygun denge ve kuvvet etkinlikleri de önerebilir.',
       strengthRecovery: 'Dinlenme günleri toparlanmana yardımcı olur. Farklı kas gruplarını mı çalıştırdın?',
-    },
-    social: {
-      sc_day_followup: 'Birine gününün nasıl geçtiğini sor ve bir soru daha sor',
-      sc_thank_by_name: 'Birine belirli bir şey için adıyla teşekkür et',
-      sc_hello_first: 'Sık gördüğün birine önce sen merhaba de',
-      sc_group_chat_opinion: 'Bir grup sohbetine sadece tepkiyle değil, kendi fikrinle yanıt ver',
-      sc_rarely_talk: 'Nadiren konuştuğun bir sınıf ya da iş arkadaşınla sohbet başlat',
-      sc_ask_question: 'Derste, toplantıda ya da bir dükkânda bir soru sor',
-      sc_group_opinion: 'Bir grup sohbetinde fikrini paylaş',
-      sc_compliment_aloud: 'Birine yüksek sesle belirli bir iltifat et',
-      sc_speak_up: 'Bir derste, toplantıda ya da grupta bir kez söz al',
-      sc_suggest_plan: 'Bir arkadaşına plan öner (kahve, yürüyüş, birlikte ders çalışmak)',
-      sc_introduce: 'Okulda, işte ya da bir kulüpte yeni biriyle tanış',
-      sc_disagree: 'Farklı düşündüğünde kibarca katılmadığını söyle',
+
+      eatBalanced:
+        'Dengeli bir öğün birkaç besin grubunu bir araya getirir; örneğin sebze ya da meyve, tahıl, ekmek, pirinç ya da patates gibi doyurucu bir şey ve fasulye, yumurta, balık, et ya da tofu gibi bir protein. Her mutfak ve her beslenme biçimi sayılır.',
+
+      eatNoRules:
+        'Sayacak ya da tartacak bir şey yok, kaçınılacak yiyecek yok: yalnızca yediğine memnun olduğun bir öğün.',
+
+      meditation:
+        'Kendi seçtiğin her meditasyon sayılır: rehberli, bir uygulamayla, nefes çalışması ya da sadece sessizce oturmak.',
+
+      outdoorsCounts:
+        'Kendin için seçtiğin zaman sayılır: bir park, dışarıda oturmak, istediğin bir yürüyüş. Egzersiz gerekmez.',
+
+      outdoorsNotCounted:
+        'İşe ya da okula gidip gelmek ve ayak işleri sayılmaz, kendin için biraz açık havada zaman eklemediğin sürece.',
     },
     skills: {
       Language: 'Dil',
@@ -125,10 +127,8 @@ export const tr: Translation = {
     target: {
       strength: { one: 'Haftada {count} seans', other: 'Haftada {count} seans' },
       strengthAbout: '{sessions}, yaklaşık {minutes} dk',
-      focus_deepwork: '{time} odaklan, telefon başka odada',
       mind_read: '{time} oku',
       move_walk: '{time} hareket et, nasıl istersen',
-      home_tidy: '{time} toparla',
       skill_practice: 'Çalışma: {skill}, {time}',
       screen_app_limit: 'Ana uygulamanı bugün {limit} altında tut',
       sleepUpBy: 'En geç {time} kalk',
@@ -148,6 +148,17 @@ export const tr: Translation = {
         topFirstNoon: 'En önemli {count} işini bitir, 1 numarayı öğleden önce',
         topShortNoon: 'İlk {count}, 1 numara öğleden önce',
         topShortBefore: 'İlk {count}, 1 numara {time} öncesi',
+      },
+
+      mind_meditation: '{time} meditasyon yap',
+
+      outdoor_time: '{time} isteyerek açık havada geçir',
+
+      eatWell: {
+        starter: 'Bir öğünde meyve ya da sebze ye',
+        standard: 'Bir dengeli öğün ye',
+
+        challenge: 'İki dengeli öğün ye',
       },
     },
     frequency: {
@@ -795,7 +806,6 @@ export const tr: Translation = {
       cantChange: 'Değiştirilemiyor: {reason}.',
       saved: 'Kaydedildi. {pending}.',
       savedBack: 'Kaydedildi: mevcut hedefine geri dönüldü.',
-      todaysStep: 'Bugünün adımı',
       shortWeek: 'Kısa bir hafta: bu hafta hedef yok.',
       weekMet: 'Bu hafta {done} / {goal} · hedefe ulaşıldı',
       week: 'Bu hafta {done} / {goal}',
@@ -812,13 +822,10 @@ export const tr: Translation = {
       undo: 'Geri al',
       logSession: 'Seans kaydet',
       markDone: 'Tamamlandı olarak işaretle',
-      dontSkip: 'Bugün atlama',
-      skip: 'Bugün atla',
       yesterdayDone: 'Dün: yapıldı (öğlene kadar düzeltebilirsin)',
       yesterdayNotDone: 'Dün: yapılmadı (öğlene kadar düzeltebilirsin)',
       undoYesterday: 'Dünü geri al',
       doneYesterday: 'Dün yapıldı',
-      anyCounts: 'Bunlardan herhangi biri sayılır',
       minutes: 'Dakika (isteğe bağlı)',
       minutesHint: 'İstersen ne kadar sürdüğünü not et. Bugünün tamam olup olmadığını asla değiştirmez.',
       min: '{minutes} dk',

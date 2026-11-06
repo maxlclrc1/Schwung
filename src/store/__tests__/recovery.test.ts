@@ -24,7 +24,7 @@ const program = () =>
     { age: '30_49', precautions: [], minutesPerDay: 90 },
     [
       { habitId: 'mind_read', intensity: 'starter' },
-      { habitId: 'home_tidy', intensity: 'starter' },
+      { habitId: 'outdoor_time', intensity: 'starter' },
     ],
     '2026-11-02',
   )!;
@@ -71,14 +71,14 @@ describe('a save that can’t be fully understood is kept, never guessed at or d
 
   it('a partly damaged save: everything valid recovered, the damaged habit named, the original kept', async () => {
     const p = program();
-    const damaged = { ...p, progression: { ...p.progression, home_tidy: { nonsense: true } } };
+    const damaged = { ...p, progression: { ...p.progression, outdoor_time: { nonsense: true } } };
     const raw = saveText(damaged);
     await launch(raw);
     const rec = useRecovery.getState();
     expect(rec.pending).toBe(true);
     expect(rec.reason).toBe('partial');
     expect(rec.recovered?.habits).toEqual(['mind_read']);
-    expect(rec.lost).toEqual(['Tidy Up: its targets and progress']);
+    expect(rec.lost).toEqual(['Time Outdoors: its targets and progress']);
     // Not applied until the person chooses.
     expect(r().program).toBeNull();
     expect(await AsyncStorage.getItem(recoveryKey(KEY, 1))).toBe(raw);
@@ -113,7 +113,7 @@ describe('a save that can’t be fully understood is kept, never guessed at or d
   it('a valid save loads as before, with nothing set aside', async () => {
     await launch(saveText(program()));
     expect(useRecovery.getState().pending).toBe(false);
-    expect(r().program?.habits).toEqual(['mind_read', 'home_tidy']);
+    expect(r().program?.habits).toEqual(['mind_read', 'outdoor_time']);
     expect(await AsyncStorage.getItem(recoveryKey(KEY, 1))).toBeNull();
   });
 });
@@ -125,7 +125,7 @@ describe('save versions and writes', () => {
     // A save from before versioning (version 0) still opens.
     await launch(saveText(program(), 0));
     expect(useRecovery.getState().pending).toBe(false);
-    expect(r().program?.habits).toEqual(['mind_read', 'home_tidy']);
+    expect(r().program?.habits).toEqual(['mind_read', 'outdoor_time']);
   });
 
   it('a failed write keeps the newest state and retries it', async () => {
@@ -134,7 +134,7 @@ describe('save versions and writes', () => {
     await expect(flushStorage()).rejects.toThrow('disk full');
     expect(await AsyncStorage.getItem(KEY)).toBeNull();
     await flushStorage();
-    expect(JSON.parse((await AsyncStorage.getItem(KEY))!).state.program.habits).toEqual(['mind_read', 'home_tidy']);
+    expect(JSON.parse((await AsyncStorage.getItem(KEY))!).state.program.habits).toEqual(['mind_read', 'outdoor_time']);
     multiSet.mockRestore();
   });
 });

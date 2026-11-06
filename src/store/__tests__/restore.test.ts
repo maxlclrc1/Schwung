@@ -28,7 +28,7 @@ function onRestoreWrite(f: typeof AsyncStorage.multiSet) {
   });
 }
 
-const pilot = (habit: 'mind_read' | 'home_tidy', startKey: string) =>
+const pilot = (habit: 'mind_read' | 'outdoor_time', startKey: string) =>
   P.complete(
     P.createPilot(
       { age: '30_49', precautions: [], minutesPerDay: 90 },
@@ -40,7 +40,11 @@ const pilot = (habit: 'mind_read' | 'home_tidy', startKey: string) =>
   ).program;
 
 const backup = (): Backup => ({
-  program: { ...pilot('home_tidy', '2026-10-01'), collection: { unlocked: ['compass'] }, ceremonies: { day1: true } },
+  program: {
+    ...pilot('outdoor_time', '2026-10-01'),
+    collection: { unlocked: ['compass'] },
+    ceremonies: { day1: true },
+  },
   journeys: [],
   exportedAt: '2026-11-01T10:00:00.000Z',
   preferences: { themePreference: 'dark', reminders: { ...DEFAULT_REMINDERS, enabled: true }, comebacks: false },
@@ -82,7 +86,7 @@ describe('Restore from backup: committing it', () => {
     const kept = JSON.parse((await AsyncStorage.getItem(recoveryKey(KEY, 1)))!);
     expect(kept.state.program).toEqual(current);
     expect(useResetPilot.getState().program).toEqual(b.program);
-    expect(useResetPilot.getState().program?.habits).toEqual(['home_tidy']);
+    expect(useResetPilot.getState().program?.habits).toEqual(['outdoor_time']);
   });
 
   it('a storage failure changes nothing: the current Life Reset stays, in memory and on disk', async () => {

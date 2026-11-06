@@ -63,10 +63,10 @@ const MIN = 60_000;
  * Shorter where the timer proves least (movement), longer where people often leave the phone for a long stretch.
  */
 export const TIMER_GRACE_MIN: Record<string, number> = {
-  focus_deepwork: 120,
+  mind_meditation: 60,
   mind_read: 120,
   skill_practice: 120,
-  home_tidy: 60,
+  outdoor_time: 60,
   move_walk: 30,
 };
 export const DEFAULT_TIMER_GRACE_MIN = 60;

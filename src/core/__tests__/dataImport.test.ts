@@ -9,14 +9,14 @@ const start = () =>
     { age: '30_49', precautions: ['heart'], minutesPerDay: 60 },
     [
       { habitId: 'mind_read', intensity: 'starter' },
-      { habitId: 'home_tidy', intensity: 'starter' },
+      { habitId: 'outdoor_time', intensity: 'starter' },
     ],
     '2026-11-02',
   )!;
 
 const progressed = () => {
   let p = P.complete(start(), 'mind_read', 1).program;
-  p = P.complete(p, 'home_tidy', 1).program;
+  p = P.complete(p, 'outdoor_time', 1).program;
   return {
     ...p,
     reflections: { 1: { week: 1, day: 8, answer: 'right' as const } },

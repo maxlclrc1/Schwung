@@ -11,16 +11,14 @@ import type { Theme, TileName } from './worldTiles';
  *   mind_read: { light: require('../../assets/habits/mind_read-light.webp'),
  *                dark: require('../../assets/habits/mind_read-dark.webp') },
  */
+// Waiting for their scenes (light and dark, painted to match the scenes below): eat_well (Eat Well),
+// mind_meditation (Meditation) and outdoor_time (Time Outdoors). Until then their cards show a crop of the world.
 const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageRequireSource>>> = {
   // Pilots, from design/artwork-candidates/scene-<id>-<theme>-v1.png (1536 × 1024, trimmed from the bottom to the
   // card's 1.61 : 1 and scaled to 1290 × 800).
   mind_read: {
     light: require('../../assets/habits/mind_read-light.webp'),
     dark: require('../../assets/habits/mind_read-dark.webp'),
-  },
-  focus_deepwork: {
-    light: require('../../assets/habits/focus_deepwork-light.webp'),
-    dark: require('../../assets/habits/focus_deepwork-dark.webp'),
   },
   move_walk: {
     light: require('../../assets/habits/move_walk-light.webp'),
@@ -43,10 +41,6 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageRequireSource>>> 
     light: require('../../assets/habits/strength_log-light.webp'),
     dark: require('../../assets/habits/strength_log-dark.webp'),
   },
-  home_tidy: {
-    light: require('../../assets/habits/home_tidy-light.webp'),
-    dark: require('../../assets/habits/home_tidy-dark.webp'),
-  },
   skill_practice: {
     light: require('../../assets/habits/skill_practice-light.webp'),
     dark: require('../../assets/habits/skill_practice-dark.webp'),
@@ -54,10 +48,6 @@ const HABIT_SCENES: Readonly<Record<string, Record<Theme, ImageRequireSource>>> 
   social_reach_out: {
     light: require('../../assets/habits/social_reach_out-light.webp'),
     dark: require('../../assets/habits/social_reach_out-dark.webp'),
-  },
-  confidence_talk: {
-    light: require('../../assets/habits/confidence_talk-light.webp'),
-    dark: require('../../assets/habits/confidence_talk-dark.webp'),
   },
 };
 

@@ -34,13 +34,13 @@ const pilot = (c: P.PilotChoice[], start = MON) => {
 const doneOn = (p: P.PilotProgram, id: string, days: number[]) =>
   days.reduce((x, d) => P.complete(x, id, d).program, p);
 const READ: P.PilotChoice = { habitId: 'mind_read', intensity: 'standard' };
-const FOCUS: P.PilotChoice = { habitId: 'focus_deepwork', intensity: 'standard' };
+const FOCUS: P.PilotChoice = { habitId: 'skill_practice', intensity: 'standard' };
 const STRENGTH: P.PilotChoice = { habitId: 'strength_log', intensity: 'standard' };
 const states = (cells: { state: string }[], days: number[]) => days.map((d) => cells[d - 1].state);
 
 describe('the weekly consistency trend (Life Reset)', () => {
   // Read every day, Focus Time 5 workdays a week. Today is Day 9 (Tuesday of Week 2).
-  const p = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'focus_deepwork', [1, 2, 3]);
+  const p = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'skill_practice', [1, 2, 3]);
 
   it('counts each week’s opportunities with the overall consistency’s rules, so the two always agree', () => {
     const t = C.weeklyTrend(p, 9);
@@ -90,7 +90,7 @@ describe('the weekly consistency trend (Life Reset)', () => {
     // weekend with no record at all is unrecorded, not 0%.
     const t = C.weeklyTrend(pilot([FOCUS], SAT), 4);
     expect(t[0]).toMatchObject({ state: 'unrecorded', eligible: 1, share: null });
-    expect(C.weeklyTrend(doneOn(pilot([FOCUS], SAT), 'focus_deepwork', [2]), 4)[0]).toMatchObject({
+    expect(C.weeklyTrend(doneOn(pilot([FOCUS], SAT), 'skill_practice', [2]), 4)[0]).toMatchObject({
       state: 'closed',
       share: 1,
     });
@@ -98,7 +98,7 @@ describe('the weekly consistency trend (Life Reset)', () => {
 });
 
 describe('the 66-day heatmap (Life Reset)', () => {
-  const p = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'focus_deepwork', [1, 2, 3]);
+  const p = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'skill_practice', [1, 2, 3]);
 
   it('has every program day on its real date and weekday', () => {
     const cells = C.dayCells(p, 9);
@@ -113,7 +113,7 @@ describe('the 66-day heatmap (Life Reset)', () => {
     // Day 1: both done. Day 3: only Focus (Read missed). Day 6, a Saturday: Read done, but Focus's week is still open
     // (3 of 5), so the day isn't complete. Day 9 is today, Day 10 hasn't come.
     expect(states(cells, [1, 3, 6, 9, 10])).toEqual(['full', 'partial', 'partial', 'today', 'future']);
-    expect(cells[2]).toMatchObject({ done: ['focus_deepwork'], planned: ['focus_deepwork', 'mind_read'] });
+    expect(cells[2]).toMatchObject({ done: ['skill_practice'], planned: ['mind_read', 'skill_practice'] });
   });
 
   it('distinguishes an explicit non-completion from a day with no record', () => {
@@ -124,14 +124,14 @@ describe('the 66-day heatmap (Life Reset)', () => {
 
   it('shows skipped days and rest days, which are never misses', () => {
     const s = P.setSkipped(
-      pilot([READ, { habitId: 'confidence_talk', intensity: 'starter' }]),
-      'confidence_talk',
+      pilot([READ, { habitId: 'mind_meditation', intensity: 'starter' }]),
+      'mind_meditation',
       2,
       true,
     );
-    expect(C.dayCells(s.program, 4)[1]).toMatchObject({ state: 'skipped', skipped: ['confidence_talk'] });
+    expect(C.dayCells(s.program, 4)[1]).toMatchObject({ state: 'skipped', skipped: ['mind_meditation'] });
     // Focus Time alone is weekly: a day it isn't done is a rest day, weekday or weekend.
-    const f = doneOn(pilot([FOCUS]), 'focus_deepwork', [1]);
+    const f = doneOn(pilot([FOCUS]), 'skill_practice', [1]);
     expect(states(C.dayCells(f, 8), [1, 2, 6, 7])).toEqual(['full', 'rest', 'rest', 'rest']);
   });
 
@@ -148,9 +148,9 @@ describe('the 66-day heatmap (Life Reset)', () => {
 
 describe('the habit breakdown and personal records (Life Reset)', () => {
   it('judges daily habits by the day and weekly ones by their goal', () => {
-    const p = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', [1, 2, 3]), 'focus_deepwork', [1, 2, 3, 4, 5, 8]);
+    const p = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', [1, 2, 3]), 'skill_practice', [1, 2, 3, 4, 5, 8]);
     const bars = C.habitBars(p, 16);
-    expect(bars.find((b) => b.id === 'focus_deepwork')).toMatchObject({
+    expect(bars.find((b) => b.id === 'skill_practice')).toMatchObject({
       kind: 'weekly',
       weeksMet: 1,
       weeksJudged: 2,

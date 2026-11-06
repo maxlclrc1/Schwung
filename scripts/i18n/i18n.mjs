@@ -215,6 +215,8 @@ function edit(text, file, key, value) {
     }
     if (last) {
       if (value !== null) return text.slice(0, p.initializer.getStart(sf)) + value + text.slice(p.initializer.end);
+      // Removing an object's only key removes the object too, so no empty `{}` is left behind.
+      if (i > 0 && obj.properties.length === 1) return edit(text, file, segs.slice(0, i).join('.'), null);
       const end = text[p.end] === ',' ? p.end + 1 : p.end;
       return text.slice(0, p.getFullStart()) + text.slice(end);
     }

@@ -41,17 +41,11 @@ export const ko: Translation = {
     levelShort: '{intensity} {phase}',
     ownHabit: '나만의 습관',
     habit: {
-      focus_deepwork: { name: '집중 시간', description: '한 가지 일에 집중하고, 휴대폰은 다른 방에' },
       screen_app_limit: { name: '스크롤 줄이기', description: '가장 많이 쓰는 앱을 하루 한도 안으로' },
       focus_top3: { name: '해내기', description: '오늘의 우선 할 일을 적고 끝내기' },
       mind_read: { name: '매일 독서', description: '종이책, 전자책, 오디오북 읽기' },
-      confidence_talk: {
-        name: '대화 자신감',
-        description: '오늘의 소셜 스텝 해 보기. 언제든 바꾸거나 건너뛸 수 있어요',
-      },
       move_walk: { name: '매일 움직이기', description: '원하는 방식으로 움직이기: 걷기, 자전거, 춤, 운동' },
       sleep_wake: { name: '수면 리듬', description: '매일 정한 시간까지 일어나기' },
-      home_tidy: { name: '정리하기', description: '방, 책상, 주방 정리하기' },
       skill_practice: { name: '기술 연습', description: '고른 기술 연습하기' },
       social_reach_out: {
         name: '연결 유지',
@@ -61,11 +55,16 @@ export const ko: Translation = {
         name: '근력 운동',
         description: '따르고 있거나 직접 고른 루틴으로 근력 운동 세션 기록하기',
       },
+
+      eat_well: { name: '잘 먹기', description: '내 방식대로 한 끼를 균형 잡힌 식사로' },
+
+      mind_meditation: { name: '명상', description: '가이드와 함께 또는 혼자서, 몇 분간의 조용한 명상' },
+
+      outdoor_time: { name: '야외 시간', description: '나를 위해 고른 바깥 시간' },
     },
     notes: {
       scrolling:
         '스스로 확인하는 거예요. Schwung은 스크린 타임을 볼 수 없어요. 실제 수치가 궁금하다면 설정 → 스크린 타임에서 확인할 수 있어요.',
-      social: '일상적인 상황만 다뤄요. 모든 스텝은 바꾸거나 건너뛸 수 있고, 건너뛰어도 절대 실패가 아니에요.',
       movement: '이미 더 오래 움직이고 있다면 내 수치를 그대로 유지하세요. 절대 낮아지지 않아요.',
       sleep:
         '내 기상 시간이 기준이에요. 더 이르게 하지 않고, 잠을 줄이지도 않아요. 취침 시간이나 휴대폰 규칙은 추가되지 않아요.',
@@ -81,20 +80,18 @@ export const ko: Translation = {
         '먼저 자격을 갖춘 코치나 체육 교사에게 자세를 배우고, 조금씩 강도를 높이고, 최대 중량 들기는 피하고, 어딘가 아프면 멈추세요.',
       strengthOlder: '전문가에게 나에게 맞는 균형 운동과 근력 운동을 추천받을 수도 있어요.',
       strengthRecovery: '쉬는 날은 회복에 도움이 돼요. 다른 근육을 운동했나요?',
-    },
-    social: {
-      sc_day_followup: '누군가에게 하루가 어떤지 묻고, 이어서 질문 하나 더 하기',
-      sc_thank_by_name: '구체적인 일에 대해 이름을 부르며 고맙다고 말하기',
-      sc_hello_first: '자주 보는 사람에게 먼저 인사하기',
-      sc_group_chat_opinion: '단체 채팅방에 반응만 말고 내 의견으로 답하기',
-      sc_rarely_talk: '평소 잘 이야기하지 않는 같은 반 친구나 동료와 대화 시작하기',
-      sc_ask_question: '수업, 회의, 가게에서 질문하기',
-      sc_group_opinion: '여럿이 대화할 때 의견 말하기',
-      sc_compliment_aloud: '누군가에게 구체적인 칭찬을 소리 내어 하기',
-      sc_speak_up: '수업, 회의, 모임에서 한 번 발언하기',
-      sc_suggest_plan: '친구에게 약속 제안하기 (커피, 산책, 같이 공부하기)',
-      sc_introduce: '학교, 직장, 동아리에서 새로운 사람에게 자기소개하기',
-      sc_disagree: '생각이 다를 때 정중하게 반대 의견 말하기',
+
+      eatBalanced:
+        '균형 잡힌 식사는 여러 식품군을 함께 담아요. 예를 들면 채소나 과일, 곡물·빵·밥·감자처럼 든든한 것, 그리고 콩·달걀·생선·고기·두부 같은 단백질이에요. 어떤 요리든, 어떤 식사 방식이든 인정돼요.',
+
+      eatNoRules: '셀 것도 잴 것도, 피해야 할 음식도 없어요. 먹고 나서 기분 좋은 한 끼면 충분해요.',
+
+      meditation: '직접 고른 명상이라면 무엇이든 인정돼요. 가이드 명상, 앱, 호흡, 그저 조용히 앉아 있기도 괜찮아요.',
+
+      outdoorsCounts:
+        '나를 위해 고른 시간이 인정돼요. 공원, 밖에 앉아 있기, 하고 싶어서 하는 산책처럼요. 운동은 필요 없어요.',
+
+      outdoorsNotCounted: '출퇴근, 등하교, 볼일은 인정되지 않아요. 나를 위한 바깥 시간을 따로 더할 때만 인정돼요.',
     },
     skills: {
       Language: '언어',
@@ -120,10 +117,8 @@ export const ko: Translation = {
     target: {
       strength: { other: '주 {count}회 세션' },
       strengthAbout: '{sessions}, 약 {minutes}분',
-      focus_deepwork: '{time} 동안 집중하기, 휴대폰은 다른 방에',
       mind_read: '{time} 동안 읽기',
       move_walk: '원하는 방식으로 {time} 동안 움직이기',
-      home_tidy: '{time} 동안 정리하기',
       skill_practice: '{skill} 연습 {time}',
       screen_app_limit: '오늘 가장 많이 쓰는 앱을 {limit} 안으로',
       sleepUpBy: '{time}까지 일어나기',
@@ -141,6 +136,17 @@ export const ko: Translation = {
         topFirstNoon: '우선순위 {count}개 끝내기, 1순위는 정오 전에',
         topShortNoon: '우선순위 {count}개, 1순위는 정오 전',
         topShortBefore: '우선순위 {count}개, 1순위는 {time} 전',
+      },
+
+      mind_meditation: '{time} 명상하기',
+
+      outdoor_time: '스스로 원해서 {time} 밖에서 보내기',
+
+      eatWell: {
+        starter: '한 끼에 과일이나 채소 먹기',
+        standard: '균형 잡힌 식사 한 끼 하기',
+
+        challenge: '균형 잡힌 식사 두 끼 하기',
       },
     },
     frequency: {
@@ -776,7 +782,6 @@ export const ko: Translation = {
       cantChange: '바꿀 수 없어요: {reason}.',
       saved: '저장했어요. {pending}.',
       savedBack: '저장했어요: 현재 목표로 돌아갔어요.',
-      todaysStep: '오늘의 한 걸음',
       shortWeek: '짧은 주: 이번 주는 목표 없음.',
       weekMet: '이번 주 {done}/{goal} · 목표 달성',
       week: '이번 주 {done}/{goal}',
@@ -793,13 +798,10 @@ export const ko: Translation = {
       undo: '취소',
       logSession: '세션 기록',
       markDone: '완료로 표시',
-      dontSkip: '오늘 건너뛰지 않기',
-      skip: '오늘 건너뛰기',
       yesterdayDone: '어제: 완료 (정오까지 수정할 수 있어요)',
       yesterdayNotDone: '어제: 미완료 (정오까지 수정할 수 있어요)',
       undoYesterday: '어제 기록 취소',
       doneYesterday: '어제 완료했어요',
-      anyCounts: '이 중 무엇이든 인정돼요',
       minutes: '시간(분, 선택)',
       minutesHint: '원하면 걸린 시간을 적어 두세요. 오늘 완료 여부는 바뀌지 않아요.',
       min: '{minutes}분',

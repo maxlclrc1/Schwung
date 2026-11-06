@@ -13,7 +13,17 @@ export const INTENSITIES: Intensity[] = ['starter', 'standard', 'challenge'];
 export const PHASES: Phase[] = ['foundation', 'momentum', 'mastery'];
 
 export type Category =
-  'focus' | 'digital' | 'execution' | 'learning' | 'social' | 'activity' | 'sleep' | 'home' | 'skill' | 'strength';
+  | 'nutrition'
+  | 'digital'
+  | 'execution'
+  | 'learning'
+  | 'mindfulness'
+  | 'activity'
+  | 'sleep'
+  | 'outdoors'
+  | 'skill'
+  | 'social'
+  | 'strength';
 
 /** How often a target is due. Metadata only: the weekly scheduling engine isn't built yet. */
 export type Schedule =
@@ -30,7 +40,7 @@ export type Unit =
   | 'minutes' // a timed block
   | 'limit' // a daily time limit for the main phone app (minutes; lower is harder)
   | 'tasks' // tasks finished
-  | 'actions' // social actions done (one a due day)
+  | 'meals' // meals that meet the day's food target
   | 'people' // people reached out to
   | 'wake-window' // up within this many minutes of the person's own wake time (lower is harder)
   | 'sessions'; // strength sessions in a week
@@ -58,8 +68,6 @@ export type Target = {
   firstBefore?: string;
   /** Stay Connected: how many of the people are a call. */
   calls?: number;
-  /** Social Confidence: which levels of the action library the day's suggestion comes from. */
-  levels?: SocialLevel[];
   /** Strength: an approximate session length shown as a guide, never a requirement. */
   aboutMinutes?: number;
   /** Optional, never part of the target (e.g. "or 3 if it feels good"). */
@@ -206,69 +214,6 @@ export function upBy(wakeTime: string, windowMinutes: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
-// --- Social Confidence: the action library. ---
-
-export type SocialLevel = 1 | 2 | 3;
-export type SocialAction = {
-  id: string;
-  level: SocialLevel;
-  text: string;
-  /** Who it involves: people the person already knows or sees, or someone new in an everyday setting. */
-  with: 'known' | 'everyday';
-};
-
-/** Every suggestion can be chosen, swapped for another or skipped; skipping one is never a failure. */
-export const SOCIAL_RULES = {
-  selectable: true,
-  swappable: true,
-  skippable: true,
-  skipIsFailure: false,
-  strangersRequired: false,
-  disclosureRequired: false,
-  discomfortRatings: false,
-  ladderToWrite: false,
-} as const;
-
-export const SOCIAL_ACTIONS: SocialAction[] = [
-  {
-    id: 'sc_day_followup',
-    level: 1,
-    with: 'known',
-    text: 'Ask someone how their day is going and ask one follow-up question',
-  },
-  { id: 'sc_thank_by_name', level: 1, with: 'known', text: 'Thank someone by name for something specific' },
-  { id: 'sc_hello_first', level: 1, with: 'known', text: 'Say hello first to someone you see often' },
-  {
-    id: 'sc_group_chat_opinion',
-    level: 1,
-    with: 'known',
-    text: 'Reply to a group chat with your own opinion, not just a reaction',
-  },
-  {
-    id: 'sc_rarely_talk',
-    level: 2,
-    with: 'known',
-    text: 'Start a conversation with a classmate or colleague you rarely talk to',
-  },
-  { id: 'sc_ask_question', level: 2, with: 'everyday', text: 'Ask a question in class, a meeting or a shop' },
-  { id: 'sc_group_opinion', level: 2, with: 'known', text: 'Share an opinion in a group conversation' },
-  { id: 'sc_compliment_aloud', level: 2, with: 'known', text: 'Give someone a specific compliment out loud' },
-  { id: 'sc_speak_up', level: 3, with: 'known', text: 'Speak up once in a class, meeting or group' },
-  {
-    id: 'sc_suggest_plan',
-    level: 3,
-    with: 'known',
-    text: 'Suggest a plan to a friend (coffee, a walk, studying together)',
-  },
-  {
-    id: 'sc_introduce',
-    level: 3,
-    with: 'everyday',
-    text: 'Introduce yourself to someone new at school, work or a club',
-  },
-  { id: 'sc_disagree', level: 3, with: 'known', text: 'Disagree politely when you see things differently' },
-];
-
 // --- Strength Training: tracking only. ---
 
 /** The approved recovery handling: one credited session a day; the day after a session only shows a note. */
@@ -343,28 +288,39 @@ export const SKILLS = ['Language', 'Instrument', 'Drawing', 'Coding', 'Writing',
 
 export const RESET_HABITS: ResetHabit[] = [
   {
-    id: 'focus_deepwork',
-    name: 'Focus Time',
-    description: 'Work on one thing, phone in another room',
-    category: 'focus',
-    existingId: 'focus_deepwork',
-    art: 'focus_deepwork',
-    frequency: 'weekly',
-    targets: minutesTargets(
-      { starter: [15, 20, 30], standard: [25, 40, 50], challenge: [45, 60, 90] },
-      (i) => weekly(i === 'starter' ? 4 : 5),
-      (m) => `${m} min, phone in another room`,
-      (_i, _p, m) => twoBlocksOver(m),
-    ),
+    id: 'eat_well',
+    name: 'Eat Well',
+    description: 'Make a meal a balanced one, your way',
+    category: 'nutrition',
+    existingId: null,
+    art: null,
+    frequency: 'daily',
+    targets: (() => {
+      const cell = (text: string, meals: number): Record<Phase, Target> =>
+        Object.fromEntries(
+          PHASES.map((p) => [
+            p,
+            { text, amount: fixed(meals), unit: 'meals', schedule: DAILY, minutesPerDueDay: null } satisfies Target,
+          ]),
+        ) as Record<Phase, Target>;
+      return {
+        starter: cell('Fruit or vegetables in one meal', 1),
+        standard: cell('One balanced meal', 1),
+        challenge: cell('Two balanced meals', 2),
+      };
+    })(),
     completion: {
-      kind: 'timer',
-      criterion: 'Swipe when the block is done, or let the timer finish',
-      timer: { optional: true, completesAtZero: true },
+      kind: 'counter',
+      criterion: 'Tap +1 for each meal that counts; reaching the day’s number completes it (or swipe)',
+      counter: { optional: true, completesAtTarget: true },
     },
     personalization: [],
     ages: { adult: ALL, teen: ALL },
-    notes: [],
-    availability: pending(),
+    notes: [
+      'A balanced meal mixes a few food groups, for example vegetables or fruit, something filling like grains, bread, rice or potatoes, and a protein such as beans, eggs, fish, meat or tofu. Any cuisine and any way of eating counts.',
+      'Nothing to count or weigh, no foods to avoid: just a meal you’re glad you ate.',
+    ],
+    availability: pending('Nutrition review of the wording', 'Light and dark scenes (until then, a crop of the world)'),
   },
   {
     id: 'screen_app_limit',
@@ -479,33 +435,27 @@ export const RESET_HABITS: ResetHabit[] = [
     availability: pending(),
   },
   {
-    id: 'confidence_talk',
-    name: 'Social Confidence',
-    description: 'Do today’s social step: swap it or skip it any time',
-    category: 'social',
-    existingId: 'confidence_talk',
-    art: 'confidence_talk',
-    frequency: 'mixed',
-    targets: (() => {
-      const cell = (days: number, levels: SocialLevel[]): Target => ({
-        text: `${days === 7 ? 'Daily' : `${days} days a week`}, Level ${levels.join('–')}`,
-        amount: fixed(1),
-        unit: 'actions',
-        schedule: weekly(days),
-        levels,
-        minutesPerDueDay: null,
-      });
-      return {
-        starter: { foundation: cell(3, [1]), momentum: cell(4, [1]), mastery: cell(4, [2]) },
-        standard: { foundation: cell(4, [1]), momentum: cell(5, [2]), mastery: cell(5, [3]) },
-        challenge: { foundation: cell(5, [2]), momentum: cell(6, [2, 3]), mastery: cell(7, [3]) },
-      };
-    })(),
-    completion: { kind: 'check', criterion: 'Swipe when you’ve done the day’s step (any step from the list counts)' },
+    id: 'mind_meditation',
+    name: 'Meditation',
+    description: 'A few quiet minutes of meditation, guided or on your own',
+    category: 'mindfulness',
+    existingId: null,
+    art: null,
+    frequency: 'daily',
+    targets: minutesTargets(
+      { starter: [2, 2, 2], standard: [5, 5, 5], challenge: [10, 10, 10] },
+      () => DAILY,
+      (m) => `${m} min`,
+    ),
+    completion: {
+      kind: 'timer',
+      criterion: 'Swipe when you’ve meditated, or let the timer finish',
+      timer: { optional: true, completesAtZero: true },
+    },
     personalization: [],
     ages: { adult: ALL, teen: ALL },
-    notes: ['Everyday situations only. Every step can be swapped or skipped; skipping one is never a failure.'],
-    availability: pending('Psychologist review of the action library and signposting'),
+    notes: ['Any meditation you choose to do counts: guided, an app, breathing or simply sitting quietly.'],
+    availability: pending('Light and dark scenes (until then, a crop of the world)'),
   },
   {
     id: 'move_walk',
@@ -575,26 +525,29 @@ export const RESET_HABITS: ResetHabit[] = [
     availability: pending(),
   },
   {
-    id: 'home_tidy',
-    name: 'Tidy Up',
-    description: 'Tidy your room, desk or kitchen',
-    category: 'home',
+    id: 'outdoor_time',
+    name: 'Time Outdoors',
+    description: 'Time outside that you choose for yourself',
+    category: 'outdoors',
     existingId: null,
-    art: 'home_tidy',
+    art: null,
     frequency: 'daily',
     targets: minutesTargets(
-      { starter: [5, 8, 10], standard: [10, 12, 15], challenge: [15, 20, 25] },
+      { starter: [5, 5, 5], standard: [10, 10, 10], challenge: [20, 20, 20] },
       () => DAILY,
       (m) => `${m} min`,
     ),
     completion: {
       kind: 'timer',
-      criterion: 'Swipe when you’ve tidied, or let the timer finish',
+      criterion: 'Swipe when you’ve been outside, or let the timer finish',
       timer: { optional: true, completesAtZero: true },
     },
     personalization: [],
     ages: { adult: ALL, teen: ALL },
-    notes: [],
+    notes: [
+      'Time you choose for yourself counts: a park, sitting outside, a walk you wanted to take. No exercise needed.',
+      'Getting to work or school and running errands don’t count, unless you add some outdoor time for yourself.',
+    ],
     availability: pending('Light and dark scenes (until then, a crop of the world)'),
   },
   {
@@ -704,6 +657,16 @@ export const RESET_HABITS: ResetHabit[] = [
 ];
 
 export const RESET_BY_ID: Record<string, ResetHabit> = Object.fromEntries(RESET_HABITS.map((h) => [h.id, h]));
+
+/**
+ * Catalog habits that were replaced (habit catalog refinement, phase 1), by their English names. Never reused as ids.
+ * A development save that still has one isn't read silently: loading names it and keeps the original for recovery.
+ */
+export const RETIRED_HABITS: Readonly<Record<string, string>> = {
+  focus_deepwork: 'Focus Time',
+  confidence_talk: 'Social Confidence',
+  home_tidy: 'Tidy Up',
+};
 
 // --- Eligibility ---
 //

@@ -41,23 +41,14 @@ export const fr: Translation = {
     levelShort: '{intensity} · {phase}',
     ownHabit: 'Votre habitude',
     habit: {
-      focus_deepwork: {
-        name: 'Temps de concen\u00ADtration',
-        description: 'Travaillez sur une seule chose, téléphone dans une autre pièce',
-      },
       screen_app_limit: {
         name: 'Moins scroller',
         description: 'Restez sous votre limite quotidienne sur votre appli principale',
       },
       focus_top3: { name: 'Passer à l’action', description: 'Notez vos tâches clés du jour et terminez-les' },
       mind_read: { name: 'Lire chaque jour', description: 'Lisez un livre, un livre numérique ou un livre audio' },
-      confidence_talk: {
-        name: 'Aisance sociale',
-        description: 'Faites le pas social du jour : changez-le ou passez-le quand vous voulez',
-      },
       move_walk: { name: 'Bouger chaque jour', description: 'Bougez comme vous voulez : marche, vélo, danse, sport' },
       sleep_wake: { name: 'Rythme de sommeil', description: 'Levé à votre heure, chaque jour' },
-      home_tidy: { name: 'Ranger', description: 'Rangez votre chambre, votre bureau ou la cuisine' },
       skill_practice: {
         name: 'Pratiquer un savoir-faire',
         description: 'Pratiquez le savoir-faire que vous avez choisi',
@@ -70,12 +61,16 @@ export const fr: Translation = {
         name: 'Renfor\u00ADcement musculaire',
         description: 'Notez une séance de renforcement issue d’un programme que vous suivez ou choisissez',
       },
+
+      eat_well: { name: 'Bien Manger', description: 'Faites d’un repas un repas équilibré, à votre façon' },
+
+      mind_meditation: { name: 'Méditation', description: 'Quelques minutes de méditation au calme, guidée ou seul' },
+
+      outdoor_time: { name: 'Temps Dehors', description: 'Du temps dehors que vous choisissez pour vous' },
     },
     notes: {
       scrolling:
         'C’est votre propre suivi : Schwung ne voit pas votre Temps d’écran. Réglages → Temps d’écran affiche le vrai chiffre si vous le voulez.',
-      social:
-        'Uniquement des situations du quotidien. Chaque pas peut être changé ou passé ; en passer un n’est jamais un échec.',
       movement: 'Si vous bougez déjà plus longtemps, gardez votre propre durée : elle n’est jamais réduite.',
       sleep:
         'Votre heure de lever est le point d’ancrage : jamais plus tôt, jamais moins de sommeil. Aucune règle de coucher ni de téléphone n’est ajoutée.',
@@ -92,20 +87,20 @@ export const fr: Translation = {
         'Apprenez d’abord la technique avec un coach qualifié ou un professeur d’EPS, progressez petit à petit, évitez les charges maximales et arrêtez-vous en cas de douleur.',
       strengthOlder: 'Un professionnel peut aussi vous proposer des activités d’équilibre et de renforcement adaptées.',
       strengthRecovery: 'Les jours de repos aident à récupérer. Avez-vous travaillé d’autres muscles ?',
-    },
-    social: {
-      sc_day_followup: 'Demandez à quelqu’un comment se passe sa journée et posez une question de suite',
-      sc_thank_by_name: 'Remerciez quelqu’un par son prénom pour quelque chose de précis',
-      sc_hello_first: 'Dites bonjour en premier à quelqu’un que vous voyez souvent',
-      sc_group_chat_opinion: 'Répondez dans une discussion de groupe avec votre avis, pas seulement une réaction',
-      sc_rarely_talk: 'Engagez la conversation avec un camarade ou un collègue à qui vous parlez rarement',
-      sc_ask_question: 'Posez une question en cours, en réunion ou dans un magasin',
-      sc_group_opinion: 'Donnez votre avis dans une conversation de groupe',
-      sc_compliment_aloud: 'Faites à voix haute un compliment précis à quelqu’un',
-      sc_speak_up: 'Prenez la parole une fois en cours, en réunion ou en groupe',
-      sc_suggest_plan: 'Proposez quelque chose à un ami (un café, une balade, réviser ensemble)',
-      sc_introduce: 'Présentez-vous à quelqu’un de nouveau à l’école, au travail ou dans un club',
-      sc_disagree: 'Exprimez poliment votre désaccord quand vous voyez les choses autrement',
+
+      eatBalanced:
+        'Un repas équilibré associe quelques groupes d’aliments, par exemple des légumes ou des fruits, quelque chose de nourrissant comme des céréales, du pain, du riz ou des pommes de terre, et une protéine comme des légumineuses, des œufs, du poisson, de la viande ou du tofu. Toutes les cuisines et toutes les façons de manger comptent.',
+
+      eatNoRules: 'Rien à compter ni à peser, aucun aliment à éviter : juste un repas qui vous fait plaisir.',
+
+      meditation:
+        'Toute méditation que vous choisissez compte : guidée, avec une appli, de respiration ou simplement assis au calme.',
+
+      outdoorsCounts:
+        'Le temps que vous choisissez pour vous compte : un parc, s’asseoir dehors, une balade que vous aviez envie de faire. Aucun exercice requis.',
+
+      outdoorsNotCounted:
+        'Les trajets pour le travail ou les études et les courses ne comptent pas, sauf si vous y ajoutez du temps dehors pour vous.',
     },
     skills: {
       Language: 'Langue',
@@ -131,10 +126,8 @@ export const fr: Translation = {
     target: {
       strength: { one: '{count} séance par semaine', other: '{count} séances par semaine' },
       strengthAbout: '{sessions}, environ {minutes} min',
-      focus_deepwork: 'Concentrez-vous {time}, téléphone dans une autre pièce',
       mind_read: 'Lisez {time}',
       move_walk: 'Bougez {time}, comme vous voulez',
-      home_tidy: 'Rangez pendant {time}',
       skill_practice: 'Pratiquez {skill} {time}',
       screen_app_limit: 'Restez sous {limit} sur votre appli principale aujourd’hui',
       sleepUpBy: 'Levé à {time}',
@@ -154,6 +147,17 @@ export const fr: Translation = {
         topFirstNoon: 'Terminez vos {count} tâches clés, la n° 1 avant midi',
         topShortNoon: 'Top {count}, la n° 1 avant midi',
         topShortBefore: 'Top {count}, la n° 1 avant {time}',
+      },
+
+      mind_meditation: 'Méditez {time}',
+
+      outdoor_time: 'Passez {time} dehors, par choix',
+
+      eatWell: {
+        starter: 'Mangez des fruits ou des légumes à un repas',
+        standard: 'Prenez un repas équilibré',
+
+        challenge: 'Prenez deux repas équilibrés',
       },
     },
     frequency: {
@@ -823,7 +827,6 @@ export const fr: Translation = {
       cantChange: 'Modification impossible : {reason}.',
       saved: 'Enregistré. {pending}.',
       savedBack: 'Enregistré : retour à votre objectif actuel.',
-      todaysStep: 'Le pas du jour',
       shortWeek: 'Semaine courte : pas d’objectif cette semaine.',
       weekMet: '{done} sur {goal} cette semaine · objectif atteint',
       week: '{done} sur {goal} cette semaine',
@@ -840,13 +843,10 @@ export const fr: Translation = {
       undo: 'Annuler',
       logSession: 'Noter une séance',
       markDone: 'Marquer comme fait',
-      dontSkip: 'Ne pas passer aujourd’hui',
-      skip: 'Passer aujourd’hui',
       yesterdayDone: 'Hier : fait (modifiable jusqu’à midi)',
       yesterdayNotDone: 'Hier : pas fait (modifiable jusqu’à midi)',
       undoYesterday: 'Annuler hier',
       doneYesterday: 'Fait hier',
-      anyCounts: 'N’importe lequel compte',
       minutes: 'Minutes (facultatif)',
       minutesHint: 'Notez la durée si vous le souhaitez. Cela ne change jamais le fait que la journée soit faite.',
       min: '{minutes} min',

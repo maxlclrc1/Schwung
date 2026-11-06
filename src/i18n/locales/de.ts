@@ -33,20 +33,14 @@ export const de: Translation = {
     levelShort: '{intensity} · {phase}',
     ownHabit: 'Deine Gewohnheit',
     habit: {
-      focus_deepwork: { name: 'Fokuszeit', description: 'An einer Sache arbeiten, das Handy in einem anderen Raum' },
       screen_app_limit: { name: 'Weniger scrollen', description: 'Bleib bei deiner Haupt-App unter deinem Tageslimit' },
       focus_top3: { name: 'Erledigt', description: 'Schreib die wichtigsten Aufgaben des Tages auf und erledige sie' },
       mind_read: { name: 'Täglich lesen', description: 'Lies ein Buch, ein E-Book oder hör ein Hörbuch' },
-      confidence_talk: {
-        name: 'Soziale Sicherheit',
-        description: 'Mach den sozialen Schritt des Tages: tausch oder überspring ihn jederzeit',
-      },
       move_walk: {
         name: 'Tägliche Be\u00ADwegung',
         description: 'Beweg dich, wie du magst: gehen, Rad fahren, tanzen, Sport',
       },
       sleep_wake: { name: 'Schlaf\u00ADrhythmus', description: 'Steh jeden Tag zu deiner Zeit auf' },
-      home_tidy: { name: 'Aufräumen', description: 'Räum dein Zimmer, deinen Schreibtisch oder die Küche auf' },
       skill_practice: { name: 'Eine Fähigkeit üben', description: 'Übe die Fähigkeit, die du gewählt hast' },
       social_reach_out: {
         name: 'In Kontakt bleiben',
@@ -56,12 +50,19 @@ export const de: Translation = {
         name: 'Krafttraining',
         description: 'Trag eine Krafteinheit aus einem Programm ein, dem du folgst oder das du wählst',
       },
+
+      eat_well: { name: 'Gut Essen', description: 'Mach eine Mahlzeit ausgewogen, auf deine Art' },
+
+      mind_meditation: {
+        name: 'Meditation',
+        description: 'Ein paar ruhige Minuten Meditation, angeleitet oder allein',
+      },
+
+      outdoor_time: { name: 'Zeit Draußen', description: 'Zeit draußen, die du dir selbst aussuchst' },
     },
     notes: {
       scrolling:
         'Deine eigene Kontrolle: Schwung sieht deine Bildschirmzeit nicht. Einstellungen → Bildschirmzeit zeigt dir den echten Wert, wenn du ihn wissen willst.',
-      social:
-        'Nur Alltagssituationen. Jeder Schritt lässt sich tauschen oder überspringen; einen zu überspringen ist nie ein Scheitern.',
       movement: 'Wenn du dich schon länger bewegst, behalte deinen eigenen Wert: Er wird nie gesenkt.',
       sleep:
         'Deine eigene Aufstehzeit ist der Anker: nie früher und nie weniger Schlaf. Es kommt keine Schlafens- oder Handyregel dazu.',
@@ -78,20 +79,21 @@ export const de: Translation = {
         'Lerne die Technik zuerst bei einer qualifizierten Trainerin, einem Trainer oder einer Sportlehrkraft, steigere dich langsam, vermeide Maximalgewichte und hör auf, wenn etwas wehtut.',
       strengthOlder: 'Eine Fachperson kann dir auch Gleichgewichts- und Kraftübungen empfehlen, die zu dir passen.',
       strengthRecovery: 'Ruhetage helfen dir bei der Erholung. Hast du andere Muskeln trainiert?',
-    },
-    social: {
-      sc_day_followup: 'Frag jemanden, wie der Tag läuft, und stell eine Nachfrage',
-      sc_thank_by_name: 'Bedank dich bei jemandem mit Namen für etwas Bestimmtes',
-      sc_hello_first: 'Grüß jemanden zuerst, den du oft siehst',
-      sc_group_chat_opinion: 'Antworte im Gruppenchat mit deiner eigenen Meinung, nicht nur mit einer Reaktion',
-      sc_rarely_talk: 'Beginn ein Gespräch mit jemandem aus der Klasse oder dem Team, mit dem du selten sprichst',
-      sc_ask_question: 'Stell eine Frage im Unterricht, in einem Meeting oder in einem Geschäft',
-      sc_group_opinion: 'Sag deine Meinung in einem Gespräch in der Gruppe',
-      sc_compliment_aloud: 'Mach jemandem laut ein konkretes Kompliment',
-      sc_speak_up: 'Melde dich einmal im Unterricht, in einem Meeting oder in einer Gruppe zu Wort',
-      sc_suggest_plan: 'Schlag einer Freundin oder einem Freund etwas vor (Kaffee, Spaziergang, zusammen lernen)',
-      sc_introduce: 'Stell dich jemand Neuem in der Schule, bei der Arbeit oder im Verein vor',
-      sc_disagree: 'Widersprich höflich, wenn du etwas anders siehst',
+
+      eatBalanced:
+        'Eine ausgewogene Mahlzeit verbindet ein paar Lebensmittelgruppen, zum Beispiel Gemüse oder Obst, etwas Sättigendes wie Getreide, Brot, Reis oder Kartoffeln und ein Eiweiß wie Bohnen, Eier, Fisch, Fleisch oder Tofu. Jede Küche und jede Art zu essen zählt.',
+
+      eatNoRules:
+        'Nichts zu zählen oder zu wiegen, keine Lebensmittel zu meiden: einfach eine Mahlzeit, über die du dich freust.',
+
+      meditation:
+        'Jede Meditation, die du wählst, zählt: angeleitet, mit einer App, Atemübungen oder einfach ruhig sitzen.',
+
+      outdoorsCounts:
+        'Zeit, die du dir selbst aussuchst, zählt: ein Park, draußen sitzen, ein Spaziergang, den du machen wolltest. Sport ist nicht nötig.',
+
+      outdoorsNotCounted:
+        'Der Weg zur Arbeit oder Schule und Besorgungen zählen nicht, außer du nimmst dir dabei extra Zeit draußen für dich.',
     },
     skills: {
       Language: 'Sprache',
@@ -117,10 +119,8 @@ export const de: Translation = {
     target: {
       strength: { one: '{count} Einheit pro Woche', other: '{count} Einheiten pro Woche' },
       strengthAbout: '{sessions}, je etwa {minutes} Min.',
-      focus_deepwork: '{time} Fokus, das Handy in einem anderen Raum',
       mind_read: '{time} lesen',
       move_walk: '{time} Be\u00ADwegung, ganz wie du magst',
-      home_tidy: '{time} aufräumen',
       skill_practice: '{time} {skill} üben',
       screen_app_limit: 'Heute unter {limit} in deiner Haupt-App',
       sleepUpBy: 'Auf bis {time}',
@@ -140,6 +140,17 @@ export const de: Translation = {
         topFirstNoon: 'Erledige deine {count} wichtigsten, die Nr. 1 vor Mittag',
         topShortNoon: 'Top {count}, die Nr. 1 vor Mittag',
         topShortBefore: 'Top {count}, die Nr. 1 vor {time}',
+      },
+
+      mind_meditation: 'Meditiere {time}',
+
+      outdoor_time: 'Verbring {time} draußen, weil du es willst',
+
+      eatWell: {
+        starter: 'Iss bei einer Mahlzeit Obst oder Gemüse',
+        standard: 'Iss eine ausgewogene Mahlzeit',
+
+        challenge: 'Iss zwei ausgewogene Mahlzeiten',
       },
     },
     frequency: {
@@ -811,7 +822,6 @@ export const de: Translation = {
       cantChange: 'Ändern nicht möglich: {reason}.',
       saved: 'Gesichert. {pending}.',
       savedBack: 'Gesichert: zurück zu deinem aktuellen Ziel.',
-      todaysStep: 'Der Schritt des Tages',
       shortWeek: 'Eine kurze Woche: diese Woche kein Ziel.',
       weekMet: '{done} von {goal} diese Woche · Ziel erreicht',
       week: '{done} von {goal} diese Woche',
@@ -828,13 +838,10 @@ export const de: Translation = {
       undo: 'Rückgängig',
       logSession: 'Einheit eintragen',
       markDone: 'Als erledigt markieren',
-      dontSkip: 'Heute doch nicht überspringen',
-      skip: 'Heute überspringen',
       yesterdayDone: 'Gestern: erledigt (du kannst es bis Mittag korrigieren)',
       yesterdayNotDone: 'Gestern: nicht erledigt (du kannst es bis Mittag korrigieren)',
       undoYesterday: 'Gestern rückgängig',
       doneYesterday: 'Gestern erledigt',
-      anyCounts: 'Jeder davon zählt',
       minutes: 'Minuten (optional)',
       minutesHint: 'Notier dir, wie lange es gedauert hat, wenn du magst. Es ändert nie, ob heute erledigt ist.',
       min: '{minutes} Min.',

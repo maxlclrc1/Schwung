@@ -41,17 +41,11 @@ export const ja: Translation = {
     levelShort: '{intensity} {phase}',
     ownHabit: '自分の習慣',
     habit: {
-      focus_deepwork: { name: '集中タイム', description: '1つのことに取り組み、スマホは別の部屋に' },
       screen_app_limit: { name: 'スクロールを減らす', description: 'よく使うアプリを1日の上限内に' },
       focus_top3: { name: 'やり切る', description: '今日の優先タスクを書き出して終わらせる' },
       mind_read: { name: '毎日の読書', description: '本、電子書籍、オーディオブックを読む' },
-      confidence_talk: {
-        name: '人と話す自信',
-        description: '今日のソーシャルステップに挑戦。いつでも入れ替えやスキップができます',
-      },
       move_walk: { name: '毎日の運動', description: '好きな方法で体を動かす：散歩、サイクリング、ダンス、スポーツ' },
       sleep_wake: { name: '睡眠リズム', description: '毎日、決めた時間までに起きる' },
-      home_tidy: { name: '片づけ', description: '部屋、机、キッチンを片づける' },
       skill_practice: { name: 'スキルを磨く', description: '選んだスキルを練習する' },
       social_reach_out: {
         name: 'つながりを保つ',
@@ -61,11 +55,16 @@ export const ja: Translation = {
         name: '筋トレ',
         description: '自分が続けている、または選んだメニューで筋トレのセッションを記録する',
       },
+
+      eat_well: { name: 'よく食べる', description: '自分なりのやり方で、1食をバランスのよい食事に' },
+
+      mind_meditation: { name: '瞑想', description: 'ガイド付きでもひとりでも、数分間の静かな瞑想' },
+
+      outdoor_time: { name: '外で過ごす時間', description: '自分のために選んで外で過ごす時間' },
     },
     notes: {
       scrolling:
         '自分でのチェックです。Schwungはスクリーンタイムを見ることができません。実際の数字を知りたい場合は、設定 → スクリーンタイムで確認できます。',
-      social: '日常の場面だけです。どのステップも入れ替えやスキップができ、スキップは決して失敗ではありません。',
       movement:
         'すでにもっと長く体を動かしているなら、自分の数字をそのまま続けてください。下げられることはありません。',
       sleep:
@@ -82,20 +81,19 @@ export const ja: Translation = {
         'まず資格のあるコーチや体育の先生から正しいフォームを学び、少しずつ負荷を上げ、最大重量のリフトは避け、どこかが痛んだら中止してください。',
       strengthOlder: '専門家は、あなたに合ったバランスと筋力の運動を提案することもできます。',
       strengthRecovery: '休息日は回復を助けます。違う筋肉を鍛えましたか？',
-    },
-    social: {
-      sc_day_followup: '誰かに今日の調子を聞いて、もう1つ質問してみる',
-      sc_thank_by_name: '具体的なことについて、名前を呼んで誰かにお礼を言う',
-      sc_hello_first: 'よく会う人に、自分から先にあいさつする',
-      sc_group_chat_opinion: 'グループチャットで、リアクションだけでなく自分の意見を返す',
-      sc_rarely_talk: 'あまり話さないクラスメートや同僚と会話を始める',
-      sc_ask_question: '授業、会議、お店で質問をする',
-      sc_group_opinion: 'グループでの会話で自分の意見を言う',
-      sc_compliment_aloud: '誰かを具体的に、声に出してほめる',
-      sc_speak_up: '授業、会議、グループで一度発言する',
-      sc_suggest_plan: '友だちに予定を提案する（お茶、散歩、一緒に勉強など）',
-      sc_introduce: '学校、職場、クラブで新しい人に自己紹介する',
-      sc_disagree: '考えが違うときは、丁寧に反対の意見を伝える',
+
+      eatBalanced:
+        'バランスのよい食事は、いくつかの食品グループを組み合わせたものです。たとえば野菜や果物、穀物・パン・ご飯・いもなどお腹を満たすもの、そして豆類・卵・魚・肉・豆腐などのたんぱく質。どんな料理でも、どんな食べ方でも数えられます。',
+
+      eatNoRules: '数えるものも量るものも、避けるべき食べ物もありません。食べてよかったと思える食事であれば十分です。',
+
+      meditation:
+        '自分で選んだ瞑想ならどれでも数えられます。ガイド付き、アプリ、呼吸法、ただ静かに座るだけでも大丈夫です。',
+
+      outdoorsCounts:
+        '自分のために選んだ時間が数えられます。公園、外で座る、歩きたくて歩く散歩など。運動は必要ありません。',
+
+      outdoorsNotCounted: '通勤・通学や用事は数えられません。ただし、自分のために外で過ごす時間を足した場合は別です。',
     },
     skills: {
       Language: '語学',
@@ -121,10 +119,8 @@ export const ja: Translation = {
     target: {
       strength: { other: '週{count}回のセッション' },
       strengthAbout: '{sessions}、約{minutes}分',
-      focus_deepwork: '{time}集中する（スマホは別の部屋に）',
       mind_read: '{time}読む',
       move_walk: '好きな方法で{time}体を動かす',
-      home_tidy: '{time}片づける',
       skill_practice: '{skill}を{time}練習する',
       screen_app_limit: '今日はよく使うアプリを{limit}以内に',
       sleepUpBy: '{time}までに起きる',
@@ -142,6 +138,17 @@ export const ja: Translation = {
         topFirstNoon: '上位{count}つを終わらせ、最優先は正午までに',
         topShortNoon: '上位{count}つ、最優先は正午まで',
         topShortBefore: '上位{count}つ、最優先は{time}まで',
+      },
+
+      mind_meditation: '{time}瞑想する',
+
+      outdoor_time: '自分の意思で{time}外で過ごす',
+
+      eatWell: {
+        starter: '1食で果物か野菜を食べる',
+        standard: 'バランスのよい食事を1回とる',
+
+        challenge: 'バランスのよい食事を2回とる',
       },
     },
     frequency: {
@@ -791,7 +798,6 @@ export const ja: Translation = {
       cantChange: '変更できません：{reason}。',
       saved: '保存しました。{pending}。',
       savedBack: '保存しました：現在の目標に戻しました。',
-      todaysStep: '今日のステップ',
       shortWeek: '短い週：今週は目標なし。',
       weekMet: '今週 {done} / {goal} · 目標達成',
       week: '今週 {done} / {goal}',
@@ -808,13 +814,10 @@ export const ja: Translation = {
       undo: '取り消す',
       logSession: 'セッションを記録',
       markDone: '達成にする',
-      dontSkip: '今日はスキップしない',
-      skip: '今日はスキップ',
       yesterdayDone: '昨日：達成（正午まで修正できます）',
       yesterdayNotDone: '昨日：未達成（正午まで修正できます）',
       undoYesterday: '昨日の記録を取り消す',
       doneYesterday: '昨日達成した',
-      anyCounts: 'どれでもカウントされます',
       minutes: '時間（分・任意）',
       minutesHint: 'よければ、かかった時間をメモしてください。今日の達成には影響しません。',
       min: '{minutes}分',

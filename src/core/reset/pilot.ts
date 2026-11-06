@@ -21,13 +21,12 @@ import {
   resetExclusion,
   scrollingLimit,
   SKILLS,
-  SOCIAL_ACTIONS,
+  RETIRED_HABITS,
   strengthNotes,
   upBy,
   type Intensity,
   type Phase,
   type Schedule,
-  type SocialAction,
   type Target,
 } from './habits';
 import { sanitizeCollection } from './collection';
@@ -333,8 +332,6 @@ export const habitName = (id: string) => (RESET_BY_ID[id] ? t(`engine.habit.${id
 export const habitDescription = (id: string) => (RESET_BY_ID[id] ? t(`engine.habit.${id}.description` as TKey) : '');
 export const intensityName = (i: Intensity) => t(`engine.intensity.${i}` as TKey);
 export const phaseName = (p: Phase) => t(`engine.phase.${p}` as TKey);
-/** A Social Confidence step, in words. */
-export const socialText = (a: SocialAction) => t(`engine.social.${a.id}` as TKey);
 /** A strength session type's label (stored as its English id). */
 export const sessionName = (type: string) =>
   t(`today.session.${type === 'full body' ? 'fullBody' : type === 'other' ? 'anything' : type}` as TKey);
@@ -430,7 +427,9 @@ export function habitNotes(habitId: PilotHabitId, a: PilotAnswers): string[] {
 /** Each habit's notes (habits.ts `notes`, in the same order), as catalog keys. */
 const NOTE_KEYS: Partial<Record<string, string[]>> = {
   screen_app_limit: ['scrolling'],
-  confidence_talk: ['social'],
+  eat_well: ['eatBalanced', 'eatNoRules'],
+  mind_meditation: ['meditation'],
+  outdoor_time: ['outdoorsCounts', 'outdoorsNotCounted'],
   move_walk: ['movement'],
   sleep_wake: ['sleep'],
   skill_practice: ['skillSport'],
@@ -809,19 +808,7 @@ export function scrollLimitFor(p: PilotProgram, l: Level): number {
   return a.kind === 'below-baseline' ? scrollingLimit(p.answers.pullMinutes ?? 120, a.reduceBy) : 0;
 }
 
-/** Social Confidence: the steps that count at a level (any of them does). */
-export function socialSteps(p: PilotProgram, day: number): SocialAction[] {
-  const levels = targetFor('confidence_talk', levelFor(p, 'confidence_talk', day)).levels ?? [1];
-  return SOCIAL_ACTIONS.filter((a) => levels.includes(a.level));
-}
-
-/** Social Confidence: the day's suggested step (it changes each day; any step from the list counts). */
-export function socialStep(p: PilotProgram, day: number): SocialAction {
-  const steps = socialSteps(p, day);
-  return steps[(day * 7) % steps.length];
-}
-
-/** The counter's daily number for Get It Done (tasks) and Stay Connected (people); null for other habits. */
+/** The counter's daily number for Get It Done (tasks), Stay Connected (people) and Eat Well (meals); else null. */
 export function counterTarget(p: PilotProgram, id: string, day: number): number | null {
   if (RESET_BY_ID[id]?.completion.kind !== 'counter') return null;
   const a = targetFor(id, levelFor(p, id, day)).amount;
@@ -846,10 +833,10 @@ export function targetText(p: PilotProgram, id: string, day: number): string {
         ? t('engine.target.strengthAbout', { sessions, minutes: target.aboutMinutes })
         : sessions;
     }
-    case 'focus_deepwork':
+    case 'mind_meditation':
     case 'mind_read':
     case 'move_walk':
-    case 'home_tidy':
+    case 'outdoor_time':
       return t(`engine.target.${id}` as TKey, { time });
     case 'skill_practice':
       return t('engine.target.skill_practice', { skill: skillWords(p.answers.skill), time });
@@ -859,8 +846,8 @@ export function targetText(p: PilotProgram, id: string, day: number): string {
       return p.answers.wake?.kind === 'time'
         ? t('engine.target.sleepUpBy', { time: upBy(p.answers.wake.time, minutes) })
         : t('engine.target.sleepUsual');
-    case 'confidence_talk':
-      return socialText(socialStep(p, day));
+    case 'eat_well':
+      return t(`engine.target.eatWell.${l.intensity}` as TKey);
     case 'social_reach_out':
       return t(target.calls ? 'engine.target.reachOutCall' : 'engine.target.reachOut', { count: minutes });
     case 'focus_top3':
@@ -1397,7 +1384,11 @@ export function inspectPilotProgram(x: unknown): { program: PilotProgram | null;
       };
   const known = (id: string) => isPilotHabit(id) || id in custom;
   const label = (id: string) =>
-    id in custom ? custom[id].name : isPilotHabit(id) ? habitName(id) : t('engine.lost.ownHabit');
+    id in custom
+      ? custom[id].name
+      : isPilotHabit(id)
+        ? habitName(id)
+        : (RETIRED_HABITS[id] ?? t('engine.lost.ownHabit'));
   const progressionIn = isObj(x.progression) ? x.progression : {};
   const habits: string[] = [];
   const progression: Record<string, ProgressionState> = {};
