@@ -12,7 +12,7 @@ export const collection = {
   newIn: 'New in your collection',
   nowTitle: 'Your title: {title}',
   more: { one: 'And {count} more waiting in your collection.', other: 'And {count} more waiting in your collection.' },
-  lovely: 'Lovely',
+  lovely: 'Got it',
   see: 'See collection',
 };
 
@@ -20,8 +20,8 @@ export const welcomeBack = {
   dismiss: 'Dismiss',
   title: 'Welcome back',
   stillThere: {
-    one: 'Your {count} complete day is still on the mountain.',
-    other: 'Your {count} complete days are still on the mountain.',
+    one: 'Your {count} complete day is still here. Nothing was lost.',
+    other: 'Your {count} complete days are all still here. Nothing was lost.',
   },
   continue: 'Continue my journey',
   offA11y: 'Don’t show welcome-back messages again',
@@ -38,8 +38,8 @@ export const story = {
   title: 'Your 66-day story',
   a11y: 'Your 66-day story, {from} to {to}. {days} of {total} days completed, {done} habits done, longest streak {streak} days, {habits} habits practised.',
   brand: 'SCHWUNG · LIFE RESET',
-  headline: '66 days.\nOne journey.',
-  message: 'Look how far you’ve come.',
+  headline: '66 days.\nOne climb.',
+  message: 'From Day 1 to the summit.',
   of: 'of {total}',
   daysCompleted: 'days completed',
   habitsDone: { one: 'habit done', other: 'habits done' },
@@ -51,8 +51,8 @@ export const story = {
 };
 
 export const welcome = {
-  headline: 'Get your momentum back.',
-  body: 'A few small habits a day, built around your life. They grow as you do.',
+  headline: '66 days to build better habits.',
+  body: 'A few small habits, fitted to your day. You choose when they get harder.',
   free: 'Free. No account. No paywall.',
   start: 'Start my reset',
   time: 'About a minute. Everything stays on your phone.',
@@ -150,24 +150,24 @@ export const ceremony = {
   day1: {
     kicker: 'Day 1 of {total}',
     kickerAscent: 'Ascent {ascent} · Day 1 of {total}',
-    headline: 'Every ascent begins with a single step.',
-    sub: 'Today, you take yours.',
+    headline: 'The climb starts here.',
+    sub: 'Sixty-six days to the summit. Today is the first.',
     begin: 'Take my first step',
   },
   milestone: {
     7: {
       overline: 'Day 7 · Finding your footing',
-      title: 'You’ve taken your first steps.',
-      line: 'A rhythm is forming, one day at a time.',
+      title: 'One week in.',
+      line: 'Seven days of showing up. That’s where habits start.',
     },
     21: {
       overline: 'Day 21 · Foundation complete',
-      title: 'Look what you’ve started.',
-      line: 'The Foundation is laid. Momentum begins today.',
+      title: 'Three weeks in.',
+      line: 'The Foundation is laid. Momentum targets open whenever you want them.',
     },
     44: {
       overline: 'Day 44 · Momentum complete',
-      title: 'You’ve come further than you think.',
+      title: 'Two thirds of the way.',
       line: 'The summit is in view. Mastery begins.',
     },
     continue: 'Continue climbing',
@@ -179,7 +179,7 @@ export const ceremony = {
     practised: { one: 'habit practised: {list}', other: 'habits practised: {list}' },
     rowA11y: '{value} {label}',
     kicker: 'The summit · Day {total}',
-    headline: 'Look how far you’ve come.',
+    headline: 'You made it. All the way up.',
     milestones: 'Milestone days completed: {list}',
     message:
       'Sixty-six days ago you chose to begin. Not every day went to plan, and you kept climbing anyway. These habits are yours now.',

@@ -39,9 +39,9 @@ export const journeyTab = {
     journey: 'Journey',
   },
   meaning: {
-    1: 'Showing up. Every habit starts at its Foundation targets, small enough to keep.',
+    1: 'Every habit starts at its Foundation target, small enough to keep on a busy day.',
     2: 'Momentum targets open from here, offered when you’ve been consistent. Taking them is always your choice.',
-    3: 'The last stretch to the summit. Mastery targets open, and the habits are becoming yours.',
+    3: 'The last stretch to the summit. Mastery targets open, if you want them.',
   },
   summary: {
     climbed: 'days climbed',

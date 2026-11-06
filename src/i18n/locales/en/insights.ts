@@ -1,7 +1,7 @@
 /** The Insights tab. */
 export const insights = {
   title: 'Insights',
-  chapter: { doing: 'How am I doing?', working: 'What’s working?', learn: 'What can I learn?' },
+  chapter: { doing: 'Consistency', working: 'By habit', learn: 'Patterns' },
   kind: {
     shortWeek: '{line} · a short week, no goal',
     week: '{line} · {done} of {goal} this week',
@@ -67,8 +67,8 @@ export const insights = {
   },
   observations: {
     early:
-      'Patterns show here once there are a couple of weeks to look at. For now, every day you mark is the beginning of one.',
-    none: 'Nothing stands out yet. Observations appear when your days show a clear pattern.',
+      'Patterns appear after about two weeks of check-ins.',
+    none: 'No clear patterns yet.',
   },
   strip: 'Last {count} days: {done} done',
   bars: 'Week {week}: {done} of {goal}',
