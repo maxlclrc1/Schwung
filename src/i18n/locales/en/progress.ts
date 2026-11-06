@@ -111,15 +111,15 @@ export const progress = {
 /** The daily reminder's words (notifications). */
 export const reminders = {
   line: {
-    0: { title: 'A little momentum today?', body: 'One small step is plenty.' },
-    1: { title: 'Your next step is waiting.', body: 'Whenever you’re ready.' },
-    2: { title: 'The trail’s right where you left it.', body: 'A few minutes is all it takes.' },
-    3: { title: 'A good moment for a small step.', body: 'Your habits are ready when you are.' },
-    4: { title: 'Fresh air on the trail today.', body: 'Whatever today holds, a small step counts.' },
-    5: { title: 'Still climbing, one day at a time.', body: 'Today’s step can be a small one.' },
-    6: { title: 'The view gets better from here.', body: 'Open Schwung for today’s habits.' },
+    0: { title: 'Today’s habits are ready.', body: 'A few minutes is enough to start.' },
+    1: { title: 'A good moment to check in?', body: 'Your habits for today are in Schwung.' },
+    2: { title: 'Got a few minutes?', body: 'Tick off one habit and see how the day goes.' },
+    3: { title: 'One habit at a time.', body: 'Start with whichever feels easiest today.' },
+    4: { title: 'Still on the trail.', body: 'Today’s habits are waiting when you are.' },
+    5: { title: 'Time for today’s habits?', body: 'Swipe one off whenever you’re ready.' },
+    6: { title: 'Your day in Schwung.', body: 'See what’s on today’s list.' },
   },
-  habitTitle: 'Time for a little {habit}?',
-  habitBody: 'One small step is plenty.',
+  habitTitle: 'A good moment for {habit}?',
+  habitBody: 'Today’s habits are ready when you are.',
   dayTitle: 'Day {day} of your Life Reset.',
 };

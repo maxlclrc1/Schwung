@@ -30,7 +30,7 @@ import { t as tr } from '../../i18n';
 import { physical } from '../../i18n/direction';
 
 /*
- * "Your journey is taking shape": the short scene between confirming the Life Reset and Day 1 (not the Day 1
+ * The finale ("Ready when you are"): the short scene between confirming the Life Reset and Day 1 (not the Day 1
  * ceremony). The world clears from the mist, a light for each chosen habit wakes along the real trail as a fine
  * path draws up it to the summit, the summit warms, and the reset is named. About three and a half seconds,
  * skippable from the first frame; with Reduce Motion it's a calm crossfade of about a second.
