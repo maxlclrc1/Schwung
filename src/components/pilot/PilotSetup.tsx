@@ -83,6 +83,8 @@ const strengthDetail = (id: P.StrengthStart) => tr(`setup.startDetail.${id}`);
 /** Phone hours, lowest first; "Not sure" is its own answer. */
 const PHONE_HOURS = PHONE.filter((x) => x.id !== 'unknown');
 const ease = Easing.bezier(0.22, 1, 0.36, 1);
+/** The review list's level chips take these in turn (any number of habits: up to all of them). */
+const DOT_TINTS: TintName[] = ['lavender', 'peach', 'sage', 'mist', 'indigo'];
 
 /**
  * The Life Reset set-up, how every program starts (app/life-reset/setup.tsx), told as a short story in five
@@ -600,7 +602,7 @@ export function PilotSetup() {
             <View style={styles.list}>
               {choices.map((x, i) => {
                 const p = P.previewTarget(x.habitId, x.intensity, answers);
-                const dot = [tints.lavender, tints.peach, tints.sage, tints.mist, tints.indigo, tints.lavender][i];
+                const dot = tints[DOT_TINTS[i % DOT_TINTS.length]];
                 return (
                   <Animated.View key={x.habitId} entering={rise(900 + i * 80)} style={styles.reviewRow}>
                     <View style={styles.reviewArt}>
