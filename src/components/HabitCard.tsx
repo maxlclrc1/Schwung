@@ -618,7 +618,7 @@ function HabitCardImpl({
               </View>
             ) : null}
           </View>
-          {/* Complete, or undo once done, beside the words. */}
+          {/* Complete, beside the words (undo, once done, is on the status line below). */}
           {readOnly ? null : (
             <View style={styles.action} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
               <Animated.View style={[styles.actionSide, todoRow]} pointerEvents={done ? 'none' : 'auto'}>
@@ -627,20 +627,6 @@ function HabitCardImpl({
                   style={[styles.check, { backgroundColor: ink.chip, borderColor: ink.edge }]}
                 >
                   <Ionicons name="checkmark" size={22} color={isDark ? c.text : c.sageInk} />
-                </CardButton>
-              </Animated.View>
-              <Animated.View
-                style={[styles.actionSide, styles.actionOver, doneRow]}
-                pointerEvents={done ? 'auto' : 'none'}
-              >
-                <CardButton
-                  onPress={toggle}
-                  style={[styles.undo, { backgroundColor: ink.chip, borderColor: ink.edge }]}
-                >
-                  <Ionicons name="arrow-undo" size={15} color={ink.title} />
-                  <Ink pick="title" style={styles.undoText}>
-                    {t('today.card.undo')}
-                  </Ink>
                 </CardButton>
               </Animated.View>
             </View>
@@ -659,13 +645,39 @@ function HabitCardImpl({
               </View>
             ) : null}
           </Animated.View>
-          <Animated.View style={[styles.statusSide, styles.statusOver, doneRow]}>
+          <Animated.View
+            style={[styles.statusSide, styles.statusOver, doneRow]}
+            pointerEvents={done ? 'box-none' : 'none'}
+          >
             <View style={[styles.donePill, { backgroundColor: c.sage }]}>
               <Ionicons name="checkmark" size={14} color={c.onTint} />
-              <Animated.Text style={[styles.doneText, { color: c.onTint }]} maxFontSizeMultiplier={1.3}>
+              <Animated.Text
+                style={[styles.doneText, { color: c.onTint }]}
+                maxFontSizeMultiplier={1.3}
+                numberOfLines={1}
+              >
                 {display.doneText ?? t('today.card.doneToday')}
               </Animated.Text>
             </View>
+            {/* Undo, on the same line as Done: it never narrows or covers the words above. */}
+            {readOnly ? null : (
+              <CardButton
+                onPress={toggle}
+                style={[
+                  styles.undo,
+                  width < 300 && styles.undoIcon,
+                  { backgroundColor: ink.chip, borderColor: ink.edge },
+                ]}
+              >
+                <Ionicons name="arrow-undo" size={14} color={ink.title} />
+                {/* The smallest phones show the arrow alone, so "Done" keeps its words. */}
+                {width < 300 ? null : (
+                  <Ink pick="title" style={styles.undoText} lines={1}>
+                    {t('today.card.undo')}
+                  </Ink>
+                )}
+              </CardButton>
+            )}
           </Animated.View>
         </View>
       </View>
@@ -687,7 +699,6 @@ const styles = StyleSheet.create({
   words: { flex: 1, gap: 2 },
   action: { minWidth: 44, minHeight: 44, alignItems: 'flex-end', justifyContent: 'center' },
   actionSide: { alignItems: 'flex-end', justifyContent: 'center' },
-  actionOver: { position: 'absolute', right: 0, top: 0, bottom: 0 },
   levelRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   levelTop: { position: 'absolute', top: 14, left: PAD },
   topVeil: { position: 'absolute', left: 0, right: 0, top: 0, height: 64 },
@@ -737,6 +748,7 @@ const styles = StyleSheet.create({
   donePill: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 1,
     gap: 6,
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
@@ -744,14 +756,17 @@ const styles = StyleSheet.create({
     borderRadius: 13,
   },
   doneText: { fontSize: 13, fontWeight: '700' },
+  // 32 tall to sit on the status line; its hit area (hitSlop 8) is 48.
   undo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    height: 40,
-    borderRadius: 20,
+    gap: 5,
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
+    flexShrink: 0,
   },
-  undoText: { fontSize: 14, lineHeight: 19, fontWeight: '700' },
+  undoText: { fontSize: 13, lineHeight: 18, fontWeight: '700' },
+  undoIcon: { width: 32, paddingHorizontal: 0, justifyContent: 'center' },
 });
