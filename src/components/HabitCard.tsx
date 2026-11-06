@@ -57,6 +57,8 @@ export type CardDisplay = {
   hint?: string;
   /** The done pill ("Done for today" by default). */
   doneText?: string;
+  /** Shows the swipe hint. The list gives it to one card only, so the instruction isn't repeated on every card. */
+  showHint?: boolean;
 };
 
 /*
@@ -85,11 +87,12 @@ const LONG_PRESS_MS = 380;
 const WEB_TOUCH = Platform.OS === 'web' ? ({ userSelect: 'none', touchAction: 'pan-y' } as object) : null;
 
 /**
- * Card height: a window onto the scene, 240 pt on a 375pt iPhone and up to 250 on larger ones, tall enough that the
- * top ~45% of the scene (where its subject is painted) stays clear of the text; it grows if larger text needs more.
+ * Card height: a window onto the scene, ~175 pt on a typical iPhone (160–180), so two whole cards fit under the
+ * Today header. The scene is anchored to its top, where its subject is painted, and the words sit low with the
+ * complete button beside them; the card grows if larger text needs more.
  */
 export function cardHeight(width: number): number {
-  return Math.max(220, Math.min(250, Math.round(width * 0.7)));
+  return Math.max(160, Math.min(180, Math.round(width * 0.49)));
 }
 
 const INK: Record<Theme, { veil: string[]; top: string[]; title: string; target: string; chip: string; edge: string }> =
@@ -125,6 +128,7 @@ function Scene({ habitId, scene, width, height }: { habitId: string; scene?: num
       <ThemedImage
         sources={{ dark, light }}
         contentFit="cover"
+        contentPosition="top"
         style={{ position: 'absolute', left: 0, top: 0, width, height }}
       />
     );
@@ -504,7 +508,8 @@ function HabitCardImpl({
         <Scene habitId={habitId} scene={scene} width={width} height={height} />
       </View>
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: c.sage }, washStyle]} />
-      <Veil pick="veil" locations={[0.35, 0.62, 1]} style={StyleSheet.absoluteFill} />
+      {/* Starts higher than on the old, taller card: the words now sit at about mid-height. */}
+      <Veil pick="veil" locations={[0.22, 0.52, 0.92]} style={StyleSheet.absoluteFill} />
       {/* A faint veil at the top, for the level label over the sky. */}
       <Veil pick="top" style={styles.topVeil} />
 
@@ -568,50 +573,71 @@ function HabitCardImpl({
       </View>
 
       <View style={styles.body}>
-        <Ink pick="title" style={styles.title} lines={2}>
-          {title}
-        </Ink>
-        {task ? (
-          <Ink pick="target" style={styles.target} lines={2}>
-            {task}
-          </Ink>
-        ) : null}
-        {accessory ? (
-          <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-            {accessory}
-          </View>
-        ) : null}
-
-        {/* The status row: how to complete, or done with an undo. */}
-        <View style={styles.status} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-          <Animated.View style={[styles.statusSide, todoRow]} pointerEvents={done ? 'none' : 'auto'}>
-            <View style={styles.hint}>
-              <Ionicons name="chevron-forward" size={16} color={ink.target} style={flipX} />
-              <Ink pick="target" style={styles.hintText}>
-                {readOnly ? t('today.card.notDone') : (display.hint ?? t('today.card.swipe'))}
+        <View style={styles.main}>
+          <View style={styles.words}>
+            {/* Three lines: the button beside the words narrows them, and a person's own habit can have a long name. */}
+            <Ink pick="title" style={styles.title} lines={3}>
+              {title}
+            </Ink>
+            {task ? (
+              <Ink pick="target" style={styles.target} lines={2}>
+                {task}
               </Ink>
+            ) : null}
+            {accessory ? (
+              <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+                {accessory}
+              </View>
+            ) : null}
+          </View>
+          {/* Complete, or undo once done, beside the words. */}
+          {readOnly ? null : (
+            <View style={styles.action} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+              <Animated.View style={[styles.actionSide, todoRow]} pointerEvents={done ? 'none' : 'auto'}>
+                <CardButton
+                  onPress={toggle}
+                  style={[styles.check, { backgroundColor: ink.chip, borderColor: ink.edge }]}
+                >
+                  <Ionicons name="checkmark" size={22} color={isDark ? c.text : c.sageInk} />
+                </CardButton>
+              </Animated.View>
+              <Animated.View
+                style={[styles.actionSide, styles.actionOver, doneRow]}
+                pointerEvents={done ? 'auto' : 'none'}
+              >
+                <CardButton
+                  onPress={toggle}
+                  style={[styles.undo, { backgroundColor: ink.chip, borderColor: ink.edge }]}
+                >
+                  <Ionicons name="arrow-undo" size={15} color={ink.title} />
+                  <Ink pick="title" style={styles.undoText}>
+                    {t('today.card.undo')}
+                  </Ink>
+                </CardButton>
+              </Animated.View>
             </View>
-            {readOnly ? null : (
-              <CardButton onPress={toggle} style={[styles.check, { backgroundColor: ink.chip, borderColor: ink.edge }]}>
-                <Ionicons name="checkmark" size={22} color={isDark ? c.text : c.sageInk} />
-              </CardButton>
-            )}
+          )}
+        </View>
+
+        {/* The status line: the swipe hint (on one card only), or done. */}
+        <View style={styles.status} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+          <Animated.View style={[styles.statusSide, todoRow]}>
+            {readOnly || display.showHint ? (
+              <View style={styles.hint}>
+                <Ionicons name="chevron-forward" size={15} color={ink.target} style={flipX} />
+                <Ink pick="target" style={styles.hintText}>
+                  {readOnly ? t('today.card.notDone') : (display.hint ?? t('today.card.swipe'))}
+                </Ink>
+              </View>
+            ) : null}
           </Animated.View>
-          <Animated.View style={[styles.statusSide, styles.statusOver, doneRow]} pointerEvents={done ? 'auto' : 'none'}>
+          <Animated.View style={[styles.statusSide, styles.statusOver, doneRow]}>
             <View style={[styles.donePill, { backgroundColor: c.sage }]}>
-              <Ionicons name="checkmark" size={16} color={c.onTint} />
+              <Ionicons name="checkmark" size={14} color={c.onTint} />
               <Animated.Text style={[styles.doneText, { color: c.onTint }]} maxFontSizeMultiplier={1.3}>
                 {display.doneText ?? t('today.card.doneToday')}
               </Animated.Text>
             </View>
-            {readOnly ? null : (
-              <CardButton onPress={toggle} style={[styles.undo, { backgroundColor: ink.chip, borderColor: ink.edge }]}>
-                <Ionicons name="arrow-undo" size={15} color={ink.title} />
-                <Ink pick="title" style={styles.undoText}>
-                  {t('today.card.undo')}
-                </Ink>
-              </CardButton>
-            )}
           </Animated.View>
         </View>
       </View>
@@ -628,7 +654,12 @@ const styles = StyleSheet.create({
   card: { borderRadius: RADIUS, overflow: 'hidden', justifyContent: 'flex-end' },
   fill: { flex: 1 },
   // Clear of the level label in the top corner, however tall the words grow (long names, large text).
-  body: { padding: PAD, paddingTop: 40, gap: 4 },
+  body: { padding: PAD, paddingTop: 36, gap: 6 },
+  main: { flexDirection: 'row', alignItems: 'flex-end', gap: space.sm },
+  words: { flex: 1, gap: 2 },
+  action: { minWidth: 44, minHeight: 44, alignItems: 'flex-end', justifyContent: 'center' },
+  actionSide: { alignItems: 'flex-end', justifyContent: 'center' },
+  actionOver: { position: 'absolute', right: 0, top: 0, bottom: 0 },
   levelRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   levelTop: { position: 'absolute', top: 14, left: PAD },
   topVeil: { position: 'absolute', left: 0, right: 0, top: 0, height: 64 },
@@ -647,7 +678,7 @@ const styles = StyleSheet.create({
   ring: { backgroundColor: 'transparent', borderWidth: 2 },
   held: { backgroundColor: '#000000' },
   edge: { borderRadius: RADIUS, borderWidth: 2.5 },
-  mark: { position: 'absolute', top: 44 },
+  mark: { position: 'absolute', top: 30 },
   markDone: { left: 24 },
   markUndo: { right: 24 },
   markCircle: {
@@ -662,11 +693,11 @@ const styles = StyleSheet.create({
   markSolid: { borderRadius: MARK / 2, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 25, lineHeight: 30, fontWeight: '800', letterSpacing: -0.5 },
   target: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
-  status: { marginTop: 10, minHeight: 44, justifyContent: 'center' },
+  status: { minHeight: 26, justifyContent: 'center' },
   statusSide: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   statusOver: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
   hint: { flexDirection: 'row', alignItems: 'center', gap: 2, flexShrink: 1 },
-  hintText: { fontSize: 14, lineHeight: 19, fontWeight: '600', letterSpacing: 0.2 },
+  hintText: { fontSize: 13, lineHeight: 18, fontWeight: '600', letterSpacing: 0.2 },
   check: {
     width: 44,
     height: 44,
@@ -679,11 +710,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 14,
-    height: 36,
-    borderRadius: 18,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    height: 26,
+    borderRadius: 13,
   },
-  doneText: { fontSize: 14, fontWeight: '700' },
+  doneText: { fontSize: 13, fontWeight: '700' },
   undo: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,5 +1,8 @@
 # Habits redesign: Phase 1 (design only)
 
+> **Status: rejected.** The current illustrated cards are kept and made more compact instead (see the commit that
+> compacts `HabitCard`). This document stays as a record; do not implement it.
+
 Direction: **"A trail log under the mountain."** The mountain is visible at the top of the screen. Below it, today's habits sit
 in one calm list that you can scan and tick off without scrolling. This answers `DESIGN_CRITIQUE.md` sections 1, 2,
 3, 4 and 7. Nothing in the app has changed yet.

@@ -82,6 +82,8 @@ export function PilotToday() {
   const offer = useMemo(() => P.currentOffer(program, today, yesterdayEditable), [program, today, yesterdayEditable]);
   const full = P.dayFull(program, today);
   const done = program.habits.filter((id) => P.isDone(program, id, today)).length;
+  // The one card that shows the swipe hint: the first still to do (the footer explains the gestures too).
+  const firstOpen = program.habits.find((id) => !P.isDone(program, id, today));
   const daily = program.habits.filter((id) => P.isDaily(program, id, today));
   const [changed, setChanged] = useState<string | null>(null);
 
@@ -233,7 +235,7 @@ export function PilotToday() {
         {/* Past the summit with nothing chosen yet: the habits rest (nothing is tracked) until the person chooses. */}
         <Animated.View
           layout={LinearTransition.duration(200)}
-          style={[styles.cards, awaiting && { opacity: 0.45 }]}
+          style={[styles.cards, awaiting && styles.resting]}
           pointerEvents={awaiting ? 'none' : 'auto'}
           accessibilityElementsHidden={awaiting}
           importantForAccessibility={awaiting ? 'no-hide-descendants' : 'auto'}
@@ -247,6 +249,7 @@ export function PilotToday() {
               onToggle={onToggle}
               onDetails={onDetails}
               onSwipe={setSwiping}
+              showHint={id === firstOpen}
             />
           ))}
         </Animated.View>
@@ -309,6 +312,7 @@ function PilotCard({
   onToggle,
   onDetails,
   onSwipe,
+  showHint,
 }: {
   program: P.PilotProgram;
   habitId: P.PilotHabitId;
@@ -316,6 +320,7 @@ function PilotCard({
   onToggle: (id: string) => void;
   onDetails: (id: string) => void;
   onSwipe: (active: boolean) => void;
+  showHint: boolean;
 }) {
   const level = P.levelFor(program, habitId, today);
   const done = P.isDone(program, habitId, today);
@@ -363,6 +368,7 @@ function PilotCard({
       onToggle={onToggle}
       onDetails={onDetails}
       onSwipe={onSwipe}
+      showHint={showHint}
     />
   );
 }
@@ -383,6 +389,7 @@ const CardView = memo(function CardView({
   onToggle,
   onDetails,
   onSwipe,
+  showHint,
 }: {
   habitId: string;
   scene: number | undefined;
@@ -399,6 +406,7 @@ const CardView = memo(function CardView({
   onToggle: (id: string) => void;
   onDetails: (id: string) => void;
   onSwipe: (active: boolean) => void;
+  showHint: boolean;
 }) {
   const { isDark } = useTheme();
   const t = useT();
@@ -468,6 +476,7 @@ const CardView = memo(function CardView({
         levelLabel,
         summary: [weekText, counterText].filter(Boolean).join('. '),
         hint: strength ? t('today.card.strengthHint') : weekly ? t('today.card.weeklyHint') : undefined,
+        showHint,
         doneText: strength ? t('today.card.sessionLogged') : undefined,
       }}
     />
@@ -577,7 +586,9 @@ const styles = StyleSheet.create({
     marginTop: space.xs,
     marginBottom: -space.xs,
   },
-  cards: { gap: space.lg },
+  cards: { gap: space.md },
+  // Resting until the person chooses what's next: calm, in colour, just stepped back (not greyed out).
+  resting: { opacity: 0.82 },
   accessory: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.sm, marginTop: 6 },
   week: { fontWeight: '600', opacity: 0.85 },
   pill: {
