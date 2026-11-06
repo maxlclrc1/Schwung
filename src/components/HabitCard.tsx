@@ -13,7 +13,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../core/swipe';
+import { dragOffset, swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../core/swipe';
 import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { useDepth } from '../theme/depth';
@@ -249,6 +249,17 @@ function HabitCardImpl({
 
   // The card's horizontal offset while dragged (pt), and the done look (0..1), which eases in and out.
   const tx = useSharedValue(0);
+  // How far the finger itself has gone toward a toggle (pt): the marks read it, so they track the threshold exactly
+  // while the card eases off near it.
+  const pull = useSharedValue(0);
+  // A toggle waiting for the program to catch up (it updates a frame later): a second swipe in that moment would
+  // read the old state and toggle back, so it's ignored until the card's state changes (or a moment passes).
+  const pending = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => {
+    clearTimeout(pending.current);
+    pending.current = undefined;
+  }, [done]);
+  useEffect(() => () => clearTimeout(pending.current), []);
   const doneP = useSharedValue(done ? 1 : 0);
   // Completing (never on open or a re-render): one soft sage ring breathes out from the check, and the check
   // itself lands with a small overshoot-free pop.
@@ -279,10 +290,21 @@ function HabitCardImpl({
     );
   }, [done, doneP, reduceMotion, ring, pop]);
 
-  const settle = () => tx.set(reduceMotion ? withTiming(0, { duration: SETTLE_MS }) : withSpring(0, SPRING));
+  /** Back to rest: a spring that picks up the finger's speed (pt/ms) as it lets go, or a plain ease (Reduce Motion). */
+  const settle = (velocity = 0) => {
+    if (reduceMotion) {
+      tx.set(withTiming(0, { duration: SETTLE_MS }));
+      pull.set(withTiming(0, { duration: SETTLE_MS }));
+      return;
+    }
+    const v = Math.max(-2500, Math.min(2500, velocity * 1000));
+    tx.set(withSpring(0, { ...SPRING, velocity: v }));
+    pull.set(withSpring(0, SPRING));
+  };
 
   const toggle = () => {
-    if (readOnly) return;
+    if (readOnly || pending.current) return;
+    pending.current = setTimeout(() => (pending.current = undefined), 600);
     if (done) haptic.undo();
     else haptic.complete();
     // The card answers at once, on the UI thread; the program (and everything that follows it: XP, the day, the
@@ -305,6 +327,8 @@ function HabitCardImpl({
   const gesture = useRef({
     x0: 0,
     y0: 0,
+    /** Where the swipe took over: the card moves from here, so it doesn't jump by the distance that decided it. */
+    x1: 0,
     intent: 'undecided' as 'undecided' | 'swipe' | 'scroll',
     mode: 'idle' as 'idle' | 'press' | 'swipe' | 'used',
     crossed: false,
@@ -323,11 +347,11 @@ function HabitCardImpl({
     if (g.intent === 'undecided') g.intent = touchIntent(dxOf(e), dyOf(e));
     return g.intent;
   };
-  /** Where the card sits for a drag of dx: with the finger toward a toggle, held back the other way. */
+  /** The swipe's own distance: from where it took over. */
+  const swipeDx = (e: GestureResponderEvent) => e.nativeEvent.pageX - gesture.current.x1;
+  /** Where the card sits for a drag of dx: 1:1 with the finger, easing off near the threshold (dragOffset). */
   const offsetFor = (dx: number) => {
-    const d = done ? -dx : dx;
-    // Past the threshold the card keeps following, more slowly; the wrong way it barely moves.
-    const shown = d < 0 ? d * 0.12 : d <= reach ? d : reach + (d - reach) * 0.35;
+    const shown = dragOffset(done ? -dx : dx, reach);
     return done ? -shown : shown;
   };
   const velocity = () => {
@@ -341,13 +365,15 @@ function HabitCardImpl({
     const s = gesture.current.samples;
     const t = e.nativeEvent.timestamp ?? Date.now();
     s.push({ x: e.nativeEvent.pageX, t });
-    while (s.length > 2 && t - s[0].t > 80) s.shift();
+    // The finger's recent speed (the last ~50 ms), so a late change of direction reads as one.
+    while (s.length > 2 && t - s[0].t > 50) s.shift();
   };
-  const beginSwipe = () => {
+  const beginSwipe = (e: GestureResponderEvent) => {
     clearTimer();
     hold(false);
     const g = gesture.current;
     g.mode = 'swipe';
+    g.x1 = e.nativeEvent.pageX;
     g.crossed = false;
     onSwipe?.(true);
   };
@@ -374,7 +400,7 @@ function HabitCardImpl({
     onResponderGrant: (e: GestureResponderEvent) => {
       sample(e);
       if (gesture.current.intent === 'swipe') {
-        beginSwipe();
+        beginSwipe(e);
         // Android: keeps native views (the page's scroll) from taking the touch from the swipe.
         return true;
       }
@@ -394,7 +420,7 @@ function HabitCardImpl({
       sample(e);
       if (g.mode === 'press') {
         const intent = readIntent(e);
-        if (intent === 'swipe' && !readOnly) beginSwipe();
+        if (intent === 'swipe' && !readOnly) beginSwipe(e);
         // Any real movement ends the long-press; a vertical one is left to the page.
         else if (Math.hypot(dxOf(e), dyOf(e)) > 8) {
           clearTimer();
@@ -403,8 +429,9 @@ function HabitCardImpl({
         }
       }
       if (g.mode !== 'swipe') return;
-      const dx = dxOf(e);
+      const dx = swipeDx(e);
       tx.set(offsetFor(dx));
+      pull.set(Math.max(0, done ? -dx : dx));
       const past = (done ? -dx : dx) >= reach;
       if (past !== g.crossed) {
         g.crossed = past;
@@ -420,8 +447,10 @@ function HabitCardImpl({
         return;
       }
       endSwipe();
-      if (swipeOutcome(dxOf(e), velocity(), width, done) === 'toggle') toggle();
-      settle();
+      const toggled = !pending.current && swipeOutcome(swipeDx(e), velocity(), width, done) === 'toggle';
+      if (toggled) toggle();
+      // A cancelled swipe carries the finger's speed back into the spring; a toggle settles from rest.
+      settle(toggled ? 0 : velocity());
     },
     // While swiping, the swipe keeps the touch; otherwise the page may take it to scroll.
     onResponderTerminationRequest: () => gesture.current.mode !== 'swipe',
@@ -445,16 +474,15 @@ function HabitCardImpl({
   });
   // How close the drag is to counting (0..1), for the check (or undo) that appears as the card moves.
   const markStyle = useAnimatedStyle(() => {
-    const d = done ? -tx.get() : tx.get();
-    const k = interpolate(d, [12, reach], [0, 1], 'clamp');
+    const k = interpolate(pull.get(), [12, reach], [0, 1], 'clamp');
     return { opacity: k, transform: [{ scale: 0.8 + 0.2 * k }] };
   });
   const markFill = useAnimatedStyle(() => ({
-    opacity: interpolate(done ? -tx.get() : tx.get(), [reach * 0.85, reach], [0, 1], 'clamp'),
+    opacity: interpolate(pull.get(), [reach * 0.85, reach], [0, 1], 'clamp'),
   }));
   // Done: a soft violet wash over the scene, which stays visible, deepening a little as a swipe nears the threshold.
   const washStyle = useAnimatedStyle(() => {
-    const k = interpolate(done ? 0 : tx.get(), [0, reach], [0, 0.5], 'clamp');
+    const k = interpolate(done ? 0 : pull.get(), [0, reach], [0, 0.5], 'clamp');
     return { opacity: Math.max(doneP.get(), k) * (isDark ? 0.24 : 0.16) };
   });
   const doneRow = useAnimatedStyle(() => ({

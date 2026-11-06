@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { FLICK_MIN, swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../swipe';
+import { dragOffset, FLICK_MIN, FLICK_SPEED, RESIST_FROM, swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../swipe';
 
 const W = 343; // the card on a 375pt iPhone
 
@@ -48,5 +48,49 @@ describe('releasing a swipe', () => {
 
   it('does not count a flick that is moving back the other way', () => {
     expect(swipeOutcome(W * 0.3, -1, W, false)).toBe('cancel');
+  });
+});
+
+describe('a change of mind', () => {
+  it('cancels a release while the finger is quickly heading back, even past the threshold', () => {
+    const far = W * SWIPE_THRESHOLD + 20;
+    expect(swipeOutcome(far, 0, W, false)).toBe('toggle');
+    expect(swipeOutcome(far, -FLICK_SPEED, W, false)).toBe('cancel');
+    // Slowly easing back past the threshold still counts.
+    expect(swipeOutcome(far, -FLICK_SPEED / 3, W, false)).toBe('toggle');
+    // Mirrored for undo.
+    expect(swipeOutcome(-far, FLICK_SPEED, W, true)).toBe('cancel');
+    expect(swipeOutcome(-far, 0, W, true)).toBe('toggle');
+  });
+});
+
+describe('how the card follows the finger', () => {
+  const reach = W * SWIPE_THRESHOLD;
+
+  it('follows 1:1, then eases off near the threshold without a kink', () => {
+    expect(dragOffset(0, reach)).toBe(0);
+    expect(dragOffset(40, reach)).toBe(40);
+    const knee = reach * RESIST_FROM;
+    expect(dragOffset(knee, reach)).toBeCloseTo(knee);
+    // Just past the knee it still moves almost 1:1 (a smooth start), at the threshold it trails a little.
+    expect(dragOffset(knee + 1, reach) - dragOffset(knee, reach)).toBeGreaterThan(0.95);
+    expect(dragOffset(reach, reach)).toBeGreaterThan(reach * 0.9);
+    expect(dragOffset(reach, reach)).toBeLessThan(reach);
+  });
+
+  it('always moves with the finger, never past its limit', () => {
+    let prev = 0;
+    for (let d = 1; d <= 2000; d += 7) {
+      const x = dragOffset(d, reach);
+      expect(x).toBeGreaterThan(prev);
+      expect(x).toBeLessThan(reach * 1.4);
+      prev = x;
+    }
+  });
+
+  it('gives only a little the wrong way', () => {
+    expect(dragOffset(-10, reach)).toBeLessThan(0);
+    expect(dragOffset(-10, reach)).toBeGreaterThan(-2);
+    expect(dragOffset(-1000, reach)).toBeGreaterThan(-20);
   });
 });

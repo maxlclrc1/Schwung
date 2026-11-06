@@ -26,10 +26,34 @@ export function touchIntent(dx: number, dy: number): 'swipe' | 'scroll' | 'undec
   return 'undecided';
 }
 
-/** What a released swipe does. A done card is undone by swiping left: everything is mirrored. */
+/**
+ * What a released swipe does. A done card is undone by swiping left: everything is mirrored. A release while the
+ * finger is quickly heading back (a change of mind) cancels, even past the threshold.
+ */
 export function swipeOutcome(dx: number, vx: number, width: number, done: boolean): 'toggle' | 'cancel' {
   const dir = done ? -1 : 1;
   const d = dx * dir;
   const v = vx * dir;
+  if (v <= -FLICK_SPEED) return 'cancel';
   return d >= width * SWIPE_THRESHOLD || (d >= width * FLICK_MIN && v >= FLICK_SPEED) ? 'toggle' : 'cancel';
+}
+
+/** Where the card follows the finger 1:1 before resistance begins, as a share of the threshold distance. */
+export const RESIST_FROM = 0.8;
+
+/**
+ * How far the card moves for a finger `d` pt along the toggle direction (`reach` is the threshold distance). It
+ * follows 1:1 up to RESIST_FROM of the threshold, then eases off smoothly (no kink: the slope starts at 1 and falls),
+ * approaching 1.4 × reach however far the finger goes. The wrong way it gives a little, then stops (about 20 pt).
+ */
+export function dragOffset(d: number, reach: number): number {
+  if (reach <= 0) return 0;
+  if (d < 0) {
+    const dim = 20;
+    return -dim * (1 - 1 / ((-d * 0.15) / dim + 1));
+  }
+  const knee = reach * RESIST_FROM;
+  if (d <= knee) return d;
+  const dim = reach * 0.6;
+  return knee + dim * (1 - 1 / ((d - knee) / dim + 1));
 }
