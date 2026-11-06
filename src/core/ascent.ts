@@ -53,31 +53,39 @@ export type Point = { x: number; y: number };
 
 /**
  * Switchbacks from the valley floor (bottom left) to the summit (upper right), traced on the single-painting world
- * (design/canvas/build_world_from_master.py): along the bottom meadow, up the grassy band above the rock ridge,
- * back left along the painted track, across the upper terrace, then up the snow face to the peak.
+ * (design/canvas/build_world_from_master.py), on open ground all the way: along the bottom meadow, up the grass above
+ * the rock ridge to where the painted track forks, back left along that track, across the upper terrace, then up the
+ * sunlit ridge to the peak. Turns are rounded so the day markers stay evenly spaced.
  */
 const WAYPOINTS: Point[] = [
-  { x: 0.05, y: 0.9 },
-  { x: 0.28, y: 0.885 },
-  { x: 0.5, y: 0.8 },
-  { x: 0.7, y: 0.735 },
-  { x: 0.84, y: 0.705 },
-  { x: 0.9, y: 0.665 },
-  { x: 0.83, y: 0.625 },
-  { x: 0.66, y: 0.595 },
-  { x: 0.5, y: 0.555 },
-  { x: 0.34, y: 0.51 },
-  { x: 0.25, y: 0.47 },
-  { x: 0.24, y: 0.43 },
-  { x: 0.32, y: 0.4 },
-  { x: 0.46, y: 0.385 },
-  { x: 0.6, y: 0.365 },
-  { x: 0.7, y: 0.34 },
-  { x: 0.72, y: 0.3 },
-  { x: 0.65, y: 0.265 },
-  { x: 0.6, y: 0.22 },
-  { x: 0.64, y: 0.16 },
-  { x: 0.73, y: 0.09 },
+  { x: 0.04, y: 0.875 },
+  { x: 0.2, y: 0.892 },
+  { x: 0.36, y: 0.862 },
+  { x: 0.5, y: 0.795 },
+  { x: 0.62, y: 0.74 },
+  { x: 0.7, y: 0.712 },
+  { x: 0.77, y: 0.698 },
+  { x: 0.815, y: 0.684 },
+  { x: 0.832, y: 0.66 },
+  { x: 0.812, y: 0.635 },
+  { x: 0.76, y: 0.622 },
+  { x: 0.68, y: 0.616 },
+  { x: 0.6, y: 0.603 },
+  { x: 0.49, y: 0.565 },
+  { x: 0.4, y: 0.53 },
+  { x: 0.32, y: 0.505 },
+  { x: 0.27, y: 0.485 },
+  { x: 0.25, y: 0.458 },
+  { x: 0.275, y: 0.432 },
+  { x: 0.33, y: 0.418 },
+  { x: 0.43, y: 0.397 },
+  { x: 0.54, y: 0.377 },
+  { x: 0.61, y: 0.355 },
+  { x: 0.64, y: 0.32 },
+  { x: 0.63, y: 0.27 },
+  { x: 0.65, y: 0.215 },
+  { x: 0.685, y: 0.155 },
+  { x: 0.725, y: 0.09 },
 ];
 
 export const SUMMIT = WAYPOINTS[WAYPOINTS.length - 1];
