@@ -160,35 +160,38 @@ export function PilotHabit() {
           ) : null}
         </Card>
 
-        {canLog && progress.kind === 'minutes' ? (
+        {canLog && (!done || progress.kind === 'minutes') ? (
           <Card style={styles.gap}>
             <T v="bodyStrong">{t('today.habit.logProgress')}</T>
-            <T v="caption" color={c.textDim}>
-              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
-            </T>
-            <View style={styles.stepper}>
-              <Step label="−5" onPress={() => logProgress(logged && logged > 5 ? logged - 5 : null)} />
-              <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {logged ? t('today.habit.min', { minutes: logged }) : '—'}
-              </T>
-              <Step label="+5" onPress={() => logProgress((logged ?? 0) + 5)} />
-            </View>
-          </Card>
-        ) : null}
-
-        {canLog && progress.kind === 'effort' && !done ? (
-          <Card style={styles.gap}>
-            <T v="bodyStrong">{t('today.habit.logProgress')}</T>
-            <T v="caption" color={c.textDim}>
-              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
-            </T>
-            <View style={styles.chips}>
-              <Choice
-                label={t('today.habit.effort')}
-                on={!!track.progress}
-                onPress={() => logProgress(track.progress ? null : 1)}
-              />
-            </View>
+            {done ? null : (
+              <>
+                <T v="caption" color={c.textDim}>
+                  {t('today.habit.progressHint', { xp: PARTIAL_XP })}
+                </T>
+                <Button
+                  label={track.progress ? t('today.habit.removePartial') : t('today.habit.effort')}
+                  kind="secondary"
+                  onPress={() => {
+                    haptic.select();
+                    s().setPartial(id, !track.progress);
+                  }}
+                />
+              </>
+            )}
+            {progress.kind === 'minutes' ? (
+              <>
+                <T v="caption" color={c.textDim}>
+                  {t('today.habit.partialMinutes')}
+                </T>
+                <View style={styles.stepper}>
+                  <Step label="−5" onPress={() => logProgress(logged && logged > 5 ? logged - 5 : null)} />
+                  <T v="heading" style={[styles.tabular, styles.flexCenter]}>
+                    {logged ? t('today.habit.min', { minutes: logged }) : '—'}
+                  </T>
+                  <Step label="+5" onPress={() => logProgress((logged ?? 0) + 5)} />
+                </View>
+              </>
+            ) : null}
           </Card>
         ) : null}
 

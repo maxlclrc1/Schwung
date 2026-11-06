@@ -781,11 +781,11 @@ export const vi: Translation = {
       doneToday: 'Đã xong hôm nay',
       undo: 'Hoàn tác',
 
-      partialMinutes: 'Làm một phần · {minutes} phút',
+      partialMinutes: 'Hoàn thành một phần · {minutes} phút',
 
-      effort: 'Đã cố gắng',
+      effort: 'Hoàn thành một phần',
 
-      logProgress: 'Ghi tiến độ',
+      logProgress: 'Đánh dấu hoàn thành một phần',
     },
     session: { fullBody: 'Toàn thân', upper: 'Thân trên', lower: 'Thân dưới', anything: 'Khác' },
     offer: {
@@ -852,13 +852,17 @@ export const vi: Translation = {
       keepIt: 'Giữ lại',
       removeThis: 'Xóa thói quen này',
 
-      partial: 'Đã làm một phần.',
+      partial: 'Hoàn thành một phần.',
 
-      logProgress: 'Ghi tiến độ',
+      logProgress: 'Đã làm một phần?',
 
-      progressHint: 'Đã làm một phần? Ghi lại để nhận +{xp} XP. Tiến độ một phần không tính vào chuỗi ngày.',
+      progressHint: 'Đánh dấu hoàn thành một phần để nhận +{xp} XP. Chỉ hoàn thành trọn vẹn mới tính vào chuỗi ngày.',
 
-      effort: 'Tôi đã cố gắng',
+      effort: 'Đánh dấu hoàn thành một phần',
+
+      removePartial: 'Bỏ hoàn thành một phần',
+
+      partialMinutes: 'Số phút đã làm (tùy chọn)',
     },
   },
   journeyTab: {

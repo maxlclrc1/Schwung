@@ -780,11 +780,11 @@ export const bn: Translation = {
       doneToday: 'আজকের মতো সম্পন্ন',
       undo: 'ফিরিয়ে নিন',
 
-      partialMinutes: 'আংশিক করা · {minutes} মিনিট',
+      partialMinutes: 'আংশিক সম্পন্ন · {minutes} মিনিট',
 
-      effort: 'চেষ্টা করা হয়েছে',
+      effort: 'আংশিক সম্পন্ন',
 
-      logProgress: 'অগ্রগতি লিখুন',
+      logProgress: 'আংশিক সম্পন্ন হিসেবে চিহ্নিত করুন',
     },
     session: { fullBody: 'পুরো শরীর', upper: 'শরীরের ওপরের অংশ', lower: 'শরীরের নিচের অংশ', anything: 'অন্যান্য' },
     offer: {
@@ -848,13 +848,17 @@ export const bn: Translation = {
       keepIt: 'রেখে দিন',
       removeThis: 'এই অভ্যাসটি সরিয়ে দিন',
 
-      partial: 'আংশিক করা হয়েছে।',
+      partial: 'আংশিক সম্পন্ন।',
 
-      logProgress: 'অগ্রগতি লিখুন',
+      logProgress: 'কিছুটা করেছেন?',
 
-      progressHint: 'কিছুটা করেছেন? +{xp} XP পেতে লিখে রাখুন। আংশিক অগ্রগতি আপনার স্ট্রিকে গোনা হয় না।',
+      progressHint: '+{xp} XP পেতে আংশিক সম্পন্ন হিসেবে চিহ্নিত করুন। স্ট্রিকে শুধু পুরোপুরি সম্পন্ন করাই গোনা হয়।',
 
-      effort: 'আমি চেষ্টা করেছি',
+      effort: 'আংশিক সম্পন্ন হিসেবে চিহ্নিত করুন',
+
+      removePartial: 'আংশিক সম্পন্ন সরান',
+
+      partialMinutes: 'করা মিনিট (ঐচ্ছিক)',
     },
   },
   journeyTab: {

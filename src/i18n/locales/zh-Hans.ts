@@ -748,9 +748,9 @@ export const zhHans: Translation = {
 
       partialMinutes: '部分完成 · {minutes} 分钟',
 
-      effort: '已尽力',
+      effort: '部分完成',
 
-      logProgress: '记录进度',
+      logProgress: '标记为部分完成',
     },
     session: { fullBody: '全身', upper: '上肢', lower: '下肢', anything: '其他' },
     offer: {
@@ -816,11 +816,15 @@ export const zhHans: Translation = {
 
       partial: '部分完成。',
 
-      logProgress: '记录进度',
+      logProgress: '完成了一部分？',
 
-      progressHint: '完成了一部分？记录下来可得 +{xp} XP。部分进度不计入连续纪录。',
+      progressHint: '标记为部分完成可得 +{xp} XP。只有完全完成才计入连续纪录。',
 
-      effort: '我尽力了',
+      effort: '标记为部分完成',
+
+      removePartial: '取消部分完成',
+
+      partialMinutes: '已完成分钟（可选）',
     },
   },
   journeyTab: {

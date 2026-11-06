@@ -785,11 +785,11 @@ export const tr: Translation = {
       doneToday: 'Bugünlük tamam',
       undo: 'Geri al',
 
-      partialMinutes: 'Kısmen yapıldı · {minutes} dk',
+      partialMinutes: 'Kısmen tamamlandı · {minutes} dk',
 
-      effort: 'Çaba gösterildi',
+      effort: 'Kısmen tamamlandı',
 
-      logProgress: 'İlerleme kaydet',
+      logProgress: 'Kısmen tamamlandı olarak işaretle',
     },
     session: { fullBody: 'Tüm vücut', upper: 'Üst vücut', lower: 'Alt vücut', anything: 'Diğer' },
     offer: {
@@ -854,13 +854,17 @@ export const tr: Translation = {
       keepIt: 'Kalsın',
       removeThis: 'Bu alışkanlığı kaldır',
 
-      partial: 'Kısmen yapıldı.',
+      partial: 'Kısmen tamamlandı.',
 
-      logProgress: 'İlerleme kaydet',
+      logProgress: 'Bir kısmını mı yaptın?',
 
-      progressHint: 'Bir kısmını mı yaptın? +{xp} XP için kaydet. Kısmi ilerleme serine sayılmaz.',
+      progressHint: '+{xp} XP için kısmen tamamlandı olarak işaretle. Serine yalnızca tam tamamlama sayılır.',
 
-      effort: 'Çaba gösterdim',
+      effort: 'Kısmen tamamlandı olarak işaretle',
+
+      removePartial: 'Kısmi tamamlamayı kaldır',
+
+      partialMinutes: 'Yapılan dakika (isteğe bağlı)',
     },
   },
   journeyTab: {

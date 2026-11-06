@@ -472,7 +472,15 @@ const CardView = memo(function CardView({
     ...(counterText !== null && !done
       ? [{ name: 'count', label: t('today.card.addOne', { count: counterText }), run: addOne }]
       : []),
-    ...(done ? [] : [{ name: 'progress', label: t('today.card.logProgress'), run: () => onDetails(habitId) }]),
+    ...(done || partialText
+      ? []
+      : [
+          {
+            name: 'partial',
+            label: t('today.card.logProgress'),
+            run: () => useResetPilot.getState().setPartial(habitId, true),
+          },
+        ]),
   ];
 
   return (

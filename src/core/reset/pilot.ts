@@ -1117,8 +1117,9 @@ export const progressOpen = (p: PilotProgram, id: string, day: number) =>
   ['due', 'open', 'done'].includes(stateOn(p, id, day));
 
 /**
- * Logs partial progress (null removes it): minutes, an amount, or (effort habits) just that an effort was made.
- * Reaching the target completes the habit, worth 10 XP in all; below it, 5 XP. Never on a resting day.
+ * Logs partial progress (null removes it): minutes for timed habits (an optional detail), the counter's amount, or
+ * (effort habits) just that part of it was done. Partially completed is worth 5 XP and never completes a habit by
+ * itself: completion is the person's swipe or "Mark as done" (or a counter reaching its goal). Never on a resting day.
  */
 export function setProgress(p: PilotProgram, id: string, day: number, value: number | null): PilotChange {
   if (!inProgram(p, id, day)) return none(p);
@@ -1126,7 +1127,19 @@ export function setProgress(p: PilotProgram, id: string, day: number, value: num
   const { kind, target } = progressKind(p, id, day);
   if (kind === 'count') return apply(p, day, (logs, at) => setCount(logs, at, id, value ?? 0, target!));
   const v = kind === 'effort' && value !== null ? undefined : value;
-  return apply(p, day, (logs, at) => logProgress(logs, at, id, v, target));
+  return apply(p, day, (logs, at) => logProgress(logs, at, id, v, null));
+}
+
+/** "Mark as partially completed" (or remove it), for any habit: 5 XP, never a completion. */
+export function setPartial(p: PilotProgram, id: string, day: number, on: boolean): PilotChange {
+  if (!inProgram(p, id, day) || isDone(p, id, day)) return none(p);
+  if (on && !progressOpen(p, id, day)) return none(p);
+  return apply(p, day, (logs, at) => {
+    const t = readTrack(logs[dateForDay(at.startKey, at.day)], id);
+    // Already partial (minutes, or a counter's amount): keep what's there.
+    if (on && t.progress) return { logs, event: null };
+    return logProgress(logs, at, id, on ? undefined : null, null);
+  });
 }
 
 /** Optional minutes the person notes (null clears them). Never completes or undoes anything. */

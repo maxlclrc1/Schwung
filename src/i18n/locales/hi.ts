@@ -784,11 +784,11 @@ export const hi: Translation = {
       doneToday: 'आज के लिए पूरा',
       undo: 'वापस लें',
 
-      partialMinutes: 'आंशिक रूप से किया · {minutes} मिनट',
+      partialMinutes: 'आंशिक रूप से पूरा · {minutes} मिनट',
 
-      effort: 'कोशिश की',
+      effort: 'आंशिक रूप से पूरा',
 
-      logProgress: 'प्रगति दर्ज करें',
+      logProgress: 'आंशिक रूप से पूरा चिह्नित करें',
     },
     session: { fullBody: 'पूरा शरीर', upper: 'ऊपरी शरीर', lower: 'निचला शरीर', anything: 'अन्य' },
     offer: {
@@ -853,13 +853,17 @@ export const hi: Translation = {
       keepIt: 'इसे रखें',
       removeThis: 'यह आदत हटाएँ',
 
-      partial: 'आंशिक रूप से किया।',
+      partial: 'आंशिक रूप से पूरा।',
 
-      logProgress: 'प्रगति दर्ज करें',
+      logProgress: 'कुछ हिस्सा किया?',
 
-      progressHint: 'कुछ हिस्सा किया? +{xp} XP के लिए दर्ज करें। आंशिक प्रगति आपकी स्ट्रीक में नहीं गिनी जाती।',
+      progressHint: '+{xp} XP के लिए इसे आंशिक रूप से पूरा चिह्नित करें। स्ट्रीक में सिर्फ़ पूरा करना गिना जाता है।',
 
-      effort: 'मैंने कोशिश की',
+      effort: 'आंशिक रूप से पूरा चिह्नित करें',
+
+      removePartial: 'आंशिक रूप से पूरा हटाएँ',
+
+      partialMinutes: 'किए गए मिनट (वैकल्पिक)',
     },
   },
   journeyTab: {

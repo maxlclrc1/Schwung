@@ -916,11 +916,11 @@ export const ar: Translation = {
       doneToday: 'أُنجزت لليوم',
       undo: 'تراجع',
 
-      partialMinutes: 'أُنجز جزئيًا · {minutes} د',
+      partialMinutes: 'مكتملة جزئيًا · {minutes} د',
 
-      effort: 'بُذل جهد',
+      effort: 'مكتملة جزئيًا',
 
-      logProgress: 'تسجيل التقدّم',
+      logProgress: 'وضع علامة «مكتملة جزئيًا»',
     },
     session: { fullBody: 'الجسم كله', upper: 'الجزء العلوي', lower: 'الجزء السفلي', anything: 'أخرى' },
     offer: {
@@ -985,13 +985,17 @@ export const ar: Translation = {
       keepIt: 'الإبقاء عليها',
       removeThis: 'إزالة هذه العادة',
 
-      partial: 'أُنجز جزئيًا.',
+      partial: 'مكتملة جزئيًا.',
 
-      logProgress: 'تسجيل التقدّم',
+      logProgress: 'أنجزت جزءًا منها؟',
 
-      progressHint: 'أنجزت جزءًا منها؟ سجّله لتحصل على +{xp} XP. التقدّم الجزئي لا يُحتسب في سلسلتك.',
+      progressHint: 'ضع علامة «مكتملة جزئيًا» لتحصل على +{xp} XP. الإكمال الكامل وحده يُحتسب في سلسلتك.',
 
-      effort: 'بذلتُ جهدًا',
+      effort: 'وضع علامة «مكتملة جزئيًا»',
+
+      removePartial: 'إزالة الإكمال الجزئي',
+
+      partialMinutes: 'الدقائق المنجزة (اختياري)',
     },
   },
   journeyTab: {

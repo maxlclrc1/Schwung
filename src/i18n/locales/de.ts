@@ -803,9 +803,9 @@ export const de: Translation = {
 
       partialMinutes: 'Teilweise erledigt · {minutes} Min.',
 
-      effort: 'Mühe gegeben',
+      effort: 'Teilweise erledigt',
 
-      logProgress: 'Fortschritt eintragen',
+      logProgress: 'Als teilweise erledigt markieren',
     },
     session: { fullBody: 'Ganzkörper', upper: 'Oberkörper', lower: 'Unterkörper', anything: 'Anderes' },
     offer: {
@@ -874,11 +874,15 @@ export const de: Translation = {
 
       partial: 'Teilweise erledigt.',
 
-      logProgress: 'Fortschritt eintragen',
+      logProgress: 'Einen Teil geschafft?',
 
-      progressHint: 'Einen Teil geschafft? Trag ihn ein für +{xp} XP. Teilfortschritt zählt nicht für deine Serie.',
+      progressHint: 'Markier es als teilweise erledigt für +{xp} XP. Nur ganz Erledigtes zählt für deine Serie.',
 
-      effort: 'Ich hab’s versucht',
+      effort: 'Als teilweise erledigt markieren',
+
+      removePartial: 'Teilweise erledigt entfernen',
+
+      partialMinutes: 'Erledigte Minuten (optional)',
     },
   },
   journeyTab: {
