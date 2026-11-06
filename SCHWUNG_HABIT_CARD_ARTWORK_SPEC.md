@@ -15,6 +15,11 @@
   - `confidence_talk` (Social Confidence) came later, with the same grade: its light master is a close repaint
     rather than an exact relight (the bridge sits a little to the right), which the theme cross-fade hides.
   - `scene-social_reach_out-*-alt.png` are the unused alternatives.
+- **Catalog refinement (Phase 1):** `mind_meditation` (Meditation), `eat_well` (Eat Well) and `outdoor_time` (Time
+  Outdoors) replace `focus_deepwork`, `home_tidy` and `confidence_talk`, whose scenes were removed from the app (their
+  masters stay here). Their subjects sat lower than the spec, so each is a 1400 × 868 window from y 110 scaled to
+  1290 × 800; the dark masters came back brighter and greyer than the set, so they're deepened (gamma 1.45) and
+  blended toward indigo #18184A from 22% at the top to 40% at the bottom; the light ones get the mist grade above.
 - **Every other habit** shows a crop of the world panorama until its scene exists, the same crop for a
   habit every time.
 
