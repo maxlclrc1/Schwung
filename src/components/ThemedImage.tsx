@@ -1,7 +1,7 @@
 import { Image, type ImageContentFit } from 'expo-image';
 import { useEffect, useId, useState } from 'react';
 import type { ImageRequireSource, ImageStyle } from 'react-native';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import type { Scheme } from '../theme';
 import { forgetPainting, reportLoaded } from '../theme/gate';
 import { useThemeProgress } from '../theme/transition';
@@ -44,8 +44,16 @@ export function ThemedImage({
   contentFit?: ImageContentFit;
 }) {
   const progress = useThemeProgress();
+  // Whether the dark version has painted, kept in a shared value for the worklet below. Read from React state
+  // instead, the worklet could keep its first value (not painted) on the web, leaving the light version on top in
+  // dark mode.
+  const darkPainted = useSharedValue(false);
   const [loaded, setLoaded] = useState<Scheme[]>([]);
   const onLoad = (t: Scheme) => () => setLoaded((l) => (l.includes(t) ? l : [...l, t]));
+  const onDarkPainted = () => {
+    darkPainted.set(true);
+    onLoad('dark')();
+  };
 
   // The theme gate still waits (briefly) for a painting that hasn't loaded yet, e.g. a card that just appeared.
   const key = useId();
@@ -56,8 +64,7 @@ export function ThemedImage({
   useEffect(() => () => forgetPainting(key), [key]);
 
   // The light version fades with the theme, unless the dark one beneath hasn't loaded yet: then it stays.
-  const darkPainted = loaded.includes('dark');
-  const lightStyle = useAnimatedStyle(() => ({ opacity: darkPainted ? progress.get() : 1 }));
+  const lightStyle = useAnimatedStyle(() => ({ opacity: darkPainted.get() ? progress.get() : 1 }));
 
   return (
     <>
@@ -66,9 +73,9 @@ export function ThemedImage({
         source={sources.dark}
         contentFit={contentFit}
         priority="high"
-        onLoad={onLoad('dark')}
+        onLoad={onDarkPainted}
         // A broken image never holds a switch up.
-        onError={onLoad('dark')}
+        onError={onDarkPainted}
         style={style}
         accessible={false}
       />

@@ -270,8 +270,10 @@ function MountainStage({
     : (['rgba(247,246,251,0)', 'rgba(247,246,251,0.82)', 'rgba(247,246,251,0)'] as const);
 
   return (
+    // Clipped to the screen: the drifting fog bands are wider than it (and the camera scales the stage up), which
+    // otherwise made the whole page scroll sideways on web.
     <View
-      style={[StyleSheet.absoluteFill, physical]}
+      style={[StyleSheet.absoluteFill, physical, styles.clip]}
       pointerEvents="none"
       accessible={false}
       importantForAccessibility="no-hide-descendants"
@@ -789,6 +791,7 @@ function SummitCeremony({
 }
 
 const styles = StyleSheet.create({
+  clip: { overflow: 'hidden' },
   dawn: { position: 'absolute', left: 0, right: 0 },
   sun: { position: 'absolute', width: 180, height: 180, alignItems: 'center', justifyContent: 'center' },
   ring: { position: 'absolute' },
