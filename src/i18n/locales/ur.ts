@@ -780,6 +780,12 @@ export const ur: Translation = {
       swipe: 'مکمل کرنے کے لیے دائیں سوائپ کریں',
       doneToday: 'آج کے لیے مکمل',
       undo: 'واپس لیں',
+
+      partialMinutes: 'جزوی طور پر کیا · {minutes} منٹ',
+
+      effort: 'کوشش کی',
+
+      logProgress: 'پیش رفت درج کریں',
     },
     session: { fullBody: 'پورا جسم', upper: 'اوپری جسم', lower: 'نچلا جسم', anything: 'دیگر' },
     offer: {
@@ -822,8 +828,6 @@ export const ur: Translation = {
       yesterdayNotDone: 'گزشتہ کل: مکمل نہیں (آپ دوپہر تک اسے درست کر سکتے ہیں)',
       undoYesterday: 'گزشتہ کل والا واپس لیں',
       doneYesterday: 'گزشتہ کل مکمل کیا',
-      minutes: 'منٹ (اختیاری)',
-      minutesHint: 'اگر چاہیں تو لکھیں کہ اس میں کتنا وقت لگا۔ اس سے یہ کبھی نہیں بدلتا کہ آج مکمل ہوا یا نہیں۔',
       min: '{minutes} منٹ',
       session: 'سیشن کی تفصیلات (اختیاری)',
       sessionHint:
@@ -845,6 +849,14 @@ export const ur: Translation = {
       removeName: '{habit} ہٹائیں',
       keepIt: 'اسے رکھیں',
       removeThis: 'یہ عادت ہٹائیں',
+
+      partial: 'جزوی طور پر کیا۔',
+
+      logProgress: 'پیش رفت درج کریں',
+
+      progressHint: 'کچھ حصہ کیا؟ +{xp} XP کے لیے درج کریں۔ جزوی پیش رفت آپ کے تسلسل میں شمار نہیں ہوتی۔',
+
+      effort: 'میں نے کوشش کی',
     },
   },
   journeyTab: {

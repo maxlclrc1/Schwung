@@ -56,9 +56,13 @@ import {
   decrement,
   editSession,
   increment,
+  logProgress,
   logSession,
+  partialCount,
+  PARTIAL_XP,
   readTrack,
   recordAmount,
+  setCount,
   skip,
   undoDone,
   undoSession,
@@ -927,7 +931,8 @@ export function dayFull(p: PilotProgram, day: number): boolean {
 }
 
 /**
- * XP: 10 for each done habit on the day's list, +20 for a complete day (dayFull). Computed from the saved days, so an
+ * XP: 10 for each done habit on the day's list, 5 for each with partial progress that isn't done, +20 for a complete
+ * day (dayFull: partial progress never makes a day full). Computed from the saved days, so an
  * undo takes it back and nothing is ever awarded twice.
  */
 const xpCache = new WeakMap<PilotProgram, number>();
@@ -938,7 +943,8 @@ export function pilotXp(p: PilotProgram): number {
   xpCache.set(p, xp);
   return xp;
 }
-const dayXp = (p: PilotProgram, l: DayLog) => doneCount(l) * XP_PER_HABIT + (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0);
+const dayXp = (p: PilotProgram, l: DayLog) =>
+  doneCount(l) * XP_PER_HABIT + partialCount(l) * PARTIAL_XP + (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0);
 
 /**
  * How a day counts for the streak and the Journey: 'rest' when nothing was due (no daily habit, nothing done:
@@ -1077,6 +1083,50 @@ export function count(p: PilotProgram, id: string, day: number, by: 1 | -1): Pil
 export function setSkipped(p: PilotProgram, id: string, day: number, on: boolean): PilotChange {
   if (!inProgram(p, id, day)) return none(p);
   return apply(p, day, (logs, at) => (on ? skip : unskip)(logs, at, id));
+}
+
+/** Habits measured in minutes: partial progress is logged in minutes against the day's target. */
+export const TIMED_HABITS: ReadonlySet<string> = new Set([
+  'mind_meditation',
+  'mind_read',
+  'move_walk',
+  'outdoor_time',
+  'skill_practice',
+]);
+
+/**
+ * How partial progress is logged for a habit: minutes (timed habits), an amount (counters: the counter itself), or
+ * just an effort (everything else, own habits included). `target` is what completes it, when there is one.
+ */
+export function progressKind(
+  p: PilotProgram,
+  id: string,
+  day: number,
+): { kind: 'minutes' | 'count' | 'effort'; target: number | null } {
+  const counter = counterTarget(p, id, day);
+  if (counter !== null) return { kind: 'count', target: counter };
+  if (TIMED_HABITS.has(id) && RESET_BY_ID[id]) {
+    const m = minutesFor(id, levelFor(p, id, day));
+    return { kind: 'minutes', target: m > 0 ? m : null };
+  }
+  return { kind: 'effort', target: null };
+}
+
+/** Progress can be logged on a day the habit is asked for (due, or a weekly goal still open), or already done. */
+export const progressOpen = (p: PilotProgram, id: string, day: number) =>
+  ['due', 'open', 'done'].includes(stateOn(p, id, day));
+
+/**
+ * Logs partial progress (null removes it): minutes, an amount, or (effort habits) just that an effort was made.
+ * Reaching the target completes the habit, worth 10 XP in all; below it, 5 XP. Never on a resting day.
+ */
+export function setProgress(p: PilotProgram, id: string, day: number, value: number | null): PilotChange {
+  if (!inProgram(p, id, day)) return none(p);
+  if (value !== null && !progressOpen(p, id, day)) return none(p);
+  const { kind, target } = progressKind(p, id, day);
+  if (kind === 'count') return apply(p, day, (logs, at) => setCount(logs, at, id, value ?? 0, target!));
+  const v = kind === 'effort' && value !== null ? undefined : value;
+  return apply(p, day, (logs, at) => logProgress(logs, at, id, v, target));
 }
 
 /** Optional minutes the person notes (null clears them). Never completes or undoes anything. */

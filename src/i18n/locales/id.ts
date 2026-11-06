@@ -789,6 +789,12 @@ export const id: Translation = {
       swipe: 'Geser ke kanan untuk menyelesaikan',
       doneToday: 'Selesai untuk hari ini',
       undo: 'Batalkan',
+
+      partialMinutes: 'Sebagian · {minutes} mnt',
+
+      effort: 'Sudah berusaha',
+
+      logProgress: 'Catat progres',
     },
     session: {
       fullBody: 'Seluruh tubuh',
@@ -837,8 +843,6 @@ export const id: Translation = {
       yesterdayNotDone: 'Kemarin: belum selesai (bisa kamu koreksi sampai tengah hari)',
       undoYesterday: 'Batalkan kemarin',
       doneYesterday: 'Selesai kemarin',
-      minutes: 'Menit (opsional)',
-      minutesHint: 'Catat berapa lama waktunya, kalau mau. Ini tidak pernah mengubah apakah hari ini selesai.',
       min: '{minutes} mnt',
       session: 'Detail sesi (opsional)',
       sessionHint: 'Satu sesi dihitung per hari. Memilih detail akan mencatat sesi hari ini kalau belum tercatat.',
@@ -861,6 +865,14 @@ export const id: Translation = {
       removeName: 'Hapus {habit}',
       keepIt: 'Pertahankan',
       removeThis: 'Hapus kebiasaan ini',
+
+      partial: 'Sebagian selesai.',
+
+      logProgress: 'Catat progres',
+
+      progressHint: 'Sudah sebagian? Catat untuk +{xp} XP. Progres sebagian tidak dihitung untuk runtunanmu.',
+
+      effort: 'Aku sudah berusaha',
     },
   },
   journeyTab: {

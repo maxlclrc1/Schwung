@@ -75,6 +75,8 @@ type Actions = {
   count: (habitId: string, by: 1 | -1) => P.PilotChange['event'];
   setSkipped: (habitId: string, on: boolean) => void;
   setMinutes: (habitId: string, minutes: number | null) => void;
+  /** Partial progress today: minutes, an amount, or (effort habits) any number; null removes it. */
+  setProgress: (habitId: string, value: number | null) => P.PilotChange['event'];
   setSession: (details: { type?: SessionType; minutes?: number }) => void;
   /** Less Scrolling's weekly Screen Time check (this week). */
   setScreenTime: (minutesPerDay: number) => void;
@@ -256,6 +258,7 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
         count: (id, by) => change((p, day) => P.count(p, id, day, by)),
         setSkipped: (id, on) => void change((p, day) => P.setSkipped(p, id, day, on)),
         setMinutes: (id, minutes) => void change((p, day) => P.setMinutes(p, id, day, minutes)),
+        setProgress: (id, value) => change((p, day) => P.setProgress(p, id, day, value)),
         setSession: (details) => void change((p, day) => P.setSession(p, day, details)),
         setScreenTime: (minutes) => progress((p, day) => P.setScreenTime(p, day, minutes)),
 

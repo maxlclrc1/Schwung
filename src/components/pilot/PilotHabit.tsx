@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { canEditYesterday } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
-import { recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
+import { PARTIAL_XP, recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
 import { haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
@@ -12,12 +12,9 @@ import { SheetHeader } from '../SheetHeader';
 import { Button, Card, Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 
-/** Habits measured in minutes, where noting the minutes is offered (optional, never needed). */
-const TIMED = new Set(['mind_meditation', 'mind_read', 'move_walk', 'outdoor_time', 'skill_practice']);
-
 /**
  * A Life Reset habit's details (app/life-reset/[id].tsx): today and,
- * until noon, yesterday; a counter, a strength session's details or optional minutes where they apply; and
+ * until noon, yesterday; a counter, a strength session's details, partial progress (minutes or an effort); and
  * difficulty. Nothing here is needed to complete a habit: a swipe on the card is enough.
  */
 export function PilotHabit() {
@@ -53,7 +50,14 @@ export function PilotHabit() {
   // Feedback about the current target only (as readiness reads it).
   const since = program.progression[id].eras.filter((e) => e.fromDay <= today).pop()?.fromDay ?? 1;
   const recentFeedback = fb && fb.day >= since ? fb.kind : null;
-  const amount = track.amount?.value ?? null;
+  // Partial progress: minutes logged (older saves may hold minutes noted before progress existed).
+  const progress = P.progressKind(program, id, today);
+  const logged = track.progress?.value ?? (track.progress ? null : (track.amount?.value ?? null));
+  const canLog = P.progressOpen(program, id, today);
+  const logProgress = (value: number | null) => {
+    haptic.select();
+    s().setProgress(id, value);
+  };
 
   const change = (f: () => string | null) => {
     const blocked = f();
@@ -107,9 +111,11 @@ export function PilotHabit() {
                 : t('today.habit.done')
               : track.skipped
                 ? t('today.habit.skipped')
-                : strength
-                  ? t('today.habit.noSession')
-                  : t('today.habit.notYet')}
+                : track.progress
+                  ? t('today.habit.partial')
+                  : strength
+                    ? t('today.habit.noSession')
+                    : t('today.habit.notYet')}
           </T>
           {counter !== null ? (
             <View style={styles.stepper}>
@@ -119,6 +125,11 @@ export function PilotHabit() {
               </T>
               <Step label="+1" onPress={() => s().count(id, 1)} />
             </View>
+          ) : null}
+          {counter !== null && !done ? (
+            <T v="caption" color={c.textDim}>
+              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
+            </T>
           ) : null}
           <Button
             label={
@@ -149,18 +160,34 @@ export function PilotHabit() {
           ) : null}
         </Card>
 
-        {TIMED.has(id) ? (
+        {canLog && progress.kind === 'minutes' ? (
           <Card style={styles.gap}>
-            <T v="bodyStrong">{t('today.habit.minutes')}</T>
+            <T v="bodyStrong">{t('today.habit.logProgress')}</T>
             <T v="caption" color={c.textDim}>
-              {t('today.habit.minutesHint')}
+              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
             </T>
             <View style={styles.stepper}>
-              <Step label="−5" onPress={() => s().setMinutes(id, amount && amount > 5 ? amount - 5 : null)} />
+              <Step label="−5" onPress={() => logProgress(logged && logged > 5 ? logged - 5 : null)} />
               <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {amount ? t('today.habit.min', { minutes: amount }) : '—'}
+                {logged ? t('today.habit.min', { minutes: logged }) : '—'}
               </T>
-              <Step label="+5" onPress={() => s().setMinutes(id, (amount ?? 0) + 5)} />
+              <Step label="+5" onPress={() => logProgress((logged ?? 0) + 5)} />
+            </View>
+          </Card>
+        ) : null}
+
+        {canLog && progress.kind === 'effort' && !done ? (
+          <Card style={styles.gap}>
+            <T v="bodyStrong">{t('today.habit.logProgress')}</T>
+            <T v="caption" color={c.textDim}>
+              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
+            </T>
+            <View style={styles.chips}>
+              <Choice
+                label={t('today.habit.effort')}
+                on={!!track.progress}
+                onPress={() => logProgress(track.progress ? null : 1)}
+              />
             </View>
           </Card>
         ) : null}

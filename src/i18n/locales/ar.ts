@@ -915,6 +915,12 @@ export const ar: Translation = {
       swipe: 'السحب يمينًا للإكمال',
       doneToday: 'أُنجزت لليوم',
       undo: 'تراجع',
+
+      partialMinutes: 'أُنجز جزئيًا · {minutes} د',
+
+      effort: 'بُذل جهد',
+
+      logProgress: 'تسجيل التقدّم',
     },
     session: { fullBody: 'الجسم كله', upper: 'الجزء العلوي', lower: 'الجزء السفلي', anything: 'أخرى' },
     offer: {
@@ -957,8 +963,6 @@ export const ar: Translation = {
       yesterdayNotDone: 'أمس: لم تُنجز (يمكنك التصحيح حتى الظهر)',
       undoYesterday: 'التراجع عن الأمس',
       doneYesterday: 'أُنجزت أمس',
-      minutes: 'الدقائق (اختياري)',
-      minutesHint: 'يمكنك تدوين المدة التي استغرقتها إن أحببت. لا يغيّر ذلك أبدًا اكتمال اليوم من عدمه.',
       min: '{minutes} د',
       session: 'تفاصيل الجلسة (اختياري)',
       sessionHint: 'تُحتسب جلسة واحدة في اليوم. اختيار تفصيل يسجّل جلسة اليوم إن لم تكن قد سُجّلت.',
@@ -980,6 +984,14 @@ export const ar: Translation = {
       removeName: 'إزالة {habit}',
       keepIt: 'الإبقاء عليها',
       removeThis: 'إزالة هذه العادة',
+
+      partial: 'أُنجز جزئيًا.',
+
+      logProgress: 'تسجيل التقدّم',
+
+      progressHint: 'أنجزت جزءًا منها؟ سجّله لتحصل على +{xp} XP. التقدّم الجزئي لا يُحتسب في سلسلتك.',
+
+      effort: 'بذلتُ جهدًا',
     },
   },
   journeyTab: {

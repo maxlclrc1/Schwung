@@ -793,6 +793,12 @@ export const nl: Translation = {
       swipe: 'Veeg naar rechts om af te vinken',
       doneToday: 'Klaar voor vandaag',
       undo: 'Ongedaan maken',
+
+      partialMinutes: 'Deels gedaan · {minutes} min',
+
+      effort: 'Moeite gedaan',
+
+      logProgress: 'Voortgang noteren',
     },
     session: { fullBody: 'Hele lichaam', upper: 'Bovenlichaam', lower: 'Onderlichaam', anything: 'Anders' },
     offer: {
@@ -835,8 +841,6 @@ export const nl: Translation = {
       yesterdayNotDone: 'Gisteren: niet gedaan (je kunt het tot 12 uur corrigeren)',
       undoYesterday: 'Gisteren ongedaan maken',
       doneYesterday: 'Gisteren gedaan',
-      minutes: 'Minuten (optioneel)',
-      minutesHint: 'Noteer hoe lang het duurde, als je wilt. Het verandert nooit of vandaag gedaan is.',
       min: '{minutes} min',
       session: 'Sessiedetails (optioneel)',
       sessionHint: 'Eén sessie per dag telt. Een detail kiezen logt de sessie van vandaag als dat nog niet is gebeurd.',
@@ -858,6 +862,14 @@ export const nl: Translation = {
       removeName: '{habit} verwijderen',
       keepIt: 'Houden',
       removeThis: 'Deze gewoonte verwijderen',
+
+      partial: 'Deels gedaan.',
+
+      logProgress: 'Voortgang noteren',
+
+      progressHint: 'Een deel gedaan? Noteer het voor +{xp} XP. Gedeeltelijke voortgang telt niet mee voor je reeks.',
+
+      effort: 'Ik heb moeite gedaan',
     },
   },
   journeyTab: {

@@ -784,6 +784,12 @@ export const tr: Translation = {
       swipe: 'Tamamlamak için sağa kaydır',
       doneToday: 'Bugünlük tamam',
       undo: 'Geri al',
+
+      partialMinutes: 'Kısmen yapıldı · {minutes} dk',
+
+      effort: 'Çaba gösterildi',
+
+      logProgress: 'İlerleme kaydet',
     },
     session: { fullBody: 'Tüm vücut', upper: 'Üst vücut', lower: 'Alt vücut', anything: 'Diğer' },
     offer: {
@@ -826,8 +832,6 @@ export const tr: Translation = {
       yesterdayNotDone: 'Dün: yapılmadı (öğlene kadar düzeltebilirsin)',
       undoYesterday: 'Dünü geri al',
       doneYesterday: 'Dün yapıldı',
-      minutes: 'Dakika (isteğe bağlı)',
-      minutesHint: 'İstersen ne kadar sürdüğünü not et. Bugünün tamam olup olmadığını asla değiştirmez.',
       min: '{minutes} dk',
       session: 'Seans ayrıntıları (isteğe bağlı)',
       sessionHint: 'Günde bir seans sayılır. Bir ayrıntı seçmek, henüz kaydedilmediyse bugünün seansını kaydeder.',
@@ -849,6 +853,14 @@ export const tr: Translation = {
       removeName: 'Kaldır: {habit}',
       keepIt: 'Kalsın',
       removeThis: 'Bu alışkanlığı kaldır',
+
+      partial: 'Kısmen yapıldı.',
+
+      logProgress: 'İlerleme kaydet',
+
+      progressHint: 'Bir kısmını mı yaptın? +{xp} XP için kaydet. Kısmi ilerleme serine sayılmaz.',
+
+      effort: 'Çaba gösterdim',
     },
   },
   journeyTab: {

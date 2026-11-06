@@ -805,6 +805,12 @@ export const fr: Translation = {
       swipe: 'Balayez vers la droite pour valider',
       doneToday: 'Fait pour aujourd’hui',
       undo: 'Annuler',
+
+      partialMinutes: 'En partie fait · {minutes} min',
+
+      effort: 'Effort fait',
+
+      logProgress: 'Noter un progrès',
     },
     session: { fullBody: 'Corps entier', upper: 'Haut du corps', lower: 'Bas du corps', anything: 'Autre' },
     offer: {
@@ -847,8 +853,6 @@ export const fr: Translation = {
       yesterdayNotDone: 'Hier : pas fait (modifiable jusqu’à midi)',
       undoYesterday: 'Annuler hier',
       doneYesterday: 'Fait hier',
-      minutes: 'Minutes (facultatif)',
-      minutesHint: 'Notez la durée si vous le souhaitez. Cela ne change jamais le fait que la journée soit faite.',
       min: '{minutes} min',
       session: 'Détails de la séance (facultatif)',
       sessionHint: 'Une séance compte par jour. Choisir un détail note la séance du jour si ce n’est pas déjà fait.',
@@ -871,6 +875,15 @@ export const fr: Translation = {
       removeName: 'Retirer {habit}',
       keepIt: 'La garder',
       removeThis: 'Retirer cette habitude',
+
+      partial: 'En partie fait.',
+
+      logProgress: 'Noter un progrès',
+
+      progressHint:
+        'Vous en avez fait une partie ? Notez-la pour +{xp} XP. Un progrès partiel ne compte pas pour votre série.',
+
+      effort: 'J’ai fait un effort',
     },
   },
   journeyTab: {
