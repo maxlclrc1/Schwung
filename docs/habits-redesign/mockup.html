@@ -1,0 +1,114 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+:root{--A:/home/user/schwung/assets}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.dark{--bg:#111116;--ink:#F2F1F6;--ink2:#A9A8B8;--ink3:#6F6E80;--line:rgba(255,255,255,.08);--sheet:rgba(17,17,22,.78);--track:rgba(255,255,255,.12);--acc:#F2A25C;--accInk:#1B130C;--tab:#16161C}
+.light{--bg:#F7F6FB;--ink:#17161D;--ink2:#5E5D6E;--ink3:#8D8C9C;--line:rgba(23,22,29,.08);--sheet:rgba(247,246,251,.86);--track:rgba(23,22,29,.10);--acc:#C8662A;--accInk:#fff;--tab:#FFFFFF}
+.phone{width:390px;height:844px;position:relative;overflow:hidden;background:var(--bg);color:var(--ink)}
+.bg{position:absolute;left:0;top:0;width:390px;height:380px;background-size:cover;background-position:center top}
+.bg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 30%,var(--bg) 92%)}
+.light .bg:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(247,246,251,.15),rgba(247,246,251,0) 40%)}
+.status{position:absolute;top:14px;left:28px;right:24px;display:flex;justify-content:space-between;font-weight:600;font-size:15px;color:#fff}
+.light .status{color:#17161D}
+.head{position:absolute;top:62px;left:20px;right:20px}
+.kicker{font-size:13px;font-weight:600;letter-spacing:.02em;color:rgba(255,255,255,.82)}
+.light .kicker{color:rgba(23,22,29,.7)}
+h1{font-size:34px;font-weight:700;letter-spacing:-.02em;color:#fff;margin-top:2px;text-shadow:0 1px 12px rgba(0,0,0,.25)}
+.light h1{color:#17161D;text-shadow:0 1px 14px rgba(255,255,255,.6)}
+.icons{position:absolute;top:58px;right:20px;display:flex;gap:10px}
+.icons i{width:36px;height:36px;border-radius:18px;background:rgba(0,0,0,.28);display:block;backdrop-filter:blur(8px)}
+.light .icons i{background:rgba(255,255,255,.55)}
+.icons i:after{content:"";display:block;width:14px;height:14px;margin:11px;border:2px solid rgba(255,255,255,.85);border-radius:50%}
+.light .icons i:after{border-color:rgba(23,22,29,.6)}
+/* the one progress indicator */
+.prog{position:absolute;top:206px;left:20px;right:20px}
+.prog .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.prog b{font-size:15px;font-weight:600;color:var(--ink)}
+.prog span{font-size:13px;color:var(--ink2)}
+.seg{display:flex;gap:4px;height:6px}
+.seg i{flex:1;border-radius:3px;background:var(--track);overflow:hidden;display:block}
+.seg i u{display:block;height:100%;background:var(--acc)}
+/* the list: one surface, rows divided by hairlines */
+.list{position:absolute;top:254px;left:12px;right:12px;background:var(--sheet);backdrop-filter:blur(18px);border-radius:20px;padding:0 0}
+.h{display:flex;align-items:center;gap:12px;height:72px;padding:0 12px 0 10px;position:relative}
+.h+.h:before{content:"";position:absolute;top:0;left:72px;right:12px;height:1px;background:var(--line)}
+.thumb{width:52px;height:52px;border-radius:12px;background-size:cover;background-position:50% 30%;flex:none}
+.txt{flex:1;min-width:0}
+.name{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.tgt{font-size:13.5px;color:var(--ink2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tgt em{font-style:normal;color:var(--acc);font-weight:600}
+.done .name{color:var(--ink2)}
+/* completion control: a 40pt ring, filled by progress */
+.ring{width:40px;height:40px;flex:none;position:relative}
+.ring svg{position:absolute;inset:0}
+.ring .n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink)}
+.pips{display:flex;gap:3px;margin-top:5px}
+.pips i{width:14px;height:4px;border-radius:2px;background:var(--track);display:block}
+.pips i.on{background:var(--acc)}
+.rest{position:absolute;left:20px;right:20px;top:0;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink2)}
+.rest .mini{width:26px;height:26px;border-radius:7px;background-size:cover;background-position:50% 30%}
+.rest b{color:var(--ink);font-weight:600}
+.hint{position:absolute;left:0;right:0;text-align:center;font-size:12.5px;color:var(--ink3)}
+.tabs{position:absolute;left:0;right:0;bottom:0;height:84px;background:var(--tab);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:10px;font-size:11px;color:var(--ink3)}
+.tabs div{text-align:center;width:80px}.tabs div:before{content:"";display:block;width:22px;height:22px;margin:0 auto 4px;border-radius:6px;border:2px solid currentColor}
+.tabs .on{color:var(--acc)}
+/* swipe state */
+.swipe{background:var(--acc);border-radius:0}
+.swipe .lbl{position:absolute;left:18px;top:0;height:72px;display:flex;align-items:center;font-weight:700;color:var(--accInk);font-size:15px;gap:8px}
+.slid{position:absolute;inset:0;left:118px;background:var(--bg);display:flex;align-items:center;gap:12px;padding:0 12px 0 10px;box-shadow:-8px 0 16px rgba(0,0,0,.18)}
+/* popover */
+.pop{position:absolute;right:20px;width:250px;background:var(--tab);border-radius:16px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.35);border:1px solid var(--line)}
+.pop .t{font-size:13px;color:var(--ink2);margin-bottom:10px}
+.chips{display:flex;gap:8px}
+.chips i{flex:1;height:38px;border-radius:10px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:600;font-size:14px;background:var(--bg)}
+.pop .go{margin-top:10px;height:40px;border-radius:10px;background:var(--acc);color:var(--accInk);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cap{font-size:13px;color:#555;margin:8px 0 4px;font-weight:600}
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+const P=new URLSearchParams(location.search), T=P.get('t')||'dark', V=P.get('v')||'screen';
+const A='../../assets/habits/', BG='mock-bg-';
+const ring=(f,state)=>{const r=17,c=2*Math.PI*r,acc='var(--acc)';
+  if(state==='done')return `<div class="ring"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="${acc}"/><path d="M13 20.5l4.6 4.5L27.5 15" stroke="var(--accInk)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+  return `<div class="ring"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="${r}" stroke="var(--track)" stroke-width="3" fill="none"/>${f>0?`<circle cx="20" cy="20" r="${r}" stroke="${acc}" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-dasharray="${c*f} ${c}" transform="rotate(-90 20 20)"/>`:''}</svg></div>`};
+const row=(id,name,tgt,state,f,extra='')=>`<div class="h ${state}"><div class="thumb" style="background-image:url(${A}${id}-${T}.webp)"></div><div class="txt"><div class="name">${name}</div><div class="tgt">${tgt}</div>${extra}</div>${ring(f,state)}</div>`;
+const pips=(n,on)=>`<div class="pips">${Array.from({length:n},(_,i)=>`<i class="${i<on?'on':''}"></i>`).join('')}</div>`;
+const rows=[
+  row('mind_read','Read Daily','<em>6 of 10 min</em>','part',0.6),
+  row('eat_well','Eat Well','<em>1 of 2</em> balanced meals','part',0.5),
+  row('move_walk','Daily Movement','Done · 32 min','done',1),
+  row('social_reach_out','Stay Connected','Reach out to 1 person','todo',0),
+  row('outdoor_time','Time Outdoors','5 minutes outside, by choice','todo',0),
+  row('skill_practice','Practice a Skill','15 min · 2 of 4 this week','todo',0,''),
+];
+function screen(){
+  const segs=[[1],[.6],[.5],[0],[0],[0]].map(([f])=>`<i><u style="width:${f*100}%"></u></i>`).join('');
+  return `<div class="phone ${T}">
+  <div class="bg" style="background-image:url(${BG}${T}.jpg)"></div>
+  <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+  <div class="head"><div class="kicker">Day 12 of 66 · Foundation</div><h1>Today</h1></div>
+  <div class="icons"><i></i><i></i></div>
+  <div class="prog"><div class="row"><b>1 of 6 done</b><span>2 under way</span></div><div class="seg">${segs}</div></div>
+  <div class="list">${rows.join('')}</div>
+  <div style="position:absolute;top:${254+6*72+16}px;left:0;right:0"><div class="rest"><div class="mini" style="background-image:url(${A}strength_log-${T}.webp)"></div><span><b>Strength Training</b> rests today · 1 of 3 this week</span></div></div>
+  <div class="tabs"><div class="on">Habits</div><div>Journey</div><div>Insights</div></div>
+  </div>`}
+function states(){
+  // Interaction panel: three states, swipe, partial log.
+  const r=(...a)=>`<div class="list" style="position:relative;top:0;left:0;right:0">${row(...a)}</div>`;
+  return `<div class="phone ${T}" style="height:auto;padding:16px 16px 20px;width:390px">
+  <div class="cap" style="color:var(--ink2)">1 · Not started</div>${r('outdoor_time','Time Outdoors','5 minutes outside, by choice','todo',0)}
+  <div class="cap" style="color:var(--ink2)">2 · Partly done (measurable)</div>${r('mind_read','Read Daily','<em>6 of 10 min</em>','part',0.6)}
+  <div class="cap" style="color:var(--ink2)">3 · Completed</div>${r('move_walk','Daily Movement','Done · 32 min','done',1)}
+  <div class="cap" style="color:var(--ink2)">Weekly habit: pips for the week, ring for today</div>${r('skill_practice','Practice a Skill','15 min today','todo',0,pips(4,2))}
+  <div class="cap" style="color:var(--ink2)">Swipe right: completes in full (unchanged)</div>
+  <div class="list" style="position:relative;top:0;left:0;right:0;overflow:hidden;border-radius:16px"><div class="h swipe" style="display:block;height:72px"><div class="lbl">✓ Done</div><div class="slid"><div class="thumb" style="background-image:url(${A}social_reach_out-${T}.webp)"></div><div class="txt"><div class="name">Stay Connected</div><div class="tgt">Reach out to 1 person</div></div>${ring(0)}</div></div></div>
+  <div class="cap" style="color:var(--ink2)">Tap the ring: log part of it</div>
+  <div style="position:relative;height:170px">${r('mind_read','Read Daily','<em>6 of 10 min</em>','part',0.6)}
+   <div class="pop" style="top:78px"><div class="t">Read Daily · add time</div><div class="chips"><i>+5</i><i>+10</i><i>+15</i></div><div class="go">Start timer</div></div></div>
+  </div>`}
+document.getElementById('root').innerHTML=V==='states'?states():screen();
+</script></body></html>
