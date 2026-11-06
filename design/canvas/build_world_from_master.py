@@ -23,7 +23,7 @@ def smooth(t):
     return t * t * (3 - 2 * t)
 
 
-m = Image.open(src).convert('RGB')
+m = Image.open(src).convert('RGB').resize((1536, 1024), Image.LANCZOS)  # ChatGPT sometimes returns 1535 px
 m = m.crop((CROP_X, 0, m.width, m.height))
 sw, sh = round(m.width * SCALE), round(m.height * SCALE)
 big = m.resize((sw, sh), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=2, percent=40, threshold=2))

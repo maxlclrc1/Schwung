@@ -24,7 +24,7 @@ const DOTS = trailDots(3);
 /** Where each phase label sits on the art (normalized), clear of the trail. */
 const PHASE_LABEL_AT: Record<1 | 2 | 3, { x: number; y: number }> = {
   1: { x: 0.03, y: 0.755 },
-  2: { x: 0.79, y: 0.555 },
+  2: { x: 0.79, y: 0.5 },
   3: { x: 0.03, y: 0.36 },
 };
 
