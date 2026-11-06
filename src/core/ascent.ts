@@ -52,27 +52,32 @@ export const LANDMARKS: Record<number, { name: string; icon: 'footsteps' | 'bonf
 export type Point = { x: number; y: number };
 
 /**
- * Switchbacks from the valley floor (bottom left) to the summit (upper right), on the Journey painting. Checked against the painting in the continuous world: two turns
- * sit on solid ground. At the left turn (days 37–39) the trail crossed a pocket of mist above the ridge; it now turns on the
- * ridge and climbs the grassy terrace. At the right turn (days 53–56) it ran along the rock's misty skyline; it
- * now stays on the rock.
+ * Switchbacks from the valley floor (bottom left) to the summit (upper right), traced on the single-painting world
+ * (design/canvas/build_world_from_master.py): along the bottom meadow, up the grassy band above the rock ridge,
+ * back left along the painted track, across the upper terrace, then up the snow face to the peak.
  */
 const WAYPOINTS: Point[] = [
-  { x: 0.07, y: 0.9 },
-  { x: 0.34, y: 0.92 },
-  { x: 0.62, y: 0.87 },
-  { x: 0.82, y: 0.78 },
-  { x: 0.6, y: 0.7 },
-  { x: 0.3, y: 0.66 },
-  { x: 0.19, y: 0.59 },
-  { x: 0.255, y: 0.545 },
-  { x: 0.34, y: 0.495 },
-  { x: 0.62, y: 0.45 },
-  { x: 0.76, y: 0.395 },
-  { x: 0.62, y: 0.29 },
-  { x: 0.5, y: 0.22 },
-  { x: 0.6, y: 0.15 },
-  { x: 0.7, y: 0.105 },
+  { x: 0.05, y: 0.9 },
+  { x: 0.28, y: 0.885 },
+  { x: 0.5, y: 0.8 },
+  { x: 0.7, y: 0.735 },
+  { x: 0.84, y: 0.705 },
+  { x: 0.9, y: 0.665 },
+  { x: 0.83, y: 0.625 },
+  { x: 0.66, y: 0.595 },
+  { x: 0.5, y: 0.555 },
+  { x: 0.34, y: 0.51 },
+  { x: 0.25, y: 0.47 },
+  { x: 0.24, y: 0.43 },
+  { x: 0.32, y: 0.4 },
+  { x: 0.46, y: 0.385 },
+  { x: 0.6, y: 0.365 },
+  { x: 0.7, y: 0.34 },
+  { x: 0.72, y: 0.3 },
+  { x: 0.65, y: 0.265 },
+  { x: 0.6, y: 0.22 },
+  { x: 0.64, y: 0.16 },
+  { x: 0.73, y: 0.09 },
 ];
 
 export const SUMMIT = WAYPOINTS[WAYPOINTS.length - 1];
