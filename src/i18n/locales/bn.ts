@@ -779,6 +779,12 @@ export const bn: Translation = {
       swipe: 'সম্পন্ন করতে ডানে সোয়াইপ করুন',
       doneToday: 'আজকের মতো সম্পন্ন',
       undo: 'ফিরিয়ে নিন',
+
+      partialMinutes: 'আংশিক করা · {minutes} মিনিট',
+
+      effort: 'চেষ্টা করা হয়েছে',
+
+      logProgress: 'অগ্রগতি লিখুন',
     },
     session: { fullBody: 'পুরো শরীর', upper: 'শরীরের ওপরের অংশ', lower: 'শরীরের নিচের অংশ', anything: 'অন্যান্য' },
     offer: {
@@ -821,8 +827,6 @@ export const bn: Translation = {
       yesterdayNotDone: 'গতকাল: সম্পন্ন হয়নি (দুপুর পর্যন্ত সংশোধন করতে পারবেন)',
       undoYesterday: 'গতকালেরটা ফিরিয়ে নিন',
       doneYesterday: 'গতকাল সম্পন্ন করেছি',
-      minutes: 'মিনিট (ঐচ্ছিক)',
-      minutesHint: 'চাইলে কতক্ষণ লাগল লিখে রাখুন। আজ সম্পন্ন হয়েছে কি না, তা এতে কখনো বদলায় না।',
       min: '{minutes} মিনিট',
       session: 'সেশনের বিস্তারিত (ঐচ্ছিক)',
       sessionHint: 'দিনে একটি সেশন গোনা হয়। কোনো বিস্তারিত বেছে নিলে, আজকের সেশন এখনো লেখা না হলে তা লেখা হয়ে যায়।',
@@ -843,6 +847,14 @@ export const bn: Translation = {
       removeName: '{habit} সরিয়ে দিন',
       keepIt: 'রেখে দিন',
       removeThis: 'এই অভ্যাসটি সরিয়ে দিন',
+
+      partial: 'আংশিক করা হয়েছে।',
+
+      logProgress: 'অগ্রগতি লিখুন',
+
+      progressHint: 'কিছুটা করেছেন? +{xp} XP পেতে লিখে রাখুন। আংশিক অগ্রগতি আপনার স্ট্রিকে গোনা হয় না।',
+
+      effort: 'আমি চেষ্টা করেছি',
     },
   },
   journeyTab: {

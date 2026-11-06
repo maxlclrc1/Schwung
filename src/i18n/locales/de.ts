@@ -800,6 +800,12 @@ export const de: Translation = {
       swipe: 'Nach rechts wischen zum Abhaken',
       doneToday: 'Für heute erledigt',
       undo: 'Rückgängig',
+
+      partialMinutes: 'Teilweise erledigt · {minutes} Min.',
+
+      effort: 'Mühe gegeben',
+
+      logProgress: 'Fortschritt eintragen',
     },
     session: { fullBody: 'Ganzkörper', upper: 'Oberkörper', lower: 'Unterkörper', anything: 'Anderes' },
     offer: {
@@ -842,8 +848,6 @@ export const de: Translation = {
       yesterdayNotDone: 'Gestern: nicht erledigt (du kannst es bis Mittag korrigieren)',
       undoYesterday: 'Gestern rückgängig',
       doneYesterday: 'Gestern erledigt',
-      minutes: 'Minuten (optional)',
-      minutesHint: 'Notier dir, wie lange es gedauert hat, wenn du magst. Es ändert nie, ob heute erledigt ist.',
       min: '{minutes} Min.',
       session: 'Details zur Einheit (optional)',
       sessionHint:
@@ -867,6 +871,14 @@ export const de: Translation = {
       removeName: '{habit} entfernen',
       keepIt: 'Behalten',
       removeThis: 'Diese Gewohnheit entfernen',
+
+      partial: 'Teilweise erledigt.',
+
+      logProgress: 'Fortschritt eintragen',
+
+      progressHint: 'Einen Teil geschafft? Trag ihn ein für +{xp} XP. Teilfortschritt zählt nicht für deine Serie.',
+
+      effort: 'Ich hab’s versucht',
     },
   },
   journeyTab: {

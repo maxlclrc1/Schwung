@@ -744,6 +744,12 @@ export const zhHant: Translation = {
       swipe: '向右滑動以完成',
       doneToday: '今天已完成',
       undo: '復原',
+
+      partialMinutes: '部分完成 · {minutes} 分鐘',
+
+      effort: '已盡力',
+
+      logProgress: '記錄進度',
     },
     session: { fullBody: '全身', upper: '上半身', lower: '下半身', anything: '其他' },
     offer: {
@@ -786,8 +792,6 @@ export const zhHant: Translation = {
       yesterdayNotDone: '昨天：未完成（中午前可以更正）',
       undoYesterday: '復原昨天',
       doneYesterday: '昨天已完成',
-      minutes: '分鐘（選填）',
-      minutesHint: '如果你願意，可以記下花了多久。它永遠不會影響今天是否算完成。',
       min: '{minutes}分鐘',
       session: '訓練細節（選填）',
       sessionHint: '每天計一次訓練。如果今天的訓練還沒記錄，選擇一個細節就會記錄它。',
@@ -808,6 +812,14 @@ export const zhHant: Translation = {
       removeName: '移除{habit}',
       keepIt: '保留',
       removeThis: '移除這個習慣',
+
+      partial: '部分完成。',
+
+      logProgress: '記錄進度',
+
+      progressHint: '完成了一部分？記錄下來可得 +{xp} XP。部分進度不計入連續紀錄。',
+
+      effort: '我盡力了',
     },
   },
   journeyTab: {

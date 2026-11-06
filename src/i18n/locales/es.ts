@@ -785,6 +785,12 @@ export const es: Translation = {
       swipe: 'Desliza a la derecha para completar',
       doneToday: 'Hecho por hoy',
       undo: 'Deshacer',
+
+      partialMinutes: 'Hecho en parte · {minutes} min',
+
+      effort: 'Hubo esfuerzo',
+
+      logProgress: 'Registrar progreso',
     },
     session: { fullBody: 'Cuerpo completo', upper: 'Tren superior', lower: 'Tren inferior', anything: 'Otra' },
     offer: {
@@ -827,8 +833,6 @@ export const es: Translation = {
       yesterdayNotDone: 'Ayer: sin hacer (puedes corregirlo hasta el mediodía)',
       undoYesterday: 'Deshacer lo de ayer',
       doneYesterday: 'Hecho ayer',
-      minutes: 'Minutos (opcional)',
-      minutesHint: 'Anota cuánto te llevó, si quieres. Nunca cambia si hoy está hecho.',
       min: '{minutes} min',
       session: 'Detalles de la sesión (opcional)',
       sessionHint: 'Cuenta una sesión al día. Elegir un detalle registra la sesión de hoy si aún no lo está.',
@@ -850,6 +854,14 @@ export const es: Translation = {
       removeName: 'Quitar {habit}',
       keepIt: 'Mantenerlo',
       removeThis: 'Quitar este hábito',
+
+      partial: 'Hecho en parte.',
+
+      logProgress: 'Registrar progreso',
+
+      progressHint: '¿Hiciste una parte? Regístrala y gana +{xp} XP. El progreso parcial no cuenta para tu racha.',
+
+      effort: 'Me esforcé',
     },
   },
   journeyTab: {

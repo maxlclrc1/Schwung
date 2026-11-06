@@ -786,6 +786,12 @@ export const ptBR: Translation = {
       swipe: 'Deslize para a direita para concluir',
       doneToday: 'Feito por hoje',
       undo: 'Desfazer',
+
+      partialMinutes: 'Feito em parte · {minutes} min',
+
+      effort: 'Houve esforço',
+
+      logProgress: 'Registrar progresso',
     },
     session: { fullBody: 'Corpo inteiro', upper: 'Membros superiores', lower: 'Membros inferiores', anything: 'Outro' },
     offer: {
@@ -828,8 +834,6 @@ export const ptBR: Translation = {
       yesterdayNotDone: 'Ontem: não feito (dá para corrigir até o meio-dia)',
       undoYesterday: 'Desfazer ontem',
       doneYesterday: 'Feito ontem',
-      minutes: 'Minutos (opcional)',
-      minutesHint: 'Anote quanto tempo levou, se quiser. Isso nunca muda se hoje está feito.',
       min: '{minutes} min',
       session: 'Detalhes da sessão (opcional)',
       sessionHint:
@@ -853,6 +857,14 @@ export const ptBR: Translation = {
       removeName: 'Remover {habit}',
       keepIt: 'Manter',
       removeThis: 'Remover este hábito',
+
+      partial: 'Feito em parte.',
+
+      logProgress: 'Registrar progresso',
+
+      progressHint: 'Fez uma parte? Registre e ganhe +{xp} XP. Progresso parcial não conta para sua sequência.',
+
+      effort: 'Fiz um esforço',
     },
   },
   journeyTab: {

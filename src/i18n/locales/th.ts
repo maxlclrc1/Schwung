@@ -757,6 +757,12 @@ export const th: Translation = {
       swipe: 'ปัดขวาเพื่อทำให้เสร็จ',
       doneToday: 'วันนี้ทำแล้ว',
       undo: 'เลิกทำ',
+
+      partialMinutes: 'ทำไปบางส่วน · {minutes} นาที',
+
+      effort: 'ได้พยายามแล้ว',
+
+      logProgress: 'บันทึกความคืบหน้า',
     },
     session: { fullBody: 'ทั้งตัว', upper: 'ช่วงบน', lower: 'ช่วงล่าง', anything: 'อื่น ๆ' },
     offer: {
@@ -799,8 +805,6 @@ export const th: Translation = {
       yesterdayNotDone: 'เมื่อวาน: ยังไม่ได้ทำ (แก้ไขได้จนถึงเที่ยง)',
       undoYesterday: 'เลิกทำของเมื่อวาน',
       doneYesterday: 'ทำแล้วเมื่อวาน',
-      minutes: 'นาที (ไม่บังคับ)',
-      minutesHint: 'จดไว้ว่าใช้เวลานานเท่าไรก็ได้ถ้าคุณต้องการ ไม่มีผลต่อการนับว่าวันนี้ทำแล้วหรือไม่',
       min: '{minutes} นาที',
       session: 'รายละเอียดการฝึก (ไม่บังคับ)',
       sessionHint: 'นับวันละหนึ่งครั้ง การเลือกรายละเอียดจะบันทึกการฝึกของวันนี้ให้ ถ้ายังไม่ได้บันทึก',
@@ -821,6 +825,14 @@ export const th: Translation = {
       removeName: 'นำ {habit} ออก',
       keepIt: 'เก็บไว้',
       removeThis: 'นำนิสัยนี้ออก',
+
+      partial: 'ทำไปบางส่วน',
+
+      logProgress: 'บันทึกความคืบหน้า',
+
+      progressHint: 'ทำไปบางส่วนแล้วใช่ไหม บันทึกไว้รับ +{xp} XP ความคืบหน้าบางส่วนไม่นับในสถิติต่อเนื่อง',
+
+      effort: 'ฉันได้พยายามแล้ว',
     },
   },
   journeyTab: {

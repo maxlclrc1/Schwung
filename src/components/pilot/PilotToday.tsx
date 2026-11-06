@@ -360,6 +360,13 @@ function PilotCard({
         counter !== null ? tr('today.card.counter', { done: Math.min(count, counter), goal: counter }) : null
       }
       skipped={!!track.skipped}
+      partialText={
+        done || !track.progress || counter !== null
+          ? null
+          : track.progress.value
+            ? tr('today.card.partialMinutes', { minutes: track.progress.value })
+            : tr('today.card.effort')
+      }
       session={session}
       title={P.nameOf(program, habitId)}
       task={P.targetText(program, habitId, today)}
@@ -381,6 +388,7 @@ const CardView = memo(function CardView({
   weekText,
   counterText,
   skipped,
+  partialText,
   session,
   title,
   task,
@@ -398,6 +406,7 @@ const CardView = memo(function CardView({
   weekText: string;
   counterText: string | null;
   skipped: boolean;
+  partialText: string | null;
   session: string | null;
   title: string;
   task: string;
@@ -435,6 +444,11 @@ const CardView = memo(function CardView({
           </T>
         </CardButton>
       ) : null}
+      {partialText ? (
+        <T v="caption" color={ink} style={styles.week}>
+          {partialText}
+        </T>
+      ) : null}
       {skipped && !done ? (
         <T v="caption" color={ink} style={styles.week}>
           {t('today.card.skipped')}
@@ -454,10 +468,12 @@ const CardView = memo(function CardView({
     </View>
   );
 
-  const actions =
-    counterText !== null && !done
+  const actions = [
+    ...(counterText !== null && !done
       ? [{ name: 'count', label: t('today.card.addOne', { count: counterText }), run: addOne }]
-      : [];
+      : []),
+    ...(done ? [] : [{ name: 'progress', label: t('today.card.logProgress'), run: () => onDetails(habitId) }]),
+  ];
 
   return (
     <HabitCard
@@ -474,7 +490,7 @@ const CardView = memo(function CardView({
         task,
         levelIndex,
         levelLabel,
-        summary: [weekText, counterText].filter(Boolean).join('. '),
+        summary: [weekText, counterText, partialText].filter(Boolean).join('. '),
         hint: strength ? t('today.card.strengthHint') : weekly ? t('today.card.weeklyHint') : undefined,
         showHint,
         doneText: strength ? t('today.card.sessionLogged') : undefined,

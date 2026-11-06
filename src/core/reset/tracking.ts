@@ -26,7 +26,7 @@ export const SESSION_TYPES: SessionType[] = ['full body', 'upper', 'lower', 'oth
 export type HabitTrack = {
   v: 1;
   /** How the current completion was made (absent when not completed). */
-  by?: 'manual' | 'timer' | 'counter' | 'session';
+  by?: 'manual' | 'timer' | 'counter' | 'session' | 'progress';
   /** The person chose to skip it today. Never set on a completed habit. */
   skipped?: true;
   /** Counter progress (tasks finished, people reached). */
@@ -43,7 +43,17 @@ export type HabitTrack = {
   session?: { type?: SessionType; minutes?: number };
   /** The habit has been completed at least once today (one celebration a day, however often it's corrected). */
   everCompleted?: true;
+  /**
+   * Partial progress the person logged: minutes (timed habits), an amount (counters), or just "made an effort" (no
+   * value). Worth PARTIAL_XP while the habit isn't completed; never counts toward the streak, a full day or a weekly
+   * goal. Absent on older saves, so their XP never changes.
+   */
+  progress?: { value?: number };
 };
+
+/** XP for a habit with logged progress that isn't completed (a completion is worth XP_PER_HABIT in all). */
+export const PARTIAL_XP = 5;
+const PROGRESS_MAX = 5000;
 
 export type Amount = { value: number; unit: 'minutes' | 'pages' };
 const AMOUNT_MAX: Record<Amount['unit'], number> = { minutes: 1440, pages: 5000 };
@@ -69,7 +79,7 @@ export function readTrack(log: DayLog | undefined, habitId: string): HabitTrack 
   const r = raw as Record<string, unknown>;
   const n = (x: unknown) => (typeof x === 'number' && Number.isFinite(x) && x >= 0 ? Math.floor(x) : undefined);
   const out: HabitTrack = { v: 1 };
-  if (r.by === 'manual' || r.by === 'timer' || r.by === 'counter' || r.by === 'session') out.by = r.by;
+  if (['manual', 'timer', 'counter', 'session', 'progress'].includes(r.by as string)) out.by = r.by as HabitTrack['by'];
   if (r.skipped === true) out.skipped = true;
   if (n(r.count) !== undefined) out.count = n(r.count);
   if (n(r.minutes) !== undefined) out.minutes = n(r.minutes);
@@ -78,6 +88,11 @@ export function readTrack(log: DayLog | undefined, habitId: string): HabitTrack 
   if (a && typeof a === 'object' && (a.unit === 'minutes' || a.unit === 'pages') && validAmount(a.value, a.unit))
     out.amount = { value: Math.round(a.value as number), unit: a.unit };
   if (r.everCompleted === true) out.everCompleted = true;
+  const pr = r.progress as Record<string, unknown> | undefined;
+  if (pr && typeof pr === 'object') {
+    const v = n(pr.value);
+    out.progress = v !== undefined && v >= 1 && v <= PROGRESS_MAX ? { value: v } : {};
+  }
   const t = r.timer as TimerRun | undefined;
   if (t && typeof t === 'object' && t.v === 1 && Array.isArray(t.blocks) && typeof t.status === 'string') out.timer = t;
   const s = r.session as Record<string, unknown> | undefined;
@@ -89,6 +104,14 @@ export function readTrack(log: DayLog | undefined, habitId: string): HabitTrack 
   }
   return out;
 }
+
+/** Partial progress on a day: logged, not completed and not skipped. */
+export const isPartial = (log: DayLog | undefined, habitId: string): boolean =>
+  !!log && !log.completed.includes(habitId) && !!readTrack(log, habitId).progress && !readTrack(log, habitId).skipped;
+
+/** Habits with partial progress in a day's record (each worth PARTIAL_XP). */
+export const partialCount = (log: DayLog): number =>
+  Object.keys((log.track as Record<string, unknown> | undefined) ?? {}).filter((id) => isPartial(log, id)).length;
 
 /** A habit's status on a day. Partial progress is still `incomplete`. */
 export function dayStatus(logs: Logs, startKey: string, day: number, habitId: string): DayStatus {
@@ -156,8 +179,13 @@ export const confirmTimer = confirmDone;
 export function undoDone(logs: Logs, at: At, habitId: string): Change {
   return edit(logs, at, habitId, (done, t) => {
     if (!done) return [false, t];
-    if (t.by === 'counter' && t.countTarget !== undefined)
-      return [false, { ...notCompleted(t), count: Math.max(0, t.countTarget - 1) }];
+    if (t.by === 'counter' && t.countTarget !== undefined) {
+      const count = Math.max(0, t.countTarget - 1);
+      const out: HabitTrack = { ...notCompleted(t), count };
+      if (count > 0) out.progress = { value: count };
+      else delete out.progress;
+      return [false, out];
+    }
     return [false, notCompleted(t)];
   });
 }
@@ -178,7 +206,12 @@ export function recordAmount(logs: Logs, at: At, habitId: string, amount: Amount
 
 /** Skip today on purpose. Not possible once completed (undo first); never counted as a failure here. */
 export function skip(logs: Logs, at: At, habitId: string): Change {
-  return edit(logs, at, habitId, (done, t) => (done ? [true, t] : [false, { ...t, skipped: true }]));
+  return edit(logs, at, habitId, (done, t) => {
+    if (done) return [true, t];
+    const out: HabitTrack = { ...t, skipped: true };
+    delete out.progress;
+    return [false, out];
+  });
 }
 
 export function unskip(logs: Logs, at: At, habitId: string): Change {
@@ -198,6 +231,11 @@ export function setCount(logs: Logs, at: At, habitId: string, count: number, tar
   return edit(logs, at, habitId, (done, t) => {
     const before = t.count ?? 0;
     const next: HabitTrack = { ...t, count: n };
+    // The count is the counter's progress: any amount is partial progress until it completes.
+    if (n > 0) {
+      next.progress = { value: Math.min(n, PROGRESS_MAX) };
+      delete next.skipped;
+    } else delete next.progress;
     if (!done && n >= target && before < target)
       return [true, { ...completedBy(next, 'counter'), countTarget: target }];
     if (done && n < target && t.by === 'counter') return [false, notCompleted(next)];
@@ -214,6 +252,36 @@ export const decrement = (logs: Logs, at: At, habitId: string, target: number) =
 export function countProgress(logs: Logs, startKey: string, day: number, habitId: string, target: number): number {
   const c = readTrack(logs[dateForDay(startKey, day)], habitId).count ?? 0;
   return target > 0 ? Math.min(1, c / target) : 0;
+}
+
+/**
+ * Logs (or, with null, removes) partial progress: minutes or an amount (`value`), or just an effort (no value).
+ * Reaching `target` completes the habit (by 'progress'), worth XP_PER_HABIT in all, never more; correcting it back
+ * under the target undoes only a completion progress made, never one the person confirmed by swiping. A completed
+ * habit keeps its completion. Logging progress un-skips the day.
+ */
+export function logProgress(
+  logs: Logs,
+  at: At,
+  habitId: string,
+  value: number | null | undefined,
+  target: number | null,
+): Change {
+  return edit(logs, at, habitId, (done, t) => {
+    const out: HabitTrack = { ...t };
+    delete out.skipped;
+    const v = value == null || !Number.isFinite(value) ? undefined : Math.min(PROGRESS_MAX, Math.floor(value));
+    // Removing it (null, or nothing left): a completion that progress made goes with it.
+    if (value === null || (v !== undefined && v < 1)) {
+      delete out.progress;
+      return done && t.by === 'progress' ? [false, notCompleted(out)] : [done, out];
+    }
+    out.progress = v === undefined ? {} : { value: v };
+    const reached = target !== null && v !== undefined && v >= target;
+    if (!done && reached) return [true, completedBy(out, 'progress')];
+    if (done && !reached && t.by === 'progress') return [false, notCompleted(out)];
+    return [done, out];
+  });
 }
 
 /**

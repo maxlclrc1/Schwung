@@ -148,6 +148,7 @@ describe('counters', () => {
   it('needs no task names or contact names', () => {
     expect(Object.keys(readTrack(increment({}, at(1), ID, 3).logs[dateForDay(MON, 1)], ID)).sort()).toEqual([
       'count',
+      'progress', // the same number, as partial progress: never a name
       'v',
     ]);
   });

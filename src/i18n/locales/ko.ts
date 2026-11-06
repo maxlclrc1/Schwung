@@ -758,6 +758,12 @@ export const ko: Translation = {
       swipe: '오른쪽으로 밀어서 완료',
       doneToday: '오늘 완료',
       undo: '취소',
+
+      partialMinutes: '일부 완료 · {minutes}분',
+
+      effort: '노력했어요',
+
+      logProgress: '진행 기록',
     },
     session: { fullBody: '전신', upper: '상체', lower: '하체', anything: '기타' },
     offer: {
@@ -800,8 +806,6 @@ export const ko: Translation = {
       yesterdayNotDone: '어제: 미완료 (정오까지 수정할 수 있어요)',
       undoYesterday: '어제 기록 취소',
       doneYesterday: '어제 완료했어요',
-      minutes: '시간(분, 선택)',
-      minutesHint: '원하면 걸린 시간을 적어 두세요. 오늘 완료 여부는 바뀌지 않아요.',
       min: '{minutes}분',
       session: '세션 세부 정보 (선택)',
       sessionHint: '세션은 하루에 하나만 인정돼요. 세부 정보를 고르면 아직 기록하지 않은 경우 오늘 세션이 기록돼요.',
@@ -823,6 +827,14 @@ export const ko: Translation = {
       removeName: '{habit} 빼기',
       keepIt: '유지하기',
       removeThis: '이 습관 빼기',
+
+      partial: '일부 완료.',
+
+      logProgress: '진행 기록',
+
+      progressHint: '일부만 했나요? 기록하면 +{xp} XP. 일부 진행은 연속 기록에 포함되지 않아요.',
+
+      effort: '노력했어요',
     },
   },
   journeyTab: {

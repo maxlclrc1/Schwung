@@ -774,6 +774,12 @@ export const ja: Translation = {
       swipe: '右にスワイプして達成',
       doneToday: '今日は達成',
       undo: '取り消す',
+
+      partialMinutes: '一部完了 · {minutes}分',
+
+      effort: '取り組みました',
+
+      logProgress: '進捗を記録',
     },
     session: { fullBody: '全身', upper: '上半身', lower: '下半身', anything: 'その他' },
     offer: {
@@ -816,8 +822,6 @@ export const ja: Translation = {
       yesterdayNotDone: '昨日：未達成（正午まで修正できます）',
       undoYesterday: '昨日の記録を取り消す',
       doneYesterday: '昨日達成した',
-      minutes: '時間（分・任意）',
-      minutesHint: 'よければ、かかった時間をメモしてください。今日の達成には影響しません。',
       min: '{minutes}分',
       session: 'セッションの詳細（任意）',
       sessionHint: 'セッションは1日1回カウントされます。詳細を選ぶと、まだの場合は今日のセッションが記録されます。',
@@ -839,6 +843,14 @@ export const ja: Translation = {
       removeName: '{habit}を外す',
       keepIt: '残す',
       removeThis: 'この習慣を外す',
+
+      partial: '一部完了。',
+
+      logProgress: '進捗を記録',
+
+      progressHint: '一部できましたか？記録すると+{xp} XP。一部の進捗は連続記録には数えられません。',
+
+      effort: '取り組んだ',
     },
   },
   journeyTab: {

@@ -870,6 +870,12 @@ export const ru: Translation = {
       swipe: 'Смахни вправо, чтобы отметить',
       doneToday: 'На сегодня выполнено',
       undo: 'Отменить',
+
+      partialMinutes: 'Частично · {minutes} мин',
+
+      effort: 'Было усилие',
+
+      logProgress: 'Отметить прогресс',
     },
     session: { fullBody: 'Всё тело', upper: 'Верх тела', lower: 'Низ тела', anything: 'Другое' },
     offer: {
@@ -912,9 +918,6 @@ export const ru: Translation = {
       yesterdayNotDone: 'Вчера: не выполнено (можно исправить до полудня)',
       undoYesterday: 'Отменить вчерашнее',
       doneYesterday: 'Выполнено вчера',
-      minutes: 'Минуты (необязательно)',
-      minutesHint:
-        'Отметь, сколько времени ушло, если хочешь. Это никогда не влияет на то, выполнен ли сегодняшний день.',
       min: '{minutes} мин',
       session: 'Детали тренировки (необязательно)',
       sessionHint:
@@ -938,6 +941,14 @@ export const ru: Translation = {
       removeName: 'Убрать «{habit}»',
       keepIt: 'Оставить',
       removeThis: 'Убрать эту привычку',
+
+      partial: 'Сделано частично.',
+
+      logProgress: 'Отметить прогресс',
+
+      progressHint: 'Сделал часть? Отметь это и получи +{xp} XP. Частичный прогресс не идёт в серию.',
+
+      effort: 'Я постарался',
     },
   },
   journeyTab: {

@@ -783,6 +783,12 @@ export const hi: Translation = {
       swipe: 'पूरा करने के लिए दाएँ स्वाइप करें',
       doneToday: 'आज के लिए पूरा',
       undo: 'वापस लें',
+
+      partialMinutes: 'आंशिक रूप से किया · {minutes} मिनट',
+
+      effort: 'कोशिश की',
+
+      logProgress: 'प्रगति दर्ज करें',
     },
     session: { fullBody: 'पूरा शरीर', upper: 'ऊपरी शरीर', lower: 'निचला शरीर', anything: 'अन्य' },
     offer: {
@@ -825,8 +831,6 @@ export const hi: Translation = {
       yesterdayNotDone: 'कल: पूरा नहीं (आप दोपहर तक इसे सुधार सकते हैं)',
       undoYesterday: 'कल का वापस लें',
       doneYesterday: 'कल पूरा किया',
-      minutes: 'मिनट (वैकल्पिक)',
-      minutesHint: 'अगर चाहें, तो लिखें कि इसमें कितना समय लगा। इससे यह कभी नहीं बदलता कि आज पूरा हुआ या नहीं।',
       min: '{minutes} मिनट',
       session: 'सेशन का विवरण (वैकल्पिक)',
       sessionHint:
@@ -848,6 +852,14 @@ export const hi: Translation = {
       removeName: '{habit} हटाएँ',
       keepIt: 'इसे रखें',
       removeThis: 'यह आदत हटाएँ',
+
+      partial: 'आंशिक रूप से किया।',
+
+      logProgress: 'प्रगति दर्ज करें',
+
+      progressHint: 'कुछ हिस्सा किया? +{xp} XP के लिए दर्ज करें। आंशिक प्रगति आपकी स्ट्रीक में नहीं गिनी जाती।',
+
+      effort: 'मैंने कोशिश की',
     },
   },
   journeyTab: {
