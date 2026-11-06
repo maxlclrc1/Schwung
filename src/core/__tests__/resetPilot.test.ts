@@ -4,6 +4,7 @@ import { dateForDay } from '../dates';
 import { totalXp } from '../progression';
 import { HELD_EXERCISE_PROGRAMMES, RESET_HABITS } from '../reset/habits';
 import { COLLECTIBLES } from '../reset/collection';
+import * as C from '../reset/charts';
 import * as P from '../reset/pilot';
 import { readTrack } from '../reset/tracking';
 
@@ -22,7 +23,7 @@ const ADULT: P.PilotAnswers = {
 };
 const THREE: P.PilotChoice[] = [
   { habitId: 'mind_read', intensity: 'standard' },
-  { habitId: 'focus_deepwork', intensity: 'standard' },
+  { habitId: 'skill_practice', intensity: 'standard' },
   { habitId: 'strength_log', intensity: 'standard' },
 ];
 const pilot = (c: P.PilotChoice[] = THREE, a: P.PilotAnswers = ADULT, start = MON) => {
@@ -41,14 +42,14 @@ const offerOf = (p: P.PilotProgram, id: string, today: number) =>
 describe('all 11 habits', () => {
   it('are the approved catalog, in its order, with their ids unchanged', () => {
     expect(P.PILOT_HABITS).toEqual([
-      'focus_deepwork',
+      'eat_well',
       'screen_app_limit',
       'focus_top3',
       'mind_read',
-      'confidence_talk',
+      'mind_meditation',
       'move_walk',
       'sleep_wake',
-      'home_tidy',
+      'outdoor_time',
       'skill_practice',
       'social_reach_out',
       'strength_log',
@@ -60,14 +61,21 @@ describe('all 11 habits', () => {
 
   it('say what to do and how much, at Starter Foundation (no timers, just the target)', () => {
     const say = (id: string) => P.targetText(one(id), id, 1);
-    expect(say('focus_deepwork')).toBe('Focus for 15 minutes, phone in another room');
+    expect(say('eat_well')).toBe('Have fruit or vegetables with one meal');
+    expect(P.targetText(one('eat_well', 'standard'), 'eat_well', 1)).toBe('Eat one balanced meal');
+    expect(P.targetText(one('eat_well', 'challenge'), 'eat_well', 1)).toBe('Eat two balanced meals');
+    expect(P.counterTarget(one('eat_well', 'challenge'), 'eat_well', 1)).toBe(2);
     expect(say('screen_app_limit')).toBe('Keep your main app under 1 h 45 today'); // 120 − 15, to 15 min
     expect(say('focus_top3')).toBe('Finish your #1 task');
     expect(say('mind_read')).toBe('Read for 10 minutes');
-    expect(P.socialSteps(one('confidence_talk'), 1).map((s) => s.text)).toContain(say('confidence_talk'));
+    expect(say('mind_meditation')).toBe('Meditate for 2 minutes');
+    expect(P.targetText(one('mind_meditation', 'challenge'), 'mind_meditation', 1)).toBe('Meditate for 10 minutes');
     expect(say('move_walk')).toBe('Move for 10 minutes, any way you like');
     expect(say('sleep_wake')).toBe('Up by 08:00'); // 07:00 + the 60-minute window
-    expect(say('home_tidy')).toBe('Tidy up for 5 minutes');
+    expect(say('outdoor_time')).toBe('Spend 5 minutes outdoors, by choice');
+    expect(P.targetText(one('outdoor_time', 'challenge'), 'outdoor_time', 1)).toBe(
+      'Spend 20 minutes outdoors, by choice',
+    );
     expect(say('skill_practice')).toBe('Practise language for 10 minutes');
     expect(say('social_reach_out')).toBe('Reach out to 1 person (more than a like)');
     expect(P.targetText(one('strength_log', 'standard'), 'strength_log', 1)).toBe('2 sessions a week, about 30 min');
@@ -76,32 +84,35 @@ describe('all 11 habits', () => {
   it('show how often', () => {
     const often = (id: string, i: P.PilotChoice['intensity'] = 'starter') => P.frequencyText(one(id, i), id, 1);
     expect(often('mind_read')).toBe('Every day');
-    expect(often('focus_deepwork')).toBe('Any 4 days a week');
+    expect(often('skill_practice')).toBe('Any 4 days a week');
     expect(often('focus_top3')).toBe('Any 3 workdays a week');
-    expect(often('confidence_talk')).toBe('Any 3 days a week');
+    for (const id of ['eat_well', 'mind_meditation', 'outdoor_time'])
+      for (const i of ['starter', 'standard', 'challenge'] as const) expect(often(id, i)).toBe('Every day');
     expect(often('social_reach_out')).toBe('Any 4 days a week');
     expect(often('social_reach_out', 'standard')).toBe('Every day');
     expect(often('strength_log')).toBe('Any days you choose, one session a day at most');
   });
 
   it('keep the 16–17 focus block limit in what the card says (a program started at 16–17, before 18+)', () => {
-    const started = one('focus_deepwork', 'challenge');
+    const started = one('skill_practice', 'challenge');
     const teen = { ...started, answers: { ...started.answers, age: '16_17' as const } };
     const mastery: P.PilotProgram = {
       ...teen,
       progression: {
-        focus_deepwork: {
-          ...teen.progression.focus_deepwork,
+        skill_practice: {
+          ...teen.progression.skill_practice,
           eras: [{ intensity: 'challenge', phase: 'mastery', fromDay: 1, reason: 'start' }],
         },
       },
     };
-    expect(P.targetText(mastery, 'focus_deepwork', 1)).toBe('Focus for 2 × 45 minutes, phone in another room');
-    expect(P.timerBlocksFor({ ...mastery, answers: ADULT }, 'focus_deepwork', 1)).toEqual([90]);
+    expect(P.targetText(mastery, 'skill_practice', 1)).toBe('Practise language for 2 × 45 minutes');
+    expect(P.timerBlocksFor({ ...mastery, answers: ADULT }, 'skill_practice', 1)).toEqual([90]);
   });
 
-  it('use their own artwork in both themes, all 11 of them', () => {
-    const own = [...P.PILOT_HABITS];
+  it('use their own artwork in both themes, except the three new habits still waiting for theirs', () => {
+    const waiting = ['eat_well', 'mind_meditation', 'outdoor_time'];
+    for (const id of waiting) expect(habitScene(id, 'light')).toBeUndefined();
+    const own = P.PILOT_HABITS.filter((id) => !waiting.includes(id));
     for (const theme of ['light', 'dark'] as const) {
       for (const id of own) expect(habitScene(id, theme)).toBeTruthy();
     }
@@ -111,7 +122,7 @@ describe('all 11 habits', () => {
 
 describe('setup', () => {
   it('asks only the baseline questions the chosen habits need', () => {
-    expect(P.baselinesFor(['mind_read', 'focus_deepwork', 'home_tidy', 'focus_top3'])).toEqual([]);
+    expect(P.baselinesFor(['mind_read', 'mind_meditation', 'eat_well', 'outdoor_time', 'focus_top3'])).toEqual([]);
     expect(P.baselinesFor(['screen_app_limit'])).toEqual(['phone', 'pullMinutes']);
     expect(P.baselinesFor(['sleep_wake', 'move_walk', 'skill_practice', 'strength_log'])).toEqual([
       'wake',
@@ -156,13 +167,21 @@ describe('setup', () => {
     const joint = P.intensityOptions('strength_log', { ...ADULT, precautions: ['joint'] });
     expect(joint.map((o) => !!o.reason)).toEqual([true, false, false]);
     // Everything else is open to every adult, whatever the health answer.
-    for (const id of ['focus_deepwork', 'focus_top3', 'mind_read', 'confidence_talk', 'home_tidy', 'skill_practice'])
+    for (const id of ['eat_well', 'focus_top3', 'mind_read', 'mind_meditation', 'outdoor_time', 'skill_practice'])
       for (const age of ['18_29', '65p'] as const)
         expect(P.habitExclusion(id, { ...ADULT, age, precautions: 'unknown' })).toBeNull();
   });
 
   it('allows every catalog habit at once (the maximum is 30)', () => {
-    const all = ['focus_deepwork', 'focus_top3', 'mind_read', 'confidence_talk', 'home_tidy', 'social_reach_out']
+    const all = [
+      'eat_well',
+      'skill_practice',
+      'focus_top3',
+      'mind_read',
+      'mind_meditation',
+      'outdoor_time',
+      'social_reach_out',
+    ]
       .concat('sleep_wake')
       .map((habitId) => ({ habitId, intensity: 'starter' as const }));
     expect(P.MAX_HABITS).toBe(30);
@@ -182,11 +201,11 @@ describe('setup', () => {
   });
 
   it('checks the time the person has', () => {
-    // Read 20 + Focus 25 + Strength ~30 = 75 min at Standard.
-    expect(P.setupProblems({ ...ADULT, minutesPerDay: 60 }, THREE)[0]).toMatch(/75 min .* 60 min/);
+    // Read 20 + Practice 20 + Strength ~30 = 70 min at Standard.
+    expect(P.setupProblems({ ...ADULT, minutesPerDay: 60 }, THREE)[0]).toMatch(/70 min .* 60 min/);
     expect(P.setupProblems({ ...ADULT, minutesPerDay: 90 }, THREE)).toEqual([]);
-    expect(P.previewTarget('focus_deepwork', 'starter', ADULT)).toEqual({
-      target: 'Focus for 15 minutes, phone in another room',
+    expect(P.previewTarget('skill_practice', 'starter', ADULT)).toEqual({
+      target: 'Practise language for 10 minutes',
       frequency: 'Any 4 days a week',
     });
   });
@@ -221,7 +240,7 @@ describe('minimum age 18', () => {
     expect(read.program).toEqual(teen);
     expect([P.ageRestricted(teen), P.ageRestricted(adult)]).toEqual([true, false]);
     // A New Ascent or a new habit can't use the under-18 answers.
-    expect(P.addProblems(teen, {}, { habitId: 'home_tidy', intensity: 'starter' }, 4)).toContain(
+    expect(P.addProblems(teen, {}, { habitId: 'outdoor_time', intensity: 'starter' }, 4)).toContain(
       'Schwung is made for people 18 and older.',
     );
     // "I'm 18 or older": only the age band changes; days, XP and the collection stay as they were.
@@ -271,12 +290,12 @@ describe('completion, undo and counters', () => {
   });
 
   it('lets Social Confidence’s step be skipped, which never completes it', () => {
-    let p = P.setSkipped(one('confidence_talk'), 'confidence_talk', 1, true).program;
-    expect(readTrack(log(p, 1), 'confidence_talk').skipped).toBe(true);
-    expect(P.isDone(p, 'confidence_talk', 1)).toBe(false);
-    expect(P.recentDays(p, 'confidence_talk', 2)[0].state).toBe('skipped');
-    p = P.complete(p, 'confidence_talk', 1).program;
-    expect(readTrack(log(p, 1), 'confidence_talk').skipped).toBeUndefined();
+    let p = P.setSkipped(one('mind_meditation'), 'mind_meditation', 1, true).program;
+    expect(readTrack(log(p, 1), 'mind_meditation').skipped).toBe(true);
+    expect(P.isDone(p, 'mind_meditation', 1)).toBe(false);
+    expect(P.recentDays(p, 'mind_meditation', 2)[0].state).toBe('skipped');
+    p = P.complete(p, 'mind_meditation', 1).program;
+    expect(readTrack(log(p, 1), 'mind_meditation').skipped).toBeUndefined();
   });
 
   it('logs strength sessions (one a day), with optional details, edits and undo', () => {
@@ -293,10 +312,10 @@ describe('completion, undo and counters', () => {
   });
 
   it('takes optional minutes without ever changing completion', () => {
-    let p = P.setMinutes(one('home_tidy'), 'home_tidy', 1, 12).program;
-    expect(P.isDone(p, 'home_tidy', 1)).toBe(false);
-    p = P.setMinutes(P.complete(p, 'home_tidy', 1).program, 'home_tidy', 1, null).program;
-    expect(P.isDone(p, 'home_tidy', 1)).toBe(true);
+    let p = P.setMinutes(one('outdoor_time'), 'outdoor_time', 1, 12).program;
+    expect(P.isDone(p, 'outdoor_time', 1)).toBe(false);
+    p = P.setMinutes(P.complete(p, 'outdoor_time', 1).program, 'outdoor_time', 1, null).program;
+    expect(P.isDone(p, 'outdoor_time', 1)).toBe(true);
   });
 });
 
@@ -305,8 +324,8 @@ describe('daily and weekly adherence', () => {
     let p = P.complete(pilot(), 'mind_read', 1).program;
     // The 80% list has only Read, but the day isn't complete while Focus's and Strength's weeks are open.
     expect([log(p, 1).planned, P.dayFull(p, 1)]).toEqual([['mind_read'], false]);
-    p = P.complete(p, 'focus_deepwork', 1).program;
-    expect(log(p, 1).planned).toEqual(['focus_deepwork', 'mind_read']);
+    p = P.complete(p, 'skill_practice', 1).program;
+    expect(log(p, 1).planned).toEqual(['mind_read', 'skill_practice']);
     p = P.complete(p, 'strength_log', 2).program;
     expect(P.dayFull(p, 2)).toBe(false);
   });
@@ -315,15 +334,15 @@ describe('daily and weekly adherence', () => {
     const p = one('focus_top3', 'standard');
     expect(P.stateOn(p, 'focus_top3', 2)).toBe('open');
     expect(P.stateOn(p, 'focus_top3', 6)).toBe('not-eligible'); // Saturday
-    const focus = doneOn(one('focus_deepwork'), 'focus_deepwork', [1, 2, 3, 4]);
-    expect(P.stateOn(focus, 'focus_deepwork', 5)).toBe('goal-met');
+    const focus = doneOn(one('skill_practice'), 'skill_practice', [1, 2, 3, 4]);
+    expect(P.stateOn(focus, 'skill_practice', 5)).toBe('goal-met');
     expect(P.dayResult(focus, 6)).toBe('rest');
   });
 
   it('keeps a streak through rest days, and breaks it on a missed daily habit', () => {
-    const weekly = doneOn(pilot(THREE.slice(1)), 'focus_deepwork', [1, 2, 5]);
+    const weekly = doneOn(pilot(THREE.slice(1)), 'skill_practice', [1, 2, 5]);
     expect(P.pilotStreak(weekly, 5)).toBe(3);
-    const withRead = doneOn(doneOn(pilot(), 'mind_read', [1, 2, 4, 5]), 'focus_deepwork', [3]);
+    const withRead = doneOn(doneOn(pilot(), 'mind_read', [1, 2, 4, 5]), 'skill_practice', [3]);
     expect(P.pilotStreak(withRead, 5)).toBe(2);
     expect(P.journeyStats(withRead, 5)).toEqual({ done: 4, streak: 2, best: 2 });
   });
@@ -351,12 +370,12 @@ describe('readiness progression', () => {
 
   it('starts a weekly habit’s step-up next Monday, and respects a decline for 7 days', () => {
     let p = pilot(THREE.slice(1, 2));
-    p = doneOn(p, 'focus_deepwork', [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19]);
-    const o = offerOf(p, 'focus_deepwork', 24)!;
+    p = doneOn(p, 'skill_practice', [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19]);
+    const o = offerOf(p, 'skill_practice', 24)!;
     expect(o).toMatchObject({ kind: 'step-up', effectiveDay: 29 });
-    const declined = doneOn(P.decline(p, 'focus_deepwork', o, 24), 'focus_deepwork', [22, 23, 24, 25, 26]);
-    expect(offerOf(declined, 'focus_deepwork', 30)).toBeNull();
-    expect(offerOf(declined, 'focus_deepwork', 31)).toMatchObject({ kind: 'step-up', effectiveDay: 36 });
+    const declined = doneOn(P.decline(p, 'skill_practice', o, 24), 'skill_practice', [22, 23, 24, 25, 26]);
+    expect(offerOf(declined, 'skill_practice', 30)).toBeNull();
+    expect(offerOf(declined, 'skill_practice', 31)).toMatchObject({ kind: 'step-up', effectiveDay: 36 });
   });
 
   it('lets the person make it easier or harder any time, within their time and baseline', () => {
@@ -367,7 +386,7 @@ describe('readiness progression', () => {
       'Read for 20 minutes',
       'Read for 10 minutes',
     ]);
-    const tight = { ...p, answers: { ...p.answers, minutesPerDay: 75 } };
+    const tight = { ...p, answers: { ...p.answers, minutesPerDay: 70 } };
     expect(P.harder(tight, 'mind_read', 3)).toEqual({ blocked: 'it doesn’t fit the time you have' });
     // Less Scrolling can't go below the floor: at 60 min a day, Starter Momentum is already at it.
     const scroll = one('screen_app_limit', 'starter', { ...ADULT, pullMinutes: 60 });
@@ -430,14 +449,14 @@ describe('adding a habit to a running program', () => {
   });
 
   it('counts a weekly habit that joins mid-week only from that day', () => {
-    const p = P.addHabit(base(), {}, { habitId: 'focus_deepwork', intensity: 'standard' }, 10)!;
-    const weeks = P.habitWeeks(p, 'focus_deepwork', 15);
+    const p = P.addHabit(base(), { skill: 'Language' }, { habitId: 'skill_practice', intensity: 'standard' }, 10)!;
+    const weeks = P.habitWeeks(p, 'skill_practice', 15);
     expect(weeks.map((w) => [w.week, w.firstDay])).toEqual([
       [2, 8],
       [3, 15],
     ]);
     // Week 2's goal is scaled to the five days it was part of the program; nothing is owed for Week 1.
-    expect(P.habitTally(p, 'focus_deepwork', 15)).toEqual({ done: 0, eligible: weeks[0].goal });
+    expect(P.habitTally(p, 'skill_practice', 15)).toEqual({ done: 0, eligible: weeks[0].goal });
     expect(weeks[0].goal).toBeLessThan(5);
   });
 
@@ -453,7 +472,14 @@ describe('adding a habit to a running program', () => {
     expect(P.addHabit(p, {}, { habitId: 'sleep_wake', intensity: 'starter' }, 10)).toBeNull();
     // Well past six habits now (the maximum is 30).
     let seven = p;
-    for (const id of ['focus_top3', 'home_tidy', 'social_reach_out', 'confidence_talk', 'focus_deepwork', 'move_walk'])
+    for (const id of [
+      'focus_top3',
+      'outdoor_time',
+      'social_reach_out',
+      'mind_meditation',
+      'skill_practice',
+      'move_walk',
+    ])
       seven = P.addHabit(seven, { activeDays: '1_2' }, { habitId: id, intensity: 'starter' }, 10) ?? seven;
     expect(seven.habits.length).toBeGreaterThanOrEqual(6);
     expect(
@@ -463,7 +489,7 @@ describe('adding a habit to a running program', () => {
 
   it('checks the time with every habit at today’s level, and accepts more time a day', () => {
     const tight = P.addHabit(
-      one('focus_deepwork', 'challenge', { ...ADULT, minutesPerDay: 60 }),
+      one('skill_practice', 'challenge', { ...ADULT, minutesPerDay: 60 }),
       {},
       {
         habitId: 'mind_read',
@@ -473,15 +499,15 @@ describe('adding a habit to a running program', () => {
     );
     expect(tight).toBeNull();
     const roomier = P.addHabit(
-      one('focus_deepwork', 'challenge', { ...ADULT, minutesPerDay: 60 }),
+      one('skill_practice', 'challenge', { ...ADULT, minutesPerDay: 60 }),
       { minutesPerDay: 90 },
       { habitId: 'mind_read', intensity: 'challenge' },
       3,
     );
     expect(roomier?.answers.minutesPerDay).toBe(90);
-    // 45 + 30 + 30 = 105 min, over the 90 now available: the message says so.
+    // 40 + 30 + 30 = 100 min, over the 90 now available: the message says so.
     expect(P.addProblems(roomier!, { activeDays: '3_4' }, { habitId: 'move_walk', intensity: 'challenge' }, 3)).toEqual(
-      [expect.stringMatching(/about 105 min .* more than the 90 min you have/)],
+      [expect.stringMatching(/about 100 min .* more than the 90 min you have/)],
     );
   });
 });
@@ -493,18 +519,18 @@ describe('a complete day', () => {
   it('needs every daily habit and every weekly habit whose week is still open', () => {
     let p = P.complete(two(), 'mind_read', 1).program;
     expect(P.dayFull(p, 1)).toBe(false);
-    p = P.complete(p, 'focus_deepwork', 1).program;
+    p = P.complete(p, 'skill_practice', 1).program;
     expect(P.dayFull(p, 1)).toBe(true);
     // Undo takes it back, and its bonus with it; doing it again never counts twice.
-    const undone = P.undo(p, 'focus_deepwork', 1).program;
+    const undone = P.undo(p, 'skill_practice', 1).program;
     expect([P.dayFull(undone, 1), P.pilotXp(undone)]).toEqual([false, 10]);
     expect(P.pilotXp(p)).toBe(2 * 10 + 20);
-    expect(P.pilotXp(P.complete(p, 'focus_deepwork', 1).program)).toBe(P.pilotXp(p));
+    expect(P.pilotXp(P.complete(p, 'skill_practice', 1).program)).toBe(P.pilotXp(p));
   });
 
   it('lets a weekly habit rest once its week’s goal is met', () => {
     // Focus done Days 1–5 (its goal of 5 met): on Saturday Read alone completes the day.
-    const p = doneOn(doneOn(two(), 'focus_deepwork', [1, 2, 3, 4, 5]), 'mind_read', [6]);
+    const p = doneOn(doneOn(two(), 'skill_practice', [1, 2, 3, 4, 5]), 'mind_read', [6]);
     expect(P.requiredOn(p, 6)).toEqual(['mind_read']);
     expect(P.dayFull(p, 6)).toBe(true);
   });
@@ -512,11 +538,11 @@ describe('a complete day', () => {
   it('is never held back by a weekly habit whose week is too short for a goal', () => {
     // Started on a Sunday: Focus Time (5 a week) has no goal in the 1-day first week, so Read alone completes Day 1.
     const p = P.complete(pilot(THREE.slice(0, 2), ADULT, '2026-11-08'), 'mind_read', 1).program;
-    expect(P.weekProgress(p, 'focus_deepwork', 1)?.goal).toBe(0);
+    expect(P.weekProgress(p, 'skill_practice', 1)?.goal).toBe(0);
     expect(P.requiredOn(p, 1)).toEqual(['mind_read']);
     expect([P.dayFull(p, 1), P.pilotXp(p)]).toEqual([true, 10 + 20]);
     // Doing it anyway is an extra: it's on the day's list, and the day stays complete.
-    const extra = P.complete(p, 'focus_deepwork', 1).program;
+    const extra = P.complete(p, 'skill_practice', 1).program;
     expect([P.dayFull(extra, 1), P.pilotXp(extra)]).toEqual([true, 2 * 10 + 20]);
   });
 
@@ -683,7 +709,7 @@ describe('the person’s own habits', () => {
 
 describe('Insights numbers, from the saved days only', () => {
   // Read every day (Standard) and Focus Time (5 days a week). Today is Day 9 (Tuesday of Week 2).
-  const p = doneOn(doneOn(pilot(THREE.slice(0, 2)), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'focus_deepwork', [1, 2, 3]);
+  const p = doneOn(doneOn(pilot(THREE.slice(0, 2)), 'mind_read', [1, 2, 4, 5, 6, 7, 8]), 'skill_practice', [1, 2, 3]);
 
   it('count a daily habit’s past days, and today only once it’s done', () => {
     expect(P.habitTally(p, 'mind_read', 9)).toEqual({ done: 7, eligible: 8 }); // Day 3 missed
@@ -692,9 +718,9 @@ describe('Insights numbers, from the saved days only', () => {
 
   it('count a weekly habit by its finished weeks’ goals, and the current week only as far as it’s done', () => {
     // Week 1: goal 5, 3 done. Week 2 so far: nothing yet, so nothing counted against it.
-    expect(P.habitTally(p, 'focus_deepwork', 9)).toEqual({ done: 3, eligible: 5 });
-    const more = P.complete(p, 'focus_deepwork', 9).program;
-    expect(P.habitTally(more, 'focus_deepwork', 9)).toEqual({ done: 4, eligible: 6 });
+    expect(P.habitTally(p, 'skill_practice', 9)).toEqual({ done: 3, eligible: 5 });
+    const more = P.complete(p, 'skill_practice', 9).program;
+    expect(P.habitTally(more, 'skill_practice', 9)).toEqual({ done: 4, eligible: 6 });
   });
 
   it('add up overall, total and this week', () => {
@@ -716,8 +742,8 @@ describe('Insights numbers, from the saved days only', () => {
       'done',
       'today',
     ]);
-    expect(P.recentDays(p, 'focus_deepwork', 9)[3].state).toBe('rest');
-    expect(P.habitWeeks(p, 'focus_deepwork', 9).map((w) => [w.week, w.credited, w.goal])).toEqual([
+    expect(P.recentDays(p, 'skill_practice', 9)[3].state).toBe('rest');
+    expect(P.habitWeeks(p, 'skill_practice', 9).map((w) => [w.week, w.credited, w.goal])).toEqual([
       [1, 3, 5],
       [2, 0, 5],
     ]);
@@ -739,9 +765,9 @@ describe('saves and compatibility', () => {
       v: 1,
       startedAt: MON,
       answers: { age: '30_49', precautions: [], minutesPerDay: 90, strengthStart: 'sometimes' },
-      habits: ['mind_read', 'focus_deepwork', 'strength_log'],
+      habits: ['mind_read', 'skill_practice', 'strength_log'],
       progression: Object.fromEntries(
-        ['mind_read', 'focus_deepwork', 'strength_log'].map((id) => [
+        ['mind_read', 'skill_practice', 'strength_log'].map((id) => [
           id,
           { v: 1, habitId: id, eras: [{ intensity: 'standard', phase: 'foundation', fromDay: 1, reason: 'start' }] },
         ]),
@@ -754,12 +780,12 @@ describe('saves and compatibility', () => {
           planned: ['mind_read'],
           track: {
             mind_read: { v: 1, by: 'timer', minutes: 20, everCompleted: true },
-            focus_deepwork: {
+            skill_practice: {
               v: 1,
               minutes: 7,
               timer: {
                 v: 1,
-                habitId: 'focus_deepwork',
+                habitId: 'skill_practice',
                 day: 1,
                 blocks: [25],
                 block: 0,
@@ -777,9 +803,9 @@ describe('saves and compatibility', () => {
     const loaded = P.sanitizePilotProgram(JSON.parse(JSON.stringify(pilotSave)))!;
     expect(loaded).toEqual(pilotSave);
     // It carries on: the saved timer is kept, untouched, by later changes.
-    const next = P.complete(loaded, 'focus_deepwork', 1).program;
-    expect(readTrack(log(next, 1), 'focus_deepwork')).toMatchObject({ minutes: 7 });
-    expect(log(next, 1).track?.focus_deepwork.timer).toEqual(pilotSave.logs[date].track.focus_deepwork.timer);
+    const next = P.complete(loaded, 'skill_practice', 1).program;
+    expect(readTrack(log(next, 1), 'skill_practice')).toMatchObject({ minutes: 7 });
+    expect(log(next, 1).track?.skill_practice.timer).toEqual(pilotSave.logs[date].track.skill_practice.timer);
     // The day already had its full-day bonus; Focus (a weekly habit) adds its own 10.
     expect(totalXp(next.logs)).toBe(totalXp(loaded.logs) + 10);
   });
@@ -854,5 +880,46 @@ describe('the milestone moments', () => {
       day1: true,
       milestones: [7, 21],
     });
+  });
+});
+
+describe('development saves from before the catalog refinement', () => {
+  // A program saved with Focus Time, Social Confidence or Tidy Up (replaced by Eat Well, Meditation, Time Outdoors).
+  const oldSave = () => {
+    const p = doneOn(pilot([{ habitId: 'mind_read', intensity: 'starter' }]), 'mind_read', [1, 2]);
+    const raw = JSON.parse(JSON.stringify(p));
+    for (const id of ['focus_deepwork', 'confidence_talk', 'home_tidy']) {
+      raw.habits.push(id);
+      raw.progression[id] = { ...raw.progression.mind_read, habitId: id };
+      raw.logs[dateForDay(p.startedAt, 1)].completed.push(id);
+    }
+    return raw;
+  };
+
+  it('is never read silently: each replaced habit is named, and the save is not accepted as it is', () => {
+    const raw = oldSave();
+    expect(P.sanitizePilotProgram(raw)).toBeNull();
+    const r = P.inspectPilotProgram(raw);
+    expect(r.lost).toEqual([
+      'Focus Time: its targets and progress',
+      'Social Confidence: its targets and progress',
+      'Tidy Up: its targets and progress',
+    ]);
+    // What can be kept is everything else, with its history; the replaced ids are never reused.
+    expect(r.program?.habits).toEqual(['mind_read']);
+    expect(P.isDone(r.program!, 'mind_read', 2)).toBe(true);
+    for (const id of ['focus_deepwork', 'confidence_talk', 'home_tidy']) expect(P.isPilotHabit(id)).toBe(false);
+  });
+
+  it('keeps working once the person keeps what could be read (old ids left in the day records are ignored)', () => {
+    const kept = P.inspectPilotProgram(oldSave()).program!;
+    expect(() => [
+      P.pilotXp(kept),
+      P.weekTally(kept, 3),
+      C.weeklyTrend(kept, 3),
+      C.dayCells(kept, 3),
+      C.habitBars(kept, 3),
+    ]).not.toThrow();
+    expect(P.plannedOn(kept, 1, ['mind_read'])).toEqual(['mind_read']);
   });
 });

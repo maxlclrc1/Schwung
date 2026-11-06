@@ -6,17 +6,14 @@ export const engine = {
   levelShort: '{intensity} {phase}',
   ownHabit: 'Your habit',
   habit: {
-    focus_deepwork: { name: 'Focus Time', description: 'Work on one thing, phone in another room' },
+    eat_well: { name: 'Eat Well', description: 'Make a meal a balanced one, your way' },
     screen_app_limit: { name: 'Less Scrolling', description: 'Keep your main app under your daily limit' },
     focus_top3: { name: 'Get It Done', description: 'Write today’s top tasks and finish them' },
     mind_read: { name: 'Read Daily', description: 'Read a book, an e-book or an audiobook' },
-    confidence_talk: {
-      name: 'Social Confidence',
-      description: 'Do today’s social step: swap it or skip it any time',
-    },
+    mind_meditation: { name: 'Meditation', description: 'A few quiet minutes of meditation, guided or on your own' },
     move_walk: { name: 'Daily Movement', description: 'Move in any way you choose: walk, cycle, dance, sport' },
     sleep_wake: { name: 'Sleep Routine', description: 'Be up by your time, every day' },
-    home_tidy: { name: 'Tidy Up', description: 'Tidy your room, desk or kitchen' },
+    outdoor_time: { name: 'Time Outdoors', description: 'Time outside that you choose for yourself' },
     skill_practice: { name: 'Practice a Skill', description: 'Practise the skill you picked' },
     social_reach_out: {
       name: 'Stay Connected',
@@ -30,7 +27,14 @@ export const engine = {
   notes: {
     scrolling:
       'Your own check: Schwung can’t see your Screen Time. Settings → Screen Time shows the real number if you want it.',
-    social: 'Everyday situations only. Every step can be swapped or skipped; skipping one is never a failure.',
+    eatBalanced:
+      'A balanced meal mixes a few food groups, for example vegetables or fruit, something filling like grains, bread, rice or potatoes, and a protein such as beans, eggs, fish, meat or tofu. Any cuisine and any way of eating counts.',
+    eatNoRules: 'Nothing to count or weigh, no foods to avoid: just a meal you’re glad you ate.',
+    meditation: 'Any meditation you choose to do counts: guided, an app, breathing or simply sitting quietly.',
+    outdoorsCounts:
+      'Time you choose for yourself counts: a park, sitting outside, a walk you wanted to take. No exercise needed.',
+    outdoorsNotCounted:
+      'Getting to work or school and running errands don’t count, unless you add some outdoor time for yourself.',
     movement: 'If you already move for longer, keep your own number: it’s never lowered.',
     sleep: 'Your own wake time is the anchor: never earlier, and never less sleep. No bedtime or phone rule is added.',
     skillSport: 'Sport skills are your own practice: Schwung doesn’t prescribe drills.',
@@ -45,20 +49,6 @@ export const engine = {
       'Learn technique from a qualified coach or PE teacher first, build up gradually, avoid maximal lifts, and stop if anything hurts.',
     strengthOlder: 'A professional can also suggest balance and strength activities that suit you.',
     strengthRecovery: 'Rest days help you recover. Did you train different muscles?',
-  },
-  social: {
-    sc_day_followup: 'Ask someone how their day is going and ask one follow-up question',
-    sc_thank_by_name: 'Thank someone by name for something specific',
-    sc_hello_first: 'Say hello first to someone you see often',
-    sc_group_chat_opinion: 'Reply to a group chat with your own opinion, not just a reaction',
-    sc_rarely_talk: 'Start a conversation with a classmate or colleague you rarely talk to',
-    sc_ask_question: 'Ask a question in class, a meeting or a shop',
-    sc_group_opinion: 'Share an opinion in a group conversation',
-    sc_compliment_aloud: 'Give someone a specific compliment out loud',
-    sc_speak_up: 'Speak up once in a class, meeting or group',
-    sc_suggest_plan: 'Suggest a plan to a friend (coffee, a walk, studying together)',
-    sc_introduce: 'Introduce yourself to someone new at school, work or a club',
-    sc_disagree: 'Disagree politely when you see things differently',
   },
   skills: {
     Language: 'Language',
@@ -85,10 +75,15 @@ export const engine = {
   target: {
     strength: { one: '{count} session a week', other: '{count} sessions a week' },
     strengthAbout: '{sessions}, about {minutes} min',
-    focus_deepwork: 'Focus for {time}, phone in another room',
+    mind_meditation: 'Meditate for {time}',
     mind_read: 'Read for {time}',
     move_walk: 'Move for {time}, any way you like',
-    home_tidy: 'Tidy up for {time}',
+    outdoor_time: 'Spend {time} outdoors, by choice',
+    eatWell: {
+      starter: 'Have fruit or vegetables with one meal',
+      standard: 'Eat one balanced meal',
+      challenge: 'Eat two balanced meals',
+    },
     skill_practice: 'Practise {skill} for {time}',
     screen_app_limit: 'Keep your main app under {limit} today',
     sleepUpBy: 'Up by {time}',

@@ -13,12 +13,12 @@ import { Button, Card, Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 
 /** Habits measured in minutes, where noting the minutes is offered (optional, never needed). */
-const TIMED = new Set(['focus_deepwork', 'mind_read', 'move_walk', 'home_tidy', 'skill_practice']);
+const TIMED = new Set(['mind_meditation', 'mind_read', 'move_walk', 'outdoor_time', 'skill_practice']);
 
 /**
  * A Life Reset habit's details (app/life-reset/[id].tsx): today and,
- * until noon, yesterday; a counter, a strength session's details or optional minutes where they apply; Social
- * Confidence's steps; and difficulty. Nothing here is needed to complete a habit: a swipe on the card is enough.
+ * until noon, yesterday; a counter, a strength session's details or optional minutes where they apply; and
+ * difficulty. Nothing here is needed to complete a habit: a swipe on the card is enough.
  */
 export function PilotHabit() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,7 +47,6 @@ export function PilotHabit() {
   const week = P.weekProgress(program, id, today);
   const track = P.trackOf(program, id, today);
   const strength = id === 'strength_log';
-  const social = id === 'confidence_talk';
   const counter = P.counterTarget(program, id, today);
   const pending = P.pendingText(program, id, today);
   const fb = program.progression[id].feedback;
@@ -75,8 +74,7 @@ export function PilotHabit() {
           <T v="overline" color={c.accentInk}>
             {P.levelLineFor(program, id, today)}
           </T>
-          <T v="heading">{social ? t('today.habit.todaysStep') : P.targetText(program, id, today)}</T>
-          {social ? <T>{P.targetText(program, id, today)}</T> : null}
+          <T v="heading">{P.targetText(program, id, today)}</T>
           <T color={c.textDim}>{P.frequencyText(program, id, today)}</T>
           {week ? (
             <T v="bodyStrong">
@@ -135,13 +133,6 @@ export function PilotHabit() {
             kind={done ? 'secondary' : 'primary'}
             onPress={() => s().toggle(id)}
           />
-          {social && !done ? (
-            <Button
-              label={track.skipped ? t('today.habit.dontSkip') : t('today.habit.skip')}
-              kind="ghost"
-              onPress={() => s().setSkipped(id, !track.skipped)}
-            />
-          ) : null}
           {yesterday !== null ? (
             <View style={styles.yesterday}>
               <T v="caption" color={c.textDim} style={{ flex: 1 }}>
@@ -157,17 +148,6 @@ export function PilotHabit() {
             </View>
           ) : null}
         </Card>
-
-        {social ? (
-          <Card style={styles.gap}>
-            <T v="bodyStrong">{t('today.habit.anyCounts')}</T>
-            {P.socialSteps(program, today).map((a) => (
-              <T key={a.id} v="caption" color={c.textDim}>
-                · {P.socialText(a)}
-              </T>
-            ))}
-          </Card>
-        ) : null}
 
         {TIMED.has(id) ? (
           <Card style={styles.gap}>

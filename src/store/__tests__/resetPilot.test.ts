@@ -27,10 +27,16 @@ const SRC = `${process.cwd()}/src`;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const r = () => useResetPilot.getState();
-const ADULT: PilotAnswers = { age: '30_49', precautions: [], minutesPerDay: 90, strengthStart: 'sometimes' };
+const ADULT: PilotAnswers = {
+  age: '30_49',
+  precautions: [],
+  minutesPerDay: 90,
+  strengthStart: 'sometimes',
+  skill: 'Language',
+};
 const ALL: PilotChoice[] = [
   { habitId: 'mind_read', intensity: 'standard' },
-  { habitId: 'focus_deepwork', intensity: 'standard' },
+  { habitId: 'skill_practice', intensity: 'standard' },
   { habitId: 'strength_log', intensity: 'standard' },
 ];
 const at = (day: number) => r().setDevDayOffset(day - 1);
@@ -52,7 +58,7 @@ describe('the program', () => {
   it('starts, runs and ends, saved on its key', async () => {
     expect(r().start(ADULT, ALL)).toBe(true);
     r().complete('mind_read');
-    r().complete('focus_deepwork');
+    r().complete('skill_practice');
     r().setSession({ type: 'upper', minutes: 30 });
     at(8);
     r().complete('mind_read');

@@ -201,7 +201,7 @@ describe('partial weeks', () => {
 
 describe('changes of phase and intensity', () => {
   it('builds a habit’s schedule eras from the catalog', () => {
-    const eras = erasFor('focus_deepwork', [
+    const eras = erasFor('skill_practice', [
       { fromDay: 1, intensity: 'starter', phase: 'foundation' },
       { fromDay: 10, intensity: 'standard', phase: 'foundation' },
     ]);
@@ -211,20 +211,20 @@ describe('changes of phase and intensity', () => {
   });
 
   it('starts a higher goal the following week (Starter → Standard on a Wednesday)', () => {
-    const eras = erasFor('focus_deepwork', [
+    const eras = erasFor('skill_practice', [
       { fromDay: 1, intensity: 'starter', phase: 'foundation' },
       { fromDay: 10, intensity: 'standard', phase: 'foundation' }, // Wed of week 2
     ]);
-    expect(weekSummary('focus_deepwork', eras, {}, ctx, 8, 8).goal).toBe(4);
-    expect(weekSummary('focus_deepwork', eras, {}, ctx, 15, 15).goal).toBe(5);
+    expect(weekSummary('skill_practice', eras, {}, ctx, 8, 8).goal).toBe(4);
+    expect(weekSummary('skill_practice', eras, {}, ctx, 15, 15).goal).toBe(5);
   });
 
   it('applies an easier goal at once', () => {
-    const eras = erasFor('focus_deepwork', [
+    const eras = erasFor('skill_practice', [
       { fromDay: 1, intensity: 'standard', phase: 'foundation' },
       { fromDay: 10, intensity: 'starter', phase: 'foundation' },
     ]);
-    expect(weekSummary('focus_deepwork', eras, {}, ctx, 8, 10).goal).toBe(4);
+    expect(weekSummary('skill_practice', eras, {}, ctx, 8, 10).goal).toBe(4);
   });
 
   it('handles a phase change mid-week, including a change from weekly to daily (Stay Connected, Starter)', () => {
@@ -238,11 +238,11 @@ describe('changes of phase and intensity', () => {
     expect(dayState('social_reach_out', eras, {}, ctx, 45)).toBe('due');
   });
 
-  it('follows the catalog’s own Social Confidence days per level', () => {
-    const h = RESET_BY_ID.confidence_talk;
-    expect(fullWeekGoal(h.targets.starter.foundation.schedule)).toBe(3);
-    expect(fullWeekGoal(h.targets.challenge.momentum.schedule)).toBe(6);
-    expect(fullWeekGoal(h.targets.challenge.mastery.schedule)).toBe(7);
+  it('counts Meditation, Eat Well and Time Outdoors every day at every level', () => {
+    for (const id of ['mind_meditation', 'eat_well', 'outdoor_time'])
+      for (const i of ['starter', 'standard', 'challenge'] as const)
+        for (const p of ['foundation', 'momentum', 'mastery'] as const)
+          expect([id, i, p, fullWeekGoal(RESET_BY_ID[id].targets[i][p].schedule)]).toEqual([id, i, p, 7]);
   });
 });
 

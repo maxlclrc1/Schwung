@@ -41,23 +41,17 @@ export const vi: Translation = {
     levelShort: '{intensity} · {phase}',
     ownHabit: 'Thói quen của bạn',
     habit: {
-      focus_deepwork: { name: 'Giờ tập trung', description: 'Làm một việc duy nhất, để điện thoại ở phòng khác' },
       screen_app_limit: { name: 'Bớt lướt mạng', description: 'Giữ ứng dụng chính dưới giới hạn mỗi ngày của bạn' },
       focus_top3: {
         name: 'Hoàn thành việc chính',
         description: 'Viết ra những việc quan trọng nhất hôm nay và hoàn thành chúng',
       },
       mind_read: { name: 'Đọc mỗi ngày', description: 'Đọc sách giấy, sách điện tử hoặc nghe sách nói' },
-      confidence_talk: {
-        name: 'Tự tin giao tiếp',
-        description: 'Thực hiện bước giao tiếp hôm nay: đổi hoặc bỏ qua bất cứ lúc nào',
-      },
       move_walk: {
         name: 'Vận động mỗi ngày',
         description: 'Vận động theo cách bạn chọn: đi bộ, đạp xe, nhảy, chơi thể thao',
       },
       sleep_wake: { name: 'Nếp ngủ', description: 'Thức dậy đúng giờ của bạn, mỗi ngày' },
-      home_tidy: { name: 'Dọn dẹp', description: 'Dọn phòng, bàn làm việc hoặc bếp' },
       skill_practice: { name: 'Luyện một kỹ năng', description: 'Luyện kỹ năng bạn đã chọn' },
       social_reach_out: {
         name: 'Giữ kết nối',
@@ -67,12 +61,16 @@ export const vi: Translation = {
         name: 'Tập sức mạnh',
         description: 'Ghi lại một buổi tập sức mạnh theo giáo án bạn đang theo hoặc tự chọn',
       },
+
+      eat_well: { name: 'Ăn Uống Tốt', description: 'Biến một bữa thành bữa ăn cân bằng, theo cách của bạn' },
+
+      mind_meditation: { name: 'Thiền', description: 'Vài phút thiền yên tĩnh, có hướng dẫn hoặc tự mình' },
+
+      outdoor_time: { name: 'Thời Gian Ngoài Trời', description: 'Thời gian ở ngoài trời bạn chọn cho chính mình' },
     },
     notes: {
       scrolling:
         'Bạn tự kiểm tra: Schwung không thể xem Thời gian sử dụng của bạn. Cài đặt → Thời gian sử dụng sẽ cho bạn con số thật nếu bạn muốn.',
-      social:
-        'Chỉ những tình huống thường ngày. Mỗi bước đều có thể đổi hoặc bỏ qua; bỏ qua không bao giờ là thất bại.',
       movement: 'Nếu bạn đã vận động lâu hơn, hãy giữ con số của bạn: nó không bao giờ bị giảm.',
       sleep:
         'Giờ thức dậy của chính bạn là mốc neo: không bao giờ sớm hơn, và không bao giờ ngủ ít hơn. Không thêm quy định nào về giờ đi ngủ hay điện thoại.',
@@ -89,20 +87,20 @@ export const vi: Translation = {
         'Trước tiên hãy học kỹ thuật từ huấn luyện viên có chuyên môn hoặc giáo viên thể dục, tăng dần từng chút, tránh nâng mức tạ tối đa, và dừng lại nếu thấy đau ở bất cứ đâu.',
       strengthOlder: 'Chuyên gia cũng có thể gợi ý các hoạt động thăng bằng và sức mạnh phù hợp với bạn.',
       strengthRecovery: 'Ngày nghỉ giúp bạn phục hồi. Bạn đã tập các nhóm cơ khác chưa?',
-    },
-    social: {
-      sc_day_followup: 'Hỏi một người xem ngày của họ thế nào và hỏi thêm một câu',
-      sc_thank_by_name: 'Gọi tên và cảm ơn ai đó vì một điều cụ thể',
-      sc_hello_first: 'Chủ động chào trước một người bạn thường gặp',
-      sc_group_chat_opinion: 'Trả lời trong nhóm chat bằng ý kiến của riêng bạn, không chỉ thả cảm xúc',
-      sc_rarely_talk: 'Bắt chuyện với một bạn học hoặc đồng nghiệp mà bạn ít khi nói chuyện',
-      sc_ask_question: 'Đặt một câu hỏi trong lớp, trong cuộc họp hoặc ở cửa hàng',
-      sc_group_opinion: 'Chia sẻ một ý kiến trong cuộc trò chuyện nhóm',
-      sc_compliment_aloud: 'Khen ai đó một điều cụ thể bằng lời',
-      sc_speak_up: 'Lên tiếng một lần trong lớp, cuộc họp hoặc nhóm',
-      sc_suggest_plan: 'Rủ một người bạn làm gì đó (cà phê, đi dạo, học cùng nhau)',
-      sc_introduce: 'Giới thiệu bản thân với một người mới ở trường, nơi làm việc hoặc câu lạc bộ',
-      sc_disagree: 'Lịch sự nói ra khi bạn nhìn nhận khác',
+
+      eatBalanced:
+        'Một bữa ăn cân bằng kết hợp vài nhóm thực phẩm, ví dụ rau hoặc trái cây, món giúp no như ngũ cốc, bánh mì, cơm hoặc khoai tây, và chất đạm như đậu, trứng, cá, thịt hoặc đậu phụ. Món ăn nào, cách ăn nào cũng được tính.',
+
+      eatNoRules: 'Không có gì phải đếm hay cân, không món nào phải tránh: chỉ cần một bữa ăn khiến bạn vui.',
+
+      meditation:
+        'Bất kỳ kiểu thiền nào bạn chọn đều được tính: có hướng dẫn, qua ứng dụng, tập thở hay chỉ ngồi yên lặng.',
+
+      outdoorsCounts:
+        'Thời gian bạn chọn cho chính mình được tính: công viên, ngồi ngoài trời, một buổi đi dạo bạn muốn. Không cần tập thể dục.',
+
+      outdoorsNotCounted:
+        'Đi làm, đi học và chạy việc vặt không được tính, trừ khi bạn thêm thời gian ngoài trời cho chính mình.',
     },
     skills: {
       Language: 'Ngôn ngữ',
@@ -128,10 +126,8 @@ export const vi: Translation = {
     target: {
       strength: { other: '{count} buổi mỗi tuần' },
       strengthAbout: '{sessions}, khoảng {minutes} phút',
-      focus_deepwork: 'Tập trung {time}, để điện thoại ở phòng khác',
       mind_read: 'Đọc {time}',
       move_walk: 'Vận động {time}, theo cách bạn thích',
-      home_tidy: 'Dọn dẹp {time}',
       skill_practice: 'Luyện {skill} {time}',
       screen_app_limit: 'Giữ ứng dụng chính dưới {limit} hôm nay',
       sleepUpBy: 'Dậy trước {time}',
@@ -149,6 +145,17 @@ export const vi: Translation = {
         topFirstNoon: 'Hoàn thành {count} việc chính, việc số 1 trước buổi trưa',
         topShortNoon: 'Top {count}, việc số 1 trước trưa',
         topShortBefore: 'Top {count}, việc số 1 trước {time}',
+      },
+
+      mind_meditation: 'Thiền {time}',
+
+      outdoor_time: 'Dành {time} ở ngoài trời, theo ý bạn',
+
+      eatWell: {
+        starter: 'Ăn trái cây hoặc rau trong một bữa',
+        standard: 'Ăn một bữa cân bằng',
+
+        challenge: 'Ăn hai bữa cân bằng',
       },
     },
     frequency: {
@@ -797,7 +804,6 @@ export const vi: Translation = {
       cantChange: 'Không thể thay đổi: {reason}.',
       saved: 'Đã lưu. {pending}.',
       savedBack: 'Đã lưu: quay về mục tiêu hiện tại.',
-      todaysStep: 'Bước hôm nay',
       shortWeek: 'Tuần ngắn: tuần này không có mục tiêu.',
       weekMet: '{done}/{goal} tuần này · đã đạt mục tiêu',
       week: '{done}/{goal} tuần này',
@@ -814,13 +820,10 @@ export const vi: Translation = {
       undo: 'Hoàn tác',
       logSession: 'Ghi một buổi tập',
       markDone: 'Đánh dấu đã xong',
-      dontSkip: 'Không bỏ qua hôm nay',
-      skip: 'Bỏ qua hôm nay',
       yesterdayDone: 'Hôm qua: đã xong (bạn có thể sửa đến trưa)',
       yesterdayNotDone: 'Hôm qua: chưa xong (bạn có thể sửa đến trưa)',
       undoYesterday: 'Hoàn tác hôm qua',
       doneYesterday: 'Đã xong hôm qua',
-      anyCounts: 'Bất kỳ mục nào cũng được tính',
       minutes: 'Số phút (không bắt buộc)',
       minutesHint:
         'Ghi lại thời gian nếu bạn muốn. Điều này không bao giờ ảnh hưởng đến việc hôm nay đã xong hay chưa.',

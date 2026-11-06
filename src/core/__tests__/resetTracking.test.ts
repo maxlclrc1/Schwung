@@ -56,7 +56,13 @@ const at = (day: number, planned: string[] = []): At => ({ startKey: MON, day, p
 const MIN = 60_000;
 const T0 = Date.UTC(2026, 10, 2, 9, 0); // 09:00 UTC on Day 1
 type Logs = Record<string, DayLog>;
-const focus25 = RESET_BY_ID.focus_deepwork.targets.standard.foundation; // 25 min
+/** A 25-minute practice block (Practice a Skill's targets with a 25-minute amount, so the arithmetic stays simple). */
+const focus25 = {
+  ...RESET_BY_ID.skill_practice.targets.standard.foundation,
+  text: '25 min',
+  amount: { kind: 'fixed' as const, value: 25 },
+  minutesPerDueDay: 25,
+};
 
 describe('quick completion (a swipe)', () => {
   it('completes once on the person’s word; doing it again changes nothing', () => {
@@ -150,10 +156,10 @@ describe('counters', () => {
 describe('timers', () => {
   it('exist only for the five timed habits', () => {
     expect(Object.keys(RESET_BY_ID).filter(hasTimer).sort()).toEqual([
-      'focus_deepwork',
-      'home_tidy',
+      'mind_meditation',
       'mind_read',
       'move_walk',
+      'outdoor_time',
       'skill_practice',
     ]);
     expect(createTimer('focus_top3', 1, RESET_BY_ID.focus_top3.targets.standard.foundation)).toBeNull();
@@ -161,7 +167,7 @@ describe('timers', () => {
   });
 
   it('start, pause, resume and reset, counting active time apart from wall-clock time', () => {
-    let t = createTimer('focus_deepwork', 1, focus25)!;
+    let t = createTimer('skill_practice', 1, focus25)!;
     t = start(t, T0, 1);
     t = pause(t, T0 + 10 * MIN, 1);
     expect(activeMs(t, T0 + 30 * MIN)).toBe(10 * MIN); // paused: no time added
@@ -175,7 +181,7 @@ describe('timers', () => {
   });
 
   it('reaches the target as ready to confirm, never completed, and never counts past it', () => {
-    let t = start(createTimer('focus_deepwork', 1, focus25)!, T0, 1);
+    let t = start(createTimer('skill_practice', 1, focus25)!, T0, 1);
     t = settle(t, T0 + 26 * MIN, 1);
     expect([t.status, t.readyAt]).toEqual(['ready', T0 + 25 * MIN]);
     expect(activeMs(t, T0 + 90 * MIN)).toBe(25 * MIN);
@@ -231,23 +237,23 @@ describe('timers', () => {
   });
 
   it('keeps partial timer progress apart from completion, and lets the person confirm anyway (manual override)', () => {
-    const t = start(createTimer('focus_deepwork', 1, focus25)!, T0, 1);
+    const t = start(createTimer('skill_practice', 1, focus25)!, T0, 1);
     const r = saveTimer({}, at(1), pause(t, T0 + 10 * MIN, 1), T0 + 10 * MIN);
     expect(r.event).toBeNull();
-    expect(dayStatus(r.logs, MON, 1, 'focus_deepwork')).toBe('incomplete');
-    expect(readTrack(r.logs[dateForDay(MON, 1)], 'focus_deepwork').minutes).toBe(10);
-    const done = confirmDone(r.logs, at(1), 'focus_deepwork');
-    expect(readTrack(done.logs[dateForDay(MON, 1)], 'focus_deepwork')).toMatchObject({ by: 'manual', minutes: 10 });
+    expect(dayStatus(r.logs, MON, 1, 'skill_practice')).toBe('incomplete');
+    expect(readTrack(r.logs[dateForDay(MON, 1)], 'skill_practice').minutes).toBe(10);
+    const done = confirmDone(r.logs, at(1), 'skill_practice');
+    expect(readTrack(done.logs[dateForDay(MON, 1)], 'skill_practice')).toMatchObject({ by: 'manual', minutes: 10 });
   });
 
   it('splits 90 minutes into 2 × 45 for 16–17, and for adults only if they choose', () => {
-    const ninety = RESET_BY_ID.focus_deepwork.targets.challenge.mastery;
+    const ninety = RESET_BY_ID.skill_practice.targets.challenge.mastery;
     expect(timerBlocks(ninety, { teen: true })).toEqual([45, 45]);
     expect(timerBlocks(ninety)).toEqual([90]);
     expect(timerBlocks(ninety, { split: true })).toEqual([45, 45]);
     expect(timerBlocks(focus25, { teen: true })).toEqual([25]);
     // Between blocks the timer waits for the person; the whole target is ready after the last block.
-    let t = start(createTimer('focus_deepwork', 1, ninety, { teen: true })!, T0, 1);
+    let t = start(createTimer('skill_practice', 1, ninety, { teen: true })!, T0, 1);
     t = settle(t, T0 + 46 * MIN, 1);
     expect([t.status, t.block, activeMinutes(t, T0 + 60 * MIN)]).toEqual(['between-blocks', 1, 45]);
     t = start(t, T0 + 60 * MIN, 1);
@@ -255,7 +261,7 @@ describe('timers', () => {
   });
 
   it('pauses and resumes across a restart without losing or adding time', () => {
-    let t = start(createTimer('focus_deepwork', 1, focus25)!, T0, 1);
+    let t = start(createTimer('skill_practice', 1, focus25)!, T0, 1);
     t = pause(t, T0 + 7 * MIN, 1);
     const saved = JSON.parse(JSON.stringify(t)) as TimerRun;
     t = resume(saved, T0 + 60 * MIN, 1); // an hour paused: none of it counts
@@ -279,19 +285,19 @@ describe('midnight', () => {
   const late = MIDNIGHT - 10 * MIN; // 23:50
 
   it('credits time up to midnight to the starting day, stops there, and completes nothing', () => {
-    const t = start(createTimer('focus_deepwork', 1, focus25, { dayEndsAt: MIDNIGHT })!, late, 1);
+    const t = start(createTimer('skill_practice', 1, focus25, { dayEndsAt: MIDNIGHT })!, late, 1);
     // Reopened the next morning.
     const r = saveTimer({}, at(2), t, MIDNIGHT + 9 * 60 * MIN);
-    const track = readTrack(r.logs[dateForDay(MON, 1)], 'focus_deepwork');
+    const track = readTrack(r.logs[dateForDay(MON, 1)], 'skill_practice');
     expect([track.timer?.status, track.minutes, r.event]).toEqual(['day-ended', 10, null]);
-    expect(dayStatus(r.logs, MON, 1, 'focus_deepwork')).toBe('incomplete');
+    expect(dayStatus(r.logs, MON, 1, 'skill_practice')).toBe('incomplete');
     expect(r.logs[dateForDay(MON, 2)]).toBeUndefined(); // nothing carried into the next day
     // It stays on Day 1 for confirmation or correction.
-    expect(dayStatus(confirmTimer(r.logs, at(1), 'focus_deepwork').logs, MON, 1, 'focus_deepwork')).toBe('completed');
+    expect(dayStatus(confirmTimer(r.logs, at(1), 'skill_practice').logs, MON, 1, 'skill_practice')).toBe('completed');
   });
 
   it('keeps a target reached before midnight ready, however late the app reopens', () => {
-    const t = start(createTimer('focus_deepwork', 1, focus25, { dayEndsAt: MIDNIGHT })!, MIDNIGHT - 30 * MIN, 1);
+    const t = start(createTimer('skill_practice', 1, focus25, { dayEndsAt: MIDNIGHT })!, MIDNIGHT - 30 * MIN, 1);
     const back = settle(t, MIDNIGHT + 30 * 60 * MIN, 3);
     expect([back.status, back.readyAt, activeMinutes(back, MIDNIGHT + 30 * 60 * MIN)]).toEqual([
       'ready',
@@ -326,18 +332,18 @@ describe('midnight', () => {
   });
 
   it('never credits an unplaceable stretch on a timer saved without a boundary', () => {
-    let t = start(createTimer('home_tidy', 1, RESET_BY_ID.home_tidy.targets.standard.foundation)!, T0, 1); // 10 min
+    let t = start(createTimer('outdoor_time', 1, RESET_BY_ID.outdoor_time.targets.standard.foundation)!, T0, 1); // 10 min
     t = pause(t, T0 + 4 * MIN, 1);
     t = resume(t, T0 + 5 * MIN, 1);
     const r = saveTimer({}, at(2), t, T0 + 24 * 60 * MIN); // reopened the next day
-    const track = readTrack(r.logs[dateForDay(MON, 1)], 'home_tidy');
+    const track = readTrack(r.logs[dateForDay(MON, 1)], 'outdoor_time');
     expect([track.timer?.status, track.minutes, r.event]).toEqual(['day-ended', 4, null]);
   });
 });
 
 describe('forgotten timers', () => {
   it('never complete on their own; a long-unconfirmed ready timer is flagged for a check', () => {
-    const t = start(createTimer('focus_deepwork', 1, focus25)!, T0, 1);
+    const t = start(createTimer('skill_practice', 1, focus25)!, T0, 1);
     const ready = settle(t, T0 + 26 * MIN, 1);
     expect(needsCheck(ready, T0 + 26 * MIN)).toBe(false);
     expect(needsCheck(ready, T0 + 25 * MIN + 121 * MIN)).toBe(true); // Focus Time: 120 min grace
@@ -352,7 +358,7 @@ describe('forgotten timers', () => {
       T0 + 21 * MIN,
       1,
     );
-    expect(TIMER_GRACE_MIN.move_walk).toBeLessThan(TIMER_GRACE_MIN.focus_deepwork);
+    expect(TIMER_GRACE_MIN.move_walk).toBeLessThan(TIMER_GRACE_MIN.skill_practice);
     expect(needsCheck(walk, T0 + 20 * MIN + 31 * MIN)).toBe(true);
     expect(needsCheck(walk, T0 + 20 * MIN + 31 * MIN, { move_walk: 60 })).toBe(false);
     expect(

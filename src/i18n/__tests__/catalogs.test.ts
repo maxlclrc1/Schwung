@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from '@jest/globals';
 import * as P from '../../core/reset/pilot';
-import { RESET_HABITS, SOCIAL_ACTIONS } from '../../core/reset/habits';
+import { RESET_HABITS } from '../../core/reset/habits';
 import { formatNumber, formatPercent, language, lookup, setLanguage, t, type Translation } from '../index';
 import { LANGUAGES, matchLanguage, READY_LANGUAGES, type LanguageCode } from '../languages';
 import { en } from '../locales/en';
@@ -136,7 +136,6 @@ describe('the catalogs', () => {
       expect(P.habitName(h.id)).toBe(h.name);
       expect(P.habitDescription(h.id)).toBe(h.description);
     }
-    for (const a of SOCIAL_ACTIONS) expect(P.socialText(a)).toBe(a.text);
     const adult: P.PilotAnswers = { age: '30_49', precautions: [], minutesPerDay: 120 };
     for (const h of RESET_HABITS)
       if (h.id !== 'strength_log') expect(P.habitNotes(h.id as P.PilotHabitId, adult)).toEqual(h.notes);

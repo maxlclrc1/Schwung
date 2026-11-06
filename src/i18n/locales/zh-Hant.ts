@@ -41,17 +41,11 @@ export const zhHant: Translation = {
     levelShort: '{intensity}·{phase}',
     ownHabit: '你的習慣',
     habit: {
-      focus_deepwork: { name: '專注時間', description: '一次只做一件事，手機放在另一個房間' },
       screen_app_limit: { name: '少滑手機', description: '讓主要 App 的使用時間維持在每日上限內' },
       focus_top3: { name: '把事做完', description: '寫下今天最重要的任務，並完成它們' },
       mind_read: { name: '每日閱讀', description: '讀紙本書、電子書或聽有聲書' },
-      confidence_talk: {
-        name: '社交自信',
-        description: '完成今天的社交小步驟：隨時都可以替換或略過',
-      },
       move_walk: { name: '每日活動', description: '用你喜歡的任何方式活動：散步、騎單車、跳舞、運動' },
       sleep_wake: { name: '規律作息', description: '每天在你定的時間前起床' },
-      home_tidy: { name: '整理一下', description: '整理你的房間、書桌或廚房' },
       skill_practice: { name: '練習技能', description: '練習你選定的技能' },
       social_reach_out: {
         name: '保持聯絡',
@@ -61,11 +55,16 @@ export const zhHant: Translation = {
         name: '肌力訓練',
         description: '依照你遵循或選擇的訓練課表，記錄一次肌力訓練',
       },
+
+      eat_well: { name: '好好吃飯', description: '用你自己的方式，讓一餐吃得均衡' },
+
+      mind_meditation: { name: '冥想', description: '幾分鐘安靜的冥想，有引導或自己進行都可以' },
+
+      outdoor_time: { name: '戶外時光', description: '你為自己選擇的戶外時間' },
     },
     notes: {
       scrolling:
         '由你自己確認：Schwung 無法看到你的螢幕使用時間。如果你想知道實際數字，可以到「設定 → 螢幕使用時間」查看。',
-      social: '只涉及日常情境。每一步都可以替換或略過；略過一步從來不算失敗。',
       movement: '如果你已經活動得更久，就保留你自己的數字：它永遠不會被調低。',
       sleep: '以你自己的起床時間為基準：永遠不會更早，也永遠不會減少睡眠。不會加入就寢時間或手機使用規則。',
       skillSport: '運動技能由你自己練習：Schwung 不會規定訓練內容。',
@@ -78,20 +77,17 @@ export const zhHant: Translation = {
       strengthTeen: '先跟合格的教練或體育老師學習動作技巧，循序漸進，避免最大重量，任何地方疼痛就停下來。',
       strengthOlder: '專業人員也可以建議適合你的平衡與肌力活動。',
       strengthRecovery: '休息日有助於身體恢復。你練的是不同的肌群嗎？',
-    },
-    social: {
-      sc_day_followup: '問問別人今天過得如何，再追問一個問題',
-      sc_thank_by_name: '叫出對方的名字，為一件具體的事向他道謝',
-      sc_hello_first: '主動向一位常見到的人打招呼',
-      sc_group_chat_opinion: '在群組聊天中回覆你自己的看法，而不只是按個表情',
-      sc_rarely_talk: '主動和一位很少交談的同學或同事聊聊',
-      sc_ask_question: '在課堂、會議或店裡問一個問題',
-      sc_group_opinion: '在團體對話中分享一個想法',
-      sc_compliment_aloud: '當面給某人一個具體的稱讚',
-      sc_speak_up: '在課堂、會議或團體中發言一次',
-      sc_suggest_plan: '向朋友提議一個計畫（喝咖啡、散步、一起讀書）',
-      sc_introduce: '在學校、公司或社團向新認識的人自我介紹',
-      sc_disagree: '看法不同時，有禮貌地表達不同意見',
+
+      eatBalanced:
+        '均衡的一餐會搭配幾類食物，例如蔬菜或水果，穀物、麵包、米飯或馬鈴薯這類能吃飽的食物，以及豆類、雞蛋、魚、肉或豆腐等蛋白質。任何菜系、任何吃法都算。',
+
+      eatNoRules: '不用計算或秤量，也沒有要避開的食物：只要是一頓你吃得開心的飯。',
+
+      meditation: '你選擇的任何冥想都算：有引導的、用 App 的、呼吸練習，或者只是安靜地坐著。',
+
+      outdoorsCounts: '你為自己選擇的時間才算：去公園、在戶外坐坐、一次你想去的散步。不需要運動。',
+
+      outdoorsNotCounted: '上班、上學途中和辦事不算，除非你特意為自己多留一些戶外時間。',
     },
     skills: {
       Language: '語言',
@@ -117,10 +113,8 @@ export const zhHant: Translation = {
     target: {
       strength: { other: '每週{count}次訓練' },
       strengthAbout: '{sessions}，約{minutes}分鐘',
-      focus_deepwork: '專注{time}，手機放在另一個房間',
       mind_read: '閱讀{time}',
       move_walk: '活動{time}，方式隨你',
-      home_tidy: '整理{time}',
       skill_practice: '練習{skill}{time}',
       screen_app_limit: '今天讓主要 App 的使用時間維持在{limit}以內',
       sleepUpBy: '{time}前起床',
@@ -138,6 +132,17 @@ export const zhHant: Translation = {
         topFirstNoon: '完成最重要的{count}項任務，第一要務在中午前完成',
         topShortNoon: '前{count}項，第一要務中午前完成',
         topShortBefore: '前{count}項，第一要務{time}前完成',
+      },
+
+      mind_meditation: '冥想{time}',
+
+      outdoor_time: '自願在戶外待{time}',
+
+      eatWell: {
+        starter: '有一餐吃水果或蔬菜',
+        standard: '吃一頓均衡的飯',
+
+        challenge: '吃兩頓均衡的飯',
       },
     },
     frequency: {
@@ -763,7 +768,6 @@ export const zhHant: Translation = {
       cantChange: '無法更改：{reason}。',
       saved: '已儲存。{pending}。',
       savedBack: '已儲存：恢復為你目前的目標。',
-      todaysStep: '今天的一步',
       shortWeek: '本週較短：本週沒有目標。',
       weekMet: '本週{done}/{goal} · 已達成目標',
       week: '本週{done}/{goal}',
@@ -780,13 +784,10 @@ export const zhHant: Translation = {
       undo: '復原',
       logSession: '記錄一次訓練',
       markDone: '標示為完成',
-      dontSkip: '今天不略過',
-      skip: '今天略過',
       yesterdayDone: '昨天：已完成（中午前可以更正）',
       yesterdayNotDone: '昨天：未完成（中午前可以更正）',
       undoYesterday: '復原昨天',
       doneYesterday: '昨天已完成',
-      anyCounts: '以下任一項都算',
       minutes: '分鐘（選填）',
       minutesHint: '如果你願意，可以記下花了多久。它永遠不會影響今天是否算完成。',
       min: '{minutes}分鐘',

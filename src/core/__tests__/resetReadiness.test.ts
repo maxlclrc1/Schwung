@@ -349,11 +349,11 @@ describe('phase boundaries and offers', () => {
   });
 
   it('never offers a step-up the person can’t take', () => {
-    const s = newProgression('focus_deepwork', 'standard', 1);
-    const logs = logsFor('focus_deepwork', [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19]);
+    const s = newProgression('skill_practice', 'standard', 1);
+    const logs = logsFor('skill_practice', [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19]);
     expect(progressionOffer({ state: s, logs, ctx, today: 22 })?.to.phase).toBe('momentum');
-    // Momentum is 40 min; 30 min of other habits and 60 available leave room for only 30.
-    const tight: Constraints = { availableMinutes: 60, otherMinutes: 30 };
+    // Momentum is 30 min; 40 min of other habits and 60 available leave room for only 20.
+    const tight: Constraints = { availableMinutes: 60, otherMinutes: 40 };
     expect(progressionOffer({ state: s, logs, ctx, today: 22, constraints: tight })).toBeNull();
   });
 });
@@ -495,11 +495,11 @@ describe('constraints', () => {
   });
 
   it('respects the time the person has', () => {
-    const s = newProgression('focus_deepwork', 'standard', 1);
-    expect(makeHarder(s, ctx, 3, { availableMinutes: 60, otherMinutes: 30 })).toEqual({
+    const s = newProgression('skill_practice', 'standard', 1);
+    expect(makeHarder(s, ctx, 3, { availableMinutes: 60, otherMinutes: 40 })).toEqual({
       blocked: 'it doesn’t fit the time you have',
     });
-    expect(makeHarder(s, ctx, 3, { availableMinutes: 70, otherMinutes: 30 })).toMatchObject({
+    expect(makeHarder(s, ctx, 3, { availableMinutes: 70, otherMinutes: 40 })).toMatchObject({
       level: { phase: 'momentum' },
     });
     // Easier always fits better, so time never blocks it.
