@@ -5,7 +5,7 @@ import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { ASCENT_PHASES, LANDMARKS } from '../../core/ascent';
 import { cellSummary, shortDate, type DayCell } from '../../core/charts';
-import { FOUNDATION_DAYS, TRAIL_DAYS, TRAIL_H, TRAIL_LENGTH, TRAIL_PATH, TRAIL_W } from '../../core/foundationTrail';
+import { FOUNDATION_TRAIL, MOMENTUM_TRAIL, TRAIL_W } from '../../core/expeditionTrail';
 import { haptic } from '../../lib/haptics';
 import { space, useTheme, type Colors } from '../../theme';
 import { T } from '../ui';
@@ -13,12 +13,14 @@ import { formatNumber, t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
 import { FOUNDATION_CONTOURS } from './foundationContours';
+import { MOMENTUM_CONTOURS } from './momentumContours';
 
 /*
- * Foundation on Journey: Days 1–21 as a trail across a contour map (the approved design, 5c42dd8). The route, the
- * terrain and the day positions are fixed in trail units (core/foundationTrail.ts) and scaled to the screen's width,
- * so the trail keeps its shape on every iPhone. The walked part is solid sage up to today; ahead it is a fine line.
- * Each day is its own button; the selected day's entry sits under the trail.
+ * A chapter of the climb on Journey as a trail across a contour map: Foundation (Days 1–21, the approved design,
+ * 5c42dd8) and Momentum (Days 22–44). The route, the terrain and the day positions are fixed in trail units
+ * (core/expeditionTrail.ts) and scaled to the screen's width, so a trail keeps its shape on every iPhone. The walked
+ * part is solid sage up to today; ahead it is a fine line. Each day is its own button; the selected day's entry sits
+ * under its chapter's trail.
  */
 
 const sys = ReduceMotion.System;
@@ -27,6 +29,14 @@ const MILESTONES = Object.keys(LANDMARKS).map(Number);
 const OVER_TOP = 120;
 const OVER_BOTTOM = 120;
 const HIT = 44;
+const ROMAN = ['I', 'II', 'III'] as const;
+
+/** The chapters drawn as trails, with their maps. Mastery still shows as day stones (Expedition.tsx). */
+export const CHAPTERS = [
+  { n: 1, trail: FOUNDATION_TRAIL, contours: FOUNDATION_CONTOURS },
+  { n: 2, trail: MOMENTUM_TRAIL, contours: MOMENTUM_CONTOURS },
+] as const;
+export type Chapter = (typeof CHAPTERS)[number];
 
 type Look = 'today' | 'milestone' | 'full' | 'partial' | 'missed' | 'rest' | 'future';
 
@@ -63,17 +73,22 @@ const Terrain = memo(function Terrain({
   width,
   color,
   today,
+  chapter,
 }: {
   scale: number;
   width: number;
   color: string;
+  chapter: Chapter;
   /** Today is numbered inside its marker, so its label spot needs no quiet patch. */
   today: number;
 }) {
   const x0 = -space.lg / scale;
   const w = width / scale;
   const top = -OVER_TOP;
-  const h = TRAIL_H + OVER_TOP + OVER_BOTTOM;
+  const { trail, contours, n } = chapter;
+  const h = trail.h + OVER_TOP + OVER_BOTTOM;
+  // Ids are per chapter: on the web they share one document.
+  const id = (k: string) => `${k}${n}`;
   return (
     <Svg
       width={width}
@@ -83,29 +98,31 @@ const Terrain = memo(function Terrain({
       pointerEvents="none"
     >
       <Defs>
-        <RadialGradient id="hole">
+        <RadialGradient id={id('hole')}>
           <Stop offset="0" stopColor="#000" stopOpacity={0.85} />
           <Stop offset="0.6" stopColor="#000" stopOpacity={0.6} />
           <Stop offset="1" stopColor="#000" stopOpacity={0} />
         </RadialGradient>
-        <LinearGradient id="edges" x1="0" y1={top} x2="0" y2={top + h} gradientUnits="userSpaceOnUse">
+        <LinearGradient id={id('edges')} x1="0" y1={top} x2="0" y2={top + h} gradientUnits="userSpaceOnUse">
           <Stop offset="0" stopColor="#fff" stopOpacity={0} />
           <Stop offset="0.12" stopColor="#fff" stopOpacity={1} />
           <Stop offset="0.92" stopColor="#fff" stopOpacity={1} />
           <Stop offset="1" stopColor="#fff" stopOpacity={0} />
         </LinearGradient>
-        <Mask id="quiet" maskUnits="userSpaceOnUse" x={x0} y={top} width={w} height={h}>
-          <Rect x={x0} y={top} width={w} height={h} fill="url(#edges)" />
-          {TRAIL_DAYS.map((d) => (
-            <Circle key={`m${d.day}`} cx={d.x} cy={d.y} r={20} fill="url(#hole)" />
+        <Mask id={id('quiet')} maskUnits="userSpaceOnUse" x={x0} y={top} width={w} height={h}>
+          <Rect x={x0} y={top} width={w} height={h} fill={`url(#${id('edges')})`} />
+          {trail.days.map((d) => (
+            <Circle key={`m${d.day}`} cx={d.x} cy={d.y} r={20} fill={`url(#${id('hole')})`} />
           ))}
-          {TRAIL_DAYS.filter((d) => d.day !== today).map((d) => (
-            <Circle key={`l${d.day}`} cx={d.label.x} cy={d.label.y} r={15} fill="url(#hole)" />
-          ))}
+          {trail.days
+            .filter((d) => d.day !== today)
+            .map((d) => (
+              <Circle key={`l${d.day}`} cx={d.label.x} cy={d.label.y} r={15} fill={`url(#${id('hole')})`} />
+            ))}
         </Mask>
       </Defs>
-      <G mask="url(#quiet)" fill="none" stroke={color} strokeLinejoin="round">
-        {FOUNDATION_CONTOURS.map((d, i) => (
+      <G mask={`url(#${id('quiet')})`} fill="none" stroke={color} strokeLinejoin="round">
+        {contours.map((d, i) => (
           <Path key={i} d={d.slice(1)} strokeWidth={d[0] === '1' ? 1.15 : 0.75} />
         ))}
       </G>
@@ -113,7 +130,8 @@ const Terrain = memo(function Terrain({
   );
 });
 
-export const FoundationTrail = memo(function FoundationTrail({
+export const ChapterTrail = memo(function ChapterTrail({
+  chapter,
   cells,
   today,
   selected,
@@ -121,7 +139,8 @@ export const FoundationTrail = memo(function FoundationTrail({
   onOpen,
   name,
 }: {
-  /** The program's days (charts.dayCells); the first 21 are drawn. */
+  chapter: Chapter;
+  /** The program's days (charts.dayCells); the chapter's own are drawn. */
   cells: DayCell[];
   /** The program day today (capped at 66). */
   today: number;
@@ -137,9 +156,14 @@ export const FoundationTrail = memo(function FoundationTrail({
   const inner = Math.min(width, 520) - space.lg * 2;
   const s = inner / TRAIL_W;
   const ink = inks(c, isDark);
-  const done = cells.slice(0, FOUNDATION_DAYS).filter((d) => d.state === 'full').length;
-  const here = today <= FOUNDATION_DAYS;
-  const walked = today >= FOUNDATION_DAYS ? TRAIL_LENGTH : (TRAIL_DAYS[today - 1]?.at ?? 0);
+  const { trail, n } = chapter;
+  const { first, last, days } = trail;
+  const length = last - first + 1;
+  const done = cells.slice(first - 1, last).filter((d) => d.state === 'full').length;
+  const here = today >= first && today <= last;
+  const ahead = today < first;
+  // Walked up to today: none of a chapter not yet reached, all of one left behind.
+  const walked = today >= last ? trail.length : today < first ? 0 : days[today - first].at;
 
   // A tap goes to the nearest day, so neighbouring buttons never fight over a touch around a tight bend.
   const press = (own: number, left: number, top: number) => (e: GestureResponderEvent) => {
@@ -149,7 +173,7 @@ export const FoundationTrail = memo(function FoundationTrail({
       const x = (left + locationX) / s;
       const y = (top + locationY) / s;
       let best = Infinity;
-      for (const d of TRAIL_DAYS) {
+      for (const d of days) {
         const dist = Math.hypot(d.x - x, d.y - y);
         if (dist < best) {
           best = dist;
@@ -166,15 +190,16 @@ export const FoundationTrail = memo(function FoundationTrail({
       <View style={styles.head} accessible accessibilityRole="header">
         <View style={styles.titleRow}>
           <T style={styles.title} maxFontSizeMultiplier={1.4} numberOfLines={2}>
-            <T style={[styles.title, styles.numeral, { color: c.textDim }]}>I · </T>
-            {ASCENT_PHASES[0].name}
+            <T style={[styles.title, styles.numeral, { color: c.textDim }]}>{ROMAN[n - 1]} · </T>
+            {ASCENT_PHASES[n - 1].name}
           </T>
           <T v="small" color={c.textDim} maxFontSizeMultiplier={1.4}>
-            {t('journeyTab.stage.days', { from: 1, to: FOUNDATION_DAYS })}
+            {t('journeyTab.stage.days', { from: first, to: last })}
           </T>
         </View>
         <T v="small" color={c.textDim} style={styles.sub} maxFontSizeMultiplier={1.4}>
-          {t('journeyTab.stage.complete', { done, length: FOUNDATION_DAYS })}
+          {t('journeyTab.stage.complete', { done, length })}
+          {ahead ? t('journeyTab.stage.opens', { day: first }) : null}
           {here ? (
             <T v="small" color={c.indigoInk}>
               {' · '}
@@ -184,25 +209,27 @@ export const FoundationTrail = memo(function FoundationTrail({
         </T>
       </View>
 
-      <View style={{ width: inner, height: TRAIL_H * s, marginTop: 30 }}>
-        <Terrain scale={s} width={inner + space.lg * 2} color={ink.contour} today={today} />
+      <View style={{ width: inner, height: trail.h * s, marginTop: 30 }}>
+        <Terrain scale={s} width={inner + space.lg * 2} color={ink.contour} today={today} chapter={chapter} />
         <Svg
           width={inner}
-          height={TRAIL_H * s}
-          viewBox={`0 0 ${TRAIL_W} ${TRAIL_H}`}
+          height={trail.h * s}
+          viewBox={`0 0 ${TRAIL_W} ${trail.h}`}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         >
-          <Path d={TRAIL_PATH} fill="none" stroke={ink.ahead} strokeWidth={1.3} strokeLinecap="round" />
-          <Path
-            d={TRAIL_PATH}
-            fill="none"
-            stroke={ink.walked}
-            strokeWidth={2.4}
-            strokeLinecap="round"
-            strokeDasharray={[walked, TRAIL_LENGTH + 10]}
-          />
-          {TRAIL_DAYS.map((d) => (
+          <Path d={trail.path} fill="none" stroke={ink.ahead} strokeWidth={1.3} strokeLinecap="round" />
+          {walked > 0 ? (
+            <Path
+              d={trail.path}
+              fill="none"
+              stroke={ink.walked}
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeDasharray={[walked, trail.length + 10]}
+            />
+          ) : null}
+          {days.map((d) => (
             <Marker
               key={d.day}
               x={d.x}
@@ -214,7 +241,7 @@ export const FoundationTrail = memo(function FoundationTrail({
             />
           ))}
         </Svg>
-        {TRAIL_DAYS.map((d) => {
+        {days.map((d) => {
           const lk = look(cells[d.day - 1], d.day, today);
           const sel = d.day === selected;
           const left = d.x * s - HIT / 2;
@@ -258,7 +285,7 @@ export const FoundationTrail = memo(function FoundationTrail({
         })}
       </View>
 
-      {selected >= 1 && selected <= FOUNDATION_DAYS && cells[selected - 1] ? (
+      {selected >= first && selected <= last && cells[selected - 1] ? (
         <Entry cell={cells[selected - 1]} today={today} name={name} onOpen={onOpen} />
       ) : null}
     </View>
