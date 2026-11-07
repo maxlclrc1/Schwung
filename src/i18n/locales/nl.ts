@@ -900,7 +900,6 @@ export const nl: Translation = {
     storyA11y: 'Je verhaal van 66 dagen. Open het om te bewaren of te delen',
     story: 'Je verhaal van 66 dagen',
     storyBody: 'Een aandenken aan de hele klim, om te bewaren of te delen.',
-    expedition: 'De expeditie',
     habitDone: '{habit}, gedaan',
     habitNotDone: '{habit}, niet gedaan',
     stillAhead: 'Nog te gaan.',
@@ -920,28 +919,19 @@ export const nl: Translation = {
       open: 'Open je reis',
       journey: 'Reis',
     },
-    meaning: {
-      1: 'Elke gewoonte begint bij haar Fundament-doel, klein genoeg voor een drukke dag.',
-      2: 'Vanaf hier gaan Vaart-doelen open, aangeboden als je consequent bent geweest. Ze aannemen is altijd jouw keuze.',
-      3: 'Het laatste stuk naar de top. Meesterschap-doelen gaan open, als je wilt.',
-    },
     summary: {
-      climbed: 'dagen geklommen',
-      dayOf: 'dag van {total}',
       complete: { one: 'dag voltooid', other: 'dagen voltooid' },
       toNext: 'dagen tot {name}',
       reached: 'top bereikt',
       a11y: '{value} {unit}',
+
+      summitDay: 'topdag',
     },
     stage: {
-      a11y: '{phase}, dag {from} tot {to}. {done} van {length} voltooid.',
       here: 'Je bent hier',
-      hereA11y: ' Je bent hier.',
-      hint: 'Toont waar deze etappe voor is',
       days: 'Dag {from}–{to}',
       complete: '{done} van {length} dagen voltooid',
       opens: ' · gaat open op dag {day}',
-      dayOf: ' · dag {day} van {length}',
     },
     cell: {
       a11y: 'Dag {day}. {state}',
@@ -956,7 +946,6 @@ export const nl: Translation = {
       unrecorded: 'Geen gegevens.',
       future: 'Nog te gaan.',
       day: 'Dag {day}',
-      todaySuffix: ' · Vandaag',
     },
 
     trail: { open: 'Dag openen' },

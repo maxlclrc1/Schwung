@@ -845,6 +845,16 @@ describe('the ceremonies', () => {
     expect(P.summitDue({ ...p, ceremonies: { summit: true } }, 70)).toBe(false);
   });
 
+  it('reaching Day 66 isn’t the summit: it is reached once Day 66 is complete, or after it, seen or not', () => {
+    const p = pilot([{ habitId: 'mind_read', intensity: 'starter' }]);
+    expect(P.summitReached(p, 65)).toBe(false);
+    expect(P.summitReached(p, 66)).toBe(false);
+    expect(P.summitReached(doneOn(p, 'mind_read', [66]), 66)).toBe(true);
+    expect(P.summitReached(p, 67)).toBe(true);
+    // The ceremony having been seen doesn't change it.
+    expect(P.summitReached({ ...doneOn(p, 'mind_read', [66]), ceremonies: { summit: true } }, 66)).toBe(true);
+  });
+
   it('keeps which ceremonies were seen through a save, and nothing else under that name', () => {
     const p = { ...pilot(), ceremonies: { day1: true, summit: 'yes' } };
     expect(P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))?.ceremonies).toEqual({ day1: true });

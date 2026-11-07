@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { FOUNDATION_TRAIL, MASTERY_TRAIL, MOMENTUM_TRAIL, TRAIL_W, type Trail } from '../expeditionTrail';
+import { dayAt, FOUNDATION_TRAIL, MASTERY_TRAIL, MOMENTUM_TRAIL, TRAIL_W, type Trail } from '../expeditionTrail';
 
 const cheb = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
@@ -29,6 +29,18 @@ describe.each([
     const scale = (375 - 32) / TRAIL_W;
     for (const a of trail.days)
       for (const b of trail.days) if (a.day < b.day) expect(cheb(a, b) * scale).toBeGreaterThanOrEqual(44);
+  });
+
+  it('selects each day from anywhere within 22 pt of its marker, even at 320 pt where buttons can overlap', () => {
+    const scale = (320 - 32) / TRAIL_W;
+    const r = 22 / scale - 0.01;
+    for (const d of trail.days) {
+      expect(dayAt(trail, d.x, d.y)).toBe(d.day);
+      for (let k = 0; k < 32; k++) {
+        const a = (k / 32) * Math.PI * 2;
+        for (const f of [0.5, 1]) expect(dayAt(trail, d.x + Math.cos(a) * r * f, d.y + Math.sin(a) * r * f)).toBe(d.day);
+      }
+    }
   });
 
   it('keeps each number clear of the markers', () => {

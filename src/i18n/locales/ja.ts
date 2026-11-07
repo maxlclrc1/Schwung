@@ -881,7 +881,6 @@ export const ja: Translation = {
     storyA11y: '66日間のストーリー。開いて保存または共有',
     story: 'あなたの66日間のストーリー',
     storyBody: '登山全体の記念に。保存も共有もできます。',
-    expedition: '遠征の記録',
     habitDone: '{habit}、達成',
     habitNotDone: '{habit}、未達成',
     stillAhead: 'まだこの先です。',
@@ -901,28 +900,19 @@ export const ja: Translation = {
       open: '道のりを開く',
       journey: '道のり',
     },
-    meaning: {
-      1: 'どの習慣も基礎の目標から始まります。忙しい日でも続けられる小ささです。',
-      2: 'ここからは「勢い」の目標が選べるようになります。安定して続けているときに提案され、受けるかどうかはいつでも自由です。',
-      3: '山頂までの最後の道のり。希望すれば熟達の目標が開きます。',
-    },
     summary: {
-      climbed: '日登った',
-      dayOf: '日目 / {total}',
       complete: { other: '日達成' },
       toNext: '日で{name}へ',
       reached: '山頂に到達',
       a11y: '{value} {unit}',
+
+      summitDay: '山頂の日',
     },
     stage: {
-      a11y: '{phase}、{from}〜{to}日目。{length}日中{done}日達成。',
       here: '現在地',
-      hereA11y: ' 現在地です。',
-      hint: 'この段階の目的を表示',
       days: '{from}〜{to}日目',
       complete: '{length}日中{done}日達成',
       opens: ' · {day}日目に開始',
-      dayOf: ' · {length}日中{day}日目',
     },
     cell: {
       a11y: '{day}日目。{state}',
@@ -937,7 +927,6 @@ export const ja: Translation = {
       unrecorded: '記録なし。',
       future: 'まだこの先。',
       day: '{day}日目',
-      todaySuffix: ' · 今日',
     },
 
     trail: { open: 'この日を開く' },

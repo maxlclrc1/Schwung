@@ -185,6 +185,23 @@ function makeTrail({
   };
 }
 
+/**
+ * The day a touch at (x, y), in trail units, selects: the one whose marker is nearest (the earlier day on an exact
+ * tie). Every point belongs to exactly one day, so day buttons that overlap on a narrow screen never compete.
+ */
+export function dayAt(trail: Trail, x: number, y: number): number {
+  let day = trail.first;
+  let best = Infinity;
+  for (const d of trail.days) {
+    const dist = Math.hypot(d.x - x, d.y - y);
+    if (dist < best) {
+      best = dist;
+      day = d.day;
+    }
+  }
+  return day;
+}
+
 export const FOUNDATION_TRAIL = makeTrail({
   first: 1,
   h: 900,

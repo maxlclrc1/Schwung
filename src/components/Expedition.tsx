@@ -21,9 +21,18 @@ const MILESTONES = Object.keys(LANDMARKS).map(Number);
 
 /**
  * The climb in one quiet line above the trail: the complete days so far and the days to the next milestone, from the
- * journey's own count.
+ * journey's own count. On Day 66 it's summit day until the day is complete (summitReached), then the summit.
  */
-export const JourneyStats = memo(function JourneyStats({ today, completed }: { today: number; completed: number }) {
+export const JourneyStats = memo(function JourneyStats({
+  today,
+  completed,
+  summit,
+}: {
+  today: number;
+  completed: number;
+  /** The 66 days are done (reset/pilot summitReached). */
+  summit: boolean;
+}) {
   const { c } = useTheme();
   const onArt = useOnArt();
   const t = useT();
@@ -31,7 +40,9 @@ export const JourneyStats = memo(function JourneyStats({ today, completed }: { t
   const unit = t('journeyTab.summary.complete', { count: completed });
   const toNext = next
     ? t('journeyTab.summary.toNext', { name: LANDMARKS[next].name })
-    : t('journeyTab.summary.reached');
+    : summit
+      ? t('journeyTab.summary.reached')
+      : t('journeyTab.summary.summitDay');
   return (
     <View style={styles.stats}>
       <Stat value={formatNumber(completed)} unit={unit} />

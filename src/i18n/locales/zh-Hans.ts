@@ -851,7 +851,6 @@ export const zhHans: Translation = {
     storyA11y: '你的66天故事。打开即可保存或分享',
     story: '你的66天故事',
     storyBody: '整段攀登的纪念，可保存或分享。',
-    expedition: '远征',
     habitDone: '{habit}，已完成',
     habitNotDone: '{habit}，未完成',
     stillAhead: '尚未到来。',
@@ -871,28 +870,19 @@ export const zhHans: Translation = {
       open: '打开你的旅程',
       journey: '旅程',
     },
-    meaning: {
-      1: '每个习惯都从基础目标开始，小到忙碌的日子也能坚持。',
-      2: '从这里开始开放动力目标，在你一直保持稳定时提供。是否接受永远由你决定。',
-      3: '通往山顶的最后一段。想要的话，精通目标会开放。',
-    },
     summary: {
-      climbed: '天已攀登',
-      dayOf: '/{total}天',
       complete: { other: '天已完成' },
       toNext: '天到达{name}',
       reached: '已登顶',
       a11y: '{value} {unit}',
+
+      summitDay: '登顶日',
     },
     stage: {
-      a11y: '{phase}，第{from}至{to}天。已完成{length}天中的{done}天。',
       here: '你在这里',
-      hereA11y: ' 你在这里。',
-      hint: '显示这个阶段的意义',
       days: '第{from}–{to}天',
       complete: '已完成{length}天中的{done}天',
       opens: ' · 第{day}天开放',
-      dayOf: ' · 第{day}天，共{length}天',
     },
     cell: {
       a11y: '第{day}天。{state}',
@@ -907,7 +897,6 @@ export const zhHans: Translation = {
       unrecorded: '没有记录。',
       future: '尚未到来。',
       day: '第{day}天',
-      todaySuffix: ' · 今天',
     },
 
     trail: { open: '打开当天' },

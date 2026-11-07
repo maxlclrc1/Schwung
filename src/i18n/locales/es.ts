@@ -892,7 +892,6 @@ export const es: Translation = {
     storyA11y: 'Tu historia de 66 días. Ábrela para guardarla o compartirla',
     story: 'Tu historia de 66 días',
     storyBody: 'Un recuerdo de todo el ascenso, para guardar o compartir.',
-    expedition: 'La expedición',
     habitDone: '{habit}, hecho',
     habitNotDone: '{habit}, sin hacer',
     stillAhead: 'Aún por llegar.',
@@ -912,28 +911,19 @@ export const es: Translation = {
       open: 'Abrir tu recorrido',
       journey: 'Recorrido',
     },
-    meaning: {
-      1: 'Cada hábito empieza con su objetivo de Base, lo bastante pequeño para cumplirlo en un día ajetreado.',
-      2: 'Desde aquí se abren los objetivos de Impulso, que se ofrecen cuando has sido constante. Aceptarlos siempre es decisión tuya.',
-      3: 'El último tramo hasta la cumbre. Se abren los objetivos de Maestría, si los quieres.',
-    },
     summary: {
-      climbed: 'días escalados',
-      dayOf: 'día de {total}',
       complete: { one: 'día completo', other: 'días completos' },
       toNext: 'días hasta {name}',
       reached: 'cumbre alcanzada',
       a11y: '{value} {unit}',
+
+      summitDay: 'día de cumbre',
     },
     stage: {
-      a11y: '{phase}, días {from} a {to}. {done} de {length} completos.',
       here: 'Estás aquí',
-      hereA11y: ' Estás aquí.',
-      hint: 'Muestra para qué sirve esta etapa',
       days: 'Días {from}–{to}',
       complete: '{done} de {length} días completos',
       opens: ' · se abre el día {day}',
-      dayOf: ' · día {day} de {length}',
     },
     cell: {
       a11y: 'Día {day}. {state}',
@@ -948,7 +938,6 @@ export const es: Translation = {
       unrecorded: 'Sin registro.',
       future: 'Aún por llegar.',
       day: 'Día {day}',
-      todaySuffix: ' · Hoy',
     },
 
     trail: { open: 'Abrir día' },

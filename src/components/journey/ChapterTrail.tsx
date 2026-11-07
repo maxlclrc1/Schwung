@@ -5,13 +5,13 @@ import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { ASCENT_PHASES, LANDMARKS } from '../../core/ascent';
 import { cellSummary, shortDate, type DayCell } from '../../core/charts';
-import { FOUNDATION_TRAIL, MASTERY_TRAIL, MOMENTUM_TRAIL, TRAIL_W } from '../../core/expeditionTrail';
+import { dayAt, FOUNDATION_TRAIL, MASTERY_TRAIL, MOMENTUM_TRAIL, TRAIL_W } from '../../core/expeditionTrail';
 import { haptic } from '../../lib/haptics';
 import { space, useTheme, type Colors } from '../../theme';
 import { T } from '../ui';
 import { formatNumber, t as tr } from '../../i18n';
-import { useT } from '../../i18n/react';
-import { flipX } from '../../i18n/direction';
+import { useLanguage, useT } from '../../i18n/react';
+import { flipX, isRTLLanguage } from '../../i18n/direction';
 import { FOUNDATION_CONTOURS } from './foundationContours';
 import { MOMENTUM_CONTOURS } from './momentumContours';
 import { MASTERY_CONTOURS } from './masteryContours';
@@ -154,6 +154,9 @@ export const ChapterTrail = memo(function ChapterTrail({
 }) {
   const { c, isDark } = useTheme();
   const t = useT();
+  // Arabic and Urdu: a right-to-left mark first, so the heading reads right to left from its Latin numeral
+  // ("I · " then the chapter's name) instead of taking its direction from the numeral.
+  const rtl = isRTLLanguage(useLanguage());
   const { width } = useWindowDimensions();
   const inner = Math.min(width, 520) - space.lg * 2;
   const s = inner / TRAIL_W;
@@ -167,24 +170,13 @@ export const ChapterTrail = memo(function ChapterTrail({
   // Walked up to today: none of a chapter not yet reached, all of one left behind.
   const walked = today >= last ? trail.length : today < first ? 0 : days[today - first].at;
 
-  // A tap goes to the nearest day, so neighbouring buttons never fight over a touch around a tight bend.
+  // A tap goes to the nearest day (dayAt), so where neighbouring buttons overlap around a tight bend on a narrow
+  // screen, whichever one receives the touch, the day chosen is the same: the one whose marker is closest.
   const press = (own: number, left: number, top: number) => (e: GestureResponderEvent) => {
     const { locationX, locationY } = e.nativeEvent;
-    let day = own;
-    if (Number.isFinite(locationX) && Number.isFinite(locationY)) {
-      const x = (left + locationX) / s;
-      const y = (top + locationY) / s;
-      let best = Infinity;
-      for (const d of days) {
-        const dist = Math.hypot(d.x - x, d.y - y);
-        if (dist < best) {
-          best = dist;
-          day = d.day;
-        }
-      }
-    }
+    const known = Number.isFinite(locationX) && Number.isFinite(locationY);
     haptic.select();
-    onSelect(day);
+    onSelect(known ? dayAt(trail, (left + locationX) / s, (top + locationY) / s) : own);
   };
 
   return (
@@ -192,6 +184,7 @@ export const ChapterTrail = memo(function ChapterTrail({
       <View style={styles.head} accessible accessibilityRole="header">
         <View style={styles.titleRow}>
           <T style={styles.title} maxFontSizeMultiplier={1.4} numberOfLines={2}>
+            {rtl ? '\u200F' : null}
             <T style={[styles.title, styles.numeral, { color: c.textDim }]}>{ROMAN[n - 1]} · </T>
             {ASCENT_PHASES[n - 1].name}
           </T>
