@@ -194,6 +194,10 @@ function Ring({ done, total, full }: { done: number; total: number; full: boolea
   );
 }
 
+/** The rolling XP number's digit width, and how many digits the chip makes room for before it grows. */
+const XP_CHAR = 8;
+const XP_SLOTS = 3;
+
 /** The level chip: level, how far to the next, and XP rolling up, with a brief "+XP" when some is earned. */
 function Level({ xp }: { xp: number }) {
   const { c } = useTheme();
@@ -232,10 +236,12 @@ function Level({ xp }: { xp: number }) {
           <T v="caption" color={c.accentInk} style={[styles.chipText, styles.shrink]} maxFontSizeMultiplier={1.3}>
             {g.title}
           </T>
-          <View style={{ width: 28 }}>
+          {/* The bar gives up one digit's room for each digit XP gains (up to three), so the chip keeps one width as
+              XP grows and the chips never jump to a second row when a habit is completed. */}
+          <View style={{ width: 28 + XP_CHAR * Math.max(0, XP_SLOTS - String(xp).length) }}>
             <ProgressBar value={g.progress} height={4} color={c.accent} />
           </View>
-          <RollingText text={`${xp}`} size={13} charWidth={8} weight="700" color={c.accentInk} />
+          <RollingText text={`${xp}`} size={13} charWidth={XP_CHAR} weight="700" color={c.accentInk} />
           <T v="caption" color={c.accentInk} style={styles.chipText} maxFontSizeMultiplier={1.3}>
             {t('today.hero.xp')}
           </T>
