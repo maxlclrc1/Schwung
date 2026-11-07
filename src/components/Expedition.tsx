@@ -21,12 +21,11 @@ import { T } from './ui';
 import { formatNumber, t as tr } from '../i18n';
 import { useT } from '../i18n/react';
 import { useOnArt } from './onArt';
-import { FoundationTrail } from './journey/FoundationTrail';
-import { FOUNDATION_DAYS } from '../core/foundationTrail';
+import { CHAPTERS, ChapterTrail } from './journey/ChapterTrail';
 
 /*
  * Below the mountain on Journey: the climb in one line (the days completed and the next milestone), then the 66 days:
- * Foundation as a trail on a contour map (journey/FoundationTrail), Momentum and Mastery as stages of day stones. Every mark comes
+ * Foundation and Momentum as trails on contour maps (journey/ChapterTrail), Mastery as a stage of day stones. Every mark comes
  * from the program's own saved days (reset/charts.ts dayCells: each day judged on the habits it actually had,
  * weekly schedules and habits added or removed included). Nothing here is estimated.
  */
@@ -125,15 +124,19 @@ export const ExpeditionCalendar = memo(function ExpeditionCalendar({
 
   return (
     <View style={styles.calendar}>
-      <FoundationTrail
-        cells={cells}
-        today={today}
-        selected={selected}
-        onSelect={onSelect}
-        onOpen={onOpen}
-        name={name}
-      />
-      {ASCENT_PHASES.slice(1).map((p) => (
+      {CHAPTERS.map((chapter) => (
+        <ChapterTrail
+          key={chapter.n}
+          chapter={chapter}
+          cells={cells}
+          today={today}
+          selected={selected}
+          onSelect={onSelect}
+          onOpen={onOpen}
+          name={name}
+        />
+      ))}
+      {ASCENT_PHASES.slice(CHAPTERS.length).map((p) => (
         <Stage
           key={p.n}
           phase={p}
@@ -146,7 +149,9 @@ export const ExpeditionCalendar = memo(function ExpeditionCalendar({
           animate={settled}
         />
       ))}
-      {cell && cell.day > FOUNDATION_DAYS ? <DayNote cell={cell} today={today} name={name} /> : null}
+      {cell && cell.day > CHAPTERS[CHAPTERS.length - 1].trail.last ? (
+        <DayNote cell={cell} today={today} name={name} />
+      ) : null}
     </View>
   );
 });
