@@ -743,6 +743,8 @@ export const vi: Translation = {
       levelA11y: '{title}, {xp} XP. Mở bộ sưu tập',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: 'Hôm nay xong {done}/{total}',
     },
     phase: {
       after: 'Mục tiêu của bạn giữ nguyên.',

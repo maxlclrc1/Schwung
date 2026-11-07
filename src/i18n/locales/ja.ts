@@ -737,6 +737,8 @@ export const ja: Translation = {
       levelA11y: '{title}、{xp} XP。コレクションを開く',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '今日は{total}件中{done}件完了',
     },
     phase: {
       after: '目標は今のままです。',

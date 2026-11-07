@@ -752,6 +752,8 @@ export const id: Translation = {
       levelA11y: '{title}, {xp} XP. Buka koleksimu',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '{done} dari {total} selesai hari ini',
     },
     phase: {
       after: 'Targetmu tetap seperti sekarang.',

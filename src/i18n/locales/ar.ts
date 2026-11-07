@@ -878,6 +878,8 @@ export const ar: Translation = {
       levelA11y: '{title}، {xp} XP. فتح مجموعتك',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '{done} من {total} أُنجزت اليوم',
     },
     phase: {
       after: 'أهدافك تبقى كما هي.',

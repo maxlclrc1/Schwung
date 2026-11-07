@@ -746,6 +746,8 @@ export const hi: Translation = {
       levelA11y: '{title}, {xp} XP। अपना संग्रह खोलें',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: 'आज {total} में से {done} पूरे',
     },
     phase: {
       after: 'आपके लक्ष्य जहाँ हैं वहीं रहते हैं।',

@@ -756,6 +756,8 @@ export const nl: Translation = {
       levelA11y: '{title}, {xp} XP. Open je verzameling',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '{done} van {total} vandaag gedaan',
     },
     phase: {
       after: 'Je doelen blijven waar ze zijn.',

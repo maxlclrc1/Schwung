@@ -743,6 +743,8 @@ export const ur: Translation = {
       levelA11y: '{title}، {xp} XP۔ اپنا مجموعہ کھولیں',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: 'آج {total} میں سے {done} مکمل',
     },
     phase: {
       after: 'آپ کے اہداف جہاں ہیں وہیں رہتے ہیں۔',

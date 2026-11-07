@@ -833,6 +833,8 @@ export const ru: Translation = {
       levelA11y: '{title}, {xp} XP. Открыть коллекцию',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '{done} из {total} выполнено сегодня',
     },
     phase: {
       after: 'Твои цели остаются прежними.',

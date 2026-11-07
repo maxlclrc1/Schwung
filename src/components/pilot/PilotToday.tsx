@@ -173,7 +173,6 @@ export function PilotToday() {
           today={today}
           done={done}
           total={program.habits.length}
-          full={full}
           streak={streak}
           xp={xp}
           momentum={!!program.after}
@@ -226,13 +225,12 @@ export function PilotToday() {
           <T v="overline" color={onArt.ink ?? c.textDim} style={onArt.style}>
             {t('today.todaysHabits')}
           </T>
-          <T v="label" color={full ? c.sageInk : (onArt.ink ?? c.textDim)} style={onArt.style}>
-            {awaiting
-              ? t('today.resting')
-              : full
-                ? t('today.allDone')
-                : t('today.progress', { done, total: program.habits.length })}
-          </T>
+          {/* Today's count lives in the header; the label only says when the habits are resting. */}
+          {awaiting ? (
+            <T v="label" color={onArt.ink ?? c.textDim} style={onArt.style}>
+              {t('today.resting')}
+            </T>
+          ) : null}
         </View>
         {/* Past the summit with nothing chosen yet: the habits rest (nothing is tracked) until the person chooses. */}
         <Animated.View

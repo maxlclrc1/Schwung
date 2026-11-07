@@ -742,6 +742,8 @@ export const bn: Translation = {
       levelA11y: '{title}, {xp} XP। আপনার সংগ্রহ খুলুন',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: 'আজ {total}টির মধ্যে {done}টি সম্পন্ন',
     },
     phase: {
       after: 'আপনার লক্ষ্যগুলো যেখানে আছে সেখানেই থাকে।',
