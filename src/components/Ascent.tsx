@@ -19,7 +19,7 @@ import { t as tr } from '../i18n';
 import { useT } from '../i18n/react';
 import { useOnArt } from './onArt';
 import { flipX, physical } from '../i18n/direction';
-import { SummitStar } from './SummitStar';
+import { SummitBeacon } from './SummitBeacon';
 
 const DOTS = trailDots(3);
 
@@ -139,13 +139,15 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
         />
       ) : null}
 
-      {/* Landmarks at 7, 21 and 44, and the summit's star. */}
+      {/* Landmarks at 7, 21 and 44, and the summit's beacon. */}
       {days
         .filter((d) => d.landmark)
         .map((d) => {
           const summit = d.day === PROGRAM_DAYS;
           if (summit)
-            return <SummitStar key={d.day} x={px(d.point.x)} y={py(d.point.y)} dark={isDark} animate={!reduceMotion} />;
+            return (
+              <SummitBeacon key={d.day} x={px(d.point.x)} y={py(d.point.y)} dark={isDark} animate={!reduceMotion} />
+            );
           const reached = d.status === 'done' || d.status === 'today';
           const size = summit ? 26 : 20;
           const color = summit ? c.gold : reached ? c.peach : c.textDim;
