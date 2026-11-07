@@ -19,7 +19,7 @@ import { newlyReached, type Collectible } from '../../core/reset/collection';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
 import { devTools } from '../../lib/flags';
-import { haptic } from '../../lib/haptics';
+import { completionHaptic, haptic } from '../../lib/haptics';
 import { usePreferences } from '../../store/preferences';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
@@ -156,7 +156,7 @@ export function PilotToday() {
     return () => clearTimeout(t);
   }, [fresh, unlock, quiet]);
 
-  const onToggle = useCallback((id: string) => void useResetPilot.getState().toggle(id), []);
+  const onToggle = useCallback((id: string) => useResetPilot.getState().toggle(id), []);
   const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
 
   return (
@@ -317,7 +317,7 @@ function PilotCard({
   program: P.PilotProgram;
   habitId: P.PilotHabitId;
   today: number;
-  onToggle: (id: string) => void;
+  onToggle: (id: string) => P.PilotChange['event'];
   onDetails: (id: string) => void;
   onSwipe: (active: boolean) => void;
   showHint: boolean;
@@ -412,7 +412,7 @@ const CardView = memo(function CardView({
   task: string;
   levelIndex: number;
   levelLabel: string;
-  onToggle: (id: string) => void;
+  onToggle: (id: string) => P.PilotChange['event'];
   onDetails: (id: string) => void;
   onSwipe: (active: boolean) => void;
   showHint: boolean;
@@ -433,8 +433,10 @@ const CardView = memo(function CardView({
       {counterText !== null && !done ? (
         <CardButton
           onPress={() => {
-            haptic.select();
-            addOne();
+            // Reaching the goal is a completion (its own haptic); any other tap is a light select.
+            const event = addOne();
+            if (event) completionHaptic(event);
+            else haptic.select();
           }}
           style={[styles.pill, { backgroundColor: chip, borderColor: edge }]}
         >

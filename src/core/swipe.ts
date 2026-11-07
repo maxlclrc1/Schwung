@@ -57,3 +57,12 @@ export function dragOffset(d: number, reach: number): number {
   const dim = reach * 0.6;
   return knee + dim * (1 - 1 / ((d - knee) / dim + 1));
 }
+
+/**
+ * The threshold haptic: once per swipe, the first time the finger reaches the threshold (`distance` along the toggle
+ * direction). Dragging back and forth across it never repeats it. Returns whether to play it, and the new state.
+ */
+export function thresholdTick(ticked: boolean, distance: number, reach: number): { play: boolean; ticked: boolean } {
+  if (ticked || distance < reach) return { play: false, ticked };
+  return { play: true, ticked: true };
+}
