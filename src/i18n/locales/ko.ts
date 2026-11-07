@@ -923,6 +923,8 @@ export const ko: Translation = {
       day: '{day}일째',
       todaySuffix: ' · 오늘',
     },
+
+    trail: { open: '이날 열기' },
   },
   insights: {
     title: '인사이트',

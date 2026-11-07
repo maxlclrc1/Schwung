@@ -38,6 +38,8 @@ export const journeyTab = {
     open: 'Open your journey',
     journey: 'Journey',
   },
+  /** The Foundation trail's day entry: opens the day's habits by the mountain. */
+  trail: { open: 'Open day' },
   meaning: {
     1: 'Every habit starts at its Foundation target, small enough to keep on a busy day.',
     2: 'Momentum targets open from here, offered when you’ve been consistent. Taking them is always your choice.',

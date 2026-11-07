@@ -921,6 +921,8 @@ export const th: Translation = {
       day: 'วันที่ {day}',
       todaySuffix: ' · วันนี้',
     },
+
+    trail: { open: 'เปิดดูวันนั้น' },
   },
   insights: {
     title: 'ภาพรวม',

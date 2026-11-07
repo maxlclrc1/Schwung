@@ -961,6 +961,8 @@ export const id: Translation = {
       day: 'Hari ke-{day}',
       todaySuffix: ' · Hari ini',
     },
+
+    trail: { open: 'Buka hari' },
   },
   insights: {
     title: 'Wawasan',

@@ -908,6 +908,8 @@ export const zhHant: Translation = {
       day: '第{day}天',
       todaySuffix: ' · 今天',
     },
+
+    trail: { open: '打開當天' },
   },
   insights: {
     title: '洞察',

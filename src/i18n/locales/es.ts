@@ -950,6 +950,8 @@ export const es: Translation = {
       day: 'Día {day}',
       todaySuffix: ' · Hoy',
     },
+
+    trail: { open: 'Abrir día' },
   },
   insights: {
     title: 'Perspectivas',

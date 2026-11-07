@@ -3,12 +3,13 @@ import { useShownProgram } from '../../components/shownProgram';
 import { router, useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
+import Animated, { useAnimatedRef, useAnimatedScrollHandler, useReducedMotion } from 'react-native-reanimated';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ascentLabel, AscentLabels, AscentScene, tapPoint } from '../../components/Ascent';
 import { SettingsButton } from '../../components/HeaderButton';
 import { ThemeToggle } from '../../components/ThemeToggle';
-import { ExpeditionCalendar, JourneySummary } from '../../components/Expedition';
+import { ExpeditionCalendar, JourneyStats } from '../../components/Expedition';
 import { PastJourneysLink, SinceSummit } from '../../components/beyond/SinceSummit';
 import { ReflectionHistory } from '../../components/reflection/ReflectionHistory';
 import { storyAvailable } from '../../core/reset/story';
@@ -27,7 +28,6 @@ import { useDepth } from '../../theme/depth';
 import { ThemedView } from '../../theme/transition';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
-import { useOnArt } from '../../components/onArt';
 import { flipX } from '../../i18n/direction';
 
 /**
@@ -78,11 +78,12 @@ function Header() {
 
 function Ascent({ picked, source }: { picked: number | null; source: JourneySource }) {
   const { c } = useTheme();
-  const onArt = useOnArt();
   const depth = useDepth();
   const t = useT();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const reduceMotion = useReducedMotion();
+  const scroller = useAnimatedRef<Animated.ScrollView>();
   const { logs, today, start, title } = source;
   const [zoneTop, setZoneTop] = useState(insets.top + 100);
   const { zoneHeight } = worldFrame(width, zoneTop);
@@ -110,6 +111,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   return (
     <>
       <Animated.ScrollView
+        ref={scroller}
         onScroll={onScroll}
         scrollEventThrottle={16}
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.sm }]}
@@ -196,7 +198,6 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
 
         {cells.length ? (
           <View style={styles.pad}>
-            <JourneySummary today={today} completed={completed} cells={cells} />
             {program && storyAvailable(program, today) ? (
               <Pressable
                 onPress={() => {
@@ -226,15 +227,24 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             ) : null}
             {program?.after ? <SinceSummit program={program} today={today} /> : null}
             <PastJourneysLink />
+            {/* The landscape settles into the page behind the stats and the Foundation trail. */}
             <View style={styles.expedition}>
-              <T v="overline" color={onArt.ink ?? c.textDim} style={onArt.style}>
-                {t('journeyTab.expedition')}
-              </T>
+              <Backdrop color={c.bg} />
+              <JourneyStats today={Math.min(today, PROGRAM_DAYS)} completed={completed} />
               <ExpeditionCalendar
                 cells={cells}
                 today={Math.min(today, PROGRAM_DAYS)}
                 selected={shownDay}
                 onSelect={(day) => setChosen(day === lastDay ? null : day)}
+                onOpen={(day) => {
+                  // The day's full detail sits by the mountain: open it and bring it into view.
+                  setChosen(day === lastDay ? null : day);
+                  setExpanded(true);
+                  scroller.current?.scrollTo({
+                    y: Math.max(0, zoneTop + zoneHeight - height * 0.3),
+                    animated: !reduceMotion,
+                  });
+                }}
                 name={title}
               />
             </View>
@@ -245,6 +255,26 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
     </>
   );
 }
+
+/** A wash from clear to the page's colour, so the painting above gives way to the map beneath. */
+const Backdrop = memo(function Backdrop({ color }: { color: string }) {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Svg width="100%" height={260}>
+        <Defs>
+          <LinearGradient id="wash" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={color} stopOpacity={0} />
+            <Stop offset="0.27" stopColor={color} stopOpacity={0.55} />
+            <Stop offset="0.65" stopColor={color} stopOpacity={0.9} />
+            <Stop offset="1" stopColor={color} stopOpacity={1} />
+          </LinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#wash)" />
+      </Svg>
+      <View style={{ flex: 1, backgroundColor: color }} />
+    </View>
+  );
+});
 
 /** The shown day in a few words (the phase is on the mountain), and in full for VoiceOver. */
 function daySummary(d: AscentDay | undefined, log: DayLog | undefined, isToday: boolean) {
@@ -331,7 +361,8 @@ function DayDetail({
 const styles = StyleSheet.create({
   scroll: { paddingBottom: space.xxxl, gap: space.md },
   pad: { paddingHorizontal: space.lg, gap: space.md },
-  expedition: { gap: space.md, marginTop: space.lg },
+  // Full-bleed, so the wash and the map run edge to edge; the stats and the trail keep the page's margins.
+  expedition: { marginHorizontal: -space.lg, paddingHorizontal: space.lg, paddingTop: 6, marginTop: space.sm },
   // Panels pad like every other panel on the core screens (space.lg).
   story: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.lg },
   storyIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },

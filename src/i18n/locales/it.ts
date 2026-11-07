@@ -971,6 +971,8 @@ export const it: Translation = {
       day: 'Giorno {day}',
       todaySuffix: ' · Oggi',
     },
+
+    trail: { open: 'Apri giorno' },
   },
   insights: {
     title: 'Andamento',

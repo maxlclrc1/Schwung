@@ -949,6 +949,8 @@ export const tr: Translation = {
       day: 'Gün {day}',
       todaySuffix: ' · Bugün',
     },
+
+    trail: { open: 'Günü aç' },
   },
   insights: {
     title: 'İçgörüler',

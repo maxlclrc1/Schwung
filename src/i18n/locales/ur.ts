@@ -945,6 +945,8 @@ export const ur: Translation = {
       day: 'دن {day}',
       todaySuffix: ' · آج',
     },
+
+    trail: { open: 'دن کھولیں' },
   },
   insights: {
     title: 'بصیرت',

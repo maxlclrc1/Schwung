@@ -958,6 +958,8 @@ export const nl: Translation = {
       day: 'Dag {day}',
       todaySuffix: ' · Vandaag',
     },
+
+    trail: { open: 'Dag openen' },
   },
   insights: {
     title: 'Inzichten',
