@@ -180,7 +180,7 @@ export function PilotHabit() {
             )}
             {progress.kind === 'minutes' ? (
               <>
-                <T v="caption" color={c.textDim}>
+                <T v="caption" color={c.textDim} style={styles.groupLabel}>
                   {t('today.habit.partialMinutes')}
                 </T>
                 <View style={styles.stepper}>
@@ -239,7 +239,7 @@ export function PilotHabit() {
               <Button label={t('today.habit.easier')} kind="secondary" onPress={() => change(() => s().easier(id))} />
               <Button label={t('today.habit.harder')} kind="secondary" onPress={() => change(() => s().harder(id))} />
             </View>
-            <T v="caption" color={c.textDim}>
+            <T v="caption" color={c.textDim} style={styles.groupLabel}>
               {t('today.habit.feel')}
             </T>
             <View style={styles.chips}>
@@ -336,6 +336,8 @@ const styles = StyleSheet.create({
   scroll: { padding: space.lg, gap: space.lg, paddingBottom: space.xxxl },
   gap: { gap: space.sm },
   stack: { gap: space.sm },
+  // A label that leads a group of controls: a little apart from what's above, so it reads with what follows.
+  groupLabel: { marginTop: space.sm },
   flexCenter: { flex: 1, textAlign: 'center' },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   yesterday: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },
