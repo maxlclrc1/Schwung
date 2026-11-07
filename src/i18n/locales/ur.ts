@@ -384,6 +384,10 @@ export const ur: Translation = {
       harderA11y: 'توقع سے مشکل',
       notNowA11y: 'ابھی نہیں۔ آپ بعد میں سفر سے جائزہ لے سکتے ہیں۔',
       notNow: 'ابھی نہیں',
+
+      title: 'ہفتہ {week} پر ایک نظر',
+
+      short: 'آپ کی عادتیں کیسی محسوس ہوئیں؟',
     },
   },
   settings: {

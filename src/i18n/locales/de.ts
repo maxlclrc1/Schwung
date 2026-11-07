@@ -391,6 +391,10 @@ export const de: Translation = {
       harderA11y: 'Schwerer als gedacht',
       notNowA11y: 'Nicht jetzt. Du kannst später über Weg zurückblicken.',
       notNow: 'Nicht jetzt',
+
+      title: 'Rückblick Woche {week}',
+
+      short: 'Wie haben sich deine Gewohnheiten angefühlt?',
     },
   },
   settings: {

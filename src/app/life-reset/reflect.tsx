@@ -4,9 +4,9 @@ import { REFLECTION_WEEKS, type ReflectionAnswer } from '../../core/reset/reflec
 
 /** A week's reflection (modal): opened from the invitation on Habits or from Journey's reflections. */
 export default function ReflectRoute() {
-  const params = useLocalSearchParams<{ week?: string; answer?: string }>();
+  const params = useLocalSearchParams<{ week?: string; answer?: string; from?: string }>();
   const week = Number(params.week);
   if (!Number.isInteger(week) || week < 1 || week > REFLECTION_WEEKS) return <Redirect href="/" />;
   const answer = (['easier', 'right', 'harder'] as const).find((a) => a === params.answer) ?? null;
-  return <WeeklyReflection week={week} initial={answer as ReflectionAnswer | null} />;
+  return <WeeklyReflection week={week} initial={answer as ReflectionAnswer | null} invite={params.from === 'invite'} />;
 }

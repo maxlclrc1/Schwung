@@ -30,5 +30,7 @@ export const reflection = {
     harderA11y: 'Harder than expected',
     notNowA11y: 'Not now. You can reflect later from Journey.',
     notNow: 'Not now',
+    title: 'Week {week} reflection',
+    short: 'How did your habits feel?',
   },
 };

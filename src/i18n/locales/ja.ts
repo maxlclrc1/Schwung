@@ -379,6 +379,10 @@ export const ja: Translation = {
       harderA11y: '思ったよりきつい',
       notNowA11y: '今はしない。あとで「道のり」からふり返れます。',
       notNow: '今はしない',
+
+      title: '第{week}週のふり返り',
+
+      short: '習慣はどう感じましたか？',
     },
   },
   settings: {

@@ -1,82 +1,78 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
 import * as P from '../../core/reset/pilot';
-import { dueReflection, type ReflectionAnswer } from '../../core/reset/reflections';
-import { useResetPilot } from '../../store/resetPilot';
+import { dueReflection } from '../../core/reset/reflections';
+import { flipX } from '../../i18n/direction';
+import { useT } from '../../i18n/react';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { T } from '../ui';
-import { useT } from '../../i18n/react';
 
 const sys = ReduceMotion.System;
-const ANSWERS: ReflectionAnswer[] = ['easier', 'right', 'harder'];
 
 /**
- * On Habits, after a program week ends: a small invitation to reflect, never in the way of the cards. One tap
- * answers (and opens the short check-in); "Not now" puts it away for good (it can be opened from Journey). Only the
- * latest finished week is ever offered.
+ * On Habits, after a program week ends: one quiet row inviting a reflection, never in the way of the cards. Reflect
+ * opens the check-in sheet with its three answers and a "Not now" that puts the invitation away for good (it can be
+ * opened from Journey). Closing the sheet without either keeps the invitation. Only the latest finished week is
+ * ever offered.
  */
 export function ReflectionInvite({ program, today }: { program: P.PilotProgram; today: number }) {
   const { c } = useTheme();
   const t = useT();
+  // On a narrow screen or with large text the question keeps its room: the action shows as its arrow alone (the whole
+  // row is the button).
+  const { width, fontScale } = useWindowDimensions();
+  const action = t('reflection.history.reflect');
+  // A long word for Reflect ("Zurückblicken") would squeeze the question onto a third line: the arrow says it.
+  const compact = (width - 2 * space.lg) / Math.min(Math.max(fontScale, 1), 1.3) < 300 || action.length > 10;
   const week = dueReflection(program.reflections, today);
   if (!week) return null;
+  const title = t('reflection.invite.title', { week });
+  const question = t('reflection.invite.short');
   return (
     <Animated.View entering={FadeIn.duration(300).reduceMotion(sys)} exiting={FadeOut.duration(180).reduceMotion(sys)}>
-      <ThemedView style={[styles.card, { backgroundColor: c.surface, borderLeftColor: c.accent }]}>
-        <T v="overline" color={c.accentInk}>
-          {t('reflection.invite.behind', { week })}
-        </T>
-        <T v="heading" accessibilityRole="header">
-          {t('reflection.invite.question')}
-        </T>
-        <View style={styles.row}>
-          {ANSWERS.map((a) => (
-            <Press
-              key={a}
-              onPress={() => router.push(`/life-reset/reflect?week=${week}&answer=${a}`)}
-              style={{ flex: 1 }}
-              accessibilityRole="button"
-              accessibilityLabel={
-                a === 'right'
-                  ? t('reflection.invite.right')
-                  : t(a === 'easier' ? 'reflection.invite.easierA11y' : 'reflection.invite.harderA11y')
-              }
-            >
-              <ThemedView style={[styles.answer, { backgroundColor: c.accentSoft }]}>
-                <T v="caption" color={c.accentInk} style={{ fontWeight: '700', textAlign: 'center' }}>
-                  {t(`reflection.invite.${a}`)}
-                </T>
-              </ThemedView>
-            </Press>
-          ))}
-        </View>
-        <Press
-          onPress={() => useResetPilot.getState().reflect(week)}
-          style={styles.later}
-          accessibilityRole="button"
-          accessibilityLabel={t('reflection.invite.notNowA11y')}
-        >
-          <T v="caption" color={c.textDim} style={{ fontWeight: '600' }}>
-            {t('reflection.invite.notNow')}
-          </T>
-        </Press>
-      </ThemedView>
+      <Press
+        onPress={() => router.push(`/life-reset/reflect?week=${week}&from=invite`)}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}. ${question}`}
+        accessibilityHint={action}
+      >
+        <ThemedView style={[styles.row, { backgroundColor: c.surface }]}>
+          <View style={styles.words}>
+            <T v="overline" color={c.accentInk} maxFontSizeMultiplier={1.3}>
+              {title}
+            </T>
+            <T v="bodyStrong" maxFontSizeMultiplier={1.3}>
+              {question}
+            </T>
+          </View>
+          <View style={styles.action}>
+            {compact ? null : (
+              <T v="label" color={c.accentInk} maxFontSizeMultiplier={1.3}>
+                {action}
+              </T>
+            )}
+            <Ionicons name="chevron-forward" size={14} color={c.accentInk} style={flipX} />
+          </View>
+        </ThemedView>
+      </Press>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radius.lg, padding: space.lg, gap: space.sm, borderLeftWidth: 3 },
-  row: { flexDirection: 'row', gap: space.sm, marginTop: space.xs },
-  answer: {
-    minHeight: 44,
-    borderRadius: radius.pill,
+  row: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: space.sm,
+    gap: space.md,
+    minHeight: 64,
+    borderRadius: radius.md,
+    paddingVertical: space.md,
+    paddingHorizontal: space.lg,
   },
-  later: { alignSelf: 'center', paddingVertical: space.xs, paddingHorizontal: space.md },
+  words: { flex: 1, gap: 2 },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 2 },
 });

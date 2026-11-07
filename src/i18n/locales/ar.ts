@@ -459,6 +459,10 @@ export const ar: Translation = {
       harderA11y: 'أصعب من المتوقع',
       notNowA11y: 'ليس الآن. يمكنك التأمل لاحقًا من الرحلة.',
       notNow: 'ليس الآن',
+
+      title: 'تأمل الأسبوع {week}',
+
+      short: 'كيف كان شعورك تجاه عاداتك؟',
     },
   },
   settings: {

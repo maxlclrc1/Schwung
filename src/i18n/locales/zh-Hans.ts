@@ -368,6 +368,10 @@ export const zhHans: Translation = {
       harderA11y: '比预期难',
       notNowA11y: '以后再说。你可以稍后在“旅程”中回顾。',
       notNow: '以后再说',
+
+      title: '第 {week} 周回顾',
+
+      short: '你的习惯感觉如何？',
     },
   },
   settings: {

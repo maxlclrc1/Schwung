@@ -368,6 +368,10 @@ export const zhHant: Translation = {
       harderA11y: '比預期難',
       notNowA11y: '稍後再說。你可以之後在「旅程」中回顧。',
       notNow: '稍後再說',
+
+      title: '第 {week} 週回顧',
+
+      short: '你的習慣感覺如何？',
     },
   },
   settings: {

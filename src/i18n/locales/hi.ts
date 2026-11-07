@@ -383,6 +383,10 @@ export const hi: Translation = {
       harderA11y: 'उम्मीद से कठिन',
       notNowA11y: 'अभी नहीं। आप बाद में सफ़र से समीक्षा कर सकते हैं।',
       notNow: 'अभी नहीं',
+
+      title: 'सप्ताह {week} पर नज़र',
+
+      short: 'आपकी आदतें कैसी लगीं?',
     },
   },
   settings: {

@@ -373,6 +373,10 @@ export const ko: Translation = {
       harderA11y: '생각보다 힘들었어요',
       notNowA11y: '나중에. 여정 탭에서 나중에 돌아볼 수 있어요.',
       notNow: '나중에',
+
+      title: '{week}주 차 돌아보기',
+
+      short: '습관이 어떻게 느껴졌나요?',
     },
   },
   settings: {

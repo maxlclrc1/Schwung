@@ -388,6 +388,10 @@ export const id: Translation = {
       harderA11y: 'Lebih berat dari perkiraan',
       notNowA11y: 'Nanti saja. Kamu bisa merefleksikannya nanti dari Perjalanan.',
       notNow: 'Nanti saja',
+
+      title: 'Refleksi minggu {week}',
+
+      short: 'Bagaimana rasanya kebiasaanmu?',
     },
   },
   settings: {
