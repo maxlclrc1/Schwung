@@ -912,17 +912,6 @@ export const zhHans: Translation = {
     details: '详情、更正和难度',
     strengthWeek: { other: '第{week}周：{count}次训练' },
     strengthTarget: ' · 目标{goal}',
-    screen: {
-      title: '本周屏幕使用时间',
-      limit: '可选 · 你的上限是每天{limit}分钟',
-      how: '“设置 → 屏幕使用时间”会显示你主要应用的每日平均使用时间。愿意的话可以填写：它只保存在你的手机上，永远不会改变任何一天的完成情况或你的连续纪录。',
-      min: '{minutes}分钟',
-      update: '更新（已保存：{minutes}分钟）',
-      save: '保存本周',
-      a11yWeek: '第{week}周：每天{minutes}分钟',
-      a11yLimit: '上限{limit}分钟。',
-      limitLine: '上限{limit}分钟',
-    },
     ring: {
       a11yNone: '一致性会在你的第一天之后显示',
       a11y: '{pct}一致性：{eligible}次习惯机会中完成了{done}次',

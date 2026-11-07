@@ -964,17 +964,6 @@ export const id: Translation = {
     details: 'Detail, koreksi & tingkat kesulitan',
     strengthWeek: { other: 'Minggu ke-{week}: {count} sesi' },
     strengthTarget: ' · target {goal}',
-    screen: {
-      title: 'Durasi Layar, minggu ini',
-      limit: 'Opsional · batasmu {limit} menit sehari',
-      how: 'Pengaturan → Durasi Layar menunjukkan rata-rata harian untuk aplikasi utamamu. Masukkan kalau kamu mau: data ini tetap di ponselmu dan tidak pernah mengubah satu hari pun atau runtunanmu.',
-      min: '{minutes} mnt',
-      update: 'Perbarui (tersimpan: {minutes} mnt)',
-      save: 'Simpan minggu ini',
-      a11yWeek: 'Minggu ke-{week}: {minutes} menit sehari',
-      a11yLimit: 'Batas {limit} menit.',
-      limitLine: 'batas {limit} mnt',
-    },
     ring: {
       a11yNone: 'Konsistensi muncul setelah hari pertamamu',
       a11y: 'Konsistensi {pct}: {done} dari {eligible} kesempatan kebiasaan selesai',

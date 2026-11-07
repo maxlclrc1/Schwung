@@ -3,15 +3,11 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { PROGRAM_DAYS } from '../../core/dates';
 import * as C from '../../core/reset/charts';
 import * as O from '../../core/reset/observations';
 import * as P from '../../core/reset/pilot';
-import { weekOf } from '../../core/reset/weekly';
-import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { space, useTheme } from '../../theme';
-import { ThemedView } from '../../theme/transition';
 import { useShownOnce, useWhileFocused } from '../InsightCharts';
 import { DayStrip, WeekBars } from '../Insights';
 import {
@@ -24,18 +20,17 @@ import {
   Observations,
   Paper,
   RecordGrid,
-  ScreenTimeHistory,
   TrendLine,
   weekNote,
 } from '../InsightsViz';
 import { RecentInsights } from '../beyond/RecentInsights';
-import { Button, T } from '../ui';
+import { T } from '../ui';
 import { useLanguage, useT } from '../../i18n/react';
 
 /**
  * Insights for the Life Reset, as a field journal in five chapters. On the painting: I · Consistency and II · Week by
  * week, with the camp and the lake left open below. On the page: III · By habit (tap one for its history, target and
- * difficulty), IV · Personal records and V · Patterns, then Less Scrolling's optional weekly Screen Time check.
+ * difficulty), IV · Personal records and V · Patterns.
  * The 66 days themselves are on Journey. Numbers come from the saved days only (reset/pilot.ts, reset/charts.ts,
  * reset/observations.ts).
  */
@@ -137,7 +132,6 @@ export function PilotInsights() {
             <Observations items={charts.observations} day={today} />
           </>
         ) : null}
-        {program.habits.includes('screen_app_limit') ? <ScreenTimeCheck program={program} today={today} /> : null}
       </Paper>
     </>
   );
@@ -163,58 +157,6 @@ function StrengthWeeks({ program, today }: { program: P.PilotProgram; today: num
   );
 }
 
-/** Less Scrolling's optional weekly check: the person's own Screen Time reading, never checked by Schwung. */
-function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: number }) {
-  const { c } = useTheme();
-  const t = useT();
-  const saved = P.screenTimeFor(program, today);
-  const [value, setValue] = useState(saved?.minutesPerDay ?? program.answers.pullMinutes ?? 60);
-  const limit = P.scrollLimitFor(program, P.levelFor(program, 'screen_app_limit', today));
-  const readings = Object.values(program.measures?.screen_app_limit ?? {})
-    .map((m) => ({ week: m.week, minutes: m.minutesPerDay }))
-    .sort((a, b) => a.week - b.week);
-  const thisWeek = weekOf(program.startedAt, Math.min(today, PROGRAM_DAYS)).week;
-  return (
-    <View style={styles.screen}>
-      <ThemedView style={[styles.screenRule, { backgroundColor: c.border }]} />
-      <View>
-        <T v="bodyStrong">{t('insights.screen.title')}</T>
-        <T v="caption" color={c.textDim}>
-          {t('insights.screen.limit', { limit })}
-        </T>
-      </View>
-      <ScreenTimeHistory readings={readings} limit={limit} thisWeek={thisWeek} />
-      <T v="caption" color={c.textDim}>
-        {t('insights.screen.how')}
-      </T>
-      <View style={styles.stepper}>
-        <Button label="−15" kind="secondary" style={styles.step} onPress={() => setValue((v) => Math.max(0, v - 15))} />
-        <T v="heading" style={styles.value}>
-          {t('insights.screen.min', { minutes: value })}
-        </T>
-        <Button
-          label="+15"
-          kind="secondary"
-          style={styles.step}
-          onPress={() => setValue((v) => Math.min(1440, v + 15))}
-        />
-      </View>
-      <Button
-        label={saved ? t('insights.screen.update', { minutes: saved.minutesPerDay }) : t('insights.screen.save')}
-        onPress={() => {
-          useResetPilot.getState().setScreenTime(value);
-          haptic.confirm();
-        }}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   plate: { gap: space.md },
-  screen: { gap: space.md, marginTop: space.xl },
-  screenRule: { height: StyleSheet.hairlineWidth, marginBottom: space.sm },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  step: { width: 72 },
-  value: { flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] },
 });

@@ -957,17 +957,6 @@ export const ptBR: Translation = {
     details: 'Detalhes, correções e dificuldade',
     strengthWeek: { one: 'Semana {week}: {count} sessão', other: 'Semana {week}: {count} sessões' },
     strengthTarget: ' · meta {goal}',
-    screen: {
-      title: 'Tempo de Uso, nesta semana',
-      limit: 'Opcional · seu limite é de {limit} min por dia',
-      how: 'Ajustes → Tempo de Uso mostra sua média diária no seu app principal. Anote se quiser: fica no seu celular e nunca muda um dia ou sua sequência.',
-      min: '{minutes} min',
-      update: 'Atualizar (salvo: {minutes} min)',
-      save: 'Salvar esta semana',
-      a11yWeek: 'Semana {week}: {minutes} minutos por dia',
-      a11yLimit: 'Limite {limit} minutos.',
-      limitLine: 'limite {limit} min',
-    },
     ring: {
       a11yNone: 'A constância aparece depois do seu primeiro dia',
       a11y: '{pct} de constância: {done} de {eligible} oportunidades de hábito feitas',

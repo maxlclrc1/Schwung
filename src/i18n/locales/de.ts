@@ -970,17 +970,6 @@ export const de: Translation = {
     details: 'Details, Korrekturen & Schwierigkeit',
     strengthWeek: { one: 'Woche {week}: {count} Einheit', other: 'Woche {week}: {count} Einheiten' },
     strengthTarget: ' · Ziel {goal}',
-    screen: {
-      title: 'Bildschirmzeit, diese Woche',
-      limit: 'Optional · dein Limit ist {limit} Min. am Tag',
-      how: 'Einstellungen → Bildschirmzeit zeigt dir den Tagesdurchschnitt deiner Haupt-App. Trag ihn ein, wenn du magst: Er bleibt auf deinem Handy und ändert nie einen Tag oder deine Serie.',
-      min: '{minutes} Min.',
-      update: 'Aktualisieren (gesichert: {minutes} Min.)',
-      save: 'Diese Woche sichern',
-      a11yWeek: 'Woche {week}: {minutes} Minuten am Tag',
-      a11yLimit: 'Limit {limit} Minuten.',
-      limitLine: 'Limit {limit} Min.',
-    },
     ring: {
       a11yNone: 'Die Beständigkeit erscheint nach deinem ersten Tag',
       a11y: '{pct} Beständigkeit: {done} von {eligible} Gelegenheiten erledigt',

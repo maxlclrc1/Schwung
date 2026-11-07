@@ -952,17 +952,6 @@ export const tr: Translation = {
     details: 'Ayrıntılar, düzeltmeler ve zorluk',
     strengthWeek: { one: 'Hafta {week}: {count} seans', other: 'Hafta {week}: {count} seans' },
     strengthTarget: ' · hedef {goal}',
-    screen: {
-      title: 'Ekran Süresi, bu hafta',
-      limit: 'İsteğe bağlı · sınırın günde {limit} dk',
-      how: 'Ayarlar → Ekran Süresi, ana uygulamanın günlük ortalamasını gösterir. İstersen gir: telefonunda kalır ve asla bir günü ya da serini değiştirmez.',
-      min: '{minutes} dk',
-      update: 'Güncelle (kayıtlı: {minutes} dk)',
-      save: 'Bu haftayı kaydet',
-      a11yWeek: 'Hafta {week}: günde {minutes} dakika',
-      a11yLimit: 'Sınır {limit} dakika.',
-      limitLine: 'sınır {limit} dk',
-    },
     ring: {
       a11yNone: 'İstikrar ilk gününden sonra görünür',
       a11y: '{pct} istikrar: {eligible} alışkanlık fırsatından {done} tanesi yapıldı',
