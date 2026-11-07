@@ -475,6 +475,7 @@ const styles = StyleSheet.create({
   stoneText: { ...textStyle.small, fontVariant: ['tabular-nums'] },
   restDot: { width: 5, height: 5, borderRadius: 3 },
   flag: { position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
-  note: { borderRadius: radius.lg, padding: space.md, gap: 4 },
+  // A panel of its own, padded like the other panels (the stage's meaning box stays tighter: it sits inside one).
+  note: { borderRadius: radius.lg, padding: space.lg, gap: 4 },
   noteHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
 });

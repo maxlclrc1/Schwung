@@ -330,10 +330,11 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: space.xxxl, gap: space.md },
   pad: { paddingHorizontal: space.lg, gap: space.md },
   expedition: { gap: space.md, marginTop: space.lg },
-  story: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
+  // Panels pad like every other panel on the core screens (space.lg).
+  story: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.lg },
   storyIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
-  card: { borderRadius: radius.lg, padding: space.md, gap: space.md },
+  card: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
   captionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   caption: {
     flexDirection: 'row',
