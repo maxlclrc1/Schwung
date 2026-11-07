@@ -101,6 +101,23 @@ describe('Partial progress: XP', () => {
   });
 });
 
+describe('Partial progress: undo restores the partially completed state', () => {
+  it('keeps the partial label’s data (progress, not done, not skipped) through complete and undo', () => {
+    for (const [id, value] of [
+      ['mind_read', 10],
+      ['sleep_wake', null],
+    ] as const) {
+      let p = one(id);
+      p = value === null ? P.setPartial(p, id, 1, true).program : P.setProgress(p, id, 1, value).program;
+      const before = P.trackOf(p, id, 1).progress;
+      p = P.complete(p, id, 1).program;
+      p = P.undo(p, id, 1).program;
+      const t = P.trackOf(p, id, 1);
+      expect([P.isDone(p, id, 1), t.progress, t.skipped, xp(p)]).toEqual([false, before, undefined, 5]);
+    }
+  });
+});
+
 describe('Partial progress: streaks, full days and rest days', () => {
   it('never counts toward the streak, a full day or the daily bonus', () => {
     let p = pilot([
