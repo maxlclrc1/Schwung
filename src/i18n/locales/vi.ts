@@ -950,17 +950,6 @@ export const vi: Translation = {
     details: 'Chi tiết, chỉnh sửa & độ khó',
     strengthWeek: { other: 'Tuần {week}: {count} buổi' },
     strengthTarget: ' · mục tiêu {goal}',
-    screen: {
-      title: 'Thời gian sử dụng tuần này',
-      limit: 'Không bắt buộc · giới hạn của bạn là {limit} phút mỗi ngày',
-      how: 'Cài đặt → Thời gian sử dụng cho biết mức trung bình mỗi ngày của ứng dụng chính. Nhập vào nếu bạn muốn: số liệu ở lại trên điện thoại và không bao giờ thay đổi một ngày hay chuỗi ngày của bạn.',
-      min: '{minutes} phút',
-      update: 'Cập nhật (đã lưu: {minutes} phút)',
-      save: 'Lưu cho tuần này',
-      a11yWeek: 'Tuần {week}: {minutes} phút mỗi ngày',
-      a11yLimit: 'Giới hạn {limit} phút.',
-      limitLine: 'giới hạn {limit} phút',
-    },
     ring: {
       a11yNone: 'Độ đều đặn hiện sau ngày đầu tiên',
       a11y: 'Độ đều đặn {pct}: đã xong {done}/{eligible} lượt thói quen',

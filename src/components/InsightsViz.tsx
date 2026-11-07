@@ -721,62 +721,6 @@ export function Observations({ items, day }: { items: Observation[]; day: number
   );
 }
 
-/** The optional weekly Screen Time readings (the person's own, never checked), against the limit. */
-export function ScreenTimeHistory({
-  readings,
-  limit,
-  thisWeek,
-}: {
-  readings: { week: number; minutes: number }[];
-  limit: number;
-  thisWeek: number;
-}) {
-  const { c } = useTheme();
-  const t = useT();
-  const shown = readings.slice(-8);
-  if (!shown.length) return null;
-  const top = Math.max(limit, ...shown.map((r) => r.minutes)) * 1.15 || 1;
-  const H = 72;
-  return (
-    <View
-      style={{ gap: space.sm }}
-      accessible
-      accessibilityLabel={`${shown.map((r) => t('insights.screen.a11yWeek', { week: r.week, minutes: r.minutes })).join('. ')}. ${t('insights.screen.a11yLimit', { limit })}`}
-    >
-      <View style={[styles.screenBars, { height: H }]}>
-        {limit > 0 ? (
-          <View style={[styles.limit, { bottom: (limit / top) * H, borderColor: c.peach }]}>
-            <T v="caption" color={c.peachInk} style={styles.limitText}>
-              {t('insights.screen.limitLine', { limit })}
-            </T>
-          </View>
-        ) : null}
-        {shown.map((r) => (
-          <View key={r.week} style={styles.screenCol}>
-            <View
-              style={[
-                styles.screenBar,
-                {
-                  height: Math.max(3, (r.minutes / top) * H),
-                  backgroundColor: limit && r.minutes <= limit ? c.sage : c.mist,
-                  opacity: r.week === thisWeek ? 1 : 0.75,
-                },
-              ]}
-            />
-          </View>
-        ))}
-      </View>
-      <View style={styles.screenLabels}>
-        {shown.map((r) => (
-          <T key={r.week} v="caption" color={r.week === thisWeek ? c.mistInk : c.textFaint} style={styles.screenLabel}>
-            W{r.week}
-          </T>
-        ))}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   rule: { height: StyleSheet.hairlineWidth },
   figure: { fontWeight: '600' },
@@ -833,11 +777,4 @@ const styles = StyleSheet.create({
   noteNum: { width: 14, fontSize: 12, lineHeight: 26, fontVariant: ['tabular-nums'] },
   note: { fontSize: 17, lineHeight: 26 },
   noteRule: { width: 28, marginVertical: 20, marginStart: 24 },
-  screenBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
-  screenCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: '100%' },
-  screenBar: { width: '70%', borderRadius: 4 },
-  limit: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1.5, borderStyle: 'dashed' },
-  limitText: { position: 'absolute', right: 0, top: -16, fontSize: 10, fontWeight: '600' },
-  screenLabels: { flexDirection: 'row', gap: 10 },
-  screenLabel: { flex: 1, textAlign: 'center', fontSize: 10 },
 });

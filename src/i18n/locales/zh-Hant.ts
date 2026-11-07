@@ -911,17 +911,6 @@ export const zhHant: Translation = {
     details: '詳細資訊、更正與難度',
     strengthWeek: { other: '第{week}週：{count}次訓練' },
     strengthTarget: ' · 目標{goal}',
-    screen: {
-      title: '本週螢幕使用時間',
-      limit: '選填 · 你的上限是每天{limit}分鐘',
-      how: '「設定 → 螢幕使用時間」會顯示你主要 App 的每日平均使用時間。願意的話可以填寫：它只保存在你的手機上，永遠不會改變任何一天的完成狀態或你的連續紀錄。',
-      min: '{minutes}分鐘',
-      update: '更新（已儲存：{minutes}分鐘）',
-      save: '儲存本週',
-      a11yWeek: '第{week}週：每天{minutes}分鐘',
-      a11yLimit: '上限{limit}分鐘。',
-      limitLine: '上限{limit}分鐘',
-    },
     ring: {
       a11yNone: '一致性會在你的第一天之後顯示',
       a11y: '{pct}一致性：{eligible}次習慣機會中完成了{done}次',

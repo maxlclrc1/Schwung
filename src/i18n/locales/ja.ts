@@ -942,17 +942,6 @@ export const ja: Translation = {
     details: '詳細・修正・難易度',
     strengthWeek: { other: '第{week}週：{count}回' },
     strengthTarget: ' · 目標{goal}',
-    screen: {
-      title: '今週のスクリーンタイム',
-      limit: '任意 · 上限は1日{limit}分',
-      how: '設定 → スクリーンタイムで、よく使うアプリの1日平均を確認できます。よければ入力してください。データはスマホの中に残り、日々の記録や連続記録が変わることはありません。',
-      min: '{minutes}分',
-      update: '更新（保存済み：{minutes}分）',
-      save: '今週分を保存',
-      a11yWeek: '第{week}週：1日{minutes}分',
-      a11yLimit: '上限{limit}分。',
-      limitLine: '上限{limit}分',
-    },
     ring: {
       a11yNone: '継続率は最初の日のあとに表示されます',
       a11y: '継続率{pct}：{eligible}回の機会中{done}回達成',

@@ -961,17 +961,6 @@ export const nl: Translation = {
     details: 'Details, correcties en moeilijkheid',
     strengthWeek: { one: 'Week {week}: {count} sessie', other: 'Week {week}: {count} sessies' },
     strengthTarget: ' · doel {goal}',
-    screen: {
-      title: 'Schermtijd, deze week',
-      limit: 'Optioneel · je limiet is {limit} min per dag',
-      how: 'Instellingen → Schermtijd toont je daggemiddelde voor je belangrijkste app. Vul het in als je wilt: het blijft op je telefoon en verandert nooit een dag of je reeks.',
-      min: '{minutes} min',
-      update: 'Bijwerken (bewaard: {minutes} min)',
-      save: 'Deze week bewaren',
-      a11yWeek: 'Week {week}: {minutes} minuten per dag',
-      a11yLimit: 'Limiet {limit} minuten.',
-      limitLine: 'limiet {limit} min',
-    },
     ring: {
       a11yNone: 'Consistentie verschijnt na je eerste dag',
       a11y: '{pct} consistentie: {done} van {eligible} gewoontemomenten gedaan',

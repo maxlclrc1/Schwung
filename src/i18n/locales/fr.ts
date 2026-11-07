@@ -975,17 +975,6 @@ export const fr: Translation = {
     details: 'Détails, corrections et difficulté',
     strengthWeek: { one: 'Semaine {week} : {count} séance', other: 'Semaine {week} : {count} séances' },
     strengthTarget: ' · objectif {goal}',
-    screen: {
-      title: 'Temps d’écran, cette semaine',
-      limit: 'Facultatif · votre limite est de {limit} min par jour',
-      how: 'Réglages → Temps d’écran affiche votre moyenne quotidienne pour votre appli principale. Saisissez-la si vous voulez : elle reste sur votre téléphone et ne modifie jamais une journée ni votre série.',
-      min: '{minutes} min',
-      update: 'Mettre à jour (enregistré : {minutes} min)',
-      save: 'Enregistrer cette semaine',
-      a11yWeek: 'Semaine {week} : {minutes} minutes par jour',
-      a11yLimit: 'Limite {limit} minutes.',
-      limitLine: 'limite {limit} min',
-    },
     ring: {
       a11yNone: 'La régularité s’affiche après votre premier jour',
       a11y: '{pct} de régularité : {done} occasions d’habitude faites sur {eligible}',

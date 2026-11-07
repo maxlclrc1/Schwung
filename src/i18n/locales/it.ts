@@ -974,17 +974,6 @@ export const it: Translation = {
     details: 'Dettagli, correzioni e difficoltà',
     strengthWeek: { one: 'Settimana {week}: {count} sessione', other: 'Settimana {week}: {count} sessioni' },
     strengthTarget: ' · obiettivo {goal}',
-    screen: {
-      title: 'Tempo di utilizzo, questa settimana',
-      limit: 'Facoltativo · il tuo limite è {limit} min al giorno',
-      how: 'Impostazioni → Tempo di utilizzo mostra la tua media giornaliera per la tua app principale. Inseriscila se vuoi: resta sul tuo telefono e non cambia mai un giorno né la tua serie.',
-      min: '{minutes} min',
-      update: 'Aggiorna (salvato: {minutes} min)',
-      save: 'Salva questa settimana',
-      a11yWeek: 'Settimana {week}: {minutes} minuti al giorno',
-      a11yLimit: 'Limite {limit} minuti.',
-      limitLine: 'limite {limit} min',
-    },
     ring: {
       a11yNone: 'La costanza appare dopo il tuo primo giorno',
       a11y: '{pct} di costanza: {done} di {eligible} occasioni di abitudine fatte',

@@ -948,17 +948,6 @@ export const ur: Translation = {
     details: 'تفصیلات، درستیاں اور مشکل',
     strengthWeek: { one: 'ہفتہ {week}: {count} سیشن', other: 'ہفتہ {week}: {count} سیشن' },
     strengthTarget: ' · ہدف {goal}',
-    screen: {
-      title: 'اسکرین ٹائم، اس ہفتے',
-      limit: 'اختیاری · آپ کی حد دن میں {limit} منٹ ہے',
-      how: 'سیٹنگز → اسکرین ٹائم میں آپ کی مرکزی ایپ کا روزانہ اوسط نظر آتا ہے۔ اگر چاہیں تو اسے درج کریں: یہ آپ کے فون پر رہتا ہے اور کبھی کسی دن یا آپ کے تسلسل کو نہیں بدلتا۔',
-      min: '{minutes} منٹ',
-      update: 'اپ ڈیٹ کریں (محفوظ: {minutes} منٹ)',
-      save: 'یہ ہفتہ محفوظ کریں',
-      a11yWeek: 'ہفتہ {week}: دن میں {minutes} منٹ',
-      a11yLimit: 'حد {limit} منٹ۔',
-      limitLine: 'حد {limit} منٹ',
-    },
     ring: {
       a11yNone: 'باقاعدگی آپ کے پہلے دن کے بعد نظر آتی ہے',
       a11y: '{pct} باقاعدگی: {eligible} عادت کے مواقع میں سے {done} مکمل',

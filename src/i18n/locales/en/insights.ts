@@ -10,17 +10,6 @@ export const insights = {
   details: 'Details, corrections & difficulty',
   strengthWeek: { one: 'Week {week}: {count} session', other: 'Week {week}: {count} sessions' },
   strengthTarget: ' · target {goal}',
-  screen: {
-    title: 'Screen Time, this week',
-    limit: 'Optional · your limit is {limit} min a day',
-    how: 'Settings → Screen Time shows your daily average for your main app. Enter it if you like: it stays on your phone and never changes a day or your streak.',
-    min: '{minutes} min',
-    update: 'Update (saved: {minutes} min)',
-    save: 'Save this week',
-    a11yWeek: 'Week {week}: {minutes} minutes a day',
-    a11yLimit: 'Limit {limit} minutes.',
-    limitLine: 'limit {limit} min',
-  },
   facts: {
     week: '{done} of {eligible} this week',
     streak: { one: '{count}-day streak', other: '{count}-day streak' },

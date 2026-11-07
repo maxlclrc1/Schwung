@@ -926,17 +926,6 @@ export const ko: Translation = {
     details: '세부 정보, 수정 및 난이도',
     strengthWeek: { other: '{week}주차: 세션 {count}회' },
     strengthTarget: ' · 목표 {goal}',
-    screen: {
-      title: '이번 주 스크린 타임',
-      limit: '선택 · 한도는 하루 {limit}분',
-      how: '설정 → 스크린 타임에서 가장 많이 쓰는 앱의 하루 평균을 볼 수 있어요. 원하면 입력하세요. 휴대폰에만 저장되며, 하루 기록이나 연속 기록을 바꾸지 않아요.',
-      min: '{minutes}분',
-      update: '업데이트 (저장됨: {minutes}분)',
-      save: '이번 주 저장',
-      a11yWeek: '{week}주차: 하루 {minutes}분',
-      a11yLimit: '한도 {limit}분.',
-      limitLine: '한도 {limit}분',
-    },
     ring: {
       a11yNone: '꾸준함은 첫날 이후에 표시돼요',
       a11y: '꾸준함 {pct}: 습관 기회 {eligible}번 중 {done}번 완료',
