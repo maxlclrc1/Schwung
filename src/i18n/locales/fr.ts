@@ -393,6 +393,10 @@ export const fr: Translation = {
       harderA11y: 'Plus difficile que prévu',
       notNowA11y: 'Pas maintenant. Vous pourrez faire le bilan plus tard depuis Parcours.',
       notNow: 'Pas maintenant',
+
+      title: 'Bilan de la semaine {week}',
+
+      short: 'Comment avez-vous vécu vos habitudes ?',
     },
   },
   settings: {

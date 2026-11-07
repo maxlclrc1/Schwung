@@ -384,6 +384,10 @@ export const vi: Translation = {
       harderA11y: 'Khó hơn dự kiến',
       notNowA11y: 'Để sau. Bạn có thể nhìn lại sau từ Hành trình.',
       notNow: 'Để sau',
+
+      title: 'Nhìn lại tuần {week}',
+
+      short: 'Thói quen của bạn thế nào?',
     },
   },
   settings: {

@@ -63,7 +63,16 @@ const tintOf = (c: Colors, a: ReflectionAnswer) =>
 
 const response = (a: ReflectionAnswer) => tr(`weekly.response.${a}`);
 
-export function WeeklyReflection({ week, initial }: { week: number; initial: ReflectionAnswer | null }) {
+export function WeeklyReflection({
+  week,
+  initial,
+  invite = false,
+}: {
+  week: number;
+  initial: ReflectionAnswer | null;
+  /** Opened from the invitation on Habits: offers "Not now", which puts the invitation away. */
+  invite?: boolean;
+}) {
   const { c } = useTheme();
   const t = useT();
   const program = useResetPilot((s) => s.program);
@@ -178,9 +187,26 @@ export function WeeklyReflection({ week, initial }: { week: number; initial: Ref
             <Button label={t('weekly.done')} onPress={() => router.back()} />
           </Animated.View>
         ) : (
-          <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-            {t('weekly.noWrong')}
-          </T>
+          <View style={styles.unanswered}>
+            <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
+              {t('weekly.noWrong')}
+            </T>
+            {invite ? (
+              <Press
+                onPress={() => {
+                  useResetPilot.getState().reflect(week);
+                  router.back();
+                }}
+                style={styles.notNow}
+                accessibilityRole="button"
+                accessibilityLabel={t('reflection.invite.notNowA11y')}
+              >
+                <T v="label" color={c.textDim}>
+                  {t('reflection.invite.notNow')}
+                </T>
+              </Press>
+            ) : null}
+          </View>
         )}
       </ScrollView>
     </Screen>
@@ -337,4 +363,6 @@ const styles = StyleSheet.create({
   adjust: { borderRadius: radius.md, padding: space.md, gap: space.sm },
   adjustHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   doneRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  unanswered: { alignItems: 'center', gap: space.md },
+  notNow: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space.lg },
 });

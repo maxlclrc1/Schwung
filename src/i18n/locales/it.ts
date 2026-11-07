@@ -394,6 +394,10 @@ export const it: Translation = {
       harderA11y: 'Più difficile del previsto',
       notNowA11y: 'Non ora. Puoi riflettere più tardi da Percorso.',
       notNow: 'Non ora',
+
+      title: 'Riflessione della settimana {week}',
+
+      short: 'Come sono andate le tue abitudini?',
     },
   },
   settings: {

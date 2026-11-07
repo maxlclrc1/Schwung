@@ -390,6 +390,10 @@ export const ptBR: Translation = {
       harderA11y: 'Mais difícil que o esperado',
       notNowA11y: 'Agora não. Você pode refletir depois pela Jornada.',
       notNow: 'Agora não',
+
+      title: 'Reflexão da semana {week}',
+
+      short: 'Como foram seus hábitos?',
     },
   },
   settings: {

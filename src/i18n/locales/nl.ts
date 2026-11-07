@@ -390,6 +390,10 @@ export const nl: Translation = {
       harderA11y: 'Zwaarder dan verwacht',
       notNowA11y: 'Niet nu. Je kunt later terugblikken vanuit Reis.',
       notNow: 'Niet nu',
+
+      title: 'Terugblik week {week}',
+
+      short: 'Hoe voelden je gewoontes?',
     },
   },
   settings: {

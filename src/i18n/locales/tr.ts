@@ -387,6 +387,10 @@ export const tr: Translation = {
       harderA11y: 'Beklediğimden zor',
       notNowA11y: 'Şimdi değil. Daha sonra Yolculuk’tan değerlendirebilirsin.',
       notNow: 'Şimdi değil',
+
+      title: '{week}. hafta değerlendirmesi',
+
+      short: 'Alışkanlıkların nasıl hissettirdi?',
     },
   },
   settings: {
