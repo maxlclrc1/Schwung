@@ -208,5 +208,5 @@ const styles = StyleSheet.create({
   readout: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   time: { flex: 1, alignItems: 'center', gap: 2 },
   mutedText: { fontSize: 34, lineHeight: 68 },
-  mood: { fontWeight: '700' },
+  mood: { fontWeight: '600' },
 });

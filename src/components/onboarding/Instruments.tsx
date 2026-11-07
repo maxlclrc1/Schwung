@@ -685,7 +685,7 @@ export function TimeDial({
                         size={14}
                         color={fits ? tn.sage.ink : tn.peach.ink}
                       />
-                      <T v="caption" color={fits ? tn.sage.ink : tn.peach.ink} style={{ fontWeight: '700' }}>
+                      <T v="label" color={fits ? tn.sage.ink : tn.peach.ink}>
                         {fits ? tr('setup.meter.fit') : tr('setup.meter.short')}
                       </T>
                     </View>
@@ -726,7 +726,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
   },
-  statusText: { fontSize: 11, fontWeight: '700' },
+  statusText: { fontSize: 11, fontWeight: '600' },
   battery: { width: 20, height: 10, borderRadius: 3, borderWidth: 1, padding: 1 },
   batteryLevel: { height: '100%', borderRadius: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 18, paddingTop: 14 },
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
     top: -7,
     right: -7,
   },
-  pingText: { fontSize: 11, lineHeight: 13, fontWeight: '800' },
+  pingText: { fontSize: 11, lineHeight: 13, fontWeight: '700' },
   liquid: { position: 'absolute', left: 0, right: 0, top: -14, height: SCREEN_H + 14 },
   wave: { position: 'absolute', top: 0, left: 0 },
   liquidBody: { position: 'absolute', top: 15, left: 0, right: 0, bottom: 0 },

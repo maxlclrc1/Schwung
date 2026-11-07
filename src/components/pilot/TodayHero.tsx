@@ -16,7 +16,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { PROGRAM_DAYS } from '../../core/dates';
 import { growth } from '../../core/reset/collection';
 import { haptic } from '../../lib/haptics';
-import { radius, space, useTheme } from '../../theme';
+import { radius, space, type as textStyle, useTheme } from '../../theme';
 import { useDepth } from '../../theme/depth';
 import { ThemedView } from '../../theme/transition';
 import { SettingsButton } from '../HeaderButton';
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   wrap: { gap: space.lg },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: space.md },
   icons: { flexDirection: 'row', gap: space.sm },
-  day: { fontSize: 34, lineHeight: 40, fontWeight: '800', letterSpacing: -0.8 },
+  day: { fontSize: 34, lineHeight: 40, fontWeight: '700', letterSpacing: -0.8 },
   of: { fontSize: 20, fontWeight: '600', letterSpacing: -0.2 },
   panel: { borderRadius: 28, padding: space.lg, gap: space.lg },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.lg },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   count: { flexDirection: 'row', alignItems: 'baseline' },
-  total: { fontSize: 13, fontWeight: '700' },
+  total: textStyle.small,
   // Streak and level side by side, the level wrapping below when both don't fit (narrow phones, long words).
   chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm },
   chip: {
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.pill,
   },
-  chipText: { fontWeight: '700' },
+  chipText: { fontWeight: '600' },
   shrink: { flexShrink: 1 },
   gain: {
     position: 'absolute',

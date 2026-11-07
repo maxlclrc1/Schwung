@@ -224,7 +224,7 @@ export function PilotToday() {
           <T v="overline" color={c.textDim}>
             {t('today.todaysHabits')}
           </T>
-          <T v="caption" color={full ? c.sageInk : c.textDim} style={{ fontWeight: '700' }}>
+          <T v="label" color={full ? c.sageInk : c.textDim}>
             {awaiting
               ? t('today.resting')
               : full
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
   },
-  pillText: { fontWeight: '700', fontVariant: ['tabular-nums'] },
+  pillText: { fontWeight: '600', fontVariant: ['tabular-nums'] },
   footer: { gap: space.md, marginTop: space.sm },
   devClock: { borderWidth: 1, borderRadius: radius.md, padding: space.md, gap: space.sm },
   devRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },

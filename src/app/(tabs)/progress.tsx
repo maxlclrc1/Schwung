@@ -174,7 +174,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             {chosen !== null ? (
               <Pressable onPress={() => setChosen(null)} accessibilityRole="button" style={styles.back} hitSlop={8}>
                 <Ionicons name="return-down-back" size={16} color={c.indigoInk} />
-                <T v="caption" color={c.indigoInk} style={{ fontWeight: '700' }}>
+                <T v="label" color={c.indigoInk}>
                   {today > PROGRAM_DAYS ? t('journeyTab.back.summit') : t('journeyTab.back.today')}
                 </T>
               </Pressable>
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     flexShrink: 1,
   },
-  captionKicker: { fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.6 },
+  captionKicker: { fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6 },
   captionText: { flexShrink: 1, fontWeight: '600' },
   habits: { gap: 6 },
   habit: { flexDirection: 'row', alignItems: 'center', gap: space.sm },

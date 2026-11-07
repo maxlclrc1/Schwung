@@ -246,7 +246,7 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
     <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface }]}>
       <View style={styles.panelHead}>
         <T v="bodyStrong">{t('insights.week.title')}</T>
-        <T v="caption" color={c.mistInk} style={{ fontWeight: '700' }}>
+        <T v="label" color={c.mistInk}>
           {judged ? t('insights.week.judged', { count: judged }) : t('insights.week.first')}
         </T>
       </View>
@@ -363,7 +363,7 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
             key={p.week}
             v="caption"
             color={p.week === selected?.week ? c.mistInk : c.textFaint}
-            style={[styles.weekLabel, { left: x(i) - 16 }, p.week === selected?.week && { fontWeight: '800' }]}
+            style={[styles.weekLabel, { left: x(i) - 16 }, p.week === selected?.week && { fontWeight: '700' }]}
           >
             W{p.week}
           </T>
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ringValue: { fontSize: 32, lineHeight: 36, fontWeight: '800', letterSpacing: -0.8, fontVariant: ['tabular-nums'] },
+  ringValue: { fontSize: 32, lineHeight: 36, fontWeight: '700', letterSpacing: -0.8, fontVariant: ['tabular-nums'] },
   heroText: { flexGrow: 1, flexShrink: 1, flexBasis: 160, minWidth: 160, gap: space.sm },
   fact: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   factDot: { width: 8, height: 8, borderRadius: 4 },
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: radius.pill,
   },
-  badgeText: { fontWeight: '700', fontSize: 11 },
+  badgeText: { fontWeight: '600', fontSize: 11 },
   track: { height: 8, borderRadius: 4, overflow: 'hidden' },
   trackFill: { height: 8, borderRadius: 4 },
   habitDetails: { gap: space.sm, paddingBottom: space.md },
@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  medalValue: { fontSize: 22, lineHeight: 26, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  medalValue: { fontSize: 22, lineHeight: 26, fontWeight: '700', fontVariant: ['tabular-nums'] },
   reflect: { borderLeftWidth: 3 },
   observation: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
   obsIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: -2 },
@@ -761,7 +761,7 @@ const styles = StyleSheet.create({
   screenCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: '100%' },
   screenBar: { width: '70%', borderRadius: 4 },
   limit: { position: 'absolute', left: 0, right: 0, borderTopWidth: 1.5, borderStyle: 'dashed' },
-  limitText: { position: 'absolute', right: 0, top: -16, fontSize: 10, fontWeight: '700' },
+  limitText: { position: 'absolute', right: 0, top: -16, fontSize: 10, fontWeight: '600' },
   screenLabels: { flexDirection: 'row', gap: 10 },
   screenLabel: { flex: 1, textAlign: 'center', fontSize: 10 },
 });

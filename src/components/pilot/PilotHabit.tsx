@@ -324,7 +324,7 @@ function Choice({ label, on, onPress }: { label: string; on: boolean; onPress: (
           { backgroundColor: on ? c.accentSoft : c.surfaceHigh, borderColor: on ? c.accentInk : c.border },
         ]}
       >
-        <T v="caption" color={on ? c.accentInk : c.text} style={{ fontWeight: '600' }}>
+        <T v="label" color={on ? c.accentInk : c.text}>
           {label}
         </T>
       </ThemedView>
