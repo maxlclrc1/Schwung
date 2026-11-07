@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { canEditYesterday } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
 import { PARTIAL_XP, recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
-import { haptic } from '../../lib/haptics';
+import { completionHaptic, haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
@@ -119,11 +119,11 @@ export function PilotHabit() {
           </T>
           {counter !== null ? (
             <View style={styles.stepper}>
-              <Step label="−1" onPress={() => s().count(id, -1)} />
+              <Step label="−1" onPress={() => completionHaptic(s().count(id, -1))} />
               <T v="heading" style={[styles.tabular, styles.flexCenter]}>
                 {t('today.habit.of', { done: Math.min(track.count ?? 0, counter), goal: counter })}
               </T>
-              <Step label="+1" onPress={() => s().count(id, 1)} />
+              <Step label="+1" onPress={() => completionHaptic(s().count(id, 1))} />
             </View>
           ) : null}
           {counter !== null && !done ? (
@@ -142,7 +142,7 @@ export function PilotHabit() {
                   : t('today.habit.markDone')
             }
             kind={done ? 'secondary' : 'primary'}
-            onPress={() => s().toggle(id)}
+            onPress={() => completionHaptic(s().toggle(id))}
           />
           {yesterday !== null ? (
             <View style={styles.yesterday}>
@@ -154,7 +154,7 @@ export function PilotHabit() {
                   P.isDone(program, id, yesterday) ? t('today.habit.undoYesterday') : t('today.habit.doneYesterday')
                 }
                 on={false}
-                onPress={() => s().toggle(id, yesterday)}
+                onPress={() => completionHaptic(s().toggle(id, yesterday))}
               />
             </View>
           ) : null}

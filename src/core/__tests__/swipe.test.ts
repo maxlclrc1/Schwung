@@ -1,5 +1,14 @@
 import { describe, expect, it } from '@jest/globals';
-import { dragOffset, FLICK_MIN, FLICK_SPEED, RESIST_FROM, swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../swipe';
+import {
+  dragOffset,
+  FLICK_MIN,
+  FLICK_SPEED,
+  RESIST_FROM,
+  swipeOutcome,
+  SWIPE_THRESHOLD,
+  thresholdTick,
+  touchIntent,
+} from '../swipe';
 
 const W = 343; // the card on a 375pt iPhone
 
@@ -92,5 +101,31 @@ describe('how the card follows the finger', () => {
     expect(dragOffset(-10, reach)).toBeLessThan(0);
     expect(dragOffset(-10, reach)).toBeGreaterThan(-2);
     expect(dragOffset(-1000, reach)).toBeGreaterThan(-20);
+  });
+});
+
+describe('the threshold haptic', () => {
+  const reach = W * SWIPE_THRESHOLD;
+  const run = (path: number[]) => {
+    let ticked = false;
+    let plays = 0;
+    for (const d of path) {
+      const r = thresholdTick(ticked, d, reach);
+      ticked = r.ticked;
+      if (r.play) plays++;
+    }
+    return plays;
+  };
+
+  it('plays once, the first time the finger reaches the threshold', () => {
+    expect(run([10, 60, reach - 1, reach, reach + 40])).toBe(1);
+  });
+
+  it('never repeats while dragging back and forth across it', () => {
+    expect(run([reach + 5, reach - 30, reach + 5, 20, reach + 60, reach - 1, reach + 1])).toBe(1);
+  });
+
+  it('never plays for a swipe that stays short (or goes the wrong way)', () => {
+    expect(run([10, 50, reach - 1, 30, -80])).toBe(0);
   });
 });

@@ -13,8 +13,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { dragOffset, swipeOutcome, SWIPE_THRESHOLD, touchIntent } from '../core/swipe';
-import { haptic } from '../lib/haptics';
+import { dragOffset, swipeOutcome, SWIPE_THRESHOLD, thresholdTick, touchIntent } from '../core/swipe';
+import { completionHaptic, haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { useDepth } from '../theme/depth';
 import { useThemeProgress } from '../theme/transition';
@@ -31,7 +31,8 @@ type Props = {
   habitId: string;
   done: boolean;
   readOnly?: boolean;
-  onToggle: (habitId: string) => void;
+  /** Toggles the habit; returns what actually changed, so the haptic follows the real outcome. */
+  onToggle: (habitId: string) => { kind: 'completed' | 'uncompleted' } | null | void;
   onLongPress?: (habitId: string) => void;
   /** A swipe has taken (true) or let go of (false) the touch: the page holds its scroll meanwhile. */
   onSwipe?: (active: boolean) => void;
@@ -305,8 +306,6 @@ function HabitCardImpl({
   const toggle = () => {
     if (readOnly || pending.current) return;
     pending.current = setTimeout(() => (pending.current = undefined), 600);
-    if (done) haptic.undo();
-    else haptic.complete();
     // The card answers at once, on the UI thread; the program (and everything that follows it: XP, the day, the
     // other tabs) updates a frame later, so that work never holds the animation's first frame.
     doneP.set(
@@ -316,7 +315,8 @@ function HabitCardImpl({
           : 1
         : withTiming(done ? 0 : 1, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
     );
-    requestAnimationFrame(() => onToggle(habitId));
+    // One haptic, from what actually changed: complete, undo, or none (nothing changed).
+    requestAnimationFrame(() => completionHaptic(onToggle(habitId)));
   };
 
   // The card's touches, all on the responder system (so a swipe cleanly cancels a press or a long-press):
@@ -432,11 +432,10 @@ function HabitCardImpl({
       const dx = swipeDx(e);
       tx.set(offsetFor(dx));
       pull.set(Math.max(0, done ? -dx : dx));
-      const past = (done ? -dx : dx) >= reach;
-      if (past !== g.crossed) {
-        g.crossed = past;
-        if (past) haptic.tick();
-      }
+      // One light tick the first time the finger reaches the threshold in this swipe; never again back and forth.
+      const tick = thresholdTick(g.crossed, done ? -dx : dx, reach);
+      g.crossed = tick.ticked;
+      if (tick.play) haptic.tick();
     },
     onResponderRelease: (e: GestureResponderEvent) => {
       clearTimer();
