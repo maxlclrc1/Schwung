@@ -989,16 +989,9 @@ export const fr: Translation = {
     ring: {
       a11yNone: 'La régularité s’affiche après votre premier jour',
       a11y: '{pct} de régularité : {done} occasions d’habitude faites sur {eligible}',
-      consistency: 'régularité',
       first: 'Votre régularité commence avec votre premier jour.',
       done: '{done} occasions d’habitude faites sur {eligible}',
-      thisWeek: 'Cette semaine',
       weekValue: '{done} sur {eligible}',
-      streak: 'Série',
-      streakValue: { one: '{count} jour', other: '{count} jours' },
-      day: 'Jour',
-      dayValue: '{day} sur {total}',
-      factA11y: '{label} : {value}',
     },
     week: {
       range: { one: ' ({count} jour)', other: ' ({count} jours)' },
@@ -1037,6 +1030,13 @@ export const fr: Translation = {
     },
     strip: '{count} derniers jours : {done} faites',
     bars: 'Semaine {week} : {done} sur {goal}',
+
+    facts: {
+      week: '{done} sur {eligible} cette semaine',
+      streak: { one: 'série de {count} jour', other: 'série de {count} jours' },
+
+      day: 'Jour {day} sur {total}',
+    },
   },
   setup: {
     age: { u16: 'Moins de 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

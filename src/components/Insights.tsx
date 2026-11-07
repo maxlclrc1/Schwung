@@ -39,12 +39,6 @@ export function InsightsPage({ children }: { children: ReactNode }) {
         <ThemeToggle />
         <SettingsButton />
       </View>
-      {/* A narrow window onto the lakeside, between the title and the numbers. */}
-      <View
-        accessible={false}
-        importantForAccessibility="no-hide-descendants"
-        style={{ height: Math.round(width * 0.12), marginHorizontal: -space.lg }}
-      />
       {children}
     </Animated.ScrollView>
   );

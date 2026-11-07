@@ -956,16 +956,9 @@ export const ja: Translation = {
     ring: {
       a11yNone: '継続率は最初の日のあとに表示されます',
       a11y: '継続率{pct}：{eligible}回の機会中{done}回達成',
-      consistency: '継続率',
       first: '継続率は最初の日から始まります。',
       done: '{eligible}回の機会中{done}回達成',
-      thisWeek: '今週',
       weekValue: '{done} / {eligible}',
-      streak: '連続記録',
-      streakValue: { other: '{count}日' },
-      day: '日数',
-      dayValue: '{day} / {total}',
-      factA11y: '{label}：{value}',
     },
     week: {
       range: { other: ' （{count}日）' },
@@ -1003,6 +996,13 @@ export const ja: Translation = {
     },
     strip: '直近{count}日：{done}回達成',
     bars: '第{week}週：{done} / {goal}',
+
+    facts: {
+      week: '今週 {eligible}件中{done}件',
+      streak: { other: '{count}日の連続記録' },
+
+      day: '{total}日中{day}日目',
+    },
   },
   setup: {
     age: {

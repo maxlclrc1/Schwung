@@ -978,16 +978,9 @@ export const id: Translation = {
     ring: {
       a11yNone: 'Konsistensi muncul setelah hari pertamamu',
       a11y: 'Konsistensi {pct}: {done} dari {eligible} kesempatan kebiasaan selesai',
-      consistency: 'konsistensi',
       first: 'Konsistensimu dimulai dari hari pertamamu.',
       done: '{done} dari {eligible} kesempatan kebiasaan selesai',
-      thisWeek: 'Minggu ini',
       weekValue: '{done} dari {eligible}',
-      streak: 'Runtunan',
-      streakValue: { other: '{count} hari' },
-      day: 'Hari',
-      dayValue: '{day} dari {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { other: ' ({count} hari)' },
@@ -1026,6 +1019,13 @@ export const id: Translation = {
     },
     strip: '{count} hari terakhir: {done} selesai',
     bars: 'Minggu ke-{week}: {done} dari {goal}',
+
+    facts: {
+      week: '{done} dari {eligible} minggu ini',
+      streak: { other: 'runtunan {count} hari' },
+
+      day: 'Hari {day} dari {total}',
+    },
   },
   setup: {
     age: {

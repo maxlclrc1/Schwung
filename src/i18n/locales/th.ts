@@ -938,16 +938,9 @@ export const th: Translation = {
     ring: {
       a11yNone: 'ความสม่ำเสมอจะแสดงหลังวันแรกของคุณ',
       a11y: 'ความสม่ำเสมอ {pct}: ทำแล้ว {done} จาก {eligible} โอกาส',
-      consistency: 'ความสม่ำเสมอ',
       first: 'ความสม่ำเสมอของคุณเริ่มนับตั้งแต่วันแรก',
       done: 'ทำแล้ว {done} จาก {eligible} โอกาส',
-      thisWeek: 'สัปดาห์นี้',
       weekValue: '{done} จาก {eligible}',
-      streak: 'สถิติต่อเนื่อง',
-      streakValue: { other: '{count} วัน' },
-      day: 'วัน',
-      dayValue: '{day} จาก {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { other: ' ({count} วัน)' },
@@ -986,6 +979,13 @@ export const th: Translation = {
     },
     strip: '{count} วันล่าสุด: ทำแล้ว {done}',
     bars: 'สัปดาห์ที่ {week}: {done} จาก {goal}',
+
+    facts: {
+      week: 'สัปดาห์นี้ {done} จาก {eligible}',
+      streak: { other: 'สถิติต่อเนื่อง {count} วัน' },
+
+      day: 'วันที่ {day} จาก {total}',
+    },
   },
   setup: {
     age: {

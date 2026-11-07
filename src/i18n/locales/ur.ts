@@ -962,16 +962,9 @@ export const ur: Translation = {
     ring: {
       a11yNone: 'باقاعدگی آپ کے پہلے دن کے بعد نظر آتی ہے',
       a11y: '{pct} باقاعدگی: {eligible} عادت کے مواقع میں سے {done} مکمل',
-      consistency: 'باقاعدگی',
       first: 'آپ کی باقاعدگی آپ کے پہلے دن سے شروع ہوتی ہے۔',
       done: '{eligible} عادت کے مواقع میں سے {done} مکمل',
-      thisWeek: 'اس ہفتے',
       weekValue: '{eligible} میں سے {done}',
-      streak: 'تسلسل',
-      streakValue: { one: '{count} دن', other: '{count} دن' },
-      day: 'دن',
-      dayValue: '{total} میں سے {day}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} دن)', other: ' ({count} دن)' },
@@ -1009,6 +1002,13 @@ export const ur: Translation = {
     },
     strip: 'پچھلے {count} دن: {done} مکمل',
     bars: 'ہفتہ {week}: {goal} میں سے {done}',
+
+    facts: {
+      week: 'اس ہفتے {eligible} میں سے {done}',
+      streak: { one: '{count} دن کا تسلسل', other: '{count} دن کا تسلسل' },
+
+      day: 'دن {day} از {total}',
+    },
   },
   setup: {
     age: { u16: '18 سے کم', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

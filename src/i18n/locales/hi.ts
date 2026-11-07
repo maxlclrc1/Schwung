@@ -965,16 +965,9 @@ export const hi: Translation = {
     ring: {
       a11yNone: 'नियमितता आपके पहले दिन के बाद दिखती है',
       a11y: '{pct} नियमितता: {eligible} में से {done} आदत-अवसर पूरे',
-      consistency: 'नियमितता',
       first: 'आपकी नियमितता आपके पहले दिन से शुरू होती है।',
       done: '{eligible} में से {done} आदत-अवसर पूरे',
-      thisWeek: 'इस हफ़्ते',
       weekValue: '{eligible} में से {done}',
-      streak: 'स्ट्रीक',
-      streakValue: { one: '{count} दिन', other: '{count} दिन' },
-      day: 'दिन',
-      dayValue: '{total} में से {day}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} दिन)', other: ' ({count} दिन)' },
@@ -1012,6 +1005,13 @@ export const hi: Translation = {
     },
     strip: 'पिछले {count} दिन: {done} पूरे',
     bars: 'हफ़्ता {week}: {goal} में से {done}',
+
+    facts: {
+      week: 'इस हफ़्ते {eligible} में से {done}',
+      streak: { one: '{count} दिन की स्ट्रीक', other: '{count} दिन की स्ट्रीक' },
+
+      day: 'दिन {day} / {total}',
+    },
   },
   setup: {
     age: { u16: '18 से कम', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

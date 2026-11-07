@@ -966,16 +966,9 @@ export const tr: Translation = {
     ring: {
       a11yNone: 'İstikrar ilk gününden sonra görünür',
       a11y: '{pct} istikrar: {eligible} alışkanlık fırsatından {done} tanesi yapıldı',
-      consistency: 'istikrar',
       first: 'İstikrarın ilk gününle başlar.',
       done: '{eligible} alışkanlık fırsatından {done} tanesi yapıldı',
-      thisWeek: 'Bu hafta',
       weekValue: '{done} / {eligible}',
-      streak: 'Seri',
-      streakValue: { one: '{count} gün', other: '{count} gün' },
-      day: 'Gün',
-      dayValue: '{day} / {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} gün)', other: ' ({count} gün)' },
@@ -1014,6 +1007,13 @@ export const tr: Translation = {
     },
     strip: 'Son {count} gün: {done} tamam',
     bars: 'Hafta {week}: {done} / {goal}',
+
+    facts: {
+      week: 'bu hafta {eligible} üzerinden {done}',
+      streak: { one: '{count} günlük seri', other: '{count} günlük seri' },
+
+      day: 'Gün {day}/{total}',
+    },
   },
   setup: {
     age: { u16: '18 yaş altı', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

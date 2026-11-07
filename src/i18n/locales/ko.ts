@@ -940,16 +940,9 @@ export const ko: Translation = {
     ring: {
       a11yNone: '꾸준함은 첫날 이후에 표시돼요',
       a11y: '꾸준함 {pct}: 습관 기회 {eligible}번 중 {done}번 완료',
-      consistency: '꾸준함',
       first: '꾸준함은 첫날부터 시작돼요.',
       done: '습관 기회 {eligible}번 중 {done}번 완료',
-      thisWeek: '이번 주',
       weekValue: '{done}/{eligible}',
-      streak: '연속 기록',
-      streakValue: { other: '{count}일' },
-      day: '날짜',
-      dayValue: '{total}일 중 {day}일째',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { other: ' ({count}일)' },
@@ -988,6 +981,13 @@ export const ko: Translation = {
     },
     strip: '최근 {count}일: {done}번 완료',
     bars: '{week}주차: {done}/{goal}',
+
+    facts: {
+      week: '이번 주 {eligible}개 중 {done}개',
+      streak: { other: '{count}일 연속 기록' },
+
+      day: '{total}일 중 {day}일째',
+    },
   },
   setup: {
     age: {

@@ -967,16 +967,9 @@ export const es: Translation = {
     ring: {
       a11yNone: 'La constancia aparece después de tu primer día',
       a11y: '{pct} de constancia: {done} de {eligible} oportunidades de hábito hechas',
-      consistency: 'constancia',
       first: 'Tu constancia empieza con tu primer día.',
       done: '{done} de {eligible} oportunidades de hábito hechas',
-      thisWeek: 'Esta semana',
       weekValue: '{done} de {eligible}',
-      streak: 'Racha',
-      streakValue: { one: '{count} día', other: '{count} días' },
-      day: 'Día',
-      dayValue: '{day} de {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} día)', other: ' ({count} días)' },
@@ -1015,6 +1008,13 @@ export const es: Translation = {
     },
     strip: 'Últimos {count} días: {done} hechos',
     bars: 'Semana {week}: {done} de {goal}',
+
+    facts: {
+      week: '{done} de {eligible} esta semana',
+      streak: { one: 'racha de {count} día', other: 'racha de {count} días' },
+
+      day: 'Día {day} de {total}',
+    },
   },
   setup: {
     age: { u16: 'Menos de 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

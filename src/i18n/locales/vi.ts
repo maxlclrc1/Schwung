@@ -964,16 +964,9 @@ export const vi: Translation = {
     ring: {
       a11yNone: 'Độ đều đặn hiện sau ngày đầu tiên',
       a11y: 'Độ đều đặn {pct}: đã xong {done}/{eligible} lượt thói quen',
-      consistency: 'độ đều đặn',
       first: 'Độ đều đặn của bạn bắt đầu từ ngày đầu tiên.',
       done: 'Đã xong {done}/{eligible} lượt thói quen',
-      thisWeek: 'Tuần này',
       weekValue: '{done}/{eligible}',
-      streak: 'Chuỗi ngày',
-      streakValue: { other: '{count} ngày' },
-      day: 'Ngày',
-      dayValue: '{day}/{total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { other: ' ({count} ngày)' },
@@ -1011,6 +1004,13 @@ export const vi: Translation = {
     },
     strip: '{count} ngày qua: xong {done}',
     bars: 'Tuần {week}: {done}/{goal}',
+
+    facts: {
+      week: '{done}/{eligible} trong tuần này',
+      streak: { other: 'chuỗi ngày {count} ngày' },
+
+      day: 'Ngày {day}/{total}',
+    },
   },
   setup: {
     age: { u16: 'Dưới 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

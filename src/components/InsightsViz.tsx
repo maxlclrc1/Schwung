@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
-import { memo, useEffect, useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { memo, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
@@ -8,7 +8,6 @@ import Animated, {
   ReduceMotion,
   useAnimatedProps,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withDelay,
   withTiming,
@@ -18,29 +17,28 @@ import { judgedWeeks, type Records, type Tally, type WeekPoint } from '../core/c
 import { PROGRAM_DAYS } from '../core/dates';
 import type { Observation } from '../core/reset/observations';
 import { haptic } from '../lib/haptics';
-import { radius, space, useTheme } from '../theme';
-import { useDepth } from '../theme/depth';
+import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, formatPercent, t as tr } from '../i18n';
-import { useT } from '../i18n/react';
+import { useLanguage, useT } from '../i18n/react';
 import { useOnArt } from './onArt';
-import { physical } from '../i18n/direction';
+import { isRTLLanguage, physical } from '../i18n/direction';
 
 /*
- * Insights 2.0, drawn by hand (no chart library): a page in three questions. How am I doing? (a consistency ring and
- * the weeks as a line), What's working? (the habits side by side, and the records as peach medallions), What can I
- * learn? (observations the saved days support, and the optional Screen Time readings). Misty blue for data, sage for
- * consistency, peach for records, lavender for reflection. Every number is passed in from reset/charts.ts and
- * reset/pilot.ts; nothing here estimates. Charts settle in once when first shown; Reduce Motion shows them at once.
+ * Insights as an alpine field journal, drawn by hand (no chart library): five chapters set as type on the lakeside
+ * painting and then on the page, with no cards. I · Consistency (one large figure and a line of facts), II · Week by
+ * week (a fine line across the misty valley), III · By habit (a ledger, each habit on a quiet scale), IV · Personal
+ * records (four figures in a hairline grid), V · Patterns (short notes). Every number is passed in from
+ * reset/charts.ts and reset/pilot.ts; nothing here estimates. Lines settle in once when first shown; Reduce Motion
+ * shows them at once.
  */
 
 const sys = ReduceMotion.System;
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-type Icon = ComponentProps<typeof Ionicons>['name'];
 const pctText = (share: number | null) => (share === null ? '—' : formatPercent(Math.round(share * 100) / 100));
+const ROMAN = ['I', 'II', 'III', 'IV', 'V'] as const;
 
 /** 0 → 1 once on mount (a short delay, on the shared curve): the charts' one entrance. */
 function useEntrance(delay = 0, duration = 760) {
@@ -51,27 +49,115 @@ function useEntrance(delay = 0, duration = 760) {
   return v;
 }
 
-/** A chapter of the page: its number in the chapter's colour, then the question itself. */
-export function Chapter({ n, title, tint }: { n: string; title: string; tint: string }) {
+// --- Figures in text ---
+
+const D = '[0-9٠-٩۰-۹०-९০-৯๐-๙]';
+const NUM = `${D}(?:[.,٫٬]?${D})*`;
+const PCT = `(?:[%٪]\\s?${NUM}|${NUM}\\s?[%٪])`;
+/** "27 of 37", "9 von 11": two figures joined by one short word. */
+const RATIO = `${NUM}\\s[^\\s0-9]{1,5}\\s${NUM}`;
+const FIGURES = new RegExp(`(${PCT}|${RATIO})`, 'g');
+const ANY_FIGURE = new RegExp(`(${PCT}|${RATIO}|${NUM})`, 'g');
+
+/** Text with its meaningful figures (percentages and "x of y") set in the main ink and semibold. */
+function Figures({ text, pattern = FIGURES }: { text: string; pattern?: RegExp }) {
   const { c } = useTheme();
-  const onArt = useOnArt();
   return (
-    <View style={styles.chapter} accessibilityRole="header">
-      <View style={[styles.chapterRule, { backgroundColor: tint }]} />
-      <T v="overline" color={onArt.ink ?? c.textDim} style={[{ letterSpacing: 2 }, onArt.style]}>
-        {n}
+    <>
+      {text.split(pattern).map((part, i) =>
+        i % 2 ? (
+          <T key={i} style={styles.figure} color={c.text}>
+            {part}
+          </T>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/** A percentage split around its number, so the sign can be set smaller ("73" "%", "%" "73", "73" " %"). */
+function splitPercent(text: string): [string, string, string] {
+  const m = new RegExp(`^(.*?)(${NUM})(.*)$`).exec(text);
+  return m ? [m[1], m[2], m[3]] : ['', text, ''];
+}
+
+/** A large light figure; a percentage's sign set smaller and raised beside it. */
+function BigFigure({ text, size, color }: { text: string; size: number; color?: string }) {
+  const { c } = useTheme();
+  const [pre, num, post] = splitPercent(text);
+  const ink = color ?? c.text;
+  const sign = [styles.sign, { fontSize: Math.round(size * 0.42), lineHeight: Math.round(size * 0.5), color: ink, marginTop: Math.round(size * 0.1) }];
+  return (
+    <View style={styles.bigRow}>
+      {pre.trim() ? (
+        <T style={sign} maxFontSizeMultiplier={1}>
+          {pre.trim()}
+        </T>
+      ) : null}
+      <T style={[styles.big, { fontSize: size, lineHeight: Math.round(size * 1.02), color: ink }]} maxFontSizeMultiplier={1}>
+        {num}
       </T>
-      <T v="title" style={styles.chapterTitle}>
-        {title}
-      </T>
+      {post.trim() ? (
+        <T style={sign} maxFontSizeMultiplier={1}>
+          {post.trim()}
+        </T>
+      ) : null}
     </View>
   );
 }
 
-// --- How am I doing? ---
+/** A hairline in the page's divider colour. */
+function Rule({ style }: { style?: object }) {
+  const { c } = useTheme();
+  return <ThemedView style={[styles.rule, { backgroundColor: c.border }, style]} />;
+}
 
-/** Overall consistency as a misty-blue ring, with the week and the day beside it. */
-export const ConsistencyRing = memo(function ConsistencyRing({
+/** A chapter of the journal: its Roman numeral and name in small capitals, a hairline, and an optional note. */
+export function Chapter({
+  n,
+  title,
+  note,
+  gap = space.xl,
+}: {
+  n: number;
+  title: string;
+  note?: string;
+  /** Space above the chapter. */
+  gap?: number;
+}) {
+  const { c } = useTheme();
+  const onArt = useOnArt();
+  // Arabic and Urdu: a right-to-left mark first, so the heading reads right to left from its Latin numeral.
+  const rtl = isRTLLanguage(useLanguage());
+  const ink = onArt.ink ?? c.textDim;
+  return (
+    <View style={[styles.chapter, { marginTop: gap }]} accessible accessibilityRole="header">
+      <T v="overline" color={ink} style={[styles.chapterTitle, onArt.style]} maxFontSizeMultiplier={1.5}>
+        {rtl ? '‏' : null}
+        <T v="overline" color={c.textDim} style={styles.numeral}>
+          {ROMAN[n - 1]}
+        </T>
+        {'   '}
+        {title}
+      </T>
+      <View style={[styles.chapterRule, { backgroundColor: ink }]} />
+      {note ? (
+        <T v="caption" color={ink} style={[styles.chapterNote, onArt.style]} maxFontSizeMultiplier={1.5}>
+          {note}
+        </T>
+      ) : null}
+    </View>
+  );
+}
+
+// --- I · Consistency ---
+
+const FACT_GAP = 10;
+
+/** Overall consistency as one large figure, the opportunities beside it, and a line of facts below. */
+export const Consistency = memo(function Consistency({
   overall,
   week,
   day,
@@ -83,20 +169,39 @@ export const ConsistencyRing = memo(function ConsistencyRing({
   streak: number;
 }) {
   const { c } = useTheme();
-  const depth = useDepth();
+  const onArt = useOnArt();
   const t = useT();
+  const { width } = useWindowDimensions();
+  // The facts on one line with fine separators while they fit, else one to a line (large text, long words).
+  const [box, setBox] = useState(0);
+  const lang = useLanguage();
+  const factKey = `${week.done}/${week.eligible}/${streak}/${day}/${lang}`;
+  // Widths measured for these words (measured again when the facts or the language change).
+  const [measured, setMeasured] = useState<{ key: string; w: number[] }>({ key: '', w: [] });
+  const widths = measured.key === factKey ? measured.w : [];
+  const measure = (i: number, w: number) =>
+    setMeasured((m) => {
+      const base = m.key === factKey ? m.w : [];
+      if (base[i] === w) return m;
+      const next = [...base];
+      next[i] = w;
+      return { key: factKey, w: next };
+    });
   const share = overall.eligible ? overall.done / overall.eligible : null;
-  const size = 132;
-  const stroke = 12;
-  const r = (size - stroke) / 2;
-  const circ = 2 * Math.PI * r;
-  const shown = useEntrance(120, 900);
-  const arc = useAnimatedProps(() => ({ strokeDashoffset: circ * (1 - (share ?? 0) * shown.value) }));
-  const shownDay = Math.min(day, PROGRAM_DAYS);
+  const size = Math.round(Math.min(116, (Math.min(width, 520) - space.lg * 2) * 0.32));
+  const facts = [
+    week.eligible ? t('insights.facts.week', { done: week.done, eligible: week.eligible }) : null,
+    t('insights.facts.streak', { count: streak }),
+    day > PROGRAM_DAYS
+      ? t('beyond.pastSummit', { day })
+      : t('insights.facts.day', { day, total: PROGRAM_DAYS }),
+  ].filter((f): f is string => f !== null);
+  const needed = facts.reduce((sum, _, i) => sum + (widths[i] ?? 0), 0) + FACT_GAP * 2 * (facts.length - 1);
+  const stacked = box > 0 && widths.length === facts.length && needed > box + 0.5;
   return (
-    <ThemedView style={[styles.hero, depth.card, { backgroundColor: c.surface }]}>
+    <View style={styles.consistency}>
       <View
-        style={{ width: size, height: size }}
+        style={styles.hero}
         accessible
         accessibilityLabel={
           share === null
@@ -104,79 +209,41 @@ export const ConsistencyRing = memo(function ConsistencyRing({
             : t('insights.ring.a11y', { pct: pctText(share), done: overall.done, eligible: overall.eligible })
         }
       >
-        <Svg width={size} height={size}>
-          <Circle cx={size / 2} cy={size / 2} r={r} stroke={c.mistSoft} strokeWidth={stroke} fill="none" />
-          <AnimatedCircle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            stroke={c.mist}
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            fill="none"
-            strokeDasharray={[circ, circ]}
-            rotation={-90}
-            origin={`${size / 2}, ${size / 2}`}
-            animatedProps={arc}
-          />
-        </Svg>
-        <View style={styles.ringCenter}>
-          <T
-            style={[styles.ringValue, depth.hero, { color: share === null ? c.textFaint : c.text }]}
-            maxFontSizeMultiplier={1.2}
-          >
-            {pctText(share)}
-          </T>
-          <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.2}>
-            {t('insights.ring.consistency')}
-          </T>
-        </View>
-      </View>
-      <View style={styles.heroText}>
-        <T v="bodyStrong" maxFontSizeMultiplier={1.3}>
-          {share === null
-            ? t('insights.ring.first')
-            : t('insights.ring.done', { done: overall.done, eligible: overall.eligible })}
+        <BigFigure text={pctText(share)} size={size} color={share === null ? c.textFaint : c.text} />
+        <T color={onArt.ink ?? c.textDim} style={[styles.lede, onArt.style]} maxFontSizeMultiplier={1.5}>
+          {share === null ? (
+            t('insights.ring.first')
+          ) : (
+            <Figures text={t('insights.ring.done', { done: overall.done, eligible: overall.eligible })} />
+          )}
         </T>
-        <Fact
-          dot={c.sage}
-          label={t('insights.ring.thisWeek')}
-          value={week.eligible ? t('insights.ring.weekValue', { done: week.done, eligible: week.eligible }) : '—'}
-        />
-        <Fact
-          dot={c.peach}
-          label={t('insights.ring.streak')}
-          value={t('insights.ring.streakValue', { count: streak })}
-        />
-        <Fact
-          dot={c.indigo}
-          label={t('insights.ring.day')}
-          value={
-            day > PROGRAM_DAYS
-              ? t('beyond.pastSummit', { day })
-              : t('insights.ring.dayValue', { day: shownDay, total: PROGRAM_DAYS })
-          }
-        />
       </View>
-    </ThemedView>
+      <Rule style={{ opacity: 0.9 }} />
+      {stacked ? (
+        <T color={onArt.ink ?? c.textDim} style={[styles.factText, onArt.style]} maxFontSizeMultiplier={1.5}>
+          <Figures text={facts.map((f) => f.replace(/ /g, '\u00A0')).join('  ·  ')} pattern={ANY_FIGURE} />
+        </T>
+      ) : (
+        <View style={styles.facts} onLayout={(e) => setBox(e.nativeEvent.layout.width)}>
+          {facts.map((f, i) => (
+            <View key={i} style={i > 0 ? [styles.factSep, { borderColor: c.textFaint }] : null}>
+              <T
+                color={onArt.ink ?? c.textDim}
+                style={[styles.factText, onArt.style]}
+                maxFontSizeMultiplier={1.5}
+                onLayout={(e) => measure(i, e.nativeEvent.layout.width)}
+              >
+                <Figures text={f} pattern={ANY_FIGURE} />
+              </T>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
   );
 });
 
-function Fact({ dot, label, value }: { dot: string; label: string; value: string }) {
-  const { c } = useTheme();
-  const t = useT();
-  return (
-    <View style={styles.fact} accessible accessibilityLabel={t('insights.ring.factA11y', { label, value })}>
-      <View style={[styles.factDot, { backgroundColor: dot }]} />
-      <T v="caption" color={c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.3}>
-        {label}
-      </T>
-      <T v="caption" style={styles.factValue} maxFontSizeMultiplier={1.3}>
-        {value}
-      </T>
-    </View>
-  );
-}
+// --- II · Week by week ---
 
 function weekWords(p: WeekPoint): string {
   const range = p.days < 7 ? tr('insights.week.range', { count: p.days }) : '';
@@ -193,179 +260,198 @@ function weekWords(p: WeekPoint): string {
   }
 }
 
-const CHART_H = 128;
+/** The chapter's note: how many weeks are finished. */
+export function weekNote(points: WeekPoint[]): string {
+  const judged = judgedWeeks(points);
+  return judged ? tr('insights.week.judged', { count: judged }) : tr('insights.week.first');
+}
+
+const CHART_H = 88;
+const TOP = 22; // room for the value above a full week
+const PAD = 14; // the first and last weeks' points stay clear of the page's edges
 
 /**
- * The weeks as a line over a soft misty area: finished weeks joined, this week (so far) a hollow point on a dashed
- * step, a week without records a break in the line, never a zero. Tap a week for its numbers.
+ * The weeks as a fine line drawn into the valley: finished weeks as small filled points joined by the line, with a
+ * thin stem down to the baseline; this week (so far) a hollow point on a dotted step; a week without records a break
+ * in the line, never a zero. One dotted 50% level. Tap a week for its numbers.
  */
 export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint[] }) {
-  const { c } = useTheme();
-  const depth = useDepth();
+  const { c, isDark } = useTheme();
+  const onArt = useOnArt();
   const t = useT();
   const { width } = useWindowDimensions();
-  const reduce = useReducedMotion();
-  const w = Math.min(width, 520) - space.lg * 4 - 30;
+  const w = Math.min(width, 520) - space.lg * 2;
   const n = points.length;
-  const x = (i: number) => (n === 1 ? w / 2 : (i / (n - 1)) * w);
-  const y = (share: number) => 6 + (1 - share) * (CHART_H - 12);
+  const x = (i: number) => (n === 1 ? w / 2 : PAD + (i / (n - 1)) * (w - PAD * 2));
+  const y = (share: number) => TOP + (1 - share) * (CHART_H - TOP - 4);
+  const base = CHART_H;
   const lastClosed = [...points].reverse().find((p) => p.state === 'closed') ?? points[n - 1];
   const [picked, setPicked] = useState<number | null>(null);
   const selected = points.find((p) => p.week === picked) ?? lastClosed;
+  const ink = c.mistInk;
+  // On the light painting the line keeps a soft edge of the page's own light, like the words around it.
+  const halo = isDark ? null : c.bg;
 
-  const { line, area, length, current } = useMemo(() => {
-    // Finished weeks with a share, in runs broken by weeks without one.
+  const { line, length, current } = useMemo(() => {
     const runs: { i: number; s: number }[][] = [[]];
     points.forEach((p, i) => {
       if (p.state === 'closed' && p.share !== null) runs[runs.length - 1].push({ i, s: p.share });
       else if (runs[runs.length - 1].length) runs.push([]);
     });
     let l = '';
-    let a = '';
     let len = 0;
     for (const run of runs.filter((r) => r.length)) {
       run.forEach((pt, k) => {
         l += `${k ? 'L' : 'M'}${x(pt.i)} ${y(pt.s)} `;
         if (k) len += Math.hypot(x(pt.i) - x(run[k - 1].i), y(pt.s) - y(run[k - 1].s));
       });
-      if (run.length > 1)
-        a += `M${x(run[0].i)} ${CHART_H} ${run.map((pt) => `L${x(pt.i)} ${y(pt.s)}`).join(' ')} L${x(run[run.length - 1].i)} ${CHART_H} Z `;
     }
-    const ci = points.findIndex((p) => p.state === 'current' && p.share !== null);
-    return { line: l, area: a, length: Math.max(1, len), current: ci >= 0 ? ci : null };
+    const ci = points.findIndex((p) => p.state === 'current');
+    return { line: l, length: Math.max(1, len), current: ci >= 0 ? ci : null };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [points, w]);
 
   const drawn = useEntrance(200, 900);
   const lineProps = useAnimatedProps(() => ({ strokeDashoffset: length * (1 - drawn.value) }));
-  const areaStyle = useAnimatedStyle(() => ({ opacity: reduce ? 1 : drawn.value }));
-  const judged = judgedWeeks(points);
   const prevIdx =
     current !== null ? [...points.slice(0, current)].reverse().findIndex((p) => p.state === 'closed') : -1;
   const prev = current !== null && prevIdx >= 0 ? current - 1 - prevIdx : null;
+  const cur = current !== null ? points[current] : null;
 
   return (
-    <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface }]}>
-      <View style={styles.panelHead}>
-        <T v="bodyStrong">{t('insights.week.title')}</T>
-        <T v="label" color={c.mistInk}>
-          {judged ? t('insights.week.judged', { count: judged }) : t('insights.week.first')}
-        </T>
-      </View>
-      <View style={styles.chartRow}>
-        <View style={[physical, { width: w, height: CHART_H }]}>
-          <Svg width={w} height={CHART_H}>
-            {[0, 0.5, 1].map((g) => (
+    <View style={styles.trend}>
+      <View style={[physical, { width: w, height: CHART_H }]}>
+        <Svg width={w} height={CHART_H} pointerEvents="none">
+          <Line x1={0} x2={w} y1={y(0.5)} y2={y(0.5)} stroke={ink} strokeOpacity={0.45} strokeDasharray="1 4" />
+          <Line x1={0} x2={w} y1={base} y2={base} stroke={ink} strokeOpacity={0.35} strokeWidth={StyleSheet.hairlineWidth} />
+          {points.map((p, i) =>
+            p.share !== null && p.state === 'closed' ? (
               <Line
-                key={g}
-                x1={0}
-                x2={w}
-                y1={y(g)}
-                y2={y(g)}
-                stroke={c.border}
+                key={p.week}
+                x1={x(i)}
+                x2={x(i)}
+                y1={y(p.share)}
+                y2={base}
+                stroke={ink}
+                strokeOpacity={p.week === selected?.week ? 0.55 : 0.3}
                 strokeWidth={1}
-                strokeDasharray={g === 0 ? undefined : '3 5'}
               />
-            ))}
-            {selected && selected.share !== null ? (
-              <Line
-                x1={x(points.indexOf(selected))}
-                x2={x(points.indexOf(selected))}
-                y1={y(selected.share)}
-                y2={CHART_H}
-                stroke={c.mist}
-                strokeOpacity={0.5}
-                strokeWidth={1.5}
-              />
-            ) : null}
-          </Svg>
-          <Animated.View style={[StyleSheet.absoluteFill, areaStyle]} pointerEvents="none">
-            <Svg width={w} height={CHART_H}>
-              {area ? <Path d={area} fill={c.mist} fillOpacity={0.16} /> : null}
-            </Svg>
-          </Animated.View>
-          <Svg width={w} height={CHART_H} style={StyleSheet.absoluteFill} pointerEvents="none">
-            {line ? (
-              <AnimatedPath
-                d={line}
-                stroke={c.mist}
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-                strokeDasharray={[length, length]}
-                animatedProps={lineProps}
-              />
-            ) : null}
-            {current !== null && prev !== null && points[prev].share !== null ? (
-              <Line
-                x1={x(prev)}
-                y1={y(points[prev].share!)}
-                x2={x(current)}
-                y2={y(points[current].share!)}
-                stroke={c.mist}
-                strokeWidth={1.5}
-                strokeDasharray="3 4"
-              />
-            ) : null}
-            {points.map((p, i) =>
-              p.share === null ? (
-                p.state === 'unrecorded' ? (
-                  <Circle
-                    key={p.week}
-                    cx={x(i)}
-                    cy={CHART_H - 6}
-                    r={3}
-                    stroke={c.textFaint}
-                    strokeDasharray="2 2"
-                    fill="none"
-                  />
-                ) : null
-              ) : (
+            ) : null,
+          )}
+          {selected && selected.share !== null ? (
+            <Line
+              x1={x(points.indexOf(selected)) + 8}
+              x2={w - PAD}
+              y1={y(selected.share)}
+              y2={y(selected.share)}
+              stroke={ink}
+              strokeOpacity={0.4}
+              strokeDasharray="1 5"
+              strokeLinecap="round"
+            />
+          ) : null}
+          {halo && line ? (
+            <Path d={line} stroke={halo} strokeOpacity={0.7} strokeWidth={5} strokeLinecap="round" fill="none" />
+          ) : null}
+          {line ? (
+            <AnimatedPath
+              d={line}
+              stroke={ink}
+              strokeWidth={1.75}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              strokeDasharray={[length, length]}
+              animatedProps={lineProps}
+            />
+          ) : null}
+          {cur && cur.share !== null && prev !== null && points[prev].share !== null ? (
+            <Line
+              x1={x(prev)}
+              y1={y(points[prev].share!)}
+              x2={x(current!)}
+              y2={y(cur.share)}
+              stroke={ink}
+              strokeOpacity={0.6}
+              strokeWidth={1}
+              strokeDasharray="1 4"
+              strokeLinecap="round"
+            />
+          ) : null}
+          {points.map((p, i) => {
+            if (p.state === 'current')
+              return (
                 <Circle
                   key={p.week}
                   cx={x(i)}
-                  cy={y(p.share)}
-                  r={p.week === selected?.week ? 6 : 4}
-                  fill={p.state === 'current' ? c.surface : c.mist}
-                  stroke={c.mist}
-                  strokeWidth={2}
+                  cy={p.share !== null ? y(p.share) : base}
+                  r={3.5}
+                  fill={c.bg}
+                  stroke={ink}
+                  strokeWidth={1.25}
                 />
-              ),
-            )}
-          </Svg>
-          {/* Tap targets, one per week. */}
-          <View style={StyleSheet.absoluteFill}>
-            {points.map((p, i) => (
-              <Pressable
+              );
+            if (p.share === null)
+              return p.state === 'unrecorded' ? (
+                <Circle key={p.week} cx={x(i)} cy={base} r={3} stroke={ink} strokeOpacity={0.6} strokeDasharray="2 2" fill="none" />
+              ) : null;
+            const sel = p.week === selected?.week;
+            return (
+              <Circle
                 key={p.week}
-                onPress={() => {
-                  haptic.select();
-                  setPicked(p.week);
-                }}
-                accessibilityRole="button"
-                accessibilityState={{ selected: p.week === selected?.week }}
-                accessibilityLabel={weekWords(p)}
-                style={[styles.weekHit, { left: x(i) - 18 }]}
+                cx={x(i)}
+                cy={y(p.share)}
+                r={sel ? 4.5 : 3.5}
+                fill={sel ? ink : (halo ?? c.bg)}
+                stroke={ink}
+                strokeWidth={sel ? 0 : 1.5}
               />
-            ))}
-          </View>
-        </View>
-        <View style={styles.axis}>
-          {['100%', '50%', '0%'].map((l) => (
-            <T key={l} v="caption" color={c.textFaint} style={styles.axisText}>
-              {l}
+            );
+          })}
+        </Svg>
+        {/* The 50% level, named once at the margin. */}
+        <T style={[styles.level, { top: y(0.5) - 15, color: onArt.ink ?? c.textDim }, onArt.style]} maxFontSizeMultiplier={1.2}>
+          {formatPercent(0.5)}
+        </T>
+        {/* Each finished week's value above its point. */}
+        {points.map((p, i) =>
+          p.share !== null && p.state === 'closed' ? (
+            <T
+              key={p.week}
+              style={[
+                styles.value,
+                { left: x(i) - 30, top: y(p.share) - 20, color: onArt.ink ?? c.textDim },
+                p.week === selected?.week && { fontWeight: '700', color: c.text },
+                onArt.style,
+              ]}
+              maxFontSizeMultiplier={1.2}
+            >
+              {pctText(p.share)}
             </T>
-          ))}
-        </View>
+          ) : null,
+        )}
+        {/* Tap targets, one per week. */}
+        {points.map((p, i) => (
+          <Pressable
+            key={p.week}
+            onPress={() => {
+              haptic.select();
+              setPicked(p.week);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: p.week === selected?.week }}
+            accessibilityLabel={weekWords(p)}
+            style={[styles.weekHit, { left: x(i) - 22 }]}
+          />
+        ))}
       </View>
-      <View style={[styles.weeks, { width: w }]}>
+      <View style={[physical, styles.weeks, { width: w }]}>
         {points.map((p, i) => (
           <T
             key={p.week}
-            v="caption"
-            color={p.week === selected?.week ? c.mistInk : c.textFaint}
-            style={[styles.weekLabel, { left: x(i) - 16 }, p.week === selected?.week && { fontWeight: '700' }]}
+            color={p.week === selected?.week ? c.text : (onArt.ink ?? c.textDim)}
+            style={[styles.weekLabel, { left: x(i) - 20 }, p.week === selected?.week && { fontWeight: '700' }, onArt.style]}
+            maxFontSizeMultiplier={1.2}
           >
             W{p.week}
           </T>
@@ -373,21 +459,42 @@ export const TrendLine = memo(function TrendLine({ points }: { points: WeekPoint
       </View>
       {selected ? (
         <Animated.View key={selected.week} entering={FadeIn.duration(180).reduceMotion(sys)}>
-          <T v="caption" color={c.textDim} accessibilityLiveRegion="polite">
+          <T color={onArt.ink ?? c.textDim} style={[styles.caption, onArt.style]} accessibilityLiveRegion="polite">
             {weekWords(selected)}
           </T>
         </Animated.View>
       ) : null}
-      {judged === 0 ? (
-        <T v="caption" color={c.textFaint}>
+      {judgedWeeks(points) === 0 ? (
+        <T color={onArt.ink ?? c.textDim} style={[styles.caption, onArt.style]}>
           {t('insights.week.note')}
         </T>
       ) : null}
-    </ThemedView>
+    </View>
   );
 });
 
-// --- What's working? ---
+// --- The page below the lake ---
+
+/**
+ * The painting fading into the page: fills whatever room the first chapters leave above the page (up to 180 pt), and
+ * at least a short fade on a small screen, so it never lies over the chart's words.
+ */
+export function ArtFade() {
+  const { c } = useTheme();
+  return (
+    <View style={styles.fadeRoom} pointerEvents="none">
+      <LinearGradient colors={[`${c.bg}00`, `${c.bg}B3`, c.bg]} locations={[0, 0.55, 1]} style={styles.fade} />
+    </View>
+  );
+}
+
+/** The page itself, below the lake: plain, in the page's own colour. */
+export function Paper({ children }: { children: ReactNode }) {
+  const { c } = useTheme();
+  return <ThemedView style={[styles.paper, { backgroundColor: c.bg }]}>{children}</ThemedView>;
+}
+
+// --- III · By habit ---
 
 export type HabitRow = {
   id: string;
@@ -399,12 +506,12 @@ export type HabitRow = {
 };
 
 /**
- * The habits side by side, most consistent first: each a sage bar on one shared scale, the strongest marked in peach
- * (with enough days to mean it). Tap one for its history, target and difficulty.
+ * The habits as a ledger, most consistent first: each name with its share, a line of detail, and a quiet scale with
+ * one mark. The strongest (with enough days to mean it) is named in its line. Tap one for its history, target and
+ * difficulty.
  */
 export function HabitBoard({ rows }: { rows: HabitRow[] }) {
   const { c } = useTheme();
-  const depth = useDepth();
   const share = (t: Tally) => (t.eligible ? t.done / t.eligible : -1);
   const sorted = [...rows].sort((a, b) => share(b.tally) - share(a.tally));
   const strongest =
@@ -412,15 +519,20 @@ export function HabitBoard({ rows }: { rows: HabitRow[] }) {
       ? sorted[0].id
       : null;
   return (
-    <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface, paddingVertical: space.sm }]}>
+    <View>
       {sorted.map((r, i) => (
-        <HabitBar key={r.id} row={r} strongest={r.id === strongest} first={i === 0} order={i} />
+        <HabitLine key={r.id} row={r} strongest={r.id === strongest} first={i === 0} order={i} />
       ))}
-    </ThemedView>
+      <View style={[physical, styles.axis]} accessible={false} importantForAccessibility="no-hide-descendants">
+        <T style={[styles.axisText, { color: c.textFaint }]}>{formatNumber(0)}</T>
+        <T style={[styles.axisText, styles.axisMid, { color: c.textFaint }]}>{formatNumber(50)}</T>
+        <T style={[styles.axisText, { color: c.textFaint }]}>{formatPercent(1)}</T>
+      </View>
+    </View>
   );
 }
 
-function HabitBar({
+function HabitLine({
   row,
   strongest,
   first,
@@ -437,9 +549,10 @@ function HabitBar({
   const share = row.tally.eligible ? row.tally.done / row.tally.eligible : null;
   const grow = useEntrance(150 + order * 70, 700);
   const fill = useAnimatedStyle(() => ({ width: `${(share ?? 0) * 100 * grow.value}%` }));
+  const meta = `${row.tally.eligible ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · ` : ''}${row.kind}`;
   return (
     <Animated.View layout={LinearTransition.duration(200).reduceMotion(sys)}>
-      {first ? null : <ThemedView style={[styles.divider, { backgroundColor: c.border }]} />}
+      {first ? null : <Rule style={{ opacity: 0.7 }} />}
       <Pressable
         onPress={() => {
           haptic.select();
@@ -456,34 +569,36 @@ function HabitBar({
               : t('insights.habit.share', { pct: pctText(share), done: row.tally.done, eligible: row.tally.eligible }),
           kind: row.kind,
         })}
-        style={({ pressed }) => [styles.habitRow, { opacity: pressed ? 0.7 : 1 }]}
+        style={({ pressed }) => [styles.habit, { opacity: pressed ? 0.6 : 1 }]}
       >
         <View style={styles.habitTop}>
-          <T v="bodyStrong" numberOfLines={2} style={{ flexShrink: 1 }}>
+          <T style={styles.habitName} maxFontSizeMultiplier={1.6}>
             {row.name}
           </T>
+          <SmallFigure text={pctText(share)} color={share === null ? c.textFaint : c.text} />
+        </View>
+        <T v="caption" color={c.textDim} style={styles.habitMeta} maxFontSizeMultiplier={1.6}>
           {strongest ? (
-            <View style={[styles.badge, { backgroundColor: c.peachSoft }]}>
-              <Ionicons name="star" size={11} color={c.peach} />
-              <T v="caption" color={c.peachInk} style={styles.badgeText}>
-                {t('insights.habit.strongest')}
-              </T>
-            </View>
+            <T v="caption" color={c.sageInk} style={{ fontWeight: '600' }}>
+              {t('insights.habit.strongest')}
+              {' · '}
+            </T>
           ) : null}
-          <T v="bodyStrong" color={share === null ? c.textFaint : c.sageInk} style={styles.habitPct}>
-            {pctText(share)}
-          </T>
-          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={15} color={c.textFaint} />
-        </View>
-        <View style={[styles.track, { backgroundColor: c.sageSoft }]}>
-          <Animated.View style={[styles.trackFill, { backgroundColor: c.sage }, fill]} />
-        </View>
-        <T v="caption" color={c.textDim}>
-          {row.tally.eligible
-            ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · `
-            : ''}
-          {row.kind}
+          {meta}
         </T>
+        <View style={[physical, styles.track]}>
+          <ThemedView style={[styles.trackLine, { backgroundColor: c.border }]} />
+          <View style={[styles.mid, { backgroundColor: c.textFaint }]} />
+          <View style={styles.trackRow}>
+            <Animated.View style={[styles.trackFill, { backgroundColor: c.sage }, fill]} />
+            <View
+              style={[
+                styles.mark,
+                share ? { backgroundColor: c.sage } : { borderWidth: 1.25, borderColor: c.textFaint, backgroundColor: c.bg },
+              ]}
+            />
+          </View>
+        </View>
       </Pressable>
       {open ? (
         <Animated.View entering={FadeIn.duration(200).reduceMotion(sys)} style={styles.habitDetails}>
@@ -494,42 +609,57 @@ function HabitBar({
   );
 }
 
-/** Personal records as peach medallions: what was actually done, as counts (never minutes or hours). */
-export const RecordMedals = memo(function RecordMedals({ records }: { records: Records }) {
+/** A habit's share: a light figure with its sign set small. */
+function SmallFigure({ text, color }: { text: string; color: string }) {
+  const [pre, num, post] = splitPercent(text);
+  return (
+    <T style={[styles.habitPct, { color }]} maxFontSizeMultiplier={1.3}>
+      {pre ? <T style={styles.habitSign}>{pre}</T> : null}
+      {num}
+      {post ? <T style={styles.habitSign}>{post}</T> : null}
+    </T>
+  );
+}
+
+/** The link under an open habit to its own page (history, corrections and difficulty). */
+export function DetailsLink({ label, onPress }: { label: string; onPress: () => void }) {
   const { c } = useTheme();
-  const depth = useDepth();
+  const rtl = isRTLLanguage(useLanguage());
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="link"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
+    >
+      <T style={[styles.linkText, { textDecorationColor: c.border }]} color={c.text}>
+        {label}
+      </T>
+      <T color={c.textDim} style={styles.linkArrow}>
+        {rtl ? '←' : '→'}
+      </T>
+    </Pressable>
+  );
+}
+
+// --- IV · Personal records ---
+
+/** Personal records as large light figures in a hairline grid: counts of what was done (never minutes or hours). */
+export const RecordGrid = memo(function RecordGrid({ records }: { records: Records }) {
+  const { c } = useTheme();
   const t = useT();
-  const medals: { icon: Icon; n: string; label: string }[] = [
+  const items: { n: string; label: string }[] = [
     records.bestWeek
-      ? {
-          icon: 'trophy',
-          n: pctText(records.bestWeek.share),
-          label: t('insights.records.bestWeek', { week: records.bestWeek.week }),
-        }
-      : { icon: 'trophy-outline', n: '—', label: t('insights.records.bestWeekLater') },
-    {
-      icon: 'flame',
-      n: formatNumber(records.bestStreak),
-      label: t('insights.records.streak', { count: records.bestStreak }),
-    },
-    {
-      icon: 'checkmark-done',
-      n: formatNumber(records.total),
-      label: t('insights.records.done', { count: records.total }),
-    },
+      ? { n: pctText(records.bestWeek.share), label: t('insights.records.bestWeek', { week: records.bestWeek.week }) }
+      : { n: '—', label: t('insights.records.bestWeekLater') },
+    { n: formatNumber(records.bestStreak), label: t('insights.records.streak', { count: records.bestStreak }) },
+    { n: formatNumber(records.total), label: t('insights.records.done', { count: records.total }) },
     ...(records.readingDays !== null
-      ? [
-          {
-            icon: 'book' as Icon,
-            n: formatNumber(records.readingDays),
-            label: t('insights.records.reading', { count: records.readingDays }),
-          },
-        ]
+      ? [{ n: formatNumber(records.readingDays), label: t('insights.records.reading', { count: records.readingDays }) }]
       : []),
     ...(records.strengthSessions !== null
       ? [
           {
-            icon: 'barbell' as Icon,
             n: formatNumber(records.strengthSessions),
             label: t('insights.records.strength', { count: records.strengthSessions }),
           },
@@ -537,87 +667,57 @@ export const RecordMedals = memo(function RecordMedals({ records }: { records: R
       : []),
   ];
   return (
-    <ThemedView style={[styles.panel, depth.card, { backgroundColor: c.surface }]}>
-      <T v="bodyStrong">{t('insights.records.title')}</T>
-      <View style={styles.medals}>
-        {medals.map((m, i) => (
-          <Animated.View
-            key={m.label}
-            entering={FadeIn.delay(120 + i * 60)
-              .duration(320)
-              .reduceMotion(sys)}
-            style={styles.medal}
-            accessible
-            accessibilityLabel={t('insights.records.a11y', { value: m.n, label: m.label })}
-          >
-            <View style={[styles.medalDisc, { backgroundColor: c.peachSoft, borderColor: c.peach }]}>
-              <Ionicons name={m.icon} size={18} color={c.peach} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <T style={[styles.medalValue, depth.hero, { color: c.text }]} maxFontSizeMultiplier={1.2}>
-                {m.n}
-              </T>
-              <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.3}>
-                {m.label}
-              </T>
-            </View>
-          </Animated.View>
-        ))}
-      </View>
-    </ThemedView>
+    <View style={styles.grid}>
+      {items.map((m, i) => (
+        <ThemedView
+          key={m.label}
+          style={[
+            styles.cell,
+            i % 2 === 0 ? styles.cellStart : styles.cellEnd,
+            i % 2 === 0 && i + 1 < items.length && [styles.cellDivide, { borderColor: c.border }],
+            i >= 2 && [styles.cellTop, { borderColor: c.border }],
+          ]}
+          accessible
+          accessibilityLabel={t('insights.records.a11y', { value: m.n, label: m.label })}
+        >
+          <BigFigure text={m.n} size={52} />
+          <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.6}>
+            {m.label}
+          </T>
+        </ThemedView>
+      ))}
+    </View>
   );
 });
 
-// --- What can I learn? ---
+// --- V · Patterns ---
 
-const TONE: Record<Observation['tone'], Icon> = {
-  up: 'trending-up',
-  steady: 'remove',
-  down: 'trending-down',
-  note: 'sparkles',
-};
-
-/** What the saved days show, one line each, in lavender; a quiet note until there's enough to say. */
+/** What the saved days show, as short numbered notes; a quiet line until there's enough to say. */
 export function Observations({ items, day }: { items: Observation[]; day: number }) {
   const { c } = useTheme();
-  const depth = useDepth();
   const t = useT();
+  if (!items.length)
+    return (
+      <T color={c.textDim} style={styles.note} maxFontSizeMultiplier={1.6}>
+        {day < 7 ? t('insights.observations.early') : t('insights.observations.none')}
+      </T>
+    );
   return (
-    <ThemedView
-      style={[styles.panel, styles.reflect, depth.card, { backgroundColor: c.surface, borderLeftColor: c.accent }]}
-    >
-      {items.length ? (
-        items.map((o, i) => (
-          <Animated.View
-            key={o.id}
-            entering={FadeIn.delay(100 + i * 70)
-              .duration(300)
-              .reduceMotion(sys)}
-            style={styles.observation}
-          >
-            <View style={[styles.obsIcon, { backgroundColor: c.accentSoft }]}>
-              <Ionicons
-                name={TONE[o.tone]}
-                size={15}
-                color={o.tone === 'up' ? c.sage : o.tone === 'down' ? c.peach : c.accentInk}
-              />
-            </View>
-            <T style={{ flex: 1 }} maxFontSizeMultiplier={1.3}>
-              {o.text}
+    <View>
+      {items.map((o, i) => (
+        <View key={o.id}>
+          {i ? <Rule style={styles.noteRule} /> : null}
+          <View style={styles.noteRow}>
+            <T style={[styles.noteNum, { color: c.textFaint }]} maxFontSizeMultiplier={1.3}>
+              {formatNumber(i + 1)}
             </T>
-          </Animated.View>
-        ))
-      ) : (
-        <View style={styles.observation}>
-          <View style={[styles.obsIcon, { backgroundColor: c.accentSoft }]}>
-            <Ionicons name="leaf-outline" size={15} color={c.accentInk} />
+            <T color={c.textDim} style={[styles.note, { flex: 1 }]} maxFontSizeMultiplier={1.6}>
+              <Figures text={o.text} />
+            </T>
           </View>
-          <T color={c.textDim} style={{ flex: 1 }} maxFontSizeMultiplier={1.3}>
-            {day < 7 ? t('insights.observations.early') : t('insights.observations.none')}
-          </T>
         </View>
-      )}
-    </ThemedView>
+      ))}
+    </View>
   );
 }
 
@@ -678,87 +778,61 @@ export function ScreenTimeHistory({
 }
 
 const styles = StyleSheet.create({
-  chapter: { marginTop: space.xl, gap: 2 },
-  chapterRule: { width: 28, height: 3, borderRadius: 2, marginBottom: space.sm },
-  chapterTitle: { fontSize: 28, lineHeight: 34 },
-  // Ring and facts side by side; on a narrow phone the facts move below the ring instead of squeezing words apart.
-  hero: {
-    borderRadius: 28,
-    padding: space.lg,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: space.lg,
-  },
-  ringCenter: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ringValue: { fontSize: 32, lineHeight: 36, fontWeight: '700', letterSpacing: -0.8, fontVariant: ['tabular-nums'] },
-  heroText: { flexGrow: 1, flexShrink: 1, flexBasis: 160, minWidth: 160, gap: space.sm },
-  fact: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  factDot: { width: 8, height: 8, borderRadius: 4 },
-  factValue: { fontWeight: '700', fontVariant: ['tabular-nums'] },
-  panel: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
-  panelHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: space.sm },
-  chartRow: { flexDirection: 'row', gap: 6 },
-  axis: { height: CHART_H, justifyContent: 'space-between', paddingVertical: 0 },
-  axisText: { fontSize: 10, lineHeight: 12, fontVariant: ['tabular-nums'] },
-  weekHit: { position: 'absolute', top: 0, bottom: 0, width: 36 },
+  rule: { height: StyleSheet.hairlineWidth },
+  figure: { fontWeight: '600' },
+  big: { fontWeight: '200', letterSpacing: -2, fontVariant: ['tabular-nums'] },
+  bigRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 2 },
+  sign: { fontWeight: '300' },
+  chapter: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  chapterTitle: { flexShrink: 0, maxWidth: '68%', fontSize: 11.5, letterSpacing: 2 },
+  numeral: { fontSize: 11.5, letterSpacing: 1 },
+  chapterRule: { flex: 1, minWidth: 12, height: StyleSheet.hairlineWidth, opacity: 0.35 },
+  chapterNote: { flexShrink: 1, maxWidth: '45%', fontSize: 13, lineHeight: 17, textAlign: 'right' },
+  consistency: { gap: space.md },
+  hero: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.lg },
+  lede: { flex: 1, minWidth: 128, fontSize: 17, lineHeight: 23 },
+  facts: { flexDirection: 'row', alignItems: 'center' },
+  factSep: { borderStartWidth: StyleSheet.hairlineWidth, marginStart: FACT_GAP, paddingStart: FACT_GAP },
+  factText: { fontSize: 15, lineHeight: 20 },
+  trend: { gap: 6, marginTop: space.xs },
+  level: { position: 'absolute', right: 0, fontSize: 11, lineHeight: 13 },
+  value: { position: 'absolute', width: 60, textAlign: 'center', fontSize: 12.5, lineHeight: 16, fontVariant: ['tabular-nums'] },
+  weekHit: { position: 'absolute', top: 0, bottom: -24, width: 44 },
   weeks: { height: 16 },
-  weekLabel: {
-    position: 'absolute',
-    width: 32,
-    textAlign: 'center',
-    fontSize: 11,
-    lineHeight: 14,
-    fontVariant: ['tabular-nums'],
-  },
-  divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 0 },
-  habitRow: { gap: 6, paddingVertical: space.md },
-  habitTop: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  habitPct: { marginLeft: 'auto', fontVariant: ['tabular-nums'] },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: radius.pill,
-  },
-  badgeText: { fontWeight: '600', fontSize: 11 },
-  track: { height: 8, borderRadius: 4, overflow: 'hidden' },
-  trackFill: { height: 8, borderRadius: 4 },
-  habitDetails: { gap: space.sm, paddingBottom: space.md },
-  medals: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space.lg },
-  // Two to a row, one to a row on a narrow phone (so a long word never breaks).
-  medal: {
-    flexBasis: '50%',
-    flexGrow: 1,
-    minWidth: 150,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.sm,
-    paddingRight: space.sm,
-  },
-  medalDisc: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  medalValue: { fontSize: 22, lineHeight: 26, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  reflect: { borderLeftWidth: 3 },
-  observation: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
-  obsIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: -2 },
+  weekLabel: { position: 'absolute', width: 40, textAlign: 'center', fontSize: 11, lineHeight: 14, fontVariant: ['tabular-nums'] },
+  caption: { fontSize: 14, lineHeight: 19 },
+  paper: { marginTop: -space.md, marginHorizontal: -space.lg, paddingHorizontal: space.lg, paddingBottom: 248, marginBottom: -248, gap: space.md },
+  fadeRoom: { flexGrow: 1, minHeight: 48, justifyContent: 'flex-end', marginHorizontal: -space.lg },
+  fade: { flex: 1, maxHeight: 180 },
+  habit: { paddingVertical: 20, gap: 4 },
+  habitTop: { flexDirection: 'row', alignItems: 'baseline', gap: space.md },
+  habitName: { flex: 1, fontSize: 16.5, lineHeight: 22, fontWeight: '600' },
+  habitPct: { fontSize: 24, lineHeight: 28, fontWeight: '300', fontVariant: ['tabular-nums'] },
+  habitSign: { fontSize: 13, fontWeight: '400' },
+  habitMeta: { fontSize: 13, lineHeight: 18 },
+  track: { height: 12, marginTop: 12, justifyContent: 'center' },
+  trackLine: { position: 'absolute', left: 0, right: 0, top: 5.5, height: 1, opacity: 0.9 },
+  mid: { position: 'absolute', left: '50%', marginLeft: -1.5, top: 4.5, width: 3, height: 3, borderRadius: 1.5, opacity: 0.6 },
+  trackRow: { flexDirection: 'row', alignItems: 'center' },
+  trackFill: { height: 1.5, opacity: 0.55 },
+  mark: { width: 8, height: 8, borderRadius: 4, marginLeft: -4 },
+  habitDetails: { gap: space.sm, paddingBottom: space.lg },
+  axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
+  axisText: { fontSize: 11, lineHeight: 14, fontVariant: ['tabular-nums'] },
+  axisMid: { position: 'absolute', left: 0, right: 0, textAlign: 'center' },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, alignSelf: 'flex-start' },
+  linkText: { fontSize: 15, lineHeight: 20, fontWeight: '500', textDecorationLine: 'underline', flexShrink: 1 },
+  linkArrow: { fontSize: 15, lineHeight: 20 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  cell: { flexBasis: '50%', flexGrow: 0, paddingVertical: 20, gap: 4 },
+  cellStart: { paddingEnd: space.lg },
+  cellEnd: { paddingStart: space.lg },
+  cellDivide: { borderEndWidth: StyleSheet.hairlineWidth },
+  cellTop: { borderTopWidth: StyleSheet.hairlineWidth },
+  noteRow: { flexDirection: 'row', gap: 10 },
+  noteNum: { width: 14, fontSize: 12, lineHeight: 26, fontVariant: ['tabular-nums'] },
+  note: { fontSize: 17, lineHeight: 26 },
+  noteRule: { width: 28, marginVertical: 20, marginStart: 24 },
   screenBars: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   screenCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: '100%' },
   screenBar: { width: '70%', borderRadius: 4 },
