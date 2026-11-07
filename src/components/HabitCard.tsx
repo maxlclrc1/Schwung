@@ -111,7 +111,8 @@ const INK: Record<Theme, { veil: string[]; top: string[]; title: string; target:
       veil: ['rgba(247,246,251,0)', 'rgba(247,246,251,0.62)', 'rgba(247,246,251,0.94)'],
       top: ['rgba(247,246,251,0.6)', 'rgba(247,246,251,0)'],
       title: '#1B1830',
-      target: 'rgba(27,24,48,0.72)',
+      // Secondary text over the painting: strong enough to read on every scene (WCAG AA on the darkest ones).
+      target: 'rgba(27,24,48,0.93)',
       chip: 'rgba(255,255,255,0.72)',
       edge: 'rgba(27,24,48,0.12)',
     },

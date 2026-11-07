@@ -24,6 +24,7 @@ import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, formatPercent, t as tr } from '../i18n';
 import { useT } from '../i18n/react';
+import { useOnArt } from './onArt';
 import { physical } from '../i18n/direction';
 
 /*
@@ -53,10 +54,11 @@ function useEntrance(delay = 0, duration = 760) {
 /** A chapter of the page: its number in the chapter's colour, then the question itself. */
 export function Chapter({ n, title, tint }: { n: string; title: string; tint: string }) {
   const { c } = useTheme();
+  const onArt = useOnArt();
   return (
     <View style={styles.chapter} accessibilityRole="header">
       <View style={[styles.chapterRule, { backgroundColor: tint }]} />
-      <T v="overline" color={c.textDim} style={{ letterSpacing: 2 }}>
+      <T v="overline" color={onArt.ink ?? c.textDim} style={[{ letterSpacing: 2 }, onArt.style]}>
         {n}
       </T>
       <T v="title" style={styles.chapterTitle}>

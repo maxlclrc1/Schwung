@@ -34,6 +34,7 @@ import { UnlockMoment } from '../collection/UnlockMoment';
 import { ChooseNextCard } from '../beyond/ChooseNextCard';
 import { TodayHero } from './TodayHero';
 import { useT } from '../../i18n/react';
+import { useOnArt } from '../onArt';
 import { formatList, t as tr } from '../../i18n';
 import { sessionName } from '../../core/reset/pilot';
 
@@ -67,6 +68,7 @@ function useResetClock() {
 
 export function PilotToday() {
   const { c } = useTheme();
+  const onArt = useOnArt();
   const t = useT();
   const insets = useSafeAreaInsets();
   const program = useResetPilot((s) => s.program)!;
@@ -221,10 +223,10 @@ export function PilotToday() {
         ) : null}
 
         <View style={styles.section}>
-          <T v="overline" color={c.textDim}>
+          <T v="overline" color={onArt.ink ?? c.textDim} style={onArt.style}>
             {t('today.todaysHabits')}
           </T>
-          <T v="label" color={full ? c.sageInk : c.textDim}>
+          <T v="label" color={full ? c.sageInk : (onArt.ink ?? c.textDim)} style={onArt.style}>
             {awaiting
               ? t('today.resting')
               : full
@@ -263,7 +265,7 @@ export function PilotToday() {
               onPress={() => router.push('/life-reset/add')}
             />
           ) : null}
-          <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
+          <T v="caption" color={onArt.ink ?? c.textFaint} style={[{ textAlign: 'center' }, onArt.style]}>
             {t('today.swipeHelp')}
           </T>
           {__DEV__ && devTools() ? <PilotClock today={today} /> : null}

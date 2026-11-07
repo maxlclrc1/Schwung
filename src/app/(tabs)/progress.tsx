@@ -27,6 +27,7 @@ import { useDepth } from '../../theme/depth';
 import { ThemedView } from '../../theme/transition';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
+import { useOnArt } from '../../components/onArt';
 import { flipX } from '../../i18n/direction';
 
 /**
@@ -77,6 +78,7 @@ function Header() {
 
 function Ascent({ picked, source }: { picked: number | null; source: JourneySource }) {
   const { c } = useTheme();
+  const onArt = useOnArt();
   const depth = useDepth();
   const t = useT();
   const insets = useSafeAreaInsets();
@@ -225,7 +227,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             {program?.after ? <SinceSummit program={program} today={today} /> : null}
             <PastJourneysLink />
             <View style={styles.expedition}>
-              <T v="overline" color={c.textDim}>
+              <T v="overline" color={onArt.ink ?? c.textDim} style={onArt.style}>
                 {t('journeyTab.expedition')}
               </T>
               <ExpeditionCalendar

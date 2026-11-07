@@ -17,6 +17,7 @@ import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { t as tr } from '../i18n';
 import { useT } from '../i18n/react';
+import { useOnArt } from './onArt';
 import { flipX, physical } from '../i18n/direction';
 
 const DOTS = trailDots(3);
@@ -189,6 +190,7 @@ export const AscentScene = memo(AscentSceneImpl);
  */
 function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
   const { c, isDark } = useTheme();
+  const onArt = useOnArt();
   const t = useT();
   const height = Math.round(width / ASCENT_ASPECT);
   const maintenance = today > PROGRAM_DAYS;
@@ -251,7 +253,12 @@ function AscentLabelsImpl({ today, width }: { today: number; width: number }) {
             {maintenance ? t('journeyTab.ascent.maintenance') : t('journeyTab.ascent.day', { day: today })}
           </T>
           {!maintenance ? (
-            <T v="caption" maxFontSizeMultiplier={1.15} color={c.textDim} style={styles.tabular}>
+            <T
+              v="caption"
+              maxFontSizeMultiplier={1.15}
+              color={onArt.ink ?? c.textDim}
+              style={[styles.tabular, onArt.style]}
+            >
               {t('journeyTab.ascent.of', { total: PROGRAM_DAYS })}
             </T>
           ) : null}

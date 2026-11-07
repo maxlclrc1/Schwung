@@ -21,6 +21,7 @@ import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, t as tr } from '../i18n';
 import { useT } from '../i18n/react';
+import { useOnArt } from './onArt';
 
 /*
  * Below the mountain on Journey: the climb in numbers (the day, the days completed, the next milestone, and a
@@ -208,6 +209,7 @@ function Stage({
   animate: { current: boolean };
 }) {
   const { c } = useTheme();
+  const onArt = useOnArt();
   const t = useT();
   const tint = phaseTint(c, phase.n);
   const [open, setOpen] = useState(false);
@@ -252,13 +254,13 @@ function Stage({
                   {phase.name}
                 </T>
                 {current ? (
-                  <View style={[styles.here, { backgroundColor: c.indigoSoft }]}>
+                  <View style={[styles.here, { backgroundColor: onArt.pill ?? c.indigoSoft }]}>
                     <T v="caption" color={c.indigoInk} style={styles.hereText}>
                       {t('journeyTab.stage.here')}
                     </T>
                   </View>
                 ) : null}
-                <T v="caption" color={c.textFaint} style={{ marginLeft: 'auto' }}>
+                <T v="caption" color={onArt.ink ?? c.textFaint} style={[{ marginLeft: 'auto' }, onArt.style]}>
                   {t('journeyTab.stage.days', { from: phase.from, to: phase.to })}
                 </T>
               </View>

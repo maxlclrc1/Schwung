@@ -24,6 +24,7 @@ import { RollingText } from '../RollingText';
 import { ThemeToggle } from '../ThemeToggle';
 import { ProgressBar, T } from '../ui';
 import { useT } from '../../i18n/react';
+import { useOnArt } from '../onArt';
 import { useScriptAdjust } from '../../i18n/script';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -63,6 +64,7 @@ export function TodayHero({
   ascent?: number;
 }) {
   const { c } = useTheme();
+  const onArt = useOnArt();
   const dayScript = useScriptAdjust(styles.day);
   const depth = useDepth();
   const t = useT();
@@ -88,7 +90,7 @@ export function TodayHero({
               </Text>
             )}
           </Text>
-          <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.4}>
+          <T v="caption" color={onArt.ink ?? c.textDim} maxFontSizeMultiplier={1.4} style={onArt.style}>
             {phase}
           </T>
         </View>
