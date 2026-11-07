@@ -721,6 +721,8 @@ export const ko: Translation = {
       levelA11y: '{title}, {xp} XP. 컬렉션 열기',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '오늘 {total}개 중 {done}개 완료',
     },
     phase: {
       after: '목표는 지금 그대로 유지돼요.',

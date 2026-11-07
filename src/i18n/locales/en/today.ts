@@ -17,6 +17,7 @@ export const today = {
     levelA11y: '{title}, {xp} XP. Open your collection',
     xp: 'XP',
     gain: '+{xp} XP',
+    doneToday: '{done} of {total} done today',
   },
   phase: {
     after: 'Your targets stay where they are.',

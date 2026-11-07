@@ -749,6 +749,8 @@ export const ptBR: Translation = {
       levelA11y: '{title}, {xp} XP. Abrir sua coleção',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '{done} de {total} feitos hoje',
     },
     phase: {
       after: 'Suas metas ficam onde estão.',

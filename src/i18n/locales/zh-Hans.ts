@@ -708,6 +708,8 @@ export const zhHans: Translation = {
       levelA11y: '{title}，{xp} XP。打开你的收藏',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '今天已完成 {done}/{total}',
     },
     phase: {
       after: '你的目标保持不变。',

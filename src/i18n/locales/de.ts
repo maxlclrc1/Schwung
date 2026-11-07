@@ -763,6 +763,8 @@ export const de: Translation = {
       levelA11y: '{title}, {xp} XP. Deine Sammlung öffnen',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '{done} von {total} heute erledigt',
     },
     phase: {
       after: 'Deine Ziele bleiben, wo sie sind.',

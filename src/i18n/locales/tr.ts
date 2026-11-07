@@ -747,6 +747,8 @@ export const tr: Translation = {
       levelA11y: '{title}, {xp} XP. Koleksiyonunu aç',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: 'Bugün {total} alışkanlıktan {done} tanesi tamam',
     },
     phase: {
       after: 'Hedeflerin olduğu yerde kalır.',

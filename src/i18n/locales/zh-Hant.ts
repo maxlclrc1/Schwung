@@ -707,6 +707,8 @@ export const zhHant: Translation = {
       levelA11y: '{title}，{xp} XP。打開你的收藏',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: '今天已完成 {done}/{total}',
     },
     phase: {
       after: '你的目標維持不變。',

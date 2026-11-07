@@ -720,6 +720,8 @@ export const th: Translation = {
       levelA11y: '{title} {xp} XP เปิดคอลเลกชันของคุณ',
       xp: 'XP',
       gain: '+{xp} XP',
+
+      doneToday: 'วันนี้ทำแล้ว {done} จาก {total}',
     },
     phase: {
       after: 'เป้าหมายของคุณคงอยู่ตามเดิม',
