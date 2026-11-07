@@ -15,7 +15,7 @@ import { ASCENT_PHASES, LANDMARKS, type AscentPhase } from '../core/ascent';
 import { cellSummary, shortDate, type DayCell } from '../core/charts';
 import { PROGRAM_DAYS } from '../core/dates';
 import { haptic } from '../lib/haptics';
-import { radius, space, useTheme, type Colors } from '../theme';
+import { radius, space, type as textStyle, useTheme, type Colors } from '../theme';
 import { useDepth } from '../theme/depth';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
@@ -278,7 +278,7 @@ function Stage({
           <T v="caption" color={c.text}>
             {phaseMeaning(phase.n)}
           </T>
-          <T v="caption" color={tint.ink} style={{ fontWeight: '700' }}>
+          <T v="label" color={tint.ink}>
             {t('journeyTab.stage.complete', { done: complete, length })}
             {ahead
               ? t('journeyTab.stage.opens', { day: phase.from })
@@ -434,7 +434,7 @@ function DayNote({ cell, today, name }: { cell: DayCell; today: number; name: (i
           </T>
         </View>
         {milestone ? (
-          <T v="caption" color={c.peachInk} style={{ fontWeight: '700' }}>
+          <T v="label" color={c.peachInk}>
             {milestone.name}
           </T>
         ) : null}
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
   summary: { borderRadius: 24, padding: space.lg, gap: space.lg },
   figures: { flexDirection: 'row', alignItems: 'flex-start' },
   figure: { flex: 1, gap: 2, alignItems: 'center' },
-  figureValue: { fontSize: 30, lineHeight: 34, fontWeight: '800', letterSpacing: -0.6, fontVariant: ['tabular-nums'] },
+  figureValue: { fontSize: 30, lineHeight: 34, fontWeight: '700', letterSpacing: -0.6, fontVariant: ['tabular-nums'] },
   figureUnit: { textAlign: 'center' },
   rule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginHorizontal: space.xs },
   ridge: { flexDirection: 'row', gap: 4, height: 8 },
@@ -461,10 +461,10 @@ const styles = StyleSheet.create({
   stage: { gap: space.md },
   stageHead: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 44 },
   stageBadge: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  stageNumber: { fontWeight: '800' },
+  stageNumber: { fontWeight: '700' },
   stageTitleRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   here: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: radius.pill },
-  hereText: { fontWeight: '700', fontSize: 12 },
+  hereText: { fontWeight: '600', fontSize: 12 },
   stageTrack: { height: 4, borderRadius: 2, overflow: 'hidden' },
   stageFill: { height: 4, borderRadius: 2 },
   meaning: { borderRadius: radius.md, padding: space.md, gap: 4 },
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   stoneHit: { alignItems: 'center', justifyContent: 'center' },
   selected: { position: 'absolute', borderWidth: 1.5 },
   stone: { alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
-  stoneText: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  stoneText: { ...textStyle.small, fontVariant: ['tabular-nums'] },
   restDot: { width: 5, height: 5, borderRadius: 3 },
   flag: { position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
   note: { borderRadius: radius.lg, padding: space.md, gap: 4 },

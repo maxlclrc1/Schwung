@@ -88,14 +88,25 @@ export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 }
 export const radius = { sm: 10, md: 16, lg: 22, pill: 999 } as const;
 export const motion = { fast: 150, base: 200, slow: 250 } as const;
 
+/**
+ * Schwung's text styles (the system font). Two weights carry almost everything: regular (400) for reading and
+ * semibold (600) for anything that labels or leads. Bold (700) is kept for the few things meant to be seen first:
+ * screen titles, the big numbers, a habit card's name.
+ * - display / title: screen and moment titles; heading: section headings and a sheet's main line;
+ * - body / bodyStrong: reading text and its lead-in; caption: secondary information;
+ * - label: a caption that names or counts something (chips, pills, short labels); small: a card's status line;
+ * - overline: the small capitals above a heading.
+ */
 export const type = {
-  display: { fontSize: 44, lineHeight: 48, fontWeight: '800', letterSpacing: -1.2 },
-  title: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
-  heading: { fontSize: 20, lineHeight: 26, fontWeight: '700', letterSpacing: -0.3 },
+  display: { fontSize: 44, lineHeight: 48, fontWeight: '700', letterSpacing: -1.2 },
+  title: { fontSize: 30, lineHeight: 36, fontWeight: '700', letterSpacing: -0.6 },
+  heading: { fontSize: 20, lineHeight: 26, fontWeight: '600', letterSpacing: -0.3 },
   body: { fontSize: 17, lineHeight: 24, fontWeight: '400' },
   bodyStrong: { fontSize: 17, lineHeight: 24, fontWeight: '600' },
-  caption: { fontSize: 14, lineHeight: 19, fontWeight: '500' },
-  overline: { fontSize: 12, lineHeight: 16, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase' },
+  caption: { fontSize: 14, lineHeight: 19, fontWeight: '400' },
+  label: { fontSize: 14, lineHeight: 19, fontWeight: '600' },
+  small: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
+  overline: { fontSize: 12, lineHeight: 16, fontWeight: '600', letterSpacing: 1.2, textTransform: 'uppercase' },
 } satisfies Record<string, TextStyle>;
 
 const themeFor = (scheme: Scheme) => ({ c: scheme === 'dark' ? dark : light, isDark: scheme === 'dark', scheme });

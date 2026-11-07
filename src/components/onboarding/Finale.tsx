@@ -203,7 +203,7 @@ export function Finale({
           accessibilityLabel={tr('setup.finale.skipA11y')}
         >
           <View style={[styles.skipPill, { backgroundColor: c.surface }]}>
-            <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
+            <T v="label" color={c.textDim}>
               {skipped && !saved ? tr('setup.finale.saving') : tr('setup.finale.skip')}
             </T>
           </View>

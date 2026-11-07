@@ -78,7 +78,7 @@ export function AgeDial({ years, onChange }: { years: number | null; onChange: (
         <View
           style={[styles.chip, { backgroundColor: young ? 'transparent' : band ? tn.lavender.soft : 'transparent' }]}
         >
-          <T v="caption" color={young ? c.danger : band ? tn.lavender.ink : c.textFaint} style={{ fontWeight: '700' }}>
+          <T v="label" color={young ? c.danger : band ? tn.lavender.ink : c.textFaint}>
             {band
               ? young
                 ? tr('setup.ageDial.under18')

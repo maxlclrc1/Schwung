@@ -360,7 +360,7 @@ export function PilotSetup() {
               >
                 <View style={[styles.suggest, { backgroundColor: tints.lavender.soft }]}>
                   <Ionicons name="sparkles" size={14} color={tints.lavender.ink} />
-                  <T v="caption" color={tints.lavender.ink} style={{ fontWeight: '700' }}>
+                  <T v="label" color={tints.lavender.ink}>
                     {t('setup.q.suggest')}
                   </T>
                 </View>
@@ -593,7 +593,7 @@ export function PilotSetup() {
                   style={[styles.fact, { backgroundColor: f.tint.soft }]}
                 >
                   <Ionicons name={f.icon} size={14} color={f.tint.ink} />
-                  <T v="caption" color={f.tint.ink} style={{ fontWeight: '700' }}>
+                  <T v="label" color={f.tint.ink}>
                     {f.text}
                   </T>
                 </Animated.View>
@@ -615,7 +615,7 @@ export function PilotSetup() {
                       </T>
                     </View>
                     <View style={[styles.level, { backgroundColor: dot.soft }]}>
-                      <T v="caption" color={dot.ink} style={{ fontWeight: '700' }}>
+                      <T v="label" color={dot.ink}>
                         {P.intensityName(x.intensity)}
                       </T>
                     </View>
@@ -717,7 +717,7 @@ const styles = StyleSheet.create({
   wash: { opacity: 0.55 },
   top: { paddingHorizontal: space.xl, paddingTop: space.sm, gap: space.xs, flexDirection: 'row', alignItems: 'center' },
   chapterBox: { minWidth: 84, minHeight: 20, flexShrink: 1, overflow: 'hidden', alignItems: 'flex-end' },
-  chapter: { fontWeight: '700', textAlign: 'right' },
+  chapter: { fontWeight: '600', textAlign: 'right' },
   facts: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, justifyContent: 'center' },
   fact: {
     flexDirection: 'row',

@@ -161,7 +161,7 @@ export function Stones({ count, max }: { count: number; max: number }) {
   // Six stones at most; past six, the number says it.
   if (count > 6)
     return (
-      <T v="caption" color={tn.lavender.ink} style={{ fontWeight: '700' }}>
+      <T v="label" color={tn.lavender.ink}>
         {count} chosen
       </T>
     );

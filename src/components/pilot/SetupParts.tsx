@@ -133,7 +133,7 @@ export function Chip({
           { backgroundColor: on ? c.accentSoft : c.surface, borderColor: on ? c.accentInk : c.border },
         ]}
       >
-        <T v="caption" color={on ? c.accentInk : c.text} style={{ fontWeight: '600' }}>
+        <T v="label" color={on ? c.accentInk : c.text}>
           {label}
         </T>
       </ThemedView>

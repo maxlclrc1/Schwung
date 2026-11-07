@@ -317,7 +317,7 @@ export function AscentCaption({
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
             <Ionicons name="map-outline" size={14} color={c.accentInk} />
-            <T v="caption" maxFontSizeMultiplier={1.3} color={c.accentInk} style={{ fontWeight: '700' }}>
+            <T v="label" maxFontSizeMultiplier={1.3} color={c.accentInk}>
               {t('journeyTab.ascent.journey')}
             </T>
           </ThemedView>
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   orb: { position: 'absolute', left: 8, top: 8, width: 14, height: 14, borderRadius: 7 },
   where: { position: 'absolute', left: space.lg, top: space.md, gap: 0 },
   dayLine: { flexDirection: 'row', alignItems: 'baseline' },
-  dayText: { fontSize: 22, lineHeight: 26, fontWeight: '800' },
+  dayText: { fontSize: 22, lineHeight: 26, fontWeight: '700' },
   dayTextSmall: { fontSize: 18, lineHeight: 24 },
   tabular: { fontVariant: ['tabular-nums'] },
   captionDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 1.5 },

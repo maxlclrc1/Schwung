@@ -16,7 +16,7 @@ import Animated, {
 import { checkLook, CONFIRM_DOWN_MS, CONFIRM_UP_MS, confirmLift, doneDuration, statusLook } from './completionMotion';
 import { dragOffset, swipeOutcome, SWIPE_THRESHOLD, thresholdTick, touchIntent } from '../core/swipe';
 import { completionHaptic, haptic } from '../lib/haptics';
-import { space, useTheme } from '../theme';
+import { space, type as textStyle, useTheme } from '../theme';
 import { useDepth } from '../theme/depth';
 import { useThemeProgress } from '../theme/transition';
 import { cropAt, habitScene, placeholderCrop } from './habitArt';
@@ -722,13 +722,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   markSolid: { borderRadius: MARK / 2, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 25, lineHeight: 30, fontWeight: '800', letterSpacing: -0.5 },
+  title: { fontSize: 25, lineHeight: 30, fontWeight: '700', letterSpacing: -0.5 },
   target: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
   status: { minHeight: 26, justifyContent: 'center' },
   statusSide: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   statusOver: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
   hint: { flexDirection: 'row', alignItems: 'center', gap: 2, flexShrink: 1 },
-  hintText: { fontSize: 13, lineHeight: 18, fontWeight: '600', letterSpacing: 0.2 },
+  hintText: { ...textStyle.small, letterSpacing: 0.2 },
   check: {
     width: 44,
     height: 44,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
     height: 26,
     borderRadius: 13,
   },
-  doneText: { fontSize: 13, fontWeight: '700' },
+  doneText: textStyle.small,
   // 32 tall to sit on the status line; its hit area (hitSlop 8) is 48.
   undo: {
     flexDirection: 'row',
@@ -759,6 +759,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexShrink: 0,
   },
-  undoText: { fontSize: 13, lineHeight: 18, fontWeight: '700' },
+  undoText: textStyle.small,
   undoIcon: { width: 32, paddingHorizontal: 0, justifyContent: 'center' },
 });
