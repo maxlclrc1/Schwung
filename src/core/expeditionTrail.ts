@@ -5,7 +5,8 @@
  * beside the route on the side with the most room. Everything here is computed once, at load.
  *
  * Foundation (Days 1–21) is the approved design's own (docs/design-exploration/journey-organic-trail-*.png,
- * 5c42dd8), starting at Day 1. Momentum (Days 22–44) picks up where Foundation leaves the map, at the top right.
+ * 5c42dd8), starting at Day 1. Momentum (Days 22–44) picks up where Foundation leaves the map, at the top right, and
+ * Mastery (Days 45–66) where Momentum leaves its own, ending at Day 66.
  */
 
 export const TRAIL_W = 358;
@@ -270,5 +271,55 @@ export const MOMENTUM_TRAIL = makeTrail({
   ],
   start: 0.05,
   span: 0.9,
+  fromFirstDay: false,
+});
+
+/**
+ * Mastery enters where Momentum leaves its map and climbs onto high ground: a long traverse under a ridge, a tight
+ * bend against a steep spur, a long crossing below a peak and through a saddle, another tight bend against the steep
+ * right flank, and a last curl that ends at Day 66: nothing leads on beyond it.
+ */
+export const MASTERY_TRAIL = makeTrail({
+  first: 45,
+  h: 1110,
+  waypoints: [
+    [152, -8],
+    [150, 44],
+    [168, 98],
+    [222, 128],
+    [290, 146],
+    [326, 192],
+    [320, 248],
+    [278, 276],
+    [222, 284],
+    [160, 298],
+    [102, 326],
+    [60, 374],
+    [50, 436],
+    [70, 490],
+    [118, 512],
+    [178, 514],
+    [240, 526],
+    [290, 556],
+    [318, 606],
+    [312, 664],
+    [276, 702],
+    [220, 716],
+    [170, 744],
+    [142, 792],
+    [146, 848],
+    [182, 888],
+    [240, 912],
+    [286, 948],
+    [298, 1000],
+    [274, 1048],
+    [226, 1078],
+    [186, 1096],
+  ],
+  gaps: [
+    1.2, 1.1, 0.9, 1.07, 1.0, 1.07, 1.15, 1.0, 0.98, 0.85, 1.06, 1.3, 1.05, 0.95, 0.85, 0.9, 1.15, 1.12, 1.0, 0.95, 1.1,
+  ],
+  start: 0.045,
+  span: 0.955,
   fromFirstDay: false,
 });

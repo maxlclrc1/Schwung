@@ -5,7 +5,7 @@ import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { ASCENT_PHASES, LANDMARKS } from '../../core/ascent';
 import { cellSummary, shortDate, type DayCell } from '../../core/charts';
-import { FOUNDATION_TRAIL, MOMENTUM_TRAIL, TRAIL_W } from '../../core/expeditionTrail';
+import { FOUNDATION_TRAIL, MASTERY_TRAIL, MOMENTUM_TRAIL, TRAIL_W } from '../../core/expeditionTrail';
 import { haptic } from '../../lib/haptics';
 import { space, useTheme, type Colors } from '../../theme';
 import { T } from '../ui';
@@ -14,10 +14,11 @@ import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
 import { FOUNDATION_CONTOURS } from './foundationContours';
 import { MOMENTUM_CONTOURS } from './momentumContours';
+import { MASTERY_CONTOURS } from './masteryContours';
 
 /*
  * A chapter of the climb on Journey as a trail across a contour map: Foundation (Days 1–21, the approved design,
- * 5c42dd8) and Momentum (Days 22–44). The route, the terrain and the day positions are fixed in trail units
+ * 5c42dd8), Momentum (Days 22–44) and Mastery (Days 45–66). The route, the terrain and the day positions are fixed in trail units
  * (core/expeditionTrail.ts) and scaled to the screen's width, so a trail keeps its shape on every iPhone. The walked
  * part is solid sage up to today; ahead it is a fine line. Each day is its own button; the selected day's entry sits
  * under its chapter's trail.
@@ -31,10 +32,11 @@ const OVER_BOTTOM = 120;
 const HIT = 44;
 const ROMAN = ['I', 'II', 'III'] as const;
 
-/** The chapters drawn as trails, with their maps. Mastery still shows as day stones (Expedition.tsx). */
+/** The three chapters of the climb, each a trail on its own map, one after the other. */
 export const CHAPTERS = [
   { n: 1, trail: FOUNDATION_TRAIL, contours: FOUNDATION_CONTOURS },
   { n: 2, trail: MOMENTUM_TRAIL, contours: MOMENTUM_CONTOURS },
+  { n: 3, trail: MASTERY_TRAIL, contours: MASTERY_CONTOURS },
 ] as const;
 export type Chapter = (typeof CHAPTERS)[number];
 
