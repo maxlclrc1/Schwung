@@ -13,6 +13,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { checkLook, CONFIRM_DOWN_MS, CONFIRM_UP_MS, confirmLift, doneDuration, statusLook } from './completionMotion';
 import { dragOffset, swipeOutcome, SWIPE_THRESHOLD, thresholdTick, touchIntent } from '../core/swipe';
 import { completionHaptic, haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
@@ -262,34 +263,38 @@ function HabitCardImpl({
   }, [done]);
   useEffect(() => () => clearTimeout(pending.current), []);
   const doneP = useSharedValue(done ? 1 : 0);
-  // Completing (never on open or a re-render): one soft sage ring breathes out from the check, and the check
-  // itself lands with a small overshoot-free pop.
-  const ring = useSharedValue(0);
+  // Completing (never on open or a re-render): the card's wash lifts a little and settles (completionMotion).
+  const confirm = useSharedValue(0);
   // A finger resting on the card: a faint shade (the card itself is never scaled, so nothing blurs).
   const held = useSharedValue(0);
   const hold = (on: boolean) => held.set(withTiming(on ? 1 : 0, { duration: on ? 80 : 200 }));
-  const pop = useSharedValue(0);
   const wasDone = useRef(done);
-  useEffect(() => {
+  // Where the done look is heading: the card starts it on a tap or swipe, so the program catching up a frame later
+  // doesn't restart it (and a change from elsewhere, such as the details, still animates).
+  const heading = useRef(done ? 1 : 0);
+  const animateDone = (to: 0 | 1) => {
+    heading.current = to;
     doneP.set(
-      reduceMotion
-        ? done
-          ? 1
-          : 0
-        : withTiming(done ? 1 : 0, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
+      withTiming(to, {
+        duration: doneDuration(reduceMotion),
+        easing: reduceMotion ? Easing.linear : Easing.bezier(0.22, 1, 0.36, 1),
+      }),
     );
+  };
+  useEffect(() => {
+    const to = done ? 1 : 0;
+    if (heading.current !== to) animateDone(to);
     const completed = done && !wasDone.current;
     wasDone.current = done;
     if (!completed || reduceMotion) return;
-    ring.set(0);
-    ring.set(withTiming(1, { duration: 620, easing: Easing.out(Easing.cubic) }));
-    pop.set(
+    confirm.set(
       withSequence(
-        withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) }),
-        withTiming(0, { duration: 260, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: CONFIRM_UP_MS, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: CONFIRM_DOWN_MS, easing: Easing.inOut(Easing.quad) }),
       ),
     );
-  }, [done, doneP, reduceMotion, ring, pop]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- animateDone reads only refs, shared values and props
+  }, [done, reduceMotion]);
 
   /** Back to rest: a spring that picks up the finger's speed (pt/ms) as it lets go, or a plain ease (Reduce Motion). */
   const settle = (velocity = 0) => {
@@ -308,15 +313,14 @@ function HabitCardImpl({
     pending.current = setTimeout(() => (pending.current = undefined), 600);
     // The card answers at once, on the UI thread; the program (and everything that follows it: XP, the day, the
     // other tabs) updates a frame later, so that work never holds the animation's first frame.
-    doneP.set(
-      reduceMotion
-        ? done
-          ? 0
-          : 1
-        : withTiming(done ? 0 : 1, { duration: 300, easing: Easing.bezier(0.22, 1, 0.36, 1) }),
-    );
+    animateDone(done ? 0 : 1);
     // One haptic, from what actually changed: complete, undo, or none (nothing changed).
-    requestAnimationFrame(() => completionHaptic(onToggle(habitId)));
+    requestAnimationFrame(() => {
+      const event = onToggle(habitId);
+      completionHaptic(event);
+      // Nothing changed after all (a change that couldn't be made): the look goes back to what's true.
+      if (!event) animateDone(done ? 1 : 0);
+    });
   };
 
   // The card's touches, all on the responder system (so a swipe cleanly cancels a press or a long-press):
@@ -482,24 +486,20 @@ function HabitCardImpl({
   // Done: a soft violet wash over the scene, which stays visible, deepening a little as a swipe nears the threshold.
   const washStyle = useAnimatedStyle(() => {
     const k = interpolate(done ? 0 : pull.get(), [0, reach], [0, 0.5], 'clamp');
-    return { opacity: Math.max(doneP.get(), k) * (isDark ? 0.24 : 0.16) };
+    return { opacity: Math.max(doneP.get(), k) * (isDark ? 0.24 : 0.16) + confirmLift(confirm.get(), reduceMotion) };
   });
-  const doneRow = useAnimatedStyle(() => ({
-    opacity: doneP.get(),
-    transform: [{ translateY: (1 - doneP.get()) * 6 }],
-  }));
+  const doneRow = useAnimatedStyle(() => {
+    const l = statusLook(doneP.get(), reduceMotion);
+    return { opacity: l.opacity, transform: [{ translateY: l.translateY }] };
+  });
   const todoRow = useAnimatedStyle(() => ({ opacity: 1 - doneP.get() }));
-  const badge = useAnimatedStyle(() => ({
-    opacity: doneP.get(),
-    transform: [{ scale: 0.6 + 0.4 * doneP.get() + 0.14 * pop.get() }],
-  }));
+  const badge = useAnimatedStyle(() => {
+    const l = checkLook(doneP.get(), reduceMotion);
+    return { opacity: l.opacity, transform: [{ scale: l.scale }] };
+  });
   const heldStyle = useAnimatedStyle(() => ({ opacity: held.get() * (isDark ? 0.16 : 0.08) }));
   // Done: a fine sage edge around the card.
   const edgeStyle = useAnimatedStyle(() => ({ opacity: doneP.get() * 0.95 }));
-  const ringStyle = useAnimatedStyle(() => ({
-    opacity: ring.get() > 0 && ring.get() < 1 ? 0.55 * (1 - ring.get()) : 0,
-    transform: [{ scale: 1 + ring.get() * 1.6 }],
-  }));
 
   const title = display.title;
   const target = display.task;
@@ -564,13 +564,7 @@ function HabitCardImpl({
         pointerEvents="none"
         style={[StyleSheet.absoluteFill, styles.edge, { borderColor: c.sage }, edgeStyle]}
       />
-      {/* Done: a check in the top-right corner, with the ring that breathes out from it on completing. */}
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.badge, styles.ring, { borderColor: c.sage }, ringStyle]}
-        importantForAccessibility="no-hide-descendants"
-        accessibilityElementsHidden
-      />
+      {/* Done: a check in the top-right corner. */}
       <Animated.View
         pointerEvents="none"
         style={[styles.badge, { backgroundColor: c.sage }, badge]}
@@ -713,7 +707,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ring: { backgroundColor: 'transparent', borderWidth: 2 },
   held: { backgroundColor: '#000000' },
   edge: { borderRadius: RADIUS, borderWidth: 2.5 },
   mark: { position: 'absolute', top: 30 },
