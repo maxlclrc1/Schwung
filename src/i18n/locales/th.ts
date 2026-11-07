@@ -863,7 +863,6 @@ export const th: Translation = {
     storyA11y: 'เรื่องราว 66 วันของคุณ เปิดเพื่อบันทึกหรือแชร์',
     story: 'เรื่องราว 66 วันของคุณ',
     storyBody: 'ของที่ระลึกของการปีนทั้งหมด สำหรับบันทึกหรือแชร์',
-    expedition: 'การเดินทาง',
     habitDone: '{habit} ทำแล้ว',
     habitNotDone: '{habit} ยังไม่ได้ทำ',
     stillAhead: 'ยังมาไม่ถึง',
@@ -883,28 +882,19 @@ export const th: Translation = {
       open: 'เปิดเส้นทางของคุณ',
       journey: 'เส้นทาง',
     },
-    meaning: {
-      1: 'ทุกนิสัยเริ่มที่เป้าหมายรากฐาน เล็กพอจะทำได้แม้วันที่ยุ่ง',
-      2: 'จากตรงนี้ เป้าหมายระดับแรงส่งจะเปิดให้ เมื่อคุณทำได้สม่ำเสมอ จะรับหรือไม่ก็เป็นสิทธิ์ของคุณเสมอ',
-      3: 'ช่วงสุดท้ายสู่ยอดเขา เป้าหมายเชี่ยวชาญจะเปิดถ้าคุณต้องการ',
-    },
     summary: {
-      climbed: 'วันที่ปีนแล้ว',
-      dayOf: 'วัน จาก {total}',
       complete: { other: 'วันที่ทำครบ' },
       toNext: 'วันถึง{name}',
       reached: 'พิชิตยอดเขาแล้ว',
       a11y: '{value} {unit}',
+
+      summitDay: 'วันพิชิตยอดเขา',
     },
     stage: {
-      a11y: '{phase} วันที่ {from} ถึง {to} ทำครบ {done} จาก {length}',
       here: 'คุณอยู่ที่นี่',
-      hereA11y: ' คุณอยู่ที่นี่',
-      hint: 'แสดงว่าช่วงนี้มีไว้เพื่ออะไร',
       days: 'วันที่ {from}–{to}',
       complete: 'ทำครบ {done} จาก {length} วัน',
       opens: ' · เปิดในวันที่ {day}',
-      dayOf: ' · วันที่ {day} จาก {length}',
     },
     cell: {
       a11y: 'วันที่ {day} {state}',
@@ -919,7 +909,6 @@ export const th: Translation = {
       unrecorded: 'ไม่มีบันทึก',
       future: 'ยังมาไม่ถึง',
       day: 'วันที่ {day}',
-      todaySuffix: ' · วันนี้',
     },
 
     trail: { open: 'เปิดดูวันนั้น' },

@@ -896,7 +896,6 @@ export const ptBR: Translation = {
     storyA11y: 'Sua história de 66 dias. Abra para salvar ou compartilhar',
     story: 'Sua história de 66 dias',
     storyBody: 'Uma lembrança de toda a subida, para salvar ou compartilhar.',
-    expedition: 'A expedição',
     habitDone: '{habit}, feito',
     habitNotDone: '{habit}, não feito',
     stillAhead: 'Ainda por vir.',
@@ -916,28 +915,19 @@ export const ptBR: Translation = {
       open: 'Abrir sua jornada',
       journey: 'Jornada',
     },
-    meaning: {
-      1: 'Cada hábito começa na meta de Base, pequena o bastante para cumprir num dia cheio.',
-      2: 'As metas de Impulso se abrem a partir daqui, oferecidas quando você tem sido constante. Aceitá-las é sempre escolha sua.',
-      3: 'O último trecho até o cume. As metas de Maestria se abrem, se você quiser.',
-    },
     summary: {
-      climbed: 'dias escalados',
-      dayOf: 'dia de {total}',
       complete: { one: 'dia completo', other: 'dias completos' },
       toNext: 'dias até {name}',
       reached: 'cume alcançado',
       a11y: '{value} {unit}',
+
+      summitDay: 'dia do cume',
     },
     stage: {
-      a11y: '{phase}, dias {from} a {to}. {done} de {length} completos.',
       here: 'Você está aqui',
-      hereA11y: ' Você está aqui.',
-      hint: 'Mostra para que serve esta etapa',
       days: 'Dias {from}–{to}',
       complete: '{done} de {length} dias completos',
       opens: ' · abre no dia {day}',
-      dayOf: ' · dia {day} de {length}',
     },
     cell: {
       a11y: 'Dia {day}. {state}',
@@ -952,7 +942,6 @@ export const ptBR: Translation = {
       unrecorded: 'Sem registro.',
       future: 'Ainda por vir.',
       day: 'Dia {day}',
-      todaySuffix: ' · Hoje',
     },
 
     trail: { open: 'Abrir dia' },

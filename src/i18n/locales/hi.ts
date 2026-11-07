@@ -890,7 +890,6 @@ export const hi: Translation = {
     storyA11y: 'आपकी 66 दिन की कहानी। सेव या शेयर करने के लिए इसे खोलें',
     story: 'आपकी 66 दिन की कहानी',
     storyBody: 'पूरी चढ़ाई की एक यादगार, सेव या शेयर करने के लिए।',
-    expedition: 'अभियान',
     habitDone: '{habit}, पूरी',
     habitNotDone: '{habit}, पूरी नहीं',
     stillAhead: 'अभी आगे है।',
@@ -910,28 +909,19 @@ export const hi: Translation = {
       open: 'अपना सफ़र खोलें',
       journey: 'सफ़र',
     },
-    meaning: {
-      1: 'हर आदत अपने नींव लक्ष्य से शुरू होती है, इतना छोटा कि व्यस्त दिन में भी निभ जाए।',
-      2: 'यहाँ से रफ़्तार के लक्ष्य खुलते हैं, जो आपके नियमित रहने पर पेश किए जाते हैं। उन्हें लेना हमेशा आपकी मर्ज़ी है।',
-      3: 'शिखर तक का आख़िरी हिस्सा। आप चाहें तो महारत लक्ष्य खुलते हैं।',
-    },
     summary: {
-      climbed: 'दिन चढ़े',
-      dayOf: '{total} में से दिन',
       complete: { one: 'दिन पूरा', other: 'दिन पूरे' },
       toNext: '{name} तक दिन',
       reached: 'शिखर पर पहुँचे',
       a11y: '{value} {unit}',
+
+      summitDay: 'शिखर का दिन',
     },
     stage: {
-      a11y: '{phase}, दिन {from} से {to}। {length} में से {done} पूरे।',
       here: 'आप यहाँ हैं',
-      hereA11y: ' आप यहाँ हैं।',
-      hint: 'दिखाता है कि यह पड़ाव किसलिए है',
       days: 'दिन {from}–{to}',
       complete: '{length} में से {done} दिन पूरे',
       opens: ' · दिन {day} को खुलेगा',
-      dayOf: ' · {length} में से दिन {day}',
     },
     cell: {
       a11y: 'दिन {day}। {state}',
@@ -946,7 +936,6 @@ export const hi: Translation = {
       unrecorded: 'कोई रिकॉर्ड नहीं।',
       future: 'अभी आगे है।',
       day: 'दिन {day}',
-      todaySuffix: ' · आज',
     },
 
     trail: { open: 'दिन खोलें' },

@@ -865,7 +865,6 @@ export const ko: Translation = {
     storyA11y: '나의 66일 이야기. 열어서 저장하거나 공유하세요',
     story: '나의 66일 이야기',
     storyBody: '등반 전체를 담은 기념품. 저장하거나 공유해 보세요.',
-    expedition: '원정 기록',
     habitDone: '{habit}, 완료',
     habitNotDone: '{habit}, 미완료',
     stillAhead: '아직 남은 날이에요.',
@@ -885,28 +884,19 @@ export const ko: Translation = {
       open: '여정 열기',
       journey: '여정',
     },
-    meaning: {
-      1: '모든 습관은 기초 목표에서 시작해요. 바쁜 날에도 지킬 수 있을 만큼 작아요.',
-      2: '여기서부터 모멘텀 목표가 열려요. 꾸준히 해 왔을 때 제안되며, 받아들일지는 언제나 내 선택이에요.',
-      3: '정상까지 마지막 구간. 원하면 숙련 목표가 열려요.',
-    },
     summary: {
-      climbed: '일 오름',
-      dayOf: '일째 / {total}',
       complete: { other: '일 완료' },
       toNext: '일 후 {name}',
       reached: '정상 도착',
       a11y: '{value} {unit}',
+
+      summitDay: '정상의 날',
     },
     stage: {
-      a11y: '{phase}, {from}–{to}일째. {length}일 중 {done}일 완료.',
       here: '현재 위치',
-      hereA11y: ' 현재 위치예요.',
-      hint: '이 단계의 의미 보기',
       days: '{from}–{to}일째',
       complete: '{length}일 중 {done}일 완료',
       opens: ' · {day}일째에 열림',
-      dayOf: ' · {length}일 중 {day}일째',
     },
     cell: {
       a11y: '{day}일째. {state}',
@@ -921,7 +911,6 @@ export const ko: Translation = {
       unrecorded: '기록 없음.',
       future: '아직 남은 날.',
       day: '{day}일째',
-      todaySuffix: ' · 오늘',
     },
 
     trail: { open: '이날 열기' },

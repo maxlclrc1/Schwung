@@ -202,12 +202,17 @@ export function milestoneDue(p: PilotProgram, today: number): number | null {
 }
 
 /**
- * The summit ceremony is due once the 66 days are done: on Day 66 when the day is complete, or from the day after
- * whatever happened (consistency never decides it). Never before Day 66, never twice.
+ * The 66 days are done: on Day 66 once the day is complete, or from the day after whatever happened (consistency
+ * never decides it). Arriving at Day 66 alone isn't the summit.
  */
+export function summitReached(p: PilotProgram, today: number): boolean {
+  return today > PROGRAM_DAYS || (today === PROGRAM_DAYS && dayFull(p, PROGRAM_DAYS));
+}
+
+/** The summit ceremony is due once the summit is reached (summitReached). Never before Day 66, never twice. */
 export function summitDue(p: PilotProgram, today: number): boolean {
   if (p.ceremonies?.summit) return false;
-  return today > PROGRAM_DAYS || (today === PROGRAM_DAYS && dayFull(p, PROGRAM_DAYS));
+  return summitReached(p, today);
 }
 
 // --- Beyond the summit (docs/BEYOND_THE_SUMMIT_PLAN.md) ---

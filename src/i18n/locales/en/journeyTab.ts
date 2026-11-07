@@ -18,7 +18,6 @@ export const journeyTab = {
   storyA11y: 'Your 66-day story. Open it to save or share',
   story: 'Your 66-day story',
   storyBody: 'A keepsake of the whole climb, to save or share.',
-  expedition: 'The expedition',
   habitDone: '{habit}, done',
   habitNotDone: '{habit}, not done',
   stillAhead: 'Still ahead.',
@@ -40,28 +39,19 @@ export const journeyTab = {
   },
   /** The Foundation trail's day entry: opens the day's habits by the mountain. */
   trail: { open: 'Open day' },
-  meaning: {
-    1: 'Every habit starts at its Foundation target, small enough to keep on a busy day.',
-    2: 'Momentum targets open from here, offered when you’ve been consistent. Taking them is always your choice.',
-    3: 'The last stretch to the summit. Mastery targets open, if you want them.',
-  },
   summary: {
-    climbed: 'days climbed',
-    dayOf: 'day of {total}',
     complete: { one: 'day complete', other: 'days complete' },
     toNext: 'days to {name}',
     reached: 'summit reached',
+    /** Day 66 before it's complete: the summit is today's climb, not reached yet. */
+    summitDay: 'summit day',
     a11y: '{value} {unit}',
   },
   stage: {
-    a11y: '{phase}, days {from} to {to}. {done} of {length} complete.',
     here: 'You are here',
-    hereA11y: ' You are here.',
-    hint: 'Shows what this stage is for',
     days: 'Days {from}–{to}',
     complete: '{done} of {length} days complete',
     opens: ' · opens on day {day}',
-    dayOf: ' · day {day} of {length}',
   },
   cell: {
     a11y: 'Day {day}. {state}',
@@ -76,6 +66,5 @@ export const journeyTab = {
     unrecorded: 'No record.',
     future: 'Still ahead.',
     day: 'Day {day}',
-    todaySuffix: ' · Today',
   },
 };

@@ -889,7 +889,6 @@ export const vi: Translation = {
     storyA11y: 'Câu chuyện 66 ngày của bạn. Mở để lưu hoặc chia sẻ',
     story: 'Câu chuyện 66 ngày của bạn',
     storyBody: 'Kỷ niệm của cả chặng leo, để lưu hoặc chia sẻ.',
-    expedition: 'Cuộc thám hiểm',
     habitDone: '{habit}, đã xong',
     habitNotDone: '{habit}, chưa xong',
     stillAhead: 'Còn ở phía trước.',
@@ -909,28 +908,19 @@ export const vi: Translation = {
       open: 'Mở hành trình của bạn',
       journey: 'Hành trình',
     },
-    meaning: {
-      1: 'Mọi thói quen bắt đầu từ mục tiêu Nền tảng, đủ nhỏ để giữ cả vào ngày bận rộn.',
-      2: 'Từ đây, mục tiêu Đà tiến được mở, gợi ý khi bạn đã đều đặn. Nhận hay không luôn là lựa chọn của bạn.',
-      3: 'Chặng cuối lên đỉnh núi. Mục tiêu Thành thạo mở ra, nếu bạn muốn.',
-    },
     summary: {
-      climbed: 'ngày đã leo',
-      dayOf: 'ngày trên {total}',
       complete: { other: 'ngày hoàn thành' },
       toNext: 'ngày đến {name}',
       reached: 'đã lên đỉnh',
       a11y: '{value} {unit}',
+
+      summitDay: 'ngày lên đỉnh',
     },
     stage: {
-      a11y: '{phase}, ngày {from} đến {to}. Hoàn thành {done}/{length}.',
       here: 'Bạn đang ở đây',
-      hereA11y: ' Bạn đang ở đây.',
-      hint: 'Cho biết giai đoạn này để làm gì',
       days: 'Ngày {from}–{to}',
       complete: 'Hoàn thành {done}/{length} ngày',
       opens: ' · mở vào ngày {day}',
-      dayOf: ' · ngày {day}/{length}',
     },
     cell: {
       a11y: 'Ngày {day}. {state}',
@@ -945,7 +935,6 @@ export const vi: Translation = {
       unrecorded: 'Không có bản ghi.',
       future: 'Còn ở phía trước.',
       day: 'Ngày {day}',
-      todaySuffix: ' · Hôm nay',
     },
 
     trail: { open: 'Mở ngày' },

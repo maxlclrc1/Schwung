@@ -903,7 +903,6 @@ export const id: Translation = {
     storyA11y: 'Kisah 66 harimu. Buka untuk menyimpan atau membagikannya',
     story: 'Kisah 66 harimu',
     storyBody: 'Kenang-kenangan dari seluruh pendakian, untuk disimpan atau dibagikan.',
-    expedition: 'Ekspedisi',
     habitDone: '{habit}, selesai',
     habitNotDone: '{habit}, belum selesai',
     stillAhead: 'Masih di depan.',
@@ -923,28 +922,19 @@ export const id: Translation = {
       open: 'Buka perjalananmu',
       journey: 'Perjalanan',
     },
-    meaning: {
-      1: 'Setiap kebiasaan dimulai dari target Fondasi, cukup kecil untuk dijalani di hari yang sibuk.',
-      2: 'Target Momentum terbuka dari sini, ditawarkan saat kamu sudah konsisten. Mengambilnya selalu pilihanmu.',
-      3: 'Bagian terakhir menuju puncak. Target Penguasaan terbuka, kalau kamu mau.',
-    },
     summary: {
-      climbed: 'hari didaki',
-      dayOf: 'hari dari {total}',
       complete: { other: 'hari lengkap' },
       toNext: 'hari menuju {name}',
       reached: 'puncak tercapai',
       a11y: '{value} {unit}',
+
+      summitDay: 'hari puncak',
     },
     stage: {
-      a11y: '{phase}, hari {from} sampai {to}. {done} dari {length} lengkap.',
       here: 'Kamu di sini',
-      hereA11y: ' Kamu di sini.',
-      hint: 'Menunjukkan tujuan tahap ini',
       days: 'Hari {from}–{to}',
       complete: '{done} dari {length} hari lengkap',
       opens: ' · terbuka di hari ke-{day}',
-      dayOf: ' · hari ke-{day} dari {length}',
     },
     cell: {
       a11y: 'Hari ke-{day}. {state}',
@@ -959,7 +949,6 @@ export const id: Translation = {
       unrecorded: 'Tidak ada catatan.',
       future: 'Masih di depan.',
       day: 'Hari ke-{day}',
-      todaySuffix: ' · Hari ini',
     },
 
     trail: { open: 'Buka hari' },

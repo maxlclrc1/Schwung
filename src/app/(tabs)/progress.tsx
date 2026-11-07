@@ -21,6 +21,7 @@ import { PROGRAM_DAYS } from '../../core/dates';
 import { dayQualifies, logForDay } from '../../core/progression';
 import type { DayLog } from '../../core/types';
 import * as C from '../../core/reset/charts';
+import { summitReached } from '../../core/reset/pilot';
 import { worldFrame } from '../../core/world';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
@@ -230,7 +231,11 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
             {/* The landscape settles into the page behind the stats and the Foundation trail. */}
             <View style={styles.expedition}>
               <Backdrop color={c.bg} />
-              <JourneyStats today={Math.min(today, PROGRAM_DAYS)} completed={completed} />
+              <JourneyStats
+                today={Math.min(today, PROGRAM_DAYS)}
+                completed={completed}
+                summit={!!program && summitReached(program, today)}
+              />
               <ExpeditionCalendar
                 cells={cells}
                 today={Math.min(today, PROGRAM_DAYS)}

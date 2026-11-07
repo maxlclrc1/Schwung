@@ -891,7 +891,6 @@ export const tr: Translation = {
     storyA11y: '66 günlük hikâyen. Kaydetmek ya da paylaşmak için aç',
     story: '66 günlük hikâyen',
     storyBody: 'Tüm tırmanışın bir hatırası; kaydet ya da paylaş.',
-    expedition: 'Sefer',
     habitDone: '{habit}, tamam',
     habitNotDone: '{habit}, yapılmadı',
     stillAhead: 'Henüz gelmedi.',
@@ -911,28 +910,19 @@ export const tr: Translation = {
       open: 'Yolculuğunu aç',
       journey: 'Yolculuk',
     },
-    meaning: {
-      1: 'Her alışkanlık Temel hedefiyle başlar; yoğun bir günde bile sürdürülecek kadar küçük.',
-      2: 'İvme hedefleri buradan itibaren açılır, istikrarlı olduğunda sunulur. Almak her zaman senin seçimin.',
-      3: 'Zirveye son etap. İstersen Ustalık hedefleri açılır.',
-    },
     summary: {
-      climbed: 'gün tırmanıldı',
-      dayOf: 'gün / {total}',
       complete: { one: 'gün tamam', other: 'gün tamam' },
       toNext: 'gün kaldı: {name}',
       reached: 'zirveye ulaşıldı',
       a11y: '{value} {unit}',
+
+      summitDay: 'zirve günü',
     },
     stage: {
-      a11y: '{phase}, günler {from}–{to}. {length} günün {done} günü tamam.',
       here: 'Buradasın',
-      hereA11y: ' Buradasın.',
-      hint: 'Bu aşamanın ne için olduğunu gösterir',
       days: 'Günler {from}–{to}',
       complete: '{length} günün {done} günü tamam',
       opens: ' · {day}. günde açılır',
-      dayOf: ' · gün {day} / {length}',
     },
     cell: {
       a11y: 'Gün {day}. {state}',
@@ -947,7 +937,6 @@ export const tr: Translation = {
       unrecorded: 'Kayıt yok.',
       future: 'Henüz gelmedi.',
       day: 'Gün {day}',
-      todaySuffix: ' · Bugün',
     },
 
     trail: { open: 'Günü aç' },

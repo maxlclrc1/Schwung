@@ -1022,7 +1022,6 @@ export const ar: Translation = {
     storyA11y: 'قصتك في 66 يومًا. فتحها للحفظ أو المشاركة',
     story: 'قصتك في 66 يومًا',
     storyBody: 'تذكار للصعود كله، للحفظ أو المشاركة.',
-    expedition: 'الرحلة الاستكشافية',
     habitDone: '{habit}، أُنجزت',
     habitNotDone: '{habit}، لم تُنجز',
     stillAhead: 'لم يأتِ بعد.',
@@ -1042,14 +1041,7 @@ export const ar: Translation = {
       open: 'فتح رحلتك',
       journey: 'الرحلة',
     },
-    meaning: {
-      1: 'تبدأ كل عادة بهدف مرحلة الأساس، صغير بما يكفي ليُحافظ عليه حتى في يوم مزدحم.',
-      2: 'من هنا تُفتح أهداف الزخم، وتُعرض عليك حين يظهر انتظامك. والأخذ بها دائمًا قرارك.',
-      3: 'المرحلة الأخيرة نحو القمة. تُفتح أهداف الإتقان إن أردت.',
-    },
     summary: {
-      climbed: 'أيام الصعود',
-      dayOf: 'يوم من {total}',
       complete: {
         zero: 'يوم مكتمل',
         one: 'يوم مكتمل',
@@ -1061,16 +1053,14 @@ export const ar: Translation = {
       toNext: 'أيام حتى {name}',
       reached: 'تم بلوغ القمة',
       a11y: '{value} {unit}',
+
+      summitDay: 'يوم القمة',
     },
     stage: {
-      a11y: '{phase}، الأيام {from} إلى {to}. اكتمل {done} من {length}.',
       here: 'أنت هنا',
-      hereA11y: ' أنت هنا.',
-      hint: 'يوضح الغاية من هذه المرحلة',
       days: 'الأيام {from}–{to}',
       complete: 'اكتمل {done} من {length} يومًا',
       opens: ' · تُفتح في اليوم {day}',
-      dayOf: ' · اليوم {day} من {length}',
     },
     cell: {
       a11y: 'اليوم {day}. {state}',
@@ -1085,7 +1075,6 @@ export const ar: Translation = {
       unrecorded: 'لا سجل.',
       future: 'لم يأتِ بعد.',
       day: 'اليوم {day}',
-      todaySuffix: ' · اليوم',
     },
 
     trail: { open: 'فتح اليوم' },
