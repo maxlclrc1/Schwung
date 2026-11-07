@@ -909,6 +909,8 @@ export const zhHans: Translation = {
       day: '第{day}天',
       todaySuffix: ' · 今天',
     },
+
+    trail: { open: '打开当天' },
   },
   insights: {
     title: '洞察',

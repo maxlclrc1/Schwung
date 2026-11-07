@@ -947,6 +947,8 @@ export const vi: Translation = {
       day: 'Ngày {day}',
       todaySuffix: ' · Hôm nay',
     },
+
+    trail: { open: 'Mở ngày' },
   },
   insights: {
     title: 'Thống kê',

@@ -972,6 +972,8 @@ export const fr: Translation = {
       day: 'Jour {day}',
       todaySuffix: ' · Aujourd’hui',
     },
+
+    trail: { open: 'Ouvrir le jour' },
   },
   insights: {
     title: 'Tendances',

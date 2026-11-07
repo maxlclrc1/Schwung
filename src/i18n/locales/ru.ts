@@ -1037,6 +1037,8 @@ export const ru: Translation = {
       day: 'День {day}',
       todaySuffix: ' · Сегодня',
     },
+
+    trail: { open: 'Открыть день' },
   },
   insights: {
     title: 'Аналитика',

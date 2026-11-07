@@ -967,6 +967,8 @@ export const de: Translation = {
       day: 'Tag {day}',
       todaySuffix: ' · Heute',
     },
+
+    trail: { open: 'Tag öffnen' },
   },
   insights: {
     title: 'Einblicke',

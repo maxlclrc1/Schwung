@@ -943,6 +943,8 @@ export const bn: Translation = {
       day: 'দিন {day}',
       todaySuffix: ' · আজ',
     },
+
+    trail: { open: 'দিন খুলুন' },
   },
   insights: {
     title: 'ইনসাইট',

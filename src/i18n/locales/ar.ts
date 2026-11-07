@@ -1087,6 +1087,8 @@ export const ar: Translation = {
       day: 'اليوم {day}',
       todaySuffix: ' · اليوم',
     },
+
+    trail: { open: 'فتح اليوم' },
   },
   insights: {
     title: 'الرؤى',

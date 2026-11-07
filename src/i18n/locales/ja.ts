@@ -939,6 +939,8 @@ export const ja: Translation = {
       day: '{day}日目',
       todaySuffix: ' · 今日',
     },
+
+    trail: { open: 'この日を開く' },
   },
   insights: {
     title: 'インサイト',

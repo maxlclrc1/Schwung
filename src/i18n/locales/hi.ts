@@ -948,6 +948,8 @@ export const hi: Translation = {
       day: 'दिन {day}',
       todaySuffix: ' · आज',
     },
+
+    trail: { open: 'दिन खोलें' },
   },
   insights: {
     title: 'इनसाइट्स',

@@ -954,6 +954,8 @@ export const ptBR: Translation = {
       day: 'Dia {day}',
       todaySuffix: ' · Hoje',
     },
+
+    trail: { open: 'Abrir dia' },
   },
   insights: {
     title: 'Insights',

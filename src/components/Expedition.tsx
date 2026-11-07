@@ -16,16 +16,17 @@ import { cellSummary, shortDate, type DayCell } from '../core/charts';
 import { PROGRAM_DAYS } from '../core/dates';
 import { haptic } from '../lib/haptics';
 import { radius, space, type as textStyle, useTheme, type Colors } from '../theme';
-import { useDepth } from '../theme/depth';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { formatNumber, t as tr } from '../i18n';
 import { useT } from '../i18n/react';
 import { useOnArt } from './onArt';
+import { FoundationTrail } from './journey/FoundationTrail';
+import { FOUNDATION_DAYS } from '../core/foundationTrail';
 
 /*
- * Below the mountain on Journey: the climb in numbers (the day, the days completed, the next milestone, and a
- * ridge-line bar of all 66 days), then the 66 days as an expedition calendar, one stage per phase. Every mark comes
+ * Below the mountain on Journey: the climb in one line (the days completed and the next milestone), then the 66 days:
+ * Foundation as a trail on a contour map (journey/FoundationTrail), Momentum and Mastery as stages of day stones. Every mark comes
  * from the program's own saved days (reset/charts.ts dayCells: each day judged on the habits it actually had,
  * weekly schedules and habits added or removed included). Nothing here is estimated.
  */
@@ -44,97 +45,47 @@ const phaseTint = (c: Colors, n: 1 | 2 | 3) =>
       ? { fill: c.mist, ink: c.mistInk, soft: c.mistSoft }
       : { fill: c.indigo, ink: c.indigoInk, soft: c.indigoSoft };
 
-/** The climb at a glance: three numbers that matter and the whole route as one bar. */
-export const JourneySummary = memo(function JourneySummary({
-  today,
-  completed,
-  cells,
-}: {
-  today: number;
-  /** Complete days so far (the journey's own count). */
-  completed: number;
-  cells: DayCell[];
-}) {
+/**
+ * The climb in one quiet line above the trail: the complete days so far and the days to the next milestone, from the
+ * journey's own count.
+ */
+export const JourneyStats = memo(function JourneyStats({ today, completed }: { today: number; completed: number }) {
   const { c } = useTheme();
-  const depth = useDepth();
+  const onArt = useOnArt();
   const t = useT();
-  const summit = today > PROGRAM_DAYS;
   const next = MILESTONES.find((d) => d > today);
-  const nextName = next ? LANDMARKS[next].name : null;
+  const unit = t('journeyTab.summary.complete', { count: completed });
+  const toNext = next
+    ? t('journeyTab.summary.toNext', { name: LANDMARKS[next].name })
+    : t('journeyTab.summary.reached');
   return (
-    <ThemedView style={[styles.summary, depth.card, { backgroundColor: c.surface }]}>
-      <View style={styles.figures}>
-        <Figure
-          value={formatNumber(summit ? PROGRAM_DAYS : today)}
-          unit={summit ? t('journeyTab.summary.climbed') : t('journeyTab.summary.dayOf', { total: PROGRAM_DAYS })}
-          color={c.indigoInk}
-        />
-        <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-        <Figure
-          value={formatNumber(completed)}
-          unit={t('journeyTab.summary.complete', { count: completed })}
-          color={c.sageInk}
-        />
-        <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-        <Figure
-          value={next ? formatNumber(next - today) : '—'}
-          unit={next ? t('journeyTab.summary.toNext', { name: nextName ?? '' }) : t('journeyTab.summary.reached')}
-          color={c.peachInk}
-        />
-      </View>
-      <Ridge cells={cells} today={today} />
-    </ThemedView>
+    <View style={styles.stats}>
+      <Stat value={formatNumber(completed)} unit={unit} />
+      {next ? (
+        <Stat value={formatNumber(next - today)} unit={toNext} />
+      ) : (
+        <T v="label" color={onArt.ink ?? c.textDim} style={onArt.style}>
+          {toNext}
+        </T>
+      )}
+    </View>
   );
 });
 
-function Figure({ value, unit, color }: { value: string; unit: string; color: string }) {
+function Stat({ value, unit }: { value: string; unit: string }) {
   const { c } = useTheme();
-  const depth = useDepth();
+  const onArt = useOnArt();
   const t = useT();
   return (
-    <View style={styles.figure} accessible accessibilityLabel={t('journeyTab.summary.a11y', { value, unit })}>
-      <Animated.View key={value} entering={FadeIn.duration(260).reduceMotion(sys)}>
-        <T style={[styles.figureValue, depth.hero, { color }]} maxFontSizeMultiplier={1.2}>
-          {value}
-        </T>
-      </Animated.View>
-      <T v="caption" color={c.textDim} style={styles.figureUnit} maxFontSizeMultiplier={1.2}>
-        {unit}
-      </T>
-    </View>
-  );
-}
-
-/** The route as one thin bar: complete days in sage, today in indigo, milestones as peach notches, phases spaced. */
-function Ridge({ cells, today }: { cells: DayCell[]; today: number }) {
-  const { c } = useTheme();
-  return (
-    <View style={styles.ridge} accessible={false} importantForAccessibility="no-hide-descendants">
-      {ASCENT_PHASES.map((p) => (
-        <View key={p.n} style={[styles.ridgePhase, { flex: p.to - p.from + 1 }]}>
-          {cells.slice(p.from - 1, p.to).map((cell) => (
-            <View
-              key={cell.day}
-              style={[
-                styles.ridgeDay,
-                {
-                  backgroundColor:
-                    cell.state === 'full'
-                      ? c.sage
-                      : cell.day === today
-                        ? c.indigo
-                        : cell.state === 'partial'
-                          ? c.sageSoft
-                          : c.surfaceHigh,
-                },
-              ]}
-            >
-              {MILESTONES.includes(cell.day) ? <View style={[styles.notch, { backgroundColor: c.peach }]} /> : null}
-            </View>
-          ))}
-        </View>
-      ))}
-    </View>
+    <T
+      v="label"
+      color={onArt.ink ?? c.textDim}
+      style={onArt.style}
+      accessibilityLabel={t('journeyTab.summary.a11y', { value, unit })}
+      maxFontSizeMultiplier={1.4}
+    >
+      <T style={[styles.statValue, { color: c.text }]}>{value}</T> {unit}
+    </T>
   );
 }
 
@@ -149,12 +100,15 @@ export const ExpeditionCalendar = memo(function ExpeditionCalendar({
   today,
   selected,
   onSelect,
+  onOpen,
   name,
 }: {
   cells: DayCell[];
   today: number;
   selected: number;
   onSelect: (day: number) => void;
+  /** Opens a day's full detail (from the Foundation trail's entry). */
+  onOpen: (day: number) => void;
   name: (id: string) => string;
 }) {
   const { width } = useWindowDimensions();
@@ -171,7 +125,15 @@ export const ExpeditionCalendar = memo(function ExpeditionCalendar({
 
   return (
     <View style={styles.calendar}>
-      {ASCENT_PHASES.map((p) => (
+      <FoundationTrail
+        cells={cells}
+        today={today}
+        selected={selected}
+        onSelect={onSelect}
+        onOpen={onOpen}
+        name={name}
+      />
+      {ASCENT_PHASES.slice(1).map((p) => (
         <Stage
           key={p.n}
           phase={p}
@@ -184,7 +146,7 @@ export const ExpeditionCalendar = memo(function ExpeditionCalendar({
           animate={settled}
         />
       ))}
-      {cell ? <DayNote cell={cell} today={today} name={name} /> : null}
+      {cell && cell.day > FOUNDATION_DAYS ? <DayNote cell={cell} today={today} name={name} /> : null}
     </View>
   );
 });
@@ -449,16 +411,8 @@ function DayNote({ cell, today, name }: { cell: DayCell; today: number; name: (i
 }
 
 const styles = StyleSheet.create({
-  summary: { borderRadius: 24, padding: space.lg, gap: space.lg },
-  figures: { flexDirection: 'row', alignItems: 'flex-start' },
-  figure: { flex: 1, gap: 2, alignItems: 'center' },
-  figureValue: { fontSize: 30, lineHeight: 34, fontWeight: '700', letterSpacing: -0.6, fontVariant: ['tabular-nums'] },
-  figureUnit: { textAlign: 'center' },
-  rule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginHorizontal: space.xs },
-  ridge: { flexDirection: 'row', gap: 4, height: 8 },
-  ridgePhase: { flexDirection: 'row', gap: 1 },
-  ridgeDay: { flex: 1, borderRadius: 1.5 },
-  notch: { position: 'absolute', left: -1, right: -1, top: -4, height: 3, borderRadius: 1.5 },
+  stats: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', columnGap: 18, rowGap: 4 },
+  statValue: { fontSize: 20, lineHeight: 24, fontWeight: '700', fontVariant: ['tabular-nums'] },
   calendar: { gap: space.xl },
   stage: { gap: space.md },
   stageHead: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 44 },
