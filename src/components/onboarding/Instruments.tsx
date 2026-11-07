@@ -194,14 +194,14 @@ export function PhoneMeter({
             return (
               <Press key={s} onPress={() => set(i)} accessibilityLabel={s} accessibilityRole="button">
                 <View style={styles.mark}>
-                  <View
-                    style={[styles.markLine, { backgroundColor: on ? fill : c.border, width: i === index ? 22 : 12 }]}
-                  />
-                  <T
-                    v="caption"
-                    color={i === index ? c.text : c.textDim}
-                    style={{ fontWeight: i === index ? '700' : '500' }}
-                  >
+                  {/* The tick grows inside a fixed slot and the label keeps one weight, so the scale's width (and the
+                      phone beside it) never shifts as the stops change. */}
+                  <View style={styles.markSlot}>
+                    <View
+                      style={[styles.markLine, { backgroundColor: on ? fill : c.border, width: i === index ? 22 : 12 }]}
+                    />
+                  </View>
+                  <T v="label" color={i === index ? c.text : c.textDim}>
                     {s}
                   </T>
                 </View>
@@ -759,6 +759,7 @@ const styles = StyleSheet.create({
   screenText: { position: 'absolute', left: 0, right: 0, top: '44%', alignItems: 'center' },
   ruler: { height: PHONE_H - 24, justifyContent: 'space-between' },
   mark: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 36 },
+  markSlot: { width: 22 },
   markLine: { height: 3, borderRadius: 2 },
   hiker: { position: 'absolute', left: 0, top: 0 },
   hikerBadge: {

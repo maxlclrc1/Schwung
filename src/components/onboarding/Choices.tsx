@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, type ComponentProps, type ReactNode } from 'react';
+import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   interpolate,
@@ -215,6 +215,10 @@ export function Stairs<K extends string>({
   onPick: (id: K) => void;
   tint: Tint;
 }) {
+  // Every step's words take the height of the tallest (a detail that wraps in one column), so the blocks above them
+  // all stand on the same line in every language and text size.
+  const [textHeight, setTextHeight] = useState(0);
+  const fit = (h: number) => setTextHeight((prev) => (h > prev ? h : prev));
   return (
     <View style={styles.stairs} accessibilityRole="radiogroup">
       {items.map((x, i) => (
@@ -226,6 +230,8 @@ export function Stairs<K extends string>({
           on={value === x.id}
           tint={tint}
           onPress={() => onPick(x.id)}
+          textHeight={textHeight}
+          onTextHeight={fit}
         />
       ))}
     </View>
@@ -239,6 +245,8 @@ function Stair({
   on,
   tint,
   onPress,
+  textHeight,
+  onTextHeight,
 }: {
   height: number;
   label: string;
@@ -246,6 +254,8 @@ function Stair({
   on: boolean;
   tint: Tint;
   onPress: () => void;
+  textHeight: number;
+  onTextHeight: (h: number) => void;
 }) {
   const { c } = useTheme();
   const t = useOn(on);
@@ -267,12 +277,17 @@ function Stair({
       <View style={styles.stair}>
         <Animated.View style={[styles.marker, { backgroundColor: tint.fill, borderColor: c.bg }, marker]} />
         <Animated.View style={[styles.block, { height }, block]} />
-        <T v="bodyStrong" color={on ? tint.ink : c.text} style={styles.center}>
-          {label}
-        </T>
-        <T v="caption" color={c.textDim} style={styles.center}>
-          {detail}
-        </T>
+        <View
+          style={[styles.stairWords, { minHeight: textHeight }]}
+          onLayout={(e) => onTextHeight(Math.ceil(e.nativeEvent.layout.height))}
+        >
+          <T v="bodyStrong" color={on ? tint.ink : c.text} style={styles.center}>
+            {label}
+          </T>
+          <T v="caption" color={c.textDim} style={styles.center}>
+            {detail}
+          </T>
+        </View>
       </View>
     </Press>
   );
@@ -479,6 +494,7 @@ const styles = StyleSheet.create({
   block: { borderRadius: radius.md, marginBottom: space.sm },
   marker: { alignSelf: 'center', width: 18, height: 18, borderRadius: 9, borderWidth: 3, marginBottom: space.sm },
   center: { textAlign: 'center' },
+  stairWords: { gap: space.xs, justifyContent: 'flex-start' },
   peaks: { flexDirection: 'row', gap: space.xs },
   peak: {
     alignItems: 'center',
