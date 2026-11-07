@@ -971,16 +971,9 @@ export const ptBR: Translation = {
     ring: {
       a11yNone: 'A constância aparece depois do seu primeiro dia',
       a11y: '{pct} de constância: {done} de {eligible} oportunidades de hábito feitas',
-      consistency: 'constância',
       first: 'Sua constância começa no seu primeiro dia.',
       done: '{done} de {eligible} oportunidades de hábito feitas',
-      thisWeek: 'Nesta semana',
       weekValue: '{done} de {eligible}',
-      streak: 'Sequência',
-      streakValue: { one: '{count} dia', other: '{count} dias' },
-      day: 'Dia',
-      dayValue: '{day} de {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} dia)', other: ' ({count} dias)' },
@@ -1019,6 +1012,13 @@ export const ptBR: Translation = {
     },
     strip: 'Últimos {count} dias: {done} feitos',
     bars: 'Semana {week}: {done} de {goal}',
+
+    facts: {
+      week: '{done} de {eligible} nesta semana',
+      streak: { one: 'sequência de {count} dia', other: 'sequência de {count} dias' },
+
+      day: 'Dia {day} de {total}',
+    },
   },
   setup: {
     age: { u16: 'Menos de 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

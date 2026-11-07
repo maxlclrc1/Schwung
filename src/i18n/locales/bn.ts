@@ -960,16 +960,9 @@ export const bn: Translation = {
     ring: {
       a11yNone: 'আপনার প্রথম দিনের পরে ধারাবাহিকতা দেখা যাবে',
       a11y: '{pct} ধারাবাহিকতা: {eligible}টি অভ্যাসের সুযোগের মধ্যে {done}টি সম্পন্ন',
-      consistency: 'ধারাবাহিকতা',
       first: 'আপনার ধারাবাহিকতা শুরু হয় আপনার প্রথম দিন থেকে।',
       done: '{eligible}টি অভ্যাসের সুযোগের মধ্যে {done}টি সম্পন্ন',
-      thisWeek: 'এই সপ্তাহ',
       weekValue: '{eligible}-এর মধ্যে {done}',
-      streak: 'স্ট্রিক',
-      streakValue: { one: '{count} দিন', other: '{count} দিন' },
-      day: 'দিন',
-      dayValue: '{total}-এর মধ্যে {day}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} দিন)', other: ' ({count} দিন)' },
@@ -1008,6 +1001,13 @@ export const bn: Translation = {
     },
     strip: 'গত {count} দিন: {done} সম্পন্ন',
     bars: 'সপ্তাহ {week}: {goal}-এর মধ্যে {done}',
+
+    facts: {
+      week: 'এই সপ্তাহে {eligible}টির মধ্যে {done}টি',
+      streak: { one: '{count} দিনের স্ট্রিক', other: '{count} দিনের স্ট্রিক' },
+
+      day: 'দিন {day} / {total}',
+    },
   },
   setup: {
     age: { u16: '18-এর কম', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

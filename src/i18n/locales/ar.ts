@@ -1111,23 +1111,9 @@ export const ar: Translation = {
     ring: {
       a11yNone: 'يظهر الانتظام بعد يومك الأول',
       a11y: 'الانتظام {pct}: أُنجزت {done} من {eligible} فرصة للعادات',
-      consistency: 'الانتظام',
       first: 'يبدأ انتظامك مع يومك الأول.',
       done: 'أُنجزت {done} من {eligible} فرصة للعادات',
-      thisWeek: 'هذا الأسبوع',
       weekValue: '{done} من {eligible}',
-      streak: 'السلسلة',
-      streakValue: {
-        zero: '{count} يوم',
-        one: 'يوم واحد',
-        two: 'يومان',
-        few: '{count} أيام',
-        many: '{count} يومًا',
-        other: '{count} يوم',
-      },
-      day: 'اليوم',
-      dayValue: '{day} من {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: {
@@ -1207,6 +1193,20 @@ export const ar: Translation = {
     },
     strip: 'آخر {count} من الأيام: أُنجز {done}',
     bars: 'الأسبوع {week}: {done} من {goal}',
+
+    facts: {
+      week: '{done} من {eligible} هذا الأسبوع',
+      streak: {
+        zero: 'السلسلة: {count} يوم',
+        one: 'السلسلة: يوم واحد',
+        two: 'السلسلة: يومان',
+        few: 'السلسلة: {count} أيام',
+        many: 'السلسلة: {count} يومًا',
+        other: 'السلسلة: {count} يوم',
+      },
+
+      day: 'اليوم {day} من {total}',
+    },
   },
   setup: {
     age: { u16: 'أقل من 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

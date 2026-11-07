@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useShownProgram } from '../shownProgram';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PROGRAM_DAYS } from '../../core/dates';
 import * as C from '../../core/reset/charts';
 import * as O from '../../core/reset/observations';
@@ -10,35 +10,43 @@ import * as P from '../../core/reset/pilot';
 import { weekOf } from '../../core/reset/weekly';
 import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { useShownOnce, useWhileFocused } from '../InsightCharts';
 import { DayStrip, WeekBars } from '../Insights';
 import {
+  ArtFade,
   Chapter,
-  ConsistencyRing,
+  Consistency,
+  DetailsLink,
   HabitBoard,
   type HabitRow,
   Observations,
-  RecordMedals,
+  Paper,
+  RecordGrid,
   ScreenTimeHistory,
   TrendLine,
+  weekNote,
 } from '../InsightsViz';
 import { RecentInsights } from '../beyond/RecentInsights';
 import { Button, T } from '../ui';
 import { useLanguage, useT } from '../../i18n/react';
 
 /**
- * Insights for the Life Reset, as three questions. How am I doing? The consistency ring and the weeks as a line.
- * What's working? The habits side by side (tap one for its history, target and difficulty) and the personal records.
- * What can I learn? Observations the saved days support, and Less Scrolling's optional weekly Screen Time check.
+ * Insights for the Life Reset, as a field journal in five chapters. On the painting: I · Consistency and II · Week by
+ * week, with the camp and the lake left open below. On the page: III · By habit (tap one for its history, target and
+ * difficulty), IV · Personal records and V · Patterns, then Less Scrolling's optional weekly Screen Time check.
  * The 66 days themselves are on Journey. Numbers come from the saved days only (reset/pilot.ts, reset/charts.ts,
  * reset/observations.ts).
  */
 export function PilotInsights() {
-  const { c } = useTheme();
   const t = useT();
   const program = useShownProgram()!;
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  // The first two chapters and the open lake fill the first screen: the page begins at the tab bar.
+  const [top, setTop] = useState(0);
+  const plate = height - (56 + insets.bottom) - top;
   const offset = useResetPilot((s) => s.devDayOffset);
   const today = pilotToday({ program, devDayOffset: offset });
   const lang = useLanguage();
@@ -97,7 +105,7 @@ export function PilotInsights() {
           )}
           <T v="caption">{P.targetText(program, id, today)}</T>
           {id === 'strength_log' ? <StrengthWeeks program={program} today={today} /> : null}
-          <Button label={t('insights.details')} kind="secondary" onPress={() => router.push(`/life-reset/${id}`)} />
+          <DetailsLink label={t('insights.details')} onPress={() => router.push(`/life-reset/${id}`)} />
         </>
       ),
     };
@@ -105,18 +113,32 @@ export function PilotInsights() {
 
   return (
     <>
-      <Chapter n="01" title={t('insights.chapter.doing')} tint={c.mist} />
-      {program.after ? <RecentInsights program={program} today={today} /> : null}
-      <ConsistencyRing {...data} day={today} />
-      {charts ? <TrendLine points={charts.trend} /> : null}
+      <View style={[styles.plate, { minHeight: plate }]} onLayout={(e) => setTop(e.nativeEvent.layout.y)}>
+        {program.after ? <RecentInsights program={program} today={today} /> : null}
+        <Chapter n={1} title={t('insights.chapter.doing')} gap={space.sm} />
+        <Consistency {...data} day={today} />
+        {charts ? (
+          <>
+            <Chapter n={2} title={t('insights.week.title')} note={weekNote(charts.trend)} gap={space.sm} />
+            <TrendLine points={charts.trend} />
+          </>
+        ) : null}
+        <ArtFade />
+      </View>
 
-      <Chapter n="02" title={t('insights.chapter.working')} tint={c.sage} />
-      <HabitBoard rows={rows} />
-      {charts ? <RecordMedals records={charts.records} /> : null}
-
-      <Chapter n="03" title={t('insights.chapter.learn')} tint={c.accent} />
-      {charts ? <Observations items={charts.observations} day={today} /> : null}
-      {program.habits.includes('screen_app_limit') ? <ScreenTimeCheck program={program} today={today} /> : null}
+      <Paper>
+        <Chapter n={3} title={t('insights.chapter.working')} />
+        <HabitBoard rows={rows} />
+        {charts ? (
+          <>
+            <Chapter n={4} title={t('insights.records.title')} />
+            <RecordGrid records={charts.records} />
+            <Chapter n={5} title={t('insights.chapter.learn')} />
+            <Observations items={charts.observations} day={today} />
+          </>
+        ) : null}
+        {program.habits.includes('screen_app_limit') ? <ScreenTimeCheck program={program} today={today} /> : null}
+      </Paper>
     </>
   );
 }
@@ -153,17 +175,13 @@ function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: n
     .sort((a, b) => a.week - b.week);
   const thisWeek = weekOf(program.startedAt, Math.min(today, PROGRAM_DAYS)).week;
   return (
-    <ThemedView style={[styles.card, { backgroundColor: c.surface }]}>
-      <View style={styles.screenHead}>
-        <View style={[styles.screenIcon, { backgroundColor: c.mistSoft }]}>
-          <Ionicons name="phone-portrait-outline" size={16} color={c.mistInk} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <T v="bodyStrong">{t('insights.screen.title')}</T>
-          <T v="caption" color={c.textDim}>
-            {t('insights.screen.limit', { limit })}
-          </T>
-        </View>
+    <View style={styles.screen}>
+      <ThemedView style={[styles.screenRule, { backgroundColor: c.border }]} />
+      <View>
+        <T v="bodyStrong">{t('insights.screen.title')}</T>
+        <T v="caption" color={c.textDim}>
+          {t('insights.screen.limit', { limit })}
+        </T>
       </View>
       <ScreenTimeHistory readings={readings} limit={limit} thisWeek={thisWeek} />
       <T v="caption" color={c.textDim}>
@@ -188,14 +206,14 @@ function ScreenTimeCheck({ program, today }: { program: P.PilotProgram; today: n
           haptic.confirm();
         }}
       />
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
-  screenHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  screenIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  plate: { gap: space.md },
+  screen: { gap: space.md, marginTop: space.xl },
+  screenRule: { height: StyleSheet.hairlineWidth, marginBottom: space.sm },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   step: { width: 72 },
   value: { flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] },

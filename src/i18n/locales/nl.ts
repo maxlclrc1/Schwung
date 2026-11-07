@@ -975,16 +975,9 @@ export const nl: Translation = {
     ring: {
       a11yNone: 'Consistentie verschijnt na je eerste dag',
       a11y: '{pct} consistentie: {done} van {eligible} gewoontemomenten gedaan',
-      consistency: 'consistentie',
       first: 'Je consistentie begint bij je eerste dag.',
       done: '{done} van {eligible} gewoontemomenten gedaan',
-      thisWeek: 'Deze week',
       weekValue: '{done} van {eligible}',
-      streak: 'Reeks',
-      streakValue: { one: '{count} dag', other: '{count} dagen' },
-      day: 'Dag',
-      dayValue: '{day} van {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} dag)', other: ' ({count} dagen)' },
@@ -1022,6 +1015,13 @@ export const nl: Translation = {
     },
     strip: 'Laatste {count} dagen: {done} gedaan',
     bars: 'Week {week}: {done} van {goal}',
+
+    facts: {
+      week: '{done} van {eligible} deze week',
+      streak: { one: 'reeks van {count} dag', other: 'reeks van {count} dagen' },
+
+      day: 'Dag {day} van {total}',
+    },
   },
   setup: {
     age: { u16: 'Jonger dan 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

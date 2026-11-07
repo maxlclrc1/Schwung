@@ -926,16 +926,9 @@ export const zhHans: Translation = {
     ring: {
       a11yNone: '一致性会在你的第一天之后显示',
       a11y: '{pct}一致性：{eligible}次习惯机会中完成了{done}次',
-      consistency: '一致性',
       first: '你的一致性从第一天开始。',
       done: '{eligible}次习惯机会中完成了{done}次',
-      thisWeek: '本周',
       weekValue: '{done}/{eligible}',
-      streak: '连续纪录',
-      streakValue: { other: '{count}天' },
-      day: '天数',
-      dayValue: '{day}/{total}',
-      factA11y: '{label}：{value}',
     },
     week: {
       range: { other: ' ({count}天)' },
@@ -973,6 +966,13 @@ export const zhHans: Translation = {
     },
     strip: '最近{count}天：完成{done}',
     bars: '第{week}周：{done}/{goal}',
+
+    facts: {
+      week: '本周 {done}/{eligible}',
+      streak: { other: '连续纪录 {count} 天' },
+
+      day: '第 {day} 天，共 {total} 天',
+    },
   },
   setup: {
     age: {

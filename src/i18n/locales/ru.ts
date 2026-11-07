@@ -1059,16 +1059,9 @@ export const ru: Translation = {
     ring: {
       a11yNone: 'Регулярность появится после первого дня',
       a11y: 'Регулярность {pct}: выполнено {done} из {eligible} возможностей',
-      consistency: 'регулярность',
       first: 'Твоя регулярность начинается с первого дня.',
       done: 'Выполнено {done} из {eligible} возможностей',
-      thisWeek: 'Эта неделя',
       weekValue: '{done} из {eligible}',
-      streak: 'Серия',
-      streakValue: { one: '{count} день', few: '{count} дня', many: '{count} дней', other: '{count} дня' },
-      day: 'День',
-      dayValue: '{day} из {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} день)', few: ' ({count} дня)', many: ' ({count} дней)', other: ' ({count} дня)' },
@@ -1127,6 +1120,18 @@ export const ru: Translation = {
     },
     strip: 'За последние {count} дн.: выполнено {done}',
     bars: 'Неделя {week}: {done} из {goal}',
+
+    facts: {
+      week: '{done} из {eligible} на этой неделе',
+      streak: {
+        one: 'серия: {count} день',
+        few: 'серия: {count} дня',
+        many: 'серия: {count} дней',
+        other: 'серия: {count} дня',
+      },
+
+      day: 'День {day} из {total}',
+    },
   },
   setup: {
     age: { u16: 'Младше 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

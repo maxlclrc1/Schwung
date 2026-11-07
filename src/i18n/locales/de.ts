@@ -984,16 +984,9 @@ export const de: Translation = {
     ring: {
       a11yNone: 'Die Beständigkeit erscheint nach deinem ersten Tag',
       a11y: '{pct} Beständigkeit: {done} von {eligible} Gelegenheiten erledigt',
-      consistency: 'Beständigkeit',
       first: 'Deine Beständigkeit beginnt mit deinem ersten Tag.',
       done: '{done} von {eligible} Gelegenheiten erledigt',
-      thisWeek: 'Diese Woche',
       weekValue: '{done} von {eligible}',
-      streak: 'Serie',
-      streakValue: { one: '{count} Tag', other: '{count} Tage' },
-      day: 'Tag',
-      dayValue: '{day} von {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} Tag)', other: ' ({count} Tage)' },
@@ -1031,6 +1024,13 @@ export const de: Translation = {
     },
     strip: 'Letzte {count} Tage: {done} erledigt',
     bars: 'Woche {week}: {done} von {goal}',
+
+    facts: {
+      week: '{done} von {eligible} diese Woche',
+      streak: { one: '{count}-Tage-Serie', other: '{count}-Tage-Serie' },
+
+      day: 'Tag {day} von {total}',
+    },
   },
   setup: {
     age: { u16: 'Unter 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

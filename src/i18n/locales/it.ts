@@ -988,16 +988,9 @@ export const it: Translation = {
     ring: {
       a11yNone: 'La costanza appare dopo il tuo primo giorno',
       a11y: '{pct} di costanza: {done} di {eligible} occasioni di abitudine fatte',
-      consistency: 'costanza',
       first: 'La tua costanza inizia con il tuo primo giorno.',
       done: '{done} di {eligible} occasioni di abitudine fatte',
-      thisWeek: 'Questa settimana',
       weekValue: '{done} di {eligible}',
-      streak: 'Serie',
-      streakValue: { one: '{count} giorno', other: '{count} giorni' },
-      day: 'Giorno',
-      dayValue: '{day} di {total}',
-      factA11y: '{label}: {value}',
     },
     week: {
       range: { one: ' ({count} giorno)', other: ' ({count} giorni)' },
@@ -1036,6 +1029,13 @@ export const it: Translation = {
     },
     strip: 'Ultimi {count} giorni: {done} fatte',
     bars: 'Settimana {week}: {done} di {goal}',
+
+    facts: {
+      week: '{done} su {eligible} questa settimana',
+      streak: { one: 'serie di {count} giorno', other: 'serie di {count} giorni' },
+
+      day: 'Giorno {day} di {total}',
+    },
   },
   setup: {
     age: {
