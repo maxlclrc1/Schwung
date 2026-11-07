@@ -42,3 +42,4 @@ yarn-error.*
 
 # visual QA (scripts/qa): web build, fixtures, screenshots and reports
 .qa/
+screenshots/
