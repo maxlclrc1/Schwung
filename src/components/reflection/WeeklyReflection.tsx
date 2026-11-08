@@ -8,7 +8,6 @@ import Animated, {
   LinearTransition,
   ReduceMotion,
   useAnimatedProps,
-  useAnimatedStyle,
   useSharedValue,
   withTiming,
   Easing,
@@ -19,7 +18,7 @@ import * as P from '../../core/reset/pilot';
 import { reflectionDays, type ReflectionAnswer } from '../../core/reset/reflections';
 import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme, type Colors } from '../../theme';
+import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { rise } from '../onboarding/kit';
@@ -29,8 +28,11 @@ import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 
 /*
- * A week's reflection (app/life-reset/reflect.tsx): one question, three answers drawn as the shape of the climb
- * (a gentle hill, a steady mountain, a steep peak), a short honest response, and, when it helps, a look at a
+ * A week's reflection (app/life-reset/reflect.tsx), as a page of the expedition journal: the week's days in small
+ * capitals on a hairline, one question, and three answers as full-width rows between hairlines, each led by the shape
+ * of the climb (a gentle hill, a steady mountain, a steep peak). The three are drawn alike (neutral outlines, regular
+ * weight); the chosen one alone takes the violet and a semibold label, so none reads as the right answer. Then a short
+ * honest response as a note, and, when it helps, a look at a
  * habit's easier or harder target. Nothing changes unless the person confirms it; a change goes through the
  * existing rules (pilot.ts easier/harder: from tomorrow or next Monday, eligible levels only), so every past day,
  * XP and streak stays exactly as it was. Habits of the person's own keep their own model and are never offered.
@@ -53,13 +55,6 @@ const OPTIONS: { id: ReflectionAnswer; label: string; shape: string }[] = [
   option('right', 'M4 50 L 30 26 L 38 31 L 50 14 L 92 50 Z'),
   option('harder', 'M4 50 L 26 34 L 34 37 L 50 4 L 66 30 L 74 26 L 92 50 Z'),
 ];
-
-const tintOf = (c: Colors, a: ReflectionAnswer) =>
-  a === 'easier'
-    ? { fill: c.sage, soft: c.sageSoft, ink: c.sageInk }
-    : a === 'right'
-      ? { fill: c.mist, soft: c.mistSoft, ink: c.mistInk }
-      : { fill: c.peach, soft: c.peachSoft, ink: c.peachInk };
 
 const response = (a: ReflectionAnswer) => tr(`weekly.response.${a}`);
 
@@ -115,15 +110,19 @@ export function WeeklyReflection({
     <Screen edges={['bottom']}>
       <SheetHeader title={t('weekly.title', { week })} action={t('weekly.close')} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Animated.View entering={rise(0)} style={{ gap: space.sm }}>
-          <T v="overline" color={c.accentInk}>
-            {t('weekly.kicker', { from, to })}
-          </T>
+        <Animated.View entering={rise(0)}>
+          {/* The week's days, in small capitals on a hairline. */}
+          <View style={styles.kickerRow}>
+            <T v="overline" color={c.textDim} style={styles.kicker}>
+              {t('weekly.kicker', { from, to })}
+            </T>
+            <ThemedView style={[styles.kickerRule, { backgroundColor: c.border }]} />
+          </View>
           <T style={[styles.question, { color: c.text }]} accessibilityRole="header">
             {t('weekly.question')}
           </T>
           {stats && stats.planned ? (
-            <T color={c.textDim}>
+            <T color={c.textDim} style={styles.summary}>
               {stats.full
                 ? t('weekly.didFull', { done: stats.done, planned: stats.planned, count: stats.full })
                 : t('weekly.did', { done: stats.done, planned: stats.planned })}
@@ -131,7 +130,11 @@ export function WeeklyReflection({
           ) : null}
         </Animated.View>
 
-        <Animated.View entering={rise(100)} style={styles.options} accessibilityRole="radiogroup">
+        <Animated.View
+          entering={rise(100)}
+          style={[styles.options, { borderTopColor: c.border }]}
+          accessibilityRole="radiogroup"
+        >
           {OPTIONS.map((o) => (
             <Option key={o.id} option={o} on={answer === o.id} onPress={() => choose(o.id)} />
           ))}
@@ -142,53 +145,52 @@ export function WeeklyReflection({
             key={answer}
             entering={rise(0)}
             layout={LinearTransition.duration(220).reduceMotion(sys)}
-            style={{ gap: space.lg }}
+            style={styles.answered}
           >
-            <ThemedView
-              style={[styles.response, { backgroundColor: tintOf(c, answer).soft }]}
-              accessibilityLiveRegion="polite"
-            >
-              <T style={{ fontSize: 18, lineHeight: 25 }}>{response(answer)}</T>
+            {/* The response, as a note in the journal's margin. */}
+            <ThemedView style={[styles.response, { borderColor: c.peach }]} accessibilityLiveRegion="polite">
+              <T style={styles.responseText}>{response(answer)}</T>
             </ThemedView>
 
             {adjustable.length && (direction || review) ? (
-              <View style={{ gap: space.sm }}>
-                <T v="bodyStrong">
+              <View style={styles.targets}>
+                <T style={styles.targetsTitle}>
                   {direction === 'harder'
                     ? t('weekly.bigger')
                     : direction === 'easier'
                       ? t('weekly.lighter')
                       : t('weekly.targets')}
                 </T>
-                <T v="caption" color={c.textDim}>
+                <T color={c.textDim} style={styles.note}>
                   {t('weekly.nothingChanges')}
                 </T>
-                {adjustable.map((id) => (
-                  <Adjust key={id} program={program} id={id} today={today} way={direction} week={week} />
-                ))}
+                <ThemedView style={[styles.ledger, { borderTopColor: c.border }]}>
+                  {adjustable.map((id) => (
+                    <Adjust key={id} program={program} id={id} today={today} way={direction} week={week} />
+                  ))}
+                </ThemedView>
               </View>
             ) : adjustable.length && answer === 'right' ? (
               <Press
                 onPress={() => setReview(true)}
+                style={styles.link}
                 accessibilityRole="button"
                 accessibilityLabel={t('weekly.reviewA11y')}
               >
-                <T v="bodyStrong" color={c.accentInk}>
-                  {t('weekly.review')}
-                </T>
+                <T style={[styles.linkText, { textDecorationColor: `${c.text}4D` }]}>{t('weekly.review')}</T>
               </Press>
             ) : null}
             {program.habits.some((id) => program.custom?.[id]) ? (
-              <T v="caption" color={c.textFaint}>
+              <T color={c.textFaint} style={styles.note}>
                 {t('weekly.ownStay')}
               </T>
             ) : null}
 
-            <Button label={t('weekly.done')} onPress={() => router.back()} />
+            <Button label={t('weekly.done')} onPress={() => router.back()} style={styles.done} />
           </Animated.View>
         ) : (
           <View style={styles.unanswered}>
-            <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
+            <T v="caption" color={c.textFaint} style={styles.noWrong}>
               {t('weekly.noWrong')}
             </T>
             {invite ? (
@@ -201,9 +203,7 @@ export function WeeklyReflection({
                 accessibilityRole="button"
                 accessibilityLabel={t('reflection.invite.notNowA11y')}
               >
-                <T v="label" color={c.textDim}>
-                  {t('reflection.invite.notNow')}
-                </T>
+                <T style={[styles.linkText, { textDecorationColor: `${c.text}4D` }]}>{t('reflection.invite.notNow')}</T>
               </Press>
             ) : null}
           </View>
@@ -213,42 +213,43 @@ export function WeeklyReflection({
   );
 }
 
-/** An answer as the shape of the climb: it fills with its colour when chosen. */
+/**
+ * An answer as a journal row: its climb's shape, then its words. Unchosen, every shape is the same neutral outline and
+ * every label the same weight; the chosen one's shape fills with the violet and its label turns semibold.
+ */
 function Option({ option, on, onPress }: { option: (typeof OPTIONS)[number]; on: boolean; onPress: () => void }) {
   const { c } = useTheme();
-  const tint = tintOf(c, option.id);
   const t = useSharedValue(on ? 1 : 0);
   useEffect(() => {
-    t.set(withTiming(on ? 1 : 0, { duration: 320, easing: SETTLE, reduceMotion: sys }));
+    t.set(withTiming(on ? 1 : 0, { duration: 260, easing: SETTLE, reduceMotion: sys }));
   }, [on, t]);
-  const fill = useAnimatedProps(() => ({ fillOpacity: 0.15 + t.value * 0.85 }));
-  const box = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(t.value, [0, 1], [c.surface, tint.soft]),
-    transform: [{ translateY: -3 * t.value }],
+  const shape = useAnimatedProps(() => ({
+    stroke: interpolateColor(t.value, [0, 1], [c.textFaint, c.accent]),
+    fillOpacity: t.value * 0.18,
+    strokeWidth: 2.6 + t.value * 0.6,
   }));
   return (
     <Press
       onPress={onPress}
-      style={{ flex: 1 }}
       accessibilityRole="radio"
       accessibilityState={{ checked: on }}
+      aria-checked={on}
       accessibilityLabel={option.label}
     >
-      <Animated.View style={[styles.option, box]}>
-        <Svg width={72} height={42} viewBox="0 0 96 54">
+      <ThemedView style={[styles.option, { borderBottomColor: c.border }]}>
+        <Svg width={40} height={23} viewBox="0 0 96 54" style={styles.shape}>
           <AnimatedPath
             d={option.shape}
-            fill={tint.fill}
-            animatedProps={fill}
-            stroke={tint.fill}
-            strokeWidth={2}
+            fill={c.accent}
+            animatedProps={shape}
             strokeLinejoin="round"
+            strokeLinecap="round"
           />
         </Svg>
-        <T v="caption" color={on ? tint.ink : c.text} style={styles.optionText} maxFontSizeMultiplier={1.3}>
+        <T color={c.text} style={[styles.optionText, on && styles.optionOn]}>
           {option.label}
         </T>
-      </Animated.View>
+      </ThemedView>
     </Press>
   );
 }
@@ -275,7 +276,7 @@ function Adjust({
   const ways: ('easier' | 'harder')[] = way ? [way] : ['easier', 'harder'];
   const pending = P.pendingText(program, id, today);
   return (
-    <ThemedView style={[styles.adjust, { backgroundColor: c.surface }]}>
+    <ThemedView style={[styles.adjust, { borderBottomColor: c.border }]}>
       <Press
         onPress={() => setOpen((o) => !o)}
         accessibilityRole="button"
@@ -287,15 +288,15 @@ function Adjust({
       >
         <View style={styles.adjustHead}>
           <View style={{ flex: 1 }}>
-            <T v="bodyStrong">{P.nameOf(program, id)}</T>
-            <T v="caption" color={c.textDim}>
+            <T style={styles.habitName}>{P.nameOf(program, id)}</T>
+            <T color={c.textDim} style={styles.note}>
               {t('weekly.levelTarget', {
                 level: P.levelLineFor(program, id, today),
                 target: P.targetText(program, id, today),
               })}
             </T>
           </View>
-          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textDim} />
+          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textFaint} />
         </View>
       </Press>
       {open ? (
@@ -347,22 +348,45 @@ function Adjust({
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
-  question: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
-  options: { flexDirection: 'row', gap: space.sm },
+  scroll: { paddingHorizontal: space.lg + 4, paddingTop: space.xs, paddingBottom: space.xxl, gap: space.xl },
+  kickerRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm + 2 },
+  kicker: { flexShrink: 1 },
+  kickerRule: { flex: 1, height: StyleSheet.hairlineWidth, minWidth: space.lg },
+  question: { marginTop: space.sm + 2, fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.5 },
+  summary: { marginTop: space.sm, fontSize: 16, lineHeight: 22 },
+  options: { borderTopWidth: StyleSheet.hairlineWidth },
   option: {
-    borderRadius: radius.lg,
-    paddingVertical: space.lg,
-    paddingHorizontal: space.sm,
+    minHeight: 60,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: space.sm,
-    minHeight: 128,
+    gap: space.lg,
+    paddingVertical: space.sm + 2,
+    paddingHorizontal: 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  optionText: { textAlign: 'center', fontWeight: '700' },
-  response: { borderRadius: radius.lg, padding: space.lg },
-  adjust: { borderRadius: radius.md, padding: space.md, gap: space.sm },
-  adjustHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  shape: { overflow: 'visible' },
+  optionText: { flex: 1, fontSize: 17, lineHeight: 22, fontWeight: '400' },
+  optionOn: { fontWeight: '600' },
+  response: { borderStartWidth: 2, paddingStart: space.md + 2, paddingVertical: 2 },
+  responseText: { fontSize: 17, lineHeight: 24 },
+  targets: { gap: 4 },
+  targetsTitle: { fontSize: 16, lineHeight: 21, fontWeight: '600' },
+  note: { fontSize: 13.5, lineHeight: 18 },
+  ledger: { marginTop: space.sm, borderTopWidth: StyleSheet.hairlineWidth },
+  adjust: {
+    paddingVertical: space.sm + 2,
+    paddingHorizontal: 2,
+    gap: space.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  adjustHead: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 40 },
+  habitName: { fontSize: 16, lineHeight: 21, fontWeight: '500' },
   doneRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  unanswered: { alignItems: 'center', gap: space.md },
-  notNow: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space.lg },
+  link: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },
+  linkText: { fontSize: 16, lineHeight: 21, fontWeight: '500', textDecorationLine: 'underline' },
+  done: { marginTop: space.xs },
+  answered: { gap: space.lg },
+  unanswered: { gap: space.md },
+  noWrong: { marginTop: -space.sm },
+  notNow: { minHeight: 44, justifyContent: 'center', alignSelf: 'center', paddingHorizontal: space.lg },
 });
