@@ -1099,13 +1099,6 @@ export const vi: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'Tuổi của bạn',
-      notChosen: 'Chưa chọn',
-      younger: 'Nhỏ hơn một tuổi',
-      older: 'Lớn hơn một tuổi',
-      band: '{band} tuổi',
-      slide: 'Trượt thước đến tuổi của bạn',
-
       under18: 'Schwung dành cho người từ 18 tuổi trở lên.',
     },
     clock: {
@@ -1155,6 +1148,12 @@ export const vi: Translation = {
       title: 'Ngày 1 bắt đầu hôm nay.',
       begin: 'Bắt đầu Ngày 1',
       slowSave: 'Đang lưu hành trình trên điện thoại này…',
+    },
+
+    ageBands: {
+      older: '65 trở lên',
+      under18Note:
+        'Cảm ơn bạn đã cho chúng tôi biết. Schwung không thể thiết lập Life Reset cho người dưới 18 tuổi. Không có gì bạn đã nhập được lưu lại.',
     },
   },
   add: {

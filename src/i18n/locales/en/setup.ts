@@ -87,13 +87,12 @@ export const setup = {
     preview: '{target} · {frequency}',
   },
   ageDial: {
-    label: 'Your age',
-    notChosen: 'Not chosen',
-    younger: 'One year younger',
-    older: 'One year older',
     under18: 'Schwung is made for people 18 and older.',
-    band: '{band} years',
-    slide: 'Slide the ruler to your age',
+  },
+  ageBands: {
+    older: '65 or older',
+    under18Note:
+      'Thanks for telling us. Schwung can’t set up a Life Reset for anyone under 18. Nothing you’ve entered has been saved.',
   },
   clock: {
     early: 'An early riser',

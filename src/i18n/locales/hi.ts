@@ -1099,13 +1099,6 @@ export const hi: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'आपकी उम्र',
-      notChosen: 'नहीं चुना',
-      younger: 'एक साल कम',
-      older: 'एक साल ज़्यादा',
-      band: '{band} साल',
-      slide: 'स्केल को अपनी उम्र तक खिसकाएँ',
-
       under18: 'Schwung 18 साल और उससे ज़्यादा उम्र के लोगों के लिए बनाया गया है।',
     },
     clock: {
@@ -1155,6 +1148,12 @@ export const hi: Translation = {
       title: 'दिन 1 आज शुरू होता है।',
       begin: 'दिन 1 शुरू करें',
       slowSave: 'आपका रीसेट इस फ़ोन पर सेव हो रहा है…',
+    },
+
+    ageBands: {
+      older: '65 या उससे अधिक',
+      under18Note:
+        'बताने के लिए धन्यवाद। Schwung 18 वर्ष से कम उम्र के किसी व्यक्ति के लिए Life Reset सेट नहीं कर सकता। आपने जो कुछ भी दर्ज किया, वह सहेजा नहीं गया है।',
     },
   },
   add: {

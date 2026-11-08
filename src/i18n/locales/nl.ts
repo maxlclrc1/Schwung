@@ -1109,13 +1109,6 @@ export const nl: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'Je leeftijd',
-      notChosen: 'Niet gekozen',
-      younger: 'Een jaar jonger',
-      older: 'Een jaar ouder',
-      band: '{band} jaar',
-      slide: 'Schuif de liniaal naar je leeftijd',
-
       under18: 'Schwung is gemaakt voor mensen van 18 en ouder.',
     },
     clock: {
@@ -1165,6 +1158,12 @@ export const nl: Translation = {
       title: 'Dag 1 begint vandaag.',
       begin: 'Begin dag 1',
       slowSave: 'Je reset wordt op deze telefoon bewaard…',
+    },
+
+    ageBands: {
+      older: '65 of ouder',
+      under18Note:
+        'Bedankt dat je het ons laat weten. Schwung kan geen Life Reset instellen voor iemand onder de 18. Niets van wat je hebt ingevuld is bewaard.',
     },
   },
   add: {

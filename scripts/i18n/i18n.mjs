@@ -34,6 +34,8 @@ const SENSITIVE = [
   'setup.health',
   'setup.q.health',
   'setup.ageDial.under16',
+  'setup.ageDial.under18',
+  'setup.ageBands.under18Note',
   'beyond.ascent.health',
   'settings.privacy',
   'settings.restore',

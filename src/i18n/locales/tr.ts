@@ -1101,13 +1101,6 @@ export const tr: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'Yaşın',
-      notChosen: 'Seçilmedi',
-      younger: 'Bir yaş küçük',
-      older: 'Bir yaş büyük',
-      band: '{band} yaş',
-      slide: 'Cetveli yaşına kaydır',
-
       under18: 'Schwung 18 yaş ve üzeri için tasarlandı.',
     },
     clock: {
@@ -1157,6 +1150,12 @@ export const tr: Translation = {
       title: '1. Gün bugün başlıyor.',
       begin: '1. güne başla',
       slowSave: 'Reset’in bu telefona kaydediliyor…',
+    },
+
+    ageBands: {
+      older: '65 ve üzeri',
+      under18Note:
+        'Bize söylediğin için teşekkürler. Schwung, 18 yaşından küçükler için Life Reset oluşturamaz. Girdiğin hiçbir şey kaydedilmedi.',
     },
   },
   add: {

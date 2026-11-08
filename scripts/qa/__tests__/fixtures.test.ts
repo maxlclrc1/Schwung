@@ -52,7 +52,7 @@ describe('visual QA fixtures', () => {
       rtl: !!l.rtl,
       continue: tIn(l.code, 'setup.q.continue'),
       confirm: tIn(l.code, 'setup.q.confirm'),
-      more: [tIn(l.code, 'setup.ageDial.older'), tIn(l.code, 'setup.clock.laterStep'), tIn(l.code, 'setup.meter.more')],
+      more: [tIn(l.code, 'setup.clock.laterStep'), tIn(l.code, 'setup.meter.more')],
     }));
     fs.writeFileSync(out!, JSON.stringify({ now: QA_NOW, languages, scenes: scenes() }));
   });

@@ -1121,13 +1121,6 @@ export const id: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'Usiamu',
-      notChosen: 'Belum dipilih',
-      younger: 'Satu tahun lebih muda',
-      older: 'Satu tahun lebih tua',
-      band: '{band} tahun',
-      slide: 'Geser penggaris ke usiamu',
-
       under18: 'Schwung dibuat untuk orang berusia 18 tahun ke atas.',
     },
     clock: {
@@ -1177,6 +1170,12 @@ export const id: Translation = {
       title: 'Hari 1 dimulai hari ini.',
       begin: 'Mulai Hari ke-1',
       slowSave: 'Menyimpan reset-mu di ponsel ini…',
+    },
+
+    ageBands: {
+      older: '65 atau lebih',
+      under18Note:
+        'Terima kasih sudah memberi tahu kami. Schwung tidak dapat menyiapkan Life Reset untuk siapa pun di bawah 18 tahun. Tidak ada yang kamu masukkan yang disimpan.',
     },
   },
   add: {

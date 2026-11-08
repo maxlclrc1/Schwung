@@ -1097,13 +1097,6 @@ export const ja: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: '年齢',
-      notChosen: '未選択',
-      younger: '1歳下',
-      older: '1歳上',
-      band: '{band}歳',
-      slide: '定規をスライドして年齢を選ぶ',
-
       under18: 'Schwungは18歳以上の方向けです。',
     },
     clock: {
@@ -1153,6 +1146,12 @@ export const ja: Translation = {
       title: '1日目は今日から。',
       begin: '1日目を始める',
       slowSave: 'このスマホにリセットを保存しています…',
+    },
+
+    ageBands: {
+      older: '65歳以上',
+      under18Note:
+        '教えてくれてありがとうございます。Schwung では 18 歳未満の方の Life Reset を設定できません。入力した内容は保存されていません。',
     },
   },
   add: {

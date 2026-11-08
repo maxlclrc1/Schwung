@@ -20,7 +20,7 @@ import { ThemedImage } from '../ThemedImage';
 import { TILE_HEIGHT, TILES } from '../worldTiles';
 import { Button, Screen, T } from '../ui';
 import { useLanguage, useT } from '../../i18n/react';
-import { isRTLLanguage } from '../../i18n/direction';
+import { isolateNumbers, isRTLLanguage } from '../../i18n/direction';
 
 /**
  * Begin a New Ascent: a short set-up from where the last one ended, as one page of the journal. It opens on the
@@ -376,12 +376,6 @@ function Chapter({ n, title, first }: { n: number; title: string; first?: boolea
     </View>
   );
 }
-
-/**
- * Number-only labels (age bands) in a left-to-right isolate, so "30–49" never reads "49–30" in Arabic or Urdu. Words
- * with a number ("Under 18") are left to the language's own direction.
- */
-const isolateNumbers = (label: string) => (/^[\d\s–+-]+$/.test(label) ? `⁦${label}⁩` : label);
 
 /** One of a few choices, side by side between hairlines; the chosen one in violet, underlined. */
 function Divided<K extends string>({

@@ -1066,13 +1066,6 @@ export const zhHans: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: '你的年龄',
-      notChosen: '未选择',
-      younger: '小一岁',
-      older: '大一岁',
-      band: '{band}岁',
-      slide: '滑动标尺选择你的年龄',
-
       under18: 'Schwung 面向18岁及以上的人。',
     },
     clock: {
@@ -1122,6 +1115,11 @@ export const zhHans: Translation = {
       title: '第 1 天从今天开始。',
       begin: '开始第1天',
       slowSave: '正在这部手机上保存你的重启…',
+    },
+
+    ageBands: {
+      older: '65岁及以上',
+      under18Note: '谢谢你告诉我们。Schwung 无法为未满 18 岁的人设置 Life Reset。你输入的内容都没有被保存。',
     },
   },
   add: {

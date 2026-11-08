@@ -1218,13 +1218,6 @@ export const ru: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'Твой возраст',
-      notChosen: 'Не выбрано',
-      younger: 'На год младше',
-      older: 'На год старше',
-      band: '{band} лет',
-      slide: 'Сдвинь линейку до своего возраста',
-
       under18: 'Schwung создан для людей от 18 лет.',
     },
     clock: {
@@ -1274,6 +1267,12 @@ export const ru: Translation = {
       title: 'День 1 начинается сегодня.',
       begin: 'Начать 1-й день',
       slowSave: 'Сохраняем перезагрузку на этом телефоне…',
+    },
+
+    ageBands: {
+      older: '65 и старше',
+      under18Note:
+        'Спасибо, что сказал(а). Schwung не может настроить Life Reset для тех, кому меньше 18 лет. Ничего из введённого не сохранено.',
     },
   },
   add: {
