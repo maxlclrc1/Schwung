@@ -1,4 +1,4 @@
-import { Redirect, router } from 'expo-router';
+import { Redirect } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -13,6 +13,7 @@ import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
 import { space, useTheme } from '../theme';
 import { useT } from '../i18n/react';
+import { pushOnce } from '../lib/navigation';
 
 export default function Welcome() {
   const { c } = useTheme();
@@ -64,11 +65,11 @@ export default function Welcome() {
           </Animated.View>
         </View>
         <Animated.View entering={FadeInDown.delay(380).duration(500)} style={{ gap: space.sm }}>
-          <Button label={t('welcome.start')} onPress={() => router.push('/life-reset/setup')} />
+          <Button label={t('welcome.start')} onPress={() => pushOnce('/life-reset/setup')} />
           <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
             {t('welcome.time')}
           </T>
-          <Button label={t('welcome.restore')} kind="ghost" onPress={() => router.push('/restore')} />
+          <Button label={t('welcome.restore')} kind="ghost" onPress={() => pushOnce('/restore')} />
         </Animated.View>
       </ScrollView>
     </Screen>

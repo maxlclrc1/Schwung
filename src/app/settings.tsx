@@ -19,6 +19,7 @@ import { ThemedView } from '../theme/transition';
 import { language } from '../i18n';
 import { LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
+import { pushOnce } from '../lib/navigation';
 
 export default function Settings() {
   const { c } = useTheme();
@@ -42,25 +43,25 @@ export default function Settings() {
             <Row
               label={t('settings.language.row')}
               value={pref === 'system' ? t('settings.language.followDevice') : lang?.native}
-              onPress={() => router.push('/language')}
+              onPress={() => pushOnce('/language')}
             />
           </Section>
 
           <Section title={t('settings.privacySection')}>
-            <Row label={t('settings.privacyRow')} icon="lock-closed-outline" onPress={() => router.push('/privacy')} />
+            <Row label={t('settings.privacyRow')} icon="lock-closed-outline" onPress={() => pushOnce('/privacy')} />
           </Section>
 
           <Section title={t('settings.about')}>
             <Row
               label={t('settings.wellness')}
               icon="heart-outline"
-              onPress={() => router.push({ pathname: '/legal', params: { doc: 'wellness' } })}
+              onPress={() => pushOnce({ pathname: '/legal', params: { doc: 'wellness' } })}
             />
             {legalVisible.terms() ? (
               <Row
                 label={t('settings.terms')}
                 icon="document-text-outline"
-                onPress={() => router.push({ pathname: '/legal', params: { doc: 'terms' } })}
+                onPress={() => pushOnce({ pathname: '/legal', params: { doc: 'terms' } })}
               />
             ) : null}
             {legalVisible.contact() ? (

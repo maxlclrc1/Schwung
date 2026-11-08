@@ -17,6 +17,7 @@ import { TILE_HEIGHT, TILES } from '../worldTiles';
 import { Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
+import { pushOnce } from '../../lib/navigation';
 
 /**
  * "What's next?": after the summit ceremony and the 66-Day Story (never over them), the next chapter on the same
@@ -110,7 +111,7 @@ export function WhatsNext() {
               ink={c.accentInk}
               title={t('beyond.next.ascent')}
               body={ascentOpen ? t('beyond.next.ascentBody') : t('beyond.next.ascentTomorrow')}
-              onPress={() => router.push('/life-reset/ascent')}
+              onPress={() => pushOnce('/life-reset/ascent')}
               disabled={busy}
               closed={!ascentOpen}
             />

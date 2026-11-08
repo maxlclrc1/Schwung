@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { haptic } from '../lib/haptics';
 import { useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { useT } from '../i18n/react';
+import { pushOnce } from '../lib/navigation';
 
 /** A round icon button for a screen's header. */
 export function IconButton({
@@ -45,7 +45,7 @@ export function IconButton({
 
 export function SettingsButton() {
   const t = useT();
-  return <IconButton name="settings-outline" label={t('nav.settings')} onPress={() => router.push('/settings')} />;
+  return <IconButton name="settings-outline" label={t('nav.settings')} onPress={() => pushOnce('/settings')} />;
 }
 
 const styles = StyleSheet.create({

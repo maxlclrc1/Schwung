@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import * as P from '../../core/reset/pilot';
@@ -12,6 +11,7 @@ import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { formatNumber } from '../../i18n';
 import { flipX } from '../../i18n/direction';
+import { pushOnce } from '../../lib/navigation';
 
 const STRIP = 28;
 
@@ -109,7 +109,7 @@ export function PastJourneysLink() {
     <Pressable
       onPress={() => {
         haptic.select();
-        router.push('/life-reset/journeys');
+        pushOnce('/life-reset/journeys');
       }}
       accessibilityRole="button"
       accessibilityLabel={t('beyond.pastLink.a11y', { count: n })}

@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
 import { space, useTheme } from '../../theme';
@@ -9,6 +8,7 @@ import { useOnArt } from '../onArt';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
+import { pushOnce } from '../../lib/navigation';
 
 const sys = ReduceMotion.System;
 
@@ -25,7 +25,7 @@ export function ChooseNextCard() {
   return (
     <Animated.View entering={FadeIn.duration(300).reduceMotion(sys)} exiting={FadeOut.duration(180).reduceMotion(sys)}>
       <Press
-        onPress={() => router.push('/life-reset/next')}
+        onPress={() => pushOnce('/life-reset/next')}
         accessibilityRole="button"
         accessibilityLabel={t('beyond.card.a11y')}
       >

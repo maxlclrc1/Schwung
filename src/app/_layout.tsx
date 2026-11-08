@@ -12,6 +12,7 @@ import { startLanguageSync } from '../i18n/device';
 import { cleanupTemps } from '../lib/appFiles';
 import { RecoveryScreen } from '../components/RecoveryScreen';
 import { ReminderSync } from '../components/reminders/ReminderSync';
+import { navGuardListeners } from '../lib/navigation';
 import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
 import { useRootTheme, useThemePreference } from '../theme';
@@ -78,6 +79,8 @@ export default function RootLayout() {
         <NativeAppearance />
         <ReminderSync />
         <Stack
+          // Tells the double-tap guard when a navigation has settled (lib/navGuard.ts); changes no transition.
+          screenListeners={navGuardListeners}
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: c.bg },

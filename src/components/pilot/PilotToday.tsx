@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -37,6 +36,7 @@ import { useT } from '../../i18n/react';
 import { useOnArt } from '../onArt';
 import { formatList, t as tr } from '../../i18n';
 import { sessionName } from '../../core/reset/pilot';
+import { pushOnce } from '../../lib/navigation';
 
 /*
  * The Habits tab: the program's habits as illustrated cards, with what to do, how much, whether it's done and the week's progress. The whole-card swipe
@@ -159,7 +159,7 @@ export function PilotToday() {
   }, [fresh, unlock, quiet]);
 
   const onToggle = useCallback((id: string) => useResetPilot.getState().toggle(id), []);
-  const onDetails = useCallback((id: string) => router.push(`/life-reset/${id}`), []);
+  const onDetails = useCallback((id: string) => pushOnce(`/life-reset/${id}`), []);
 
   return (
     <ThemedView style={[styles.root, arrive]}>
@@ -260,7 +260,7 @@ export function PilotToday() {
               label={t('today.addHabit')}
               kind="secondary"
               icon={<Ionicons name="add" size={18} color={c.text} />}
-              onPress={() => router.push('/life-reset/add')}
+              onPress={() => pushOnce('/life-reset/add')}
             />
           ) : null}
           <T v="caption" color={onArt.ink ?? c.textFaint} style={[{ textAlign: 'center' }, onArt.style]}>

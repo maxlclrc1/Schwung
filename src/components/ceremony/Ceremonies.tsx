@@ -1,5 +1,4 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -38,6 +37,7 @@ import { ceremonyCover, setCeremonyState, useCeremonyState } from './state';
 import { formatList, formatNumber, t as tr } from '../../i18n';
 import { useLanguage, useT } from '../../i18n/react';
 import { physical } from '../../i18n/direction';
+import { pushOnce } from '../../lib/navigation';
 
 /*
  * The two ceremonies, two chapters of one story on Schwung's own mountain painting: Day 1, the first step at the
@@ -159,7 +159,7 @@ export function CeremonyHost() {
           onSeen={() => useResetPilot.getState().markCeremony('summit')}
           // Then the 66-Day Story if chosen, and "What's next?" after it (or straight away), never over either.
           onDone={(fast, story) =>
-            finish('summit', fast, () => router.push(story ? '/life-reset/story?from=summit' : '/life-reset/next'))
+            finish('summit', fast, () => pushOnce(story ? '/life-reset/story?from=summit' : '/life-reset/next'))
           }
         />
       )}

@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import type * as P from '../../core/reset/pilot';
 import { ANSWER_WORDS, lastFinishedWeek, reflectionDays } from '../../core/reset/reflections';
@@ -9,6 +8,7 @@ import { Press } from '../onboarding/Choices';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
+import { pushOnce } from '../../lib/navigation';
 
 /** Journey: each finished week's reflection (tap to open it again), or the way to reflect on one not answered. */
 export function ReflectionHistory({ program, today }: { program: P.PilotProgram; today: number }) {
@@ -29,7 +29,7 @@ export function ReflectionHistory({ program, today }: { program: P.PilotProgram;
             return (
               <Press
                 key={w}
-                onPress={() => router.push(`/life-reset/reflect?week=${w}`)}
+                onPress={() => pushOnce(`/life-reset/reflect?week=${w}`)}
                 accessibilityRole="button"
                 accessibilityLabel={`${t('reflection.history.row', {
                   week: w,
