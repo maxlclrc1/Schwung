@@ -1273,8 +1273,7 @@ export const consistency = share;
  * Before noon yesterday is still editable, but it already counts here (a correction updates it).
  */
 export function habitTally(p: PilotProgram, id: string, today: number): Tally {
-  const last = Math.min(today, endDay(p));
-  return weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), last).reduce(
+  return weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), reportDay(p, today)).reduce(
     (t, w) => {
       const x = weekTallyOf(p, id, w, today);
       return { done: t.done + x.done, eligible: t.eligible + x.eligible };
@@ -1372,7 +1371,14 @@ export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
 
 /** A weekly habit's weeks so far (Strength Training: sessions a week). */
 export const habitWeeks = (p: PilotProgram, id: string, today: number): WeekSummary[] =>
-  weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), Math.min(today, endDay(p)));
+  weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), reportDay(p, today));
+
+/**
+ * The day the reports read weeks as of: today, or once the program's last day is over, the day after it. Its final
+ * week (even one shorter than seven days) is then closed, so an unmet weekly goal counts there as in any other week.
+ * While the last day is still today, the week stays open (the existing rules).
+ */
+const reportDay = (p: PilotProgram, today: number) => Math.min(today, endDay(p) + 1);
 
 // --- Loading saves ---
 

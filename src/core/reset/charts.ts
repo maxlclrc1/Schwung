@@ -16,7 +16,7 @@ export function weeklyTrend(p: P.PilotProgram, today: number): WeekPoint[] {
   const last = Math.min(today, PROGRAM_DAYS);
   const byHabit = P.allHabits(p).map((id) => ({
     id,
-    weeks: new Map(P.habitWeeks(p, id, last).map((w) => [w.week, w])),
+    weeks: new Map(P.habitWeeks(p, id, today).map((w) => [w.week, w])),
   }));
   return programWeeks(p.startedAt)
     .filter((w) => w.firstDay <= last)
@@ -85,7 +85,8 @@ export type HabitBar = {
 export function habitBars(p: P.PilotProgram, today: number): HabitBar[] {
   const last = Math.min(today, PROGRAM_DAYS);
   return p.habits.map((id) => {
-    const weeks = P.habitWeeks(p, id, last);
+    // The 66 days' weeks, read as of today (so the final week is closed once Day 66 is over).
+    const weeks = P.habitWeeks(p, id, today).filter((w) => w.firstDay <= PROGRAM_DAYS);
     const judged = weeks.filter((w) => w.status === 'achieved' || w.status === 'not-achieved');
     return {
       id,

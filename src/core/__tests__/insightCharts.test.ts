@@ -11,6 +11,7 @@ import {
 import { dateForDay, PROGRAM_DAYS } from '../dates';
 import * as C from '../reset/charts';
 import * as P from '../reset/pilot';
+import { storyFacts } from '../reset/story';
 
 // 2026-11-02 is a Monday: weeks are Days 1–7, 8–14, 15–21… Day 6 is a Saturday. 2026-11-07 is a Saturday.
 const MON = '2026-11-02';
@@ -226,5 +227,58 @@ describe('an inspected day', () => {
     expect(cellSummary(cell('unrecorded', [], ['a']), name)).toBe('No record: nothing was checked off that day.');
     expect(cellSummary(cell('rest', [], []), name)).toBe('A rest day: nothing was due.');
     expect(cellSummary(cell('today', [], ['a']), name)).toBe('Today, still open.');
+  });
+});
+
+describe('the final week, once Day 66 is over', () => {
+  // Read every day but each Monday of Weeks 1–9; Focus Time (5 workdays a week) every workday of Weeks 1–9. The final
+  // week is Days 64–66 (Monday to Wednesday): three of seven days, so Focus Time's goal there is scaled to 2.
+  const range = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  const read = range(1, 66).filter((d) => d > 63 || (d - 1) % 7 !== 0);
+  const focus = range(1, 63).filter((d) => (d - 1) % 7 < 5);
+  const base = doneOn(doneOn(pilot([READ, FOCUS]), 'mind_read', read), 'skill_practice', focus);
+  const withFinal = (days: number[]) => doneOn(base, 'skill_practice', days);
+  const lastWeek = (p: P.PilotProgram, today: number) => P.habitWeeks(p, 'skill_practice', today).at(-1)!;
+  const lastPoint = (p: P.PilotProgram, today: number) => C.weeklyTrend(p, today).at(-1)!;
+
+  it('stays open on Day 66 itself, under the existing rules', () => {
+    const w = lastWeek(base, 66);
+    expect([w.firstDay, w.lastDay, w.goal, w.closed, w.status]).toEqual([64, 66, 2, false, 'pending']);
+    // Nothing is counted against Focus Time yet: Read's 3 of 3 alone.
+    expect([lastPoint(base, 66).done, lastPoint(base, 66).eligible]).toEqual([3, 3]);
+  });
+
+  it('is closed after Day 66, and an unmet goal counts as in any other week', () => {
+    const w = lastWeek(base, 67);
+    expect([w.closed, w.status, w.credited]).toEqual([true, 'not-achieved', 0]);
+    expect([lastPoint(base, 67).done, lastPoint(base, 67).eligible]).toEqual([3, 5]);
+    // The overall consistency and the habit's own tally count the same goal.
+    expect(P.habitTally(base, 'skill_practice', 67)).toEqual({ done: 45, eligible: 47 });
+    const bar = C.habitBars(base, 67).find((b) => b.id === 'skill_practice')!;
+    expect([bar.weeksMet, bar.weeksJudged]).toEqual([9, 10]);
+  });
+
+  it('counts a partly met goal for what was done', () => {
+    const p = withFinal([64]);
+    expect([lastWeek(p, 67).status, lastWeek(p, 67).credited]).toEqual(['not-achieved', 1]);
+    expect([lastPoint(p, 67).done, lastPoint(p, 67).eligible]).toEqual([4, 5]);
+  });
+
+  it('keeps a goal that was met, met', () => {
+    const p = withFinal([64, 65, 66]);
+    expect([lastWeek(p, 66).status, lastWeek(p, 67).status]).toEqual(['achieved', 'achieved']);
+    expect([lastPoint(p, 67).done, lastPoint(p, 67).eligible]).toEqual([5, 5]);
+  });
+
+  it('never makes an untouched final week the best week, in Insights or the Story, read now or later', () => {
+    // Weeks 1–9 are 11 of 12 (92%); the final week is 3 of 5, no longer a 100% "best week".
+    const best = C.records(base, 67).bestWeek!;
+    expect([best.week, Math.round(best.share * 100)]).toEqual([1, 92]);
+    const story = storyFacts(base, 67);
+    expect(story.highlight).toContain('Week 1,');
+    // An archived journey, opened months later, tells the same story.
+    expect(storyFacts(base, 200)).toEqual(story);
+    // The days themselves are untouched: Day 66 is complete (Read done, Focus open but not done → not complete).
+    expect(P.dayFull(withFinal([66]), 66)).toBe(true);
   });
 });
