@@ -880,11 +880,8 @@ export const fr: Translation = {
       pastStaysAdd: ' Ses jours passés restent dans Parcours et Tendances, et vous pourrez la rajouter à tout moment.',
       removeName: 'Retirer {habit}',
       keepIt: 'La garder',
-      removeThis: 'Retirer cette habitude',
 
       partial: 'En partie terminé.',
-
-      logProgress: 'Vous en avez fait une partie ?',
 
       progressHint:
         'Marquez-le comme en partie terminé pour +{xp} XP. Seule une habitude terminée compte pour votre série.',
@@ -894,6 +891,8 @@ export const fr: Translation = {
       removePartial: 'Retirer « en partie terminé »',
 
       partialMinutes: 'Minutes faites (facultatif)',
+
+      thisWeek: 'Cette semaine',
     },
   },
   journeyTab: {

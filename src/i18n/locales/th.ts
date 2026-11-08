@@ -830,11 +830,8 @@ export const th: Translation = {
       pastStaysAdd: ' วันที่ผ่านมาของนิสัยนี้ยังอยู่ใน เส้นทาง และ ภาพรวม และคุณเพิ่มกลับมาได้ทุกเมื่อ',
       removeName: 'นำ {habit} ออก',
       keepIt: 'เก็บไว้',
-      removeThis: 'นำนิสัยนี้ออก',
 
       partial: 'ทำสำเร็จบางส่วน',
-
-      logProgress: 'ทำไปบางส่วนแล้วใช่ไหม',
 
       progressHint: 'ทำเครื่องหมายว่าสำเร็จบางส่วนเพื่อรับ +{xp} XP เฉพาะการทำสำเร็จครบเท่านั้นที่นับในสถิติต่อเนื่อง',
 
@@ -843,6 +840,8 @@ export const th: Translation = {
       removePartial: 'ลบการสำเร็จบางส่วน',
 
       partialMinutes: 'นาทีที่ทำ (ไม่บังคับ)',
+
+      thisWeek: 'สัปดาห์นี้',
     },
   },
   journeyTab: {

@@ -989,11 +989,8 @@ export const ar: Translation = {
       pastStaysAdd: ' تبقى أيامها السابقة في الرحلة والرؤى، ويمكنك إضافتها مجددًا في أي وقت.',
       removeName: 'إزالة {habit}',
       keepIt: 'الإبقاء عليها',
-      removeThis: 'إزالة هذه العادة',
 
       partial: 'مكتملة جزئيًا.',
-
-      logProgress: 'أنجزت جزءًا منها؟',
 
       progressHint: 'ضع علامة «مكتملة جزئيًا» لتحصل على +{xp} XP. الإكمال الكامل وحده يُحتسب في سلسلتك.',
 
@@ -1002,6 +999,8 @@ export const ar: Translation = {
       removePartial: 'إزالة الإكمال الجزئي',
 
       partialMinutes: 'الدقائق المنجزة (اختياري)',
+
+      thisWeek: 'هذا الأسبوع',
     },
   },
   journeyTab: {

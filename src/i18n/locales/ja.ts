@@ -848,11 +848,8 @@ export const ja: Translation = {
       pastStaysAdd: ' これまでの日々は「道のり」と「インサイト」に残り、いつでもまた追加できます。',
       removeName: '{habit}を外す',
       keepIt: '残す',
-      removeThis: 'この習慣を外す',
 
       partial: '一部完了。',
-
-      logProgress: '一部できましたか？',
 
       progressHint: '一部完了にすると+{xp} XP。連続記録に数えられるのは完了だけです。',
 
@@ -861,6 +858,8 @@ export const ja: Translation = {
       removePartial: '一部完了を取り消す',
 
       partialMinutes: 'できた時間（任意）',
+
+      thisWeek: '今週',
     },
   },
   journeyTab: {

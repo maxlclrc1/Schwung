@@ -858,11 +858,8 @@ export const tr: Translation = {
       pastStaysAdd: ' Geçmiş günleri Yolculuk ve İçgörüler’de kalır, istediğin zaman tekrar ekleyebilirsin.',
       removeName: 'Kaldır: {habit}',
       keepIt: 'Kalsın',
-      removeThis: 'Bu alışkanlığı kaldır',
 
       partial: 'Kısmen tamamlandı.',
-
-      logProgress: 'Bir kısmını mı yaptın?',
 
       progressHint: '+{xp} XP için kısmen tamamlandı olarak işaretle. Serine yalnızca tam tamamlama sayılır.',
 
@@ -871,6 +868,8 @@ export const tr: Translation = {
       removePartial: 'Kısmi tamamlamayı kaldır',
 
       partialMinutes: 'Yapılan dakika (isteğe bağlı)',
+
+      thisWeek: 'Bu hafta',
     },
   },
   journeyTab: {

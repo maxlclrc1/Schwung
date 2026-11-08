@@ -852,11 +852,8 @@ export const bn: Translation = {
       pastStaysAdd: ' এর আগের দিনগুলো আপনার যাত্রা ও ইনসাইটে থেকে যায়, আর আপনি যেকোনো সময় এটি আবার যোগ করতে পারেন।',
       removeName: '{habit} সরিয়ে দিন',
       keepIt: 'রেখে দিন',
-      removeThis: 'এই অভ্যাসটি সরিয়ে দিন',
 
       partial: 'আংশিক সম্পন্ন।',
-
-      logProgress: 'কিছুটা করেছেন?',
 
       progressHint: '+{xp} XP পেতে আংশিক সম্পন্ন হিসেবে চিহ্নিত করুন। স্ট্রিকে শুধু পুরোপুরি সম্পন্ন করাই গোনা হয়।',
 
@@ -865,6 +862,8 @@ export const bn: Translation = {
       removePartial: 'আংশিক সম্পন্ন সরান',
 
       partialMinutes: 'করা মিনিট (ঐচ্ছিক)',
+
+      thisWeek: 'এই সপ্তাহ',
     },
   },
   journeyTab: {
