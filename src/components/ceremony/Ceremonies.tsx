@@ -8,6 +8,7 @@ import Animated, {
   interpolate,
   ReduceMotion,
   useAnimatedProps,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -638,6 +639,8 @@ function SummitCeremony({
   const t = useT();
   const reduce = useReducedMotion();
   const stage = useStage();
+  const insets = useSafeAreaInsets();
+  const { height, fontScale } = useWindowDimensions();
   const [phase, setPhase] = useState<'rise' | 'summary'>('rise');
   const finished = useRef(false);
   const done = (fast: boolean, story?: boolean) => {
@@ -699,96 +702,149 @@ function SummitCeremony({
     if (phase === 'summary') onSeen();
   }, [phase, onSeen]);
 
-  const rows: { value: string; label: string; color: string }[] = [
-    {
-      value: formatNumber(summary.complete),
-      label: t('ceremony.summit.daysCompleted', { total: PROGRAM_DAYS }),
-      color: c.sageInk,
-    },
-    {
-      value: formatNumber(summary.total),
-      label: t('ceremony.summit.completed', { count: summary.total }),
-      color: c.mistInk,
-    },
-    {
-      value: formatNumber(summary.best),
-      label: t('ceremony.summit.streak', { count: summary.best }),
-      color: c.peachInk,
-    },
+  const rows: { value: string; label: string }[] = [
+    { value: formatNumber(summary.complete), label: t('ceremony.summit.daysCompleted', { total: PROGRAM_DAYS }) },
+    { value: formatNumber(summary.total), label: t('ceremony.summit.completed', { count: summary.total }) },
+    { value: formatNumber(summary.best), label: t('ceremony.summit.streak', { count: summary.best }) },
     {
       value: formatNumber(summary.habits.length),
       label: t('ceremony.summit.practised', { count: summary.habits.length, list: formatList(summary.habits) }),
-      color: c.indigoInk,
     },
   ];
 
+  // The words begin below the trail's lowest point, in the mist; the painting scrolls with them (one page).
+  const start = Math.round(height * SUMMIT_WORDS_AT);
+  // A short screen lets the actions follow the words; otherwise they stay at the bottom, always in reach.
+  const pinned = height >= 700;
+  // Larger text: one figure a row.
+  const stacked = fontScale > 1.2;
+  const [footHeight, setFootHeight] = useState(126 + insets.bottom);
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
+  const follow = useAnimatedStyle(() => ({ transform: [{ translateY: -Math.max(0, scrollY.value) }] }));
+
+  const appear = FadeIn.delay(reduce ? 0 : 1500)
+    .duration(400)
+    .reduceMotion(sys);
+  const actions = (
+    <View style={styles.summitActions}>
+      <Button label={t('ceremony.summit.journey')} onPress={() => done(false, true)} />
+      <Button label={t('ceremony.summit.return')} kind="ghost" onPress={() => done(false)} />
+    </View>
+  );
+  const stat = (r: { value: string; label: string }, i: number, own?: boolean) => (
+    <Animated.View
+      key={r.label}
+      entering={rise(reduce ? 0 : 200 + i * 160)}
+      style={[
+        own || stacked ? styles.statRow : styles.statCell,
+        !own && !stacked && i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
+        !own && !stacked && i === 0 && styles.statFirst,
+        (own || stacked) && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border },
+      ]}
+      accessible
+      accessibilityLabel={t('ceremony.summit.rowA11y', { value: r.value, label: r.label })}
+    >
+      <T style={[styles.statValue, (own || stacked) && { minWidth: stacked ? 66 : 28 }, { color: c.text }]}>
+        {r.value}
+      </T>
+      <T color={c.textDim} style={own || stacked ? styles.statLabelRow : styles.statLabel}>
+        {r.label}
+      </T>
+    </Animated.View>
+  );
+
   return (
     <View style={[StyleSheet.absoluteFill, { backgroundColor: c.bg }]}>
-      <MountainStage
-        stage={stage}
-        trailTo={PROGRAM_DAYS}
-        lights={summary.lights}
-        glowDay={PROGRAM_DAYS}
-        glowColor={c.gold}
-        camera={{ from: { scale: 1.12, y: -40 }, to: { scale: 1.0, y: 26 } }}
-      />
-      <Words scroll={phase === 'summary'}>
-        <Animated.View entering={rise(reduce ? 0 : 2900)}>
-          <T v="overline" color={c.peachInk} style={{ letterSpacing: 2.4 }}>
-            {t('ceremony.summit.kicker', { total: PROGRAM_DAYS })}
-          </T>
-        </Animated.View>
-        <Animated.View entering={rise(reduce ? 100 : 3100)}>
-          <T style={[styles.headline, { color: c.text }]} accessibilityRole="header">
-            {t('ceremony.summit.headline')}
-          </T>
-        </Animated.View>
-        {phase === 'summary' ? (
-          <>
-            <View style={styles.summary}>
-              {rows.map((r, i) => (
-                <Animated.View
-                  key={r.label}
-                  entering={rise(reduce ? 0 : 200 + i * 160)}
-                  style={styles.row}
-                  accessible
-                  accessibilityLabel={t('ceremony.summit.rowA11y', { value: r.value, label: r.label })}
+      <Animated.View style={[StyleSheet.absoluteFill, follow]}>
+        <MountainStage
+          stage={stage}
+          trailTo={PROGRAM_DAYS}
+          lights={summary.lights}
+          glowDay={PROGRAM_DAYS}
+          glowColor={c.gold}
+          camera={{ from: { scale: 1.12, y: -40 }, to: { scale: 1.0, y: 26 } }}
+        />
+      </Animated.View>
+      <Animated.ScrollView
+        style={StyleSheet.absoluteFill}
+        contentContainerStyle={{
+          paddingTop: start,
+          paddingBottom: pinned ? footHeight + 28 : insets.bottom + space.lg,
+        }}
+        scrollEnabled={phase === 'summary'}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* The page's own colour rising out of the mist behind the words: no card, the painting stays above. */}
+        <View style={[styles.paper, { top: start - 64 }]} pointerEvents="none">
+          <LinearGradient
+            colors={[`${c.bg}00`, `${c.bg}CC`, `${c.bg}ED`, c.bg]}
+            locations={[0, 0.37, 0.67, 1]}
+            style={styles.paperFade}
+          />
+          <View style={[styles.paperRest, { backgroundColor: c.bg }]} />
+        </View>
+        <View style={styles.summitWords}>
+          <Animated.View entering={rise(reduce ? 0 : 2900)}>
+            <T v="overline" color={c.peachInk} style={{ letterSpacing: 2.4 }}>
+              {t('ceremony.summit.kicker', { total: PROGRAM_DAYS })}
+            </T>
+          </Animated.View>
+          <Animated.View entering={rise(reduce ? 100 : 3100)}>
+            <T style={[styles.summitHeadline, { color: c.text }]} accessibilityRole="header">
+              {t('ceremony.summit.headline')}
+            </T>
+          </Animated.View>
+          {phase === 'summary' ? (
+            <>
+              {/* The record: three figures side by side between hairlines, then the habits practised. */}
+              <View style={[styles.record, { borderColor: c.border }]}>
+                <View
+                  style={[
+                    stacked ? null : styles.three,
+                    !stacked && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border },
+                  ]}
                 >
-                  <T style={[styles.rowValue, { color: r.color }]}>{r.value}</T>
-                  <T color={c.textDim} style={{ flex: 1 }}>
-                    {r.label}
-                  </T>
-                </Animated.View>
-              ))}
+                  {rows.slice(0, 3).map((r, i) => stat(r, i))}
+                </View>
+                {stat(rows[3], 3, true)}
+              </View>
               {summary.earned.length ? (
                 <Animated.View entering={rise(reduce ? 0 : 200 + rows.length * 160)}>
-                  <T v="caption" color={c.peachInk} style={{ fontWeight: '700' }}>
+                  <T color={c.peachInk} style={styles.milestones}>
                     {t('ceremony.summit.milestones', { list: summary.earned.join(' · ') })}
                   </T>
                 </Animated.View>
               ) : null}
-            </View>
-            <Animated.View entering={rise(reduce ? 0 : 1100)}>
-              <T style={[styles.sub, { color: c.textDim }]}>{t('ceremony.summit.message')}</T>
-            </Animated.View>
-            <Animated.View
-              entering={FadeIn.delay(reduce ? 0 : 1500)
-                .duration(400)
-                .reduceMotion(sys)}
-              style={styles.cta}
-            >
-              <View style={{ gap: space.xs }}>
-                <Button label={t('ceremony.summit.journey')} onPress={() => done(false, true)} />
-                <Button label={t('ceremony.summit.return')} kind="ghost" onPress={() => done(false)} />
-              </View>
-            </Animated.View>
-          </>
-        ) : null}
-      </Words>
+              <Animated.View entering={rise(reduce ? 0 : 1100)}>
+                <T style={[styles.summitMessage, { color: c.text }]}>{t('ceremony.summit.message')}</T>
+              </Animated.View>
+              {pinned ? null : <Animated.View entering={appear}>{actions}</Animated.View>}
+            </>
+          ) : null}
+        </View>
+      </Animated.ScrollView>
+      {phase === 'summary' && pinned ? (
+        <Animated.View
+          entering={appear}
+          style={[styles.summitFoot, { paddingBottom: insets.bottom + space.md, backgroundColor: c.bg }]}
+          onLayout={(e) => setFootHeight(Math.round(e.nativeEvent.layout.height))}
+        >
+          <LinearGradient colors={[`${c.bg}00`, c.bg]} style={styles.summitFootFade} pointerEvents="none" />
+          {actions}
+        </Animated.View>
+      ) : null}
       <SkipButton onPress={() => done(true)} />
     </View>
   );
 }
+
+/** Where the summit's words begin, as a share of the screen's height: just below the lit trail's lowest point. */
+const SUMMIT_WORDS_AT = 0.383;
 
 const styles = StyleSheet.create({
   clip: { overflow: 'hidden' },
@@ -807,7 +863,23 @@ const styles = StyleSheet.create({
   headline: { fontSize: 36, lineHeight: 42, fontWeight: '800', letterSpacing: -0.8 },
   sub: { fontSize: 19, lineHeight: 27, fontWeight: '500' },
   cta: { minHeight: 64, justifyContent: 'center', marginTop: space.sm },
-  summary: { gap: space.sm, marginTop: space.xs },
-  row: { flexDirection: 'row', alignItems: 'baseline', gap: space.md },
-  rowValue: { fontSize: 28, lineHeight: 32, fontWeight: '800', minWidth: 52, fontVariant: ['tabular-nums'] },
+  // The summit's page: the record and its words (SummitCeremony).
+  paper: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  paperFade: { height: 300 },
+  paperRest: { flex: 1 },
+  summitWords: { paddingHorizontal: space.xl },
+  summitHeadline: { fontSize: 34, lineHeight: 40, fontWeight: '800', letterSpacing: -0.8, marginTop: 6 },
+  record: { marginTop: 18, borderTopWidth: StyleSheet.hairlineWidth },
+  three: { flexDirection: 'row' },
+  statCell: { flex: 1, minWidth: 0, paddingVertical: 12, paddingHorizontal: 10 },
+  statFirst: { paddingStart: 0 },
+  statRow: { flexDirection: 'row', alignItems: 'baseline', gap: 14, paddingVertical: 12 },
+  statValue: { fontSize: 34, lineHeight: 40, fontWeight: '300', letterSpacing: -0.6, fontVariant: ['tabular-nums'] },
+  statLabel: { fontSize: 13.5, lineHeight: 18, marginTop: 2 },
+  statLabelRow: { flex: 1, fontSize: 15, lineHeight: 21 },
+  milestones: { marginTop: space.md, fontSize: 13.5, lineHeight: 19, fontWeight: '600' },
+  summitMessage: { marginTop: space.lg, fontSize: 18, lineHeight: 26, fontWeight: '500' },
+  summitActions: { gap: space.xs, marginTop: space.lg },
+  summitFoot: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space.xl, paddingTop: 6 },
+  summitFootFade: { position: 'absolute', left: 0, right: 0, top: -22, height: 22 },
 });
