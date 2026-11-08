@@ -1,5 +1,4 @@
 import { useShownProgram } from '../shownProgram';
-import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +25,7 @@ import {
 import { RecentInsights } from '../beyond/RecentInsights';
 import { T } from '../ui';
 import { useLanguage, useT } from '../../i18n/react';
+import { pushOnce } from '../../lib/navigation';
 
 /**
  * Insights for the Life Reset, as a field journal in five chapters. On the painting: I · Consistency and II · Week by
@@ -100,7 +100,7 @@ export function PilotInsights() {
           )}
           <T v="caption">{P.targetText(program, id, today)}</T>
           {id === 'strength_log' ? <StrengthWeeks program={program} today={today} /> : null}
-          <DetailsLink label={t('insights.details')} onPress={() => router.push(`/life-reset/${id}`)} />
+          <DetailsLink label={t('insights.details')} onPress={() => pushOnce(`/life-reset/${id}`)} />
         </>
       ),
     };

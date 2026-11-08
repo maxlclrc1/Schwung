@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { PROGRAM_DAYS } from '../../core/dates';
@@ -13,6 +12,7 @@ import { SheetHeader } from '../SheetHeader';
 import { Screen, T } from '../ui';
 import { formatDate } from '../../i18n';
 import { useT } from '../../i18n/react';
+import { pushOnce } from '../../lib/navigation';
 
 const longDate = (key: string) => formatDate(key, 'long');
 
@@ -75,7 +75,7 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
       <Pressable
         onPress={() => {
           haptic.select();
-          router.push(`/life-reset/story?journey=${encodeURIComponent(journey.id)}`);
+          pushOnce(`/life-reset/story?journey=${encodeURIComponent(journey.id)}`);
         }}
         accessibilityRole="button"
         accessibilityLabel={t('beyond.past.rowA11y', {

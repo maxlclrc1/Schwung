@@ -11,6 +11,7 @@ import { Row, Section } from '../settingsRows';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { usePreferences } from '../../store/preferences';
+import { pushOnce } from '../../lib/navigation';
 
 /**
  * Settings → Your program, last on the page: where the Life Reset is, what comes after the summit, and ending it (a
@@ -81,14 +82,14 @@ export function PilotSettings() {
         <Row
           label={t('settings.program.whatsNext')}
           icon="flag-outline"
-          onPress={() => router.push('/life-reset/next')}
+          onPress={() => pushOnce('/life-reset/next')}
         />
       ) : null}
       {program && today > PROGRAM_DAYS ? (
         <Row
           label={t('settings.program.newAscent')}
           icon="trending-up-outline"
-          onPress={() => router.push('/life-reset/ascent')}
+          onPress={() => pushOnce('/life-reset/ascent')}
         />
       ) : null}
       {program ? (
@@ -100,7 +101,7 @@ export function PilotSettings() {
           )}
         </Pressable>
       ) : (
-        <Row label={t('settings.program.start')} icon="leaf-outline" onPress={() => router.push('/life-reset/setup')} />
+        <Row label={t('settings.program.start')} icon="leaf-outline" onPress={() => pushOnce('/life-reset/setup')} />
       )}
     </Section>
   );

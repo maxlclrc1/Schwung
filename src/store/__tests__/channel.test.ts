@@ -75,7 +75,7 @@ describe('one app: the Life Reset', () => {
     );
     const welcome = read('welcome.tsx');
     expect(welcome).toContain('if (started) return <Redirect href="/today" />;');
-    expect(welcome).toContain("router.push('/life-reset/setup')");
+    expect(welcome).toContain("pushOnce('/life-reset/setup')");
     expect(read('(tabs)/today.tsx')).toContain('if (!started) return <Redirect href="/welcome" />;');
   });
 

@@ -3,7 +3,6 @@ import { usePanGesture } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import Animated, {
-  Easing,
   FadeIn,
   FadeInDown,
   interpolate,
@@ -16,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useState } from 'react';
 import { space, useTheme } from '../../theme';
+import { EASE } from '../../theme/motion';
 import { T } from '../ui';
 import { t as tr, type TKey } from '../../i18n';
 
@@ -64,14 +64,14 @@ export const DURATION = { tick: 160, move: 280, scene: 520 } as const;
 /** The one easing curve: a quick start that settles softly. */
 export const settle = (to: number, duration: number = DURATION.move) => {
   'worklet';
-  return withTiming(to, { duration, easing: Easing.bezier(0.22, 1, 0.36, 1), reduceMotion: ReduceMotion.System });
+  return withTiming(to, { duration, easing: EASE, reduceMotion: ReduceMotion.System });
 };
 
 /** Content rising a few points into place, after `delay` ms. */
 export const rise = (delay = 0) =>
   FadeInDown.duration(DURATION.scene)
     .delay(delay)
-    .easing(Easing.bezier(0.22, 1, 0.36, 1))
+    .easing(EASE)
     .withInitialValues({ opacity: 0, transform: [{ translateY: 10 }] })
     .reduceMotion(ReduceMotion.System);
 export const appear = (delay = 0) => FadeIn.duration(DURATION.scene).delay(delay).reduceMotion(ReduceMotion.System);

@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -25,6 +24,7 @@ import { flipX } from '../../i18n/direction';
 import { useT } from '../../i18n/react';
 import { useOnArt } from '../onArt';
 import { useScriptAdjust } from '../../i18n/script';
+import { pushOnce } from '../../lib/navigation';
 
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const sys = ReduceMotion.System;
@@ -193,7 +193,7 @@ function Level({ xp }: { xp: number }) {
       <Pressable
         onPress={() => {
           haptic.select();
-          router.push('/life-reset/collection');
+          pushOnce('/life-reset/collection');
         }}
         accessibilityRole="button"
         accessibilityLabel={t('today.hero.levelA11y', { title: g.title, xp })}

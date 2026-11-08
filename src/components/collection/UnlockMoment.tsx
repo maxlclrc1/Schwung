@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -20,6 +19,7 @@ import { rise } from '../onboarding/kit';
 import { Button, T } from '../ui';
 import { CollectibleArt } from './Collectible';
 import { useT } from '../../i18n/react';
+import { pushOnce } from '../../lib/navigation';
 
 const sys = ReduceMotion.System;
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
@@ -94,7 +94,7 @@ export function UnlockMoment({ item, more, onClose }: { item: Collectible; more:
             label={t('collection.see')}
             onPress={() => {
               onClose();
-              router.push('/life-reset/collection');
+              pushOnce('/life-reset/collection');
             }}
             style={{ flex: 1 }}
           />

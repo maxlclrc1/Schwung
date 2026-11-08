@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useShownProgram } from '../../components/shownProgram';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedRef, useAnimatedScrollHandler, useReducedMotion } from 'react-native-reanimated';
@@ -30,6 +30,7 @@ import { ThemedView } from '../../theme/transition';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
+import { pushOnce } from '../../lib/navigation';
 
 /**
  * The Journey tab: the Ascent fills the screen, with the stats in one small line above it, the full 66-day calendar
@@ -203,7 +204,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
               <Pressable
                 onPress={() => {
                   haptic.select();
-                  router.push('/life-reset/story');
+                  pushOnce('/life-reset/story');
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={t('journeyTab.storyA11y')}

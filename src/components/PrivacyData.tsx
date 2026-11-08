@@ -17,6 +17,7 @@ import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
 import { formatList } from '../i18n';
 import { useT } from '../i18n/react';
+import { pushOnce } from '../lib/navigation';
 
 const sys = ReduceMotion.System;
 
@@ -88,7 +89,7 @@ export function PrivacyData() {
                 icon="cloud-download-outline"
                 label={t('settings.privacy.restore')}
                 hint={t('settings.privacy.restoreHint')}
-                onPress={() => router.push('/restore')}
+                onPress={() => pushOnce('/restore')}
               />
               {/* Hidden from App Store builds while the address is still a placeholder (lib/legal.ts). */}
               {legalVisible.privacyPolicy() ? (

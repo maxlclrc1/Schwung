@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ReduceMotion } from 'react-native-reanimated';
 import * as P from '../../core/reset/pilot';
@@ -10,6 +9,7 @@ import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { T } from '../ui';
+import { pushOnce } from '../../lib/navigation';
 
 const sys = ReduceMotion.System;
 
@@ -35,7 +35,7 @@ export function ReflectionInvite({ program, today }: { program: P.PilotProgram; 
   return (
     <Animated.View entering={FadeIn.duration(300).reduceMotion(sys)} exiting={FadeOut.duration(180).reduceMotion(sys)}>
       <Press
-        onPress={() => router.push(`/life-reset/reflect?week=${week}&from=invite`)}
+        onPress={() => pushOnce(`/life-reset/reflect?week=${week}&from=invite`)}
         accessibilityRole="button"
         accessibilityLabel={`${title}. ${question}`}
         accessibilityHint={action}

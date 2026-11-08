@@ -6,6 +6,7 @@ import { Button, Screen, T } from '../components/ui';
 import { useT } from '../i18n/react';
 import { useResetPilot } from '../store/resetPilot';
 import { space, useTheme } from '../theme';
+import { pushOnce } from '../lib/navigation';
 
 /**
  * A Life Reset started with an age under 18, from when the minimum age was 16 (pilot.ts ageRestricted). It's kept
@@ -41,7 +42,7 @@ export default function AgeLimit() {
         </T>
         <T color={c.textDim}>{t('settings.ageLimit.body')}</T>
         <View style={styles.actions}>
-          <Button label={t('settings.ageLimit.data')} onPress={() => router.push('/privacy')} />
+          <Button label={t('settings.ageLimit.data')} onPress={() => pushOnce('/privacy')} />
           <Button label={t('settings.ageLimit.adult')} kind="ghost" onPress={adult} />
         </View>
       </ScrollView>
