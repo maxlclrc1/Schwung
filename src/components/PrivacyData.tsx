@@ -1,7 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState, type ComponentProps } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { EXPORT_CONTAINS } from '../core/dataExport';
 import { removeAllTemps } from '../lib/appFiles';
@@ -11,15 +10,14 @@ import { haptic } from '../lib/haptics';
 import { legalVisible } from '../lib/legal';
 import { cancelAllReminders } from '../lib/reminders';
 import { deleteAllLocalData } from '../store/deleteData';
-import { radius, space, useTheme } from '../theme';
+import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
+import { Row } from './settingsRows';
 import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
 import { formatList } from '../i18n';
 import { useT } from '../i18n/react';
-import { flipX } from '../i18n/direction';
 
-type Icon = ComponentProps<typeof Ionicons>['name'];
 const sys = ReduceMotion.System;
 
 /**
@@ -75,50 +73,43 @@ export function PrivacyData() {
     <Screen edges={['bottom']}>
       <SheetHeader title={t('settings.privacy.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.intro}>
-          <View style={[styles.icon, { backgroundColor: c.sageSoft }]}>
-            <Ionicons name="lock-closed-outline" size={22} color={c.sageInk} />
-          </View>
-          <T color={c.textDim}>{t('settings.privacy.intro')}</T>
-        </View>
+        <T style={styles.intro}>{t('settings.privacy.intro')}</T>
 
         {step === 'list' ? (
           <Animated.View entering={FadeIn.duration(180).reduceMotion(sys)} style={{ gap: space.lg }}>
-            <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
+            <ThemedView style={[styles.group, { borderColor: c.border }]}>
               <Row
                 icon="download-outline"
                 label={t('settings.privacy.export')}
                 hint={t('settings.privacy.exportHint')}
                 onPress={() => setStep('export')}
               />
-              <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
               <Row
                 icon="cloud-download-outline"
                 label={t('settings.privacy.restore')}
                 hint={t('settings.privacy.restoreHint')}
                 onPress={() => router.push('/restore')}
               />
-              <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
+              {/* Hidden from App Store builds while the address is still a placeholder (lib/legal.ts). */}
+              {legalVisible.privacyPolicy() ? (
+                <Row
+                  icon="open-outline"
+                  label={t('settings.privacy.policy')}
+                  onPress={() => void Linking.openURL(PRIVACY_URL)}
+                />
+              ) : null}
+            </ThemedView>
+            {/* Apart from the everyday actions. */}
+            <ThemedView style={[styles.group, styles.apart, { borderColor: c.border }]}>
               <Row
                 icon="trash-outline"
                 label={t('settings.privacy.delete')}
                 hint={t('settings.privacy.deleteHint')}
-                danger
+                destructive
                 onPress={() => setStep('delete')}
               />
-              {/* Hidden from App Store builds while the address is still a placeholder (lib/legal.ts). */}
-              {legalVisible.privacyPolicy() ? (
-                <>
-                  <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-                  <Row
-                    icon="open-outline"
-                    label={t('settings.privacy.policy')}
-                    onPress={() => void Linking.openURL(PRIVACY_URL)}
-                  />
-                </>
-              ) : null}
             </ThemedView>
-            <T v="caption" color={c.textFaint}>
+            <T v="caption" color={c.textDim}>
               {t('settings.privacy.footnote')}
             </T>
           </Animated.View>
@@ -128,7 +119,7 @@ export function PrivacyData() {
               {t('settings.privacy.exportTitle')}
             </T>
             <T color={c.textDim}>{t('settings.privacy.exportIntro')}</T>
-            <ThemedView style={[styles.panel, { backgroundColor: c.surface, paddingVertical: space.md }]}>
+            <ThemedView style={[styles.list, { borderColor: c.border }]}>
               {EXPORT_CONTAINS.map((key) => (
                 <View key={key} style={styles.bullet}>
                   <View style={[styles.dot, { backgroundColor: c.mist }]} />
@@ -171,51 +162,16 @@ export function PrivacyData() {
   );
 }
 
-function Row({
-  icon,
-  label,
-  hint,
-  danger,
-  onPress,
-}: {
-  icon: Icon;
-  label: string;
-  hint?: string;
-  danger?: boolean;
-  onPress: () => void;
-}) {
-  const { c } = useTheme();
-  return (
-    <Pressable
-      onPress={() => {
-        onPress();
-        haptic.select();
-      }}
-      accessibilityRole="button"
-      accessibilityLabel={hint ? `${label}. ${hint}` : label}
-      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
-    >
-      <Ionicons name={icon} size={20} color={danger ? c.danger : c.textDim} />
-      <View style={{ flex: 1 }}>
-        <T color={danger ? c.danger : c.text}>{label}</T>
-        {hint ? (
-          <T v="caption" color={c.textFaint}>
-            {hint}
-          </T>
-        ) : null}
-      </View>
-      <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
-  intro: { flexDirection: 'row', gap: space.md, alignItems: 'flex-start' },
-  icon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  panel: { borderRadius: radius.lg, paddingHorizontal: space.lg },
-  rule: { height: StyleSheet.hairlineWidth },
-  row: { minHeight: 60, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
+  scroll: { paddingHorizontal: space.lg + 4, paddingBottom: space.xxl, gap: space.xl },
+  intro: { fontSize: 17, lineHeight: 25 },
+  group: { borderTopWidth: StyleSheet.hairlineWidth },
+  apart: { marginTop: space.md },
+  list: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: space.md,
+  },
   bullet: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, paddingVertical: 4 },
   dot: { width: 7, height: 7, borderRadius: 4, marginTop: 8 },
 });

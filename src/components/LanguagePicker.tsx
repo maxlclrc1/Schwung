@@ -7,7 +7,7 @@ import { LANGUAGES, READY_LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
 import { haptic } from '../lib/haptics';
 import { usePreferences, type LanguagePreference } from '../store/preferences';
-import { radius, space, useTheme } from '../theme';
+import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
@@ -34,12 +34,12 @@ export function LanguagePicker() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <T color={c.textDim}>{t('settings.language.intro')}</T>
         {restart ? (
-          <ThemedView style={[styles.restart, { backgroundColor: c.surface }]}>
+          <ThemedView style={[styles.restart, { borderColor: c.accent }]}>
             <T color={c.text}>{t('settings.language.restartBody')}</T>
             <Button label={t('settings.language.restartNow')} onPress={() => void reloadAppAsync()} />
           </ThemedView>
         ) : null}
-        <ThemedView style={[styles.panel, { backgroundColor: c.surface }]} accessibilityRole="radiogroup">
+        <ThemedView style={[styles.panel, { borderColor: c.border }]} accessibilityRole="radiogroup">
           <Option
             label={t('settings.language.followDevice')}
             hint={device ? t('settings.language.followDeviceNow', { language: device.native }) : undefined}
@@ -98,9 +98,10 @@ function Option({
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.lg },
-  panel: { borderRadius: radius.lg, paddingHorizontal: space.lg },
+  scroll: { paddingHorizontal: space.lg + 4, paddingBottom: space.xxl, gap: space.lg },
+  // The languages as a plain list between hairlines, as the rest of Settings.
+  panel: { borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth },
   rule: { height: StyleSheet.hairlineWidth },
-  restart: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
+  restart: { borderStartWidth: 1.5, paddingStart: space.md, gap: space.md },
   row: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
 });

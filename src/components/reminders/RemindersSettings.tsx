@@ -10,7 +10,8 @@ import { haptic } from '../../lib/haptics';
 import { askForReminders, openNotificationSettings, reminderPermission, type Permission } from '../../lib/reminders';
 import { usePreferences } from '../../store/preferences';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
+import { Row, Section } from '../settingsRows';
 import { ThemedView } from '../../theme/transition';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
@@ -77,23 +78,16 @@ export function RemindersSettings() {
       : reminderText(toDateKey(tomorrow), program ? pilotToday() + 1 : 1, null);
 
   return (
-    <Animated.View layout={LinearTransition.duration(220).reduceMotion(sys)} style={{ gap: space.sm }}>
-      <T v="overline" color={c.textDim}>
-        {t('settings.reminders.title')}
-      </T>
-      <ThemedView style={[styles.panel, { backgroundColor: c.surface }]}>
-        <View style={styles.head}>
-          <View style={[styles.bell, { backgroundColor: c.accentSoft }]}>
-            <Ionicons name={on ? 'notifications' : 'notifications-outline'} size={18} color={c.accentInk} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <T v="bodyStrong">{t('settings.reminders.daily')}</T>
-            <T v="caption" color={c.textDim}>
-              {on
-                ? t('settings.reminders.everyDay', { time: hhmm(reminders.hour, reminders.minute) })
-                : t('settings.reminders.off')}
-            </T>
-          </View>
+    <Animated.View layout={LinearTransition.duration(220).reduceMotion(sys)}>
+      <Section title={t('settings.reminders.title')} first>
+        <Row
+          label={t('settings.reminders.daily')}
+          hint={
+            on
+              ? t('settings.reminders.everyDay', { time: hhmm(reminders.hour, reminders.minute) })
+              : t('settings.reminders.off')
+          }
+        >
           <Switch
             value={on}
             onValueChange={(v) => void turn(v)}
@@ -103,33 +97,32 @@ export function RemindersSettings() {
             accessibilityLabel={t('settings.reminders.daily')}
             accessibilityHint={on ? t('settings.reminders.hintOff') : t('settings.reminders.hintOn')}
           />
-        </View>
+        </Row>
 
         {blocked ? (
           <Animated.View
             entering={FadeIn.duration(200).reduceMotion(sys)}
-            style={[styles.note, { backgroundColor: c.peachSoft }]}
+            style={[styles.note, { borderColor: c.peach }]}
           >
-            <T v="caption" color={c.text} style={styles.noteText}>
+            <T v="caption" color={c.text}>
               {t('settings.reminders.blocked')}
             </T>
-            <Pressable onPress={openNotificationSettings} accessibilityRole="button" hitSlop={8}>
-              <T v="caption" color={c.peachInk} style={{ fontWeight: '800' }}>
-                {t('settings.reminders.openSettings')}
-              </T>
+            <Pressable onPress={openNotificationSettings} accessibilityRole="button" hitSlop={4} style={styles.link}>
+              {({ pressed }) => (
+                <T color={c.accentInk} style={[styles.linkText, { opacity: pressed ? 0.6 : 1 }]}>
+                  {t('settings.reminders.openSettings')}
+                </T>
+              )}
             </Pressable>
           </Animated.View>
         ) : null}
-
         {on ? (
           <Animated.View
             entering={FadeIn.duration(220).reduceMotion(sys)}
             exiting={FadeOut.duration(140).reduceMotion(sys)}
-            style={{ gap: space.lg }}
           >
-            <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-            <View
-              style={styles.time}
+            <ThemedView
+              style={[styles.time, { borderColor: c.border }]}
               accessible
               accessibilityRole="adjustable"
               accessibilityLabel={t('settings.reminders.time')}
@@ -137,16 +130,18 @@ export function RemindersSettings() {
               accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
               onAccessibilityAction={(e) => shift(e.nativeEvent.actionName === 'increment' ? 15 : -15)}
             >
-              <Round icon="remove" label={t('settings.reminders.earlier')} onPress={() => shift(-15)} />
               <Animated.View
                 key={`${reminders.hour}:${reminders.minute}`}
                 entering={FadeIn.duration(160).reduceMotion(sys)}
               >
                 <T style={[styles.clock, { color: c.text }]}>{hhmm(reminders.hour, reminders.minute)}</T>
               </Animated.View>
-              <Round icon="add" label={t('settings.reminders.later')} onPress={() => shift(15)} />
-            </View>
-            <View style={styles.presets}>
+              <View style={styles.steps}>
+                <Round icon="remove" label={t('settings.reminders.earlier')} onPress={() => shift(-15)} />
+                <Round icon="add" label={t('settings.reminders.later')} onPress={() => shift(15)} />
+              </View>
+            </ThemedView>
+            <ThemedView style={[styles.presets, { borderColor: c.border }]} accessibilityRole="radiogroup">
               {PRESETS.map((p) => {
                 const sel = p.hour === reminders.hour && p.minute === reminders.minute;
                 return (
@@ -162,28 +157,20 @@ export function RemindersSettings() {
                       name: t(`settings.reminders.${p.label}`),
                       time: hhmm(p.hour, p.minute),
                     })}
-                    style={{ flex: 1 }}
+                    style={({ pressed }) => [styles.preset, { opacity: pressed ? 0.6 : 1 }]}
                   >
-                    <ThemedView style={[styles.preset, { backgroundColor: sel ? c.accentSoft : c.surfaceHigh }]}>
-                      <T v="caption" color={sel ? c.accentInk : c.text} style={{ fontWeight: '700' }}>
-                        {t(`settings.reminders.${p.label}`)}
-                      </T>
-                      <T v="caption" color={sel ? c.accentInk : c.textDim} style={{ fontSize: 12 }}>
-                        {hhmm(p.hour, p.minute)}
-                      </T>
-                    </ThemedView>
+                    <T color={sel ? c.accentInk : c.text} style={[styles.presetName, sel && styles.selected]}>
+                      {t(`settings.reminders.${p.label}`)}
+                    </T>
+                    <T v="caption" color={sel ? c.accentInk : c.textDim} style={styles.presetTime}>
+                      {hhmm(p.hour, p.minute)}
+                    </T>
+                    {sel ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
                   </Pressable>
                 );
               })}
-            </View>
-
-            <View style={styles.head}>
-              <View style={{ flex: 1 }}>
-                <T>{t('settings.reminders.mention')}</T>
-                <T v="caption" color={c.textDim}>
-                  {t('settings.reminders.mentionHint')}
-                </T>
-              </View>
+            </ThemedView>
+            <Row label={t('settings.reminders.mention')} hint={t('settings.reminders.mentionHint')}>
               <Switch
                 value={reminders.showHabits}
                 onValueChange={(v) => {
@@ -195,14 +182,13 @@ export function RemindersSettings() {
                 ios_backgroundColor={c.surfaceHigh}
                 accessibilityLabel={t('settings.reminders.mentionA11y')}
               />
-            </View>
-
+            </Row>
             {/* What will arrive, as it will look. */}
-            <View accessible accessibilityLabel={t('settings.reminders.previewA11y', preview)}>
-              <T v="caption" color={c.textFaint} style={{ marginBottom: space.xs }}>
+            <View style={styles.preview} accessible accessibilityLabel={t('settings.reminders.previewA11y', preview)}>
+              <T v="overline" color={c.textFaint} style={styles.previewLabel}>
                 {t('settings.reminders.preview')}
               </T>
-              <ThemedView style={[styles.bubble, { backgroundColor: c.surfaceHigh }]}>
+              <ThemedView style={[styles.bubble, { backgroundColor: `${c.text}0B` }]}>
                 <Image source={require('../../../assets/icon.png')} style={styles.appIcon} cachePolicy="memory-disk" />
                 <View style={{ flex: 1, gap: 1 }}>
                   <View style={styles.bubbleTop}>
@@ -221,13 +207,13 @@ export function RemindersSettings() {
                   </T>
                 </View>
               </ThemedView>
-              <T v="caption" color={c.textFaint} style={{ marginTop: space.sm }}>
+              <T v="caption" color={c.textDim} style={{ marginTop: space.sm }}>
                 {t('settings.reminders.rules')}
               </T>
             </View>
           </Animated.View>
         ) : null}
-      </ThemedView>
+      </Section>
     </Animated.View>
   );
 }
@@ -235,10 +221,10 @@ export function RemindersSettings() {
 function Round({ icon, label, onPress }: { icon: 'add' | 'remove'; label: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.roundHit}>
       {({ pressed }) => (
-        <ThemedView style={[styles.round, { backgroundColor: c.surfaceHigh, opacity: pressed ? 0.6 : 1 }]}>
-          <Ionicons name={icon} size={20} color={c.text} />
+        <ThemedView style={[styles.round, { borderColor: c.border, opacity: pressed ? 0.6 : 1 }]}>
+          <Ionicons name={icon} size={18} color={c.text} />
         </ThemedView>
       )}
     </Pressable>
@@ -246,27 +232,45 @@ function Round({ icon, label, onPress }: { icon: 'add' | 'remove'; label: string
 }
 
 const styles = StyleSheet.create({
-  panel: { borderRadius: radius.lg, padding: space.lg, gap: space.md },
-  head: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  bell: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  note: {
-    flexWrap: 'wrap',
+  // Blocked notifications: a short note on a thin peach rule, and the way to the phone's settings.
+  note: { marginTop: space.md, paddingStart: space.md, borderStartWidth: 1.5, gap: 2 },
+  link: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },
+  linkText: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
+  time: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 68,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  clock: { fontSize: 36, lineHeight: 44, fontWeight: '200', letterSpacing: -0.5, fontVariant: ['tabular-nums'] },
+  steps: { flexDirection: 'row', gap: 4 },
+  roundHit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  round: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  presets: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
+  preset: { flex: 1, minHeight: 56, alignItems: 'center', justifyContent: 'center', paddingVertical: space.sm, gap: 1 },
+  presetName: { fontSize: 15, lineHeight: 20, textAlign: 'center' },
+  presetTime: { fontSize: 12.5, lineHeight: 16, fontVariant: ['tabular-nums'] },
+  selected: { fontWeight: '600' },
+  underline: {
+    position: 'absolute',
+    bottom: -StyleSheet.hairlineWidth,
+    left: '28%',
+    right: '28%',
+    height: 2,
+    borderRadius: 1,
+  },
+  preview: { marginTop: space.lg },
+  previewLabel: { fontSize: 11.5, letterSpacing: 1.6 },
+  bubble: {
+    flexDirection: 'row',
     gap: space.md,
     padding: space.md,
-    borderRadius: radius.md,
+    borderRadius: 14,
+    alignItems: 'flex-start',
+    marginTop: space.sm,
   },
-  // The text takes the full width and the link wraps below it when the two don't fit side by side (long languages).
-  noteText: { flexGrow: 1, flexShrink: 1, flexBasis: 180 },
-  rule: { height: StyleSheet.hairlineWidth },
-  time: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  clock: { fontSize: 44, lineHeight: 50, fontWeight: '800', letterSpacing: -1, fontVariant: ['tabular-nums'] },
-  round: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  presets: { flexDirection: 'row', gap: space.sm },
-  preset: { minHeight: 52, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', gap: 1 },
-  bubble: { flexDirection: 'row', gap: space.md, padding: space.md, borderRadius: 18, alignItems: 'flex-start' },
-  appIcon: { width: 32, height: 32, borderRadius: 8 },
+  appIcon: { width: 30, height: 30, borderRadius: 7 },
   bubbleTop: { flexDirection: 'row', justifyContent: 'space-between' },
   appName: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
 });

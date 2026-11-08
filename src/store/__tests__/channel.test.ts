@@ -137,9 +137,9 @@ describe('one app: the Life Reset', () => {
   it('Settings has no restart, reminder or V1 developer tools: ending the Life Reset is the one way to start over', () => {
     const settings = read('settings.tsx');
     expect(settings).not.toMatch(/Restart program|Daily reminder|Developer/);
-    expect(settings).toContain('<PilotSettings Section={Section} Row={Row} />');
+    expect(settings).toContain('<PilotSettings />');
     expect(fs.readFileSync(`${SRC}/components/pilot/PilotSettings.tsx`, 'utf8')).toContain(
-      "label={t('settings.program.end')}",
+      "{t('settings.program.end')}",
     );
   });
 });

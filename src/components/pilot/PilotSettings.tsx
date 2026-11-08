@@ -1,31 +1,22 @@
-import type { Ionicons } from '@expo/vector-icons';
 import { removeAllTemps } from '../../lib/appFiles';
 import { flushStorage } from '../../store/storage';
 import { router } from 'expo-router';
-import type { ComponentType, ReactNode } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Pressable, StyleSheet } from 'react-native';
 import { PROGRAM_DAYS } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
 import { startNewAscent } from '../../store/ascent';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
-import { useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
+import { Row, Section } from '../settingsRows';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { usePreferences } from '../../store/preferences';
 
-type SectionC = ComponentType<{ title: string; children: ReactNode }>;
-type RowC = ComponentType<{
-  label: string;
-  icon?: keyof typeof Ionicons.glyphMap;
-  onPress?: () => void;
-  destructive?: boolean;
-}>;
-
 /**
- * Settings → Your program: where the Life Reset is, what comes after the summit, and ending it (after a confirmation;
- * after the summit it can be kept in Past journeys instead of deleted).
+ * Settings → Your program, last on the page: where the Life Reset is, what comes after the summit, and ending it (a
+ * red line of text, after a confirmation; after the summit it can be kept in Past journeys instead of deleted).
  */
-export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }) {
+export function PilotSettings() {
   const { c } = useTheme();
   const t = useT();
   const program = useResetPilot((s) => s.program);
@@ -83,7 +74,7 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
 
   return (
     <Section title={t('settings.program.title')}>
-      <T v="caption" color={c.textDim} style={{ paddingTop: 12 }}>
+      <T color={c.textDim} style={styles.where}>
         {where}
       </T>
       {program && P.awaitingChoice(program, today) ? (
@@ -101,10 +92,22 @@ export function PilotSettings({ Section, Row }: { Section: SectionC; Row: RowC }
         />
       ) : null}
       {program ? (
-        <Row label={t('settings.program.end')} icon="trash-outline" destructive onPress={end} />
+        <Pressable onPress={end} accessibilityRole="button" hitSlop={4} style={styles.end}>
+          {({ pressed }) => (
+            <T color={c.danger} style={[styles.endText, { opacity: pressed ? 0.6 : 1 }]}>
+              {t('settings.program.end')}
+            </T>
+          )}
+        </Pressable>
       ) : (
         <Row label={t('settings.program.start')} icon="leaf-outline" onPress={() => router.push('/life-reset/setup')} />
       )}
     </Section>
   );
 }
+
+const styles = StyleSheet.create({
+  where: { paddingTop: space.sm, paddingBottom: space.xs },
+  end: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },
+  endText: { fontWeight: '500' },
+});
