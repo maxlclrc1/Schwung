@@ -879,11 +879,8 @@ export const it: Translation = {
       pastStaysAdd: ' I suoi giorni passati restano in Percorso e Andamento, e puoi aggiungerla di nuovo quando vuoi.',
       removeName: 'Rimuovi {habit}',
       keepIt: 'Tienila',
-      removeThis: 'Rimuovi questa abitudine',
 
       partial: 'Completata in parte.',
-
-      logProgress: 'Ne hai fatto una parte?',
 
       progressHint:
         'Segnala come completata in parte per +{xp} XP. Solo il completamento pieno conta per la tua serie.',
@@ -893,6 +890,8 @@ export const it: Translation = {
       removePartial: 'Rimuovi completamento parziale',
 
       partialMinutes: 'Minuti fatti (facoltativo)',
+
+      thisWeek: 'Questa settimana',
     },
   },
   journeyTab: {

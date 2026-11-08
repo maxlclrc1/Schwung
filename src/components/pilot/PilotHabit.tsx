@@ -1,26 +1,32 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useState, type ReactNode } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { canEditYesterday } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
 import { PARTIAL_XP, recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
 import { completionHaptic, haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
+import { Scene } from '../HabitCard';
 import { SheetHeader } from '../SheetHeader';
-import { Button, Card, Screen, T } from '../ui';
+import { Button, Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
+import { IS_RTL } from '../../i18n/direction';
 
 /**
- * A Life Reset habit's details (app/life-reset/[id].tsx): today and,
- * until noon, yesterday; a counter, a strength session's details, partial progress (minutes or an effort); and
- * difficulty. Nothing here is needed to complete a habit: a swipe on the card is enough.
+ * A Life Reset habit's details (app/life-reset/[id].tsx), as a page of the journal: the habit's own painting, its
+ * name and target; then Today (its state, the one filled action, partial progress, a counter or minutes, and
+ * yesterday's correction until noon), a weekly habit's week, a strength session's details, difficulty, and removal
+ * last. Nothing here is needed to complete a habit: a swipe on the card is enough.
  */
 export function PilotHabit() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { c } = useTheme();
   const t = useT();
+  const { width } = useWindowDimensions();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
   const [message, setMessage] = useState<string | null>(null);
@@ -54,10 +60,14 @@ export function PilotHabit() {
   const progress = P.progressKind(program, id, today);
   const logged = track.progress?.value ?? (track.progress ? null : (track.amount?.value ?? null));
   const canLog = P.progressOpen(program, id, today);
+  const showMinutes = canLog && progress.kind === 'minutes';
+  // The partial-progress rule, said once: by the partial action, or by the counter.
+  const showHint = !done && (canLog || counter !== null);
   const logProgress = (value: number | null) => {
     haptic.select();
     s().setProgress(id, value);
   };
+  const heroHeight = Math.round(Math.min(width, 520) * 0.5);
 
   const change = (f: () => string | null) => {
     const blocked = f();
@@ -70,244 +80,397 @@ export function PilotHabit() {
     }
   };
 
+  const state = done
+    ? strength
+      ? t('today.habit.sessionLogged')
+      : t('today.habit.done')
+    : track.skipped
+      ? t('today.habit.skipped')
+      : track.progress
+        ? t('today.habit.partial')
+        : strength
+          ? t('today.habit.noSession')
+          : t('today.habit.notYet');
+
   return (
     <Screen edges={['bottom']}>
-      <SheetHeader title={name} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Card style={styles.gap}>
-          <T v="overline" color={c.accentInk}>
-            {P.levelLineFor(program, id, today)}
+        {/* The habit's painting, fading into the page; the sheet's grabber and Done sit on it. */}
+        <View style={{ height: heroHeight }} accessible={false} importantForAccessibility="no-hide-descendants">
+          <View style={[StyleSheet.absoluteFill, styles.clip]}>
+            <Scene habitId={id} scene={own?.scene} width={Math.min(width, 520)} height={heroHeight} />
+          </View>
+          <LinearGradient colors={['rgba(20,16,40,0.32)', 'rgba(20,16,40,0)']} style={styles.shade} />
+          <LinearGradient colors={[`${c.bg}00`, c.bg]} locations={[0, 0.92]} style={styles.fade} />
+          <View style={styles.grabber} />
+        </View>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t('nav.done')}
+          style={styles.done}
+        >
+          <T v="bodyStrong" color="#FFFFFF" style={styles.doneText}>
+            {t('nav.done')}
           </T>
-          <T v="heading">{P.targetText(program, id, today)}</T>
-          <T color={c.textDim}>{P.frequencyText(program, id, today)}</T>
+        </Pressable>
+
+        <View style={styles.page}>
+          <View style={styles.head}>
+            <T v="overline" color={c.textDim} style={styles.level}>
+              {P.levelLineFor(program, id, today)}
+            </T>
+            <T v="title" accessibilityRole="header">
+              {name}
+            </T>
+            <T style={styles.target}>{P.targetText(program, id, today)}</T>
+            <T v="caption" color={c.textDim} style={styles.freq}>
+              {P.frequencyText(program, id, today)}
+            </T>
+            {pending ? (
+              <T v="caption" color={c.accentInk} style={styles.freq}>
+                {t('today.habit.comingUp', { pending })}
+              </T>
+            ) : null}
+          </View>
+
           {week ? (
-            <T v="bodyStrong">
-              {week.goal === 0
-                ? t('today.habit.shortWeek')
-                : t(week.credited >= week.goal ? 'today.habit.weekMet' : 'today.habit.week', {
-                    done: week.credited,
-                    goal: week.goal,
-                  })}
-            </T>
-          ) : null}
-          {week && week.goal > week.credited ? (
-            <T v="caption" color={c.textDim}>
-              {t('today.habit.anyDays')}
-            </T>
-          ) : null}
-          {pending ? (
-            <T v="caption" color={c.accentInk}>
-              {t('today.habit.comingUp', { pending })}
-            </T>
-          ) : null}
-        </Card>
-
-        <Card style={styles.gap}>
-          <T v="bodyStrong">{t('today.habit.today')}</T>
-          <T color={c.textDim}>
-            {done
-              ? strength
-                ? t('today.habit.sessionLogged')
-                : t('today.habit.done')
-              : track.skipped
-                ? t('today.habit.skipped')
-                : track.progress
-                  ? t('today.habit.partial')
-                  : strength
-                    ? t('today.habit.noSession')
-                    : t('today.habit.notYet')}
-          </T>
-          {counter !== null ? (
-            <View style={styles.stepper}>
-              <Step label="−1" onPress={() => completionHaptic(s().count(id, -1))} />
-              <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {t('today.habit.of', { done: Math.min(track.count ?? 0, counter), goal: counter })}
-              </T>
-              <Step label="+1" onPress={() => completionHaptic(s().count(id, 1))} />
-            </View>
-          ) : null}
-          {counter !== null && !done ? (
-            <T v="caption" color={c.textDim}>
-              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
-            </T>
-          ) : null}
-          <Button
-            label={
-              done
-                ? strength
-                  ? t('today.habit.undoSession')
-                  : t('today.habit.undo')
-                : strength
-                  ? t('today.habit.logSession')
-                  : t('today.habit.markDone')
-            }
-            kind={done ? 'secondary' : 'primary'}
-            onPress={() => completionHaptic(s().toggle(id))}
-          />
-          {yesterday !== null ? (
-            <View style={styles.yesterday}>
-              <T v="caption" color={c.textDim} style={{ flex: 1 }}>
-                {P.isDone(program, id, yesterday) ? t('today.habit.yesterdayDone') : t('today.habit.yesterdayNotDone')}
-              </T>
-              <Choice
-                label={
-                  P.isDone(program, id, yesterday) ? t('today.habit.undoYesterday') : t('today.habit.doneYesterday')
-                }
-                on={false}
-                onPress={() => completionHaptic(s().toggle(id, yesterday))}
-              />
-            </View>
-          ) : null}
-        </Card>
-
-        {canLog && (!done || progress.kind === 'minutes') ? (
-          <Card style={styles.gap}>
-            <T v="bodyStrong">{t('today.habit.logProgress')}</T>
-            {done ? null : (
-              <>
-                <T v="caption" color={c.textDim}>
-                  {t('today.habit.progressHint', { xp: PARTIAL_XP })}
+            <>
+              <Section title={t('today.habit.thisWeek')} />
+              <View style={styles.week}>
+                {week.goal > 0 ? (
+                  <View style={styles.weekDots} accessible={false} importantForAccessibility="no-hide-descendants">
+                    {Array.from({ length: week.goal }, (_, i) => (
+                      <ThemedView
+                        key={i}
+                        style={[
+                          styles.weekDot,
+                          i < week.credited
+                            ? { backgroundColor: c.sage, borderColor: c.sage }
+                            : { borderColor: c.textFaint },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                ) : null}
+                <T style={styles.weekText}>
+                  {week.goal === 0
+                    ? t('today.habit.shortWeek')
+                    : t(week.credited >= week.goal ? 'today.habit.weekMet' : 'today.habit.week', {
+                        done: week.credited,
+                        goal: week.goal,
+                      })}
                 </T>
-                <Button
+              </View>
+              {week.goal > week.credited ? (
+                <T v="caption" color={c.textDim} style={styles.note}>
+                  {t('today.habit.anyDays')}
+                </T>
+              ) : null}
+            </>
+          ) : null}
+
+          <Section title={t('today.habit.today')} note={t('common.day', { day: today })} />
+          <View style={styles.state} accessible accessibilityLiveRegion="polite">
+            {done ? <Check color={c.sage} /> : null}
+            <T style={styles.stateText}>{state}</T>
+            {track.progress && !done && logged ? (
+              <T color={c.textDim} style={styles.stateSub}>
+                {t('today.habit.min', { minutes: logged })}
+              </T>
+            ) : null}
+          </View>
+
+          {counter !== null ? (
+            <View style={styles.rows}>
+              <Ledger label={t('today.habit.of', { done: Math.min(track.count ?? 0, counter), goal: counter })} big>
+                <Stepper
+                  minus={() => completionHaptic(s().count(id, -1))}
+                  plus={() => completionHaptic(s().count(id, 1))}
+                  step="1"
+                />
+              </Ledger>
+            </View>
+          ) : null}
+
+          {done ? (
+            <TextLink
+              label={strength ? t('today.habit.undoSession') : t('today.habit.undo')}
+              onPress={() => completionHaptic(s().toggle(id))}
+              align="start"
+            />
+          ) : (
+            <>
+              <Button
+                label={strength ? t('today.habit.logSession') : t('today.habit.markDone')}
+                onPress={() => completionHaptic(s().toggle(id))}
+                style={styles.primary}
+              />
+              {canLog ? (
+                <TextLink
                   label={track.progress ? t('today.habit.removePartial') : t('today.habit.effort')}
-                  kind="secondary"
                   onPress={() => {
                     haptic.select();
                     s().setPartial(id, !track.progress);
                   }}
                 />
-              </>
-            )}
-            {progress.kind === 'minutes' ? (
-              <>
-                <T v="caption" color={c.textDim} style={styles.groupLabel}>
-                  {t('today.habit.partialMinutes')}
-                </T>
-                <View style={styles.stepper}>
-                  <Step label="−5" onPress={() => logProgress(logged && logged > 5 ? logged - 5 : null)} />
-                  <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                    {logged ? t('today.habit.min', { minutes: logged }) : '—'}
-                  </T>
-                  <Step label="+5" onPress={() => logProgress((logged ?? 0) + 5)} />
-                </View>
-              </>
-            ) : null}
-          </Card>
-        ) : null}
-
-        {strength ? (
-          <Card style={styles.gap}>
-            <T v="bodyStrong">{t('today.habit.session')}</T>
-            <T v="caption" color={c.textDim}>
-              {t('today.habit.sessionHint')}
-            </T>
-            <View style={styles.chips}>
-              {SESSION_TYPES.map((type) => (
-                <Choice
-                  key={type}
-                  label={P.sessionName(type)}
-                  on={track.session?.type === type}
-                  onPress={() => s().setSession({ type })}
-                />
-              ))}
-            </View>
-            <View style={styles.stepper}>
-              <Step
-                label="−5"
-                onPress={() => s().setSession({ minutes: Math.max(5, (track.session?.minutes ?? 30) - 5) })}
-              />
-              <T v="heading" style={[styles.tabular, styles.flexCenter]}>
-                {track.session?.minutes ? t('today.habit.min', { minutes: track.session.minutes }) : '—'}
-              </T>
-              <Step label="+5" onPress={() => s().setSession({ minutes: (track.session?.minutes ?? 25) + 5 })} />
-            </View>
-            {done && recoveryNote(program.logs, program.startedAt, today, id) ? (
-              <T v="caption" color={c.textDim}>
-                {t('today.habit.recovery')}
-              </T>
-            ) : null}
-          </Card>
-        ) : null}
-
-        {own ? null : (
-          <Card style={styles.gap}>
-            <T v="bodyStrong">{t('today.habit.difficulty')}</T>
-            <T v="caption" color={c.textDim}>
-              {week ? t('today.habit.difficultyHintWeek') : t('today.habit.difficultyHintDay')}
-            </T>
-            <View style={styles.stack}>
-              <Button label={t('today.habit.easier')} kind="secondary" onPress={() => change(() => s().easier(id))} />
-              <Button label={t('today.habit.harder')} kind="secondary" onPress={() => change(() => s().harder(id))} />
-            </View>
-            <T v="caption" color={c.textDim} style={styles.groupLabel}>
-              {t('today.habit.feel')}
-            </T>
-            <View style={styles.chips}>
-              <Choice
-                label={t('today.habit.tooEasy')}
-                on={recentFeedback === 'too-easy'}
-                onPress={() => s().feedback(id, 'too-easy')}
-              />
-              <Choice
-                label={t('today.habit.tooHard')}
-                on={recentFeedback === 'too-hard'}
-                onPress={() => s().feedback(id, 'too-hard')}
-              />
-            </View>
-            {message ? <T v="caption">{message}</T> : null}
-          </Card>
-        )}
-
-        {own
-          ? null
-          : P.habitNotes(id, program.answers).map((n) => (
-              <T key={n} v="caption" color={c.textFaint}>
-                {n}
-              </T>
-            ))}
-
-        <Card style={styles.gap}>
-          <T v="bodyStrong">{t('today.habit.remove')}</T>
-          <T v="caption" color={c.textDim}>
-            {P.isDone(program, id, today) ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
-            {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
-          </T>
-          {removing ? (
-            <View style={styles.stack}>
-              <Button
-                label={t('today.habit.removeName', { habit: name })}
-                kind="danger"
-                onPress={() => {
-                  const problem = s().removeHabit(id);
-                  if (problem) setRemoveError(problem);
-                  else {
-                    haptic.confirm();
-                    if (router.canGoBack()) router.back();
-                    else router.replace('/today');
-                  }
-                }}
-              />
-              <Button label={t('today.habit.keepIt')} kind="ghost" onPress={() => setRemoving(false)} />
-            </View>
-          ) : (
-            <Button label={t('today.habit.removeThis')} kind="secondary" onPress={() => setRemoving(true)} />
+              ) : null}
+            </>
           )}
-          {removeError ? (
-            <T v="caption" color={c.danger}>
-              {removeError}
+          {showHint ? (
+            <T v="caption" color={c.textDim} style={styles.hint}>
+              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
             </T>
           ) : null}
-        </Card>
+
+          <View style={styles.rows}>
+            {showMinutes ? (
+              <Ledger label={t('today.habit.partialMinutes')}>
+                <Stepper
+                  minus={() => logProgress(logged && logged > 5 ? logged - 5 : null)}
+                  plus={() => logProgress((logged ?? 0) + 5)}
+                  value={logged ? t('today.habit.min', { minutes: logged }) : '—'}
+                  step="5"
+                />
+              </Ledger>
+            ) : null}
+            {yesterday !== null ? (
+              <Ledger
+                label={
+                  P.isDone(program, id, yesterday) ? t('today.habit.yesterdayDone') : t('today.habit.yesterdayNotDone')
+                }
+                small
+              >
+                <TextLink
+                  label={
+                    P.isDone(program, id, yesterday) ? t('today.habit.undoYesterday') : t('today.habit.doneYesterday')
+                  }
+                  onPress={() => completionHaptic(s().toggle(id, yesterday))}
+                  accent
+                />
+              </Ledger>
+            ) : null}
+          </View>
+
+          {strength ? (
+            <>
+              <Section title={t('today.habit.session')} />
+              <T v="caption" color={c.textDim} style={styles.note}>
+                {t('today.habit.sessionHint')}
+              </T>
+              <View style={styles.options}>
+                {SESSION_TYPES.map((type) => (
+                  <Option
+                    key={type}
+                    label={P.sessionName(type)}
+                    on={track.session?.type === type}
+                    onPress={() => s().setSession({ type })}
+                  />
+                ))}
+              </View>
+              <View style={styles.rows}>
+                <Ledger>
+                  <Stepper
+                    minus={() => s().setSession({ minutes: Math.max(5, (track.session?.minutes ?? 30) - 5) })}
+                    plus={() => s().setSession({ minutes: (track.session?.minutes ?? 25) + 5 })}
+                    value={track.session?.minutes ? t('today.habit.min', { minutes: track.session.minutes }) : '—'}
+                    step="5"
+                  />
+                </Ledger>
+              </View>
+              {done && recoveryNote(program.logs, program.startedAt, today, id) ? (
+                <T v="caption" color={c.textDim} style={styles.note}>
+                  {t('today.habit.recovery')}
+                </T>
+              ) : null}
+            </>
+          ) : null}
+
+          {own ? null : (
+            <>
+              <Section title={t('today.habit.difficulty')} />
+              <T v="caption" color={c.textDim} style={styles.note}>
+                {week ? t('today.habit.difficultyHintWeek') : t('today.habit.difficultyHintDay')}
+              </T>
+              <ThemedView style={[styles.pair, { borderColor: c.border }]}>
+                <PairHalf
+                  label={t('today.habit.easier')}
+                  arrow={IS_RTL ? '›' : '‹'}
+                  onPress={() => change(() => s().easier(id))}
+                />
+                <ThemedView style={[styles.pairRule, { backgroundColor: c.border }]} />
+                <PairHalf
+                  label={t('today.habit.harder')}
+                  arrow={IS_RTL ? '‹' : '›'}
+                  end
+                  onPress={() => change(() => s().harder(id))}
+                />
+              </ThemedView>
+              <View style={styles.feel}>
+                <T color={c.textDim} style={styles.feelQ}>
+                  {t('today.habit.feel')}
+                </T>
+                <View style={styles.feelOpts}>
+                  <Option
+                    label={t('today.habit.tooEasy')}
+                    on={recentFeedback === 'too-easy'}
+                    onPress={() => s().feedback(id, 'too-easy')}
+                  />
+                  <Option
+                    label={t('today.habit.tooHard')}
+                    on={recentFeedback === 'too-hard'}
+                    onPress={() => s().feedback(id, 'too-hard')}
+                  />
+                </View>
+              </View>
+              {message ? (
+                <T v="caption" style={styles.note} accessibilityLiveRegion="polite">
+                  {message}
+                </T>
+              ) : null}
+              {P.habitNotes(id, program.answers).map((n) => (
+                <ThemedView key={n} style={[styles.tip, { borderColor: c.border }]}>
+                  <T v="caption" color={c.textDim}>
+                    {n}
+                  </T>
+                </ThemedView>
+              ))}
+            </>
+          )}
+
+          <ThemedView style={[styles.remove, { borderColor: c.border }]}>
+            {removing ? (
+              <View style={styles.confirm}>
+                <Button
+                  label={t('today.habit.removeName', { habit: name })}
+                  kind="danger"
+                  onPress={() => {
+                    const problem = s().removeHabit(id);
+                    if (problem) setRemoveError(problem);
+                    else {
+                      haptic.confirm();
+                      if (router.canGoBack()) router.back();
+                      else router.replace('/today');
+                    }
+                  }}
+                />
+                <Button label={t('today.habit.keepIt')} kind="ghost" onPress={() => setRemoving(false)} />
+              </View>
+            ) : (
+              <TextLink label={t('today.habit.remove')} onPress={() => setRemoving(true)} danger align="start" />
+            )}
+            <T v="caption" color={c.textDim}>
+              {done ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
+              {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
+            </T>
+            {removeError ? (
+              <T v="caption" color={c.danger}>
+                {removeError}
+              </T>
+            ) : null}
+          </ThemedView>
+        </View>
       </ScrollView>
     </Screen>
   );
 }
 
-function Step({ label, onPress }: { label: string; onPress: () => void }) {
-  return <Button label={label} kind="secondary" style={{ width: 72 }} onPress={onPress} />;
+/** A section of the page: its name in small capitals, a hairline, and an optional note at the end. */
+function Section({ title, note }: { title: string; note?: string }) {
+  const { c } = useTheme();
+  return (
+    <View style={styles.section} accessible accessibilityRole="header">
+      <T v="overline" color={c.textDim} style={styles.sectionTitle} maxFontSizeMultiplier={1.5}>
+        {title}
+      </T>
+      <ThemedView style={[styles.sectionRule, { backgroundColor: c.border }]} />
+      {note ? (
+        <T v="caption" color={c.textDim} maxFontSizeMultiplier={1.5}>
+          {note}
+        </T>
+      ) : null}
+    </View>
+  );
 }
 
-function Choice({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+/** One row of the ledger: what it is, and its control at the end; a hairline above. */
+function Ledger({
+  label,
+  children,
+  big,
+  small,
+}: {
+  label?: string;
+  children: ReactNode;
+  big?: boolean;
+  small?: boolean;
+}) {
+  const { c } = useTheme();
+  return (
+    <ThemedView style={[styles.ledger, { borderColor: c.border }]}>
+      {label === undefined ? null : (
+        <T
+          v={small ? 'caption' : 'body'}
+          style={[styles.ledgerLabel, big && styles.ledgerBig, small && styles.ledgerSmall]}
+          color={small ? c.textDim : c.text}
+        >
+          {label}
+        </T>
+      )}
+      {children}
+    </ThemedView>
+  );
+}
+
+/** − value +, in small round buttons (44 pt to touch). */
+function Stepper({ minus, plus, value, step }: { minus: () => void; plus: () => void; value?: string; step: string }) {
+  return (
+    <View style={styles.stepper}>
+      <Round label="−" a11y={`−${step}`} onPress={minus} />
+      {value !== undefined ? (
+        <T style={styles.stepValue} accessibilityLiveRegion="polite">
+          {value}
+        </T>
+      ) : null}
+      <Round label="+" a11y={`+${step}`} onPress={plus} />
+    </View>
+  );
+}
+
+function Round({ label, a11y, onPress }: { label: string; a11y: string; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={a11y}
+      hitSlop={4}
+      style={({ pressed }) => [styles.roundHit, { opacity: pressed ? 0.5 : 1 }]}
+    >
+      <ThemedView style={[styles.round, { borderColor: c.border }]}>
+        <T style={styles.roundText} color={c.text}>
+          {label}
+        </T>
+      </ThemedView>
+    </Pressable>
+  );
+}
+
+/** A secondary action as words: underlined by a hairline, red for removal, violet for a correction. */
+function TextLink({
+  label,
+  onPress,
+  align = 'center',
+  danger,
+  accent,
+}: {
+  label: string;
+  onPress: () => void;
+  align?: 'center' | 'start';
+  danger?: boolean;
+  accent?: boolean;
+}) {
   const { c } = useTheme();
   return (
     <Pressable
@@ -316,38 +479,181 @@ function Choice({ label, on, onPress }: { label: string; on: boolean; onPress: (
         onPress();
       }}
       accessibilityRole="button"
-      accessibilityState={{ selected: on }}
+      style={({ pressed }) => [
+        styles.link,
+        { alignSelf: align === 'center' ? 'center' : 'flex-start', opacity: pressed ? 0.5 : 1 },
+      ]}
     >
-      <ThemedView
+      <T
         style={[
-          styles.chip,
-          { backgroundColor: on ? c.accentSoft : c.surfaceHigh, borderColor: on ? c.accentInk : c.border },
+          styles.linkText,
+          !danger && !accent && { textDecorationLine: 'underline', textDecorationColor: `${c.text}40` },
         ]}
+        color={danger ? c.danger : accent ? c.accentInk : c.text}
       >
-        <T v="label" color={on ? c.accentInk : c.text}>
-          {label}
-        </T>
-      </ThemedView>
+        {label}
+      </T>
     </Pressable>
   );
 }
 
+/** Half of the divided easier / harder row. */
+function PairHalf({
+  label,
+  arrow,
+  end,
+  onPress,
+}: {
+  label: string;
+  arrow: string;
+  end?: boolean;
+  onPress: () => void;
+}) {
+  const { c } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [styles.half, { opacity: pressed ? 0.5 : 1 }]}
+    >
+      {end ? null : <T color={c.textFaint}>{arrow}</T>}
+      <T style={styles.halfText}>{label}</T>
+      {end ? <T color={c.textFaint}>{arrow}</T> : null}
+    </Pressable>
+  );
+}
+
+/** A choice as a small radio mark and its words. */
+function Option({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+  const { c } = useTheme();
+  return (
+    <Pressable
+      onPress={() => {
+        haptic.select();
+        onPress();
+      }}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: on }}
+      style={({ pressed }) => [styles.option, { opacity: pressed ? 0.5 : 1 }]}
+    >
+      <ThemedView style={[styles.radio, { borderColor: on ? c.accent : c.textFaint }]}>
+        {on ? <ThemedView style={[styles.radioDot, { backgroundColor: c.accent }]} /> : null}
+      </ThemedView>
+      <T style={styles.optionText}>{label}</T>
+    </Pressable>
+  );
+}
+
+/** Done: a thin sage check in a ring. */
+function Check({ color }: { color: string }) {
+  return (
+    <View style={[styles.check, { borderColor: color }]}>
+      <Svg width={13} height={13} viewBox="0 0 13 13">
+        <Path d="M2.5 6.8l2.8 2.7 5.2-6" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+      </Svg>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  scroll: { padding: space.lg, gap: space.lg, paddingBottom: space.xxxl },
-  gap: { gap: space.sm },
-  stack: { gap: space.sm },
-  // A label that leads a group of controls: a little apart from what's above, so it reads with what follows.
-  groupLabel: { marginTop: space.sm },
-  flexCenter: { flex: 1, textAlign: 'center' },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  yesterday: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xs },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: {
-    minHeight: 40,
-    paddingHorizontal: space.md,
-    borderRadius: radius.pill,
+  scroll: { paddingBottom: space.xxxl },
+  clip: { overflow: 'hidden' },
+  shade: { position: 'absolute', left: 0, right: 0, top: 0, height: 72 },
+  fade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 96 },
+  grabber: {
+    position: 'absolute',
+    top: 7,
+    alignSelf: 'center',
+    width: 36,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.75)',
+  },
+  done: { position: 'absolute', top: 14, end: space.lg, minHeight: 32, justifyContent: 'center' },
+  doneText: { textShadowColor: 'rgba(0,0,0,0.35)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 0 } },
+  page: { paddingHorizontal: space.lg + 4, marginTop: -36 },
+  head: { gap: 4 },
+  level: { letterSpacing: 2, fontSize: 11.5 },
+  target: { fontSize: 19, lineHeight: 26, marginTop: 2 },
+  freq: { fontSize: 15, lineHeight: 20 },
+  section: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: space.xxl },
+  sectionTitle: { flexShrink: 1, maxWidth: '70%', fontSize: 11.5, letterSpacing: 2 },
+  sectionRule: { flex: 1, minWidth: 12, height: StyleSheet.hairlineWidth },
+  week: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.md, marginTop: space.lg },
+  weekDots: { flexDirection: 'row', gap: 12 },
+  weekDot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.4 },
+  weekText: { flexShrink: 1, fontSize: 15, lineHeight: 20 },
+  note: { marginTop: space.md },
+  state: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', columnGap: space.md, marginTop: space.lg },
+  stateText: { fontSize: 28, lineHeight: 34, fontWeight: '300', letterSpacing: -0.4, flexShrink: 1 },
+  stateSub: { fontSize: 15, lineHeight: 20 },
+  check: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  primary: { marginTop: space.xl },
+  hint: { marginTop: space.xs, textAlign: 'center' },
+  rows: { marginTop: space.lg },
+  ledger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    minHeight: 56,
+    paddingVertical: space.xs,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginTop: -StyleSheet.hairlineWidth,
+  },
+  ledgerLabel: { flex: 1, fontSize: 16, lineHeight: 21 },
+  ledgerSmall: { fontSize: 14, lineHeight: 19 },
+  ledgerBig: { fontSize: 22, lineHeight: 28, fontWeight: '300', fontVariant: ['tabular-nums'] },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  stepValue: { minWidth: 64, textAlign: 'center', fontVariant: ['tabular-nums'] },
+  roundHit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  round: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     borderWidth: 1,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  tabular: { fontVariant: ['tabular-nums'] },
+  roundText: { fontSize: 20, lineHeight: 24, fontWeight: '300' },
+  link: { minHeight: 44, justifyContent: 'center', paddingVertical: space.xs },
+  linkText: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
+  options: { flexDirection: 'row', flexWrap: 'wrap', columnGap: space.xl, marginTop: space.xs },
+  pair: {
+    flexDirection: 'row',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    marginTop: space.lg,
+  },
+  pairRule: { width: StyleSheet.hairlineWidth },
+  half: {
+    flex: 1,
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.sm,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.sm,
+  },
+  halfText: { fontWeight: '500', textAlign: 'center', flexShrink: 1 },
+  feel: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.md, marginTop: space.xs },
+  feelQ: { flexGrow: 1, fontSize: 15, lineHeight: 20 },
+  feelOpts: { flexDirection: 'row', columnGap: space.lg },
+  optionText: { fontSize: 15, lineHeight: 20 },
+  option: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 48 },
+  radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.3, alignItems: 'center', justifyContent: 'center' },
+  radioDot: { width: 9, height: 9, borderRadius: 4.5 },
+  tip: { marginTop: space.lg, paddingStart: space.md, borderStartWidth: StyleSheet.hairlineWidth },
+  remove: { marginTop: space.xxl, paddingTop: space.sm, borderTopWidth: StyleSheet.hairlineWidth, gap: 2 },
+  confirm: { gap: space.sm, marginVertical: space.sm },
 });

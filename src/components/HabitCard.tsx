@@ -122,7 +122,7 @@ const INK: Record<Theme, { veil: string[]; top: string[]; title: string; target:
  * The habit's scene: its own art, or a part of the world panorama (the one given to a habit of the person's own, or
  * one picked by id).
  */
-function Scene({ habitId, scene, width, height }: { habitId: string; scene?: number; width: number; height: number }) {
+export function Scene({ habitId, scene, width, height }: { habitId: string; scene?: number; width: number; height: number }) {
   const dark = habitScene(habitId, 'dark');
   const light = habitScene(habitId, 'light');
   // An explicit size (not just absoluteFill): the web otherwise draws the image at its natural size.

@@ -857,11 +857,8 @@ export const hi: Translation = {
       pastStaysAdd: ' इसके पिछले दिन आपके सफ़र और इनसाइट्स में रहते हैं, और आप इसे कभी भी फिर से जोड़ सकते हैं।',
       removeName: '{habit} हटाएँ',
       keepIt: 'इसे रखें',
-      removeThis: 'यह आदत हटाएँ',
 
       partial: 'आंशिक रूप से पूरा।',
-
-      logProgress: 'कुछ हिस्सा किया?',
 
       progressHint: '+{xp} XP के लिए इसे आंशिक रूप से पूरा चिह्नित करें। स्ट्रीक में सिर्फ़ पूरा करना गिना जाता है।',
 
@@ -870,6 +867,8 @@ export const hi: Translation = {
       removePartial: 'आंशिक रूप से पूरा हटाएँ',
 
       partialMinutes: 'किए गए मिनट (वैकल्पिक)',
+
+      thisWeek: 'इस हफ़्ते',
     },
   },
   journeyTab: {

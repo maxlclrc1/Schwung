@@ -84,6 +84,7 @@ export const today = {
     shortWeek: 'A short week: no goal this week.',
     weekMet: '{done} of {goal} this week · goal met',
     week: '{done} of {goal} this week',
+    thisWeek: 'This week',
     anyDays: 'Any days you choose. A day without it is a rest day, never a missed one.',
     comingUp: 'Coming up: {pending}.',
     today: 'Today',
@@ -102,7 +103,6 @@ export const today = {
     undoYesterday: 'Undo yesterday',
     doneYesterday: 'Done yesterday',
     partial: 'Partially completed.',
-    logProgress: 'Did part of it?',
     progressHint: 'Mark it as partially completed for +{xp} XP. Only a full completion counts toward your streak.',
     effort: 'Mark as partially completed',
     removePartial: 'Remove partial completion',
@@ -126,6 +126,5 @@ export const today = {
     pastStaysAdd: ' Its past days stay in your Journey and Insights, and you can add it again any time.',
     removeName: 'Remove {habit}',
     keepIt: 'Keep it',
-    removeThis: 'Remove this habit',
   },
 };

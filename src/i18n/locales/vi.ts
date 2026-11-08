@@ -856,11 +856,8 @@ export const vi: Translation = {
         ' Những ngày trước đây vẫn ở trong Hành trình và Thống kê của bạn, và bạn có thể thêm lại bất cứ lúc nào.',
       removeName: 'Xóa {habit}',
       keepIt: 'Giữ lại',
-      removeThis: 'Xóa thói quen này',
 
       partial: 'Hoàn thành một phần.',
-
-      logProgress: 'Đã làm một phần?',
 
       progressHint: 'Đánh dấu hoàn thành một phần để nhận +{xp} XP. Chỉ hoàn thành trọn vẹn mới tính vào chuỗi ngày.',
 
@@ -869,6 +866,8 @@ export const vi: Translation = {
       removePartial: 'Bỏ hoàn thành một phần',
 
       partialMinutes: 'Số phút đã làm (tùy chọn)',
+
+      thisWeek: 'Tuần này',
     },
   },
   journeyTab: {

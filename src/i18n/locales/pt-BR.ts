@@ -862,11 +862,8 @@ export const ptBR: Translation = {
         ' Os dias anteriores continuam na Jornada e nos Insights, e você pode adicioná-lo de novo quando quiser.',
       removeName: 'Remover {habit}',
       keepIt: 'Manter',
-      removeThis: 'Remover este hábito',
 
       partial: 'Concluído em parte.',
-
-      logProgress: 'Fez uma parte?',
 
       progressHint:
         'Marque como concluído em parte e ganhe +{xp} XP. Só a conclusão completa conta para sua sequência.',
@@ -876,6 +873,8 @@ export const ptBR: Translation = {
       removePartial: 'Remover conclusão parcial',
 
       partialMinutes: 'Minutos feitos (opcional)',
+
+      thisWeek: 'Esta semana',
     },
   },
   journeyTab: {

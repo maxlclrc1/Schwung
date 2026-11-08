@@ -859,11 +859,8 @@ export const es: Translation = {
         ' Sus días anteriores se quedan en Recorrido y Perspectivas, y puedes volver a añadirlo cuando quieras.',
       removeName: 'Quitar {habit}',
       keepIt: 'Mantenerlo',
-      removeThis: 'Quitar este hábito',
 
       partial: 'Completado en parte.',
-
-      logProgress: '¿Hiciste una parte?',
 
       progressHint: 'Márcalo como completado en parte y gana +{xp} XP. Solo completarlo del todo cuenta para tu racha.',
 
@@ -872,6 +869,8 @@ export const es: Translation = {
       removePartial: 'Quitar completado en parte',
 
       partialMinutes: 'Minutos hechos (opcional)',
+
+      thisWeek: 'Esta semana',
     },
   },
   journeyTab: {

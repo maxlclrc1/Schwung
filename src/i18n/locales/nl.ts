@@ -867,11 +867,8 @@ export const nl: Translation = {
       pastStaysAdd: ' De eerdere dagen blijven in je Reis en Inzichten, en je kunt hem altijd weer toevoegen.',
       removeName: '{habit} verwijderen',
       keepIt: 'Houden',
-      removeThis: 'Deze gewoonte verwijderen',
 
       partial: 'Deels voltooid.',
-
-      logProgress: 'Een deel gedaan?',
 
       progressHint: 'Markeer het als deels voltooid voor +{xp} XP. Alleen volledig voltooien telt mee voor je reeks.',
 
@@ -880,6 +877,8 @@ export const nl: Translation = {
       removePartial: 'Deels voltooid verwijderen',
 
       partialMinutes: 'Gedane minuten (optioneel)',
+
+      thisWeek: 'Deze week',
     },
   },
   journeyTab: {

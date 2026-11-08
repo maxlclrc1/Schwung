@@ -870,11 +870,8 @@ export const id: Translation = {
         ' Hari-hari sebelumnya tetap ada di Perjalanan dan Wawasan, dan kamu bisa menambahkannya lagi kapan saja.',
       removeName: 'Hapus {habit}',
       keepIt: 'Pertahankan',
-      removeThis: 'Hapus kebiasaan ini',
 
       partial: 'Selesai sebagian.',
-
-      logProgress: 'Sudah sebagian?',
 
       progressHint: 'Tandai selesai sebagian untuk +{xp} XP. Hanya selesai penuh yang dihitung untuk runtunanmu.',
 
@@ -883,6 +880,8 @@ export const id: Translation = {
       removePartial: 'Hapus selesai sebagian',
 
       partialMinutes: 'Menit yang dilakukan (opsional)',
+
+      thisWeek: 'Minggu ini',
     },
   },
   journeyTab: {

@@ -854,11 +854,8 @@ export const ur: Translation = {
       pastStaysAdd: ' اس کے پچھلے دن آپ کے سفر اور بصیرت میں رہتے ہیں، اور آپ اسے کسی بھی وقت دوبارہ شامل کر سکتے ہیں۔',
       removeName: '{habit} ہٹائیں',
       keepIt: 'اسے رکھیں',
-      removeThis: 'یہ عادت ہٹائیں',
 
       partial: 'جزوی طور پر مکمل۔',
-
-      logProgress: 'کچھ حصہ کیا؟',
 
       progressHint: '+{xp} XP کے لیے اسے جزوی طور پر مکمل نشان زد کریں۔ تسلسل میں صرف مکمل کرنا شمار ہوتا ہے۔',
 
@@ -867,6 +864,8 @@ export const ur: Translation = {
       removePartial: 'جزوی تکمیل ہٹائیں',
 
       partialMinutes: 'کیے گئے منٹ (اختیاری)',
+
+      thisWeek: 'اس ہفتے',
     },
   },
   journeyTab: {

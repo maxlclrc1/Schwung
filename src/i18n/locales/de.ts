@@ -876,11 +876,8 @@ export const de: Translation = {
         ' Ihre bisherigen Tage bleiben in Weg und Einblicke, und du kannst sie jederzeit wieder hinzufügen.',
       removeName: '{habit} entfernen',
       keepIt: 'Behalten',
-      removeThis: 'Diese Gewohnheit entfernen',
 
       partial: 'Teilweise erledigt.',
-
-      logProgress: 'Einen Teil geschafft?',
 
       progressHint: 'Markier es als teilweise erledigt für +{xp} XP. Nur ganz Erledigtes zählt für deine Serie.',
 
@@ -889,6 +886,8 @@ export const de: Translation = {
       removePartial: 'Teilweise erledigt entfernen',
 
       partialMinutes: 'Erledigte Minuten (optional)',
+
+      thisWeek: 'Diese Woche',
     },
   },
   journeyTab: {

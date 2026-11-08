@@ -832,11 +832,8 @@ export const ko: Translation = {
       pastStaysAdd: ' 지난 기록은 여정과 인사이트에 남고, 언제든 다시 추가할 수 있어요.',
       removeName: '{habit} 빼기',
       keepIt: '유지하기',
-      removeThis: '이 습관 빼기',
 
       partial: '일부 완료.',
-
-      logProgress: '일부만 했나요?',
 
       progressHint: '일부 완료로 표시하면 +{xp} XP. 연속 기록에는 완료만 포함돼요.',
 
@@ -845,6 +842,8 @@ export const ko: Translation = {
       removePartial: '일부 완료 취소',
 
       partialMinutes: '한 시간(분, 선택)',
+
+      thisWeek: '이번 주',
     },
   },
   journeyTab: {

@@ -817,11 +817,8 @@ export const zhHant: Translation = {
       pastStaysAdd: ' 它過去的紀錄仍保留在「旅程」和「洞察」中，你隨時可以再加入它。',
       removeName: '移除{habit}',
       keepIt: '保留',
-      removeThis: '移除這個習慣',
 
       partial: '部分完成。',
-
-      logProgress: '完成了一部分？',
 
       progressHint: '標記為部分完成可得 +{xp} XP。只有完全完成才計入連續紀錄。',
 
@@ -830,6 +827,8 @@ export const zhHant: Translation = {
       removePartial: '取消部分完成',
 
       partialMinutes: '已完成分鐘（選填）',
+
+      thisWeek: '本週',
     },
   },
   journeyTab: {
