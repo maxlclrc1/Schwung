@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, Defs, G, LinearGradient, Mask, Path, Rect, Stop } from 'react-native-svg';
-import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, ReduceMotion, useAnimatedStyle } from 'react-native-reanimated';
 import { isMinor, SETUP_AGE_BANDS, type AgeBand } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { space, useTheme } from '../../theme';
+import { useSelectColors, useSelected, useSelectedOpacity } from '../../theme/select';
 import { T } from '../ui';
 import { t as tr } from '../../i18n';
 import { ageBandLabel, CONTOURS, H, smoothPath, STOPS, TRAIL, W } from './ageTrail';
@@ -93,32 +94,34 @@ function Trail({ chosen, low }: { chosen: number; low: boolean }) {
 function Row({ label, on, first, onPress }: { label: string; on: boolean; first: boolean; onPress: () => void }) {
   const { c } = useTheme();
   const hair = `${c.text}1F`;
+  const [pressed, setPressed] = useState(false);
+  // The wash, the ring and its dot ease on the shared selection timing; the label's weight changes at once.
+  const v = useSelected(on);
+  const wash = useSelectColors(v, { backgroundColor: [pressed ? `${c.text}0A` : null, c.accentSoft] });
+  const ring = useSelectColors(v, { borderColor: [c.textFaint, c.accent] });
+  const ringWidth = useAnimatedStyle(() => ({ borderWidth: 1.5 + 0.5 * v.value }));
+  const dot = useSelectedOpacity(v);
   return (
     <Pressable
       onPress={onPress}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
       accessibilityRole="radio"
       accessibilityState={{ checked: on }}
       aria-checked={on}
       // Spoken without the invisible direction marks.
       accessibilityLabel={label.replace(/[\u2066\u2069]/g, '')}
     >
-      {({ pressed }) => (
-        <View
-          style={[
-            styles.row,
-            { borderBottomColor: hair },
-            first && { borderTopColor: hair, borderTopWidth: HAIR },
-            on ? { backgroundColor: c.accentSoft } : pressed ? { backgroundColor: `${c.text}0A` } : null,
-          ]}
-        >
-          <View style={[styles.radio, on ? { borderColor: c.accent, borderWidth: 2 } : { borderColor: c.textFaint }]}>
-            {on ? <View style={[styles.dot, { backgroundColor: c.accent }]} /> : null}
-          </View>
-          <T style={[styles.label, on && styles.labelOn]} color={c.text}>
-            {label}
-          </T>
-        </View>
-      )}
+      <Animated.View
+        style={[styles.row, { borderBottomColor: hair }, first && { borderTopColor: hair, borderTopWidth: HAIR }, wash]}
+      >
+        <Animated.View style={[styles.radio, ring, ringWidth]}>
+          <Animated.View style={[styles.dot, { backgroundColor: c.accent }, dot]} />
+        </Animated.View>
+        <T style={[styles.label, on && styles.labelOn]} color={c.text}>
+          {label}
+        </T>
+      </Animated.View>
     </Pressable>
   );
 }

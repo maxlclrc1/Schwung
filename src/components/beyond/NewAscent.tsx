@@ -18,7 +18,9 @@ import { Scene } from '../HabitCard';
 import { AGES, HEALTH } from '../pilot/SetupParts';
 import { ThemedImage } from '../ThemedImage';
 import { TILE_HEIGHT, TILES } from '../worldTiles';
-import { Button, Screen, T } from '../ui';
+import { Button, InkT, Screen, T } from '../ui';
+import { Underline } from '../Selection';
+import { useSelectColors, useSelected, useSelectedOpacity } from '../../theme/select';
 import { useLanguage, useT } from '../../i18n/react';
 import { isolateNumbers, isRTLLanguage } from '../../i18n/direction';
 import { Tap } from '../Tap';
@@ -425,18 +427,31 @@ function Divided<K extends string>({
               i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
             ]}
           >
-            <T
-              color={o.disabled ? c.textFaint : on ? c.accentInk : c.text}
-              style={[styles.cellText, on && styles.cellOn]}
-              numberOfLines={fit ? 1 : 2}
-            >
-              {o.label}
-            </T>
-            {on ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
+            <Cell label={o.label} on={on} disabled={o.disabled} fit={fit} />
           </Tap>
         );
       })}
     </ThemedView>
+  );
+}
+
+/** A divided cell's label and underline: its ink and underline ease on the shared selection timing. */
+function Cell({ label, on, disabled, fit }: { label: string; on: boolean; disabled?: boolean; fit?: boolean }) {
+  const { c } = useTheme();
+  const v = useSelected(on);
+  return (
+    <>
+      <InkT
+        color={disabled ? c.textFaint : c.text}
+        selectedColor={c.accentInk}
+        selected={v}
+        style={[styles.cellText, on && styles.cellOn]}
+        numberOfLines={fit ? 1 : 2}
+      >
+        {label}
+      </InkT>
+      <Underline v={v} style={styles.underline} />
+    </>
   );
 }
 
@@ -464,20 +479,16 @@ function CheckRow({ label, on, dim, onPress }: { label: string; on: boolean; dim
 function Box({ on, small }: { on: boolean; small?: boolean }) {
   const { c } = useTheme();
   const size = small ? 20 : 22;
+  // The outline fills and the tick fades in on the shared selection timing (theme/select.ts).
+  const v = useSelected(on);
+  const fill = useSelectColors(v, { borderColor: [c.textFaint, c.accent], backgroundColor: [null, c.accent] });
+  const tick = useSelectedOpacity(v);
   return (
-    <ThemedView
-      style={[
-        styles.box,
-        {
-          width: size,
-          height: size,
-          borderColor: on ? c.accent : c.textFaint,
-          backgroundColor: on ? c.accent : undefined,
-        },
-      ]}
-    >
-      {on ? <Tick color={c.onAccent} size={small ? 11 : 12} /> : null}
-    </ThemedView>
+    <Animated.View style={[styles.box, { width: size, height: size }, fill]}>
+      <Animated.View style={tick}>
+        <Tick color={c.onAccent} size={small ? 11 : 12} />
+      </Animated.View>
+    </Animated.View>
   );
 }
 

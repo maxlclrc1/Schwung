@@ -1,25 +1,57 @@
 import { ReactNode, useEffect } from 'react';
 import { Pressable, StyleProp, StyleSheet, TextProps, View, ViewStyle } from 'react-native';
-import Animated, { Easing, ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { useScriptAdjust } from '../i18n/script';
 import { haptic } from '../lib/haptics';
 import { radius, space, type, useTheme } from '../theme';
 import { useDepth } from '../theme/depth';
 import { ThemedView, useThemedColors } from '../theme/transition';
+import { useSelectColors, useSelected } from '../theme/select';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Variant = keyof typeof type;
 
-export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Variant; color?: string }) {
-  const { c } = useTheme();
-  const col = color ?? c.text;
-  // Palette colors fade with the theme; anything else (ceremony, overlays) is used as-is.
-  const fade = useThemedColors({ color: col });
+type TProps = TextProps & { v?: Variant; color?: string };
+
+function Text_({ v = 'body', col, style, ink, ...rest }: Omit<TProps, 'color'> & { col: string; ink: object }) {
   const script = useScriptAdjust([type[v], style]);
   // The big headings carry a whisper of depth; everything smaller stays flat.
   const depth = useDepth();
   const lift = v === 'display' || v === 'title' ? depth.title : null;
-  return <Animated.Text {...rest} style={[type[v], lift, { color: col }, style, script, fade]} />;
+  return <Animated.Text {...rest} style={[type[v], lift, { color: col }, style, script, ink]} />;
+}
+
+export function T({ color, ...rest }: TProps) {
+  const { c } = useTheme();
+  const col = color ?? c.text;
+  // Palette colors fade with the theme; anything else (ceremony, overlays) is used as-is.
+  const fade = useThemedColors({ color: col });
+  return <Text_ {...rest} col={col} ink={fade} />;
+}
+
+/**
+ * Text whose ink eases from `color` to `selectedColor` as `selected` goes 0 → 1 (theme/select.ts): one text, so its
+ * layout never moves; it still follows a theme change.
+ */
+export function InkT({
+  color,
+  selectedColor,
+  selected,
+  ...rest
+}: TProps & { selectedColor: string; selected: SharedValue<number> }) {
+  const { c } = useTheme();
+  const col = color ?? c.text;
+  const ink = useSelectColors(selected, { color: [col, selectedColor] });
+  return <Text_ {...rest} col={col} ink={ink} />;
 }
 
 export function Screen({
@@ -66,15 +98,19 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
   const give = useAnimatedStyle(() => ({
     transform: [{ scaleX: 1 - pressed.value * 0.03 }, { scaleY: 1 - pressed.value * 0.06 }],
   }));
-  // Pressed in, the button settles onto the page: its cast shadow fades (opacity only, no shadow redrawn).
-  const settle = useAnimatedStyle(() => ({ opacity: 1 - pressed.value * 0.75 }));
+  // Becoming available (or not) eases on the shared selection timing; the disabled state itself is immediate.
+  const enabled = useSelected(!disabled);
+  const available = useAnimatedStyle(() => ({ opacity: 0.4 + 0.6 * enabled.value }));
+  // Pressed in, the button settles onto the page: its cast shadow fades (opacity only, no shadow redrawn). A disabled
+  // button casts none; becoming available, the shadow fades in with it.
+  const settle = useAnimatedStyle(() => ({ opacity: (1 - pressed.value * 0.75) * enabled.value }));
   const depth = useDepth();
   const bg = kind === 'primary' ? c.accent : kind === 'secondary' ? c.surfaceHigh : 'transparent';
   const fg = kind === 'primary' ? c.onAccent : kind === 'danger' ? c.danger : kind === 'ghost' ? c.textDim : c.text;
   const fade = useThemedColors({ backgroundColor: bg });
 
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
@@ -88,7 +124,7 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
         haptic.select();
       }}
       // The disabled dim sits on the Pressable: on the animated view it was overridden by the press opacity.
-      style={[style, disabled && styles.disabled]}
+      style={[style, available]}
     >
       <Animated.View style={[styles.button, kind === 'ghost' && { minHeight: 44 }, anim]}>
         {kind === 'primary' && !disabled ? (
@@ -109,7 +145,7 @@ export function Button({ label, onPress, kind = 'primary', disabled, style, icon
           {label}
         </T>
       </Animated.View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -166,7 +202,6 @@ const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const PRESS_OUT = Easing.out(Easing.cubic);
 
 const styles = StyleSheet.create({
-  disabled: { opacity: 0.4 },
   backing: { borderRadius: radius.md },
   // Long labels (German, French, Russian…) wrap inside the button instead of running past its edges.
   label: { flexShrink: 1, textAlign: 'center' },

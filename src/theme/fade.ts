@@ -48,3 +48,29 @@ export function themedPairs(
   }
   return out;
 }
+
+/** The same colour, fully transparent, so a wash eases in without passing through grey. Hex or rgba(). */
+export function transparentOf(color: string): string {
+  if (color.startsWith('#')) {
+    const hex = color.length === 4 ? `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}` : color;
+    return `${hex.slice(0, 7)}00`;
+  }
+  if (color.startsWith('rgba(')) return color.replace(/,\s*[\d.]+\)$/, ', 0)');
+  if (color.startsWith('rgb(')) return color.replace(/^rgb\((.*)\)$/, 'rgba($1, 0)');
+  return 'transparent';
+}
+
+/**
+ * A colour's [dark, light] values for a selection fade: a palette token's two values, so it still follows a theme
+ * change, or any other colour twice. `null` (nothing drawn) is the transparent form of `other`, the colour it fades
+ * to or from.
+ */
+export function themePair(color: string | null, other: string | null, current: Colors): [string, string] {
+  if (color === null) {
+    if (other === null) return ['transparent', 'transparent'];
+    const [d, l] = themePair(other, null, current);
+    return [transparentOf(d), transparentOf(l)];
+  }
+  const token = findToken(current, color);
+  return token ? [palettes.dark[token], palettes.light[token]] : [color, color];
+}

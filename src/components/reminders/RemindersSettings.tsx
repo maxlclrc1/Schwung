@@ -13,7 +13,9 @@ import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { space, useTheme } from '../../theme';
 import { Row, Section } from '../settingsRows';
 import { ThemedView } from '../../theme/transition';
-import { T } from '../ui';
+import { InkT, T } from '../ui';
+import { Underline } from '../Selection';
+import { useSelected } from '../../theme/select';
 import { useT } from '../../i18n/react';
 import { Tap } from '../Tap';
 
@@ -158,13 +160,7 @@ export function RemindersSettings() {
                     })}
                     style={styles.preset}
                   >
-                    <T color={sel ? c.accentInk : c.text} style={[styles.presetName, sel && styles.selected]}>
-                      {t(`settings.reminders.${p.label}`)}
-                    </T>
-                    <T v="caption" color={sel ? c.accentInk : c.textDim} style={styles.presetTime}>
-                      {hhmm(p.hour, p.minute)}
-                    </T>
-                    {sel ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
+                    <PresetFace name={t(`settings.reminders.${p.label}`)} time={hhmm(p.hour, p.minute)} selected={sel} />
                   </Tap>
                 );
               })}
@@ -214,6 +210,28 @@ export function RemindersSettings() {
         ) : null}
       </Section>
     </Animated.View>
+  );
+}
+
+/** A preset's name, time and underline, easing on the shared selection timing (theme/select.ts). */
+function PresetFace({ name, time, selected }: { name: string; time: string; selected: boolean }) {
+  const { c } = useTheme();
+  const v = useSelected(selected);
+  return (
+    <>
+      <InkT
+        color={c.text}
+        selectedColor={c.accentInk}
+        selected={v}
+        style={[styles.presetName, selected && styles.selected]}
+      >
+        {name}
+      </InkT>
+      <InkT v="caption" color={c.textDim} selectedColor={c.accentInk} selected={v} style={styles.presetTime}>
+        {time}
+      </InkT>
+      <Underline v={v} style={styles.underline} />
+    </>
   );
 }
 

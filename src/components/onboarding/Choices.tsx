@@ -12,7 +12,9 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
-import { T } from '../ui';
+import { InkT, T } from '../ui';
+import { useSelectColors, useSelected } from '../../theme/select';
+import { InkIcon } from '../Selection';
 import { settle, type Tint } from './kit';
 import { t as tr } from '../../i18n';
 
@@ -346,14 +348,19 @@ export function SoftChoice({
   onPress: () => void;
 }) {
   const { c } = useTheme();
+  // The fill, the ink and the icon turning into a tick ease on the shared selection timing (theme/select.ts).
+  const v = useSelected(on);
+  const fill = useSelectColors(v, { backgroundColor: [c.surface, tint.fill] });
   return (
     <Press onPress={onPress} accessibilityRole="radio" accessibilityState={{ checked: on }} accessibilityLabel={label}>
-      <View style={[styles.soft, { backgroundColor: on ? tint.fill : c.surface }]}>
-        {icon ? <Ionicons name={on ? 'checkmark' : icon} size={18} color={on ? tint.on : c.textDim} /> : null}
-        <T v="bodyStrong" color={on ? tint.on : c.text}>
+      <Animated.View style={[styles.soft, fill]}>
+        {icon ? (
+          <InkIcon v={v} name={icon} selectedName="checkmark" size={18} color={c.textDim} selectedColor={tint.on} />
+        ) : null}
+        <InkT v="bodyStrong" color={c.text} selectedColor={tint.on} selected={v}>
           {label}
-        </T>
-      </View>
+        </InkT>
+      </Animated.View>
     </Press>
   );
 }
