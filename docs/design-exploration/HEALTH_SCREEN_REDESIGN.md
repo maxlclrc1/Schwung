@@ -1,4 +1,11 @@
-# Health screen: two directions (mockups only)
+# Health screen: two directions
+
+**Status: Option A approved and implemented** (`src/components/onboarding/HealthList.tsx`; the toggle rule is
+`togglePrecaution` in `core/reset/profile.ts`; tests in `core/__tests__/healthAnswer.test.ts`). Production
+screenshots: `health-impl.png`, `health-impl-checks.png`, `health-impl-before-after.png`. Two approved refinements:
+- **Journal divider:** a short, softened peach rule sits on the "None of these / Rather not say" strip's top hairline.
+- **Last selection:** unticking the last precaution returns the question to unanswered, so Continue is off again, instead of selecting "None of these". The meanings of a saved `[]` and `'unknown'` are unchanged.
+
 
 "Anything your body would like us to know?" is drawn as a temporary version of the real set-up screen in the web build. It uses the real header, progress trail, backdrop, Back/Continue footer and copy. The temporary code was removed afterwards, so no production code, logic, data, translations or navigation changed.
 
