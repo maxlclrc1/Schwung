@@ -8,7 +8,8 @@ import { RemindersSettings } from '../components/reminders/RemindersSettings';
 import { Row, Section } from '../components/settingsRows';
 import { ThemedImage } from '../components/ThemedImage';
 import { TILE_HEIGHT, TILES } from '../components/worldTiles';
-import { Screen, T } from '../components/ui';
+import { InkT, Screen, T } from '../components/ui';
+import { InkIcon, Underline } from '../components/Selection';
 import type { ThemePreference } from '../core/types';
 import { APP_NAME, CONTACT_EMAIL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
@@ -16,6 +17,7 @@ import { legalVisible } from '../lib/legal';
 import { usePreferences } from '../store/preferences';
 import { space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
+import { useSelected } from '../theme/select';
 import { language } from '../i18n';
 import { LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
@@ -141,6 +143,34 @@ const APPEARANCE: { value: ThemePreference; icon: keyof typeof Ionicons.glyphMap
   { value: 'dark', icon: 'moon-outline' },
 ];
 
+/** A segment's icon, label and underline, easing on the shared selection timing (theme/select.ts). */
+function SegmentFace({
+  icon,
+  label,
+  selected,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  selected: boolean;
+}) {
+  const { c } = useTheme();
+  const v = useSelected(selected);
+  return (
+    <>
+      <InkIcon v={v} name={icon} size={18} color={c.textDim} selectedColor={c.accentInk} />
+      <InkT
+        color={c.text}
+        selectedColor={c.accentInk}
+        selected={v}
+        style={[styles.segmentText, selected && styles.selected]}
+      >
+        {label}
+      </InkT>
+      <Underline v={v} style={styles.underline} />
+    </>
+  );
+}
+
 function AppearancePicker() {
   const { c } = useTheme();
   const t = useT();
@@ -169,11 +199,7 @@ function AppearancePicker() {
               i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
             ]}
           >
-            <Ionicons name={o.icon} size={18} color={selected ? c.accentInk : c.textDim} />
-            <T color={selected ? c.accentInk : c.text} style={[styles.segmentText, selected && styles.selected]}>
-              {t(`settings.theme.${o.value}`)}
-            </T>
-            {selected ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
+            <SegmentFace icon={o.icon} label={t(`settings.theme.${o.value}`)} selected={selected} />
           </Tap>
         );
       })}
