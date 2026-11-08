@@ -574,6 +574,8 @@ export const zhHans: Translation = {
     more: { other: '还有{count}件在你的收藏中等你。' },
     lovely: '知道了',
     see: '查看收藏',
+
+    howXp: '你完成的每个习惯都会带来 XP（每个 10，完成一整天再加 20）。即使撤销，物品也仍然属于你。',
   },
   welcomeBack: {
     dismiss: '关闭',

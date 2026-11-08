@@ -622,6 +622,9 @@ export const fr: Translation = {
     },
     lovely: 'Compris',
     see: 'Voir la collection',
+
+    howXp:
+      'Les XP viennent de chaque habitude que vous faites (10 chacune, 20 de plus pour une journée complète). Les objets restent à vous, même après une annulation.',
   },
   welcomeBack: {
     dismiss: 'Ignorer',

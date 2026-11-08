@@ -622,6 +622,9 @@ export const it: Translation = {
     },
     lovely: 'Ok',
     see: 'Vedi la collezione',
+
+    howXp:
+      'Gli XP arrivano da ogni abitudine che fai (10 ciascuna, 20 in più per un giorno completo). Gli oggetti restano tuoi, anche dopo un annullamento.',
   },
   welcomeBack: {
     dismiss: 'Chiudi',

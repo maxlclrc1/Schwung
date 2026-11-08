@@ -605,6 +605,9 @@ export const tr: Translation = {
     },
     lovely: 'Tamam',
     see: 'Koleksiyonu gör',
+
+    howXp:
+      'XP yaptığın her alışkanlıktan gelir (her biri 10, tamamlanan bir gün için 20 daha). Nesneler, bir geri almadan sonra bile senin kalır.',
   },
   welcomeBack: {
     dismiss: 'Kapat',
