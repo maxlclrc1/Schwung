@@ -26,8 +26,22 @@ const MIST = {
   light: require('../../../assets/world/mist-light.webp'),
   dark: require('../../../assets/world/mist-dark.webp'),
 };
-/** The cleared band: from a narrow, fully clear core to a wide, faint outer edge (trail units). */
-const BANDS = [90, 140, 190, 240, 290, 340, 390, 440];
+/**
+ * The cleared band (trail units): wide enough that the walked part of the map is clear from edge to edge (the map is
+ * ~390 wide), from a fully clear core to a broad, fading outer edge. Each outer band clears only a little, so no
+ * band's own edge shows in the mist ahead.
+ */
+const BANDS: [width: number, strength: number][] = [
+  [140, 0.6],
+  [240, 0.6],
+  [340, 0.55],
+  [440, 0.45],
+  [520, 0.35],
+  [600, 0.3],
+  [680, 0.25],
+  [760, 0.2],
+  [840, 0.15],
+];
 /** How far beyond today's marker the ground is already clear (today's own stretch is never misty). */
 const AHEAD = 46;
 
@@ -74,8 +88,8 @@ export const MistLayer = memo(function MistLayer({
         <Defs>
           <Mask id={id('ahead')} maskUnits="userSpaceOnUse" x={x0} y={top} width={w} height={h}>
             <Rect x={x0} y={top} width={w} height={h} fill="#fff" />
-            {BANDS.map((b) => (
-              <G key={b} opacity={0.3}>
+            {BANDS.map(([b, strength]) => (
+              <G key={b} opacity={strength}>
                 {/* Where the chapter begins, the ground above its first day is open too. */}
                 <Path
                   d={`M${start.x} ${start.y} L${start.x} ${top}`}
@@ -105,20 +119,34 @@ export const MistLayer = memo(function MistLayer({
   );
 });
 
-/** Revealed: clearly there, still quiet. Ahead: a hint of a shape, inside the mist. */
-const SHOWN = 1;
-const HIDDEN = 0.4;
 /**
  * Settling each painting into the map: a soft contact shadow where it meets the ground, and a faint glaze of the
  * theme's own air over it (lavender haze by day, cool dusk by night), so it shares the map's light instead of sitting
- * on it. The glaze is the painting's own silhouette (tintColor), so edges stay crisp.
+ * on it. The glaze is the painting's own silhouette (tintColor), so edges stay crisp. Before its day a discovery is
+ * only its silhouette, in the mist's own shade; on its day the painting comes through it.
  */
 const SETTLE = {
-  light: { shadow: '#463F5C', shadowAlpha: 0.24, glaze: '#ECE9F6', glazeAlpha: 0.16, shown: SHOWN },
-  dark: { shadow: '#000000', shadowAlpha: 0.5, glaze: '#1E1E36', glazeAlpha: 0.3, shown: 0.94 },
+  light: {
+    shadow: '#463F5C',
+    shadowAlpha: 0.24,
+    glaze: '#ECE9F6',
+    glazeAlpha: 0.16,
+    shown: 1,
+    silhouette: '#B3AEC6',
+    silhouetteAlpha: 0.75,
+  },
+  dark: {
+    shadow: '#000000',
+    shadowAlpha: 0.5,
+    glaze: '#1E1E36',
+    glazeAlpha: 0.3,
+    shown: 0.94,
+    silhouette: '#4A4A6E',
+    silhouetteAlpha: 0.8,
+  },
 };
 
-/** The chapter's weekly discoveries, under the mist (so an unrevealed one is only a hint of a shape). */
+/** The chapter's weekly discoveries, under the mist. */
 export const Discoveries = memo(function Discoveries({
   n,
   today,
@@ -146,13 +174,14 @@ export const Discoveries = memo(function Discoveries({
 
 function Scene({ d, revealed, dark, scale }: { d: Discovery; revealed: boolean; dark: boolean; scale: number }) {
   const look = dark ? SETTLE.dark : SETTLE.light;
-  const target = revealed ? look.shown : HIDDEN;
-  // Starts where it is (no fade on every launch); a new day's discovery comes out of the mist, slowly.
-  const opacity = useSharedValue(target);
+  // 0: its silhouette; 1: its painting. Starts where it is (no fade on every launch); on its day the painting comes
+  // through the silhouette, slowly (at once with reduced motion).
+  const shown = useSharedValue(revealed ? 1 : 0);
   useEffect(() => {
-    opacity.value = withTiming(target, { duration: 1400, reduceMotion: ReduceMotion.System });
-  }, [target, opacity]);
-  const fade = useAnimatedStyle(() => ({ opacity: opacity.value }));
+    shown.value = withTiming(revealed ? 1 : 0, { duration: 1400, reduceMotion: ReduceMotion.System });
+  }, [revealed, shown]);
+  const painting = useAnimatedStyle(() => ({ opacity: shown.value * look.shown }));
+  const outline = useAnimatedStyle(() => ({ opacity: (1 - shown.value) * look.silhouetteAlpha }));
   const w = d.width * scale;
   const h = w * d.aspect;
   // The shadow: a flat ellipse under the painting's base, a little into it (the art's ground is its own bottom edge).
@@ -160,29 +189,45 @@ function Scene({ d, revealed, dark, scale }: { d: Discovery; revealed: boolean; 
   const sh = Math.max(4, w * 0.17);
   const shadow = `shadow-${d.id}`;
   return (
-    <Animated.View
-      style={[styles.scene, { left: d.x * scale - w / 2, top: d.y * scale - h, width: w, height: h }, fade]}
-    >
-      <Svg width={sw} height={sh} style={{ position: 'absolute', left: (w - sw) / 2, top: h - sh * 0.7 }}>
-        <Defs>
-          <RadialGradient id={shadow} cx="50%" cy="50%" rx="50%" ry="50%">
-            <Stop offset="0" stopColor={look.shadow} stopOpacity={look.shadowAlpha} />
-            <Stop offset="0.55" stopColor={look.shadow} stopOpacity={look.shadowAlpha * 0.45} />
-            <Stop offset="1" stopColor={look.shadow} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Ellipse cx={sw / 2} cy={sh / 2} rx={sw / 2} ry={sh / 2} fill={`url(#${shadow})`} />
-      </Svg>
-      <Image {...ART_IMAGE} source={DISCOVERY_ART[d.id]} style={styles.fill} contentFit="contain" accessible={false} />
-      <Image
-        {...ART_IMAGE}
-        source={DISCOVERY_ART[d.id]}
-        style={[StyleSheet.absoluteFill, { opacity: look.glazeAlpha }]}
-        contentFit="contain"
-        tintColor={look.glaze}
-        accessible={false}
-      />
-    </Animated.View>
+    <View style={[styles.scene, { left: d.x * scale - w / 2, top: d.y * scale - h, width: w, height: h }]}>
+      <Animated.View style={[StyleSheet.absoluteFill, outline]}>
+        <Image
+          {...ART_IMAGE}
+          source={DISCOVERY_ART[d.id]}
+          style={styles.fill}
+          contentFit="contain"
+          tintColor={look.silhouette}
+          accessible={false}
+        />
+      </Animated.View>
+      <Animated.View style={[StyleSheet.absoluteFill, painting]}>
+        <Svg width={sw} height={sh} style={{ position: 'absolute', left: (w - sw) / 2, top: h - sh * 0.7 }}>
+          <Defs>
+            <RadialGradient id={shadow} cx="50%" cy="50%" rx="50%" ry="50%">
+              <Stop offset="0" stopColor={look.shadow} stopOpacity={look.shadowAlpha} />
+              <Stop offset="0.55" stopColor={look.shadow} stopOpacity={look.shadowAlpha * 0.45} />
+              <Stop offset="1" stopColor={look.shadow} stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Ellipse cx={sw / 2} cy={sh / 2} rx={sw / 2} ry={sh / 2} fill={`url(#${shadow})`} />
+        </Svg>
+        <Image
+          {...ART_IMAGE}
+          source={DISCOVERY_ART[d.id]}
+          style={styles.fill}
+          contentFit="contain"
+          accessible={false}
+        />
+        <Image
+          {...ART_IMAGE}
+          source={DISCOVERY_ART[d.id]}
+          style={[StyleSheet.absoluteFill, { opacity: look.glazeAlpha }]}
+          contentFit="contain"
+          tintColor={look.glaze}
+          accessible={false}
+        />
+      </Animated.View>
+    </View>
   );
 }
 

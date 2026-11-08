@@ -21,16 +21,16 @@ export type Discovery = {
 };
 
 export const DISCOVERIES: readonly Discovery[] = [
-  { id: 'gentians', chapter: 1, day: 7, x: 202.1, y: 275.7, width: 56, aspect: 0.667 }, // Gentians and edelweiss
-  { id: 'cairn', chapter: 1, day: 14, x: 329.3, y: 603.8, width: 40, aspect: 0.828 }, // A stone cairn
-  { id: 'signpost', chapter: 1, day: 21, x: 319.5, y: 853.5, width: 34, aspect: 1.224 }, // A trail signpost
-  { id: 'streamlet', chapter: 2, day: 28, x: 109.9, y: 340.4, width: 60, aspect: 0.478 }, // A meltwater streamlet
-  { id: 'footbridge', chapter: 2, day: 35, x: 184.8, y: 735.2, width: 60, aspect: 0.489 }, // A footbridge over a stream
-  { id: 'lantern', chapter: 2, day: 42, x: 242.9, y: 1043.2, width: 32, aspect: 1.161 }, // A lantern on a mossy rock
-  { id: 'ice_axe', chapter: 3, day: 49, x: 262.1, y: 249.5, width: 42, aspect: 0.881 }, // An ice axe in the scree
-  { id: 'pine', chapter: 3, day: 56, x: 251.7, y: 605.4, width: 56, aspect: 0.683 }, // A wind-bent pine and heather
-  { id: 'rope', chapter: 3, day: 63, x: 238.9, y: 982.1, width: 54, aspect: 0.531 }, // A rope and carabiner
-  { id: 'pennant', chapter: 3, day: 66, x: 186.0, y: 1065.0, width: 46, aspect: 0.911 }, // A pennant among wildflowers
+  { id: 'gentians', chapter: 1, day: 7, x: 168.8, y: 333.5, width: 78, aspect: 0.667 }, // Gentians and edelweiss
+  { id: 'cairn', chapter: 1, day: 14, x: 290.8, y: 651.7, width: 56, aspect: 0.828 }, // A stone cairn
+  { id: 'signpost', chapter: 1, day: 21, x: 327.0, y: 859.4, width: 48, aspect: 1.224 }, // A trail signpost
+  { id: 'streamlet', chapter: 2, day: 28, x: 120.1, y: 340.6, width: 84, aspect: 0.478 }, // A meltwater streamlet
+  { id: 'footbridge', chapter: 2, day: 35, x: 149.2, y: 643.4, width: 84, aspect: 0.489 }, // A footbridge over a stream
+  { id: 'lantern', chapter: 2, day: 42, x: 308.5, y: 1123.6, width: 45, aspect: 1.161 }, // A lantern on a mossy rock
+  { id: 'ice_axe', chapter: 3, day: 49, x: 249.9, y: 247.8, width: 59, aspect: 0.881 }, // An ice axe in the scree
+  { id: 'pine', chapter: 3, day: 56, x: 250.3, y: 502.7, width: 78, aspect: 0.683 }, // A wind-bent pine and heather
+  { id: 'rope', chapter: 3, day: 63, x: 271.9, y: 895.1, width: 76, aspect: 0.531 }, // A rope and carabiner
+  { id: 'pennant', chapter: 3, day: 66, x: 186.0, y: 1065.2, width: 64, aspect: 0.911 }, // A pennant among wildflowers
 ];
 
 /** Revealed once the program's day has reached it (missed days never hide one again). */
