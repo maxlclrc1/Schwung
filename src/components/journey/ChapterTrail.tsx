@@ -15,6 +15,7 @@ import { flipX, isRTLLanguage } from '../../i18n/direction';
 import { FOUNDATION_CONTOURS } from './foundationContours';
 import { MOMENTUM_CONTOURS } from './momentumContours';
 import { MASTERY_CONTOURS } from './masteryContours';
+import { Discoveries, MistLayer } from './MistLayer';
 
 /*
  * A chapter of the climb on Journey as a trail across a contour map: Foundation (Days 1–21, the approved design,
@@ -206,6 +207,18 @@ export const ChapterTrail = memo(function ChapterTrail({
 
       <View style={{ width: inner, height: trail.h * s, marginTop: 30 }}>
         <Terrain scale={s} width={inner + space.lg * 2} color={ink.contour} today={today} chapter={chapter} />
+        {/* The weekly discoveries, then the mist over what's still ahead: both under the trail and its days. */}
+        <Discoveries n={n} today={today} dark={isDark} scale={s} />
+        <MistLayer
+          trail={trail}
+          n={n}
+          today={today}
+          dark={isDark}
+          scale={s}
+          width={inner + space.lg * 2}
+          overTop={OVER_TOP}
+          overBottom={OVER_BOTTOM}
+        />
         <Svg
           width={inner}
           height={trail.h * s}
