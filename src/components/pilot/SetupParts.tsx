@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { INTENSITIES, PULL_MINUTES_OPTIONS, SKILLS, type Intensity } from '../../core/reset/habits';
+import { PULL_MINUTES_OPTIONS, SKILLS } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
 import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
@@ -14,13 +14,7 @@ import { useT } from '../../i18n/react';
  * The pieces set-up and "Add a habit" share: the answer chips, the questions a habit needs, and a habit's intensity.
  */
 
-export const AGES: { id: AgeBand; label: string }[] = labelled('setup.age', [
-  'u16',
-  '18_29',
-  '30_49',
-  '50_64',
-  '65p',
-]);
+export const AGES: { id: AgeBand; label: string }[] = labelled('setup.age', ['u16', '18_29', '30_49', '50_64', '65p']);
 export const HEALTH: { id: Precaution; label: string }[] = labelled('setup.health', [
   'joint',
   'walkingDifficult',
@@ -241,80 +235,8 @@ export function BaselineQuestions({
   );
 }
 
-/** A habit's intensity choice (with why one isn't available), its own sessions for Strength at Challenge, and a preview. */
-export function IntensityCard({
-  id,
-  answers,
-  chosen,
-  onChoose,
-  own,
-  setOwn,
-  onRemove,
-}: {
-  id: string;
-  answers: P.PilotAnswers;
-  chosen: Intensity | null;
-  onChoose: (i: Intensity) => void;
-  own: number;
-  setOwn: (f: (n: number) => number) => void;
-  /** Set-up only: take a habit that turned out unavailable back out. */
-  onRemove?: () => void;
-}) {
-  const { c } = useTheme();
-  const tt = useT();
-  const reason = P.habitExclusion(id, answers);
-  const options = P.intensityOptions(id, answers);
-  const preview = chosen && !reason ? P.previewTarget(id, chosen, answers) : null;
-  return (
-    <ThemedView style={[setupStyles.level, { backgroundColor: c.surface }]}>
-      <T v="bodyStrong">{P.habitName(id)}</T>
-      {reason ? (
-        <>
-          <T v="caption" color={c.danger}>
-            {tt('setup.intensity.notAvailable', { reason })}
-          </T>
-          {onRemove ? <Chip label={tt('setup.intensity.removeIt')} on={false} onPress={onRemove} /> : null}
-        </>
-      ) : (
-        <>
-          <View style={setupStyles.chips}>
-            {INTENSITIES.map((i) => {
-              const blocked = options.find((o) => o.intensity === i)?.reason;
-              return (
-                <Chip
-                  key={i}
-                  label={P.intensityName(i)}
-                  on={chosen === i}
-                  disabled={!!blocked}
-                  onPress={() => onChoose(i)}
-                />
-              );
-            })}
-          </View>
-          {id === 'strength_log' && chosen === 'challenge' ? (
-            <View style={setupStyles.row}>
-              <T v="caption" color={c.textDim} style={{ flex: 1 }}>
-                {tt('setup.intensity.ownSessions')}
-              </T>
-              <Chip label="−" on={false} onPress={() => setOwn((n) => Math.max(2, n - 1))} />
-              <T v="bodyStrong">{own}</T>
-              <Chip label="+" on={false} onPress={() => setOwn((n) => Math.min(7, n + 1))} />
-            </View>
-          ) : null}
-          {preview ? (
-            <T v="caption" color={c.textDim}>
-              {tt('setup.intensity.preview', preview)}
-            </T>
-          ) : null}
-        </>
-      )}
-    </ThemedView>
-  );
-}
-
 export const setupStyles = StyleSheet.create({
   section: { gap: space.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
     minHeight: 40,
@@ -323,7 +245,6 @@ export const setupStyles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
   },
-  level: { borderRadius: radius.lg, padding: space.md, gap: space.sm },
   habit: {
     flexDirection: 'row',
     alignItems: 'center',
