@@ -24,6 +24,7 @@ import { formatNumber, formatPercent, t as tr } from '../i18n';
 import { useLanguage, useT } from '../i18n/react';
 import { useOnArt } from './onArt';
 import { isRTLLanguage, physical } from '../i18n/direction';
+import { Tap } from './Tap';
 
 /*
  * Insights as an alpine field journal, drawn by hand (no chart library): five chapters set as type on the lakeside
@@ -553,7 +554,7 @@ function HabitLine({
   return (
     <Animated.View layout={LinearTransition.duration(200).reduceMotion(sys)}>
       {first ? null : <Rule style={{ opacity: 0.7 }} />}
-      <Pressable
+      <Tap
         onPress={() => {
           haptic.select();
           setOpen((o) => !o);
@@ -569,7 +570,7 @@ function HabitLine({
               : t('insights.habit.share', { pct: pctText(share), done: row.tally.done, eligible: row.tally.eligible }),
           kind: row.kind,
         })}
-        style={({ pressed }) => [styles.habit, { opacity: pressed ? 0.6 : 1 }]}
+        style={styles.habit}
       >
         <View style={styles.habitTop}>
           <T style={styles.habitName} maxFontSizeMultiplier={1.6}>
@@ -599,7 +600,7 @@ function HabitLine({
             />
           </View>
         </View>
-      </Pressable>
+      </Tap>
       {open ? (
         <Animated.View entering={FadeIn.duration(200).reduceMotion(sys)} style={styles.habitDetails}>
           {row.details}
@@ -626,11 +627,11 @@ export function DetailsLink({ label, onPress }: { label: string; onPress: () => 
   const { c } = useTheme();
   const rtl = isRTLLanguage(useLanguage());
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="link"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
+      style={styles.link}
     >
       <T style={[styles.linkText, { textDecorationColor: c.border }]} color={c.text}>
         {label}
@@ -638,7 +639,7 @@ export function DetailsLink({ label, onPress }: { label: string; onPress: () => 
       <T color={c.textDim} style={styles.linkArrow}>
         {rtl ? '←' : '→'}
       </T>
-    </Pressable>
+    </Tap>
   );
 }
 

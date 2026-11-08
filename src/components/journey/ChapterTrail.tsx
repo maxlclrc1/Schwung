@@ -16,6 +16,7 @@ import { FOUNDATION_CONTOURS } from './foundationContours';
 import { MOMENTUM_CONTOURS } from './momentumContours';
 import { MASTERY_CONTOURS } from './masteryContours';
 import { Discoveries, MistLayer } from './MistLayer';
+import { Tap } from '../Tap';
 
 /*
  * A chapter of the climb on Journey as a trail across a contour map: Foundation (Days 1–21, the approved design,
@@ -404,20 +405,20 @@ function Entry({
       <T style={styles.words} color={c.textDim}>
         {cellSummary(cell, name)}
       </T>
-      <Pressable
+      <Tap
         onPress={() => {
           haptic.select();
           onOpen(cell.day);
         }}
         accessibilityRole="button"
         hitSlop={8}
-        style={({ pressed }) => [styles.open, { opacity: pressed ? 0.6 : 1 }]}
+        style={styles.open}
       >
         <T v="label" color={c.indigoInk}>
           {t('journeyTab.trail.open')}
         </T>
         <Ionicons name="chevron-forward" size={14} color={c.indigoInk} style={flipX} />
-      </Pressable>
+      </Tap>
     </Animated.View>
   );
 }

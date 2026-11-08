@@ -25,6 +25,9 @@ export const MOTION = {
   reflow: 240,
 } as const;
 
+/** How far a row, link or secondary control dims while held. */
+export const PRESS_DIM = 0.6;
+
 export type MotionToken = keyof typeof MOTION;
 
 /** A timing on the shared curve for one of the tokens; follows Reduce Motion. */

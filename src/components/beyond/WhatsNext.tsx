@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PROGRAM_DAYS } from '../../core/dates';
@@ -18,6 +18,7 @@ import { Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
 import { pushOnce } from '../../lib/navigation';
+import { Tap } from '../Tap';
 
 /**
  * "What's next?": after the summit ceremony and the 66-Day Story (never over them), the next chapter on the same
@@ -119,15 +120,15 @@ export function WhatsNext() {
         </Animated.View>
 
         <Animated.View entering={rise(220)} style={styles.later}>
-          <Pressable
+          <Tap
             onPress={close}
             disabled={busy}
             accessibilityRole="button"
             hitSlop={4}
-            style={({ pressed }) => [styles.laterLink, { opacity: pressed ? 0.5 : 1 }]}
+            style={styles.laterLink}
           >
             <T style={[styles.laterText, { textDecorationColor: `${c.text}4D` }]}>{t('beyond.next.later')}</T>
-          </Pressable>
+          </Tap>
           <T v="caption" color={c.textFaint} style={styles.centered}>
             {t('beyond.next.laterBody')}
           </T>
@@ -164,13 +165,13 @@ function Choice({
 }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       disabled={disabled || closed}
       accessibilityRole="button"
       aria-disabled={!!(disabled || closed)}
       accessibilityLabel={`${title}. ${body}`}
-      style={({ pressed }) => [styles.choice, { borderColor: c.border, opacity: pressed ? 0.6 : 1 }]}
+      style={[styles.choice, { borderColor: c.border }]}
     >
       <View style={[styles.rule, { backgroundColor: rule, opacity: closed ? 0.35 : 1 }]} />
       <View style={styles.choiceText}>
@@ -182,7 +183,7 @@ function Choice({
         </T>
       </View>
       {closed ? null : <Ionicons name="chevron-forward" size={18} color={c.textFaint} style={flipX} />}
-    </Pressable>
+    </Tap>
   );
 }
 

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInLeft, FadeInRight, ReduceMotion } from 'react-native-reanimated';
 import type { Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
@@ -21,6 +21,7 @@ import { BaselineQuestions, Chips, duration } from './SetupParts';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
+import { Tap } from '../Tap';
 
 /*
  * Add a habit to the running Life Reset (app/life-reset/add.tsx), as a short set-up of its own, one question a
@@ -401,7 +402,7 @@ export function PilotAddHabit() {
       </ScrollView>
       {step === 'pick' ? null : (
         <View style={styles.footer}>
-          <Pressable
+          <Tap
             onPress={() => {
               haptic.select();
               go(-1);
@@ -410,12 +411,10 @@ export function PilotAddHabit() {
             accessibilityRole="button"
             accessibilityLabel={t('add.back')}
           >
-            {({ pressed }) => (
-              <ThemedView style={[styles.back, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}>
-                <Ionicons name="chevron-back" size={22} color={c.text} style={flipX} />
-              </ThemedView>
-            )}
-          </Pressable>
+            <ThemedView style={[styles.back, { backgroundColor: c.surface}]}>
+              <Ionicons name="chevron-back" size={22} color={c.text} style={flipX} />
+            </ThemedView>
+          </Tap>
           {step === 'review' ? (
             <Button
               label={t('add.add', { habit: habitName })}

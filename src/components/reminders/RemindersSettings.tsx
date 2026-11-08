@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { AppState, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { AppState, StyleSheet, Switch, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 import { habitLine, reminderText } from '../../core/reminders';
 import * as P from '../../core/reset/pilot';
@@ -15,6 +15,7 @@ import { Row, Section } from '../settingsRows';
 import { ThemedView } from '../../theme/transition';
 import { T } from '../ui';
 import { useT } from '../../i18n/react';
+import { Tap } from '../Tap';
 
 const sys = ReduceMotion.System;
 const hhmm = (h: number, m: number) => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
@@ -107,13 +108,11 @@ export function RemindersSettings() {
             <T v="caption" color={c.text}>
               {t('settings.reminders.blocked')}
             </T>
-            <Pressable onPress={openNotificationSettings} accessibilityRole="button" hitSlop={4} style={styles.link}>
-              {({ pressed }) => (
-                <T color={c.accentInk} style={[styles.linkText, { opacity: pressed ? 0.6 : 1 }]}>
-                  {t('settings.reminders.openSettings')}
-                </T>
-              )}
-            </Pressable>
+            <Tap onPress={openNotificationSettings} accessibilityRole="button" hitSlop={4} style={styles.link}>
+              <T color={c.accentInk} style={styles.linkText}>
+                {t('settings.reminders.openSettings')}
+              </T>
+            </Tap>
           </Animated.View>
         ) : null}
         {on ? (
@@ -145,7 +144,7 @@ export function RemindersSettings() {
               {PRESETS.map((p) => {
                 const sel = p.hour === reminders.hour && p.minute === reminders.minute;
                 return (
-                  <Pressable
+                  <Tap
                     key={p.label}
                     onPress={() => {
                       haptic.select();
@@ -157,7 +156,7 @@ export function RemindersSettings() {
                       name: t(`settings.reminders.${p.label}`),
                       time: hhmm(p.hour, p.minute),
                     })}
-                    style={({ pressed }) => [styles.preset, { opacity: pressed ? 0.6 : 1 }]}
+                    style={styles.preset}
                   >
                     <T color={sel ? c.accentInk : c.text} style={[styles.presetName, sel && styles.selected]}>
                       {t(`settings.reminders.${p.label}`)}
@@ -166,7 +165,7 @@ export function RemindersSettings() {
                       {hhmm(p.hour, p.minute)}
                     </T>
                     {sel ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
-                  </Pressable>
+                  </Tap>
                 );
               })}
             </ThemedView>
@@ -221,13 +220,11 @@ export function RemindersSettings() {
 function Round({ icon, label, onPress }: { icon: 'add' | 'remove'; label: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.roundHit}>
-      {({ pressed }) => (
-        <ThemedView style={[styles.round, { borderColor: c.border, opacity: pressed ? 0.6 : 1 }]}>
-          <Ionicons name={icon} size={18} color={c.text} />
-        </ThemedView>
-      )}
-    </Pressable>
+    <Tap onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.roundHit}>
+      <ThemedView style={[styles.round, { borderColor: c.border}]}>
+        <Ionicons name={icon} size={18} color={c.text} />
+      </ThemedView>
+    </Tap>
   );
 }
 

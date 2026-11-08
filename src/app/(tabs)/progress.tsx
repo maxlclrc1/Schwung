@@ -31,6 +31,7 @@ import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
 import { pushOnce } from '../../lib/navigation';
+import { Tap } from '../../components/Tap';
 
 /**
  * The Journey tab: the Ascent fills the screen, with the stats in one small line above it, the full 66-day calendar
@@ -157,7 +158,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
         <View style={styles.pad}>
           {/* The day in a line; tap it for that day's habits. */}
           <View style={styles.captionRow}>
-            <Pressable
+            <Tap
               onPress={() => setExpanded((e) => !e)}
               accessibilityRole="button"
               accessibilityState={{ expanded }}
@@ -165,7 +166,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 kicker: summary.kicker,
                 full: summary.full,
               })}
-              style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
+              style={{ flexShrink: 1}}
             >
               <ThemedView style={[styles.caption, depth.raised, { backgroundColor: c.surface }]}>
                 <T v="caption" color={c.indigoInk} style={styles.captionKicker} maxFontSizeMultiplier={1.3}>
@@ -176,14 +177,14 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 </T>
                 <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={c.textDim} />
               </ThemedView>
-            </Pressable>
+            </Tap>
             {chosen !== null ? (
-              <Pressable onPress={() => setChosen(null)} accessibilityRole="button" style={styles.back} hitSlop={8}>
+              <Tap onPress={() => setChosen(null)} accessibilityRole="button" style={styles.back} hitSlop={8}>
                 <Ionicons name="return-down-back" size={16} color={c.indigoInk} />
                 <T v="label" color={c.indigoInk}>
                   {today > PROGRAM_DAYS ? t('journeyTab.back.summit') : t('journeyTab.back.today')}
                 </T>
-              </Pressable>
+              </Tap>
             ) : null}
           </View>
           {expanded ? (
@@ -201,7 +202,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
         {cells.length ? (
           <View style={styles.pad}>
             {program && storyAvailable(program, today) ? (
-              <Pressable
+              <Tap
                 onPress={() => {
                   haptic.select();
                   pushOnce('/life-reset/story');
@@ -209,23 +210,21 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 accessibilityRole="button"
                 accessibilityLabel={t('journeyTab.storyA11y')}
               >
-                {({ pressed }) => (
-                  <ThemedView
-                    style={[styles.story, depth.card, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}
-                  >
-                    <View style={[styles.storyIcon, { backgroundColor: c.peachSoft }]}>
-                      <Ionicons name="image-outline" size={18} color={c.peachInk} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <T v="bodyStrong">{t('journeyTab.story')}</T>
-                      <T v="caption" color={c.textDim}>
-                        {t('journeyTab.storyBody')}
-                      </T>
-                    </View>
-                    <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
-                  </ThemedView>
-                )}
-              </Pressable>
+                <ThemedView
+                  style={[styles.story, depth.card, { backgroundColor: c.surface}]}
+                >
+                  <View style={[styles.storyIcon, { backgroundColor: c.peachSoft }]}>
+                    <Ionicons name="image-outline" size={18} color={c.peachInk} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <T v="bodyStrong">{t('journeyTab.story')}</T>
+                    <T v="caption" color={c.textDim}>
+                      {t('journeyTab.storyBody')}
+                    </T>
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
+                </ThemedView>
+              </Tap>
             ) : null}
             {program?.after ? <SinceSummit program={program} today={today} /> : null}
             <PastJourneysLink />

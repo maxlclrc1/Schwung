@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { canEditYesterday } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
@@ -15,6 +15,7 @@ import { SheetHeader } from '../SheetHeader';
 import { Button, Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 import { IS_RTL } from '../../i18n/direction';
+import { Tap } from '../Tap';
 
 /**
  * A Life Reset habit's details (app/life-reset/[id].tsx), as a page of the journal: the habit's own painting, its
@@ -104,8 +105,11 @@ export function PilotHabit() {
           <LinearGradient colors={[`${c.bg}00`, c.bg]} locations={[0, 0.92]} style={styles.fade} />
           <View style={styles.grabber} />
         </View>
-        <Pressable
-          onPress={() => router.back()}
+        <Tap
+          onPress={() => {
+            router.back();
+            haptic.select();
+          }}
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel={t('nav.done')}
@@ -114,7 +118,7 @@ export function PilotHabit() {
           <T v="bodyStrong" color="#FFFFFF" style={styles.doneText}>
             {t('nav.done')}
           </T>
-        </Pressable>
+        </Tap>
 
         <View style={styles.page}>
           <View style={styles.head}>
@@ -441,19 +445,19 @@ function Stepper({ minus, plus, value, step }: { minus: () => void; plus: () => 
 function Round({ label, a11y, onPress }: { label: string; a11y: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={a11y}
       hitSlop={4}
-      style={({ pressed }) => [styles.roundHit, { opacity: pressed ? 0.5 : 1 }]}
+      style={styles.roundHit}
     >
       <ThemedView style={[styles.round, { borderColor: c.border }]}>
         <T style={styles.roundText} color={c.text}>
           {label}
         </T>
       </ThemedView>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -473,15 +477,15 @@ function TextLink({
 }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={() => {
         haptic.select();
         onPress();
       }}
       accessibilityRole="button"
-      style={({ pressed }) => [
+      style={[
         styles.link,
-        { alignSelf: align === 'center' ? 'center' : 'flex-start', opacity: pressed ? 0.5 : 1 },
+        { alignSelf: align === 'center' ? 'center' : 'flex-start' },
       ]}
     >
       <T
@@ -493,7 +497,7 @@ function TextLink({
       >
         {label}
       </T>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -511,16 +515,16 @@ function PairHalf({
 }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.half, { opacity: pressed ? 0.5 : 1 }]}
+      style={styles.half}
     >
       {end ? null : <T color={c.textFaint}>{arrow}</T>}
       <T style={styles.halfText}>{label}</T>
       {end ? <T color={c.textFaint}>{arrow}</T> : null}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -528,20 +532,20 @@ function PairHalf({
 function Option({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={() => {
         haptic.select();
         onPress();
       }}
       accessibilityRole="radio"
       accessibilityState={{ checked: on }}
-      style={({ pressed }) => [styles.option, { opacity: pressed ? 0.5 : 1 }]}
+      style={styles.option}
     >
       <ThemedView style={[styles.radio, { borderColor: on ? c.accent : c.textFaint }]}>
         {on ? <ThemedView style={[styles.radioDot, { backgroundColor: c.accent }]} /> : null}
       </ThemedView>
       <T style={styles.optionText}>{label}</T>
-    </Pressable>
+    </Tap>
   );
 }
 

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as MediaLibrary from 'expo-media-library/legacy';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -36,6 +36,7 @@ import { WORLD_ART } from '../World';
 import { useT } from '../../i18n/react';
 import { formatDate, formatNumber } from '../../i18n';
 import { physical } from '../../i18n/direction';
+import { Tap } from '../Tap';
 
 /*
  * The 66-Day Story (app/life-reset/story.tsx): a keepsake made at the summit, a portrait poster of Schwung's own
@@ -178,8 +179,12 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
   return (
     <View style={[styles.screen, { backgroundColor: c.bg, paddingTop: insets.top + space.sm }]}>
       <View style={styles.bar}>
-        <Pressable
-          onPress={() => (onClose ? onClose() : router.back())}
+        <Tap
+          onPress={() => {
+            if (onClose) onClose();
+            else router.back();
+            haptic.select();
+          }}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={t('story.close')}
@@ -187,7 +192,7 @@ export function StoryKeepsake({ archived, onClose }: { archived?: PilotProgram; 
           <View style={[styles.close, { backgroundColor: c.surface }]}>
             <Ionicons name="close" size={20} color={c.text} />
           </View>
-        </Pressable>
+        </Tap>
         <T v="caption" color={c.textDim} style={{ fontWeight: '700' }}>
           {t('story.title')}
         </T>

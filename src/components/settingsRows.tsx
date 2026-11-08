@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { haptic } from '../lib/haptics';
 import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { flipX } from '../i18n/direction';
+import { Tap } from './Tap';
 
 /*
  * Settings as a page of the journal (as Habit Details and Insights): each section a small-capitals heading on a
@@ -51,7 +52,7 @@ export function Row({
   const { c } = useTheme();
   return (
     <ThemedView style={[styles.rowLine, { borderColor: c.border }]}>
-      <Pressable
+      <Tap
         onPress={
           onPress
             ? () => {
@@ -63,7 +64,7 @@ export function Row({
         disabled={!onPress}
         accessibilityRole={onPress ? 'button' : undefined}
         accessibilityLabel={onPress ? [label, hint, value].filter(Boolean).join('. ') : undefined}
-        style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
+        style={styles.row}
       >
         {icon ? (
           <Ionicons name={icon} size={19} color={destructive ? c.danger : c.textDim} style={styles.icon} />
@@ -83,7 +84,7 @@ export function Row({
         ) : null}
         {children}
         {chevron ? <Ionicons name="chevron-forward" size={17} color={c.textFaint} style={flipX} /> : null}
-      </Pressable>
+      </Tap>
     </ThemedView>
   );
 }

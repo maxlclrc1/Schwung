@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as P from '../../core/reset/pilot';
 import { haptic } from '../../lib/haptics';
 import { useJourneys } from '../../store/journeys';
@@ -12,6 +12,7 @@ import { useT } from '../../i18n/react';
 import { formatNumber } from '../../i18n';
 import { flipX } from '../../i18n/direction';
 import { pushOnce } from '../../lib/navigation';
+import { Tap } from '../Tap';
 
 const STRIP = 28;
 
@@ -106,7 +107,7 @@ export function PastJourneysLink() {
   const n = useJourneys((s) => s.journeys.length);
   if (!n) return null;
   return (
-    <Pressable
+    <Tap
       onPress={() => {
         haptic.select();
         pushOnce('/life-reset/journeys');
@@ -114,21 +115,19 @@ export function PastJourneysLink() {
       accessibilityRole="button"
       accessibilityLabel={t('beyond.pastLink.a11y', { count: n })}
     >
-      {({ pressed }) => (
-        <ThemedView style={[styles.link, { backgroundColor: c.surface, opacity: pressed ? 0.75 : 1 }]}>
-          <View style={[styles.icon, { backgroundColor: tint.indigo.soft }]}>
-            <Ionicons name="albums-outline" size={18} color={tint.indigo.ink} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <T v="bodyStrong">{t('beyond.pastLink.title')}</T>
-            <T v="caption" color={c.textDim}>
-              {n === 1 ? t('beyond.pastLink.one') : t('beyond.pastLink.many', { count: n })}
-            </T>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
-        </ThemedView>
-      )}
-    </Pressable>
+      <ThemedView style={[styles.link, { backgroundColor: c.surface}]}>
+        <View style={[styles.icon, { backgroundColor: tint.indigo.soft }]}>
+          <Ionicons name="albums-outline" size={18} color={tint.indigo.ink} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <T v="bodyStrong">{t('beyond.pastLink.title')}</T>
+          <T v="caption" color={c.textDim}>
+            {n === 1 ? t('beyond.pastLink.one') : t('beyond.pastLink.many', { count: n })}
+          </T>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={c.textFaint} style={flipX} />
+      </ThemedView>
+    </Tap>
   );
 }
 

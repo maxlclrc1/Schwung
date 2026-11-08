@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { PROGRAM_DAYS } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
@@ -13,6 +13,7 @@ import { Screen, T } from '../ui';
 import { formatDate } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { pushOnce } from '../../lib/navigation';
+import { Tap } from '../Tap';
 
 const longDate = (key: string) => formatDate(key, 'long');
 
@@ -72,7 +73,7 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
     ]);
   return (
     <ThemedView style={[styles.card, { backgroundColor: c.surface }]}>
-      <Pressable
+      <Tap
         onPress={() => {
           haptic.select();
           pushOnce(`/life-reset/story?journey=${encodeURIComponent(journey.id)}`);
@@ -84,7 +85,7 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
           done: stats.done,
           total: PROGRAM_DAYS,
         })}
-        style={({ pressed }) => [styles.row, { opacity: pressed ? 0.75 : 1 }]}
+        style={styles.row}
       >
         <View style={[styles.badge, { backgroundColor: tint.indigo.soft }]}>
           <T v="bodyStrong" color={tint.indigo.ink}>
@@ -106,12 +107,12 @@ function JourneyRow({ journey }: { journey: ArchivedJourney }) {
           </T>
         </View>
         <Ionicons name="image-outline" size={18} color={c.textDim} />
-      </Pressable>
-      <Pressable onPress={remove} accessibilityRole="button" hitSlop={8} style={styles.remove}>
+      </Tap>
+      <Tap onPress={remove} accessibilityRole="button" hitSlop={8} style={styles.remove}>
         <T v="caption" color={c.textFaint}>
           {t('beyond.past.remove')}
         </T>
-      </Pressable>
+      </Tap>
     </ThemedView>
   );
 }
