@@ -1104,13 +1104,6 @@ export const ptBR: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: 'Sua idade',
-      notChosen: 'Não escolhida',
-      younger: 'Um ano a menos',
-      older: 'Um ano a mais',
-      band: '{band} anos',
-      slide: 'Deslize a régua até a sua idade',
-
       under18: 'O Schwung é feito para pessoas de 18 anos ou mais.',
     },
     clock: {
@@ -1160,6 +1153,12 @@ export const ptBR: Translation = {
       title: 'O dia 1 começa hoje.',
       begin: 'Começar o dia 1',
       slowSave: 'Salvando seu reset neste celular…',
+    },
+
+    ageBands: {
+      older: '65 ou mais',
+      under18Note:
+        'Obrigado por nos contar. O Schwung não pode preparar um Life Reset para menores de 18 anos. Nada do que você informou foi salvo.',
     },
   },
   add: {

@@ -1,4 +1,13 @@
-# Age screen: Mountain Path (Option C) mockups
+# Age screen: Mountain Path (Option C)
+
+**Status: approved and implemented** (`src/components/onboarding/AgeBands.tsx`, geometry and labels in `ageTrail.ts`,
+rules in `core/reset/profile.ts`: `SETUP_AGE_BANDS`, `ageAllowsSetup`; tests in `core/__tests__/ageBands.test.ts`).
+The implementation screenshots are `age-path-impl.png` and `age-path-impl-checks.png`. It differs from the mockups in four ways:
+- Rows are at least 48 pt everywhere, including the iPhone SE.
+- The drawing is mirrored by the launch's layout direction (`flipX`). The web build is always left-to-right, so the Arabic screenshots show it unmirrored.
+- The under-18 note scrolls into view when it appears below the visible area, and VoiceOver reads it out.
+- The ruler's `AgeDial` and its six labels were removed.
+
 
 Mockups only. They're screenshots of a temporary version of the real set-up screen in the web build (same header, progress trail, backdrop and footer). That temporary code was removed afterwards, so no production code, logic, data, translations or navigation changed.
 

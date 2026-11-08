@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { PULL_MINUTES_OPTIONS, SKILLS } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
-import type { ActiveDays, AgeBand, PhoneHours, Precaution } from '../../core/reset/profile';
+import { SETUP_AGE_BANDS, type ActiveDays, type AgeBand, type PhoneHours, type Precaution } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { radius, space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
@@ -14,7 +14,7 @@ import { useT } from '../../i18n/react';
  * The pieces set-up and "Add a habit" share: the answer chips, the questions a habit needs, and a habit's intensity.
  */
 
-export const AGES: { id: AgeBand; label: string }[] = labelled('setup.age', ['u16', '18_29', '30_49', '50_64', '65p']);
+export const AGES: { id: AgeBand; label: string }[] = labelled('setup.age', [...SETUP_AGE_BANDS]);
 export const HEALTH: { id: Precaution; label: string }[] = labelled('setup.health', [
   'joint',
   'walkingDifficult',

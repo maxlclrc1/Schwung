@@ -16,12 +16,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import { PULL_MINUTES_OPTIONS, SKILLS, type Intensity } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
-import { isMinor, type ActiveDays, type AgeBand, type PhoneHours, type Precaution } from '../../core/reset/profile';
+import {
+  ageAllowsSetup,
+  type ActiveDays,
+  type AgeBand,
+  type PhoneHours,
+  type Precaution,
+} from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { useResetPilot } from '../../store/resetPilot';
 import { flushStorage } from '../../store/storage';
 import { radius, space, useTheme } from '../../theme';
-import { AgeDial, bandOf, YEARS_OF } from '../onboarding/AgeDial';
+import { AgeBands } from '../onboarding/AgeBands';
 import { IconTiles, Press, SoftChoice, Stairs, Stepper, Token } from '../onboarding/Choices';
 import { HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
 import { DayClock, hhmm, minutesOf } from '../onboarding/DayClock';
@@ -102,8 +108,6 @@ export function PilotSetup() {
   const running = useResetPilot((s) => s.program !== null);
   const [step, setStep] = useState<Step>('age');
   const [age, setAge] = useState<AgeBand | null>(null);
-  // The age itself is only shown here; the program keeps its band.
-  const [years, setYears] = useState<number | null>(null);
   const [health, setHealth] = useState<Precaution[] | 'unknown' | null>(null);
   const [picked, setPicked] = useState<P.PilotHabitId[]>([]);
   const [levels, setLevels] = useState<Partial<Record<string, Intensity>>>({});
@@ -116,6 +120,8 @@ export function PilotSetup() {
   const [start, setStart] = useState<P.StrengthStart | undefined>(undefined);
   const [own, setOwn] = useState(2);
   const [dragging, setDragging] = useState(false);
+  // The question's scroller (one page at a time): Age brings its under-18 note into view.
+  const scroller = useRef<React.ComponentRef<typeof ScrollView>>(null);
   // Confirmed: the program is created and the finale (Handoff.tsx, above the navigator) takes it from here.
   const [launching, setLaunching] = useState<string[] | null>(null);
 
@@ -249,7 +255,7 @@ export function PilotSetup() {
 
   const canContinue =
     step === 'age'
-      ? age !== null && !isMinor(age)
+      ? ageAllowsSetup(age)
       : step === 'health'
         ? health !== null
         : step === 'habits'
@@ -287,12 +293,11 @@ export function PilotSetup() {
             hint={t('setup.q.ageHint')}
             center
           >
-            <AgeDial
-              years={years ?? (age ? YEARS_OF[age] : null)}
-              onChange={(y) => {
-                setYears(y);
-                setAge(bandOf(y));
-              }}
+            <AgeBands
+              value={age}
+              onChange={setAge}
+              label={t('setup.q.ageTitle')}
+              onNote={() => scroller.current?.scrollToEnd({ animated: !reduce })}
             />
           </Question>
         );
@@ -670,6 +675,7 @@ export function PilotSetup() {
               style={StyleSheet.absoluteFill}
             >
               <ScrollView
+                ref={scroller}
                 scrollEnabled={!dragging}
                 contentContainerStyle={styles.scroll}
                 showsVerticalScrollIndicator={false}

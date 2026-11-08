@@ -31,3 +31,11 @@ export const hasPrecaution = (p: Pick<Profile, 'precautions'>, t: Precaution) =>
 
 /** The longest single focus block offered to 16–17-year-olds (Focus Time and Practice a Skill blocks). */
 export const TEEN_FOCUS_MAX_MIN = 60;
+
+/**
+ * The age bands set-up offers, in order: one tap each, nothing else about age is asked. Under 18 is 'u16' (never
+ * '16_17', which only older programs carry). Only the band is kept.
+ */
+export const SETUP_AGE_BANDS = ['u16', '18_29', '30_49', '50_64', '65p'] as const satisfies readonly AgeBand[];
+/** Set-up may go on from the age question only with an adult band chosen. */
+export const ageAllowsSetup = (age: AgeBand | null) => age !== null && !isMinor(age);

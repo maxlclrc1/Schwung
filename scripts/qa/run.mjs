@@ -243,7 +243,7 @@ async function advance(page, lang) {
     if (await picks.count()) await picks.nth(Math.max(0, (await picks.count()) - 1 - tries)).click({ force: true }).catch(() => {});
     else
       for (const name of lang.more) {
-        // A dial (age, time, a meter): a step up at a time until the answer is enough.
+        // A dial (time, a meter): a step up at a time until the answer is enough.
         const more = page.getByRole('button', { name, exact: true });
         if (await more.count()) for (let k = 0; k < 4; k++) await more.first().click({ force: true }).catch(() => {});
       }

@@ -1082,13 +1082,6 @@ export const ko: Translation = {
       preview: '{target} · {frequency}',
     },
     ageDial: {
-      label: '나이',
-      notChosen: '선택 안 함',
-      younger: '한 살 적게',
-      older: '한 살 많게',
-      band: '{band}세',
-      slide: '눈금자를 밀어 나이를 선택하세요',
-
       under18: 'Schwung은 18세 이상을 위한 앱이에요.',
     },
     clock: {
@@ -1138,6 +1131,12 @@ export const ko: Translation = {
       title: '1일째는 오늘 시작해요.',
       begin: '1일째 시작하기',
       slowSave: '이 휴대폰에 리셋을 저장하는 중…',
+    },
+
+    ageBands: {
+      older: '65세 이상',
+      under18Note:
+        '알려 주셔서 고마워요. Schwung은 18세 미만인 분께 Life Reset을 설정해 드릴 수 없어요. 입력한 내용은 저장되지 않았어요.',
     },
   },
   add: {

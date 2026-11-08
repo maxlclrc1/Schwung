@@ -36,3 +36,9 @@ export function applyDirection(lang: LanguageCode): boolean {
   I18nManager.forceRTL(rtl);
   return rtl !== IS_RTL;
 }
+
+/**
+ * Number-only labels (age bands) in a left-to-right isolate, so "30–49" never reads "49–30" in Arabic or Urdu. Words
+ * with a number ("Under 18") are left to the language's own direction.
+ */
+export const isolateNumbers = (label: string) => (/^[\d\s–+-]+$/.test(label) ? `\u2066${label}\u2069` : label);
