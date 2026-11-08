@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { PULL_MINUTES_OPTIONS, SKILLS } from '../../core/reset/habits';
 import * as P from '../../core/reset/pilot';
 import { SETUP_AGE_BANDS, type ActiveDays, type AgeBand, type PhoneHours, type Precaution } from '../../core/reset/profile';
@@ -9,6 +9,7 @@ import { ThemedView } from '../../theme/transition';
 import { T } from '../ui';
 import { t, type TKey } from '../../i18n';
 import { useT } from '../../i18n/react';
+import { Tap } from '../Tap';
 
 /*
  * The pieces set-up and "Add a habit" share: the answer chips, the questions a habit needs, and a habit's intensity.
@@ -114,7 +115,7 @@ export function Chip({
 }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
@@ -131,7 +132,7 @@ export function Chip({
           {label}
         </T>
       </ThemedView>
-    </Pressable>
+    </Tap>
   );
 }
 

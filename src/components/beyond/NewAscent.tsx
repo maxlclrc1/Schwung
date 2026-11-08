@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { toDateKey } from '../../core/dates';
@@ -21,6 +21,7 @@ import { TILE_HEIGHT, TILES } from '../worldTiles';
 import { Button, Screen, T } from '../ui';
 import { useLanguage, useT } from '../../i18n/react';
 import { isolateNumbers, isRTLLanguage } from '../../i18n/direction';
+import { Tap } from '../Tap';
 
 /**
  * Begin a New Ascent: a short set-up from where the last one ended, as one page of the journal. It opens on the
@@ -181,18 +182,18 @@ export function NewAscent() {
               </T>
             </Animated.View>
           ) : (
-            <Pressable
+            <Tap
               onPress={() => {
                 haptic.select();
                 setConfirmed(true);
               }}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.confirm, { borderColor: c.accent, opacity: pressed ? 0.6 : 1 }]}
+              style={[styles.confirm, { borderColor: c.accent }]}
             >
               <T v="bodyStrong" color={c.accentInk} style={styles.centered}>
                 {t('beyond.ascent.confirm')}
               </T>
-            </Pressable>
+            </Tap>
           )}
 
           {/* II · What carries forward, and what can change. */}
@@ -228,7 +229,7 @@ export function NewAscent() {
                         {t('beyond.ascent.yourHabit')} · {P.frequencyText(prev, id, today)}
                       </T>
                     </View>
-                    <Pressable
+                    <Tap
                       onPress={() => {
                         haptic.select();
                         setCustom((k) => (k.includes(id) ? k.filter((x) => x !== id) : [...k, id]));
@@ -237,13 +238,13 @@ export function NewAscent() {
                       aria-checked={kept}
                       accessibilityLabel={P.nameOf(prev, id)}
                       hitSlop={6}
-                      style={({ pressed }) => [styles.kept, { opacity: pressed ? 0.6 : 1 }]}
+                      style={styles.kept}
                     >
                       <Box on={kept} small />
                       <T v="bodyStrong" color={kept ? c.accentInk : c.textDim} style={styles.keptText}>
                         {kept ? t('beyond.ascent.kept') : t('beyond.ascent.leftOut')}
                       </T>
-                    </Pressable>
+                    </Tap>
                   </View>
                 </ThemedView>
               );
@@ -349,11 +350,19 @@ function Cancel({ style }: { style?: object }) {
   const { c } = useTheme();
   const t = useT();
   return (
-    <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" style={[styles.cancel, style]}>
+    <Tap
+      onPress={() => {
+        router.back();
+        haptic.select();
+      }}
+      hitSlop={12}
+      accessibilityRole="button"
+      style={[styles.cancel, style]}
+    >
       <T v="bodyStrong" color={c.accentInk}>
         {t('common.cancel')}
       </T>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -399,7 +408,7 @@ function Divided<K extends string>({
       {items.map((o, i) => {
         const on = selected === o.id;
         return (
-          <Pressable
+          <Tap
             key={o.id}
             onPress={() => {
               haptic.select();
@@ -410,11 +419,10 @@ function Divided<K extends string>({
             aria-checked={on}
             aria-disabled={!!o.disabled}
             accessibilityLabel={name ? `${name}: ${o.label}` : undefined}
-            style={({ pressed }) => [
+            style={[
               styles.cell,
               fit ? styles.cellFit : styles.cellEqual,
               i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
-              { opacity: pressed ? 0.6 : 1 },
             ]}
           >
             <T
@@ -425,7 +433,7 @@ function Divided<K extends string>({
               {o.label}
             </T>
             {on ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
-          </Pressable>
+          </Tap>
         );
       })}
     </ThemedView>
@@ -436,20 +444,20 @@ function Divided<K extends string>({
 function CheckRow({ label, on, dim, onPress }: { label: string; on: boolean; dim?: boolean; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={() => {
         haptic.select();
         onPress();
       }}
       accessibilityRole="checkbox"
       aria-checked={on}
-      style={({ pressed }) => [styles.checkRow, { borderColor: c.border, opacity: pressed ? 0.6 : 1 }]}
+      style={[styles.checkRow, { borderColor: c.border }]}
     >
       <Box on={on} />
       <T color={dim ? c.textDim : c.text} style={styles.checkText}>
         {label}
       </T>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -593,13 +601,13 @@ function HabitRow({
 function Link({ label, accent, onPress }: { label: string; accent?: boolean; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={() => {
         haptic.select();
         onPress();
       }}
       accessibilityRole="button"
-      style={({ pressed }) => [styles.link, { opacity: pressed ? 0.5 : 1 }]}
+      style={styles.link}
     >
       <T
         color={accent ? c.accentInk : c.text}
@@ -610,7 +618,7 @@ function Link({ label, accent, onPress }: { label: string; accent?: boolean; onP
       >
         {label}
       </T>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -618,19 +626,19 @@ function Link({ label, accent, onPress }: { label: string; accent?: boolean; onP
 function Round({ label, a11y, onPress }: { label: string; a11y: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={() => {
         haptic.select();
         onPress();
       }}
       accessibilityRole="button"
       accessibilityLabel={a11y}
-      style={({ pressed }) => [styles.roundHit, { opacity: pressed ? 0.5 : 1 }]}
+      style={styles.roundHit}
     >
       <ThemedView style={[styles.round, { borderColor: c.border }]}>
         <T style={styles.roundText}>{label}</T>
       </ThemedView>
-    </Pressable>
+    </Tap>
   );
 }
 

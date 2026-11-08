@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Linking, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { PilotSettings } from '../components/pilot/PilotSettings';
 import { RemindersSettings } from '../components/reminders/RemindersSettings';
 import { Row, Section } from '../components/settingsRows';
@@ -20,6 +20,7 @@ import { language } from '../i18n';
 import { LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
 import { pushOnce } from '../lib/navigation';
+import { Tap } from '../components/Tap';
 
 export default function Settings() {
   const { c } = useTheme();
@@ -111,11 +112,19 @@ function Band({ title }: { title: string }) {
         <LinearGradient colors={[`${c.bg}00`, c.bg]} locations={[0, 0.88]} style={styles.fade} />
       </View>
       <View style={styles.grabber} />
-      <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" style={styles.done}>
+      <Tap
+        onPress={() => {
+          router.back();
+          haptic.select();
+        }}
+        hitSlop={12}
+        accessibilityRole="button"
+        style={styles.done}
+      >
         <T v="bodyStrong" color={c.accentInk}>
           {t('nav.done')}
         </T>
-      </Pressable>
+      </Tap>
       <T v="title" accessibilityRole="header" style={styles.title} numberOfLines={2}>
         {title}
       </T>
@@ -142,7 +151,7 @@ function AppearancePicker() {
       {APPEARANCE.map((o, i) => {
         const selected = preference === o.value;
         return (
-          <Pressable
+          <Tap
             key={o.value}
             onPress={() => {
               haptic.confirm();
@@ -155,10 +164,9 @@ function AppearancePicker() {
                 ? t('settings.theme.systemA11y')
                 : t('settings.theme.mode', { name: t(`settings.theme.${o.value}`) })
             }
-            style={({ pressed }) => [
+            style={[
               styles.segmentItem,
               i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
-              { opacity: pressed ? 0.6 : 1 },
             ]}
           >
             <Ionicons name={o.icon} size={18} color={selected ? c.accentInk : c.textDim} />
@@ -166,7 +174,7 @@ function AppearancePicker() {
               {t(`settings.theme.${o.value}`)}
             </T>
             {selected ? <ThemedView style={[styles.underline, { backgroundColor: c.accent }]} /> : null}
-          </Pressable>
+          </Tap>
         );
       })}
     </ThemedView>

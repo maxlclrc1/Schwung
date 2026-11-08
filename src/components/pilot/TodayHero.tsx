@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -25,6 +25,7 @@ import { useT } from '../../i18n/react';
 import { useOnArt } from '../onArt';
 import { useScriptAdjust } from '../../i18n/script';
 import { pushOnce } from '../../lib/navigation';
+import { Tap } from '../Tap';
 
 const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const sys = ReduceMotion.System;
@@ -190,7 +191,7 @@ function Level({ xp }: { xp: number }) {
   const g = growth(xp);
   return (
     <View style={styles.shrink}>
-      <Pressable
+      <Tap
         onPress={() => {
           haptic.select();
           pushOnce('/life-reset/collection');
@@ -198,7 +199,7 @@ function Level({ xp }: { xp: number }) {
         accessibilityRole="button"
         accessibilityLabel={t('today.hero.levelA11y', { title: g.title, xp })}
         hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
-        style={({ pressed }) => [styles.metaItem, { opacity: pressed ? 0.6 : 1 }]}
+        style={styles.metaItem}
       >
         <Ionicons name="diamond-outline" size={12} color={c.accentInk} />
         <T
@@ -218,7 +219,7 @@ function Level({ xp }: { xp: number }) {
           {t('today.hero.xp')}
         </T>
         <Ionicons name="chevron-forward" size={11} color={c.textFaint} style={flipX} />
-      </Pressable>
+      </Tap>
       {gain ? (
         <Animated.View
           key={gain.key}

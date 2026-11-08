@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { reloadAppAsync } from 'expo';
 import { useSyncExternalStore } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { deviceLanguage, isDirectionPending, subscribeDirection } from '../i18n/device';
 import { LANGUAGES, READY_LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
@@ -11,6 +11,7 @@ import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
+import { Tap } from './Tap';
 
 /**
  * Settings → Language: follow the phone, or choose one. Each language is named in its own language (Deutsch,
@@ -74,13 +75,13 @@ function Option({
 }) {
   const { c } = useTheme();
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={hint ? `${label}. ${hint}` : label}
       accessibilityLanguage={lang}
-      style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
+      style={styles.row}
     >
       <View style={{ flex: 1, gap: 2 }}>
         <T color={c.text} style={{ fontWeight: selected ? '700' : '400' }}>
@@ -93,7 +94,7 @@ function Option({
         ) : null}
       </View>
       {selected ? <Ionicons name="checkmark" size={20} color={c.accentInk} /> : null}
-    </Pressable>
+    </Tap>
   );
 }
 

@@ -1,7 +1,7 @@
 import { removeAllTemps } from '../../lib/appFiles';
 import { flushStorage } from '../../store/storage';
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { PROGRAM_DAYS } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
 import { startNewAscent } from '../../store/ascent';
@@ -12,6 +12,7 @@ import { T } from '../ui';
 import { useT } from '../../i18n/react';
 import { usePreferences } from '../../store/preferences';
 import { pushOnce } from '../../lib/navigation';
+import { Tap } from '../Tap';
 
 /**
  * Settings → Your program, last on the page: where the Life Reset is, what comes after the summit, and ending it (a
@@ -93,13 +94,11 @@ export function PilotSettings() {
         />
       ) : null}
       {program ? (
-        <Pressable onPress={end} accessibilityRole="button" hitSlop={4} style={styles.end}>
-          {({ pressed }) => (
-            <T color={c.danger} style={[styles.endText, { opacity: pressed ? 0.6 : 1 }]}>
-              {t('settings.program.end')}
-            </T>
-          )}
-        </Pressable>
+        <Tap onPress={end} accessibilityRole="button" hitSlop={4} style={styles.end}>
+          <T color={c.danger} style={styles.endText}>
+            {t('settings.program.end')}
+          </T>
+        </Tap>
       ) : (
         <Row label={t('settings.program.start')} icon="leaf-outline" onPress={() => pushOnce('/life-reset/setup')} />
       )}

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { BackHandler, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { BackHandler, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -41,6 +41,7 @@ import { ACTIVE, duration, PHONE, STARTS } from './SetupParts';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
+import { Tap } from '../Tap';
 
 type Step = 'age' | 'health' | 'habits' | P.Baseline | 'levels' | 'time' | 'review';
 
@@ -646,7 +647,7 @@ export function PilotSetup() {
           </View>
         </DragLock.Provider>
         <View style={styles.footer}>
-          <Pressable
+          <Tap
             onPress={() => {
               haptic.select();
               go(-1);
@@ -656,12 +657,10 @@ export function PilotSetup() {
             accessibilityRole="button"
             accessibilityLabel={t('setup.q.back')}
           >
-            {({ pressed }) => (
-              <View style={[styles.back, { backgroundColor: c.surface, opacity: pressed ? 0.7 : 1 }]}>
-                <Ionicons name="chevron-back" size={24} color={c.text} style={flipX} />
-              </View>
-            )}
-          </Pressable>
+            <View style={[styles.back, { backgroundColor: c.surface}]}>
+              <Ionicons name="chevron-back" size={24} color={c.text} style={flipX} />
+            </View>
+          </Tap>
           <Button
             label={step === 'review' ? t('setup.q.confirm') : t('setup.q.continue')}
             disabled={!canContinue || !!launching}

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { GestureResponderEvent, Pressable, StyleSheet, View } from 'react-native';
+import { GestureResponderEvent, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -20,6 +20,7 @@ import { useT } from '../i18n/react';
 import { useOnArt } from './onArt';
 import { flipX, physical } from '../i18n/direction';
 import { SummitBeacon } from './SummitBeacon';
+import { Tap } from './Tap';
 
 const DOTS = trailDots(3);
 
@@ -299,11 +300,11 @@ export function AscentCaption({
   return (
     <View style={styles.bottomRow}>
       {selectedDay ? (
-        <Pressable
+        <Tap
           onPress={() => onOpenJourney(selectedDay.day)}
           accessibilityRole="button"
           accessibilityLabel={t('journeyTab.ascent.openDay', { day: describeDay(selectedDay) })}
-          style={({ pressed }) => ({ flexShrink: 1, opacity: pressed ? 0.7 : 1 })}
+          style={{ flexShrink: 1}}
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
             <ThemedView style={[styles.captionDot, { borderColor: c.text }]} />
@@ -312,7 +313,7 @@ export function AscentCaption({
             </T>
             <Ionicons name="chevron-forward" size={14} color={c.textDim} style={flipX} />
           </ThemedView>
-        </Pressable>
+        </Tap>
       ) : (
         <T v="caption" maxFontSizeMultiplier={1.3} color={c.textDim} numberOfLines={2} style={{ flexShrink: 1 }}>
           {t('journeyTab.ascent.climbed', { done, total: PROGRAM_DAYS })}
@@ -320,12 +321,11 @@ export function AscentCaption({
       )}
       {/* While a day is selected, its caption is the way into Journey, so it gets the whole row. */}
       {selectedDay ? null : (
-        <Pressable
+        <Tap
           onPress={() => onOpenJourney()}
           accessibilityRole="button"
           accessibilityLabel={t('journeyTab.ascent.open')}
           hitSlop={8}
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <ThemedView style={[styles.caption, { backgroundColor: c.surface }]}>
             <Ionicons name="map-outline" size={14} color={c.accentInk} />
@@ -333,7 +333,7 @@ export function AscentCaption({
               {t('journeyTab.ascent.journey')}
             </T>
           </ThemedView>
-        </Pressable>
+        </Tap>
       )}
     </View>
   );

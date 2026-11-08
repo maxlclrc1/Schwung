@@ -1,9 +1,11 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 import { T } from './ui';
 import { useT } from '../i18n/react';
+import { Tap } from './Tap';
+import { haptic } from '../lib/haptics';
 
 /** Header for modal sheets: grabber + title + Done. */
 export function SheetHeader({ title, action }: { title: string; action?: string }) {
@@ -16,11 +18,18 @@ export function SheetHeader({ title, action }: { title: string; action?: string 
         <T v="heading" numberOfLines={2} style={{ flex: 1 }}>
           {title}
         </T>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button">
+        <Tap
+          onPress={() => {
+            router.back();
+            haptic.select();
+          }}
+          hitSlop={12}
+          accessibilityRole="button"
+        >
           <T v="bodyStrong" color={c.accentInk}>
             {action ?? t('nav.done')}
           </T>
-        </Pressable>
+        </Tap>
       </View>
     </View>
   );
