@@ -1,21 +1,14 @@
 # Health screen: two directions
 
-**Status: Option A approved and implemented** (`src/components/onboarding/HealthList.tsx`; the toggle rule is
-`togglePrecaution` in `core/reset/profile.ts`; tests in `core/__tests__/healthAnswer.test.ts`). Production
-screenshots: `health-impl.png`, `health-impl-checks.png`, `health-impl-before-after.png`. Two approved refinements:
-- **Journal divider:** a short, softened peach rule sits on the "None of these / Rather not say" strip's top hairline.
-- **Last selection:** unticking the last precaution returns the question to unanswered, so Continue is off again, instead of selecting "None of these". The meanings of a saved `[]` and `'unknown'` are unchanged.
+**Status: Option B implemented** (replacing a first implementation of Option A at your request).
+- **Code:** `src/components/onboarding/HealthList.tsx`. The toggle rule is `togglePrecaution` in `core/reset/profile.ts`, with tests in `core/__tests__/healthAnswer.test.ts`.
+- **Screenshots:** `health-impl.png`, `health-impl-checks.png`, `health-impl-before-after.png`.
 
-
-"Anything your body would like us to know?" is drawn as a temporary version of the real set-up screen in the web build. It uses the real header, progress trail, backdrop, Back/Continue footer and copy. The temporary code was removed afterwards, so no production code, logic, data, translations or navigation changed.
-
-| Board | What it shows |
-|---|---|
-| `health-before-after.png` | The current screen next to Option A and Option B, each with nothing chosen and with three precautions chosen |
-| `health-a-journal.png` | Option A in light and dark, with nothing chosen and with three precautions chosen |
-| `health-b-field-notes.png` | Option B in light and dark, with nothing chosen and with three precautions chosen |
-| `health-none-rather-not.png` | "None of these" and "Rather not say" in both options |
-| `health-a-checks.png`, `health-b-checks.png` | 320 pt, iPhone SE (scrolled), German, Arabic (RTL, emulated), larger text |
+Differences from the Option B mockup:
+- **Original icons kept:** each precaution's waypoint carries the screen's original small icon (bandage, walk, heart, flower, water, moon) on a soft peach disc.
+- **Original selection colours kept:** a chosen precaution's waypoint fills peach and its icon turns into a tick with a quarter turn, as before. The row takes the peach card colour and its label turns peach ink, semibold.
+- **None of these / Rather not say:** they keep their original leaf and eye-off icons. When chosen they take sage and mist, as before.
+- **Last selection:** unticking the last precaution returns the question to unanswered, so Continue is off again. The meanings of a saved `[]` and `'unknown'` are unchanged.
 
 ## Option A: Expedition journal
 

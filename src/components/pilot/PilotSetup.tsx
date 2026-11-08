@@ -28,7 +28,7 @@ import { useResetPilot } from '../../store/resetPilot';
 import { flushStorage } from '../../store/storage';
 import { radius, space, useTheme } from '../../theme';
 import { AgeBands } from '../onboarding/AgeBands';
-import { HealthList } from '../onboarding/HealthList';
+import { HealthList, PaintingWindow } from '../onboarding/HealthList';
 import { IconTiles, Press, SoftChoice, Stairs, Stepper } from '../onboarding/Choices';
 import { HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
 import { DayClock, hhmm, minutesOf } from '../onboarding/DayClock';
@@ -296,14 +296,17 @@ export function PilotSetup() {
         );
       case 'health':
         return (
-          <Question
-            eyebrow={t('setup.q.youToday')}
-            tint="peach"
-            title={t('setup.q.healthTitle')}
-            hint={t('setup.q.healthHint')}
-          >
-            <HealthList value={health} onChange={setHealth} />
-          </Question>
+          <View>
+            <PaintingWindow />
+            <Question
+              eyebrow={t('setup.q.youToday')}
+              tint="peach"
+              title={t('setup.q.healthTitle')}
+              hint={t('setup.q.healthHint')}
+            >
+              <HealthList value={health} onChange={setHealth} />
+            </Question>
+          </View>
         );
       case 'habits':
         return (
