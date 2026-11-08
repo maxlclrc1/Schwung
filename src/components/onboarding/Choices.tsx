@@ -67,65 +67,6 @@ function useOn(on: boolean) {
   return v;
 }
 
-/**
- * A round token with an icon and a few words (things to keep in mind). Chosen, it takes the tint and its icon
- * turns into a check with a small quarter turn.
- */
-export function Token({
-  label,
-  icon,
-  on,
-  tint,
-  onPress,
-  multi = true,
-}: {
-  label: string;
-  icon: Icon;
-  on: boolean;
-  tint: Tint;
-  onPress: () => void;
-  multi?: boolean;
-}) {
-  const { c } = useTheme();
-  const t = useOn(on);
-  const box = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(t.value, [0, 1], [c.surface, tint.soft]),
-  }));
-  const bubble = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(t.value, [0, 1], [tint.soft, tint.fill]),
-  }));
-  const before = useAnimatedStyle(() => ({
-    opacity: 1 - t.value,
-    transform: [{ rotate: `${t.value * 90}deg` }],
-  }));
-  const after = useAnimatedStyle(() => ({
-    opacity: t.value,
-    transform: [{ rotate: `${(t.value - 1) * 90}deg` }],
-  }));
-  return (
-    <Press
-      onPress={onPress}
-      accessibilityRole={multi ? 'checkbox' : 'radio'}
-      accessibilityState={{ checked: on }}
-      accessibilityLabel={label}
-    >
-      <Animated.View style={[styles.token, box]}>
-        <Animated.View style={[styles.bubble, bubble]}>
-          <Animated.View style={[StyleSheet.absoluteFill, styles.mid, before]}>
-            <Ionicons name={icon} size={18} color={tint.ink} />
-          </Animated.View>
-          <Animated.View style={[StyleSheet.absoluteFill, styles.mid, after]}>
-            <Ionicons name="checkmark" size={18} color={tint.on} />
-          </Animated.View>
-        </Animated.View>
-        <T v="bodyStrong" color={on ? tint.ink : c.text} style={styles.tokenText}>
-          {label}
-        </T>
-      </Animated.View>
-    </Press>
-  );
-}
-
 /** Icon badges in a centred grid (which skill): the badge fills and its icon tilts in when chosen. */
 export function IconTiles<K extends string>({
   items,
@@ -472,18 +413,6 @@ const styles = StyleSheet.create({
   stepper: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   stepButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   mid: { alignItems: 'center', justifyContent: 'center' },
-  token: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.md,
-    minHeight: 56,
-    paddingLeft: space.sm,
-    paddingRight: space.lg,
-    paddingVertical: space.sm,
-    borderRadius: radius.pill,
-  },
-  bubble: { width: 40, height: 40, borderRadius: 20 },
-  tokenText: { flexShrink: 1 },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', rowGap: space.lg },
   tile: { width: '33.3%' },
   tileInner: { alignItems: 'center', gap: space.sm, paddingVertical: space.xs },

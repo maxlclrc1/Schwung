@@ -20,15 +20,16 @@ import {
   ageAllowsSetup,
   type ActiveDays,
   type AgeBand,
+  type HealthAnswer,
   type PhoneHours,
-  type Precaution,
 } from '../../core/reset/profile';
 import { haptic } from '../../lib/haptics';
 import { useResetPilot } from '../../store/resetPilot';
 import { flushStorage } from '../../store/storage';
 import { radius, space, useTheme } from '../../theme';
 import { AgeBands } from '../onboarding/AgeBands';
-import { IconTiles, Press, SoftChoice, Stairs, Stepper, Token } from '../onboarding/Choices';
+import { HealthList } from '../onboarding/HealthList';
+import { IconTiles, Press, SoftChoice, Stairs, Stepper } from '../onboarding/Choices';
 import { HabitArt, HabitFan, HabitTile, StartCard, Stones } from '../onboarding/Habits';
 import { DayClock, hhmm, minutesOf } from '../onboarding/DayClock';
 import { markSaved, showFinale } from '../onboarding/Handoff';
@@ -36,7 +37,7 @@ import { PhoneMeter, TimeDial, TrailPicker } from '../onboarding/Instruments';
 import { CHAPTERS, DragLock, Question, rise, TrailProgress, useTints, type TintName } from '../onboarding/kit';
 import { Button, Screen, T } from '../ui';
 import { OnboardingBackdrop } from '../World';
-import { ACTIVE, duration, HEALTH, PHONE, STARTS } from './SetupParts';
+import { ACTIVE, duration, PHONE, STARTS } from './SetupParts';
 import { t as tr } from '../../i18n';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
@@ -66,14 +67,6 @@ const ASKED_BY: Record<P.Baseline, string> = {
   activeDays: 'move_walk',
   skill: 'skill_practice',
   strengthStart: 'strength_log',
-};
-const HEALTH_ICON: Record<Precaution, React.ComponentProps<typeof Ionicons>['name']> = {
-  joint: 'bandage-outline',
-  walkingDifficult: 'walk-outline',
-  heart: 'heart-outline',
-  pregnancy: 'flower-outline',
-  fluidLimit: 'water-outline',
-  sleepCondition: 'moon-outline',
 };
 const SKILL_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   Language: 'chatbubbles-outline',
@@ -108,7 +101,7 @@ export function PilotSetup() {
   const running = useResetPilot((s) => s.program !== null);
   const [step, setStep] = useState<Step>('age');
   const [age, setAge] = useState<AgeBand | null>(null);
-  const [health, setHealth] = useState<Precaution[] | 'unknown' | null>(null);
+  const [health, setHealth] = useState<HealthAnswer>(null);
   const [picked, setPicked] = useState<P.PilotHabitId[]>([]);
   const [levels, setLevels] = useState<Partial<Record<string, Intensity>>>({});
   const [minutes, setMinutes] = useState<number | null>(null);
@@ -309,43 +302,7 @@ export function PilotSetup() {
             title={t('setup.q.healthTitle')}
             hint={t('setup.q.healthHint')}
           >
-            <View style={styles.tokens}>
-              {HEALTH.map((h) => (
-                <Token
-                  key={h.id}
-                  label={h.label}
-                  icon={HEALTH_ICON[h.id]}
-                  tint={tint('peach')}
-                  on={Array.isArray(health) && health.includes(h.id)}
-                  onPress={() =>
-                    setHealth((cur) => {
-                      const list = Array.isArray(cur) ? cur : [];
-                      return list.includes(h.id) ? list.filter((x) => x !== h.id) : [...list, h.id];
-                    })
-                  }
-                />
-              ))}
-            </View>
-            <View style={styles.pair}>
-              <View style={{ flex: 1 }}>
-                <SoftChoice
-                  label={t('setup.q.none')}
-                  icon="leaf-outline"
-                  tint={tint('sage')}
-                  on={Array.isArray(health) && health.length === 0}
-                  onPress={() => setHealth([])}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <SoftChoice
-                  label={t('setup.q.ratherNot')}
-                  icon="eye-off-outline"
-                  tint={tint('mist')}
-                  on={health === 'unknown'}
-                  onPress={() => setHealth('unknown')}
-                />
-              </View>
-            </View>
+            <HealthList value={health} onChange={setHealth} />
           </Question>
         );
       case 'habits':
@@ -745,7 +702,6 @@ const styles = StyleSheet.create({
   },
   note: { minHeight: 44, justifyContent: 'center' },
   centerText: { textAlign: 'center' },
-  tokens: { gap: space.sm },
   pair: { flexDirection: 'row', gap: space.sm },
   solo: { alignSelf: 'center' },
   habitBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

@@ -39,3 +39,17 @@ export const TEEN_FOCUS_MAX_MIN = 60;
 export const SETUP_AGE_BANDS = ['u16', '18_29', '30_49', '50_64', '65p'] as const satisfies readonly AgeBand[];
 /** Set-up may go on from the age question only with an adult band chosen. */
 export const ageAllowsSetup = (age: AgeBand | null) => age !== null && !isMinor(age);
+
+/** Set-up's health answer: unanswered (null), "None of these" ([]), precautions, or "Rather not say" ('unknown'). */
+export type HealthAnswer = Precaution[] | 'unknown' | null;
+/**
+ * Ticking or unticking one precaution on set-up's health question. Ticking replaces "None of these" or "Rather not
+ * say"; unticking the last one leaves the question unanswered again (null), never "None of these": [] is only ever
+ * an explicit choice.
+ */
+export function togglePrecaution(current: HealthAnswer, id: Precaution): HealthAnswer {
+  const list = Array.isArray(current) ? current : [];
+  if (!list.includes(id)) return [...list, id];
+  const rest = list.filter((x) => x !== id);
+  return rest.length > 0 ? rest : null;
+}
