@@ -609,6 +609,9 @@ export const id: Translation = {
     more: { other: 'Dan {count} lagi menunggu di koleksimu.' },
     lovely: 'Oke',
     see: 'Lihat koleksi',
+
+    howXp:
+      'XP datang dari setiap kebiasaan yang kamu lakukan (masing-masing 10, ditambah 20 untuk hari yang lengkap). Benda tetap milikmu, bahkan setelah dibatalkan.',
   },
   welcomeBack: {
     dismiss: 'Tutup',

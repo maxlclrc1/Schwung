@@ -606,6 +606,9 @@ export const ptBR: Translation = {
     more: { one: 'E mais {count} esperando na sua coleção.', other: 'E mais {count} esperando na sua coleção.' },
     lovely: 'Entendi',
     see: 'Ver coleção',
+
+    howXp:
+      'O XP vem de cada hábito que você faz (10 cada, mais 20 por um dia completo). Os objetos continuam seus, mesmo depois de desfazer.',
   },
   welcomeBack: {
     dismiss: 'Dispensar',

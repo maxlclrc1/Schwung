@@ -585,6 +585,9 @@ export const ko: Translation = {
     more: { other: '컬렉션에서 {count}개가 더 기다리고 있어요.' },
     lovely: '알겠어요',
     see: '컬렉션 보기',
+
+    howXp:
+      'XP는 실천한 습관마다 쌓여요(하나에 10, 하루를 모두 마치면 20 더). 되돌리기를 해도 물건은 계속 당신의 것이에요.',
   },
   welcomeBack: {
     dismiss: '닫기',

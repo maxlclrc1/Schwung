@@ -14,6 +14,9 @@ export const collection = {
   more: { one: 'And {count} more waiting in your collection.', other: 'And {count} more waiting in your collection.' },
   lovely: 'Got it',
   see: 'See collection',
+  /** How XP is earned, under the collection. */
+  howXp:
+    'XP comes from every habit you do (10 each, 20 more for a complete day). Objects stay yours, even after an undo.',
 };
 
 export const welcomeBack = {

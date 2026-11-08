@@ -573,6 +573,8 @@ export const zhHant: Translation = {
     more: { other: '還有{count}件在你的收藏中等你。' },
     lovely: '知道了',
     see: '查看收藏',
+
+    howXp: '你完成的每個習慣都會帶來 XP（每個 10，完成一整天再加 20）。即使復原，物品也仍然屬於你。',
   },
   welcomeBack: {
     dismiss: '關閉',

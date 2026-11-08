@@ -602,6 +602,9 @@ export const vi: Translation = {
     more: { other: 'Và còn {count} vật phẩm nữa đang chờ trong bộ sưu tập.' },
     lovely: 'Đã hiểu',
     see: 'Xem bộ sưu tập',
+
+    howXp:
+      'XP đến từ mỗi thói quen bạn làm (mỗi thói quen 10, thêm 20 cho một ngày hoàn thành). Đồ vật vẫn là của bạn, kể cả sau khi hoàn tác.',
   },
   welcomeBack: {
     dismiss: 'Ẩn',

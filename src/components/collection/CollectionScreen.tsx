@@ -1,31 +1,35 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, LinearTransition, ReduceMotion } from 'react-native-reanimated';
-import { COLLECTIBLES, growth } from '../../core/reset/collection';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
+import { COLLECTIBLES, growth, type Collectible } from '../../core/reset/collection';
 import * as P from '../../core/reset/pilot';
 import { useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { rise } from '../onboarding/kit';
 import { SheetHeader } from '../SheetHeader';
-import { ProgressBar, Screen, T } from '../ui';
+import { Screen, T } from '../ui';
 import { CollectibleArt } from './Collectible';
 import { useT } from '../../i18n/react';
 import type { TKey } from '../../i18n';
 
 const sys = ReduceMotion.System;
 
+/** An object's place in the collection, as an accession number ("03 / 07"), kept left-to-right in every language. */
+const accession = (i: number) =>
+  `⁦${String(i + 1).padStart(2, '0')} / ${String(COLLECTIBLES.length).padStart(2, '0')}⁩`;
+
 /**
- * Your collection (app/life-reset/collection.tsx, from the XP chip on Habits): the title XP has earned and the way to
- * the next, then the seven alpine objects, each yours from its XP mark (kept for good) or a quiet silhouette with
- * the XP it needs. Tap one to read it.
+ * Your collection (app/life-reset/collection.tsx, from the XP chip on Habits), as expedition keepsakes: the title XP
+ * has earned on one slim line with the way to the next, then the object in view on the page itself (its painting,
+ * number, name, mark and reflection, or what it needs), then all seven laid out in an open specimen tray: each
+ * yours from its XP mark (kept for good) or a quiet silhouette with the XP it needs. Tap one to read it.
  */
 export function CollectionScreen() {
   const { c } = useTheme();
   const t = useT();
-  const { width } = useWindowDimensions();
+  const { width, fontScale } = useWindowDimensions();
   const program = useResetPilot((s) => s.program);
   // Lifetime XP: earlier ascents' XP is carried in, never counted twice.
   const xp = program ? P.lifetimeXp(program) : 0;
@@ -34,92 +38,124 @@ export function CollectionScreen() {
   const latest = [...COLLECTIBLES].reverse().find((o) => owned.includes(o.id));
   const [picked, setPicked] = useState<string | null>(latest?.id ?? COLLECTIBLES[0].id);
   const shown = COLLECTIBLES.find((o) => o.id === picked) ?? COLLECTIBLES[0];
+  const shownAt = COLLECTIBLES.indexOf(shown);
   const shownOwned = owned.includes(shown.id);
-  const tile = Math.floor((Math.min(width, 520) - space.xl * 2 - space.md * 2) / 3);
+  const art = Math.round(Math.min(168, width * 0.43));
+  // Larger text: two columns, each object beside its words.
+  const wide = fontScale > 1.2;
+  const cols = wide ? 2 : 4;
+  const rows: Collectible[][] = [];
+  for (let i = 0; i < COLLECTIBLES.length; i += cols) rows.push(COLLECTIBLES.slice(i, i + cols));
 
   return (
     <Screen edges={['bottom']}>
       <SheetHeader title={t('collection.title')} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Animated.View entering={rise(0)} style={styles.hero}>
-          <T v="overline" color={c.peachInk}>
-            {t('collection.xp', { xp })}
-          </T>
-          <T style={[styles.title, { color: c.text }]} accessibilityRole="header">
-            {g.title}
-          </T>
-          <ProgressBar value={g.progress} height={6} color={c.peach} />
-          <T v="caption" color={c.textDim}>
+        {/* The title XP has earned, the lifetime XP, and the way to the next object as a thin rule. */}
+        <Animated.View entering={rise(0)}>
+          <View style={styles.rankLine}>
+            <T style={[styles.rank, { color: c.text }]} accessibilityRole="header">
+              {g.title}
+            </T>
+            <T color={c.peachInk} style={styles.xp}>
+              {t('collection.xp', { xp })}
+            </T>
+          </View>
+          <View
+            style={styles.track}
+            accessibilityRole="progressbar"
+            accessibilityValue={{ min: 0, max: 100, now: Math.round(g.progress * 100) }}
+          >
+            <ThemedView style={[styles.trackLine, { backgroundColor: c.border }]} />
+            <ThemedView style={[styles.trackFill, { width: `${g.progress * 100}%`, backgroundColor: c.peach }]} />
+          </View>
+          <T color={c.textDim} style={styles.next}>
             {g.next
               ? t('collection.toNext', { xp: g.next.xp - xp, name: g.next.name, title: g.next.title })
               : t('collection.complete')}
           </T>
         </Animated.View>
 
-        {/* The one in view: its art, name and reflection (or what it needs). */}
-        <Animated.View key={shown.id} entering={FadeIn.duration(220).reduceMotion(sys)}>
-          <ThemedView style={[styles.detail, { backgroundColor: c.surface }]}>
-            <CollectibleArt id={shown.id} size={120} locked={!shownOwned} />
-            <View style={{ flex: 1, gap: 4 }}>
-              <T v="bodyStrong">{shown.name}</T>
-              <T v="caption" color={shownOwned ? c.peachInk : c.textFaint} style={{ fontWeight: '700' }}>
-                {shownOwned
-                  ? t('collection.owned', { title: shown.title, xp: shown.xp })
-                  : t('collection.unlocksAt', { xp: shown.xp })}
-              </T>
-              <T v="caption" color={shownOwned ? c.text : c.textDim}>
-                {shownOwned ? shown.reflection : t('collection.keepGoing')}
-              </T>
-            </View>
-          </ThemedView>
+        {/* The one in view, on the page itself: its painting, number, name, mark and reflection (or what it needs). */}
+        <Animated.View key={shown.id} entering={FadeIn.duration(220).reduceMotion(sys)} style={styles.plate}>
+          <CollectibleArt id={shown.id} size={art} locked={!shownOwned} />
+          <T color={c.textFaint} style={styles.accession}>
+            {accession(shownAt)}
+          </T>
+          <T style={styles.name}>{shown.name}</T>
+          <T color={shownOwned ? c.peachInk : c.textFaint} style={styles.mark}>
+            {shownOwned
+              ? t('collection.owned', { title: shown.title, xp: shown.xp })
+              : t('collection.unlocksAt', { xp: shown.xp })}
+          </T>
+          <T color={shownOwned ? c.text : c.textDim} style={styles.reflection}>
+            {shownOwned ? shown.reflection : t('collection.keepGoing')}
+          </T>
         </Animated.View>
 
-        <Animated.View layout={LinearTransition.duration(200).reduceMotion(sys)} style={styles.grid}>
-          {COLLECTIBLES.map((o, i) => {
-            const mine = owned.includes(o.id);
-            return (
-              <Animated.View key={o.id} entering={rise(80 + i * 50)}>
-                <Press
-                  onPress={() => setPicked(o.id)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: picked === o.id }}
-                  accessibilityLabel={
-                    mine
-                      ? t('collection.tileOwnedA11y', { name: o.name, reflection: o.reflection })
-                      : t('collection.tileLockedA11y', { name: o.name, xp: o.xp })
-                  }
-                >
-                  <ThemedView
+        {/* All seven, an open specimen tray: faint dividers between objects, no box around them. */}
+        <View style={styles.tray}>
+          {rows.map((row, r) => (
+            <ThemedView
+              key={r}
+              style={[
+                styles.trayRow,
+                r < rows.length - 1 && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.border },
+              ]}
+            >
+              {row.map((o, i) => {
+                const mine = owned.includes(o.id);
+                const at = r * cols + i;
+                const on = picked === o.id;
+                return (
+                  <Animated.View
+                    key={o.id}
+                    entering={rise(80 + at * 50)}
                     style={[
-                      styles.tile,
-                      {
-                        width: tile,
-                        backgroundColor: c.surface,
-                        borderColor: picked === o.id ? c.peach : 'transparent',
-                      },
+                      { width: `${100 / cols}%` },
+                      i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
                     ]}
                   >
-                    <CollectibleArt id={o.id} size={tile * 0.58} locked={!mine} />
-                    <T v="caption" numberOfLines={2} style={styles.tileName} color={mine ? c.text : c.textDim}>
-                      {t(`progress.collection.${o.id}.short` as TKey)}
-                    </T>
-                    {mine ? (
-                      <Ionicons name="checkmark-circle" size={14} color={c.sage} />
-                    ) : (
-                      <T v="caption" color={c.textFaint} style={styles.tileXp}>
-                        {t('collection.xp', { xp: o.xp })}
-                      </T>
-                    )}
-                  </ThemedView>
-                </Press>
-              </Animated.View>
-            );
-          })}
-        </Animated.View>
+                    <Press
+                      onPress={() => setPicked(o.id)}
+                      accessibilityRole="button"
+                      aria-selected={on}
+                      accessibilityLabel={
+                        mine
+                          ? t('collection.tileOwnedA11y', { name: o.name, reflection: o.reflection })
+                          : t('collection.tileLockedA11y', { name: o.name, xp: o.xp })
+                      }
+                    >
+                      <View style={[styles.cell, wide && styles.cellWide]}>
+                        <CollectibleArt id={o.id} size={wide ? 44 : 52} locked={!mine} />
+                        <View style={[styles.cellWords, wide && styles.cellWordsWide]}>
+                          <T color={c.textFaint} style={styles.cellNumber}>
+                            {String(at + 1).padStart(2, '0')}
+                          </T>
+                          <T
+                            color={mine ? c.text : c.textDim}
+                            style={[styles.cellName, !mine && styles.cellNameLocked, wide && styles.cellNameWide]}
+                          >
+                            {t(`progress.collection.${o.id}.short` as TKey)}
+                          </T>
+                          {mine ? null : (
+                            <T color={c.textFaint} style={styles.cellXp}>
+                              {t('collection.xp', { xp: o.xp })}
+                            </T>
+                          )}
+                        </View>
+                        {on ? <ThemedView style={[styles.underline, { backgroundColor: c.peach }]} /> : null}
+                      </View>
+                    </Press>
+                  </Animated.View>
+                );
+              })}
+            </ThemedView>
+          ))}
+        </View>
 
-        <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
-          XP comes from every habit you do (10 each, 20 more for a complete day). Objects stay yours, even after an
-          undo.
+        <T color={c.textFaint} style={styles.howXp}>
+          {t('collection.howXp')}
         </T>
       </ScrollView>
     </Screen>
@@ -127,20 +163,44 @@ export function CollectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingHorizontal: space.xl, paddingBottom: space.xxl, gap: space.xl },
-  hero: { gap: space.sm },
-  title: { fontSize: 34, lineHeight: 40, fontWeight: '800', letterSpacing: -0.8 },
-  detail: { flexDirection: 'row', alignItems: 'center', gap: space.lg, padding: space.lg, borderRadius: 24 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
-  tile: {
+  scroll: { paddingHorizontal: space.lg + 4, paddingBottom: space.xxl },
+  rankLine: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: space.md },
+  rank: { flexShrink: 1, fontSize: 26, lineHeight: 32, fontWeight: '700', letterSpacing: -0.5 },
+  xp: { fontSize: 15, lineHeight: 20, fontWeight: '600', fontVariant: ['tabular-nums'] },
+  track: { marginTop: space.sm + 2, height: 3, justifyContent: 'center' },
+  trackLine: { position: 'absolute', left: 0, right: 0, height: StyleSheet.hairlineWidth },
+  trackFill: { position: 'absolute', start: 0, height: 3, borderRadius: 2 },
+  next: { marginTop: space.sm, fontSize: 13.5, lineHeight: 18 },
+  plate: { marginTop: space.xl, alignItems: 'center' },
+  accession: { marginTop: space.md, fontSize: 11.5, lineHeight: 15, letterSpacing: 2, fontWeight: '600' },
+  name: { marginTop: 4, fontSize: 22, lineHeight: 28, fontWeight: '600', letterSpacing: -0.3, textAlign: 'center' },
+  mark: { marginTop: 3, fontSize: 13.5, lineHeight: 18, fontWeight: '600', textAlign: 'center' },
+  reflection: { marginTop: space.sm, fontSize: 15.5, lineHeight: 22, textAlign: 'center', maxWidth: 340 },
+  tray: { marginTop: space.xl },
+  trayRow: { flexDirection: 'row' },
+  cell: {
+    minHeight: 118,
     alignItems: 'center',
-    gap: space.xs,
-    paddingVertical: space.md,
-    paddingHorizontal: space.xs,
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    minHeight: 150,
+    gap: 3,
+    paddingTop: space.sm + 2,
+    paddingBottom: space.sm + 1,
+    paddingHorizontal: 4,
   },
-  tileName: { textAlign: 'center', fontWeight: '700' },
-  tileXp: { fontSize: 11, fontVariant: ['tabular-nums'] },
+  cellWide: { minHeight: 72, flexDirection: 'row', gap: 10, paddingHorizontal: space.sm },
+  cellWords: { alignItems: 'center', gap: 1 },
+  cellWordsWide: { flex: 1, alignItems: 'flex-start' },
+  cellNumber: {
+    marginTop: 4,
+    fontSize: 10.5,
+    lineHeight: 14,
+    letterSpacing: 1.4,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  cellName: { fontSize: 12.5, lineHeight: 16, fontWeight: '500', textAlign: 'center' },
+  cellNameLocked: { fontWeight: '400' },
+  cellNameWide: { textAlign: 'auto' },
+  cellXp: { fontSize: 11, lineHeight: 14, fontVariant: ['tabular-nums'] },
+  underline: { position: 'absolute', bottom: 0, left: '28%', right: '28%', height: 2, borderRadius: 1 },
+  howXp: { marginTop: space.lg, fontSize: 12.5, lineHeight: 17, textAlign: 'center' },
 });

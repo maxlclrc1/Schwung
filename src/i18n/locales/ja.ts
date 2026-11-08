@@ -601,6 +601,9 @@ export const ja: Translation = {
     more: { other: 'ほかに{count}個がコレクションで待っています。' },
     lovely: 'OK',
     see: 'コレクションを見る',
+
+    howXp:
+      'XPは、行った習慣ひとつごとに入ります（1つにつき10、1日すべて達成するとさらに20）。取り消しをしても、手に入れたものはあなたのものです。',
   },
   welcomeBack: {
     dismiss: '閉じる',

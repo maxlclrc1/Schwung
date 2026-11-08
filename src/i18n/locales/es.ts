@@ -604,6 +604,9 @@ export const es: Translation = {
     more: { one: 'Y {count} más te espera en tu colección.', other: 'Y {count} más te esperan en tu colección.' },
     lovely: 'Entendido',
     see: 'Ver colección',
+
+    howXp:
+      'Los XP vienen de cada hábito que haces (10 cada uno, 20 más por un día completo). Los objetos siguen siendo tuyos, incluso después de deshacer.',
   },
   welcomeBack: {
     dismiss: 'Descartar',

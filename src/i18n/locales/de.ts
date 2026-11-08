@@ -616,6 +616,9 @@ export const de: Translation = {
     },
     lovely: 'Alles klar',
     see: 'Sammlung ansehen',
+
+    howXp:
+      'XP bekommst du für jede Gewohnheit, die du machst (je 10, dazu 20 für einen geschafften Tag). Objekte bleiben deine, auch nach einem Rückgängigmachen.',
   },
   welcomeBack: {
     dismiss: 'Schließen',

@@ -612,6 +612,9 @@ export const nl: Translation = {
     more: { one: 'En nog {count} wacht in je verzameling.', other: 'En nog {count} wachten in je verzameling.' },
     lovely: 'Oké',
     see: 'Bekijk verzameling',
+
+    howXp:
+      'XP komt van elke gewoonte die je doet (10 per stuk, 20 extra voor een volledige dag). Objecten blijven van jou, ook na het ongedaan maken.',
   },
   welcomeBack: {
     dismiss: 'Sluiten',
