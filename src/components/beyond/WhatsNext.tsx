@@ -1,34 +1,34 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState, type ComponentProps } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PROGRAM_DAYS } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
 import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
-import { radius, space, useTheme } from '../../theme';
+import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
-import { Press } from '../onboarding/Choices';
-import { rise, useTints, type Tint } from '../onboarding/kit';
-import { Button, Screen, T } from '../ui';
-import { WorldBackdrop } from '../World';
+import { rise } from '../onboarding/kit';
+import { ThemedImage } from '../ThemedImage';
+import { TILE_HEIGHT, TILES } from '../worldTiles';
+import { Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 import { flipX } from '../../i18n/direction';
 
-type Icon = ComponentProps<typeof Ionicons>['name'];
-
 /**
  * "What's next?": after the summit ceremony and the 66-Day Story (never over them), the next chapter on the same
- * mountain. Keep My Momentum (the same habits go on), Begin a New Ascent (a fresh 66 days; this one is kept), or
- * decide later (a small card on Habits; habits and reminders rest meanwhile).
+ * mountain. The summit stays clear at the top and fades into the page; below it, two paths as ruled rows: Keep My
+ * Momentum (the same habits go on) and Begin a New Ascent (a fresh 66 days; this one is kept); and, quieter, decide
+ * later (a small card on Habits; habits and reminders rest meanwhile).
  */
 export function WhatsNext() {
   const { c } = useTheme();
-  const tint = useTints();
   const t = useT();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
   const [busy, setBusy] = useState(false);
@@ -51,51 +51,83 @@ export function WhatsNext() {
     close();
   };
 
+  const k = width / TILES.dark.journey.width;
+  const artHeight = Math.round(width * ART_RATIO);
+
   return (
     <Screen edges={['bottom']}>
-      <WorldBackdrop zoneTop={insets.top + space.xl} dim={0.72} fadeTop />
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xxl }]}
+        contentContainerStyle={[
+          styles.scroll,
+          // The words sit low, on the painting's fade; a short screen keeps a band of the summit above them and scrolls.
+          { minHeight: height - insets.bottom, paddingTop: insets.top + Math.round(width * MIN_BAND_RATIO) },
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={rise(0)} style={{ gap: space.sm }}>
-          <T v="overline" color={tint.peach.ink}>
+        <View
+          style={[styles.art, { height: artHeight }]}
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+        >
+          <ThemedImage
+            sources={{ dark: TILES.dark.journey.source, light: TILES.light.journey.source }}
+            contentFit="fill"
+            style={{ position: 'absolute', left: 0, top: -SUMMIT_ROW * k, width, height: TILE_HEIGHT * k }}
+          />
+          <LinearGradient
+            colors={[`${c.bg}00`, c.bg]}
+            locations={[0, 0.82]}
+            style={[styles.fade, { height: artHeight * 0.62 }]}
+          />
+        </View>
+
+        <Animated.View entering={rise(0)} style={styles.head}>
+          <T v="overline" color={c.peachInk} style={styles.kicker} maxFontSizeMultiplier={1.5}>
             {P.ascentOf(program) > 1
               ? t('beyond.next.kickerAscent', { ascent: P.ascentOf(program), total: PROGRAM_DAYS })
               : t('beyond.next.kicker', { total: PROGRAM_DAYS })}
           </T>
-          <T v="display" accessibilityRole="header">
+          <T v="display" accessibilityRole="header" style={styles.title}>
             {t('beyond.next.title')}
           </T>
-          <T color={c.textDim}>{t('beyond.next.body', { done: stats.done, total: PROGRAM_DAYS })}</T>
+          <T color={c.textDim} style={styles.body}>
+            {t('beyond.next.body', { done: stats.done, total: PROGRAM_DAYS })}
+          </T>
         </Animated.View>
 
-        <View style={styles.options}>
-          <Animated.View entering={rise(120)}>
-            <Option
-              tint={tint.sage}
-              icon="trending-up-outline"
+        <Animated.View entering={rise(120)}>
+          <ThemedView style={[styles.choices, { borderColor: c.border }]}>
+            <Choice
+              rule={c.sage}
+              ink={c.sageInk}
               title={t('beyond.next.momentum')}
               body={t('beyond.next.momentumBody')}
               onPress={keep}
               disabled={busy}
             />
-          </Animated.View>
-          <Animated.View entering={rise(220)}>
-            <Option
-              tint={tint.lavender}
-              icon="flag-outline"
+            <Choice
+              rule={c.accent}
+              ink={c.accentInk}
               title={t('beyond.next.ascent')}
               body={ascentOpen ? t('beyond.next.ascentBody') : t('beyond.next.ascentTomorrow')}
               onPress={() => router.push('/life-reset/ascent')}
-              disabled={busy || !ascentOpen}
+              disabled={busy}
+              closed={!ascentOpen}
             />
-          </Animated.View>
-        </View>
+          </ThemedView>
+        </Animated.View>
 
-        <Animated.View entering={rise(320)} style={{ gap: space.xs }}>
-          <Button label={t('beyond.next.later')} kind="ghost" onPress={close} disabled={busy} />
-          <T v="caption" color={c.textFaint} style={{ textAlign: 'center' }}>
+        <Animated.View entering={rise(220)} style={styles.later}>
+          <Pressable
+            onPress={close}
+            disabled={busy}
+            accessibilityRole="button"
+            hitSlop={4}
+            style={({ pressed }) => [styles.laterLink, { opacity: pressed ? 0.5 : 1 }]}
+          >
+            <T style={[styles.laterText, { textDecorationColor: `${c.text}4D` }]}>{t('beyond.next.later')}</T>
+          </Pressable>
+          <T v="caption" color={c.textFaint} style={styles.centered}>
             {t('beyond.next.laterBody')}
           </T>
         </Animated.View>
@@ -104,61 +136,77 @@ export function WhatsNext() {
   );
 }
 
-function Option({
-  tint,
-  icon,
+/** The Journey painting's row (in its own pixels) at the top of the screen: sky, then the summit. */
+const SUMMIT_ROW = 188;
+/** The painting's height, and the least of it kept above the words, as shares of the width. */
+const ART_RATIO = 1.18;
+const MIN_BAND_RATIO = 0.56;
+
+/** One path: a thin rule in its colour, its name in that colour, what it means, and a chevron when it's open. */
+function Choice({
+  rule,
+  ink,
   title,
   body,
   onPress,
   disabled,
+  closed,
 }: {
-  tint: Tint;
-  icon: Icon;
+  rule: string;
+  ink: string;
   title: string;
   body: string;
   onPress: () => void;
   disabled?: boolean;
+  /** Not open yet (the summit day): shown, quieter, and not pressable. */
+  closed?: boolean;
 }) {
   const { c } = useTheme();
   return (
-    <Press
+    <Pressable
       onPress={onPress}
-      disabled={disabled}
+      disabled={disabled || closed}
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      aria-disabled={!!(disabled || closed)}
       accessibilityLabel={`${title}. ${body}`}
+      style={({ pressed }) => [styles.choice, { borderColor: c.border, opacity: pressed ? 0.6 : 1 }]}
     >
-      <ThemedView style={[styles.option, { backgroundColor: c.surface, opacity: disabled ? 0.6 : 1 }]}>
-        <View style={[styles.icon, { backgroundColor: tint.soft }]}>
-          <Ionicons name={icon} size={22} color={tint.ink} />
-        </View>
-        <View style={{ flex: 1, gap: 4 }}>
-          <T v="heading" color={tint.ink}>
-            {title}
-          </T>
-          <T color={c.textDim}>{body}</T>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={c.textFaint} style={flipX} />
-      </ThemedView>
-    </Press>
+      <View style={[styles.rule, { backgroundColor: rule, opacity: closed ? 0.35 : 1 }]} />
+      <View style={styles.choiceText}>
+        <T v="heading" color={closed ? c.textDim : ink}>
+          {title}
+        </T>
+        <T color={c.textDim} style={styles.choiceBody}>
+          {body}
+        </T>
+      </View>
+      {closed ? null : <Ionicons name="chevron-forward" size={18} color={c.textFaint} style={flipX} />}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flexGrow: 1,
-    justifyContent: 'flex-end',
-    paddingHorizontal: space.xl,
-    paddingBottom: space.xl,
-    gap: space.xl,
-  },
-  options: { gap: space.md },
-  option: {
+  scroll: { justifyContent: 'flex-end', paddingHorizontal: space.lg + 4, paddingBottom: space.xl },
+  art: { position: 'absolute', left: 0, right: 0, top: 0, overflow: 'hidden' },
+  fade: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  head: { gap: 6 },
+  kicker: { letterSpacing: 1.8 },
+  title: { fontSize: 40, lineHeight: 46, letterSpacing: -1 },
+  body: { fontSize: 16, lineHeight: 22 },
+  choices: { marginTop: space.xl, borderTopWidth: StyleSheet.hairlineWidth },
+  choice: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.md,
-    padding: space.lg,
-    borderRadius: radius.lg,
+    gap: 14,
+    minHeight: 64,
+    paddingVertical: space.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  icon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  rule: { alignSelf: 'stretch', width: 2, borderRadius: 1 },
+  choiceText: { flex: 1, gap: 3 },
+  choiceBody: { fontSize: 15, lineHeight: 21 },
+  later: { marginTop: space.lg, alignItems: 'center', gap: 2 },
+  laterLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space.sm },
+  laterText: { fontSize: 16, lineHeight: 21, fontWeight: '500', textDecorationLine: 'underline' },
+  centered: { textAlign: 'center', maxWidth: 320 },
 });
