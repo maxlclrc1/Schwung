@@ -42,7 +42,8 @@ export function programOn(day: number, opts: { misses?: number[]; seen?: boolean
   const last = Math.min(day - 1, P.endDay(p));
   for (let d = 1; d <= last; d++) {
     if (misses.has(d)) continue;
-    for (const id of P.plannedOn(p, d, [])) {
+    // Everything the day asks for: the daily habits and an open weekly one (the custom habit until its 3 are in).
+    for (const id of P.requiredOn(p, d)) {
       const next: P.PilotProgram | null = P.complete(p, id, d).program;
       if (next) p = next;
     }

@@ -38,6 +38,8 @@ Quality: **Strong**: already belongs. **Fair**: works, with a generic layer. **W
 
 **Not design: check before the Summit work.** The Summit ceremony and the 66-Day Story both show "0 of 66 days completed" next to "51 days, your longest streak" and 189 habits done. In the QA state every day has its daily habits completed, but the program also has a weekly custom habit, and no day is counted as complete. Either a day with a weekly habit can never count as complete, or the QA state is unrealistic. This is worth confirming in the counting rules (`reset/charts.ts`) before the Summit screen is restyled.
 
+**Resolved:** the counting is correct; the QA state was unrealistic. A complete day needs every daily habit and every weekly habit whose week is still open (tested in `resetPilot.test.ts`), and the fixture never logged its weekly custom habit. It now logs what each day asks for, so the Summit and the Story show 63 of 66 days, matching the 63 counted days and the 51-day streak.
+
 ## The five highest-value improvements, in order
 
 1. **Begin a New Ascent:** redesign it with the set-up and Habit Details vocabulary. It is the weakest screen, and it asks sensitive questions in pill clutter. Same questions, same rules.

@@ -1,9 +1,10 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { inspectPilotProgram } from '../../../src/core/reset/pilot';
+import { inspectPilotProgram, journeyStats } from '../../../src/core/reset/pilot';
+import { storyFacts } from '../../../src/core/reset/story';
 import { tIn } from '../../../src/i18n';
 import { READY_LANGUAGES } from '../../../src/i18n/languages';
 import { sanitizeResetPilot } from '../../../src/store/resetPilot';
-import { QA_NOW, scenes } from '../fixtures';
+import { programOn, QA_NOW, scenes } from '../fixtures';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -20,6 +21,15 @@ describe('visual QA fixtures', () => {
       expect(sanitizeResetPilot({ program: pilot }).lost).toBeUndefined();
       for (const j of s.state.journeys ?? []) expect(inspectPilotProgram(j.program).lost).toEqual([]);
     }
+  });
+
+  // Every day but the three misses is done in full, the weekly custom habit included, so the Summit and the Story
+  // show the days the streak counts (not "0 of 66 days completed" from a weekly habit never logged).
+  it('complete every day that counts', () => {
+    const p = programOn(67);
+    const facts = storyFacts(p, 67);
+    expect([facts.daysCompleted, journeyStats(p, 67).done, facts.longestStreak]).toEqual([63, 63, 51]);
+    expect(Object.values(p.logs).some((l) => l.completed.includes('custom_1'))).toBe(true);
   });
 
   it('keep the recovery case unreadable', () => {
