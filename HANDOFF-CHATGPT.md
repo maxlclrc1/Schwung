@@ -1,184 +1,216 @@
 # Schwung — Project Handoff for ChatGPT
 
-You're joining an in-progress project as a **creative and product partner**. The code is built and
-maintained by another AI assistant (Claude) working directly in the repository. Your job is to help the
-owner with direction, artwork, copy, and ideas, and to produce outputs the owner can bring back to Claude
-to implement. Please read this whole document before suggesting anything.
+You're joining an in-progress project as a **product and design partner**. The code is built and maintained by
+Claude, working directly in the repository. Your job is to help the owner with direction, behavioural design, copy,
+artwork and review, and to produce outputs the owner can bring back to Claude to implement. Please read this whole
+document before suggesting anything.
+
+This document was rewritten from the code on `main` at `5364be2` (November 2026). Where an older document disagrees,
+the code wins. Earlier versions of this file described a removed program (a 6-question quiz, a 19-habit library,
+automatic step-downs); none of that is in the app any more.
 
 ---
 
 ## 1. What Schwung is
 
-**Schwung** (German for "momentum") is a **completely free** iPhone app that runs a guided **66-day life
-reset**. You answer a short quiz, get a personalized plan of 5–6 small daily habits, check them off every day,
-and the habits level up across three phases.
+**Schwung** (German for "momentum") is a **free, private, offline-first** iPhone app for one program: the **66-day
+Life Reset**. The person chooses a few of 11 habits, starts each at an intensity that suits them, and swipes them done
+each day, while a painted alpine world shows their climb.
 
-- **Pitch:** "Get your momentum back. Free. No account. No paywall."
-- **Philosophy:** changing your life shouldn't cost a thing. Progress over perfection. A missed day is a
-  pause, not the end.
-- **Repo:** https://github.com/maxlclrc1/Schwung (branch `main`)
+- **Pitch:** "Get your momentum back." / "Free. No account. No tracking. Everything stays on this phone."
+- **Philosophy:** progress over perfection; the person decides every change of difficulty; a missed day is never
+  punished.
+- **Repo:** https://github.com/maxlclrc1/Schwung (`main` and `development` are kept in sync).
 
 ### Non-negotiables (never propose otherwise)
-- Free forever: **no paywalls, trials, premium tiers, habit limits, or accounts.**
-- Offline and local-first. All data stays on the phone. No backend, no analytics, no AI-generated messages.
-- No guilt, fake urgency, fabricated statistics, or unsupported predictions in any copy.
-- No manipulative subscription-funnel patterns, even if competitors use them.
-- "66" stays out of the **branding** (name, icon, welcome screen, share card). It's fine inside the program.
-- Must keep working in **Expo Go** (no native modules beyond what Expo Go ships). No new dependencies
-  without a strong reason and the owner's approval.
+
+- Free forever: **no paywalls, trials, premium tiers, ads or accounts.**
+- Offline and local-first. No backend, no analytics, no AI-generated messages. Data stays on the phone (export and
+  restore are files the person handles).
+- No guilt, fake urgency, streak threats, fabricated statistics or unsupported promises in any copy. Words describe
+  what was actually recorded (see "truthful moments" below).
+- **Difficulty never changes without the person's yes.** The app offers; the person accepts or declines.
+- Safety, age and health rules are never loosened by a feature (see section 4).
+- Saved data is never lost or silently rewritten. A save the app can't fully read is kept for recovery, not deleted.
+- Approved screens are not redesigned without the owner's permission.
+- No new dependencies without a strong reason and the owner's approval.
 
 ---
 
-## 2. How the program works (the real rules, don't change them)
+## 2. Architecture (for context)
 
-- **66 days in three phases:** Foundation (days 1–21), Momentum (22–44), Mastery (45–66). Day 67+ is
-  "Maintenance": same checklist, no countdown.
-- **Habit levels:** each habit has easy / medium / hard targets. Every habit steps up one level at day 22 and
-  day 45.
-- **Successful day:** at least **80%** of that day's habits checked. Streaks count successful days.
-- **XP:** 10 per check-off, +20 bonus for a full day. Player level every 200 XP. XP is derived from logs.
-- **Early level-up:** 7 days in a row on a habit → the app *offers* (doesn't force) a level-up.
-- **Gentle step-down:** a habit left for 3 days in a row steps back one level (never below easy). One kind
-  message, never a pile.
-- **Yesterday** can still be edited until noon.
-- **Ceremonies:** full-screen moments on Day 1, 7, 21, 44 and the Day 66 finale (finale plays at 80%).
-  Ceremonies are **always dark**, whatever the app theme. The finale includes a shareable image card.
-- **Comeback:** after one or more days with nothing checked, Today shows a calm "Welcome back" card with one
-  small first step. It disappears once they check something. Nothing is erased or back-filled.
-
-### The quiz and plan
-- Quiz (6 questions, goal first): **goal** (more energy, better focus, more discipline, more confidence,
-  less stress, get in shape), **sleep**, **screen time**, **exercise**, **water**, **read/meditate/journal**.
-  5–6 options each.
-- The plan is built deterministically on the phone (`src/core/plan.ts`): "Make your bed" is always first;
-  each area where an answer shows room to improve gets one habit; the goal always gets at least one core habit;
-  nothing the user already does is assigned; near-duplicates are avoided; every habit shows a one-line reason
-  quoting the user's answer or naming their goal.
-- **Habit library (19):** earlier bedtime, phone-free wind-down, consistent wake time, phone-free morning,
-  screen cap, social-free mornings, daily walk, short workout, step count, water, reading, breathing/meditation,
-  journaling, deep work, top 3 priorities, cold finish, make your bed, start a conversation, genuine compliment.
-  Users can swap, edit, add custom habits, or remove them (min 3).
+- **Stack:** Expo SDK 58, React Native 0.88, React 19.3, TypeScript, Expo Router (routes in `src/app/`), Zustand +
+  AsyncStorage, Reanimated 4, react-native-gesture-handler, expo-image, expo-notifications (local only),
+  react-native-view-shot + expo-sharing (share image). iPhone only.
+- **Pure engine** (`src/core/`, no React, heavily unit-tested, ~640 tests):
+  - `core/reset/habits.ts`: the 11-habit catalogue, every target at every level, eligibility and safety notes.
+  - `core/reset/pilot.ts`: the program — set-up, adding/removing habits, day rules, XP, streaks, saves. (It keeps
+    the name it had as a pilot, as do `PilotProgram` and the save key `schwung-reset-pilot`.)
+  - `core/reset/readiness.ts`: when a step up or down is offered; "Make it easier/harder".
+  - `core/reset/weekly.ts`, `tracking.ts`: weekly scheduling, completion, skips, partial progress, corrections.
+  - `core/reset/comeback.ts` (welcome back), `reflections.ts` (weekly question), `moments.ts` (milestone and summit
+    words), `collection.ts` (XP titles and alpine collectibles), `story.ts` (the 66-Day Story), `core/reminders.ts`.
+- **Stores** (`src/store/`): the program, preferences (appearance, language, reminders, welcome back on/off), past
+  journeys, recovery of unreadable saves, restore from a backup.
+- **Screens:** `src/components/pilot/` (Habits, set-up, habit details, Insights, Settings section), `components/
+ceremony/`, `components/reflection/`, `components/beyond/` (after Day 66).
+- **Localisation:** 20 languages (`src/i18n/locales/`). New strings are machine-translated and marked for review.
+- **Build channels:** development (with a developer clock), internal (testers) and production, all the same app.
 
 ---
 
-## 3. Screens and current flow
+## 3. The experience, screen by screen
 
-1. **Welcome:** mountain artwork with an empty trail and a glowing violet orb at the trailhead. "Get your
-   momentum back." "Free. No account. No paywall." → "Start my reset".
-2. **Quiz:** 6 screens, goal first, progress shown as trail markers.
-3. **Starting point:** your goal, "most room to grow" (your hardest answer that the plan addresses), and
-   "already working".
-4. **Plan reveal:** the habits with reasons, "For your goal" tags, and "How it grows" (one real habit through
-   the three phases).
-5. **Reminder** (optional): one daily local notification at a chosen time.
-6. **Day 1 ceremony**, then **Today**.
-7. **Today:** greeting, **the Schwung Ascent** (an interactive mountain with a 66-marker trail; tap a day to see
-   it), the daily mission card (progress, streak, level/XP), the comeback card when relevant, and the habit
-   checklist.
-8. **Journey** (66-day grid), **Habit detail**, **Swap**, **Add**, **Settings** (theme, reminder, export,
-   restart).
+1. **Choose language** (first launch): 20 languages on a turning wheel.
+2. **Welcome:** the painted mountain, "Get your momentum back.", **Start my reset**.
+3. **Set-up** (about a minute, nothing saved until the end):
+   1. **Age** (a band only; under 18 cannot start).
+   2. **Health:** precautions (joint pain, walking difficulty, heart condition, pregnancy, fluid limit, sleep
+      condition), "None of these", or "Rather not say".
+   3. **Habits:** choose from the 11 ("Two to four is a good start"; the program allows up to 30 habits in all,
+      catalogue and own). "Start with a suggested three" offers Read Daily, Daily Movement
+      and Sleep Routine; nothing is pre-selected. Unavailable habits show why.
+   4. **Only the questions those habits need:** phone time and main-app minutes (Less Scrolling), usual wake time
+      (Sleep Routine), active days (Daily Movement), which skill (Practice a Skill), strength starting point and
+      current sessions (Strength Training).
+   5. **Intensity** per habit: Starter, Standard or Challenge, with a suggestion (Starter by default; Movement,
+      Strength and Less Scrolling suggested from their answers). Blocked intensities are greyed out with a reason.
+   6. **Time available a day** (20 min to 3 h), checked against the busiest day.
+   7. **Review**, then **Begin Day 1** (Day 1 ceremony).
+4. **Habits tab:** an illustrated card per habit with today's target. Swipe right to complete, left to undo.
+   Counters (tasks, people), strength sessions, skips, optional partial progress and minutes live on the card or in
+   its details. Offers (a step up or down) appear here one at a time. **Add a habit** (catalogue or the person's own,
+   up to 30 in all). The welcome back and the weekly reflection invitation also appear here.
+5. **Journey tab:** the trail of 66 days up the mountain, stats (days completed, streak, best), any day's habits and a
+   66-day calendar.
+6. **Insights tab:** consistency, weekly trend, per-habit bars and history, a 66-day heatmap and personal records,
+   from saved days only.
+7. **Habit details** (long-press a card): today, a correction for yesterday (until noon), "too easy" / "too hard",
+   **Make it easier / Make it harder**, safety notes, **Remove from my Life Reset**.
+8. **Settings:** your program (day, what's next, end it), appearance, language, reminders, privacy and data (export,
+   restore, delete), about and legal.
+9. **After Day 66:** summit ceremony and the 66-Day Story, then **What's next?**: **Keep My Momentum** (same habits
+   continue with no end) or **Begin a New Ascent** (a fresh 66 days; the previous journey is kept in Past journeys).
+   Until a choice is made, tracking and reminders rest.
 
----
-
-## 4. Visual system today
-
-- **Dark theme:** background #111116, surface #1C1B25, text #F5F3FF / #A5A3B5, lavender accent #A78BFA.
-- **Light theme:** background #F7F6FB, surface #FFFFFF, text #191621 / #696575, deeper violet accent #7451C8.
-- **Gold** (#F2B84B dark / #A76A00 light) is reserved for milestones and the summit, never everyday UI.
-- Typography: system font (SF Pro), heavy weights for headlines.
-- Theme: System / Light / Dark, with a smooth fade between them. Splash and ceremonies are always dark.
-- Rule learned the hard way: never scale views that contain text or icons (they look pixelated on iOS).
-
-### Current artwork (honest assessment)
-- `assets/ascent-dark.jpg` / `ascent-light.jpg` (1500×1000) are **procedurally generated** placeholder
-  mountains: flat, a visible shading seam, empty sky. They're the biggest visual quality gap.
-- The app icon is a placeholder violet "S" on charcoal.
-- Everything else (trail, markers, orb, rings, confetti, share card) is drawn in code.
-
----
-
-## 5. Where we are now: Step 10A, visual identity ("The Quiet Ascent")
-
-The owner wants a distinctive, premium, cinematic but calm identity. **Do not imitate** Life Reset's anime
-characters or any other app's recognizable style (also avoid the flat orange layered-ridge "Firewatch" look).
-
-### Art direction (proposed, awaiting owner sign-off)
-- **One world, many vantage points:** the same mountain and trail seen from the trailhead (Welcome), the whole
-  mountain (Today), the camps (Day 7 / 21 / 44), and the summit (Day 66).
-- **Light follows progress:** blue hour (Day 1, Foundation), first light (Momentum), sunrise (Mastery, Day 66).
-  Dark theme = pre-dawn; light theme = the same scene in soft morning haze.
-- **Elevation follows phase:** valley mist, then above the tree line, then above the clouds.
-- **Artwork palette:** night ink #0E0D14, indigo #1A1830, slate violet #2A2742, ridge haze #3B3858,
-  mist #5A5678; day lilac haze #D9D6EA, periwinkle #C3C1DD, cloud #F4F3F9, faint warm horizon #EFE3D6.
-- **Reserved colors:** the artwork itself contains **no violet hot spots** (violet glow = the user, drawn by
-  the app on top). **Gold only at the summit sunrise** (faint on Today, full only on Day 66 and the share card).
-- Soft atmospheric light, haze, deliberate negative space, fine film grain, faint topographic contour lines.
-- **No people** by default (the violet orb is the user). Optional: a tiny ambiguous silhouette on the summit
-  in the Day 66 image only.
-- **Avoid:** anime, mascots, cartoon, stock fitness photos, RPG UI, neon, random 3D objects, lens flares.
-
-### Asset list (priority order)
-| ID | Asset | Specs |
-|---|---|---|
-| **A1** | **Ascent landscape** (Today) | 3:2, master 3000×2000, delivered 1800×1200 JPEG ≤250 KB, **dark + light**. Must match the existing trail geometry (a guide image will be provided): the main mountain's ridgeline, summit at about 70% across / 10% down, the switchback corridor kept calm and low-contrast so the app's markers sit on rock, quiet zones top-left (for "Day N") and where phase labels sit. |
-| **A2** | **Trailhead** (Welcome, full-bleed) | Portrait 3:4, 1320×1760 JPEG ≤280 KB, dark + light. Key content in the top 60%; bottom 35% fades into the exact background color (#111116 / #F7F6FB) so text sits on flat color. A clear spot where the trail begins (the app draws the orb there). |
-| **A7** | **App icon + splash mark** | 1024×1024. Concept: a peak whose switchback trail suggests an "S", with a small violet dot at the trailhead, on a dark ground. Must read at 60px. iOS dark/tinted variants if supported. |
-| **A4** | **Summit at sunrise** (Day 66 finale + share card) | Dark. Tall master 1290×2796 containing a 4:5 safe area (share card is 1080×1350). The one scene flooded with gold. |
-| **A3** | **Ceremony backdrops** Day 1 (trailhead at blue hour), Day 7 (first switchback, frost), Day 21 (base camp, violet-white lantern in mist), Day 44 (high camp above a sea of clouds, first warm hint at the horizon) | Dark, 1179×2556 JPEG ≤300 KB. Low-detail circle at ~35% height for the big number and rings; bottom 40% dark for text. |
-| A5 | Topographic contour texture | Made in code by Claude; no help needed. |
-
-Total budget for all new art: about 2 MB.
-
-### Open decisions the owner still has to make
-1. Who makes the art: AI image generation + retouching, an illustrator, or a mix.
-2. Day 66 silhouette: yes or no (default no).
-3. Gold on ceremonies: none on Day 1/7, small accent on 21/44, full on 66?
-4. Phase lighting on Today: code-drawn tints first, or separate images per phase.
-5. Share card shows the user's own trail on the summit art (recommended: yes).
+The three tabs are one swipeable pager over a single painted world (dark and light themes).
 
 ---
 
-## 6. How you can help most
+## 4. The habit catalogue (the 11)
 
-1. **Image-generation prompts** for A1–A4 (and icon concepts for A7) that follow the art direction above.
-   Keep prompts free of artist names and other apps' names. Give a base style prompt plus per-asset variations
-   so every image looks like the same world. Include negative prompts (anime, cartoon, neon, people, text,
-   logos, lens flare, saturated orange).
-2. **Style frames / critique:** when the owner shows you generated images, judge them against this guide:
-   palette, no violet hot spots, gold only at the summit, calm zones where UI sits, both themes matching.
-3. **Copy:** App Store description, subtitle, keywords, screenshot captions, and in-app microcopy. Calm,
-   warm, specific, no hype, no guilt, no fake numbers, no promises the app can't keep.
-4. **Product thinking** for later versions (see section 8), always within the non-negotiables.
+Targets shown are **Starter Foundation** (the easiest level and where most people start). Every habit has nine
+levels: three intensities × three phases.
 
-### How to hand work back
-The owner relays your output to Claude, who implements it. So please deliver:
-- final copy as exact strings, marked with where it goes;
-- art specs as sizes, aspect ratios, safe areas, and file budgets (as above);
-- images as files the owner can drop in (Claude handles grading, compression, and integration).
+| Habit             | Starter Foundation target                                        | How often             |
+| ----------------- | ---------------------------------------------------------------- | --------------------- |
+| Eat Well          | Fruit or vegetables with one meal                                | Every day             |
+| Less Scrolling    | Main app 15 min under the person's own daily time (floor 30 min) | Every day             |
+| Get It Done       | Finish your #1 task                                              | Any 3 workdays a week |
+| Read Daily        | Read for 10 minutes (or 5 pages)                                 | Every day             |
+| Meditation        | Meditate for 2 minutes                                           | Every day             |
+| Daily Movement    | Move for 10 minutes, any way you like                            | Every day             |
+| Sleep Routine     | Up within 60 min of the person's own wake time                   | Every day             |
+| Time Outdoors     | 5 minutes outdoors, by choice                                    | Every day             |
+| Practice a Skill  | Practise the chosen skill for 10 minutes                         | Any 4 days a week     |
+| Stay Connected    | Reach out to 1 person (more than a like)                         | Any 4 days a week     |
+| Strength Training | 2 sessions a week, about 20 min                                  | Sessions, any days    |
 
-**Please don't** write or rewrite app code, propose new libraries, change the program rules, or redesign
-screens that are already done (onboarding, comeback, Today's layout). If you think something there is
-wrong, flag it as a suggestion for the owner to bring to Claude.
+Plus **the person's own habits**: a name, what counts, and every day or 1–6 days a week. They count like any habit
+but have no levels or offers.
+
+**Retired** (never reuse): Focus Time, Social Confidence, Tidy Up.
+
+### Safety and eligibility (never weaken)
+
+- **Age:** 18+ only. A program started at 16–17 under an older rule is paused until the person confirms they're 18.
+- **Daily Movement:** not offered with walking difficulty, or with heart or pregnancy advice.
+- **Strength Training:** not offered if health was "Rather not say", or with heart, pregnancy or walking difficulty;
+  joint pain rules out Starter. It tracks sessions only — never prescribes exercises, sets or weights. Notes:
+  qualified guidance, and "stop and get medical help" warning signs.
+- **Sleep Routine:** not offered when the wake time varies or the person works shifts. The person's own wake time is
+  the anchor: never earlier, never less sleep.
+- **Less Scrolling:** not offered under 2 hours of phone use a day; the limit never goes below 30 min, the time the
+  person says they need, or where they already are.
+- **Stay Connected:** "Never a prompt to contact someone who harmed you."
+- Every change of level (offered or manual) is re-checked against these rules and the person's time a day.
 
 ---
 
-## 7. Tech facts (for context only)
+## 5. The rules (habit science as implemented)
 
-- Expo SDK 57 (Expo Go compatible), React Native 0.86, TypeScript, Expo Router (routes in `src/app/`),
-  Zustand + AsyncStorage (local persistence), Reanimated 4, expo-notifications (local only),
-  react-native-view-shot + expo-sharing (share card).
-- Images use React Native's built-in `Image` with JPEG/PNG. Both theme versions of an image crossfade.
-- iPhone only for v1.
-- Decisions and their reasons are logged in `DECISIONS.md`; the app overview is `OVERVIEW.md`;
-  future ideas are in `LATER.md`.
+- **66 days, three phases:** Foundation (Days 1–21), Momentum (22–44), Mastery (45–66). A phase only makes the next
+  target **available**; nothing changes unless the person accepts.
+- **Readiness** (per habit, from the current target's own days): at least 7 recorded days (or 2 judged weeks for
+  weekly habits).
+  - **Ready (≥80% done):** a step up is offered once the next phase is open.
+  - **Ready early (≥90% and the person said "too easy"):** offered before the phase opens.
+  - **Struggling (<60% of recorded days):** a step down is offered — but only above Starter Foundation, which has no
+    easier level.
+  - Days the app wasn't opened are **unknown**: they never make a habit look ready and never push it down.
+  - A step that changes nothing (some phases ask the same) is never offered or made.
+  - After a decline, the same offer waits 7 days. Declined twice in a row, it stops until the person says "too easy".
+    "Too hard" holds back step-ups for 14 days.
+  - Changes start at the next boundary: tomorrow (daily habits) or next Monday (weekly habits).
+- **A day that counts:** at least 80% of the day's due habits done. With 1–4 habits that means all of them; one miss
+  is allowed only from 5 habits. A day with nothing due (weekly habits resting) is neutral.
+- **Streak:** consecutive counted days; rest days neither count nor break it.
+- **XP:** 10 per habit done, 5 for partial progress, +20 for a full day. XP climbs a ladder of titles that unlock
+  alpine collectibles (kept for good). XP is derived from the saved days, so an undo takes it back.
+- **Weekly habits** count by the week ("any 4 days"); a day without them is never a miss.
+- **Skips:** a deliberate skip is recorded, never a failure, and never counts as done.
+- **Corrections:** yesterday can be edited until noon.
+- **Removing a habit:** it leaves from today (or tomorrow if done today); its past stays in every number. It can be
+  added back later.
+- **Weekly reflection** (after each program week): "How did the habits feel?" — easier / about right / harder. It
+  never changes anything by itself; it can lead to a previewed, confirmed easier or harder target.
+- **Welcome back:** after two or more days with something due and no activity, a calm card on Habits, once per
+  absence (it can be turned off). It is words only: it doesn't change the day's rules or targets.
+- **Ceremonies:** Day 1, milestones on Days 7, 21 and 44, and the summit (Day 66, reached by everyone by the
+  calendar). **Truthful moments:** their words follow what was recorded — "Seven days of showing up" only after
+  seven active days; "You made it. All the way up." only when most days had activity.
+- **Reminders:** optional, off by default, set in Settings. One gentle line a day at the person's time, planned 14
+  days ahead (so they go quiet if the app isn't opened), none on a complete day, habit names only if asked for.
+- **After Day 66:** Keep My Momentum continues the same targets (no offers or reflections yet); the welcome back
+  keeps working.
 
 ---
 
-## 8. Later (not now)
+## 6. Development status
 
-- v1.1: home-screen widget; optional one-time tip jar (asked only at days 7/30/66) with a supporter badge.
-- v1.2: Seasons (Body, Mind, Money, People), Turkish localization.
-- v2: Android release, optional iCloud sync.
-- Ideas: tap a past day in Journey to see what was checked; per-habit history; data import; nutrition habits
-  (would need its own quiz question); finer quiz baselines (bedtime/wake time).
-- Never: social features, leaderboards, analytics, AI-generated messages.
+**Done:** the full Life Reset, the painted world and its pager, ceremonies, collection, Story, reflections,
+reminders, after-66 choices, past journeys, export/restore and save recovery, 20 languages.
+
+**66-day improvement roadmap** (from `docs/66_DAY_EXPERIENCE_AUDIT.md`, read it for the evidence):
+
+| Step | Item                                                                                       | Status                                             |
+| ---- | ------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| 1    | Welcome back after Day 66; no step-ups that change nothing                                 | Done                                               |
+| 2    | Respect a "no"; truthful milestone and summit words; honest totals                         | Done                                               |
+| 3    | A path down for struggling people: Minimum Effort, recovery after an absence, fewer habits | **In design** — `docs/RECOVERY_SYSTEM_PROPOSAL.md` |
+| 4    | How a day counts (the 80% rule with few habits)                                            | Not started                                        |
+| 5    | Reminders offered on Day 1; an optional cue per habit                                      | Not started                                        |
+| 6    | Progression content for flat habits; offers after Mastery                                  | Not started                                        |
+| 7    | A Day 60 review and a real maintenance mode after 66                                       | Not started                                        |
+
+**Open product decision (do not assume an answer):** whether "Minimum Effort" is a permanent fourth level or a
+temporary fallback. The owner currently prefers a temporary fallback that keeps the person's original goal while
+recognising a smaller action on hard days.
+
+---
+
+## 7. How you can help, and how to hand work back
+
+- **Behavioural design:** challenge proposals against the evidence and the non-negotiables. Label claims as evidence
+  or hypothesis, as the audit does.
+- **Copy:** exact strings, marked with where they go, calm and specific, describing only what happened.
+- **Artwork and review:** judge images against the existing painted world (dark and light) and its calm zones.
+
+Please deliver final copy as exact strings, decisions as clear choices with reasons, and art as specs and files.
+**Please don't** write app code, propose new libraries, change the safety rules, or redesign approved screens.
+If something looks wrong, flag it for the owner to bring to Claude.
+
+Other references: `docs/66_DAY_EXPERIENCE_AUDIT.md` (current priorities), `SCHWUNG_LIFE_RESET_PROGRESSION.md`
+(readiness thresholds), `SCHWUNG_LIFE_RESET_HABITS.md` (catalogue rationale), `docs/BEYOND_THE_SUMMIT_PLAN.md`
+(after 66), `DECISIONS.md`, `LATER.md`. Note: `OVERVIEW.md` and `SCHWUNG_LIFE_RESET_PROGRAM.md` still mention some
+retired habits and features; this handoff and the code are current.
