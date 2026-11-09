@@ -9,9 +9,8 @@ import { describe, expect, it } from '@jest/globals';
 import { PROGRAM_DAYS } from '../../../src/core/dates';
 import { playerLevel } from '../../../src/core/progression';
 import { DEFAULT_REMINDERS, planReminders } from '../../../src/core/reminders';
-import * as C from '../../../src/core/reset/charts';
 import { growth } from '../../../src/core/reset/collection';
-import { absenceStart } from '../../../src/core/reset/comeback';
+import { programAbsence } from '../../../src/core/reset/comeback';
 import * as P from '../../../src/core/reset/pilot';
 import type { Offer } from '../../../src/core/reset/readiness';
 import { dueReflection } from '../../../src/core/reset/reflections';
@@ -61,8 +60,7 @@ function simulate(p0: P.PilotProgram, b: Behaviour, last = PROGRAM_DAYS) {
       if (choice === 'accept') p = P.accept(p, o.habitId, o.offer, d);
       if (choice === 'decline') p = P.decline(p, o.habitId, o.offer, d);
     }
-    const cells = C.dayCells(p, d);
-    const absence = opened ? absenceStart(cells, d) : null;
+    const absence = opened ? programAbsence(p, d) : null;
     const milestone = opened ? P.milestoneDue(p, d) : null;
     const reflection = opened ? dueReflection(p.reflections, d) : null;
     if (milestone) {
@@ -281,6 +279,15 @@ run('66-day audit: three simulated people through the real engine', () => {
   it('User C, the ambitious person who wants more', () => {
     const r = simulate(startC(), behaviourC);
     show('USER C', r);
+    // B2: every step the program took for C changed what C is asked.
+    for (const id of r.p.habits) {
+      const eras = r.p.progression[id].eras;
+      for (let i = 1; i < eras.length; i++) {
+        const before = P.targetText(r.p, id, eras[i].fromDay - 1) + P.frequencyText(r.p, id, eras[i].fromDay - 1);
+        const after = P.targetText(r.p, id, eras[i].fromDay) + P.frequencyText(r.p, id, eras[i].fromDay);
+        expect(after).not.toBe(before);
+      }
+    }
     for (const id of r.p.habits) {
       const tried = P.harder(r.p, id, 66);
       console.log(
@@ -304,9 +311,8 @@ run('66-day audit: three simulated people through the real engine', () => {
     const r = simulate(startC(), behaviourC);
     let p = P.keepMomentum({ ...r.p, ceremonies: { ...r.p.ceremonies, summit: true } }, 67);
     for (let d = 67; d <= 80; d++) for (const id of askedOn(p, d)) p = P.complete(p, id, d).program;
-    // Away Days 81–90, back on Day 91.
-    const cells = C.dayCells(p, 91);
-    console.log('Momentum: cells cover', cells.length, 'days; welcome back on Day 91 →', absenceStart(cells, 91));
+    // Away Days 81–90, back on Day 91: welcomed (B1), once.
+    console.log('Momentum: welcome back on Day 91 →', programAbsence(p, 91));
     console.log('Momentum stats Day 91:', JSON.stringify(P.sinceSummit(p, 91)), 'streak', P.pilotStreak(p, 91));
     console.log(
       'Offers after Day 66:',
@@ -314,7 +320,8 @@ run('66-day audit: three simulated people through the real engine', () => {
       '| reflection due:',
       dueReflection(p.reflections, 91),
     );
-    expect(absenceStart(cells, 91)).toBeNull();
+    expect(programAbsence(p, 91)).toBe(81);
+    expect(programAbsence({ ...p, comeback: { seen: 81 } }, 91)).toBe(81); // same absence: PilotToday compares `seen`
   });
   it('Probes: the 80% rule, overload at set-up, step-ups that change nothing, and a "harder" week at Starter', () => {
     // How many habits of a day must be done for it to count, by number of daily habits.
@@ -376,7 +383,7 @@ run('66-day audit: three simulated people through the real engine', () => {
           )
             same.push(`${id} ${intensity} ${from}→${to}`);
         }
-    console.log(`Step-ups that change nothing (${same.length}):`, same.join(', '));
+    console.log(`Phase steps that ask the same (${same.length}), now never offered or made:`, same.join(', '));
     // A, at Starter, says the week felt harder: what can be made easier?
     const a = simulate(startA(), behaviourA, 15).p;
     console.log(

@@ -38,37 +38,40 @@ export function weeklyTrend(p: P.PilotProgram, today: number): WeekPoint[] {
 /** Every program day, Day 1 to 66, with what was done, skipped and due on it. */
 export function dayCells(p: P.PilotProgram, today: number): DayCell[] {
   const out: DayCell[] = [];
-  for (let d = 1; d <= PROGRAM_DAYS; d++) {
-    const base = cellBase(p.startedAt, d);
-    if (d > today) {
-      out.push({ ...base, state: 'future', done: [], skipped: [], planned: [] });
-      continue;
-    }
-    const log = p.logs[base.date];
-    // Every habit that was in the program that day (one removed later still counts for its days).
-    const ids = P.allHabits(p);
-    const done = ids.filter((id) => log?.completed.includes(id));
-    const skipped = ids.filter((id) => !done.includes(id) && P.trackOf(p, id, d).skipped);
-    const dailyDue = ids.filter((id) => P.isDaily(p, id, d));
-    // The day's list as the 80% rule sees it: daily habits, plus weekly ones done that day.
-    const planned = log ? P.plannedOn(p, d, log.completed) : dailyDue;
-    const full = P.dayFull(p, d);
-    const state: DayCell['state'] = full
-      ? 'full'
-      : d === today
-        ? 'today'
-        : done.length
-          ? 'partial'
-          : skipped.length
-            ? 'skipped'
-            : dailyDue.length === 0
-              ? 'rest'
-              : log
-                ? 'missed'
-                : 'unrecorded';
-    out.push({ ...base, state, done, skipped, planned });
-  }
+  for (let d = 1; d <= PROGRAM_DAYS; d++) out.push(dayCell(p, d, today));
   return out;
+}
+
+/**
+ * One day as the Journey judges it (dayCells' rule, for any tracked day: also after Day 66 with Keep My Momentum,
+ * where nothing asked is 'rest', the pause before the choice included).
+ */
+export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
+  const base = cellBase(p.startedAt, d);
+  if (d > today) return { ...base, state: 'future', done: [], skipped: [], planned: [] };
+  const log = p.logs[base.date];
+  // Every habit that was in the program that day (one removed later still counts for its days).
+  const ids = P.allHabits(p);
+  const done = ids.filter((id) => log?.completed.includes(id));
+  const skipped = ids.filter((id) => !done.includes(id) && P.trackOf(p, id, d).skipped);
+  const dailyDue = ids.filter((id) => P.isDaily(p, id, d));
+  // The day's list as the 80% rule sees it: daily habits, plus weekly ones done that day.
+  const planned = log ? P.plannedOn(p, d, log.completed) : dailyDue;
+  const full = P.dayFull(p, d);
+  const state: DayCell['state'] = full
+    ? 'full'
+    : d === today
+      ? 'today'
+      : done.length
+        ? 'partial'
+        : skipped.length
+          ? 'skipped'
+          : dailyDue.length === 0
+            ? 'rest'
+            : log
+              ? 'missed'
+              : 'unrecorded';
+  return { ...base, state, done, skipped, planned };
 }
 
 export type HabitBar = {

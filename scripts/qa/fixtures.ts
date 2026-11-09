@@ -31,13 +31,20 @@ const CUSTOM = {
   perWeek: 3,
 };
 
-/** A program on `day` (today), with most earlier days done, every moment before today already seen. */
-export function programOn(day: number, opts: { misses?: number[]; seen?: boolean } = {}): P.PilotProgram {
+/**
+ * A program on `day` (today), with most earlier days done, every moment before today already seen. `momentum`: Keep
+ * My Momentum chosen on that day, and the days after it done like the rest (an active person beyond the summit).
+ */
+export function programOn(
+  day: number,
+  opts: { misses?: number[]; seen?: boolean; momentum?: number } = {},
+): P.PilotProgram {
   const created = P.createPilot(ADULT, CHOICES, addDays(QA_TODAY, 1 - day));
   if (!created) throw new Error(`QA program refused: ${P.setupProblems(ADULT, CHOICES).join('; ')}`);
   let p: P.PilotProgram = created;
   const added = P.addCustomHabit(p, CUSTOM, 1, 12);
   if (added) p = added.program;
+  if (opts.momentum !== undefined) p = P.keepMomentum(p, opts.momentum);
   const misses = new Set(opts.misses ?? [4, 9, 15]);
   const last = Math.min(day - 1, P.endDay(p));
   for (let d = 1; d <= last; d++) {
@@ -98,7 +105,7 @@ export function scenes(): QaScene[] {
   const day7 = { ...programOn(7), ceremonies: { day1: true, milestones: [] } };
   const summit = { ...programOn(67), ceremonies: { day1: true, milestones: [7, 21, 44] } };
   const beyond = programOn(67);
-  const momentum = P.keepMomentum(programOn(80), 67);
+  const momentum = programOn(80, { momentum: 67 });
   const absent = programOn(20, { misses: [4, 9, 16, 17, 18, 19] });
   return [
     {

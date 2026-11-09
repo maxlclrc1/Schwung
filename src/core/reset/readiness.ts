@@ -134,6 +134,52 @@ export function harderLevel(l: Level): Level | null {
   return n < 2 ? { intensity: INTENSITIES[n + 1], phase: 'mastery' } : null;
 }
 
+/**
+ * A target as the person meets it: everything it asks (amount, unit, schedule, timing, blocks, time), without the
+ * specification's wording (`text`: cards are worded from these values, pilot.ts targetText) or its optional extra
+ * (never part of the target).
+ */
+function asked(habitId: string, l: Level): unknown {
+  const { text: _text, optional: _optional, ...rest } = RESET_BY_ID[habitId].targets[l.intensity][l.phase];
+  return rest;
+}
+
+const equal = (a: unknown, b: unknown): boolean => {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  const ka = Object.keys(a).filter((k) => (a as Record<string, unknown>)[k] !== undefined);
+  const kb = Object.keys(b).filter((k) => (b as Record<string, unknown>)[k] !== undefined);
+  return (
+    ka.length === kb.length &&
+    ka.every((k) => equal((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
+  );
+};
+
+/**
+ * Whether two levels of a habit ask exactly the same of the person (some phases keep a target unchanged: Meditation,
+ * Time Outdoors and Eat Well within an intensity, Strength at Challenge). Moving between them changes nothing, so it
+ * is never offered or made as a step (docs/66_DAY_EXPERIENCE_AUDIT.md, B2). Less Scrolling's limits also depend on the
+ * person's own baseline: a harder level that can't lower their limit is refused by checkLevel ("lowest"), as before.
+ */
+export function sameTarget(habitId: string, a: Level, b: Level): boolean {
+  return !!RESET_BY_ID[habitId] && equal(asked(habitId, a), asked(habitId, b));
+}
+
+/**
+ * The first level `step` reaches from `l` whose target actually differs, or null. Levels that ask the same in
+ * between aren't steps: they're passed over, so one change by the person is one real change of target.
+ */
+function realStep(habitId: string, l: Level, step: (l: Level) => Level | null): Level | null {
+  let to = step(l);
+  while (to && sameTarget(habitId, l, to)) to = step(to);
+  return to;
+}
+
+/** The next phase within the intensity that changes the target (for step-up offers), or null. */
+export const nextRealPhase = (habitId: string, l: Level) => realStep(habitId, l, nextPhase);
+/** The next harder level that changes the target (for "Make it harder"), or null. */
+export const nextRealHarder = (habitId: string, l: Level) => realStep(habitId, l, harderLevel);
+
 // --- Readiness ---
 
 export type ReadinessOutcome =
@@ -294,8 +340,8 @@ export function checkLevel(habitId: string, from: Level, to: Level, c: Constrain
 }
 
 /**
- * The offer to show now, if any. A step-up only within the person's chosen intensity, only when ready and the next
- * phase is open (or early with 90% and "too easy"), and only if it fits their constraints. A step-up isn't suggested
+ * The offer to show now, if any. A step-up only within the person's chosen intensity, only to a phase that changes
+ * the target (nextRealPhase), only when ready and that phase is open (or early with 90% and "too easy"), and only if it fits their constraints. A step-up isn't suggested
  * after a recent "too hard". A step-down is suggested when struggling (never because of feedback alone), from the
  * next boundary. Nothing is offered while an accepted change is waiting, or within the cooldown after a decline.
  */
@@ -310,7 +356,8 @@ export function progressionOffer(input: ReadinessInput & { constraints?: Constra
   if (r.outcome === 'ready' || r.outcome === 'ready-early') {
     // The person recently said it's too hard: no step-up is suggested (and nothing is lowered because of it).
     if (saidTooHard(state, today)) return null;
-    const to = nextPhase(from);
+    // Only a phase that changes the target: none left within the intensity, nothing is offered.
+    const to = nextRealPhase(state.habitId, from);
     if (!to || cooling(to) || checkLevel(state.habitId, from, to, input.constraints)) return null;
     const open = today >= PHASE_OPENS[to.phase];
     if (!open && r.outcome !== 'ready-early') return null;
@@ -371,11 +418,13 @@ export function makeEasier(s: ProgressionState, ctx: WeeklyContext, today: numbe
 
 /**
  * "Make it harder", any time (choosing it is the consent, even to a higher intensity at Mastery): one step harder,
- * from the next boundary. Blocked at Challenge Mastery, or by age, safety, time, frequency or the person's baseline.
+ * from the next boundary. A step is a change of target: levels that ask the same are passed over (nextRealHarder).
+ * Blocked when no harder target is left, or by age, safety, time, frequency or the person's baseline.
  */
 export function makeHarder(s: ProgressionState, ctx: WeeklyContext, today: number, c: Constraints = {}): ManualResult {
   const from = levelOn(s, pendingChange(s, today)?.fromDay ?? today);
-  const to = harderLevel(from);
+  // The next level that changes the target (levels asking the same are passed over); none left is the hardest.
+  const to = nextRealHarder(s.habitId, from);
   if (!to) return { blocked: t('engine.blocked.hardest') };
   const reason = checkLevel(s.habitId, from, to, c);
   if (reason) return { blocked: reason };
