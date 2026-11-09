@@ -18,7 +18,11 @@ bundled.
   program, progress and navigation are untouched. Reminders are planned again in the new language.
 - Settings → Language: **Follow device** (the first of the phone's preferred languages Schwung has, else English) or
   a language chosen explicitly. Each language is listed in its own name. The choice is saved with the preferences,
-  kept by Delete my data, and never taken from a restored backup.
+  kept by Delete my data, and never taken from a restored backup. A change spreads from the chosen row as a circle
+  (600 ms): inside it the screen is already in the new language, outside it still in the old one; the screen is
+  locked until it has passed every corner, then the language is applied everywhere. With Reduce Motion it changes at
+  once. Two live layers, no screenshots: `src/components/LanguageRipple.tsx` (with `LanguageOverride` in
+  `src/i18n/react.ts`).
 - **First launch:** the app opens on its own language screen (`src/app/choose-language.tsx`) after installing, and
   again after a Life Reset is ended or the data deleted. the 20 language names travel clockwise around the frame as
   one unbroken ring (a ticker band; the chosen one lights up), and the languages turn on a wheel in their own names,

@@ -50,8 +50,6 @@ describe('one app: the Life Reset', () => {
       '_layout.tsx',
       'age-limit.tsx',
       'choose-language.tsx',
-      // Development builds only (redirects to Settings elsewhere): the language-ripple prototype.
-      'dev/language-ripple.tsx',
       'index.tsx',
       'language.tsx',
       'legal.tsx',
