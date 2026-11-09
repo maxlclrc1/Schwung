@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
-  LinearTransition,
   ReduceMotion,
   useAnimatedProps,
   useAnimatedStyle,
@@ -25,6 +24,7 @@ import { useLanguage, useT } from '../i18n/react';
 import { useOnArt } from './onArt';
 import { isRTLLanguage, physical } from '../i18n/direction';
 import { Tap } from './Tap';
+import { Disclosure } from './Disclosure';
 
 /*
  * Insights as an alpine field journal, drawn by hand (no chart library): five chapters set as type on the lakeside
@@ -552,7 +552,7 @@ function HabitLine({
   const fill = useAnimatedStyle(() => ({ width: `${(share ?? 0) * 100 * grow.value}%` }));
   const meta = `${row.tally.eligible ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · ` : ''}${row.kind}`;
   return (
-    <Animated.View layout={LinearTransition.duration(200).reduceMotion(sys)}>
+    <View>
       {first ? null : <Rule style={{ opacity: 0.7 }} />}
       <Tap
         onPress={() => {
@@ -601,12 +601,11 @@ function HabitLine({
           </View>
         </View>
       </Tap>
-      {open ? (
-        <Animated.View entering={FadeIn.duration(200).reduceMotion(sys)} style={styles.habitDetails}>
-          {row.details}
-        </Animated.View>
-      ) : null}
-    </Animated.View>
+      {/* The details open in place and the rows below move with them (components/Disclosure.tsx). */}
+      <Disclosure open={open} style={styles.habitDetails}>
+        {row.details}
+      </Disclosure>
+    </View>
   );
 }
 
