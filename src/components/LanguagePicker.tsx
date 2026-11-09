@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { reloadAppAsync } from 'expo';
-import { useRef, useSyncExternalStore, type ComponentRef } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useRef, useSyncExternalStore, type ComponentRef, type Ref } from 'react';
+import { ScrollView, StyleSheet, View, type ScrollViewProps } from 'react-native';
 import { deviceLanguage, isDirectionPending, subscribeDirection } from '../i18n/device';
 import { LANGUAGES, READY_LANGUAGES } from '../i18n/languages';
 import { useT } from '../i18n/react';
@@ -22,16 +22,28 @@ type ViewRef = ComponentRef<typeof View>;
  */
 export function LanguagePicker({
   onChoose,
+  onPrepare,
+  preview,
+  scrollProps,
 }: {
-  /** Development prototype only (components/dev/LanguageRipple.tsx): takes over the change, given the row tapped. */
+  /*
+   * Development prototype only (components/dev/LanguageRipple.tsx); none of these is used in production.
+   * onChoose: takes over the change, given the row tapped. onPrepare: a finger landed on a row (it may not become a
+   * choice). preview: drawn as if this were already chosen. scrollProps: passed to the list's scroll view.
+   */
   onChoose?: (language: LanguagePreference, row: ViewRef | null) => void;
+  onPrepare?: (language: LanguagePreference, row: ViewRef | null) => void;
+  preview?: { pref: LanguagePreference; restart: boolean };
+  scrollProps?: ScrollViewProps & { ref?: Ref<ComponentRef<typeof ScrollView>> };
 } = {}) {
   const { c } = useTheme();
   const t = useT();
-  const pref = usePreferences((s) => s.language);
+  const saved = usePreferences((s) => s.language);
   const setLanguage = usePreferences((s) => s.setLanguage);
   const device = LANGUAGES.find((l) => l.code === deviceLanguage());
-  const restart = useSyncExternalStore(subscribeDirection, isDirectionPending);
+  const pending = useSyncExternalStore(subscribeDirection, isDirectionPending);
+  const pref = preview ? preview.pref : saved;
+  const restart = preview ? preview.restart : pending;
   const choose = (l: LanguagePreference, row: ViewRef | null) => {
     haptic.select();
     if (onChoose) onChoose(l, row);
@@ -40,7 +52,7 @@ export function LanguagePicker({
   return (
     <Screen edges={['bottom']}>
       <SheetHeader title={t('settings.language.title')} />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView {...scrollProps} contentContainerStyle={styles.scroll}>
         <T color={c.textDim}>{t('settings.language.intro')}</T>
         {restart ? (
           <ThemedView style={[styles.restart, { borderColor: c.accent }]}>
@@ -54,11 +66,18 @@ export function LanguagePicker({
             hint={device ? t('settings.language.followDeviceNow', { language: device.native }) : undefined}
             selected={pref === 'system'}
             onPress={(row) => choose('system', row)}
+            onPressIn={onPrepare && ((row) => onPrepare('system', row))}
           />
           {READY_LANGUAGES.map((l) => (
             <View key={l.code}>
               <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-              <Option label={l.native} lang={l.code} selected={pref === l.code} onPress={(row) => choose(l.code, row)} />
+              <Option
+                label={l.native}
+                lang={l.code}
+                selected={pref === l.code}
+                onPress={(row) => choose(l.code, row)}
+                onPressIn={onPrepare && ((row) => onPrepare(l.code, row))}
+              />
             </View>
           ))}
         </ThemedView>
@@ -73,6 +92,7 @@ function Option({
   lang,
   selected,
   onPress,
+  onPressIn,
 }: {
   label: string;
   hint?: string;
@@ -80,6 +100,7 @@ function Option({
   lang?: string;
   selected: boolean;
   onPress: (row: ViewRef | null) => void;
+  onPressIn?: (row: ViewRef | null) => void;
 }) {
   const { c } = useTheme();
   const ref = useRef<ViewRef>(null);
@@ -87,6 +108,7 @@ function Option({
     <Tap
       ref={ref}
       onPress={() => onPress(ref.current)}
+      onPressIn={onPressIn && (() => onPressIn(ref.current))}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={hint ? `${label}. ${hint}` : label}
