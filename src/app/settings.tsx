@@ -13,7 +13,6 @@ import { InkIcon, Underline } from '../components/Selection';
 import type { ThemePreference } from '../core/types';
 import { APP_NAME, CONTACT_EMAIL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
-import { devTools } from '../lib/flags';
 import { legalVisible } from '../lib/legal';
 import { usePreferences } from '../store/preferences';
 import { space, useTheme, useThemePreference } from '../theme';
@@ -49,10 +48,6 @@ export default function Settings() {
               value={pref === 'system' ? t('settings.language.followDevice') : lang?.native}
               onPress={() => pushOnce('/language')}
             />
-            {/* Development builds only, not translated: the language-ripple prototype. */}
-            {devTools() ? (
-              <Row label="Language ripple (prototype)" onPress={() => pushOnce('/dev/language-ripple')} />
-            ) : null}
           </Section>
 
           <Section title={t('settings.privacySection')}>

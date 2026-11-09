@@ -17,8 +17,10 @@ type ViewRef = ComponentRef<typeof View>;
 
 /**
  * Settings → Language: follow the phone, or choose one. Each language is named in its own language (Deutsch,
- * Français, Türkçe), never translated. A change applies at once, everywhere; nothing about the program changes.
+ * Français, Türkçe), never translated. A change applies everywhere; nothing about the program changes.
  * Between a right-to-left and a left-to-right language the layout turns around with the next launch: offered here.
+ * The screen (app/language.tsx) is LanguageRipple, which draws this list twice: live, and in the language about to be
+ * chosen, revealed through the ripple.
  */
 export function LanguagePicker({
   onChoose,
@@ -27,9 +29,9 @@ export function LanguagePicker({
   scrollProps,
 }: {
   /*
-   * Development prototype only (components/dev/LanguageRipple.tsx); none of these is used in production.
-   * onChoose: takes over the change, given the row tapped. onPrepare: a finger landed on a row (it may not become a
-   * choice). preview: drawn as if this were already chosen. scrollProps: passed to the list's scroll view.
+   * For LanguageRipple. onChoose: takes over the change, given the row tapped (without it, the change applies at
+   * once). onPrepare: a finger landed on a row (it may not become a choice). preview: drawn as if this were already
+   * chosen. scrollProps: passed to the list's scroll view.
    */
   onChoose?: (language: LanguagePreference, row: ViewRef | null) => void;
   onPrepare?: (language: LanguagePreference, row: ViewRef | null) => void;
@@ -45,6 +47,8 @@ export function LanguagePicker({
   const pref = preview ? preview.pref : saved;
   const restart = preview ? preview.restart : pending;
   const choose = (l: LanguagePreference, row: ViewRef | null) => {
+    // The language already chosen: nothing at all.
+    if (l === saved) return;
     haptic.select();
     if (onChoose) onChoose(l, row);
     else setLanguage(l);

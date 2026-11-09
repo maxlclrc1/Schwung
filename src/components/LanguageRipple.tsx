@@ -22,20 +22,19 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { language } from '../../i18n';
-import { effectiveLanguage } from '../../i18n/device';
-import { IS_RTL, isRTLLanguage } from '../../i18n/direction';
-import type { LanguageCode } from '../../i18n/languages';
-import { LanguageOverride } from '../../i18n/react';
-import { usePreferences, type LanguagePreference } from '../../store/preferences';
-import { useTheme } from '../../theme';
-import { LanguagePicker } from '../LanguagePicker';
+import { language } from '../i18n';
+import { effectiveLanguage } from '../i18n/device';
+import { IS_RTL, isRTLLanguage } from '../i18n/direction';
+import type { LanguageCode } from '../i18n/languages';
+import { LanguageOverride } from '../i18n/react';
+import { usePreferences, type LanguagePreference } from '../store/preferences';
+import { useTheme } from '../theme';
+import { LanguagePicker } from './LanguagePicker';
 
 /*
- * PROTOTYPE, development builds only (Settings → "Language ripple (prototype)"). Not the production Language screen.
- *
- * Changing the language here spreads from the tapped row as a circle: inside it the screen is already in the new
- * language, outside it is still in the old one, until the circle has passed the furthest corner.
+ * Settings → Language (app/language.tsx): the language list (LanguagePicker), where a change of language spreads
+ * from the tapped row as a circle: inside it the screen is already in the new language, outside it is still in the
+ * old one, until the circle has passed the furthest corner.
  *
  * Two live layers, no screenshots:
  * - beneath, the screen itself, still in the old language for the whole ripple;
@@ -109,7 +108,10 @@ export function LanguageRipple() {
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   // The language the upper layer is drawn in (built on press in, kept until the next one or the end of a run).
   const [layer, setLayerState] = useState<{ l: LanguagePreference; y: number } | null>(null);
-  const setLayer = useCallback((l: LanguagePreference | null) => setLayerState(l === null ? null : { l, y: scrollY.current }), []);
+  const setLayer = useCallback(
+    (l: LanguagePreference | null) => setLayerState(l === null ? null : { l, y: scrollY.current }),
+    [],
+  );
   const [running, setRunning] = useState(false);
   // Mirrors `running` for the synchronous checks (a second tap in the same frame).
   const busy = useRef(false);

@@ -1,6 +1,6 @@
-import { LanguagePicker } from '../components/LanguagePicker';
+import { LanguageRipple } from '../components/LanguageRipple';
 
-/** Settings → Language (modal). */
+/** Settings → Language (modal): the language list, a change spreading from the chosen row (LanguageRipple). */
 export default function LanguageRoute() {
-  return <LanguagePicker />;
+  return <LanguageRipple />;
 }
