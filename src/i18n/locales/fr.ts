@@ -284,12 +284,12 @@ export const fr: Translation = {
     comeback: {
       0: {
         title: 'Votre chemin est toujours là.',
-        body: 'Bon retour. Reprenez là où vous en êtes : un petit pas aujourd’hui suffit.',
+        body: 'Bon retour. Reprenez à partir d’ici, au rythme que la journée permet.',
       },
       1: { title: 'Chaque pas en avant compte.', body: 'Contents de vous revoir. Le sentier continue d’ici même.' },
       2: {
         title: 'Bon retour. Reprenez là où vous en êtes.',
-        body: 'La montagne ne bouge pas, et ce que vous avez construit non plus.',
+        body: 'La montagne ne bouge pas, et votre Parcours non plus.',
       },
     },
     answer: { easier: 'Plus facile que prévu', right: 'Juste comme il faut', harder: 'Plus difficile que prévu' },
@@ -1279,11 +1279,20 @@ export const fr: Translation = {
         overline: 'Jour 7 · Trouver ses appuis',
         title: 'Une semaine déjà.',
         line: 'Sept jours d’affilée. C’est ainsi que naissent les habitudes.',
+
+        lineSome: {
+          one: 'Vous avez noté une activité sur {count} de ces sept jours. C’est ainsi que naissent les habitudes.',
+          other: 'Vous avez noté une activité sur {count} de ces sept jours. C’est ainsi que naissent les habitudes.',
+        },
+
+        lineQuiet: 'Une semaine depuis votre début. Vos habitudes sont là dès que vous le souhaitez.',
       },
       21: {
         overline: 'Jour 21 · Fondations posées',
         title: 'Trois semaines déjà.',
         line: 'Les Fondations sont posées. Les objectifs Élan s’ouvrent quand vous voulez.',
+
+        lineQuiet: 'Trois semaines depuis votre début. Les objectifs Élan s’ouvrent quand vous voulez.',
       },
       44: {
         overline: 'Jour 44 · Élan accompli',
@@ -1302,9 +1311,14 @@ export const fr: Translation = {
       headline: 'Vous y êtes arrivé. Tout en haut.',
       milestones: 'Jours d’étape accomplis : {list}',
       message:
-        'Il y a soixante-six jours, vous avez choisi de commencer. Tous les jours ne se sont pas passés comme prévu, et vous avez continué à grimper malgré tout. Ces habitudes sont désormais les vôtres.',
+        'Il y a soixante-six jours, vous avez choisi de commencer. Tous les jours ne se sont pas passés comme prévu, et vous avez continué à revenir. Ce que vous avez pratiqué ici est à vous, pour continuer à bâtir.',
       journey: 'Voir mon parcours',
       return: 'Revenir à Schwung',
+
+      headlineQuiet: 'Jour 66. Vous êtes au sommet.',
+
+      messageQuiet:
+        'Il y a soixante-six jours, vous avez choisi de commencer. Quels qu’aient été ces jours, le sommet est à vous, tout comme ce qui vient ensuite.',
     },
   },
 };

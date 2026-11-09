@@ -278,12 +278,12 @@ export const es: Translation = {
     comeback: {
       0: {
         title: 'Tu camino sigue aquí.',
-        body: 'Qué bien verte de nuevo. Retoma desde donde estás: un pequeño paso hoy es suficiente.',
+        body: 'Qué bien verte de nuevo. Retoma desde aquí, al ritmo que hoy te permita.',
       },
       1: { title: 'Cada paso adelante cuenta.', body: 'Qué bien verte. El sendero continúa justo desde aquí.' },
       2: {
         title: 'Qué bien verte de nuevo. Retoma desde donde estás.',
-        body: 'La montaña no se va a ninguna parte, y lo que has construido tampoco.',
+        body: 'La montaña no se va a ninguna parte, y tu Recorrido tampoco.',
       },
     },
     answer: { easier: 'Más fácil de lo esperado', right: 'Lo justo', harder: 'Más difícil de lo esperado' },
@@ -1249,11 +1249,20 @@ export const es: Translation = {
         overline: 'Día 7 · Encontrando tu ritmo',
         title: 'Una semana.',
         line: 'Siete días presente. Así empiezan los hábitos.',
+
+        lineSome: {
+          one: 'Registraste actividad en {count} de estos siete días. Así empiezan los hábitos.',
+          other: 'Registraste actividad en {count} de estos siete días. Así empiezan los hábitos.',
+        },
+
+        lineQuiet: 'Ya pasó una semana desde que empezaste. Tus hábitos están aquí cuando quieras.',
       },
       21: {
         overline: 'Día 21 · Base completada',
         title: 'Tres semanas.',
         line: 'La Base está puesta. Los objetivos de Impulso se abren cuando quieras.',
+
+        lineQuiet: 'Ya pasaron tres semanas desde que empezaste. Los objetivos de Impulso se abren cuando quieras.',
       },
       44: {
         overline: 'Día 44 · Impulso completado',
@@ -1272,9 +1281,14 @@ export const es: Translation = {
       headline: 'Lo lograste. Hasta arriba.',
       milestones: 'Días clave completados: {list}',
       message:
-        'Hace sesenta y seis días decidiste empezar. No todos los días salieron según lo previsto, y aun así seguiste subiendo. Estos hábitos ya son tuyos.',
+        'Hace sesenta y seis días decidiste empezar. No todos los días salieron según lo previsto, y aun así seguiste volviendo. Lo que practicaste aquí es tuyo para seguir construyendo.',
       journey: 'Ver mi recorrido',
       return: 'Volver a Schwung',
+
+      headlineQuiet: 'Día 66. Estás en la cumbre.',
+
+      messageQuiet:
+        'Hace sesenta y seis días decidiste empezar. Hayan sido como hayan sido estos días, la cumbre es tuya, y también lo que venga después.',
     },
   },
 };

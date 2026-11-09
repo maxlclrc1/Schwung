@@ -269,6 +269,18 @@ These are behavioural-science strengths, each in the code:
 
   Saved programs and every day count are unchanged.
 
+**Step 2 (trust, messaging and autonomy):**
+
+- **B3 and B4 fixed:** the moments' words follow what was recorded (`moments.ts`). Calendar progress, recorded activity, complete days and the summit are kept apart:
+  - Day 7 says "Seven days of showing up" only after seven days with activity. Otherwise it gives the count, or the calendar alone.
+  - Day 21 says "The Foundation is laid" only when most days had activity.
+  - The summit's "You made it. All the way up." needs activity on most of the 66 days. Otherwise it says "Day 66. You're at the summit." Everyone still reaches the summit, its ceremony and its numbers.
+  - The summit message no longer claims "these habits are yours now".
+  - The welcome back no longer promises that a small step is enough, or claims something was built.
+- **A "no" is respected:** a step-up declined twice in a row isn't offered again on its own, until the person says the target is too easy (after that decline). "Make it harder" stays available. The 7-day cooldown after the first decline is unchanged. The count is kept on the existing `declined` record, so it survives restarts and backup/restore. Older saves count as one decline.
+- **The welcome back's total** of complete days includes the days since the summit (Keep My Momentum). The Journey, Story and summit keep their 66-day numbers.
+- **"Make it easier" and step-down offers** pass over levels that ask the same (`nextRealEasier`), as step-ups already do.
+
 **Data integrity:** no risk was found in this audit. Every derived number (XP, streak, days completed, offers) is recomputed from the saved days, undo is exact, and nothing in these flows writes data the person didn't cause. No bug was found here that loses or corrupts data.
 
 ---

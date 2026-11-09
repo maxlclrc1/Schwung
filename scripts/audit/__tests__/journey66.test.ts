@@ -11,6 +11,7 @@ import { playerLevel } from '../../../src/core/progression';
 import { DEFAULT_REMINDERS, planReminders } from '../../../src/core/reminders';
 import { growth } from '../../../src/core/reset/collection';
 import { programAbsence } from '../../../src/core/reset/comeback';
+import { completeDaysSoFar, milestoneLine, summitWords } from '../../../src/core/reset/moments';
 import * as P from '../../../src/core/reset/pilot';
 import type { Offer } from '../../../src/core/reset/readiness';
 import { dueReflection } from '../../../src/core/reset/reflections';
@@ -64,11 +65,12 @@ function simulate(p0: P.PilotProgram, b: Behaviour, last = PROGRAM_DAYS) {
     const milestone = opened ? P.milestoneDue(p, d) : null;
     const reflection = opened ? dueReflection(p.reflections, d) : null;
     if (milestone) {
-      events.push(`D${d} milestone ${milestone}`);
+      const said = milestoneLine(p, milestone, d);
+      events.push(`D${d} milestone ${milestone} (${said.key}, ${said.count} active)`);
       p = { ...p, ceremonies: { ...p.ceremonies, milestones: [...(p.ceremonies?.milestones ?? []), milestone] } };
     }
     if (absence !== null && p.comeback?.seen !== absence) {
-      events.push(`D${d} welcome back (absence from D${absence})`);
+      events.push(`D${d} welcome back (absence from D${absence}, ${completeDaysSoFar(p, d)} complete days)`);
       p = { ...p, comeback: { seen: absence } };
     }
     if (reflection) {
@@ -84,7 +86,8 @@ function simulate(p0: P.PilotProgram, b: Behaviour, last = PROGRAM_DAYS) {
     const asked = askedOn(p, d);
     if (opened) for (const id of b.does(d, asked)) p = P.complete(p, id, d).program;
     if (opened && P.summitDue(p, d)) {
-      events.push(`D${d} summit`);
+      const w = summitWords(p);
+      events.push(`D${d} summit (${w.headline})`);
       p = { ...p, ceremonies: { ...p.ceremonies, summit: true } };
     }
     const stats = P.journeyStats(p, d);

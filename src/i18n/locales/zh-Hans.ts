@@ -265,12 +265,12 @@ export const zhHans: Translation = {
     comeback: {
       0: {
         title: '你的路还在这里。',
-        body: '欢迎回来。从你现在的位置继续：今天迈出一小步就足够了。',
+        body: '欢迎回来。从这里继续，按今天能做到的节奏来。',
       },
       1: { title: '每向前一步都算数。', body: '很高兴见到你。山路就从这里继续。' },
       2: {
         title: '欢迎回来。从你现在的位置继续。',
-        body: '山不会走开，你已经建立起来的一切也不会。',
+        body: '山不会走开，你的旅程也不会。',
       },
     },
     answer: { easier: '比预期轻松', right: '刚刚好', harder: '比预期难' },
@@ -1217,11 +1217,17 @@ export const zhHans: Translation = {
         overline: '第7天 · 站稳脚跟',
         title: '一周了。',
         line: '坚持了七天。习惯就是这样开始的。',
+
+        lineSome: { other: '这七天里，有 {count} 天留下了记录。习惯就是这样开始的。' },
+
+        lineQuiet: '开始已经一周了。准备好时，你的习惯就在这里。',
       },
       21: {
         overline: '第21天 · 基础阶段完成',
         title: '三周了。',
         line: '基础已经打好。动力目标随时为你开放。',
+
+        lineQuiet: '开始已经三周了。动力目标随时为你开放。',
       },
       44: {
         overline: '第44天 · 动力阶段完成',
@@ -1239,9 +1245,14 @@ export const zhHans: Translation = {
       kicker: '山顶 · 第{total}天',
       headline: '你做到了。一路登顶。',
       milestones: '已完成的里程碑日：{list}',
-      message: '六十六天前，你选择了开始。不是每一天都按计划进行，但你依然在攀登。这些习惯现在属于你了。',
+      message:
+        '六十六天前，你选择了开始。不是每一天都按计划进行，但你一次次回来了。你在这里练习的一切都属于你，可以继续在此基础上前进。',
       journey: '查看我的旅程',
       return: '返回 Schwung',
+
+      headlineQuiet: '第 66 天。你已在山顶。',
+
+      messageQuiet: '六十六天前，你选择了开始。无论这些日子过得怎样，山顶属于你，接下来的一切也是。',
     },
   },
 };

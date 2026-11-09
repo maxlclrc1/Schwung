@@ -290,12 +290,12 @@ export const it: Translation = {
     comeback: {
       0: {
         title: 'Il tuo sentiero è ancora qui.',
-        body: 'Che bello rivederti. Riparti da dove sei: un piccolo passo oggi è più che sufficiente.',
+        body: 'Che bello rivederti. Riprendi da qui, al ritmo che la giornata ti permette.',
       },
       1: { title: 'Ogni passo avanti conta.', body: 'Che bello rivederti. Il sentiero continua proprio da qui.' },
       2: {
         title: 'Che bello rivederti. Riparti da dove sei.',
-        body: 'La montagna non va da nessuna parte, e nemmeno ciò che hai costruito.',
+        body: 'La montagna non va da nessuna parte, e nemmeno il tuo Percorso.',
       },
     },
     answer: { easier: 'Più facile del previsto', right: 'Più o meno giusto', harder: 'Più difficile del previsto' },
@@ -1284,11 +1284,20 @@ export const it: Translation = {
         overline: 'Giorno 7 · Trovare l’equilibrio',
         title: 'Una settimana.',
         line: 'Sette giorni di presenza. È così che nascono le abitudini.',
+
+        lineSome: {
+          one: 'Hai registrato attività in {count} di questi sette giorni. È così che nascono le abitudini.',
+          other: 'Hai registrato attività in {count} di questi sette giorni. È così che nascono le abitudini.',
+        },
+
+        lineQuiet: 'È passata una settimana da quando hai iniziato. Le tue abitudini sono qui quando vuoi.',
       },
       21: {
         overline: 'Giorno 21 · Basi completate',
         title: 'Tre settimane.',
         line: 'Le Basi sono gettate. Gli obiettivi Slancio si aprono quando vuoi.',
+
+        lineQuiet: 'Sono passate tre settimane da quando hai iniziato. Gli obiettivi Slancio si aprono quando vuoi.',
       },
       44: {
         overline: 'Giorno 44 · Slancio completato',
@@ -1307,9 +1316,14 @@ export const it: Translation = {
       headline: 'Ce l’hai fatta. Fino in cima.',
       milestones: 'Giorni tappa completati: {list}',
       message:
-        'Sessantasei giorni fa hai scelto di iniziare. Non tutti i giorni sono andati come previsto, e hai continuato a salire comunque. Queste abitudini ora sono tue.',
+        'Sessantasei giorni fa hai scelto di iniziare. Non tutti i giorni sono andati come previsto, e hai continuato a tornare. Ciò che hai praticato qui è tuo, per continuare a costruire.',
       journey: 'Vedi il mio percorso',
       return: 'Torna a Schwung',
+
+      headlineQuiet: 'Giorno 66. Sei in vetta.',
+
+      messageQuiet:
+        'Sessantasei giorni fa hai scelto di iniziare. Comunque siano andati questi giorni, la vetta è tua, e anche ciò che verrà dopo.',
     },
   },
 };

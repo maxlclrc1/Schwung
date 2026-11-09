@@ -283,12 +283,12 @@ export const tr: Translation = {
     comeback: {
       0: {
         title: 'Yolun hâlâ burada.',
-        body: 'Tekrar hoş geldin. Olduğun yerden devam et: bugün küçük bir adım bile yeter.',
+        body: 'Tekrar hoş geldin. Buradan devam et, bugün ne kadarına imkân varsa.',
       },
       1: { title: 'İleriye atılan her adım önemli.', body: 'Seni görmek güzel. Patika tam buradan devam ediyor.' },
       2: {
         title: 'Tekrar hoş geldin. Olduğun yerden devam et.',
-        body: 'Dağ hiçbir yere gitmiyor, kurduğun şey de.',
+        body: 'Dağ hiçbir yere gitmiyor; Yolculuk’un da burada.',
       },
     },
     answer: { easier: 'Beklediğimden kolay', right: 'Tam kararında', harder: 'Beklediğimden zor' },
@@ -1255,11 +1255,20 @@ export const tr: Translation = {
         overline: 'Gün 7 · Ayağını basacak yeri buluyorsun',
         title: 'Bir hafta oldu.',
         line: 'Yedi gündür buradasın. Alışkanlıklar böyle başlar.',
+
+        lineSome: {
+          one: 'Bu yedi günün {count} gününde kayıt girdin. Alışkanlıklar böyle başlar.',
+          other: 'Bu yedi günün {count} gününde kayıt girdin. Alışkanlıklar böyle başlar.',
+        },
+
+        lineQuiet: 'Başlayalı bir hafta oldu. Alışkanlıkların, hazır olduğunda burada.',
       },
       21: {
         overline: 'Gün 21 · Temel tamamlandı',
         title: 'Üç hafta oldu.',
         line: 'Temel atıldı. İvme hedefleri ne zaman istersen açık.',
+
+        lineQuiet: 'Başlayalı üç hafta oldu. İvme hedefleri ne zaman istersen açık.',
       },
       44: {
         overline: 'Gün 44 · İvme tamamlandı',
@@ -1278,9 +1287,14 @@ export const tr: Translation = {
       headline: 'Başardın. Ta zirveye kadar.',
       milestones: 'Tamamlanan dönüm noktası günleri: {list}',
       message:
-        'Altmış altı gün önce başlamayı seçtin. Her gün plana göre gitmedi, yine de tırmanmaya devam ettin. Bu alışkanlıklar artık senin.',
+        'Altmış altı gün önce başlamayı seçtin. Her gün plana göre gitmedi, yine de dönmeye devam ettin. Burada pratik ettiklerin senin; üzerine inşa etmeye devam edebilirsin.',
       journey: 'Yolculuğumu gör',
       return: 'Schwung’a dön',
+
+      headlineQuiet: '66. gün. Zirvedesin.',
+
+      messageQuiet:
+        'Altmış altı gün önce başlamayı seçtin. Bu günler nasıl geçmiş olursa olsun, zirve senin; sırada ne varsa o da.',
     },
   },
 };

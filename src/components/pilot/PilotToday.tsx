@@ -12,8 +12,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { XP_FULL_DAY_BONUS } from '../../core/progression';
-import * as C from '../../core/reset/charts';
 import { programAbsence } from '../../core/reset/comeback';
+import { completeDaysSoFar } from '../../core/reset/moments';
 import { newlyReached, type Collectible } from '../../core/reset/collection';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
@@ -130,13 +130,17 @@ export function PilotToday() {
   // The days before today (after Day 66 too, with Keep My Momentum), judged once a day: a check-off today never
   // changes them, so it never pays for this.
   const absence = useMemo(() => programAbsence(useResetPilot.getState().program!, today), [today]);
-  // The complete days the welcome back mentions: the Journey's, as before.
-  const cells = useMemo(() => C.dayCells(useResetPilot.getState().program!, today), [today]);
+
   const due =
     comebacks && absence !== null && program.comeback?.seen !== absence && !ceremony.ceremonyUp && !ceremony.finaleUp;
   const [welcome, setWelcome] = useState<number | null>(null);
   // Adjusting state while rendering (React's pattern for following a condition): it stays up until dismissed.
   if (due && welcome === null) setWelcome(absence);
+  // The complete days it mentions, so far: after Day 66 the days since the summit too (moments.ts). Only while shown.
+  const completeDays = useMemo(
+    () => (welcome === null ? 0 : completeDaysSoFar(useResetPilot.getState().program!, today)),
+    [welcome, today],
+  );
   useEffect(() => {
     // Seen as soon as it's shown, so another open (or a restart) never brings it back for this absence.
     if (welcome !== null) useResetPilot.getState().markComeback(welcome);
@@ -192,7 +196,7 @@ export function PilotToday() {
         {welcome !== null ? (
           <WelcomeBack
             start={welcome}
-            completeDays={cells.filter((d) => d.state === 'full').length}
+            completeDays={completeDays}
             onClose={() => setWelcome(null)}
           />
         ) : (

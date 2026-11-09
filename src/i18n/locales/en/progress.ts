@@ -47,12 +47,12 @@ export const progress = {
   comeback: {
     0: {
       title: 'Your path is still here.',
-      body: 'Welcome back. Pick up where you are: one small step today is plenty.',
+      body: 'Welcome back. Pick up from here, at whatever pace today allows.',
     },
     1: { title: 'Every step forward counts.', body: 'Good to see you. The trail continues from right here.' },
     2: {
       title: 'Welcome back. Pick up where you are.',
-      body: 'The mountain isn’t going anywhere, and neither is what you’ve built.',
+      body: 'The mountain isn’t going anywhere, and neither is your Journey.',
     },
   },
   answer: { easier: 'Easier than expected', right: 'About right', harder: 'Harder than expected' },

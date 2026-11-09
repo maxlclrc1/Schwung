@@ -281,12 +281,12 @@ export const id: Translation = {
     comeback: {
       0: {
         title: 'Jalurmu masih di sini.',
-        body: 'Selamat datang kembali. Lanjutkan dari posisimu sekarang: satu langkah kecil hari ini sudah cukup.',
+        body: 'Selamat datang kembali. Lanjutkan dari sini, dengan langkah yang memungkinkan hari ini.',
       },
       1: { title: 'Setiap langkah maju itu berarti.', body: 'Senang bertemu lagi. Jalurnya berlanjut dari sini.' },
       2: {
         title: 'Selamat datang kembali. Lanjutkan dari posisimu sekarang.',
-        body: 'Gunungnya tidak ke mana-mana, begitu juga semua yang sudah kamu bangun.',
+        body: 'Gunungnya tidak ke mana-mana, begitu juga Perjalananmu.',
       },
     },
     answer: { easier: 'Lebih mudah dari perkiraan', right: 'Pas', harder: 'Lebih berat dari perkiraan' },
@@ -1274,11 +1274,17 @@ export const id: Translation = {
         overline: 'Hari ke-7 · Menemukan pijakan',
         title: 'Satu minggu berlalu.',
         line: 'Tujuh hari hadir. Begitulah kebiasaan dimulai.',
+
+        lineSome: { other: 'Kamu mencatat aktivitas di {count} dari tujuh hari ini. Begitulah kebiasaan dimulai.' },
+
+        lineQuiet: 'Sudah seminggu sejak kamu mulai. Kebiasaanmu ada di sini kapan pun kamu siap.',
       },
       21: {
         overline: 'Hari ke-21 · Fondasi selesai',
         title: 'Tiga minggu berlalu.',
         line: 'Fondasi sudah terbentuk. Target Momentum terbuka kapan pun kamu mau.',
+
+        lineQuiet: 'Sudah tiga minggu sejak kamu mulai. Target Momentum terbuka kapan pun kamu mau.',
       },
       44: {
         overline: 'Hari ke-44 · Momentum selesai',
@@ -1297,9 +1303,14 @@ export const id: Translation = {
       headline: 'Kamu berhasil. Sampai ke puncak.',
       milestones: 'Hari tonggak yang diselesaikan: {list}',
       message:
-        'Enam puluh enam hari lalu kamu memilih untuk memulai. Tidak setiap hari berjalan sesuai rencana, tapi kamu tetap terus mendaki. Kebiasaan-kebiasaan ini sekarang milikmu.',
+        'Enam puluh enam hari lalu kamu memilih untuk memulai. Tidak setiap hari berjalan sesuai rencana, dan kamu terus kembali. Apa yang kamu latih di sini milikmu, untuk terus kamu bangun.',
       journey: 'Lihat perjalananku',
       return: 'Kembali ke Schwung',
+
+      headlineQuiet: 'Hari ke-66. Kamu ada di puncak.',
+
+      messageQuiet:
+        'Enam puluh enam hari lalu kamu memilih untuk memulai. Bagaimanapun hari-hari ini berjalan, puncak ini milikmu, begitu juga apa pun yang datang berikutnya.',
     },
   },
 };
