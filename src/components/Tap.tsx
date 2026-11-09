@@ -1,13 +1,17 @@
-import { useEffect, type ReactNode } from 'react';
-import { Pressable, StyleSheet, type GestureResponderEvent, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { useEffect, type ComponentRef, type ReactNode, type Ref } from 'react';
+import { Pressable, StyleSheet, type GestureResponderEvent, type PressableProps, type StyleProp, type View, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { PRESS_DIM, timing } from '../theme/motion';
+
+type ViewRef = ComponentRef<typeof View>;
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = Omit<PressableProps, 'style' | 'children'> & {
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
+  /** The pressable's view (passed through, as for Pressable). */
+  ref?: Ref<ViewRef>;
   /** Opacity while held. Rows, links and secondary controls use the shared PRESS_DIM. */
   dim?: number;
 };
