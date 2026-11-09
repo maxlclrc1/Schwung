@@ -120,6 +120,8 @@ export default function RootLayout() {
           <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="language" options={{ presentation: 'modal', animation: 'default' }} />
+          {/* Development builds only: the language-ripple prototype, presented as the Language screen is. */}
+          <Stack.Screen name="dev/language-ripple" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}

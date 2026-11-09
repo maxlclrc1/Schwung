@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { reloadAppAsync } from 'expo';
-import { useSyncExternalStore } from 'react';
+import { useRef, useSyncExternalStore, type ComponentRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { deviceLanguage, isDirectionPending, subscribeDirection } from '../i18n/device';
 import { LANGUAGES, READY_LANGUAGES } from '../i18n/languages';
@@ -13,21 +13,29 @@ import { SheetHeader } from './SheetHeader';
 import { Button, Screen, T } from './ui';
 import { Tap } from './Tap';
 
+type ViewRef = ComponentRef<typeof View>;
+
 /**
  * Settings → Language: follow the phone, or choose one. Each language is named in its own language (Deutsch,
  * Français, Türkçe), never translated. A change applies at once, everywhere; nothing about the program changes.
  * Between a right-to-left and a left-to-right language the layout turns around with the next launch: offered here.
  */
-export function LanguagePicker() {
+export function LanguagePicker({
+  onChoose,
+}: {
+  /** Development prototype only (components/dev/LanguageRipple.tsx): takes over the change, given the row tapped. */
+  onChoose?: (language: LanguagePreference, row: ViewRef | null) => void;
+} = {}) {
   const { c } = useTheme();
   const t = useT();
   const pref = usePreferences((s) => s.language);
   const setLanguage = usePreferences((s) => s.setLanguage);
   const device = LANGUAGES.find((l) => l.code === deviceLanguage());
   const restart = useSyncExternalStore(subscribeDirection, isDirectionPending);
-  const choose = (l: LanguagePreference) => {
+  const choose = (l: LanguagePreference, row: ViewRef | null) => {
     haptic.select();
-    setLanguage(l);
+    if (onChoose) onChoose(l, row);
+    else setLanguage(l);
   };
   return (
     <Screen edges={['bottom']}>
@@ -45,12 +53,12 @@ export function LanguagePicker() {
             label={t('settings.language.followDevice')}
             hint={device ? t('settings.language.followDeviceNow', { language: device.native }) : undefined}
             selected={pref === 'system'}
-            onPress={() => choose('system')}
+            onPress={(row) => choose('system', row)}
           />
           {READY_LANGUAGES.map((l) => (
             <View key={l.code}>
               <ThemedView style={[styles.rule, { backgroundColor: c.border }]} />
-              <Option label={l.native} lang={l.code} selected={pref === l.code} onPress={() => choose(l.code)} />
+              <Option label={l.native} lang={l.code} selected={pref === l.code} onPress={(row) => choose(l.code, row)} />
             </View>
           ))}
         </ThemedView>
@@ -71,12 +79,14 @@ function Option({
   /** The language the label is written in, so VoiceOver reads it in its own voice. */
   lang?: string;
   selected: boolean;
-  onPress: () => void;
+  onPress: (row: ViewRef | null) => void;
 }) {
   const { c } = useTheme();
+  const ref = useRef<ViewRef>(null);
   return (
     <Tap
-      onPress={onPress}
+      ref={ref}
+      onPress={() => onPress(ref.current)}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={hint ? `${label}. ${hint}` : label}
