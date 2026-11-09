@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { canEditYesterday, PROGRAM_DAYS, toDateKey } from '../../core/dates';
 import { XP_FULL_DAY_BONUS } from '../../core/progression';
 import * as C from '../../core/reset/charts';
-import { absenceStart } from '../../core/reset/comeback';
+import { programAbsence } from '../../core/reset/comeback';
 import { newlyReached, type Collectible } from '../../core/reset/collection';
 import * as P from '../../core/reset/pilot';
 import { PHASE_OPENS } from '../../core/reset/readiness';
@@ -127,9 +127,11 @@ export function PilotToday() {
   // never during a ceremony or the onboarding finale, and only for those who haven't turned it off.
   const comebacks = usePreferences((s) => s.comebacks);
   const ceremony = useCeremonyState();
-  // The days before today, judged once a day: a check-off today never changes them, so it never pays for this.
+  // The days before today (after Day 66 too, with Keep My Momentum), judged once a day: a check-off today never
+  // changes them, so it never pays for this.
+  const absence = useMemo(() => programAbsence(useResetPilot.getState().program!, today), [today]);
+  // The complete days the welcome back mentions: the Journey's, as before.
   const cells = useMemo(() => C.dayCells(useResetPilot.getState().program!, today), [today]);
-  const absence = absenceStart(cells, today);
   const due =
     comebacks && absence !== null && program.comeback?.seen !== absence && !ceremony.ceremonyUp && !ceremony.finaleUp;
   const [welcome, setWelcome] = useState<number | null>(null);

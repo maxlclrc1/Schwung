@@ -259,6 +259,16 @@ These are behavioural-science strengths, each in the code:
 | B3  | Low      | Milestone words describe effort that may not have happened ("Seven days of showing up" on Day 12 after an absence; "You made it. All the way up." after 7 of 66) | `milestoneDue` and `summitDue` are intentionally independent of consistency; only the copy assumes it                  |
 | B4  | Low      | The welcome back ("one small step today is plenty") contradicts the day rule (a small step is a missed day)                                                      | B, Day 12                                                                                                              |
 
+**Status:** B1 and B2 are fixed (66-day improvements, Step 1).
+
+- **B1:** the welcome back is decided over the program's tracked days (`comeback.ts` `programAbsence`). Days 1–66 are judged exactly as before. With Keep My Momentum, later days are judged by the same rule, and the pause before a later choice is never part of an absence. Nothing is welcomed while the program waits for a choice.
+- **B2:** a step up is a change of what the person is asked (`readiness.ts` `sameTarget`, `nextRealPhase`, `nextRealHarder`).
+  - Offers and "Make it harder" pass over levels that ask the same.
+  - Nothing is offered when no real step is left.
+  - The catalogue has 21 such phase steps. The 22nd in this audit, Less Scrolling at Challenge, is personal: both limits reach that person's floor, and the existing "lowest" check refuses it.
+
+  Saved programs and every day count are unchanged.
+
 **Data integrity:** no risk was found in this audit. Every derived number (XP, streak, days completed, offers) is recomputed from the saved days, undo is exact, and nothing in these flows writes data the person didn't cause. No bug was found here that loses or corrupts data.
 
 ---
