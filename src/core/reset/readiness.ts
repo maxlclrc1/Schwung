@@ -38,6 +38,11 @@ export const READINESS = {
   easierBelow: 60,
   /** A declined offer (up or down) isn't made again for this many days. */
   declineCooldownDays: 7,
+  /**
+   * A step-up declined this many times in a row isn't offered again on its own: "Make it harder" stays, and saying
+   * the target is too easy (after the last decline) makes it eligible again.
+   */
+  stepUpDeclinesToStop: 2,
   /** "Too hard" given this recently (and since the current target began) holds back step-up offers. */
   tooHardDays: 14,
 } as const;
@@ -59,8 +64,11 @@ export type ProgressionState = {
   eras: Era[];
   /** The person's latest "too easy" or "too hard". */
   feedback?: Feedback;
-  /** The last offer the person declined, and when. */
-  declined?: { to: Level; day: number };
+  /**
+   * The last offer the person declined, and when. `count`: how many times in a row that same offer was declined
+   * (absent in saves from before it was kept: one).
+   */
+  declined?: { to: Level; day: number; count?: number };
   /** A habit of the person's own: its schedule (it has no catalog targets, levels or offers). */
   schedule?: Schedule;
   /** Out of the program from `from` (removed), and back from `to` (added again); its days in between don't exist. */
@@ -179,6 +187,8 @@ function realStep(habitId: string, l: Level, step: (l: Level) => Level | null): 
 export const nextRealPhase = (habitId: string, l: Level) => realStep(habitId, l, nextPhase);
 /** The next harder level that changes the target (for "Make it harder"), or null. */
 export const nextRealHarder = (habitId: string, l: Level) => realStep(habitId, l, harderLevel);
+/** The next easier level that changes the target (for "Make it easier" and step-down offers), or null. */
+export const nextRealEasier = (habitId: string, l: Level) => realStep(habitId, l, easierLevel);
 
 // --- Readiness ---
 
@@ -341,9 +351,11 @@ export function checkLevel(habitId: string, from: Level, to: Level, c: Constrain
 
 /**
  * The offer to show now, if any. A step-up only within the person's chosen intensity, only to a phase that changes
- * the target (nextRealPhase), only when ready and that phase is open (or early with 90% and "too easy"), and only if it fits their constraints. A step-up isn't suggested
- * after a recent "too hard". A step-down is suggested when struggling (never because of feedback alone), from the
- * next boundary. Nothing is offered while an accepted change is waiting, or within the cooldown after a decline.
+ * the target (nextRealPhase), only when ready and that phase is open (or early with 90% and "too easy"), and only if
+ * it fits their constraints. A step-up isn't suggested after a recent "too hard", nor after the person has declined it
+ * twice (until they say it's too easy: stepUpStopped). A step-down is suggested when struggling (never because of
+ * feedback alone), to the next easier target that changes something, from the next boundary. Nothing is offered while
+ * an accepted change is waiting, or within the cooldown after a decline.
  */
 export function progressionOffer(input: ReadinessInput & { constraints?: Constraints }): Offer | null {
   const { state, today, ctx } = input;
@@ -358,17 +370,35 @@ export function progressionOffer(input: ReadinessInput & { constraints?: Constra
     if (saidTooHard(state, today)) return null;
     // Only a phase that changes the target: none left within the intensity, nothing is offered.
     const to = nextRealPhase(state.habitId, from);
-    if (!to || cooling(to) || checkLevel(state.habitId, from, to, input.constraints)) return null;
+    if (!to || cooling(to) || stepUpStopped(state, to) || checkLevel(state.habitId, from, to, input.constraints))
+      return null;
     const open = today >= PHASE_OPENS[to.phase];
     if (!open && r.outcome !== 'ready-early') return null;
     return { kind: 'step-up', from, to, early: !open, effectiveDay: nextBoundary(state, ctx, today) };
   }
   if (r.outcome === 'struggling') {
-    const to = easierLevel(from);
+    const to = nextRealEasier(state.habitId, from);
     if (!to || cooling(to) || checkLevel(state.habitId, from, to, input.constraints)) return null;
     return { kind: 'step-down', from, to, early: false, effectiveDay: nextBoundary(state, ctx, today) };
   }
   return null;
+}
+
+/** How many times in a row the last declined offer was declined (a save from before counts were kept: one). */
+const declines = (s: ProgressionState) => {
+  const n = s.declined?.count;
+  return s.declined ? (Number.isInteger(n) && (n as number) > 0 ? (n as number) : 1) : 0;
+};
+
+/**
+ * The person has said no to this step-up often enough (stepUpDeclinesToStop) that it isn't offered on its own any
+ * more, until they say the target is too easy after their last no. Only this step: a different one (after a manual
+ * change, say) is offered as usual. Doing nothing about an offer is never a no.
+ */
+export function stepUpStopped(s: ProgressionState, to: Level): boolean {
+  if (!s.declined || !sameLevel(s.declined.to, to) || declines(s) < READINESS.stepUpDeclinesToStop) return false;
+  const f = s.feedback;
+  return !(f?.kind === 'too-easy' && f.day >= s.declined.day);
 }
 
 /** "Too hard", said since the current target began and within the last `tooHardDays` days. */
@@ -393,7 +423,8 @@ export function acceptOffer(s: ProgressionState, offer: Offer, today: number): P
 
 /** The person declines: nothing changes, and the same offer waits out the cooldown. */
 export function declineOffer(s: ProgressionState, offer: Offer, today: number): ProgressionState {
-  return { ...s, declined: { to: offer.to, day: today } };
+  const again = s.declined && sameLevel(s.declined.to, offer.to) ? declines(s) : 0;
+  return { ...s, declined: { to: offer.to, day: today, count: again + 1 } };
 }
 
 /** The person says the target feels too easy or too hard (used by readiness from the current target on). */
@@ -405,11 +436,14 @@ export type ManualResult = { state: ProgressionState; level: Level } | { blocked
 
 /**
  * "Make it easier", any time, without waiting for readiness: one step easier, from the next boundary (tomorrow, or
- * next Monday for a weekly habit). Blocked only at Starter Foundation or by a constraint.
+ * next Monday for a weekly habit). A step is a change of target: levels that ask the same are passed over
+ * (nextRealEasier). Blocked when no easier target is left (Starter Foundation, or levels that all ask the same), or by
+ * a constraint.
  */
 export function makeEasier(s: ProgressionState, ctx: WeeklyContext, today: number, c: Constraints = {}): ManualResult {
   const from = levelOn(s, pendingChange(s, today)?.fromDay ?? today);
-  const to = easierLevel(from);
+  // The next level that changes the target (levels asking the same are passed over); none left is the easiest.
+  const to = nextRealEasier(s.habitId, from);
   if (!to) return { blocked: t('engine.blocked.easiest') };
   const reason = checkLevel(s.habitId, from, to, c);
   if (reason) return { blocked: reason };

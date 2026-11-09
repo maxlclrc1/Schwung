@@ -162,11 +162,17 @@ export const ceremony = {
       overline: 'Day 7 · Finding your footing',
       title: 'One week in.',
       line: 'Seven days of showing up. That’s where habits start.',
+      lineSome: {
+        one: 'You checked in on {count} of these seven days. That’s where habits start.',
+        other: 'You checked in on {count} of these seven days. That’s where habits start.',
+      },
+      lineQuiet: 'A week since you began. Your habits are here whenever you’re ready.',
     },
     21: {
       overline: 'Day 21 · Foundation complete',
       title: 'Three weeks in.',
       line: 'The Foundation is laid. Momentum targets open whenever you want them.',
+      lineQuiet: 'Three weeks since you began. Momentum targets open whenever you want them.',
     },
     44: {
       overline: 'Day 44 · Momentum complete',
@@ -183,9 +189,12 @@ export const ceremony = {
     rowA11y: '{value} {label}',
     kicker: 'The summit · Day {total}',
     headline: 'You made it. All the way up.',
+    headlineQuiet: 'Day 66. You’re at the summit.',
     milestones: 'Milestone days completed: {list}',
     message:
-      'Sixty-six days ago you chose to begin. Not every day went to plan, and you kept climbing anyway. These habits are yours now.',
+      'Sixty-six days ago you chose to begin. Not every day went to plan, and you kept coming back. What you practised here is yours to keep building on.',
+    messageQuiet:
+      'Sixty-six days ago you chose to begin. However these days went, the summit is yours, and so is whatever comes next.',
     journey: 'See my journey',
     return: 'Return to Schwung',
   },

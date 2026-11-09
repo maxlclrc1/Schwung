@@ -279,12 +279,12 @@ export const vi: Translation = {
     comeback: {
       0: {
         title: 'Con đường của bạn vẫn ở đây.',
-        body: 'Chào mừng bạn trở lại. Hãy tiếp tục từ chỗ bạn đang đứng: một bước nhỏ hôm nay là đủ.',
+        body: 'Chào mừng bạn trở lại. Tiếp tục từ đây, theo nhịp mà hôm nay cho phép.',
       },
       1: { title: 'Mỗi bước tiến đều có giá trị.', body: 'Rất vui được gặp lại bạn. Con đường tiếp tục ngay từ đây.' },
       2: {
         title: 'Chào mừng bạn trở lại. Hãy tiếp tục từ chỗ bạn đang đứng.',
-        body: 'Ngọn núi vẫn ở đó, và những gì bạn đã xây dựng cũng vậy.',
+        body: 'Ngọn núi vẫn ở đó, và Hành trình của bạn cũng vậy.',
       },
     },
     answer: { easier: 'Dễ hơn dự kiến', right: 'Vừa sức', harder: 'Khó hơn dự kiến' },
@@ -1252,11 +1252,17 @@ export const vi: Translation = {
         overline: 'Ngày 7 · Tìm được chỗ đứng',
         title: 'Đã một tuần.',
         line: 'Bảy ngày có mặt. Thói quen bắt đầu như thế.',
+
+        lineSome: { other: 'Bạn đã ghi nhận hoạt động vào {count} trong bảy ngày này. Thói quen bắt đầu như thế.' },
+
+        lineQuiet: 'Đã một tuần kể từ khi bạn bắt đầu. Thói quen của bạn ở đây bất cứ khi nào bạn sẵn sàng.',
       },
       21: {
         overline: 'Ngày 21 · Hoàn thành Nền tảng',
         title: 'Đã ba tuần.',
         line: 'Nền tảng đã vững. Mục tiêu Đà tiến mở bất cứ khi nào bạn muốn.',
+
+        lineQuiet: 'Đã ba tuần kể từ khi bạn bắt đầu. Mục tiêu Đà tiến mở bất cứ khi nào bạn muốn.',
       },
       44: {
         overline: 'Ngày 44 · Hoàn thành Đà tiến',
@@ -1275,9 +1281,14 @@ export const vi: Translation = {
       headline: 'Bạn đã làm được. Lên tận đỉnh.',
       milestones: 'Các ngày cột mốc đã hoàn thành: {list}',
       message:
-        'Sáu mươi sáu ngày trước, bạn đã chọn bắt đầu. Không phải ngày nào cũng như dự tính, nhưng bạn vẫn tiếp tục leo. Giờ những thói quen này là của bạn.',
+        'Sáu mươi sáu ngày trước, bạn đã chọn bắt đầu. Không phải ngày nào cũng như dự tính, và bạn vẫn luôn quay lại. Những gì bạn đã luyện tập ở đây là của bạn, để tiếp tục xây dựng.',
       journey: 'Xem hành trình của tôi',
       return: 'Quay lại Schwung',
+
+      headlineQuiet: 'Ngày 66. Bạn đang ở trên đỉnh.',
+
+      messageQuiet:
+        'Sáu mươi sáu ngày trước, bạn đã chọn bắt đầu. Dù những ngày qua thế nào, đỉnh núi là của bạn, và những gì sắp tới cũng vậy.',
     },
   },
 };

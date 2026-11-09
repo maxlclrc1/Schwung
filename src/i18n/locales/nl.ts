@@ -282,12 +282,12 @@ export const nl: Translation = {
     comeback: {
       0: {
         title: 'Je pad is er nog.',
-        body: 'Welkom terug. Pak het op waar je nu bent: één kleine stap vandaag is genoeg.',
+        body: 'Welkom terug. Ga vanaf hier verder, in het tempo dat vandaag toelaat.',
       },
       1: { title: 'Elke stap vooruit telt.', body: 'Fijn je te zien. Het pad gaat gewoon verder vanaf hier.' },
       2: {
         title: 'Welkom terug. Pak het op waar je nu bent.',
-        body: 'De berg gaat nergens heen, en wat jij hebt opgebouwd ook niet.',
+        body: 'De berg gaat nergens heen, en je Reis ook niet.',
       },
     },
     answer: { easier: 'Makkelijker dan verwacht', right: 'Precies goed', harder: 'Zwaarder dan verwacht' },
@@ -1262,11 +1262,20 @@ export const nl: Translation = {
         overline: 'Dag 7 · Je voeten vinden',
         title: 'Een week onderweg.',
         line: 'Zeven dagen volgehouden. Zo beginnen gewoontes.',
+
+        lineSome: {
+          one: 'Je hebt op {count} van deze zeven dagen iets bijgehouden. Zo beginnen gewoontes.',
+          other: 'Je hebt op {count} van deze zeven dagen iets bijgehouden. Zo beginnen gewoontes.',
+        },
+
+        lineQuiet: 'Een week sinds je begon. Je gewoontes zijn er wanneer je er klaar voor bent.',
       },
       21: {
         overline: 'Dag 21 · Fundament voltooid',
         title: 'Drie weken onderweg.',
         line: 'Het Fundament ligt er. Vaart-doelen gaan open wanneer je wilt.',
+
+        lineQuiet: 'Drie weken sinds je begon. Vaart-doelen gaan open wanneer je wilt.',
       },
       44: {
         overline: 'Dag 44 · Vaart voltooid',
@@ -1285,9 +1294,14 @@ export const nl: Translation = {
       headline: 'Het is je gelukt. Helemaal naar boven.',
       milestones: 'Mijlpaaldagen voltooid: {list}',
       message:
-        'Zesenzestig dagen geleden koos je ervoor om te beginnen. Niet elke dag ging volgens plan, en toch bleef je klimmen. Deze gewoontes zijn nu van jou.',
+        'Zesenzestig dagen geleden koos je ervoor om te beginnen. Niet elke dag ging volgens plan, en je bleef terugkomen. Wat je hier hebt geoefend, is van jou om op verder te bouwen.',
       journey: 'Bekijk mijn reis',
       return: 'Terug naar Schwung',
+
+      headlineQuiet: 'Dag 66. Je staat op de top.',
+
+      messageQuiet:
+        'Zesenzestig dagen geleden koos je ervoor om te beginnen. Hoe deze dagen ook gingen, de top is van jou, en wat er hierna komt ook.',
     },
   },
 };

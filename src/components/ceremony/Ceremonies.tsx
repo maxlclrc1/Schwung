@@ -23,6 +23,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { DAY_POINTS, LANDMARKS } from '../../core/ascent';
 import { PROGRAM_DAYS } from '../../core/dates';
 import * as C from '../../core/reset/charts';
+import { milestoneLine, summitWords } from '../../core/reset/moments';
 import * as P from '../../core/reset/pilot';
 import { worldFrame } from '../../core/world';
 import { haptic } from '../../lib/haptics';
@@ -34,7 +35,7 @@ import { Press } from '../onboarding/Choices';
 import { Button, T } from '../ui';
 import { WorldBackdrop } from '../World';
 import { ceremonyCover, setCeremonyState, useCeremonyState } from './state';
-import { formatList, formatNumber, t as tr } from '../../i18n';
+import { formatList, formatNumber, t as tr, type TKey } from '../../i18n';
 import { useLanguage, useT } from '../../i18n/react';
 import { physical } from '../../i18n/direction';
 import { pushOnce } from '../../lib/navigation';
@@ -151,7 +152,12 @@ export function CeremonyHost() {
       {active === 'day1' ? (
         <DayOneCeremony onDone={(fast) => finish('day1', fast)} />
       ) : active === 'milestone' && milestoneDay ? (
-        <MilestoneMoment day={milestoneDay} onDone={(fast) => finish('milestone', fast)} />
+        <MilestoneMoment
+          program={program}
+          today={today}
+          day={milestoneDay}
+          onDone={(fast) => finish('milestone', fast)}
+        />
       ) : (
         <SummitCeremony
           program={program}
@@ -519,7 +525,6 @@ type Chapter = {
   from: number;
   overline: string;
   title: string;
-  line: string;
   tint: 'sage' | 'peach' | 'indigo';
   cameraY: number;
 };
@@ -534,9 +539,6 @@ const milestone = (day: 7 | 21 | 44, from: number, tint: Chapter['tint'], camera
   get title() {
     return tr(`ceremony.milestone.${day}.title`);
   },
-  get line() {
-    return tr(`ceremony.milestone.${day}.line`);
-  },
 });
 const CHAPTERS: Record<number, Chapter> = {
   7: milestone(7, 1, 'sage', 40),
@@ -544,12 +546,25 @@ const CHAPTERS: Record<number, Chapter> = {
   44: milestone(44, 21, 'indigo', 0),
 };
 
-function MilestoneMoment({ day, onDone }: { day: number; onDone: (fast: boolean) => void }) {
+function MilestoneMoment({
+  program,
+  today,
+  day,
+  onDone,
+}: {
+  program: P.PilotProgram;
+  today: number;
+  day: number;
+  onDone: (fast: boolean) => void;
+}) {
   const { c } = useTheme();
   const t = useT();
   const reduce = useReducedMotion();
   const stage = useStage();
   const ch = CHAPTERS[day] ?? CHAPTERS[7];
+  // Its line says only what happened: the calendar for everyone, activity only where it was recorded (moments.ts).
+  const said = milestoneLine(program, day, today);
+  const line = t(`ceremony.milestone.${day}.${said.key}` as TKey, { count: said.count });
   const tint = ch.tint === 'sage' ? c.sage : ch.tint === 'peach' ? c.peach : c.indigo;
   const ink = ch.tint === 'sage' ? c.sageInk : ch.tint === 'peach' ? c.peachInk : c.indigoInk;
   // Where the trail already stood before this chapter (days are evenly spaced along it).
@@ -605,7 +620,7 @@ function MilestoneMoment({ day, onDone }: { day: number; onDone: (fast: boolean)
           </T>
         </Animated.View>
         <Animated.View entering={rise(reduce ? 100 : 1100)}>
-          <T style={[styles.sub, { color: c.textDim }]}>{ch.line}</T>
+          <T style={[styles.sub, { color: c.textDim }]}>{line}</T>
         </Animated.View>
         <View style={styles.cta}>
           {ready ? (
@@ -664,6 +679,8 @@ function SummitCeremony({
     const lights = cells.filter((d) => d.state === 'full').map((d) => ({ day: d.day, color: c.sage }));
     return { complete, total: P.totalCompleted(program), best: stats.best, habits, earned, lights };
   }, [program, today, c.sage, lang]);
+  // The summit is everyone's; its headline and message only claim the climb when most days had activity (moments.ts).
+  const words = useMemo(() => summitWords(program), [program]);
 
   useEffect(() => {
     if (reduce) {
@@ -796,7 +813,7 @@ function SummitCeremony({
           </Animated.View>
           <Animated.View entering={rise(reduce ? 100 : 3100)}>
             <T style={[styles.summitHeadline, { color: c.text }]} accessibilityRole="header">
-              {t('ceremony.summit.headline')}
+              {t(`ceremony.summit.${words.headline}`)}
             </T>
           </Animated.View>
           {phase === 'summary' ? (
@@ -821,7 +838,7 @@ function SummitCeremony({
                 </Animated.View>
               ) : null}
               <Animated.View entering={rise(reduce ? 0 : 1100)}>
-                <T style={[styles.summitMessage, { color: c.text }]}>{t('ceremony.summit.message')}</T>
+                <T style={[styles.summitMessage, { color: c.text }]}>{t(`ceremony.summit.${words.message}`)}</T>
               </Animated.View>
               {pinned ? null : <Animated.View entering={appear}>{actions}</Animated.View>}
             </>

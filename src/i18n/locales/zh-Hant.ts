@@ -265,12 +265,12 @@ export const zhHant: Translation = {
     comeback: {
       0: {
         title: '你的路還在這裡。',
-        body: '歡迎回來。從你現在的位置繼續：今天跨出一小步就夠了。',
+        body: '歡迎回來。從這裡繼續，照今天能做到的步調來。',
       },
       1: { title: '每往前一步都算數。', body: '很高興見到你。山徑就從這裡繼續。' },
       2: {
         title: '歡迎回來。從你現在的位置繼續。',
-        body: '山不會跑掉，你已經建立起來的一切也不會。',
+        body: '山不會跑掉，你的旅程也不會。',
       },
     },
     answer: { easier: '比預期輕鬆', right: '剛剛好', harder: '比預期難' },
@@ -1216,11 +1216,17 @@ export const zhHant: Translation = {
         overline: '第7天 · 站穩腳步',
         title: '一週了。',
         line: '堅持了七天。習慣就是這樣開始的。',
+
+        lineSome: { other: '這七天裡，有 {count} 天留下了紀錄。習慣就是這樣開始的。' },
+
+        lineQuiet: '開始已經一週了。準備好時，你的習慣就在這裡。',
       },
       21: {
         overline: '第21天 · 基礎階段完成',
         title: '三週了。',
         line: '基礎已經打好。動力目標隨時為你開放。',
+
+        lineQuiet: '開始已經三週了。動力目標隨時為你開放。',
       },
       44: {
         overline: '第44天 · 動力階段完成',
@@ -1238,9 +1244,14 @@ export const zhHant: Translation = {
       kicker: '山頂 · 第{total}天',
       headline: '你做到了。一路登頂。',
       milestones: '已完成的里程碑日：{list}',
-      message: '六十六天前，你選擇了開始。不是每一天都照計畫進行，但你依然繼續攀登。這些習慣現在屬於你了。',
+      message:
+        '六十六天前，你選擇了開始。不是每一天都照計畫進行，但你一次次回來了。你在這裡練習的一切都屬於你，可以繼續在此基礎上前進。',
       journey: '查看我的旅程',
       return: '返回 Schwung',
+
+      headlineQuiet: '第 66 天。你已在山頂。',
+
+      messageQuiet: '六十六天前，你選擇了開始。無論這些日子過得如何，山頂屬於你，接下來的一切也是。',
     },
   },
 };

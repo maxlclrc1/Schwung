@@ -279,12 +279,12 @@ export const de: Translation = {
     comeback: {
       0: {
         title: 'Dein Weg ist noch da.',
-        body: 'Willkommen zurück. Mach da weiter, wo du gerade bist: Ein kleiner Schritt heute reicht völlig.',
+        body: 'Willkommen zurück. Mach von hier aus weiter, in dem Tempo, das der Tag erlaubt.',
       },
       1: { title: 'Jeder Schritt nach vorn zählt.', body: 'Schön, dich zu sehen. Der Weg geht genau hier weiter.' },
       2: {
         title: 'Willkommen zurück. Mach da weiter, wo du bist.',
-        body: 'Der Berg läuft nicht weg, und das, was du aufgebaut hast, auch nicht.',
+        body: 'Der Berg läuft nicht weg, und dein Weg auch nicht.',
       },
     },
     answer: { easier: 'Leichter als gedacht', right: 'Genau richtig', harder: 'Schwerer als gedacht' },
@@ -1271,11 +1271,20 @@ export const de: Translation = {
         overline: 'Tag 7 · Du findest deinen Tritt',
         title: 'Eine Woche geschafft.',
         line: 'Sieben Tage drangeblieben. So fangen Gewohnheiten an.',
+
+        lineSome: {
+          one: 'An {count} dieser sieben Tage hast du etwas eingetragen. So fangen Gewohnheiten an.',
+          other: 'An {count} dieser sieben Tage hast du etwas eingetragen. So fangen Gewohnheiten an.',
+        },
+
+        lineQuiet: 'Eine Woche seit deinem Start. Deine Gewohnheiten sind da, wann immer du bereit bist.',
       },
       21: {
         overline: 'Tag 21 · Fundament geschafft',
         title: 'Drei Wochen geschafft.',
         line: 'Das Fundament steht. Aufwind-Ziele öffnen sich, wann immer du willst.',
+
+        lineQuiet: 'Drei Wochen seit deinem Start. Aufwind-Ziele öffnen sich, wann immer du willst.',
       },
       44: {
         overline: 'Tag 44 · Aufwind geschafft',
@@ -1294,9 +1303,14 @@ export const de: Translation = {
       headline: 'Du hast es geschafft. Ganz nach oben.',
       milestones: 'Geschaffte Meilensteintage: {list}',
       message:
-        'Vor sechsundsechzig Tagen hast du beschlossen anzufangen. Nicht jeder Tag lief nach Plan, und du bist trotzdem weiter aufgestiegen. Diese Gewohnheiten gehören jetzt dir.',
+        'Vor sechsundsechzig Tagen hast du beschlossen anzufangen. Nicht jeder Tag lief nach Plan, und du bist immer wieder zurückgekommen. Was du hier geübt hast, gehört dir, und du kannst darauf weiter aufbauen.',
       journey: 'Meinen Weg ansehen',
       return: 'Zurück zu Schwung',
+
+      headlineQuiet: 'Tag 66. Du bist am Gipfel.',
+
+      messageQuiet:
+        'Vor sechsundsechzig Tagen hast du beschlossen anzufangen. Wie auch immer diese Tage gelaufen sind: Der Gipfel gehört dir, und alles, was als Nächstes kommt, auch.',
     },
   },
 };

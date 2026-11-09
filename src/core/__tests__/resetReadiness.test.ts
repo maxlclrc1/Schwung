@@ -383,7 +383,7 @@ describe('accepting and declining', () => {
     expect(accepted.eras.map((e) => e.reason)).toEqual(['start', 'step-down']);
   });
 
-  it('doesn’t repeat a declined offer for 7 days, then offers it again if still ready', () => {
+  it('doesn’t repeat a declined offer for 7 days, then offers it again once if still ready', () => {
     const s = walk('standard');
     const offer = progressionOffer({ state: s, logs: allDone(21), ctx, today: 22 })!;
     const declined = declineOffer(s, offer, 22);
@@ -392,10 +392,10 @@ describe('accepting and declining', () => {
       expect(progressionOffer({ state: declined, logs: allDone(d - 1), ctx, today: d })).toBeNull();
     const again = progressionOffer({ state: declined, logs: allDone(28), ctx, today: 29 });
     expect(again).toMatchObject({ kind: 'step-up', effectiveDay: 30 });
-    // Declining again starts a new cooldown.
+    // Declined a second time: no longer offered on its own (docs/66_DAY_EXPERIENCE_AUDIT.md, Step 2).
     const twice = declineOffer(declined, again!, 29);
-    expect(progressionOffer({ state: twice, logs: allDone(30), ctx, today: 31 })).toBeNull();
-    expect(progressionOffer({ state: twice, logs: allDone(35), ctx, today: 36 })).not.toBeNull();
+    expect(twice.declined).toEqual({ to: again!.to, day: 29, count: 2 });
+    for (const d of [31, 36, 44, 60]) expect(progressionOffer({ state: twice, logs: allDone(d - 1), ctx, today: d })).toBeNull();
   });
 
   it('keeps a declined step-up from blocking a different suggestion', () => {
