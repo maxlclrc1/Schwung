@@ -1,4 +1,4 @@
-import { Easing, LinearTransition, ReduceMotion, withTiming } from 'react-native-reanimated';
+import { Easing, FadeIn, FadeOut, LinearTransition, ReduceMotion, withTiming } from 'react-native-reanimated';
 
 /*
  * Schwung's shared motion vocabulary (docs/INTERACTION_AUDIT.md §4). One easing curve, a few durations, and every
@@ -38,3 +38,9 @@ export const timing = (to: number, token: MotionToken) => {
 
 /** Siblings moving into place when content opens or closes above them. */
 export const reflow = () => LinearTransition.duration(MOTION.reflow).easing(EASE).reduceMotion(ReduceMotion.System);
+
+/** Inline content appearing in place (a message, a confirmation, a stepper): a fade, nothing moving. */
+export const reveal = () => FadeIn.duration(MOTION.reveal).easing(EASE).reduceMotion(ReduceMotion.System);
+
+/** Inline content going: a shorter fade, so what replaces it is never kept waiting. */
+export const conceal = () => FadeOut.duration(MOTION.conceal).easing(EASE).reduceMotion(ReduceMotion.System);

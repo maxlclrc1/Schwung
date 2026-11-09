@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Animated, { LayoutAnimationConfig } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { canEditYesterday } from '../../core/dates';
 import * as P from '../../core/reset/pilot';
@@ -10,12 +11,18 @@ import { completionHaptic, haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
 import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
+import { conceal, reflow, reveal } from '../../theme/motion';
 import { Scene } from '../HabitCard';
 import { SheetHeader } from '../SheetHeader';
 import { Button, Screen, T } from '../ui';
 import { useT } from '../../i18n/react';
 import { IS_RTL } from '../../i18n/direction';
 import { Tap } from '../Tap';
+
+/** The shared reveal, conceal and reflow (theme/motion.ts). */
+const REVEAL = reveal();
+const CONCEAL = conceal();
+const REFLOW = reflow();
 
 /**
  * A Life Reset habit's details (app/life-reset/[id].tsx), as a page of the journal: the habit's own painting, its
@@ -96,285 +103,332 @@ export function PilotHabit() {
   return (
     <Screen edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* The habit's painting, fading into the page; the sheet's grabber and Done sit on it. */}
-        <View style={{ height: heroHeight }} accessible={false} importantForAccessibility="no-hide-descendants">
-          <View style={[StyleSheet.absoluteFill, styles.clip]}>
-            <Scene habitId={id} scene={own?.scene} width={Math.min(width, 520)} height={heroHeight} />
-          </View>
-          <LinearGradient colors={['rgba(20,16,40,0.32)', 'rgba(20,16,40,0)']} style={styles.shade} />
-          <LinearGradient colors={[`${c.bg}00`, c.bg]} locations={[0, 0.92]} style={styles.fade} />
-          <View style={styles.grabber} />
-        </View>
-        <Tap
-          onPress={() => {
-            router.back();
-            haptic.select();
-          }}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel={t('nav.done')}
-          style={styles.done}
-        >
-          <T v="bodyStrong" color="#FFFFFF" style={styles.doneText}>
-            {t('nav.done')}
-          </T>
-        </Tap>
-
-        <View style={styles.page}>
-          <View style={styles.head}>
-            <T v="overline" color={c.textDim} style={styles.level}>
-              {P.levelLineFor(program, id, today)}
-            </T>
-            <T v="title" accessibilityRole="header">
-              {name}
-            </T>
-            <T style={styles.target}>{P.targetText(program, id, today)}</T>
-            <T v="caption" color={c.textDim} style={styles.freq}>
-              {P.frequencyText(program, id, today)}
-            </T>
-            {pending ? (
-              <T v="caption" color={c.accentInk} style={styles.freq}>
-                {t('today.habit.comingUp', { pending })}
-              </T>
-            ) : null}
-          </View>
-
-          {week ? (
-            <>
-              <Section title={t('today.habit.thisWeek')} />
-              <View style={styles.week}>
-                {week.goal > 0 ? (
-                  <View style={styles.weekDots} accessible={false} importantForAccessibility="no-hide-descendants">
-                    {Array.from({ length: week.goal }, (_, i) => (
-                      <ThemedView
-                        key={i}
-                        style={[
-                          styles.weekDot,
-                          i < week.credited
-                            ? { backgroundColor: c.sage, borderColor: c.sage }
-                            : { borderColor: c.textFaint },
-                        ]}
-                      />
-                    ))}
-                  </View>
-                ) : null}
-                <T style={styles.weekText}>
-                  {week.goal === 0
-                    ? t('today.habit.shortWeek')
-                    : t(week.credited >= week.goal ? 'today.habit.weekMet' : 'today.habit.week', {
-                        done: week.credited,
-                        goal: week.goal,
-                      })}
-                </T>
-              </View>
-              {week.goal > week.credited ? (
-                <T v="caption" color={c.textDim} style={styles.note}>
-                  {t('today.habit.anyDays')}
-                </T>
-              ) : null}
-            </>
-          ) : null}
-
-          <Section title={t('today.habit.today')} note={t('common.day', { day: today })} />
-          <View style={styles.state} accessible accessibilityLiveRegion="polite">
-            {done ? <Check color={c.sage} /> : null}
-            <T style={styles.stateText}>{state}</T>
-            {track.progress && !done && logged ? (
-              <T color={c.textDim} style={styles.stateSub}>
-                {t('today.habit.min', { minutes: logged })}
-              </T>
-            ) : null}
-          </View>
-
-          {counter !== null ? (
-            <View style={styles.rows}>
-              <Ledger label={t('today.habit.of', { done: Math.min(track.count ?? 0, counter), goal: counter })} big>
-                <Stepper
-                  minus={() => completionHaptic(s().count(id, -1))}
-                  plus={() => completionHaptic(s().count(id, 1))}
-                  step="1"
-                />
-              </Ledger>
+        {/* Contents ease in and out as they change (docs/INTERACTION_AUDIT.md, finding D); nothing animates as the
+            sheet opens or closes. */}
+        <LayoutAnimationConfig skipEntering skipExiting>
+          {/* The habit's painting, fading into the page; the sheet's grabber and Done sit on it. */}
+          <View style={{ height: heroHeight }} accessible={false} importantForAccessibility="no-hide-descendants">
+            <View style={[StyleSheet.absoluteFill, styles.clip]}>
+              <Scene habitId={id} scene={own?.scene} width={Math.min(width, 520)} height={heroHeight} />
             </View>
-          ) : null}
-
-          {done ? (
-            <TextLink
-              label={strength ? t('today.habit.undoSession') : t('today.habit.undo')}
-              onPress={() => completionHaptic(s().toggle(id))}
-              align="start"
-            />
-          ) : (
-            <>
-              <Button
-                label={strength ? t('today.habit.logSession') : t('today.habit.markDone')}
-                onPress={() => completionHaptic(s().toggle(id))}
-                style={styles.primary}
-              />
-              {canLog ? (
-                <TextLink
-                  label={track.progress ? t('today.habit.removePartial') : t('today.habit.effort')}
-                  onPress={() => {
-                    haptic.select();
-                    s().setPartial(id, !track.progress);
-                  }}
-                />
-              ) : null}
-            </>
-          )}
-          {showHint ? (
-            <T v="caption" color={c.textDim} style={styles.hint}>
-              {t('today.habit.progressHint', { xp: PARTIAL_XP })}
-            </T>
-          ) : null}
-
-          <View style={styles.rows}>
-            {showMinutes ? (
-              <Ledger label={t('today.habit.partialMinutes')}>
-                <Stepper
-                  minus={() => logProgress(logged && logged > 5 ? logged - 5 : null)}
-                  plus={() => logProgress((logged ?? 0) + 5)}
-                  value={logged ? t('today.habit.min', { minutes: logged }) : '—'}
-                  step="5"
-                />
-              </Ledger>
-            ) : null}
-            {yesterday !== null ? (
-              <Ledger
-                label={
-                  P.isDone(program, id, yesterday) ? t('today.habit.yesterdayDone') : t('today.habit.yesterdayNotDone')
-                }
-                small
-              >
-                <TextLink
-                  label={
-                    P.isDone(program, id, yesterday) ? t('today.habit.undoYesterday') : t('today.habit.doneYesterday')
-                  }
-                  onPress={() => completionHaptic(s().toggle(id, yesterday))}
-                  accent
-                />
-              </Ledger>
-            ) : null}
+            <LinearGradient colors={['rgba(20,16,40,0.32)', 'rgba(20,16,40,0)']} style={styles.shade} />
+            <LinearGradient colors={[`${c.bg}00`, c.bg]} locations={[0, 0.92]} style={styles.fade} />
+            <View style={styles.grabber} />
           </View>
+          <Tap
+            onPress={() => {
+              router.back();
+              haptic.select();
+            }}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={t('nav.done')}
+            style={styles.done}
+          >
+            <T v="bodyStrong" color="#FFFFFF" style={styles.doneText}>
+              {t('nav.done')}
+            </T>
+          </Tap>
 
-          {strength ? (
-            <>
-              <Section title={t('today.habit.session')} />
-              <T v="caption" color={c.textDim} style={styles.note}>
-                {t('today.habit.sessionHint')}
+          <View style={styles.page}>
+            <View style={styles.head}>
+              <T v="overline" color={c.textDim} style={styles.level}>
+                {P.levelLineFor(program, id, today)}
               </T>
-              <View style={styles.options}>
-                {SESSION_TYPES.map((type) => (
-                  <Option
-                    key={type}
-                    label={P.sessionName(type)}
-                    on={track.session?.type === type}
-                    onPress={() => s().setSession({ type })}
-                  />
-                ))}
+              <T v="title" accessibilityRole="header">
+                {name}
+              </T>
+              <T style={styles.target}>{P.targetText(program, id, today)}</T>
+              <T v="caption" color={c.textDim} style={styles.freq}>
+                {P.frequencyText(program, id, today)}
+              </T>
+              {pending ? (
+                <Animated.View key={pending} entering={REVEAL} exiting={CONCEAL} layout={REFLOW}>
+                  <T v="caption" color={c.accentInk} style={styles.freq}>
+                    {t('today.habit.comingUp', { pending })}
+                  </T>
+                </Animated.View>
+              ) : null}
+            </View>
+
+            {week ? (
+              <Animated.View layout={REFLOW}>
+                <Section title={t('today.habit.thisWeek')} />
+                <View style={styles.week}>
+                  {week.goal > 0 ? (
+                    <View style={styles.weekDots} accessible={false} importantForAccessibility="no-hide-descendants">
+                      {Array.from({ length: week.goal }, (_, i) => (
+                        <ThemedView
+                          key={i}
+                          style={[
+                            styles.weekDot,
+                            i < week.credited
+                              ? { backgroundColor: c.sage, borderColor: c.sage }
+                              : { borderColor: c.textFaint },
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  ) : null}
+                  <T style={styles.weekText}>
+                    {week.goal === 0
+                      ? t('today.habit.shortWeek')
+                      : t(week.credited >= week.goal ? 'today.habit.weekMet' : 'today.habit.week', {
+                          done: week.credited,
+                          goal: week.goal,
+                        })}
+                  </T>
+                </View>
+                {week.goal > week.credited ? (
+                  <T v="caption" color={c.textDim} style={styles.note}>
+                    {t('today.habit.anyDays')}
+                  </T>
+                ) : null}
+              </Animated.View>
+            ) : null}
+
+            <Animated.View layout={REFLOW}>
+              <Section title={t('today.habit.today')} note={t('common.day', { day: today })} />
+              <View style={styles.state} accessible accessibilityLiveRegion="polite">
+                {/* The tick fades in beside the state; the words themselves change at once, so the line is never
+                    blank. */}
+                {done ? (
+                  <Animated.View entering={REVEAL} style={styles.checkWrap}>
+                    <Check color={c.sage} />
+                  </Animated.View>
+                ) : null}
+                <T style={styles.stateText}>{state}</T>
+                {track.progress && !done && logged ? (
+                  <Animated.View entering={REVEAL}>
+                    <T color={c.textDim} style={styles.stateSub}>
+                      {t('today.habit.min', { minutes: logged })}
+                    </T>
+                  </Animated.View>
+                ) : null}
               </View>
-              <View style={styles.rows}>
-                <Ledger>
+            </Animated.View>
+
+            {counter !== null ? (
+              <Animated.View layout={REFLOW} style={styles.rows}>
+                <Ledger label={t('today.habit.of', { done: Math.min(track.count ?? 0, counter), goal: counter })} big>
                   <Stepper
-                    minus={() => s().setSession({ minutes: Math.max(5, (track.session?.minutes ?? 30) - 5) })}
-                    plus={() => s().setSession({ minutes: (track.session?.minutes ?? 25) + 5 })}
-                    value={track.session?.minutes ? t('today.habit.min', { minutes: track.session.minutes }) : '—'}
+                    minus={() => completionHaptic(s().count(id, -1))}
+                    plus={() => completionHaptic(s().count(id, 1))}
+                    step="1"
+                  />
+                </Ledger>
+              </Animated.View>
+            ) : null}
+
+            {/* Mark done and Undo trade places: the one going leaves at once, the one coming fades in, and what's below
+                glides to its new place (one movement, nothing sliding over content that is still fading). */}
+            {done ? (
+              <Animated.View key="undo" entering={REVEAL} layout={REFLOW}>
+                <TextLink
+                  label={strength ? t('today.habit.undoSession') : t('today.habit.undo')}
+                  onPress={() => completionHaptic(s().toggle(id))}
+                  align="start"
+                />
+              </Animated.View>
+            ) : (
+              <Animated.View key="mark" entering={REVEAL} layout={REFLOW}>
+                <Button
+                  label={strength ? t('today.habit.logSession') : t('today.habit.markDone')}
+                  onPress={() => completionHaptic(s().toggle(id))}
+                  style={styles.primary}
+                />
+                {canLog ? (
+                  // Same place, new words: a crossfade.
+                  <Animated.View key={track.progress ? 'remove' : 'add'} entering={REVEAL} exiting={CONCEAL}>
+                    <TextLink
+                      label={track.progress ? t('today.habit.removePartial') : t('today.habit.effort')}
+                      onPress={() => {
+                        haptic.select();
+                        s().setPartial(id, !track.progress);
+                      }}
+                    />
+                  </Animated.View>
+                ) : null}
+              </Animated.View>
+            )}
+            {showHint ? (
+              <Animated.View entering={REVEAL} layout={REFLOW}>
+                <T v="caption" color={c.textDim} style={styles.hint}>
+                  {t('today.habit.progressHint', { xp: PARTIAL_XP })}
+                </T>
+              </Animated.View>
+            ) : null}
+
+            {/* The minutes row and yesterday's row, each moving on its own (no reflow inside a reflow). */}
+            {showMinutes ? (
+              <Animated.View entering={REVEAL} layout={REFLOW} style={styles.rows}>
+                <Ledger label={t('today.habit.partialMinutes')}>
+                  <Stepper
+                    minus={() => logProgress(logged && logged > 5 ? logged - 5 : null)}
+                    plus={() => logProgress((logged ?? 0) + 5)}
+                    value={logged ? t('today.habit.min', { minutes: logged }) : '—'}
                     step="5"
                   />
                 </Ledger>
-              </View>
-              {done && recoveryNote(program.logs, program.startedAt, today, id) ? (
-                <T v="caption" color={c.textDim} style={styles.note}>
-                  {t('today.habit.recovery')}
-                </T>
-              ) : null}
-            </>
-          ) : null}
-
-          {own ? null : (
-            <>
-              <Section title={t('today.habit.difficulty')} />
-              <T v="caption" color={c.textDim} style={styles.note}>
-                {week ? t('today.habit.difficultyHintWeek') : t('today.habit.difficultyHintDay')}
-              </T>
-              <ThemedView style={[styles.pair, { borderColor: c.border }]}>
-                <PairHalf
-                  label={t('today.habit.easier')}
-                  arrow={IS_RTL ? '›' : '‹'}
-                  onPress={() => change(() => s().easier(id))}
-                />
-                <ThemedView style={[styles.pairRule, { backgroundColor: c.border }]} />
-                <PairHalf
-                  label={t('today.habit.harder')}
-                  arrow={IS_RTL ? '‹' : '›'}
-                  end
-                  onPress={() => change(() => s().harder(id))}
-                />
-              </ThemedView>
-              <View style={styles.feel}>
-                <T color={c.textDim} style={styles.feelQ}>
-                  {t('today.habit.feel')}
-                </T>
-                <View style={styles.feelOpts}>
-                  <Option
-                    label={t('today.habit.tooEasy')}
-                    on={recentFeedback === 'too-easy'}
-                    onPress={() => s().feedback(id, 'too-easy')}
-                  />
-                  <Option
-                    label={t('today.habit.tooHard')}
-                    on={recentFeedback === 'too-hard'}
-                    onPress={() => s().feedback(id, 'too-hard')}
-                  />
-                </View>
-              </View>
-              {message ? (
-                <T v="caption" style={styles.note} accessibilityLiveRegion="polite">
-                  {message}
-                </T>
-              ) : null}
-              {P.habitNotes(id, program.answers).map((n) => (
-                <ThemedView key={n} style={[styles.tip, { borderColor: c.border }]}>
-                  <T v="caption" color={c.textDim}>
-                    {n}
-                  </T>
-                </ThemedView>
-              ))}
-            </>
-          )}
-
-          <ThemedView style={[styles.remove, { borderColor: c.border }]}>
-            {removing ? (
-              <View style={styles.confirm}>
-                <Button
-                  label={t('today.habit.removeName', { habit: name })}
-                  kind="danger"
-                  onPress={() => {
-                    const problem = s().removeHabit(id);
-                    if (problem) setRemoveError(problem);
-                    else {
-                      haptic.confirm();
-                      if (router.canGoBack()) router.back();
-                      else router.replace('/today');
-                    }
-                  }}
-                />
-                <Button label={t('today.habit.keepIt')} kind="ghost" onPress={() => setRemoving(false)} />
-              </View>
-            ) : (
-              <TextLink label={t('today.habit.remove')} onPress={() => setRemoving(true)} danger align="start" />
-            )}
-            <T v="caption" color={c.textDim}>
-              {done ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
-              {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
-            </T>
-            {removeError ? (
-              <T v="caption" color={c.danger}>
-                {removeError}
-              </T>
+              </Animated.View>
             ) : null}
-          </ThemedView>
-        </View>
+            {yesterday !== null ? (
+              <Animated.View layout={REFLOW} style={showMinutes ? null : styles.rows}>
+                <Ledger
+                  label={
+                    P.isDone(program, id, yesterday)
+                      ? t('today.habit.yesterdayDone')
+                      : t('today.habit.yesterdayNotDone')
+                  }
+                  small
+                >
+                  <TextLink
+                    label={
+                      P.isDone(program, id, yesterday) ? t('today.habit.undoYesterday') : t('today.habit.doneYesterday')
+                    }
+                    onPress={() => completionHaptic(s().toggle(id, yesterday))}
+                    accent
+                  />
+                </Ledger>
+              </Animated.View>
+            ) : null}
+
+            {strength ? (
+              <Animated.View layout={REFLOW}>
+                <Section title={t('today.habit.session')} />
+                <T v="caption" color={c.textDim} style={styles.note}>
+                  {t('today.habit.sessionHint')}
+                </T>
+                <View style={styles.options}>
+                  {SESSION_TYPES.map((type) => (
+                    <Option
+                      key={type}
+                      label={P.sessionName(type)}
+                      on={track.session?.type === type}
+                      onPress={() => s().setSession({ type })}
+                    />
+                  ))}
+                </View>
+                <View style={styles.rows}>
+                  <Ledger>
+                    <Stepper
+                      minus={() => s().setSession({ minutes: Math.max(5, (track.session?.minutes ?? 30) - 5) })}
+                      plus={() => s().setSession({ minutes: (track.session?.minutes ?? 25) + 5 })}
+                      value={track.session?.minutes ? t('today.habit.min', { minutes: track.session.minutes }) : '—'}
+                      step="5"
+                    />
+                  </Ledger>
+                </View>
+                {done && recoveryNote(program.logs, program.startedAt, today, id) ? (
+                  <Animated.View entering={REVEAL} exiting={CONCEAL}>
+                    <T v="caption" color={c.textDim} style={styles.note}>
+                      {t('today.habit.recovery')}
+                    </T>
+                  </Animated.View>
+                ) : null}
+              </Animated.View>
+            ) : null}
+
+            {own ? null : (
+              <Animated.View layout={REFLOW}>
+                <Section title={t('today.habit.difficulty')} />
+                <T v="caption" color={c.textDim} style={styles.note}>
+                  {week ? t('today.habit.difficultyHintWeek') : t('today.habit.difficultyHintDay')}
+                </T>
+                <ThemedView style={[styles.pair, { borderColor: c.border }]}>
+                  <PairHalf
+                    label={t('today.habit.easier')}
+                    arrow={IS_RTL ? '›' : '‹'}
+                    onPress={() => change(() => s().easier(id))}
+                  />
+                  <ThemedView style={[styles.pairRule, { backgroundColor: c.border }]} />
+                  <PairHalf
+                    label={t('today.habit.harder')}
+                    arrow={IS_RTL ? '‹' : '›'}
+                    end
+                    onPress={() => change(() => s().harder(id))}
+                  />
+                </ThemedView>
+                <View style={styles.feel}>
+                  <T color={c.textDim} style={styles.feelQ}>
+                    {t('today.habit.feel')}
+                  </T>
+                  <View style={styles.feelOpts}>
+                    <Option
+                      label={t('today.habit.tooEasy')}
+                      on={recentFeedback === 'too-easy'}
+                      onPress={() => s().feedback(id, 'too-easy')}
+                    />
+                    <Option
+                      label={t('today.habit.tooHard')}
+                      on={recentFeedback === 'too-hard'}
+                      onPress={() => s().feedback(id, 'too-hard')}
+                    />
+                  </View>
+                </View>
+                {/* Each new message fades in in place of the last. */}
+                {message ? (
+                  <Animated.View key={message} entering={REVEAL} exiting={CONCEAL}>
+                    <T v="caption" style={styles.note} accessibilityLiveRegion="polite">
+                      {message}
+                    </T>
+                  </Animated.View>
+                ) : null}
+                {P.habitNotes(id, program.answers).map((n) => (
+                  <Animated.View key={n} layout={REFLOW}>
+                    <ThemedView style={[styles.tip, { borderColor: c.border }]}>
+                      <T v="caption" color={c.textDim}>
+                        {n}
+                      </T>
+                    </ThemedView>
+                  </Animated.View>
+                ))}
+              </Animated.View>
+            )}
+
+            <Animated.View layout={REFLOW}>
+              <ThemedView style={[styles.remove, { borderColor: c.border }]}>
+                {removing ? (
+                  // The confirmation opens in place of the link (and the link returns in its place); the note below
+                  // glides to make room.
+                  <Animated.View key="confirm" entering={REVEAL} style={styles.confirm}>
+                    <Button
+                      label={t('today.habit.removeName', { habit: name })}
+                      kind="danger"
+                      onPress={() => {
+                        const problem = s().removeHabit(id);
+                        if (problem) setRemoveError(problem);
+                        else {
+                          haptic.confirm();
+                          if (router.canGoBack()) router.back();
+                          else router.replace('/today');
+                        }
+                      }}
+                    />
+                    <Button label={t('today.habit.keepIt')} kind="ghost" onPress={() => setRemoving(false)} />
+                  </Animated.View>
+                ) : (
+                  <Animated.View key="ask" entering={REVEAL}>
+                    <TextLink label={t('today.habit.remove')} onPress={() => setRemoving(true)} danger align="start" />
+                  </Animated.View>
+                )}
+                <Animated.View layout={REFLOW}>
+                  <T v="caption" color={c.textDim}>
+                    {done ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
+                    {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
+                  </T>
+                </Animated.View>
+                {removeError ? (
+                  <Animated.View key={removeError} entering={REVEAL} exiting={CONCEAL} layout={REFLOW}>
+                    <T v="caption" color={c.danger} accessibilityLiveRegion="polite">
+                      {removeError}
+                    </T>
+                  </Animated.View>
+                ) : null}
+              </ThemedView>
+            </Animated.View>
+          </View>
+        </LayoutAnimationConfig>
       </ScrollView>
     </Screen>
   );
@@ -445,13 +499,7 @@ function Stepper({ minus, plus, value, step }: { minus: () => void; plus: () => 
 function Round({ label, a11y, onPress }: { label: string; a11y: string; onPress: () => void }) {
   const { c } = useTheme();
   return (
-    <Tap
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={a11y}
-      hitSlop={4}
-      style={styles.roundHit}
-    >
+    <Tap onPress={onPress} accessibilityRole="button" accessibilityLabel={a11y} hitSlop={4} style={styles.roundHit}>
       <ThemedView style={[styles.round, { borderColor: c.border }]}>
         <T style={styles.roundText} color={c.text}>
           {label}
@@ -483,10 +531,7 @@ function TextLink({
         onPress();
       }}
       accessibilityRole="button"
-      style={[
-        styles.link,
-        { alignSelf: align === 'center' ? 'center' : 'flex-start' },
-      ]}
+      style={[styles.link, { alignSelf: align === 'center' ? 'center' : 'flex-start' }]}
     >
       <T
         style={[
@@ -515,12 +560,7 @@ function PairHalf({
 }) {
   const { c } = useTheme();
   return (
-    <Tap
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={styles.half}
-    >
+    <Tap onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.half}>
       {end ? null : <T color={c.textFaint}>{arrow}</T>}
       <T style={styles.halfText}>{label}</T>
       {end ? <T color={c.textFaint}>{arrow}</T> : null}
@@ -592,6 +632,7 @@ const styles = StyleSheet.create({
   state: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', columnGap: space.md, marginTop: space.lg },
   stateText: { fontSize: 28, lineHeight: 34, fontWeight: '300', letterSpacing: -0.4, flexShrink: 1 },
   stateSub: { fontSize: 15, lineHeight: 20 },
+  checkWrap: { alignSelf: 'center' },
   check: {
     width: 26,
     height: 26,
