@@ -340,6 +340,8 @@ export const ar: Translation = {
       kept: 'حُوفظ عليه بالحد الأدنى.',
 
       atMinimum: 'بالحد الأدنى: {list}.',
+
+      grace: ' لم يُحتسب، لكن سلسلتك استمرت: يوم واحد فائت في الأسبوع لا يقطعها.',
     },
     observation: {
       steady: 'ثبت الأسبوع {week} عند {pct}، قريبًا من {prevPct} في الأسبوع {prev}.',
@@ -348,7 +350,7 @@ export const ar: Translation = {
       weekday: 'كانت {days} أكثر أيامك اكتمالًا: {full} من {count} أُنجزت بالكامل.',
       habit: '{habit} هي عادتك الأكثر انتظامًا: {done} من {eligible} مرة ({pct}).',
       goals: '{habit}: تحقق الهدف الأسبوعي في {met} من {judged} أسابيع مكتملة.',
-      streak: 'أنت الآن في أطول سلسلة لك حتى الآن: {count} من الأيام المتتالية.',
+      streak: 'أنت الآن في أطول سلسلة لك حتى الآن: {count} من الأيام. يوم واحد فائت في الأسبوع لا يقطعها.',
 
       habitMinimum: '{habit} أكثر عاداتك انتظامًا: أُنجزت {done} من {eligible} مرة، و{minimum} بالحد الأدنى ({pct}).',
     },
@@ -1105,7 +1107,7 @@ export const ar: Translation = {
       maintenance: 'المحافظة',
       day: 'اليوم {day}',
       of: ' / {total}',
-      labelSummit: 'صعود Schwung. تم بلوغ القمة. {done} من {total} يومًا مكتملة.',
+      labelSummit: 'صعود Schwung. تم بلوغ القمة. أيام الصعود {done} من {total}.',
       label: 'صعود Schwung. اليوم {day} من {total}، مرحلة {phase}. الأيام المكتملة حتى الآن: {done}.',
       openDay: '{day}. فتح في الرحلة',
       climbed: 'أيام الصعود {done} من {total} · النقر على يوم لفتحه',

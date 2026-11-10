@@ -277,6 +277,8 @@ export const hi: Translation = {
       kept: 'न्यूनतम से बनाए रखा।',
 
       atMinimum: 'न्यूनतम पर: {list}।',
+
+      grace: ' यह गिना नहीं गया, पर आपकी स्ट्रीक जारी रही: हफ़्ते में एक छूटा दिन इसे नहीं तोड़ता।',
     },
     observation: {
       steady: 'हफ़्ता {week} {pct} पर स्थिर रहा, हफ़्ता {prev} के {prevPct} के क़रीब।',
@@ -285,7 +287,7 @@ export const hi: Translation = {
       weekday: '{days} आपके सबसे पूरे दिन रहे हैं: {count} में से {full} पूरी तरह पूरे।',
       habit: '{habit} आपकी सबसे नियमित आदत है: {eligible} में से {done} बार ({pct})।',
       goals: '{habit}: {judged} पूरे हुए हफ़्तों में से {met} में साप्ताहिक लक्ष्य पूरा हुआ।',
-      streak: 'आप अब तक की अपनी सबसे लंबी स्ट्रीक पर हैं: लगातार {count} दिन।',
+      streak: 'आप अब तक की अपनी सबसे लंबी स्ट्रीक पर हैं: {count} दिन। हफ़्ते में एक छूटा दिन इसे नहीं तोड़ता।',
 
       habitMinimum:
         '{habit} आपकी सबसे नियमित आदत है: {eligible} में से {done} बार पूरी और {minimum} बार न्यूनतम पर ({pct})।',
@@ -960,7 +962,7 @@ export const hi: Translation = {
       maintenance: 'बनाए रखना',
       day: 'दिन {day}',
       of: ' / {total}',
-      labelSummit: 'Schwung की चढ़ाई। शिखर पर पहुँचे। {total} में से {done} दिन पूरे।',
+      labelSummit: 'Schwung की चढ़ाई। शिखर पर पहुँचे। {total} में से {done} दिन चढ़े।',
       label: 'Schwung की चढ़ाई। {total} में से दिन {day}, {phase} चरण। अब तक {done} दिन पूरे।',
       openDay: '{day}। सफ़र में खोलें',
       climbed: '{total} में से {done} दिन चढ़े · किसी दिन पर टैप करें',

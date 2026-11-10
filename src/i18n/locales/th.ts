@@ -271,6 +271,8 @@ export const th: Translation = {
       kept: 'รักษาไว้ด้วยขั้นต่ำ',
 
       atMinimum: 'แบบขั้นต่ำ: {list}',
+
+      grace: ' วันนี้ไม่นับ แต่สถิติต่อเนื่องของคุณยังอยู่: พลาดหนึ่งวันต่อสัปดาห์จะไม่ทำให้สถิติขาด',
     },
     observation: {
       steady: 'สัปดาห์ที่ {week} คงที่ที่ {pct} ใกล้กับ {prevPct} ของสัปดาห์ที่ {prev}',
@@ -279,7 +281,7 @@ export const th: Translation = {
       weekday: '{days} เป็นวันที่คุณทำได้ครบที่สุด: ทำครบ {full} จาก {count} ครั้ง',
       habit: '{habit} เป็นนิสัยที่คุณทำสม่ำเสมอที่สุด: {done} จาก {eligible} ครั้ง ({pct})',
       goals: '{habit}: ทำได้ตามเป้าหมายรายสัปดาห์ {met} จาก {judged} สัปดาห์ที่จบแล้ว',
-      streak: 'คุณกำลังทำสถิติต่อเนื่องยาวที่สุด: {count} วันติดต่อกัน',
+      streak: 'คุณกำลังทำสถิติต่อเนื่องยาวที่สุด: {count} วัน พลาดหนึ่งวันต่อสัปดาห์จะไม่ทำให้สถิติขาด',
 
       habitMinimum:
         '{habit} คือนิสัยที่คุณทำสม่ำเสมอที่สุด: ทำแล้ว {done} จาก {eligible} ครั้ง และแบบขั้นต่ำ {minimum} ครั้ง ({pct})',
@@ -930,7 +932,7 @@ export const th: Translation = {
       maintenance: 'ช่วงรักษาไว้',
       day: 'วันที่ {day}',
       of: ' / {total}',
-      labelSummit: 'การปีนของ Schwung พิชิตยอดเขาแล้ว ทำครบ {done} จาก {total} วัน',
+      labelSummit: 'การปีนของ Schwung พิชิตยอดเขาแล้ว ปีนมาแล้ว {done} จาก {total} วัน',
       label: 'การปีนของ Schwung วันที่ {day} จาก {total} ช่วง{phase} ทำครบแล้ว {done} วัน',
       openDay: '{day} เปิดในเส้นทาง',
       climbed: 'ปีนมาแล้ว {done} จาก {total} วัน · แตะเลือกวัน',

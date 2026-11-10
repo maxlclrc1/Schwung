@@ -57,7 +57,7 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
   const skipped = ids.filter((id) => !done.includes(id) && P.trackOf(p, id, d).skipped);
   const minimum = ids.filter((id) => P.minimumOn(p, id, d));
   const dailyDue = ids.filter((id) => P.isDaily(p, id, d));
-  // The day's list as the 80% rule sees it: daily habits, plus weekly ones done that day.
+  // The day's list as the day rule sees it (progression.ts dayNeed): daily habits, plus weekly ones done that day.
   const planned = log ? P.plannedOn(p, d, log.completed) : dailyDue;
   const full = P.dayFull(p, d);
   const state: DayCell['state'] = full
@@ -76,7 +76,18 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
   // The day's minimums, only when there are any (a day without them is exactly what it always was), and whether
   // they kept it (the Journey's seed mark, mark A).
   const kept = minimum.length > 0 && state === 'partial' && P.dayOutcome(p, d) === 'kept';
-  return { ...base, state, done, skipped, planned, ...(minimum.length ? { minimum } : {}), ...(kept ? { kept } : {}) };
+  // A missed day the streak carried over (judged once the day is past: today is still open).
+  const grace = d < today && P.graceDays(p, today).includes(d);
+  return {
+    ...base,
+    state,
+    done,
+    skipped,
+    planned,
+    ...(minimum.length ? { minimum } : {}),
+    ...(kept ? { kept } : {}),
+    ...(grace ? { grace } : {}),
+  };
 }
 
 export type HabitBar = {

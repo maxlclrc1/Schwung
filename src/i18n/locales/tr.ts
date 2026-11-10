@@ -285,6 +285,8 @@ export const tr: Translation = {
       kept: 'En azıyla korundu.',
 
       atMinimum: 'En azıyla: {list}.',
+
+      grace: ' Sayılmadı, ama serin sürdü: haftada bir kaçırılan gün serini bozmaz.',
     },
     observation: {
       steady: 'Hafta {week} {pct} ile sabit kaldı; Hafta {prev} {prevPct} idi, ona yakın.',
@@ -293,7 +295,7 @@ export const tr: Translation = {
       weekday: 'En eksiksiz günlerin {days} oldu: {count} günün {full} tanesi tamamen bitti.',
       habit: 'En istikrarlı alışkanlığın {habit}: {eligible} fırsatın {done} tanesi ({pct}).',
       goals: '{habit}: tamamlanan {judged} haftanın {met} tanesinde haftalık hedefe ulaşıldı.',
-      streak: 'Şu ana kadarki en uzun serindesin: art arda {count} gün.',
+      streak: 'Şu ana kadarki en uzun serindesin: {count} gün. Haftada bir kaçırılan gün serini bozmaz.',
 
       habitMinimum:
         'En istikrarlı alışkanlığın {habit}: {eligible} seferden {done} tanesi tamam, {minimum} tanesi en azıyla ({pct}).',
@@ -961,7 +963,7 @@ export const tr: Translation = {
       maintenance: 'Koruma',
       day: 'Gün {day}',
       of: ' / {total}',
-      labelSummit: 'Schwung Tırmanışı. Zirveye ulaşıldı. {total} günün {done} günü tamamlandı.',
+      labelSummit: 'Schwung Tırmanışı. Zirveye ulaşıldı. {total} günün {done} günü tırmanıldı.',
       label: 'Schwung Tırmanışı. Gün {day} / {total}, {phase} aşaması. Şimdiye kadar {done} gün tamamlandı.',
       openDay: '{day}. Yolculukta aç',
       climbed: '{total} günün {done} günü tırmanıldı · bir güne dokun',

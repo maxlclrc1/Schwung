@@ -15,7 +15,7 @@ import { RESET_BY_ID, type Intensity, type Phase, type Schedule } from './habits
  * - Rest days are never misses. A week is achieved as soon as the goal is met, pending until the week closes, then
  *   not achieved if it fell short. A closed week with nothing recorded at all is unrecorded: neither achieved nor
  *   failed. No missed days are ever invented.
- * - Weekly adherence is its own measure, separate from the daily streak and the 80% day rule.
+ * - Weekly adherence is its own measure, separate from the daily streak and the day rule.
  */
 
 export const WEEK_STARTS_ON: Weekday = 1; // Monday
@@ -237,8 +237,8 @@ export function dayState(
 }
 
 /**
- * Whether a habit belongs in a day's 80% count: daily habits always do; a weekly habit only on a day it's done
- * (then it helps the day), so a rest day can never pull a day under 80%.
+ * Whether a habit belongs in a day's list for the day rule: daily habits always do; a weekly habit only on a day it's
+ * done (then it helps the day), so a rest day can never pull a day down.
  */
 export function countsTowardDay(schedule: Schedule, doneThatDay: boolean): boolean {
   return schedule.kind === 'daily' || doneThatDay;

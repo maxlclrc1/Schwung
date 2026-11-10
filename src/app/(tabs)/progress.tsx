@@ -102,10 +102,10 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   const shownDay = chosen ?? lastDay;
 
   const days = useMemo(
-    () => ascentDays(logs, start, today, source.rest, source.kept),
-    [logs, start, today, source.rest, source.kept],
+    () => ascentDays(logs, start, today, source.rest, source.kept, source.counted),
+    [logs, start, today, source.rest, source.kept, source.counted],
   );
-  const todayDone = dayQualifies(logForDay(logs, start, today));
+  const todayDone = source.counted ? source.counted(today) : dayQualifies(logForDay(logs, start, today));
   // This page's scroll moves the shared world (the trail must stay on the painting), and the trail and labels stay
   // on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -169,7 +169,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 kicker: summary.kicker,
                 full: summary.full,
               })}
-              style={{ flexShrink: 1}}
+              style={{ flexShrink: 1 }}
             >
               <ThemedView style={[styles.caption, depth.raised, { backgroundColor: c.surface }]}>
                 <T v="caption" color={c.indigoInk} style={styles.captionKicker} maxFontSizeMultiplier={1.3}>
@@ -213,9 +213,7 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
                 accessibilityRole="button"
                 accessibilityLabel={t('journeyTab.storyA11y')}
               >
-                <ThemedView
-                  style={[styles.story, depth.card, { backgroundColor: c.surface}]}
-                >
+                <ThemedView style={[styles.story, depth.card, { backgroundColor: c.surface }]}>
                   <View style={[styles.storyIcon, { backgroundColor: c.peachSoft }]}>
                     <Ionicons name="image-outline" size={18} color={c.peachInk} />
                   </View>

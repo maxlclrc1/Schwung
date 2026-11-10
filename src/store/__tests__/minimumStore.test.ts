@@ -98,7 +98,7 @@ describe('the launch switch', () => {
   });
 });
 
-/** A finished Life Reset, the last week kept with minimums on some days. */
+/** A finished Life Reset, kept with minimums on some days (Days 3, 13, …, 63). */
 function summited(): P.PilotProgram {
   const ids = ['mind_read', 'outdoor_time'];
   let p = P.createPilot(
@@ -109,7 +109,7 @@ function summited(): P.PilotProgram {
   for (let d = 1; d <= PROGRAM_DAYS; d++)
     p =
       d % 10 === 3
-        ? P.setMinimum(P.complete(p, 'mind_read', d).program, 'outdoor_time', d, true).program
+        ? ids.reduce((q, id) => P.setMinimum(q, id, d, true).program, p) // kept: minimums alone
         : ids.reduce((q, id) => P.complete(q, id, d).program, p);
   return { ...p, ceremonies: { day1: true, summit: true } };
 }

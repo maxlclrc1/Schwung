@@ -1,8 +1,17 @@
 # Fairer Day Counting: decision document
 
-**Status:** for approval.
+**Status:** approved at `6c0913e` (decisions 1–3 as recommended; no per-habit streaks) and **implemented**.
 
-- **Production code is unchanged.** This document and its simulation are all that's new.
+- **Implementation:**
+  - `progression.ts` `dayNeed`/`dayQualifies` and `pilot.ts` `streakWalk` (shared by `pilotStreak`,
+    `journeyStats`, `sinceSummit` and `graceDays`);
+  - the Journey mountain takes "climbed" from the engine (`journeySource` `counted`);
+  - a grace day's Journey entry and the Insights streak note explain the grace;
+  - the VoiceOver label now says "days climbed".
+- **Tests:** `src/core/__tests__/fairDayCounting.test.ts`, plus the simulation below, which now checks that the
+  engine is the approved model day for day.
+- **Wording:** 3 strings, machine-translated into 19 languages and awaiting native review.
+- The sections below are the decision as approved; "today" there means the rule before it.
 - **Baseline:** `0031623`, the Minimum Effort release candidate. Its flag stays off.
 - **Sources:**
   - `docs/66_DAY_EXPERIENCE_AUDIT.md` (W3, D3);

@@ -284,6 +284,9 @@ export const vi: Translation = {
       kept: 'Giữ được nhờ mức tối thiểu.',
 
       atMinimum: 'Ở mức tối thiểu: {list}.',
+
+      grace:
+        ' Ngày này không được tính, nhưng chuỗi của bạn vẫn tiếp tục: lỡ một ngày mỗi tuần sẽ không làm đứt chuỗi.',
     },
     observation: {
       steady: 'Tuần {week} giữ ổn định ở {pct}, gần với mức {prevPct} của Tuần {prev}.',
@@ -292,7 +295,8 @@ export const vi: Translation = {
       weekday: '{days} là những ngày bạn hoàn thành đầy đủ nhất: {full}/{count} ngày xong trọn vẹn.',
       habit: '{habit} là thói quen đều đặn nhất của bạn: {done}/{eligible} lần ({pct}).',
       goals: '{habit}: đạt mục tiêu tuần trong {met}/{judged} tuần đã kết thúc.',
-      streak: 'Bạn đang có chuỗi ngày dài nhất từ trước đến nay: {count} ngày liên tiếp.',
+      streak:
+        'Bạn đang có chuỗi ngày dài nhất từ trước đến nay: {count} ngày. Lỡ một ngày mỗi tuần sẽ không làm đứt chuỗi.',
 
       habitMinimum:
         '{habit} là thói quen đều đặn nhất của bạn: xong {done}/{eligible} lần và {minimum} lần ở mức tối thiểu ({pct}).',
@@ -961,7 +965,7 @@ export const vi: Translation = {
       maintenance: 'Duy trì',
       day: 'Ngày {day}',
       of: ' / {total}',
-      labelSummit: 'Chặng leo Schwung. Đã lên đỉnh. Hoàn thành {done}/{total} ngày.',
+      labelSummit: 'Chặng leo Schwung. Đã lên đỉnh. Đã leo {done}/{total} ngày.',
       label: 'Chặng leo Schwung. Ngày {day}/{total}, giai đoạn {phase}. Đến nay đã hoàn thành {done} ngày.',
       openDay: '{day}. Mở trong hành trình',
       climbed: 'Đã leo {done}/{total} ngày · chạm vào một ngày',

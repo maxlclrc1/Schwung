@@ -295,6 +295,8 @@ export const it: Translation = {
       kept: 'Mantenuto col minimo.',
 
       atMinimum: 'Col minimo: {list}.',
+
+      grace: ' Non è contato, ma la tua serie è continuata: un giorno saltato a settimana non la interrompe.',
     },
     observation: {
       steady: 'La settimana {week} si è mantenuta stabile al {pct}, vicino al {prevPct} della settimana {prev}.',
@@ -303,7 +305,7 @@ export const it: Translation = {
       weekday: '{days}: sono stati i tuoi giorni più completi, {full} su {count} fatti per intero.',
       habit: '{habit} è la tua abitudine più costante: {done} volte su {eligible} ({pct}).',
       goals: '{habit}: obiettivo settimanale raggiunto in {met} delle {judged} settimane concluse.',
-      streak: 'Sei sulla tua serie più lunga finora: {count} giorni di fila.',
+      streak: 'Sei sulla tua serie più lunga finora: {count} giorni. Un giorno saltato a settimana non la interrompe.',
 
       habitMinimum:
         '{habit} è la tua abitudine più costante: {done} volte su {eligible} fatta e {minimum} col minimo ({pct}).',
@@ -989,7 +991,7 @@ export const it: Translation = {
       maintenance: 'Mantenimento',
       day: 'Giorno {day}',
       of: ' / {total}',
-      labelSummit: 'L’ascesa di Schwung. Vetta raggiunta. {done} giorni su {total} completati.',
+      labelSummit: 'L’ascesa di Schwung. Vetta raggiunta. {done} giorni su {total} saliti.',
       label: 'L’ascesa di Schwung. Giorno {day} di {total}, fase {phase}. {done} giorni completati finora.',
       openDay: '{day}. Apri nel percorso',
       climbed: '{done} giorni su {total} saliti · tocca un giorno',

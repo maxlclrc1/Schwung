@@ -280,6 +280,8 @@ export const es: Translation = {
       kept: 'Mantenido con el mínimo.',
 
       atMinimum: 'Con el mínimo: {list}.',
+
+      grace: ' No contó, pero tu racha siguió: un día perdido a la semana no la rompe.',
     },
     observation: {
       steady: 'La semana {week} se mantuvo en {pct}, cerca del {prevPct} de la semana {prev}.',
@@ -288,7 +290,7 @@ export const es: Translation = {
       weekday: 'Los {days} han sido tus días más completos: {full} de {count} hechos por completo.',
       habit: '{habit} es tu hábito más constante: {done} de {eligible} veces ({pct}).',
       goals: '{habit}: objetivo semanal cumplido en {met} de {judged} semanas terminadas.',
-      streak: 'Estás en tu racha más larga hasta ahora: {count} días seguidos.',
+      streak: 'Estás en tu racha más larga hasta ahora: {count} días. Un día perdido a la semana no la rompe.',
 
       habitMinimum:
         '{habit} es tu hábito más constante: {done} de {eligible} veces hecho y {minimum} con el mínimo ({pct}).',
@@ -965,7 +967,7 @@ export const es: Translation = {
       maintenance: 'Mantenimiento',
       day: 'Día {day}',
       of: ' / {total}',
-      labelSummit: 'El ascenso de Schwung. Cumbre alcanzada. {done} de {total} días completados.',
+      labelSummit: 'El ascenso de Schwung. Cumbre alcanzada. {done} de {total} días escalados.',
       label: 'El ascenso de Schwung. Día {day} de {total}, fase {phase}. {done} días completados hasta ahora.',
       openDay: '{day}. Abrir en el recorrido',
       climbed: '{done} de {total} días escalados · toca un día',

@@ -312,6 +312,8 @@ export const ru: Translation = {
       kept: 'Сохранено минимумом.',
 
       atMinimum: 'На минимуме: {list}.',
+
+      grace: ' Он не засчитан, но серия продолжилась: один пропущенный день в неделю её не прервёт.',
     },
     observation: {
       steady: 'Неделя {week} держалась на уровне {pct}, близко к {prevPct} недели {prev}.',
@@ -320,7 +322,7 @@ export const ru: Translation = {
       weekday: '{days} — твои самые полные дни: полностью выполнено {full} из {count}.',
       habit: '{habit} — твоя самая стабильная привычка: {done} из {eligible} раз ({pct}).',
       goals: '{habit}: недельная цель достигнута в {met} из {judged} завершённых недель.',
-      streak: 'Это твоя самая длинная серия: {count} дн. подряд.',
+      streak: 'Это твоя самая длинная серия: {count} дн. Один пропущенный день в неделю её не прервёт.',
 
       habitMinimum:
         '{habit} — твоя самая регулярная привычка: выполнено {done} из {eligible} раз и ещё {minimum} на минимуме ({pct}).',
@@ -1059,7 +1061,7 @@ export const ru: Translation = {
       maintenance: 'Поддержание',
       day: 'День {day}',
       of: ' / {total}',
-      labelSummit: 'Восхождение Schwung. Вершина достигнута. Пройдено дней: {done} из {total}.',
+      labelSummit: 'Восхождение Schwung. Вершина достигнута. Пройдено {done} из {total} дн.',
       label: 'Восхождение Schwung. День {day} из {total}, фаза «{phase}». Пока пройдено дней: {done}.',
       openDay: '{day}. Открыть в пути',
       climbed: 'Пройдено {done} из {total} дн. · нажми на день',

@@ -8,7 +8,9 @@ once the per-habit review in §3 is done.
 - the on-screen label stays "Streak", and consistency is explained in the details;
 - the Journey mark needs a visual preview before it's built;
 - **the Sleep minimum is disabled** pending a further safety review;
-- the existing 80% rule applies to full and minimum actions combined.
+- the existing 80% rule applies to full and minimum actions combined. Since Fairer Day Counting
+  (`docs/FAIRER_DAY_COUNTING.md`), that rule is 80% rounded down, and the streak carries one missed day in any seven.
+  Minimums are treated exactly as before.
 
 **R2a (engine) — implemented, not reachable in the app:**
 

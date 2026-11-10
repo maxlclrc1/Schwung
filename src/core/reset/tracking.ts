@@ -7,7 +7,7 @@ import { activeMinutes, settle, type TimerRun } from './timer';
  * session), partial progress, explicit skips, corrections and undo. Pure.
  *
  * One rule keeps everything consistent: **whether a habit was done is only ever `log.completed`**, exactly as for
- * every existing habit. XP, the 80% rule, streaks and the weekly scheduling all read that list, so tracking details
+ * every existing habit. XP, the day rule, streaks and the weekly scheduling all read that list, so tracking details
  * can't add XP twice, and partial progress is never mistaken for completion. A swipe completes a habit on the
  * person's word; nothing here claims it was checked.
  *
@@ -391,7 +391,7 @@ export const MINIMUM_RULES = {
   xp: PARTIAL_XP,
   countsAsCompletion: false,
   countsTowardFullDay: false,
-  /** Combined with full completions under the existing 80% rule, a day can be kept (the consistency streak). */
+  /** Combined with full completions under the day rule (progression.ts dayNeed), a day can be kept (the consistency streak). */
   countsTowardConsistency: true,
   /** For readiness a minimum is recorded and not done, kept apart from misses: it never speeds up a step-up. */
   countsAsDoneForReadiness: false,

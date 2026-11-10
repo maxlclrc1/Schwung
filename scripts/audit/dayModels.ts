@@ -1,7 +1,8 @@
 /*
  * Fairer Day Counting (docs/FAIRER_DAY_COUNTING.md): candidate rules for how a day counts, run over what the real
- * engine saved. Read-only and outside the app: the engine's own rule (pilot.ts dayOutcome) is the "current" model
- * here, and the tests check that this copy of it agrees with the engine on every simulated day.
+ * engine saved. Read-only and outside the app. "current" is the rule until 6c0913e (80% rounded up, no grace);
+ * "recommended" is the approved rule the engine now implements (pilot.ts dayOutcome, streakWalk), and the tests check
+ * that this copy of it agrees with the engine on every simulated day.
  *
  * Every model reads the same record of each day (`readDays`) and keeps the approved Minimum Effort structure:
  *   - counted: the rule is met by full completions alone;
@@ -47,7 +48,7 @@ export type Threshold = { key: string; name: string; need: (n: number) => number
 const EPS = 1e-9;
 export const CURRENT: Threshold = {
   key: 'current',
-  name: '80%, rounded up (today)',
+  name: '80%, rounded up (before)',
   need: (n) => Math.ceil(n * 0.8 - EPS),
 };
 export const MAJORITY: Threshold = {

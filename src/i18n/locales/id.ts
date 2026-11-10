@@ -292,6 +292,9 @@ export const id: Translation = {
       kept: 'Terjaga dengan minimum.',
 
       atMinimum: 'Dengan minimum: {list}.',
+
+      grace:
+        ' Hari itu tidak terhitung, tapi runtunanmu berlanjut: satu hari terlewat dalam seminggu tidak memutusnya.',
     },
     observation: {
       steady: 'Minggu ke-{week} stabil di {pct}, mendekati {prevPct} di Minggu ke-{prev}.',
@@ -300,7 +303,8 @@ export const id: Translation = {
       weekday: 'Hari {days} jadi hari-hari paling lengkapmu: {full} dari {count} selesai sepenuhnya.',
       habit: '{habit} adalah kebiasaanmu yang paling konsisten: {done} dari {eligible} kali ({pct}).',
       goals: '{habit}: target mingguan tercapai di {met} dari {judged} minggu yang sudah selesai.',
-      streak: 'Kamu sedang di runtunan terpanjangmu sejauh ini: {count} hari berturut-turut.',
+      streak:
+        'Kamu sedang di runtunan terpanjangmu sejauh ini: {count} hari. Satu hari terlewat dalam seminggu tidak memutusnya.',
 
       habitMinimum:
         '{habit} adalah kebiasaanmu yang paling konsisten: {done} dari {eligible} kali selesai dan {minimum} dengan minimum ({pct}).',
@@ -979,7 +983,7 @@ export const id: Translation = {
       maintenance: 'Pemeliharaan',
       day: 'Hari ke-{day}',
       of: ' / {total}',
-      labelSummit: 'Pendakian Schwung. Puncak tercapai. {done} dari {total} hari diselesaikan.',
+      labelSummit: 'Pendakian Schwung. Puncak tercapai. {done} dari {total} hari didaki.',
       label: 'Pendakian Schwung. Hari ke-{day} dari {total}, fase {phase}. Sejauh ini {done} hari diselesaikan.',
       openDay: '{day}. Buka di perjalanan',
       climbed: '{done} dari {total} hari didaki · ketuk satu hari',
