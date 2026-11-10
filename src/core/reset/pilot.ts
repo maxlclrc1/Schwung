@@ -808,7 +808,7 @@ export function isDaily(p: PilotProgram, id: string, day: number): boolean {
 }
 
 /**
- * The day's list for the 80% rule and XP. Daily habits always belong to it; a weekly habit only on a day it's done
+ * The day's list for the day rule (80% rounded down, progression.ts dayNeed) and XP. Daily habits always belong to it; a weekly habit only on a day it's done
  * (it helps the day, and a rest day never pulls a day down). Derived, never chosen.
  */
 export function plannedOn(p: PilotProgram, day: number, completed: string[]): string[] {
@@ -975,9 +975,10 @@ const dayXp = (p: PilotProgram, l: DayLog) =>
   (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0);
 
 /**
- * How a day counts by full completions alone (completed days, the Journey's total, the Story): 'rest' when nothing
- * was due (no daily habit, nothing done: weekly habits resting), else whether it met the existing 80% rule. Minimums
- * never count here; `dayOutcome` adds the kept day.
+ * How a day counts by full completions alone (the days climbed, the Journey's total): 'rest' when nothing was due
+ * (no daily habit, nothing done: weekly habits resting), else whether it met the day rule (80% of its habits, rounded
+ * down, at least one: progression.ts dayNeed). Minimums never count here; `dayOutcome` adds the kept day. A missed
+ * day stays missed even when the streak carries it over (`streakWalk`).
  */
 export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'missed' {
   // Past the summit with nothing chosen yet: nothing is asked, so nothing is missed.
@@ -991,7 +992,7 @@ export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'm
 
 /**
  * A day's outcome for consistency (docs/MINIMUM_EFFORT_SPEC.md §2.1): `dayResult`, with one more outcome. A day that
- * isn't counted by full completions is 'kept' when the existing 80% rule is met by its full completions and minimums
+ * isn't counted by full completions is 'kept' when the day rule is met by its full completions and minimums
  * together. A kept day continues the streak; it never adds a completed day or a full day. Without minimums (every
  * save made before them) it's exactly `dayResult`.
  */
@@ -1007,31 +1008,55 @@ export function dayOutcome(p: PilotProgram, day: number): DayOutcome {
   return dayQualifies({ ...log, completed: [...log.completed, ...minimums], planned }) ? 'kept' : 'missed';
 }
 
-/**
- * The streak (consistency): consecutive days that count or are kept, ending today (an unfinished today doesn't
- * break it). A rest day is neutral: it neither counts nor breaks the streak.
- */
-export function pilotStreak(p: PilotProgram, today: number): number {
-  let streak = 0;
-  for (let d = today; d >= 1; d--) {
-    const r = dayOutcome(p, d);
-    if (r === 'rest') continue;
-    if (r === 'counted' || r === 'kept') streak++;
-    else if (d !== today) return streak;
-  }
-  // Unbroken back to Day 1: a streak carried from the previous ascent (only when this one began the next day) runs on.
-  return streak + (p.carry?.streak ?? 0);
-}
+/** One missed day in any GRACE_WINDOW days may leave the streak standing (docs/FAIRER_DAY_COUNTING.md). */
+export const GRACE_WINDOW = 7;
 
-/** Keep My Momentum, in numbers: the days since the summit (never the 66-day ascent's own). */
-export function sinceSummit(p: PilotProgram, today: number) {
-  const from = p.after?.since ?? PROGRAM_DAYS + 1;
+/** A walk over days: the streak at its end, the best run, and the days whose miss the streak carried over. */
+export type StreakWalk = {
+  /** The streak at the walk's end, a carried streak included. */
+  streak: number;
+  /** The longest run within the walk, never including a carried streak. */
+  best: number;
+  counted: number;
+  kept: number;
+  /** Days that asked something and are judged: counted, kept, or missed before today. */
+  judged: number;
+  /** Missed days the streak carried over (grace days): neither counted, kept nor climbed. */
+  grace: number[];
+  /** Whether a miss ended a run since `from` (a carried streak only runs on while nothing did). */
+  broken: boolean;
+};
+
+const walkCache = new WeakMap<PilotProgram, Map<string, StreakWalk>>();
+
+/**
+ * The streak walk (consistency), from `from` to `to` as of `today`, shared by the streak, the Journey's numbers and
+ * Keep My Momentum's:
+ * - a counted or kept day adds one; a rest day is neutral; an unfinished today is neither;
+ * - a missed day ends the run, unless it's a **grace day**: the run is going, the judged day before it wasn't
+ *   missed, and no other grace day fell in the GRACE_WINDOW days up to it. A grace day adds nothing and is never
+ *   counted, kept or climbed. So two misses in a row, or two in any seven days, always end the run, and grace days
+ *   can never add up to a run: a run grows only by counted and kept days.
+ * `carry` (a streak carried from the previous ascent) starts the run; it counts toward a grace day's run.
+ * Derived from the saved days only, as every number is. Cached: programs are immutable.
+ */
+export function streakWalk(p: PilotProgram, from: number, to: number, today: number, carry = 0): StreakWalk {
+  let byKey = walkCache.get(p);
+  if (!byKey) walkCache.set(p, (byKey = new Map()));
+  const key = `${from}:${to}:${today}:${carry}`;
+  const hit = byKey.get(key);
+  if (hit) return hit;
+  let run = carry;
+  let own = 0;
+  let best = 0;
   let counted = 0;
   let kept = 0;
   let judged = 0;
-  let best = 0;
-  let run = 0;
-  for (let d = from; d <= today; d++) {
+  let broken = false;
+  let lastGrace = -Infinity;
+  let prevMissed = false;
+  const grace: number[] = [];
+  for (let d = from; d <= to; d++) {
     const r = dayOutcome(p, d);
     if (r === 'rest') continue;
     if (r === 'counted' || r === 'kept') {
@@ -1039,15 +1064,48 @@ export function sinceSummit(p: PilotProgram, today: number) {
       else kept++;
       judged++;
       run++;
-      best = Math.max(best, run);
-    } else if (d !== today) {
-      judged++;
-      run = 0;
+      own++;
+      best = Math.max(best, own);
+      prevMissed = false;
+      continue;
     }
+    if (d === today) continue; // still open
+    judged++;
+    if (run > 0 && !prevMissed && d - lastGrace >= GRACE_WINDOW) {
+      lastGrace = d;
+      grace.push(d);
+    } else {
+      run = 0;
+      own = 0;
+      broken = true;
+      lastGrace = -Infinity;
+    }
+    prevMissed = true;
   }
+  const out = { streak: run, best, counted, kept, judged, grace, broken };
+  byKey.set(key, out);
+  return out;
+}
+
+/**
+ * The streak (consistency): counted and kept days up to today, a grace day carried over (`streakWalk`). A rest day is
+ * neutral and an unfinished today never breaks it. A streak carried from the previous ascent runs on while nothing
+ * since Day 1 ended it.
+ */
+export function pilotStreak(p: PilotProgram, today: number): number {
+  return streakWalk(p, 1, today, today, p.carry?.streak ?? 0).streak;
+}
+
+/** The days up to today whose miss the streak carried over (shown as missed, with a word in the Journey). */
+export const graceDays = (p: PilotProgram, today: number) => streakWalk(p, 1, today, today, p.carry?.streak ?? 0).grace;
+
+/** Keep My Momentum, in numbers: the days since the summit (never the 66-day ascent's own). */
+export function sinceSummit(p: PilotProgram, today: number) {
+  const from = p.after?.since ?? PROGRAM_DAYS + 1;
+  const w = streakWalk(p, from, today, today);
   let xp = 0;
   for (const l of Object.values(p.logs)) if (l.day > PROGRAM_DAYS) xp += dayXp(p, l);
-  return { days: Math.max(0, today - from + 1), counted, kept, judged, best, xp };
+  return { days: Math.max(0, today - from + 1), counted: w.counted, kept: w.kept, judged: w.judged, best: w.best, xp };
 }
 
 /**
@@ -1083,25 +1141,13 @@ export function recentDays80(p: PilotProgram, today: number, n = 28) {
 }
 
 /**
- * The Journey's numbers: `done`, the completed days (full completions only); `kept`, the days kept with minimums; and
- * the streak and best streak (consistency: counted and kept days, rest days neutral).
+ * The Journey's numbers: `done`, the days climbed (counted by full completions); `kept`, the days kept with minimums;
+ * and the streak and best streak (consistency: counted and kept days, rest days neutral, a grace day carried over).
+ * Days 1–66 only; the streak runs on after them.
  */
 export function journeyStats(p: PilotProgram, today: number) {
-  let best = 0;
-  let run = 0;
-  let done = 0;
-  let kept = 0;
-  for (let d = 1; d <= Math.min(today, PROGRAM_DAYS); d++) {
-    const r = dayOutcome(p, d);
-    if (r === 'rest') continue;
-    if (r === 'counted' || r === 'kept') {
-      if (r === 'counted') done++;
-      else kept++;
-      run++;
-      best = Math.max(best, run);
-    } else if (d !== today) run = 0;
-  }
-  return { done, kept, streak: pilotStreak(p, today), best };
+  const w = streakWalk(p, 1, Math.min(today, PROGRAM_DAYS), today, p.carry?.streak ?? 0);
+  return { done: w.counted, kept: w.kept, streak: pilotStreak(p, today), best: w.best };
 }
 
 // --- Changes. Each returns the new program and the tracking event (at most one, only when completion changes). ---

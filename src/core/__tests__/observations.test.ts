@@ -53,6 +53,8 @@ describe('Insights observations: only what the saved days support', () => {
     );
     expect(streakNote(2, 2)).toBeNull();
     expect(streakNote(4, 6)).toBeNull();
-    expect(streakNote(5, 5)?.text).toBe('You’re on your longest streak so far: 5 days in a row.');
+    expect(streakNote(5, 5)?.text).toBe(
+      'You’re on your longest streak so far: 5 days. One missed day a week won’t break it.',
+    );
   });
 });

@@ -284,6 +284,8 @@ export const nl: Translation = {
       kept: 'Behouden met het minimum.',
 
       atMinimum: 'Met het minimum: {list}.',
+
+      grace: ' Hij telde niet mee, maar je reeks ging door: één gemiste dag per week breekt hem niet.',
     },
     observation: {
       steady: 'Week {week} bleef stabiel op {pct}, dicht bij de {prevPct} van week {prev}.',
@@ -292,7 +294,7 @@ export const nl: Translation = {
       weekday: 'Op {days} kom je het vaakst helemaal rond: {full} van de {count} volledig gedaan.',
       habit: '{habit} is je meest consistente gewoonte: {done} van de {eligible} keer ({pct}).',
       goals: '{habit}: weekdoel gehaald in {met} van de {judged} afgeronde weken.',
-      streak: 'Je zit in je langste reeks tot nu toe: {count} dagen op rij.',
+      streak: 'Je zit in je langste reeks tot nu toe: {count} dagen. Eén gemiste dag per week breekt hem niet.',
 
       habitMinimum:
         '{habit} is je meest consequente gewoonte: {done} van {eligible} keer gedaan en {minimum} met het minimum ({pct}).',
@@ -973,7 +975,7 @@ export const nl: Translation = {
       maintenance: 'Onderhoud',
       day: 'Dag {day}',
       of: ' / {total}',
-      labelSummit: 'De Schwung-beklimming. Top bereikt. {done} van {total} dagen voltooid.',
+      labelSummit: 'De Schwung-beklimming. Top bereikt. {done} van {total} dagen geklommen.',
       label: 'De Schwung-beklimming. Dag {day} van {total}, fase {phase}. Tot nu toe {done} dagen voltooid.',
       openDay: '{day}. Openen in je reis',
       climbed: '{done} van {total} dagen geklommen · tik op een dag',

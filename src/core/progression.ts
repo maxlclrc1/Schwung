@@ -2,7 +2,8 @@ import { dateForDay } from './dates';
 import type { DayLog } from './types';
 
 /*
- * Day rules shared by the Life Reset and its Journey: XP, a day that counts (the 80% rule), a full day.
+ * Day rules shared by the Life Reset and its Journey: XP, a day that counts (80% of its habits, rounded down, at least
+ * one: docs/FAIRER_DAY_COUNTING.md), a full day.
  */
 
 export const XP_PER_HABIT = 10;
@@ -32,9 +33,21 @@ export function isFullDay(log: DayLog | undefined): boolean {
   return !!log && log.planned.length > 0 && doneCount(log) === log.planned.length;
 }
 
+/**
+ * How many of a day's `n` habits must be done for it to count: 80% rounded down, at least one (1 of 1, 1 of 2, 2 of 3,
+ * 3 of 4, 4 of 5, 4 of 6). It never asks more than the earlier rule (80% rounded up), so no day that counted stops
+ * counting. None for an empty list.
+ */
+export function dayNeed(n: number): number {
+  // Small epsilon so 0.8 × 5 = 4 despite float error.
+  return n > 0 ? Math.max(1, Math.floor(n * STREAK_THRESHOLD + 1e-9)) : Infinity;
+}
+
+/** Whether `done` of `n` habits make a day count (`dayNeed`). */
+export const meetsDay = (done: number, n: number) => n > 0 && done >= dayNeed(n);
+
 export function dayQualifies(log: DayLog | undefined): boolean {
-  // Small epsilon so 4/5 = 0.8 counts despite float error.
-  return dayRatio(log) >= STREAK_THRESHOLD - 1e-9;
+  return !!log && meetsDay(doneCount(log), log.planned.length);
 }
 
 export function xpForLog(log: DayLog): number {

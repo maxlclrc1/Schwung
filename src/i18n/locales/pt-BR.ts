@@ -294,6 +294,8 @@ export const ptBR: Translation = {
       kept: 'Mantido com o mínimo.',
 
       atMinimum: 'Com o mínimo: {list}.',
+
+      grace: ' Não contou, mas sua sequência continuou: um dia perdido por semana não a quebra.',
     },
     observation: {
       steady: 'A semana {week} se manteve em {pct}, perto dos {prevPct} da semana {prev}.',
@@ -302,7 +304,7 @@ export const ptBR: Translation = {
       weekday: 'As {days} têm sido seus dias mais completos: {full} de {count} totalmente feitos.',
       habit: '{habit} é seu hábito mais constante: {done} de {eligible} vezes ({pct}).',
       goals: '{habit}: meta semanal cumprida em {met} de {judged} semanas concluídas.',
-      streak: 'Você está na sua maior sequência até agora: {count} dias seguidos.',
+      streak: 'Você está na sua maior sequência até agora: {count} dias. Um dia perdido por semana não a quebra.',
 
       habitMinimum:
         '{habit} é seu hábito mais constante: {done} de {eligible} vezes feito e {minimum} com o mínimo ({pct}).',
@@ -972,7 +974,7 @@ export const ptBR: Translation = {
       maintenance: 'Manutenção',
       day: 'Dia {day}',
       of: ' / {total}',
-      labelSummit: 'A subida Schwung. Cume alcançado. {done} de {total} dias concluídos.',
+      labelSummit: 'A subida Schwung. Cume alcançado. {done} de {total} dias escalados.',
       label: 'A subida Schwung. Dia {day} de {total}, fase {phase}. {done} dias concluídos até agora.',
       openDay: '{day}. Abrir na jornada',
       climbed: '{done} de {total} dias escalados · toque em um dia',

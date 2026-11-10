@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+import { dayStats } from '../../../scripts/audit/dayModels';
 import { dateForDay } from '../dates';
 import { doneCount, XP_FULL_DAY_BONUS, XP_PER_HABIT } from '../progression';
 import { dayCell, dayCells, weeklyTrend } from '../reset/charts';
@@ -168,20 +169,22 @@ describe('XP: 5 for a minimum, 10 for a full completion, never both', () => {
   });
 });
 
-describe('a day’s outcome: the existing 80% rule over full and minimum actions together', () => {
+describe('a day’s outcome: 80% rounded down, over full and minimum actions together', () => {
   it('four habits', () => {
     let p = program();
-    p = min(done(p, FOUR.slice(0, 3), 1), ['outdoor_time'], 1); // 3 + 1
+    p = min(done(p, FOUR.slice(0, 3), 1), ['outdoor_time'], 1); // 3 of 4 done: counted by itself
     p = min(done(p, FOUR.slice(0, 2), 2), FOUR.slice(2), 2); // 2 + 2
-    p = min(done(p, FOUR.slice(0, 2), 3), ['move_walk'], 3); // 2 + 1 of 4
+    p = min(done(p, FOUR.slice(0, 1), 3), ['move_walk'], 3); // 1 + 1 of 4
     p = min(p, FOUR, 4); // 4 minimums
     p = done(p, FOUR, 5); // full
-    expect([1, 2, 3, 4, 5].map((d) => P.dayResult(p, d))).toEqual(['missed', 'missed', 'missed', 'missed', 'counted']);
-    expect([1, 2, 3, 4, 5].map((d) => P.dayOutcome(p, d))).toEqual(['kept', 'kept', 'missed', 'kept', 'counted']);
-    // Completed days count full completions only; the streak counts kept days too.
-    expect(P.journeyStats(p, 6)).toEqual({ done: 1, kept: 3, streak: 2, best: 2 });
-    expect(P.pilotStreak(p, 5)).toBe(2);
-    expect(P.recentDays80(p, 6)).toEqual({ counted: 1, kept: 3, judged: 5, from: 1 });
+    expect([1, 2, 3, 4, 5].map((d) => P.dayResult(p, d))).toEqual(['counted', 'missed', 'missed', 'missed', 'counted']);
+    expect([1, 2, 3, 4, 5].map((d) => P.dayOutcome(p, d))).toEqual(['counted', 'kept', 'missed', 'kept', 'counted']);
+    expect(P.dayFull(p, 1)).toBe(false); // counted is never full
+    // Days climbed count full completions only; the streak counts kept days too, and carries Day 3 over (a grace day).
+    expect(P.journeyStats(p, 6)).toEqual({ done: 2, kept: 2, streak: 4, best: 4 });
+    expect(P.graceDays(p, 6)).toEqual([3]);
+    expect(P.pilotStreak(p, 5)).toBe(4);
+    expect(P.recentDays80(p, 6)).toEqual({ counted: 2, kept: 2, judged: 5, from: 1 });
   });
 
   it('five habits: one miss is still allowed, and a minimum can fill it', () => {
@@ -193,7 +196,7 @@ describe('a day’s outcome: the existing 80% rule over full and minimum actions
     expect([1, 2, 3].map((d) => P.dayOutcome(p, d))).toEqual(['counted', 'kept', 'missed']);
   });
 
-  it('rest days stay neutral, an unrecorded day breaks the streak, and an unfinished today never does', () => {
+  it('rest days stay neutral, one unrecorded day is carried over, two end the streak, and an unfinished today never does', () => {
     let p = program(['mind_read', 'skill_practice']);
     p = min(p, ['mind_read'], 1);
     p = min(p, ['mind_read'], 2);
@@ -204,7 +207,8 @@ describe('a day’s outcome: the existing 80% rule over full and minimum actions
     expect(P.pilotStreak(p, 6)).toBe(3);
     expect(P.pilotStreak(p, 7)).toBe(3); // today, unfinished
     expect(P.dayOutcome(p, 7)).toBe('missed'); // unrecorded (unknown): never kept
-    expect(P.pilotStreak(p, 8)).toBe(0);
+    expect(P.pilotStreak(p, 8)).toBe(3); // Day 7 missed: a grace day, carried over, adding nothing
+    expect(P.pilotStreak(p, 9)).toBe(0); // Days 7 and 8: two in a row
   });
 
   it('skips: a skip replaces a minimum, a minimum clears a skip, and a skipped habit is never kept', () => {
@@ -243,9 +247,11 @@ describe('weekly habits', () => {
   });
 
   it('a weekly habit done that day helps it, as always, alongside a daily minimum', () => {
-    const p = min(done(program(['mind_read', 'skill_practice']), ['skill_practice'], 1), ['mind_read'], 1);
-    expect(P.plannedOn(p, 1, ['skill_practice'])).toEqual(['mind_read', 'skill_practice']);
-    expect(P.dayOutcome(p, 1)).toBe('kept');
+    const three = ['mind_read', 'move_walk', 'skill_practice'];
+    const p = min(done(program(three), ['skill_practice'], 1), ['mind_read'], 1);
+    expect(P.plannedOn(p, 1, ['skill_practice'])).toEqual(three);
+    expect(P.dayOutcome(p, 1)).toBe('kept'); // 1 done + 1 minimum of 3
+    expect(P.dayResult(p, 1)).toBe('missed');
     // Its week: credited by its completion only.
     expect(P.weekProgress(p, 'skill_practice', 1)?.credited).toBe(1);
   });
@@ -424,17 +430,13 @@ describe('saves without minimums: every result exactly as before', () => {
       { p: c, until: 82 },
     ];
   }
-  /** The streak as the engine counted it before minimums existed. */
-  const legacyStreak = (p: P.PilotProgram, today: number) => {
-    let s = 0;
-    for (let d = today; d >= 1; d--) {
-      const r = P.dayResult(p, d);
-      if (r === 'rest') continue;
-      if (r === 'counted') s++;
-      else if (d !== today) return s;
-    }
-    return s + (p.carry?.streak ?? 0);
-  };
+  /** The streak by full completions alone (the audit's model of the rule, docs/FAIRER_DAY_COUNTING.md). */
+  const legacyStreak = (p: P.PilotProgram, today: number) =>
+    dayStats(
+      Array.from({ length: today }, (_, i) => P.dayResult(p, i + 1)),
+      today,
+      'week',
+    ).streak;
 
   it('outcomes, streaks, XP, tallies and Journey cells', () => {
     for (const { p, until } of saves()) {

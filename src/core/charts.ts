@@ -57,8 +57,13 @@ export type DayCell = {
   planned: string[];
   /** Habit ids kept with their minimum that day (present only when there are any). */
   minimum?: string[];
-  /** The day was kept with the minimum: the 80% rule met by full and minimum actions together (only when true). */
+  /** The day was kept with the minimum: the day's rule met by full and minimum actions together (only when true). */
   kept?: true;
+  /**
+   * A missed day the streak carried over (a grace day: one in any seven days, pilot.ts `streakWalk`). It still
+   * didn't count: it's never climbed, kept or completed, and looks as it always did. Only when true.
+   */
+  grace?: true;
 };
 
 export type Records = {
@@ -145,6 +150,11 @@ const list = (ids: string[], name: (id: string) => string) => ids.map(name).join
 
 /** What a heatmap day shows when it's inspected: its state in words, and what was done or skipped. */
 export function cellSummary(cell: DayCell, name: (id: string) => string): string {
+  const words = cellWords(cell, name);
+  return cell.grace ? words + t('progress.cell.grace') : words;
+}
+
+function cellWords(cell: DayCell, name: (id: string) => string): string {
   const n = cell.planned.length;
   const done = cell.done.length;
   const skipped = cell.skipped.length ? t('progress.cell.skipped', { list: list(cell.skipped, name) }) : '';

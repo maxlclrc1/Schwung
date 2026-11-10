@@ -268,6 +268,8 @@ export const ko: Translation = {
       kept: '최소한으로 이어 간 날.',
 
       atMinimum: '최소한: {list}.',
+
+      grace: ' 이날은 집계되지 않았지만 연속 기록은 이어졌어요: 일주일에 하루를 놓쳐도 끊기지 않아요.',
     },
     observation: {
       steady: '{week}주차는 {pct}로 안정적이었고, {prev}주차의 {prevPct}와 비슷했어요.',
@@ -276,7 +278,7 @@ export const ko: Translation = {
       weekday: '가장 꾸준했던 요일은 {days}이에요: {count}번 중 {full}번 모두 완료했어요.',
       habit: '가장 꾸준한 습관은 {habit}: {eligible}번 중 {done}번 ({pct}).',
       goals: '{habit}: 끝난 {judged}주 중 {met}주 동안 주간 목표를 달성했어요.',
-      streak: '지금까지 가장 긴 연속 기록이에요: {count}일 연속.',
+      streak: '지금까지 가장 긴 연속 기록이에요: {count}일. 일주일에 하루를 놓쳐도 끊기지 않아요.',
 
       habitMinimum:
         '{habit}이(가) 가장 꾸준한 습관이에요: {eligible}번 중 {done}번 완료, {minimum}번은 최소한 ({pct}).',
@@ -929,7 +931,7 @@ export const ko: Translation = {
       maintenance: '유지',
       day: '{day}일째',
       of: ' / {total}',
-      labelSummit: 'Schwung 등반. 정상 도착. {total}일 중 {done}일 완료.',
+      labelSummit: 'Schwung 등반. 정상 도착. {total}일 중 {done}일 오름.',
       label: 'Schwung 등반. {total}일 중 {day}일째, {phase} 단계. 지금까지 {done}일 완료.',
       openDay: '{day}. 여정에서 열기',
       climbed: '{total}일 중 {done}일 오름 · 날짜를 탭하세요',

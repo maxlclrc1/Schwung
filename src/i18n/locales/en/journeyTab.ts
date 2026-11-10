@@ -30,7 +30,7 @@ export const journeyTab = {
     maintenance: 'Maintenance',
     day: 'Day {day}',
     of: ' / {total}',
-    labelSummit: 'The Schwung Ascent. Summit reached. {done} of {total} days completed.',
+    labelSummit: 'The Schwung Ascent. Summit reached. {done} of {total} days climbed.',
     label: 'The Schwung Ascent. Day {day} of {total}, {phase} phase. {done} days completed so far.',
     openDay: '{day}. Open in journey',
     climbed: '{done} of {total} days climbed · tap a day',

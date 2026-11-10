@@ -138,10 +138,13 @@ describe('Begin a New Ascent', () => {
     expect(P.carriedStreak(prev, 400)).toBe(streak);
     const paused = P.beginAscent(prev, answers, P.ascentDefaults(prev, 75).choices, [], dateForDay(START, 75), 75, 7)!;
     expect(paused.carry).toMatchObject({ streak, xp: P.lifetimeXp(prev) });
-    // Then the normal rules: Day 1 unfinished keeps it, Day 1 done adds one, a missed Day 1 ends it on Day 2.
+    // Then the normal rules: Day 1 unfinished keeps it, Day 1 done adds one, a missed Day 1 is carried over (a grace
+    // day, adding nothing), and a second missed day ends it.
     expect(P.pilotStreak(paused, 1)).toBe(streak);
     expect(P.pilotStreak(P.complete(paused, 'mind_read', 1).program, 1)).toBe(streak + 1);
-    expect(P.pilotStreak(paused, 2)).toBe(0);
+    expect(P.pilotStreak(paused, 2)).toBe(streak);
+    expect(P.graceDays(paused, 2)).toEqual([1]);
+    expect(P.pilotStreak(paused, 3)).toBe(0);
     // After Keep My Momentum, the previous one ended yesterday.
     const kept = climb(P.keepMomentum(prev, 67), 67, 90);
     expect(P.carriedStreak(kept, 91)).toBe(P.pilotStreak(kept, 90));

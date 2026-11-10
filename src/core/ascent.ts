@@ -172,9 +172,10 @@ export function phaseFor(day: number): AscentPhase {
 }
 
 /**
- * State of every marker. "done" uses the existing successful-day rule (dayQualifies, 80%).
- * Past days that weren't successful are "missed" but stay on the walked trail, so a missed
- * day never hides earlier progress. Beyond day 66 (maintenance), every day is in the past.
+ * State of every marker. "done" is a day that counts (`counted`: the Life Reset's own judgement, pilot.ts
+ * `dayResult`; without it, the same rule over the day's saved list, `dayQualifies`). Past days that weren't
+ * successful are "missed" but stay on the walked trail, so a missed day never hides earlier progress. Beyond day 66
+ * (maintenance), every day is in the past.
  */
 export function ascentDays(
   logs: Logs,
@@ -182,6 +183,7 @@ export function ascentDays(
   today: number,
   rest?: (day: number) => boolean,
   kept?: (day: number) => boolean,
+  counted?: (day: number) => boolean,
 ): AscentDay[] {
   return DAY_POINTS.map((point, i) => {
     const day = i + 1;
@@ -189,7 +191,14 @@ export function ascentDays(
     let status: DayStatus;
     if (day === today) status = 'today';
     else if (day > today) status = 'future';
-    else status = dayQualifies(log) ? 'done' : rest?.(day) ? 'rest' : kept?.(day) ? 'kept' : 'missed';
+    else
+      status = (counted ? counted(day) : dayQualifies(log))
+        ? 'done'
+        : rest?.(day)
+          ? 'rest'
+          : kept?.(day)
+            ? 'kept'
+            : 'missed';
     return {
       day,
       phase: phaseFor(day).n,

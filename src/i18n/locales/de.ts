@@ -284,6 +284,8 @@ export const de: Translation = {
       kept: 'Mit dem Minimum gehalten.',
 
       atMinimum: 'Mit dem Minimum: {list}.',
+
+      grace: ' Er hat nicht gezählt, aber deine Serie lief weiter: Ein verpasster Tag pro Woche unterbricht sie nicht.',
     },
     observation: {
       steady: 'Woche {week} blieb stabil bei {pct}, nah an den {prevPct} von Woche {prev}.',
@@ -292,7 +294,8 @@ export const de: Translation = {
       weekday: '{days} waren deine vollständigsten Tage: {full} von {count} ganz erledigt.',
       habit: '{habit} ist deine beständigste Gewohnheit: {done} von {eligible} Mal ({pct}).',
       goals: '{habit}: Wochenziel in {met} von {judged} abgeschlossenen Wochen erreicht.',
-      streak: 'Du bist auf deiner bisher längsten Serie: {count} Tage am Stück.',
+      streak:
+        'Du bist auf deiner bisher längsten Serie: {count} Tage. Ein verpasster Tag pro Woche unterbricht sie nicht.',
 
       habitMinimum:
         '{habit} ist deine beständigste Gewohnheit: {done} von {eligible} Malen erledigt und {minimum} mit dem Minimum ({pct}).',

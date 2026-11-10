@@ -24,11 +24,12 @@ describe('visual QA fixtures', () => {
   });
 
   // Every day but the three misses is done in full, the weekly custom habit included, so the Summit and the Story
-  // show the days the streak counts (not "0 of 66 days completed" from a weekly habit never logged).
+  // show the days the streak counts (not "0 of 66 days completed" from a weekly habit never logged). The misses on
+  // Days 4 and 15 are grace days; Day 9's, five days after Day 4's, ends the run, so the longest is Days 10–66.
   it('complete every day that counts', () => {
     const p = programOn(67);
     const facts = storyFacts(p, 67);
-    expect([facts.daysCompleted, journeyStats(p, 67).done, facts.longestStreak]).toEqual([63, 63, 51]);
+    expect([facts.daysCompleted, journeyStats(p, 67).done, facts.longestStreak]).toEqual([63, 63, 56]);
     expect(Object.values(p.logs).some((l) => l.completed.includes('custom_1'))).toBe(true);
   });
 

@@ -277,6 +277,8 @@ export const ur: Translation = {
       kept: 'کم از کم سے برقرار رکھا۔',
 
       atMinimum: 'کم از کم پر: {list}۔',
+
+      grace: ' یہ شمار نہیں ہوا، مگر آپ کا تسلسل جاری رہا: ہفتے میں ایک چھوٹا ہوا دن اسے نہیں توڑتا۔',
     },
     observation: {
       steady: 'ہفتہ {week} {pct} پر مستحکم رہا، ہفتہ {prev} کے {prevPct} کے قریب۔',
@@ -285,7 +287,7 @@ export const ur: Translation = {
       weekday: '{days} آپ کے سب سے مکمل دن رہے ہیں: {count} میں سے {full} پوری طرح مکمل۔',
       habit: '{habit} آپ کی سب سے باقاعدہ عادت ہے: {eligible} میں سے {done} بار ({pct})۔',
       goals: '{habit}: مکمل ہونے والے {judged} ہفتوں میں سے {met} میں ہفتہ وار ہدف پورا ہوا۔',
-      streak: 'آپ اب تک کے اپنے سب سے لمبے تسلسل پر ہیں: لگاتار {count} دن۔',
+      streak: 'آپ اب تک کے اپنے سب سے لمبے تسلسل پر ہیں: {count} دن۔ ہفتے میں ایک چھوٹا ہوا دن اسے نہیں توڑتا۔',
 
       habitMinimum:
         '{habit} آپ کی سب سے باقاعدہ عادت ہے: {eligible} میں سے {done} بار مکمل اور {minimum} بار کم از کم پر ({pct})۔',
@@ -957,7 +959,7 @@ export const ur: Translation = {
       maintenance: 'برقرار رکھنا',
       day: 'دن {day}',
       of: ' / {total}',
-      labelSummit: 'Schwung کی چڑھائی۔ چوٹی پر پہنچ گئے۔ {total} میں سے {done} دن مکمل۔',
+      labelSummit: 'Schwung کی چڑھائی۔ چوٹی پر پہنچ گئے۔ {total} میں سے {done} دن چڑھے۔',
       label: 'Schwung کی چڑھائی۔ {total} میں سے دن {day}، {phase} مرحلہ۔ اب تک {done} دن مکمل۔',
       openDay: '{day}۔ سفر میں کھولیں',
       climbed: '{total} میں سے {done} دن چڑھے · کسی دن پر ٹیپ کریں',

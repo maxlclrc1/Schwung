@@ -248,9 +248,12 @@ describe('the candidate rules', () => {
 audit('Fairer Day Counting: the models over the real engine', () => {
   const sims = PEOPLE.map((x) => ({ ...x, p: simulate(x.start(), x.b) }));
 
-  it('the "current" model is the engine’s own rule, day for day', () => {
+  it('the approved model ("recommended") is the engine’s own rule, day for day', () => {
     for (const s of sims) {
-      const r = judge(s.p, MODELS[0]);
+      const r = judge(
+        s.p,
+        MODELS.find((m) => m.key === 'recommended')!,
+      );
       for (let d = 1; d <= PROGRAM_DAYS; d++)
         expect([s.key, d, r.outcomes[d - 1]]).toEqual([s.key, d, P.dayOutcome(s.p, d)]);
       const j = P.journeyStats(s.p, PROGRAM_DAYS);
@@ -382,8 +385,11 @@ audit('Fairer Day Counting: the models over the real engine', () => {
     expect(pick('B')).toEqual({ counted: 51, kept: 0, best: 47, streak: 47 });
     expect(pick('B+min')).toEqual({ counted: 51, kept: 8, best: 55, streak: 55 });
     expect(pick('C')).toEqual({ counted: 66, kept: 0, best: 66, streak: 66 });
-    // Today's rule, for comparison (docs/66_DAY_EXPERIENCE_AUDIT.md §2).
-    const now = (k: string) => P.journeyStats(sims.find((s) => s.key === k)!.p, PROGRAM_DAYS);
-    expect([now('A').done, now('A').best, now('B').done, now('B').best]).toEqual([7, 7, 50, 6]);
+    // The engine gives the same numbers; the rule before (80% rounded up, no grace) gave the audit's
+    // (docs/66_DAY_EXPERIENCE_AUDIT.md §2).
+    const engine = (k: string) => P.journeyStats(sims.find((s) => s.key === k)!.p, PROGRAM_DAYS);
+    expect([engine('A').done, engine('A').best, engine('B').done, engine('B').best]).toEqual([13, 13, 51, 47]);
+    const before = (k: string) => judge(sims.find((s) => s.key === k)!.p, MODELS[0]);
+    expect([before('A').counted, before('A').best, before('B').counted, before('B').best]).toEqual([7, 7, 50, 6]);
   });
 });

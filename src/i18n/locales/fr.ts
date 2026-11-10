@@ -289,6 +289,8 @@ export const fr: Translation = {
       kept: 'Gardé avec le minimum.',
 
       atMinimum: 'Au minimum : {list}.',
+
+      grace: ' Il n’a pas compté, mais votre série a continué : un jour manqué par semaine ne la rompt pas.',
     },
     observation: {
       steady: 'La semaine {week} s’est maintenue à {pct}, proche des {prevPct} de la semaine {prev}.',
@@ -297,7 +299,7 @@ export const fr: Translation = {
       weekday: 'Les {days} sont vos jours les plus complets : {full} sur {count} entièrement faits.',
       habit: '{habit} est votre habitude la plus régulière : {done} fois sur {eligible} ({pct}).',
       goals: '{habit} : objectif hebdomadaire atteint {met} semaines sur {judged} terminées.',
-      streak: 'Vous êtes sur votre plus longue série : {count} jours d’affilée.',
+      streak: 'Vous êtes sur votre plus longue série : {count} jours. Un jour manqué par semaine ne la rompt pas.',
 
       habitMinimum:
         '{habit} est votre habitude la plus régulière : {done} fois sur {eligible} faite et {minimum} au minimum ({pct}).',
@@ -987,7 +989,7 @@ export const fr: Translation = {
       maintenance: 'Entretien',
       day: 'Jour {day}',
       of: ' / {total}',
-      labelSummit: 'L’ascension Schwung. Sommet atteint. {done} jours accomplis sur {total}.',
+      labelSummit: 'L’ascension Schwung. Sommet atteint. {done} jours gravis sur {total}.',
       label: 'L’ascension Schwung. Jour {day} sur {total}, phase {phase}. {done} jours accomplis jusqu’ici.',
       openDay: '{day}. Ouvrir dans le parcours',
       climbed: '{done} jours gravis sur {total} · touchez un jour',

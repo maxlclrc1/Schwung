@@ -40,10 +40,16 @@ function older(): P.PilotProgram {
   p = P.setPartial(p, 'outdoor_time', 7, true).program;
   return { ...p, reflections: { 1: { week: 1, day: 8, answer: 'right' } } };
 }
-/** One with minimums (recorded through the drafts, as only tests and previews can). */
+/**
+ * One with minimums (recorded through the drafts, as only tests and previews can): Days 8 and 9 kept with minimums
+ * alone (Read Daily's completion undone; one done habit of two would count those days by itself).
+ */
 const withMinimums = () =>
-  P.setMinimum(P.setMinimum(older(), 'outdoor_time', 8, true, 'drafts').program, 'outdoor_time', 9, true, 'drafts')
-    .program;
+  [8, 9].reduce((p, d) => {
+    let q = P.undo(p, 'mind_read', d).program;
+    for (const id of ['mind_read', 'outdoor_time']) q = P.setMinimum(q, id, d, true, 'drafts').program;
+    return q;
+  }, older());
 
 const numbers = (p: P.PilotProgram, today: number) => ({
   xp: P.pilotXp(p),
@@ -129,7 +135,7 @@ describe('restore from a backup', () => {
     const r = readBackup(exported(withMinimums(), 3), FORMAT);
     if (!r.ok) throw new Error(r.problem);
     expect(numbers(r.backup.program!, 10)).toEqual(numbers(withMinimums(), 10));
-    expect(P.minimumsOn(r.backup.program!, 9)).toEqual(['outdoor_time']);
+    expect(P.minimumsOn(r.backup.program!, 9)).toEqual(['mind_read', 'outdoor_time']);
   });
 
   it('refuses a backup from a newer Schwung', () => {

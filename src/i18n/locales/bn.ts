@@ -276,6 +276,8 @@ export const bn: Translation = {
       kept: 'ন্যূনতম দিয়ে ধরে রাখা হয়েছে।',
 
       atMinimum: 'ন্যূনতমে: {list}।',
+
+      grace: ' এটি গোনা হয়নি, তবে আপনার স্ট্রিক চলেছে: সপ্তাহে একটি বাদ পড়া দিন এটি ভাঙবে না।',
     },
     observation: {
       steady: 'সপ্তাহ {week} {pct}-এ স্থির ছিল, সপ্তাহ {prev}-এর {prevPct}-এর কাছাকাছি।',
@@ -284,7 +286,8 @@ export const bn: Translation = {
       weekday: '{days} আপনার সবচেয়ে পূর্ণ দিন: {count}টির মধ্যে {full}টি পুরোপুরি সম্পন্ন।',
       habit: '{habit} আপনার সবচেয়ে নিয়মিত অভ্যাস: {eligible} বারের মধ্যে {done} বার ({pct})।',
       goals: '{habit}: শেষ হওয়া {judged}টি সপ্তাহের মধ্যে {met}টিতে সাপ্তাহিক লক্ষ্য পূরণ হয়েছে।',
-      streak: 'আপনি এখন পর্যন্ত আপনার সবচেয়ে লম্বা স্ট্রিকে আছেন: টানা {count} দিন।',
+      streak:
+        'আপনি এখন পর্যন্ত আপনার সবচেয়ে লম্বা স্ট্রিকে আছেন: {count} দিন। সপ্তাহে একটি বাদ পড়া দিন এটি ভাঙবে না।',
 
       habitMinimum:
         '{habit} আপনার সবচেয়ে নিয়মিত অভ্যাস: {eligible} বারের মধ্যে {done} বার সম্পন্ন এবং {minimum} বার ন্যূনতমে ({pct})।',
@@ -956,7 +959,7 @@ export const bn: Translation = {
       maintenance: 'ধরে রাখা',
       day: 'দিন {day}',
       of: ' / {total}',
-      labelSummit: 'Schwung আরোহণ। চূড়ায় পৌঁছেছেন। {total} দিনের মধ্যে {done} দিন সম্পন্ন।',
+      labelSummit: 'Schwung আরোহণ। চূড়ায় পৌঁছেছেন। {total} দিনের মধ্যে {done} দিন চড়েছেন।',
       label: 'Schwung আরোহণ। {total}-এর মধ্যে দিন {day}, {phase} পর্ব। এখন পর্যন্ত {done} দিন সম্পন্ন।',
       openDay: '{day}। যাত্রায় খুলুন',
       climbed: '{total} দিনের মধ্যে {done} দিন চড়েছেন · একটি দিনে ট্যাপ করুন',

@@ -108,7 +108,7 @@ export function minimumProgram(): P.PilotProgram {
   if (!p) throw new Error(`QA program refused: ${P.setupProblems(ADULT, choices).join('; ')}`);
   const KEPT: Record<number, string[]> = {
     7: ['mind_read', 'move_walk'],
-    8: ['outdoor_time'],
+    8: ['outdoor_time', 'eat_well'],
     13: ['mind_read', 'move_walk', 'outdoor_time'],
   };
   for (let d = 1; d < day; d++) {

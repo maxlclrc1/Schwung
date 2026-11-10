@@ -211,10 +211,10 @@ function hardWeek() {
   const FOUR = ['mind_read', 'mind_meditation', 'move_walk', 'outdoor_time'];
   let p = program(FOUR);
   for (let d = 1; d <= 4; d++) p = done(p, FOUR, d);
-  p = min(done(p, ['mind_read', 'move_walk', 'outdoor_time'], 5), ['mind_meditation'], 5); // kept: 3 done + 1 minimum
+  p = min(done(p, ['mind_read', 'move_walk'], 5), ['mind_meditation'], 5); // kept: 2 done + 1 minimum (3 of 4)
   p = min(p, FOUR, 6); // kept: minimums only
   p = done(p, ['mind_read'], 7); // missed: 1 of 4
-  p = min(done(p, ['mind_read'], 8), ['move_walk'], 8); // missed: 2 of 4 is under 80%
+  p = min(done(p, ['mind_read'], 8), ['move_walk'], 8); // missed: 2 of 4 is under 3 of 4
   return p;
 }
 
@@ -234,7 +234,7 @@ describe('progress display: the Journey’s kept days', () => {
     const p = hardWeek();
     const name = (id: string) => P.nameOf(p, id);
     expect(cellSummary(dayCell(p, 5, 9), name)).toBe(
-      'Kept with the minimum. Done: Read Daily, Daily Movement, Time Outdoors. At the minimum: Meditation.',
+      'Kept with the minimum. Done: Read Daily, Daily Movement. At the minimum: Meditation.',
     );
     expect(cellSummary(dayCell(p, 6, 9), name)).toBe(
       'Kept with the minimum. At the minimum: Read Daily, Meditation, Daily Movement, Time Outdoors.',
@@ -330,7 +330,8 @@ describe('after Day 66: kept days are never shown as missed', () => {
 
   it('the panel’s numbers and caption report kept days beside counted ones', () => {
     const s = P.sinceSummit(momentum(), 71);
-    expect(s).toMatchObject({ counted: 2, kept: 1, judged: 4, best: 2 });
+    // Day 69's miss is a grace day: the best run carries over it (67, 68, 70), and it's still judged as missed.
+    expect(s).toMatchObject({ counted: 2, kept: 1, judged: 4, best: 3 });
     expect(P.recentDays80(momentum(), 71)).toMatchObject({ kept: 1 });
     expect(t('beyond.since.kept', { count: 1 })).toBe(
       'Plus 1 day kept with the minimum (the ringed dot): it keeps your streak going.',

@@ -270,6 +270,8 @@ export const ja: Translation = {
       kept: '最小限でつないだ日。',
 
       atMinimum: '最小限：{list}。',
+
+      grace: ' この日はカウントされませんが、連続記録は続きました：週に1日休んでも途切れません。',
     },
     observation: {
       steady: '第{week}週は{pct}で安定し、第{prev}週の{prevPct}とほぼ同じでした。',
@@ -278,7 +280,7 @@ export const ja: Translation = {
       weekday: '{days}がいちばん達成度の高い曜日です：{count}回中{full}回すべて達成。',
       habit: '{habit}がいちばん安定している習慣です：{eligible}回中{done}回（{pct}）。',
       goals: '{habit}：終わった{judged}週のうち{met}週で週の目標を達成。',
-      streak: '今までで最長の連続記録です：{count}日連続。',
+      streak: '今までで最長の連続記録です：{count}日。週に1日休んでも途切れません。',
 
       habitMinimum: '{habit}がいちばん続いている習慣です：{eligible}回中{done}回達成、{minimum}回は最小限（{pct}）。',
     },
@@ -944,7 +946,7 @@ export const ja: Translation = {
       maintenance: '維持',
       day: '{day}日目',
       of: ' / {total}',
-      labelSummit: 'Schwungの登山。山頂に到達。{total}日中{done}日達成。',
+      labelSummit: 'Schwungの登山。山頂に到達。{total}日中{done}日を登りました。',
       label: 'Schwungの登山。{total}日中{day}日目、{phase}の段階。これまでに{done}日達成。',
       openDay: '{day}。道のりで開く',
       climbed: '{total}日中{done}日を登りました · 日をタップ',

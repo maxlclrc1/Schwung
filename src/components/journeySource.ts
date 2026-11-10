@@ -14,6 +14,8 @@ export type JourneySource = {
   rest?: (day: number) => boolean;
   /** Past days kept with the minimum (Minimum Effort): not completed, never missed. */
   kept?: (day: number) => boolean;
+  /** Days that count (climbed), as the engine judges them; today too, once it counts. */
+  counted?: (day: number) => boolean;
   stats: { done: number; streak: number; best: number };
   title: (id: string) => string;
 };
@@ -39,6 +41,7 @@ export function useJourneySource(): JourneySource {
       today,
       rest: (day: number) => day < today && P.dayResult(program, day) === 'rest',
       kept: (day: number) => day < today && P.dayOutcome(program, day) === 'kept',
+      counted: (day: number) => P.dayResult(program, day) === 'counted',
       stats: P.journeyStats(program, today),
       title: (id: string) => P.nameOf(program, id),
     };

@@ -90,12 +90,14 @@ describe('kept-day streaks', () => {
     let p = program();
     p = done(p, FOUR, 1);
     p = min(p, FOUR, 2); // kept
-    p = min(done(p, ['mind_read', 'move_walk', 'outdoor_time'], 3), ['mind_meditation'], 3); // kept
+    p = min(done(p, ['mind_read', 'move_walk'], 3), ['mind_meditation'], 3); // kept: 2 done + 1 minimum of 4
     expect(P.pilotStreak(p, 4)).toBe(3);
     expect(P.journeyStats(p, 4)).toMatchObject({ done: 1, kept: 2, streak: 3, best: 3 });
-    p = done(p, ['mind_read'], 4); // missed
-    expect(P.pilotStreak(p, 5)).toBe(0);
-    expect(P.journeyStats(p, 5)).toMatchObject({ done: 1, kept: 2, best: 3 });
+    p = done(p, ['mind_read'], 4); // missed: a grace day, carried over
+    expect(P.pilotStreak(p, 5)).toBe(3);
+    p = done(p, ['mind_read'], 5); // missed again: two in a row end it
+    expect(P.pilotStreak(p, 6)).toBe(0);
+    expect(P.journeyStats(p, 6)).toMatchObject({ done: 1, kept: 2, best: 3 });
   });
 });
 
@@ -151,7 +153,7 @@ describe('Read Daily: pages mode is never offered, so no "one page" minimum appe
 
 describe('Journey and Insights wording on a kept day', () => {
   it('the day entry and its outcome agree', () => {
-    const p = min(done(program(), ['mind_read', 'move_walk', 'outdoor_time'], 1), ['mind_meditation'], 1);
+    const p = min(done(program(), ['mind_read', 'move_walk'], 1), ['mind_meditation'], 1);
     expect(P.dayOutcome(p, 1)).toBe('kept');
     expect(cellSummary(dayCell(p, 1, 2), (id) => P.nameOf(p, id))).toMatch(/^Kept with the minimum\./);
   });

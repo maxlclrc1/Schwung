@@ -337,12 +337,17 @@ describe('daily and weekly adherence', () => {
     expect(P.dayResult(focus, 6)).toBe('rest');
   });
 
-  it('keeps a streak through rest days, and breaks it on a missed daily habit', () => {
+  it('keeps a streak through rest days, carries one missed day over, and breaks it on two', () => {
     const weekly = doneOn(pilot(THREE.slice(1)), 'skill_practice', [1, 2, 5]);
     expect(P.pilotStreak(weekly, 5)).toBe(3);
-    const withRead = doneOn(doneOn(pilot(), 'mind_read', [1, 2, 4, 5]), 'skill_practice', [3]);
-    expect(P.pilotStreak(withRead, 5)).toBe(2);
-    expect(P.journeyStats(withRead, 5)).toEqual({ done: 4, kept: 0, streak: 2, best: 2 });
+    // A weekly habit done that day helps it: 1 of its 2 habits counts the day.
+    const helped = doneOn(doneOn(pilot(), 'mind_read', [1, 2, 4, 5]), 'skill_practice', [3]);
+    expect(P.journeyStats(helped, 5)).toEqual({ done: 5, kept: 0, streak: 5, best: 5 });
+    // Day 3 missed: a grace day (no day added). Days 6 and 7 missed: the streak ends.
+    const withRead = doneOn(pilot(), 'mind_read', [1, 2, 4, 5, 8]);
+    expect(P.journeyStats(withRead, 5)).toEqual({ done: 4, kept: 0, streak: 4, best: 4 });
+    expect(P.graceDays(withRead, 5)).toEqual([3]);
+    expect(P.journeyStats(withRead, 8)).toEqual({ done: 5, kept: 0, streak: 1, best: 4 });
   });
 });
 

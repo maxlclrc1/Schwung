@@ -264,6 +264,8 @@ export const zhHans: Translation = {
       kept: '以最低限度保住。',
 
       atMinimum: '最低限度：{list}。',
+
+      grace: ' 这天没有计入，但你的连续纪录延续了：每周错过一天不会中断它。',
     },
     observation: {
       steady: '第{week}周稳定在{pct}，与第{prev}周的{prevPct}相近。',
@@ -272,7 +274,7 @@ export const zhHans: Translation = {
       weekday: '{days}是你完成得最完整的日子：{count}次中有{full}次全部完成。',
       habit: '{habit}是你最稳定的习惯：{eligible}次中完成了{done}次（{pct}）。',
       goals: '{habit}：在{judged}个已结束的周中，有{met}周达成了每周目标。',
-      streak: '你正处于目前最长的连续纪录：连续{count}天。',
+      streak: '你正处于目前最长的连续纪录：{count}天。每周错过一天不会中断它。',
 
       habitMinimum: '{habit}是你最稳定的习惯：{eligible}次中完成{done}次，另有{minimum}次为最低限度（{pct}）。',
     },
@@ -911,7 +913,7 @@ export const zhHans: Translation = {
       maintenance: '保持期',
       day: '第{day}天',
       of: ' / {total}',
-      labelSummit: 'Schwung 攀登。已登顶。已完成{total}天中的{done}天。',
+      labelSummit: 'Schwung 攀登。已登顶。已攀登{done}/{total}天。',
       label: 'Schwung 攀登。第{day}天，共{total}天，{phase}阶段。目前已完成{done}天。',
       openDay: '{day}。在旅程中打开',
       climbed: '已攀登{done}/{total}天 · 点按某一天',
