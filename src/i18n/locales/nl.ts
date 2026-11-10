@@ -935,6 +935,8 @@ export const nl: Translation = {
 
       minimumHintDone:
         '{minimum} telt vandaag als komen opdagen. Je doel blijft hetzelfde ({target}); het helemaal doen telt nog steeds als gedaan.',
+
+      leavesTomorrowMinimum: 'Hij verdwijnt vanaf morgen (het minimum van vandaag blijft).',
     },
   },
   journeyTab: {

@@ -872,6 +872,8 @@ export const zhHant: Translation = {
         '最低限度是：{minimum}。它算作到場：和你的其他習慣一起，可以讓今天留在連續紀錄裡（+{xp} XP）。部分完成可得 +{xp} XP，但不計入連續紀錄。',
 
       minimumHintDone: '「{minimum}」讓今天算作到場。你的目標不變（{target}）；完整做完仍算完成。',
+
+      leavesTomorrowMinimum: '從明天起移除（今天的最低限度保留）。',
     },
   },
   journeyTab: {

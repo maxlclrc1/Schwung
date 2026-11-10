@@ -129,6 +129,7 @@ export const today = {
     tooHard: 'Too hard',
     remove: 'Remove from my Life Reset',
     leavesTomorrow: 'It leaves from tomorrow (today stays done).',
+    leavesTomorrowMinimum: 'It leaves from tomorrow (today’s minimum stays).',
     leavesToday: 'It leaves from today.',
     pastStays: ' Its past days stay in your Journey and Insights.',
     pastStaysAdd: ' Its past days stay in your Journey and Insights, and you can add it again any time.',

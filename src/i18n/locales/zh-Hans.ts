@@ -873,6 +873,8 @@ export const zhHans: Translation = {
         '最低限度是：{minimum}。它算作到场：和你的其他习惯一起，可以让今天留在连续纪录里（+{xp} XP）。部分完成可得 +{xp} XP，但不计入连续纪录。',
 
       minimumHintDone: '“{minimum}”让今天算作到场。你的目标不变（{target}）；完整做完仍算完成。',
+
+      leavesTomorrowMinimum: '从明天起移除（今天的最低限度保留）。',
     },
   },
   journeyTab: {

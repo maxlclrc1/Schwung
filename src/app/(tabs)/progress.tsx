@@ -101,7 +101,10 @@ function Ascent({ picked, source }: { picked: number | null; source: JourneySour
   const lastDay = Math.min(today, PROGRAM_DAYS);
   const shownDay = chosen ?? lastDay;
 
-  const days = useMemo(() => ascentDays(logs, start, today, source.rest), [logs, start, today, source.rest]);
+  const days = useMemo(
+    () => ascentDays(logs, start, today, source.rest, source.kept),
+    [logs, start, today, source.rest, source.kept],
+  );
   const todayDone = dayQualifies(logForDay(logs, start, today));
   // This page's scroll moves the shared world (the trail must stay on the painting), and the trail and labels stay
   // on the mountain as the pages slide, and fade in as the camera arrives (useOnPainting).

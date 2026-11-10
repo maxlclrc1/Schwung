@@ -82,7 +82,7 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
         const color =
           s === 'done' || (s === 'today' && todayDone)
             ? tone.lit
-            : s === 'missed' || s === 'rest' || s === 'today'
+            : s === 'missed' || s === 'kept' || s === 'rest' || s === 'today'
               ? tone.walked
               : tone.ahead;
         return (
@@ -100,6 +100,16 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
             <View key={d.day} style={[styles.abs, { left: x - 6.5, top: y - 6.5 }]}>
               <View style={[styles.halo, { backgroundColor: tone.halo }]} />
               <View style={[styles.marker, { backgroundColor: tone.lit, left: 3, top: 3 }]} />
+            </View>
+          );
+        // Kept with the minimum: the Journey's seed (mark A), a sage ring with a solid centre.
+        if (d.status === 'kept')
+          return (
+            <View
+              key={d.day}
+              style={[styles.marker, styles.hollow, styles.seed, { left: x - 3.5, top: y - 3.5, borderColor: tone.lit }]}
+            >
+              <View style={[styles.seedCentre, { backgroundColor: tone.lit }]} />
             </View>
           );
         if (d.status === 'missed')
@@ -415,6 +425,8 @@ const styles = StyleSheet.create({
   marker: { position: 'absolute', width: 7, height: 7, borderRadius: 3.5 },
   small: { width: 5, height: 5, borderRadius: 2.5 },
   hollow: { borderWidth: 1.5, backgroundColor: 'transparent' },
+  seed: { alignItems: 'center', justifyContent: 'center' },
+  seedCentre: { width: 2.5, height: 2.5, borderRadius: 1.25 },
   halo: { position: 'absolute', width: 13, height: 13, borderRadius: 6.5 },
   badge: { position: 'absolute', borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   phase: { position: 'absolute', paddingHorizontal: 7, paddingVertical: 3, borderRadius: radius.pill },

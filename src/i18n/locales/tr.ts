@@ -923,6 +923,8 @@ export const tr: Translation = {
 
       minimumHintDone:
         '{minimum}: bugün gelmiş sayılırsın. Hedefin aynı kalır ({target}); tamamını yapmak yine tamamlandı sayılır.',
+
+      leavesTomorrowMinimum: 'Yarından itibaren çıkar (bugünkü en azı kalır).',
     },
   },
   journeyTab: {

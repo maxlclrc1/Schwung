@@ -922,6 +922,8 @@ export const hi: Translation = {
 
       minimumHintDone:
         '{minimum}: आज की हाज़िरी गिनी गई। आपका लक्ष्य वही रहता है ({target}); इसे पूरा करना अब भी पूरा ही गिना जाता है।',
+
+      leavesTomorrowMinimum: 'यह कल से हटेगी (आज का न्यूनतम बना रहेगा)।',
     },
   },
   journeyTab: {

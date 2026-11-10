@@ -891,6 +891,8 @@ export const ko: Translation = {
 
       minimumHintDone:
         '‘{minimum}’(으)로 오늘 참여가 인정됐어요. 목표는 그대로예요 ({target}). 전부 하면 여전히 완료로 인정돼요.',
+
+      leavesTomorrowMinimum: '내일부터 빠져요 (오늘의 최소한은 그대로예요).',
     },
   },
   journeyTab: {

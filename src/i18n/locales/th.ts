@@ -892,6 +892,8 @@ export const th: Translation = {
 
       minimumHintDone:
         '{minimum} นับว่าคุณมาแล้ววันนี้ เป้าหมายของคุณยังเหมือนเดิม ({target}) ถ้าทำครบก็ยังนับว่าทำสำเร็จ',
+
+      leavesTomorrowMinimum: 'นำออกตั้งแต่พรุ่งนี้ (ขั้นต่ำของวันนี้ยังอยู่)',
     },
   },
   journeyTab: {

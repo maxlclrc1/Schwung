@@ -12,6 +12,8 @@ export type JourneySource = {
   today: number;
   /** Past days with nothing due (weekly habits resting): neither done nor missed. */
   rest?: (day: number) => boolean;
+  /** Past days kept with the minimum (Minimum Effort): not completed, never missed. */
+  kept?: (day: number) => boolean;
   stats: { done: number; streak: number; best: number };
   title: (id: string) => string;
 };
@@ -36,6 +38,7 @@ export function useJourneySource(): JourneySource {
       start: program.startedAt,
       today,
       rest: (day: number) => day < today && P.dayResult(program, day) === 'rest',
+      kept: (day: number) => day < today && P.dayOutcome(program, day) === 'kept',
       stats: P.journeyStats(program, today),
       title: (id: string) => P.nameOf(program, id),
     };

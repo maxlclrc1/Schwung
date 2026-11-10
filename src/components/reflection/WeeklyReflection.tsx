@@ -562,7 +562,7 @@ function Stop({
             ) : (
               <>
                 <T v="caption" color={c.textDim}>
-                  {P.isDone(program, id, today) ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
+                  {P.leavesText(P.removalStays(program, id, today))}
                   {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
                 </T>
                 <Button

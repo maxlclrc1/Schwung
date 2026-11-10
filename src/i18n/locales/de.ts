@@ -944,6 +944,8 @@ export const de: Translation = {
 
       minimumHintDone:
         '{minimum}: Das zählt heute als Dranbleiben. Dein Ziel bleibt gleich ({target}); es ganz zu machen, zählt weiterhin als erledigt.',
+
+      leavesTomorrowMinimum: 'Sie geht ab morgen (das Minimum von heute bleibt).',
     },
   },
   journeyTab: {

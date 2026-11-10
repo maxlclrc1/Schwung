@@ -721,10 +721,28 @@ export function removeProblem(p: PilotProgram, id: string): string | null {
  * past stays: earlier days, XP, the streak and Insights count it while it was in the program, and never after. A
  * change it had waiting is dropped. It can be added again later.
  */
+/**
+ * What removing a habit today keeps: 'done' or 'minimum' when today stays as it is (the habit leaves from tomorrow),
+ * null when it leaves from today. The screens' words follow this, so they always say what removeHabit does.
+ */
+export function removalStays(p: PilotProgram, id: string, day: number): 'done' | 'minimum' | null {
+  return isDone(p, id, day) ? 'done' : minimumOn(p, id, day) ? 'minimum' : null;
+}
+
+/** The removal note's first sentence, from `removalStays`. */
+export const leavesText = (stays: 'done' | 'minimum' | null) =>
+  t(
+    stays === 'done'
+      ? 'today.habit.leavesTomorrow'
+      : stays === 'minimum'
+        ? 'today.habit.leavesTomorrowMinimum'
+        : 'today.habit.leavesToday',
+  );
+
 export function removeHabit(p: PilotProgram, id: string, day: number): PilotProgram | null {
   if (removeProblem(p, id)) return null;
   const s = p.progression[id];
-  const from = isDone(p, id, day) || minimumOn(p, id, day) ? day + 1 : day;
+  const from = removalStays(p, id, day) ? day + 1 : day;
   const eras = s.eras.filter((e, i) => i === 0 || e.fromDay <= day);
   return {
     ...p,

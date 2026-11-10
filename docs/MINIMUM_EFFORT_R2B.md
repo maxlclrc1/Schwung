@@ -4,6 +4,8 @@
 internal (tester) builds. Production stays off until the safety wording is reviewed by a person and the full
 integration is verified on an iPhone. Turning it on is one line: `MINIMUM_EFFORT_LAUNCHED` in `src/lib/flags.ts`.
 
+Release checklist (verified items, iPhone checks, review blockers): `docs/MINIMUM_EFFORT_RELEASE_CHECKLIST.md`.
+
 Rules: `docs/MINIMUM_EFFORT_SPEC.md`. Approved content and mockups: `docs/MINIMUM_EFFORT_APPROVAL.md` (`d7652fc`).
 
 ## What was built

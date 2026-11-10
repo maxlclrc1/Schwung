@@ -927,6 +927,8 @@ export const es: Translation = {
 
       minimumHintDone:
         '{minimum} cuenta como presentarte hoy. Tu objetivo sigue igual ({target}); hacerlo del todo sigue contando como hecho.',
+
+      leavesTomorrowMinimum: 'Sale a partir de mañana (el mínimo de hoy se mantiene).',
     },
   },
   journeyTab: {
