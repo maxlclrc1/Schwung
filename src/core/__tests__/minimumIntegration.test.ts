@@ -7,7 +7,7 @@ import { MINIMUM_CATALOGUE_VERSION, MINIMUMS, minimumAvailable, minimumCounted }
 import { strongestHabit } from '../reset/observations';
 import * as P from '../reset/pilot';
 import type { HabitTrack } from '../reset/tracking';
-import { MINIMUM_EFFORT_LAUNCHED, minimumEffort } from '../../lib/flags';
+import { minimumEffort } from '../../lib/flags';
 import { t } from '../../i18n';
 
 /*
@@ -199,10 +199,10 @@ describe('the versioned catalogue: an edited backup can’t add a minimum Schwun
 
 describe('the launch switch: off for normal users until the safety wording is reviewed', () => {
   it('only development and internal (tester) builds offer it', () => {
-    expect(MINIMUM_EFFORT_LAUNCHED).toBe(false);
-    expect(minimumEffort('production')).toBe(false);
-    expect(minimumEffort('internal')).toBe(true);
-    expect(minimumEffort('development')).toBe(true);
+    // Before launch (the switch itself is guarded by minimumLaunch.test.ts).
+    expect(minimumEffort('production', false)).toBe(false);
+    expect(minimumEffort('internal', false)).toBe(true);
+    expect(minimumEffort('development', false)).toBe(true);
   });
 });
 

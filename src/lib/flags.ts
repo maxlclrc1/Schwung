@@ -27,12 +27,14 @@ export function devTools(): boolean {
 }
 
 /**
- * Minimum Effort (docs/MINIMUM_EFFORT_SPEC.md): whether "Did the minimum" is offered. Off for normal users (the
- * production channel) until its safety wording is reviewed and the full integration is verified on device; on for
- * development and internal (tester) builds. Turning it on for everyone is this one line. A minimum already saved
- * (from a tester build, or a restored backup) is shown and counted whatever this says; only recording is gated.
+ * Minimum Effort (docs/MINIMUM_EFFORT_SPEC.md): whether "Did the minimum" is offered. On for development and internal
+ * (tester, `eas build --profile internal`) builds; off for normal users (the production channel) until the release
+ * checklist is complete (docs/MINIMUM_EFFORT_RELEASE_CHECKLIST.md). The production release is this one line, set to
+ * true; `src/core/__tests__/minimumLaunch.test.ts` fails if it's set while any checklist item or Minimum Effort
+ * translation is still awaiting a person's sign-off. A minimum already saved (from a tester build, or a restored
+ * backup) is shown and counted whatever this says; only recording is gated.
  */
 export const MINIMUM_EFFORT_LAUNCHED = false;
-export function minimumEffort(ch: Channel = channel()): boolean {
-  return MINIMUM_EFFORT_LAUNCHED || ch !== 'production';
+export function minimumEffort(ch: Channel = channel(), launched: boolean = MINIMUM_EFFORT_LAUNCHED): boolean {
+  return launched || ch !== 'production';
 }

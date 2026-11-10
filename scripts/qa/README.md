@@ -26,6 +26,15 @@ node scripts/qa/run.mjs --lang=de,ar --scene=today,setup --config=small,large
 node scripts/qa/run.mjs --shots=all   # screenshot every case, not only those with problems
 ```
 
+**Minimum Effort** (offered only in development and internal builds): build with the internal channel, then run its
+scenes and its accessibility pass:
+
+```bash
+EXPO_PUBLIC_SCHWUNG_CHANNEL=internal npm run qa:build && npm run qa:fixtures
+node scripts/qa/run.mjs --scene=min-today,min-detail-recorded,min-detail-outdoors,min-detail-eatwell,min-journey,min-insights,min-momentum-journey,min-momentum-insights --config=small,large,small-large-dark
+node scripts/qa/minimum-a11y.mjs
+```
+
 **Requirements:** Playwright with Chromium. It is preinstalled in the cloud dev container, so it isn't a project dependency. Elsewhere, install it once with `npm i -g playwright && npx playwright install chromium`, then set `NODE_PATH` to the global `node_modules`.
 
 ## The matrix

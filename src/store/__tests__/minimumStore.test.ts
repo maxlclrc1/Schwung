@@ -26,12 +26,13 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 const mockChannel: { value: Channel } = { value: 'development' };
 const ch = (): Channel => mockChannel?.value ?? 'development';
 jest.mock('../../lib/flags', () => {
-  const actual = jest.requireActual('../../lib/flags') as { minimumEffort: (c: Channel) => boolean };
+  const actual = jest.requireActual('../../lib/flags') as { minimumEffort: (c: Channel, l: boolean) => boolean };
   return {
     ...actual,
     channel: () => ch(),
     devTools: () => ch() === 'development',
-    minimumEffort: () => actual.minimumEffort(ch()),
+    // These tests play a build before launch, whatever the switch says (minimumLaunch.test.ts guards the switch).
+    minimumEffort: () => actual.minimumEffort(ch(), false),
   };
 });
 
