@@ -12,6 +12,7 @@ export const insights = {
   strengthTarget: ' · target {goal}',
   facts: {
     week: '{done} of {eligible} this week',
+    weekMinimum: '{shown} of {eligible} this week, {minimum} at the minimum',
     streak: { one: '{count}-day streak', other: '{count}-day streak' },
     day: 'Day {day} of {total}',
   },
@@ -20,12 +21,18 @@ export const insights = {
     a11y: '{pct} consistency: {done} of {eligible} habit opportunities done',
     first: 'Your consistency starts with your first day.',
     done: '{done} of {eligible} habit opportunities done',
+    doneMinimum: '{shown} of {eligible} habit opportunities, {minimum} at the minimum',
+    a11yMinimum: '{pct} consistency: {shown} of {eligible} habit opportunities, {done} done and {minimum} at the minimum',
     weekValue: '{done} of {eligible}',
+    weekValueMinimum: '{done} of {eligible} · {minimum} at the minimum',
   },
   week: {
     range: { one: ' ({count} day)', other: ' ({count} days)' },
     closed: 'Week {week}{range}: {pct}, {done} of {eligible} done.',
+    closedMinimum: 'Week {week}{range}: {pct}, {done} of {eligible} done and {minimum} at the minimum.',
     current: 'Week {week}, so far: {done} of {eligible} done. Today and open weekly goals aren’t counted yet.',
+    currentMinimum:
+      'Week {week}, so far: {done} of {eligible} done and {minimum} at the minimum. Today and open weekly goals aren’t counted yet.',
     currentNone: 'Week {week}, so far: nothing to count yet.',
     unrecorded: 'Week {week}{range}: no days recorded.',
     none: 'Week {week}{range}: nothing was due.',
@@ -40,6 +47,7 @@ export const insights = {
     a11yStrongest: '{name}, your strongest habit. {share}. {kind}',
     noDays: 'No days yet',
     share: '{pct}, {done} of {eligible}',
+    shareMinimum: '{pct}, {done} of {eligible} done and {minimum} at the minimum',
     strongest: 'Strongest',
   },
   records: {
@@ -58,5 +66,6 @@ export const insights = {
     none: 'No clear patterns yet.',
   },
   strip: 'Last {count} days: {done} done',
+  stripMinimum: 'Last {count} days: {done} done, {minimum} at the minimum',
   bars: 'Week {week}: {done} of {goal}',
 };

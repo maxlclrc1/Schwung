@@ -73,9 +73,10 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
             : log
               ? 'missed'
               : 'unrecorded';
-  // The day's minimums, only when there are any (a day without them is exactly what it always was). The Journey's
-  // own mark for a kept day comes with the screens, after its preview is approved; until then it's a partial day.
-  return { ...base, state, done, skipped, planned, ...(minimum.length ? { minimum } : {}) };
+  // The day's minimums, only when there are any (a day without them is exactly what it always was), and whether
+  // they kept it (the Journey's seed mark, mark A).
+  const kept = minimum.length > 0 && state === 'partial' && P.dayOutcome(p, d) === 'kept';
+  return { ...base, state, done, skipped, planned, ...(minimum.length ? { minimum } : {}), ...(kept ? { kept } : {}) };
 }
 
 export type HabitBar = {

@@ -17,7 +17,11 @@ export type { ArchivedJourney };
  * Export my data, until the person deletes their data.
  */
 
-export const JOURNEYS_VERSION = 1;
+/**
+ * 2: a journey may hold minimums (Minimum Effort). Every v1 store is already valid (an identity step); the bump keeps an
+ * older Schwung, which would recount a journey without its kept days, from reading it: it holds it for recovery.
+ */
+export const JOURNEYS_VERSION = 2;
 
 export function journeysKey(ch: Channel = channel(), dev: boolean = __DEV__): string {
   return dev && ch === 'internal' ? 'schwung-journeys-internal' : 'schwung-journeys';

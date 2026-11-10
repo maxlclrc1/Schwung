@@ -9,6 +9,7 @@ import * as P from '../../core/reset/pilot';
 import { PARTIAL_XP, recoveryNote, SESSION_TYPES } from '../../core/reset/tracking';
 import { completionHaptic, haptic } from '../../lib/haptics';
 import { pilotNow, pilotToday, useResetPilot } from '../../store/resetPilot';
+import { minimumEffort } from '../../lib/flags';
 import { space, useTheme } from '../../theme';
 import { ThemedView } from '../../theme/transition';
 import { conceal, reflow, reveal } from '../../theme/motion';
@@ -71,6 +72,18 @@ export function PilotHabit() {
   const showMinutes = canLog && progress.kind === 'minutes';
   // The partial-progress rule, said once: by the partial action, or by the counter.
   const showHint = !done && (canLog || counter !== null);
+  // Minimum Effort: "Did the minimum", only where the launch switch and the catalogue offer one (never where it would
+  // equal the target), and "Remove minimum" whenever one is recorded today.
+  const hasMinimum = P.minimumOn(program, id, today);
+  const canMinimum = !hasMinimum && minimumEffort() && P.minimumFor(program, id, today);
+  const minimumHint = hasMinimum
+    ? t('today.habit.minimumHintDone', {
+        minimum: P.minimumText(id, 'title'),
+        target: P.targetText(program, id, today),
+      })
+    : canMinimum
+      ? t('today.habit.minimumHint', { minimum: P.minimumText(id, 'inline'), xp: PARTIAL_XP })
+      : null;
   const logProgress = (value: number | null) => {
     haptic.select();
     s().setProgress(id, value);
@@ -94,11 +107,13 @@ export function PilotHabit() {
       : t('today.habit.done')
     : track.skipped
       ? t('today.habit.skipped')
-      : track.progress
-        ? t('today.habit.partial')
-        : strength
-          ? t('today.habit.noSession')
-          : t('today.habit.notYet');
+      : hasMinimum
+        ? t('today.habit.minimumDone')
+        : track.progress
+          ? t('today.habit.partial')
+          : strength
+            ? t('today.habit.noSession')
+            : t('today.habit.notYet');
 
   return (
     <Screen edges={['bottom']}>
@@ -249,12 +264,28 @@ export function PilotHabit() {
                     />
                   </Animated.View>
                 ) : null}
+                {canMinimum || hasMinimum ? (
+                  // One more quiet link beneath, the same crossfade (never the completion haptic or celebration).
+                  <Animated.View
+                    key={hasMinimum ? 'minimum-remove' : 'minimum-add'}
+                    entering={REVEAL}
+                    exiting={CONCEAL}
+                  >
+                    <TextLink
+                      label={hasMinimum ? t('today.habit.removeMinimum') : t('today.habit.minimum')}
+                      onPress={() => {
+                        haptic.select();
+                        s().setMinimum(id, !hasMinimum);
+                      }}
+                    />
+                  </Animated.View>
+                ) : null}
               </Animated.View>
             )}
-            {showHint ? (
+            {showHint || minimumHint ? (
               <Animated.View entering={REVEAL} layout={REFLOW}>
                 <T v="caption" color={c.textDim} style={styles.hint}>
-                  {t('today.habit.progressHint', { xp: PARTIAL_XP })}
+                  {minimumHint ?? t('today.habit.progressHint', { xp: PARTIAL_XP })}
                 </T>
               </Animated.View>
             ) : null}

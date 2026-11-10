@@ -224,6 +224,19 @@ export const ja: Translation = {
     pending: '{when}から{level}：{target}',
     tomorrow: '明日',
     dayN: '{day}日目',
+
+    minimum: {
+      mind_read: { inline: '2分間読むか聴く', title: '2分間読むか聴く' },
+      mind_meditation: { inline: '好きな方法で静かな1分', title: '好きな方法で静かな1分' },
+
+      move_walk: { inline: '好きな方法で2分間体を動かす', title: '好きな方法で2分間体を動かす' },
+
+      outdoor_time: { inline: '2分間外に出る', title: '2分間外に出る' },
+
+      eat_well: { inline: '1食に果物か野菜', title: '1食に果物か野菜' },
+
+      social_reach_out: { inline: '大切な人に短いメッセージを1通', title: '大切な人に短いメッセージを1通' },
+    },
   },
   progress: {
     phase: { 1: '基礎', 2: '勢い', 3: '熟達' },
@@ -249,6 +262,10 @@ export const ja: Translation = {
       rest: '休息日：予定はありませんでした。',
       unrecorded: '記録なし：その日は何もチェックされていません。',
       future: 'まだ来ていません。',
+
+      kept: '最小限でつないだ日。',
+
+      atMinimum: '最小限：{list}。',
     },
     observation: {
       steady: '第{week}週は{pct}で安定し、第{prev}週の{prevPct}とほぼ同じでした。',
@@ -258,6 +275,8 @@ export const ja: Translation = {
       habit: '{habit}がいちばん安定している習慣です：{eligible}回中{done}回（{pct}）。',
       goals: '{habit}：終わった{judged}週のうち{met}週で週の目標を達成。',
       streak: '今までで最長の連続記録です：{count}日連続。',
+
+      habitMinimum: '{habit}がいちばん続いている習慣です：{eligible}回中{done}回達成、{minimum}回は最小限（{pct}）。',
     },
     weekdaysPlural: {
       0: '月曜日',
@@ -669,6 +688,11 @@ export const ja: Translation = {
       streak: '日の連続記録',
       best: '最長記録',
       xp: 'XP',
+
+      a11yKept:
+        '山頂から：{days}日、{counted}日カウント、{kept}日は最小限でつないだ日、{streak}日の連続記録、最長記録{best}、{xp} XP。',
+
+      kept: { other: 'ほかに最小限でつないだ日が{count}日（輪の付いた点）：連続記録は続いています。' },
     },
     pastLink: {
       title: 'これまでの道のり',
@@ -694,6 +718,11 @@ export const ja: Translation = {
       title: '最近 · 直近4週間',
       counted: { other: '/ {count}日カウント' },
       since: '山頂から：{counted}日カウント · 最長記録{best} · {xp} XP。下のグラフは66日間の登山の記録です。',
+
+      a11yKept:
+        '最近の4週間：{judged}日中{counted}日カウント、{kept}日は最小限でつないだ日。山頂から：{since}日カウント、{xp} XP。',
+
+      kept: { other: 'ほかに最小限でつないだ日が{count}日。' },
     },
     ascent: {
       title: '新しい登山を始める',
@@ -789,6 +818,8 @@ export const ja: Translation = {
       effort: '一部完了',
 
       logProgress: '一部完了にする',
+
+      minimum: '最小限を達成',
     },
     session: { fullBody: '全身', upper: '上半身', lower: '下半身', anything: 'その他' },
     offer: {
@@ -863,6 +894,18 @@ export const ja: Translation = {
       partialMinutes: 'できた時間（任意）',
 
       thisWeek: '今週',
+
+      minimum: '最小限できた',
+
+      removeMinimum: '最小限を取り消す',
+
+      minimumDone: '最小限を達成。',
+
+      minimumHint:
+        '最小限は「{minimum}」です。取り組んだ日として数えられ、ほかの習慣と合わせて今日を連続記録につなげられます（+{xp} XP）。一部完了は+{xp} XPで、連続記録には数えられません。',
+
+      minimumHintDone:
+        '「{minimum}」で今日は取り組んだ日になりました。目標は変わりません（{target}）。全部やれば、これまでどおり達成になります。',
     },
   },
   journeyTab: {
@@ -929,6 +972,8 @@ export const ja: Translation = {
       unrecorded: '記録なし。',
       future: 'まだこの先。',
       day: '{day}日目',
+
+      kept: '最小限でつないだ日。',
     },
 
     trail: { open: 'この日を開く' },
@@ -950,6 +995,12 @@ export const ja: Translation = {
       first: '継続率は最初の日から始まります。',
       done: '{eligible}回の機会中{done}回達成',
       weekValue: '{done} / {eligible}',
+
+      doneMinimum: '{eligible}回の機会中{shown}回、うち{minimum}回は最小限',
+
+      a11yMinimum: '継続率{pct}：{eligible}回の機会中{shown}回、{done}回達成、{minimum}回は最小限',
+
+      weekValueMinimum: '{eligible}回中{done}回 · {minimum}回は最小限',
     },
     week: {
       range: { other: ' （{count}日）' },
@@ -962,6 +1013,11 @@ export const ja: Translation = {
       judged: { other: '終わった週：{count}週' },
       first: '最初の週が進行中です',
       note: '週は月曜日から日曜日まで。最初の週のグラフは、その週が終わると表示されます。',
+
+      closedMinimum: '第{week}週{range}：{pct}、{eligible}回中{done}回達成、{minimum}回は最小限。',
+
+      currentMinimum:
+        '第{week}週の途中経過：{eligible}回中{done}回達成、{minimum}回は最小限。今日の分と途中の週の目標はまだカウントされません。',
     },
     habit: {
       hint: '履歴、目標、難易度を表示',
@@ -970,6 +1026,8 @@ export const ja: Translation = {
       noDays: 'まだ記録がありません',
       share: '{pct}、{eligible}回中{done}回',
       strongest: 'いちばん安定',
+
+      shareMinimum: '{pct}、{eligible}回中{done}回達成、{minimum}回は最小限',
     },
     records: {
       title: '自己ベスト',
@@ -993,7 +1051,11 @@ export const ja: Translation = {
       streak: { other: '{count}日の連続記録' },
 
       day: '{total}日中{day}日目',
+
+      weekMinimum: '今週 {eligible}件中{shown}件、うち{minimum}件は最小限',
     },
+
+    stripMinimum: '直近{count}日：{done}回達成、{minimum}回は最小限',
   },
   setup: {
     age: {

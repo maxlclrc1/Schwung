@@ -222,6 +222,19 @@ export const ko: Translation = {
     pending: '{when}부터 {level}: {target}',
     tomorrow: '내일',
     dayN: '{day}일째',
+
+    minimum: {
+      mind_read: { inline: '2분 동안 읽거나 듣기', title: '2분 동안 읽거나 듣기' },
+      mind_meditation: { inline: '원하는 방식으로 조용한 1분', title: '원하는 방식으로 조용한 1분' },
+
+      move_walk: { inline: '원하는 방식으로 2분 동안 움직이기', title: '원하는 방식으로 2분 동안 움직이기' },
+
+      outdoor_time: { inline: '2분 동안 밖에 나가기', title: '2분 동안 밖에 나가기' },
+
+      eat_well: { inline: '한 끼에 과일이나 채소', title: '한 끼에 과일이나 채소' },
+
+      social_reach_out: { inline: '소중한 사람에게 짧은 메시지 하나', title: '소중한 사람에게 짧은 메시지 하나' },
+    },
   },
   progress: {
     phase: { 1: '기초', 2: '모멘텀', 3: '숙련' },
@@ -247,6 +260,10 @@ export const ko: Translation = {
       rest: '쉬는 날: 할 일이 없었어요.',
       unrecorded: '기록 없음: 그날은 체크한 것이 없어요.',
       future: '아직 오지 않은 날이에요.',
+
+      kept: '최소한으로 이어 간 날.',
+
+      atMinimum: '최소한: {list}.',
     },
     observation: {
       steady: '{week}주차는 {pct}로 안정적이었고, {prev}주차의 {prevPct}와 비슷했어요.',
@@ -256,6 +273,9 @@ export const ko: Translation = {
       habit: '가장 꾸준한 습관은 {habit}: {eligible}번 중 {done}번 ({pct}).',
       goals: '{habit}: 끝난 {judged}주 중 {met}주 동안 주간 목표를 달성했어요.',
       streak: '지금까지 가장 긴 연속 기록이에요: {count}일 연속.',
+
+      habitMinimum:
+        '{habit}이(가) 가장 꾸준한 습관이에요: {eligible}번 중 {done}번 완료, {minimum}번은 최소한 ({pct}).',
     },
     weekdaysPlural: {
       0: '월요일',
@@ -654,6 +674,11 @@ export const ko: Translation = {
       streak: '일 연속 기록',
       best: '최고 기록',
       xp: 'XP',
+
+      a11yKept:
+        '정상 이후: {days}일, {counted}일 인정, {kept}일은 최소한으로 이어 감, {streak}일 연속 기록, 최고 기록 {best}, {xp} XP.',
+
+      kept: { other: '그리고 최소한으로 이어 간 날 {count}일 (테두리 점): 연속 기록이 계속돼요.' },
     },
     pastLink: {
       title: '지난 여정',
@@ -679,6 +704,11 @@ export const ko: Translation = {
       title: '최근 · 지난 4주',
       counted: { other: '/ {count}일 인정' },
       since: '정상 이후: {counted}일 인정 · 최고 기록 {best} · {xp} XP. 아래 차트는 66일 등반 기록이에요.',
+
+      a11yKept:
+        '최근 4주: {judged}일 중 {counted}일 인정, {kept}일은 최소한으로 이어 감. 정상 이후: {since}일 인정, {xp} XP.',
+
+      kept: { other: '그리고 최소한으로 이어 간 날 {count}일.' },
     },
     ascent: {
       title: '새 등반 시작하기',
@@ -773,6 +803,8 @@ export const ko: Translation = {
       effort: '일부 완료',
 
       logProgress: '일부 완료로 표시',
+
+      minimum: '최소한 완료',
     },
     session: { fullBody: '전신', upper: '상체', lower: '하체', anything: '기타' },
     offer: {
@@ -847,6 +879,18 @@ export const ko: Translation = {
       partialMinutes: '한 시간(분, 선택)',
 
       thisWeek: '이번 주',
+
+      minimum: '최소한은 했어요',
+
+      removeMinimum: '최소한 취소',
+
+      minimumDone: '최소한 완료.',
+
+      minimumHint:
+        '최소한은 ‘{minimum}’이에요. 참여한 것으로 인정돼요: 다른 습관과 함께 오늘을 연속 기록에 남길 수 있어요 (+{xp} XP). 일부 완료는 +{xp} XP이고, 연속 기록에는 포함되지 않아요.',
+
+      minimumHintDone:
+        '‘{minimum}’(으)로 오늘 참여가 인정됐어요. 목표는 그대로예요 ({target}). 전부 하면 여전히 완료로 인정돼요.',
     },
   },
   journeyTab: {
@@ -913,6 +957,8 @@ export const ko: Translation = {
       unrecorded: '기록 없음.',
       future: '아직 남은 날.',
       day: '{day}일째',
+
+      kept: '최소한으로 이어 간 날.',
     },
 
     trail: { open: '이날 열기' },
@@ -934,6 +980,12 @@ export const ko: Translation = {
       first: '꾸준함은 첫날부터 시작돼요.',
       done: '습관 기회 {eligible}번 중 {done}번 완료',
       weekValue: '{done}/{eligible}',
+
+      doneMinimum: '습관 기회 {eligible}번 중 {shown}번, {minimum}번은 최소한',
+
+      a11yMinimum: '꾸준함 {pct}: 습관 기회 {eligible}번 중 {shown}번, {done}번 완료, {minimum}번은 최소한',
+
+      weekValueMinimum: '{eligible}번 중 {done}번 · {minimum}번은 최소한',
     },
     week: {
       range: { other: ' ({count}일)' },
@@ -947,6 +999,11 @@ export const ko: Translation = {
       judged: { other: '끝난 주 {count}주' },
       first: '첫 주가 진행 중이에요',
       note: '한 주는 월요일부터 일요일까지예요. 첫 주의 그래프는 그 주가 끝나면 시작돼요.',
+
+      closedMinimum: '{week}주차{range}: {pct}, {eligible}번 중 {done}번 완료, {minimum}번은 최소한.',
+
+      currentMinimum:
+        '{week}주차, 지금까지: {eligible}번 중 {done}번 완료, {minimum}번은 최소한. 오늘과 아직 진행 중인 주간 목표는 아직 계산되지 않아요.',
     },
     habit: {
       hint: '기록, 목표, 난이도 보기',
@@ -955,6 +1012,8 @@ export const ko: Translation = {
       noDays: '아직 기록 없음',
       share: '{pct}, {eligible}번 중 {done}번',
       strongest: '가장 꾸준함',
+
+      shareMinimum: '{pct}, {eligible}번 중 {done}번 완료, {minimum}번은 최소한',
     },
     records: {
       title: '개인 기록',
@@ -978,7 +1037,11 @@ export const ko: Translation = {
       streak: { other: '{count}일 연속 기록' },
 
       day: '{total}일 중 {day}일째',
+
+      weekMinimum: '이번 주 {eligible}개 중 {shown}개, {minimum}개는 최소한',
     },
+
+    stripMinimum: '최근 {count}일: {done}번 완료, {minimum}번은 최소한',
   },
   setup: {
     age: {

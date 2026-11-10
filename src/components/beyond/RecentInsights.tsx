@@ -23,8 +23,9 @@ export function RecentInsights({ program, today }: { program: P.PilotProgram; to
     <ThemedView
       style={[styles.panel, { backgroundColor: c.surface }]}
       accessible
-      accessibilityLabel={t('beyond.recent.a11y', {
+      accessibilityLabel={t(recent.kept ? 'beyond.recent.a11yKept' : 'beyond.recent.a11y', {
         counted: recent.counted,
+        kept: recent.kept,
         judged: recent.judged,
         since: since.counted,
         xp: since.xp,
@@ -42,6 +43,12 @@ export function RecentInsights({ program, today }: { program: P.PilotProgram; to
         </T>
       </View>
       <ProgressBar value={share} height={6} color={tint.sage.fill} />
+      {/* Days kept with the minimum aren't counted days, but they're never misses: said beside the bar. */}
+      {recent.kept ? (
+        <T v="caption" color={c.textDim}>
+          {t('beyond.recent.kept', { count: recent.kept })}
+        </T>
+      ) : null}
       <T v="caption" color={c.textDim}>
         {t('beyond.recent.since', { counted: since.counted, best: since.best, xp: since.xp })}
       </T>

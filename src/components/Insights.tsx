@@ -44,15 +44,27 @@ export function InsightsPage({ children }: { children: ReactNode }) {
   );
 }
 
-export type StripState = 'done' | 'skipped' | 'missed' | 'rest' | 'today';
+export type StripState = 'done' | 'minimum' | 'skipped' | 'missed' | 'rest' | 'today';
 
-/** The last days as small marks: filled done, hollow missed, faint rest; today outlined. */
+/**
+ * The last days as small marks: filled done, hollow missed, faint rest; today outlined. A day kept with the minimum is
+ * the Journey's seed: a sage ring with a small solid centre.
+ */
 export function DayStrip({ days }: { days: { day: number; state: StripState }[] }) {
   const { c } = useTheme();
   const t = useT();
   const done = days.filter((d) => d.state === 'done').length;
+  const minimum = days.filter((d) => d.state === 'minimum').length;
   return (
-    <View style={styles.strip} accessible accessibilityLabel={t('insights.strip', { count: days.length, done })}>
+    <View
+      style={styles.strip}
+      accessible
+      accessibilityLabel={t(minimum ? 'insights.stripMinimum' : 'insights.strip', {
+        count: days.length,
+        done,
+        minimum,
+      })}
+    >
       {days.map((d) => (
         <View
           key={d.day}
@@ -60,13 +72,17 @@ export function DayStrip({ days }: { days: { day: number; state: StripState }[] 
             styles.mark,
             d.state === 'done'
               ? { backgroundColor: c.sage }
-              : d.state === 'missed' || d.state === 'skipped'
-                ? { borderWidth: 1.5, borderColor: c.textFaint }
-                : d.state === 'today'
-                  ? { borderWidth: 1.5, borderColor: c.mistInk }
-                  : { backgroundColor: c.border, transform: [{ scale: 0.5 }] },
+              : d.state === 'minimum'
+                ? [styles.seed, { borderColor: c.sage }]
+                : d.state === 'missed' || d.state === 'skipped'
+                  ? { borderWidth: 1.5, borderColor: c.textFaint }
+                  : d.state === 'today'
+                    ? { borderWidth: 1.5, borderColor: c.mistInk }
+                    : { backgroundColor: c.border, transform: [{ scale: 0.5 }] },
           ]}
-        />
+        >
+          {d.state === 'minimum' ? <View style={[styles.seedCentre, { backgroundColor: c.sage }]} /> : null}
+        </View>
       ))}
     </View>
   );
@@ -112,6 +128,8 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 },
   strip: { flexDirection: 'row', gap: 4, flexWrap: 'wrap' },
   mark: { width: 12, height: 12, borderRadius: 6 },
+  seed: { borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  seedCentre: { width: 4, height: 4, borderRadius: 2 },
   bars: { flexDirection: 'row', gap: 8, alignItems: 'flex-end' },
   barCol: { alignItems: 'center', gap: 4 },
   bar: { width: 14, height: 40, borderRadius: 4, overflow: 'hidden', justifyContent: 'flex-end' },

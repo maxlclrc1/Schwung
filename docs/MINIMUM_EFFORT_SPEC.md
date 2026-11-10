@@ -12,15 +12,16 @@ once the per-habit review in §3 is done.
 
 **R2a (engine) — implemented, not reachable in the app:**
 
-- `core/reset/minimum.ts` holds the review gate. No minimum is approved, so nothing can be recorded outside tests.
+- `core/reset/minimum.ts` holds the review gate and the versioned catalogue. The six minimums are approved (R2b).
 - `HabitTrack.minimum` and `markMinimum` are in `tracking.ts`.
 - `minimumFor`, `minimumOn`, `setMinimum`, `dayOutcome`, the XP rules, the statistics, `consistency` and
   `fullShare` are in `pilot.ts`.
 - The save is version 3.
-- The screens (R2b) aren't built.
+- The screens (R2b) are built, behind a launch switch that is off for normal users:
+  `docs/MINIMUM_EFFORT_R2B.md`.
 
 **Content and visual approval package:** `docs/MINIMUM_EFFORT_APPROVAL.md`, with real-app mockups in
-`docs/minimum-effort/`. It's awaiting approval.
+`docs/minimum-effort/`. Approved at `d7652fc` (mark A, the seed).
 
 **Sources:**
 

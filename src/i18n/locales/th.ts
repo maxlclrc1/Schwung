@@ -222,6 +222,22 @@ export const th: Translation = {
     pending: '{level} ตั้งแต่{when}: {target}',
     tomorrow: 'พรุ่งนี้',
     dayN: 'วันที่ {day}',
+
+    minimum: {
+      mind_read: { inline: 'อ่านหรือฟัง 2 นาที', title: 'อ่านหรือฟัง 2 นาที' },
+      mind_meditation: { inline: 'นิ่งสงบหนึ่งนาที ในแบบที่คุณชอบ', title: 'นิ่งสงบหนึ่งนาที ในแบบที่คุณชอบ' },
+
+      move_walk: { inline: 'ขยับร่างกาย 2 นาที ในแบบที่คุณชอบ', title: 'ขยับร่างกาย 2 นาที ในแบบที่คุณชอบ' },
+
+      outdoor_time: { inline: 'ออกไปข้างนอก 2 นาที', title: 'ออกไปข้างนอก 2 นาที' },
+
+      eat_well: { inline: 'ผลไม้หรือผักในหนึ่งมื้อ', title: 'ผลไม้หรือผักในหนึ่งมื้อ' },
+
+      social_reach_out: {
+        inline: 'ข้อความสั้น ๆ หนึ่งข้อความถึงคนที่คุณใส่ใจ',
+        title: 'ข้อความสั้น ๆ หนึ่งข้อความถึงคนที่คุณใส่ใจ',
+      },
+    },
   },
   progress: {
     phase: { 1: 'รากฐาน', 2: 'แรงส่ง', 3: 'เชี่ยวชาญ' },
@@ -247,6 +263,10 @@ export const th: Translation = {
       rest: 'วันพัก: ไม่มีอะไรต้องทำ',
       unrecorded: 'ไม่มีบันทึก: วันนั้นไม่ได้ติ๊กอะไรเลย',
       future: 'ยังมาไม่ถึง',
+
+      kept: 'รักษาไว้ด้วยขั้นต่ำ',
+
+      atMinimum: 'แบบขั้นต่ำ: {list}',
     },
     observation: {
       steady: 'สัปดาห์ที่ {week} คงที่ที่ {pct} ใกล้กับ {prevPct} ของสัปดาห์ที่ {prev}',
@@ -256,6 +276,9 @@ export const th: Translation = {
       habit: '{habit} เป็นนิสัยที่คุณทำสม่ำเสมอที่สุด: {done} จาก {eligible} ครั้ง ({pct})',
       goals: '{habit}: ทำได้ตามเป้าหมายรายสัปดาห์ {met} จาก {judged} สัปดาห์ที่จบแล้ว',
       streak: 'คุณกำลังทำสถิติต่อเนื่องยาวที่สุด: {count} วันติดต่อกัน',
+
+      habitMinimum:
+        '{habit} คือนิสัยที่คุณทำสม่ำเสมอที่สุด: ทำแล้ว {done} จาก {eligible} ครั้ง และแบบขั้นต่ำ {minimum} ครั้ง ({pct})',
     },
     weekdaysPlural: {
       0: 'วันจันทร์',
@@ -651,6 +674,11 @@ export const th: Translation = {
       streak: 'วันต่อเนื่อง',
       best: 'ต่อเนื่องดีที่สุด',
       xp: 'XP',
+
+      a11yKept:
+        'ตั้งแต่พิชิตยอดเขา: {days} วัน นับแล้ว {counted} วัน และรักษาไว้ด้วยขั้นต่ำ {kept} วัน สถิติต่อเนื่อง {streak} วัน ดีที่สุด {best} {xp} XP',
+
+      kept: { other: 'และอีก {count} วันที่รักษาไว้ด้วยขั้นต่ำ (จุดที่มีวง): สถิติต่อเนื่องของคุณยังไปต่อ' },
     },
     pastLink: {
       title: 'เส้นทางที่ผ่านมา',
@@ -677,6 +705,11 @@ export const th: Translation = {
       counted: { other: 'จาก {count} วันที่นับ' },
       since:
         'ตั้งแต่พิชิตยอดเขา: นับแล้ว {counted} · ต่อเนื่องดีที่สุด {best} · {xp} XP กราฟด้านล่างคือการปีน 66 วันของคุณ',
+
+      a11yKept:
+        'ช่วงนี้ สี่สัปดาห์ล่าสุด: นับแล้ว {counted} จาก {judged} วัน และรักษาไว้ด้วยขั้นต่ำ {kept} วัน ตั้งแต่พิชิตยอดเขา: นับแล้ว {since} วัน และ {xp} XP',
+
+      kept: { other: 'และอีก {count} วันที่รักษาไว้ด้วยขั้นต่ำ' },
     },
     ascent: {
       title: 'เริ่มการปีนครั้งใหม่',
@@ -772,6 +805,8 @@ export const th: Translation = {
       effort: 'ทำสำเร็จบางส่วน',
 
       logProgress: 'ทำเครื่องหมายว่าสำเร็จบางส่วน',
+
+      minimum: 'ทำขั้นต่ำแล้ว',
     },
     session: { fullBody: 'ทั้งตัว', upper: 'ช่วงบน', lower: 'ช่วงล่าง', anything: 'อื่น ๆ' },
     offer: {
@@ -845,6 +880,18 @@ export const th: Translation = {
       partialMinutes: 'นาทีที่ทำ (ไม่บังคับ)',
 
       thisWeek: 'สัปดาห์นี้',
+
+      minimum: 'ทำขั้นต่ำแล้ว',
+
+      removeMinimum: 'เอาขั้นต่ำออก',
+
+      minimumDone: 'ทำขั้นต่ำแล้ว',
+
+      minimumHint:
+        'ขั้นต่ำคือ {minimum} นับว่าคุณมาแล้ว: เมื่อรวมกับนิสัยอื่น ๆ วันนี้จะยังอยู่ในสถิติต่อเนื่องได้ (+{xp} XP) ส่วนการทำสำเร็จบางส่วนได้ +{xp} XP โดยไม่นับในสถิติต่อเนื่อง',
+
+      minimumHintDone:
+        '{minimum} นับว่าคุณมาแล้ววันนี้ เป้าหมายของคุณยังเหมือนเดิม ({target}) ถ้าทำครบก็ยังนับว่าทำสำเร็จ',
     },
   },
   journeyTab: {
@@ -911,6 +958,8 @@ export const th: Translation = {
       unrecorded: 'ไม่มีบันทึก',
       future: 'ยังมาไม่ถึง',
       day: 'วันที่ {day}',
+
+      kept: 'รักษาไว้ด้วยขั้นต่ำ',
     },
 
     trail: { open: 'เปิดดูวันนั้น' },
@@ -932,6 +981,12 @@ export const th: Translation = {
       first: 'ความสม่ำเสมอของคุณเริ่มนับตั้งแต่วันแรก',
       done: 'ทำแล้ว {done} จาก {eligible} โอกาส',
       weekValue: '{done} จาก {eligible}',
+
+      doneMinimum: '{shown} จาก {eligible} โอกาส แบบขั้นต่ำ {minimum}',
+
+      a11yMinimum: 'ความสม่ำเสมอ {pct}: {shown} จาก {eligible} โอกาส ทำแล้ว {done} และแบบขั้นต่ำ {minimum}',
+
+      weekValueMinimum: '{done} จาก {eligible} · แบบขั้นต่ำ {minimum}',
     },
     week: {
       range: { other: ' ({count} วัน)' },
@@ -945,6 +1000,11 @@ export const th: Translation = {
       judged: { other: '{count} สัปดาห์ที่จบแล้ว' },
       first: 'สัปดาห์แรกของคุณกำลังดำเนินอยู่',
       note: 'สัปดาห์เริ่มวันจันทร์ถึงวันอาทิตย์ เส้นกราฟของสัปดาห์แรกจะเริ่มเมื่อสัปดาห์นั้นจบ',
+
+      closedMinimum: 'สัปดาห์ที่ {week}{range}: {pct} ทำแล้ว {done} จาก {eligible} และแบบขั้นต่ำ {minimum}',
+
+      currentMinimum:
+        'สัปดาห์ที่ {week} จนถึงตอนนี้: ทำแล้ว {done} จาก {eligible} และแบบขั้นต่ำ {minimum} ยังไม่นับวันนี้และเป้าหมายรายสัปดาห์ที่ยังไม่จบ',
     },
     habit: {
       hint: 'แสดงประวัติ เป้าหมาย และระดับความยาก',
@@ -953,6 +1013,8 @@ export const th: Translation = {
       noDays: 'ยังไม่มีวัน',
       share: '{pct}, {done} จาก {eligible}',
       strongest: 'แข็งแรงที่สุด',
+
+      shareMinimum: '{pct}, ทำแล้ว {done} จาก {eligible} และแบบขั้นต่ำ {minimum}',
     },
     records: {
       title: 'สถิติส่วนตัว',
@@ -976,7 +1038,11 @@ export const th: Translation = {
       streak: { other: 'สถิติต่อเนื่อง {count} วัน' },
 
       day: 'วันที่ {day} จาก {total}',
+
+      weekMinimum: 'สัปดาห์นี้ {shown} จาก {eligible} แบบขั้นต่ำ {minimum}',
     },
+
+    stripMinimum: '{count} วันล่าสุด: ทำแล้ว {done} แบบขั้นต่ำ {minimum}',
   },
   setup: {
     age: {

@@ -60,6 +60,7 @@ export const journeyTab = {
     today: 'Today.',
     full: 'Complete.',
     partial: 'Partly done.',
+    kept: 'Kept with the minimum.',
     missed: 'Nothing done.',
     skipped: 'Skipped.',
     rest: 'A rest day.',

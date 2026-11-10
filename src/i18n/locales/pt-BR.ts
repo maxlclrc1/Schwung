@@ -238,6 +238,28 @@ export const ptBR: Translation = {
     pending: '{level} a partir de {when}: {target}',
     tomorrow: 'amanhã',
     dayN: 'o dia {day}',
+
+    minimum: {
+      mind_read: { inline: 'ler ou ouvir por 2 minutos', title: 'Leia ou ouça por 2 minutos' },
+      mind_meditation: {
+        inline: 'um minuto de calma, do jeito que quiser',
+        title: 'Um minuto de calma, do jeito que quiser',
+      },
+
+      move_walk: {
+        inline: 'se mexer por 2 minutos, do jeito que quiser',
+        title: 'Mexa-se por 2 minutos, do jeito que quiser',
+      },
+
+      outdoor_time: { inline: 'sair por 2 minutos', title: 'Saia por 2 minutos' },
+
+      eat_well: { inline: 'frutas ou legumes em uma refeição', title: 'Frutas ou legumes em uma refeição' },
+
+      social_reach_out: {
+        inline: 'uma mensagem curta para alguém de quem você gosta',
+        title: 'Uma mensagem curta para alguém de quem você gosta',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Base', 2: 'Impulso', 3: 'Maestria' },
@@ -264,6 +286,10 @@ export const ptBR: Translation = {
       rest: 'Um dia de descanso: nada estava previsto.',
       unrecorded: 'Sem registro: nada foi marcado nesse dia.',
       future: 'Ainda não chegou.',
+
+      kept: 'Mantido com o mínimo.',
+
+      atMinimum: 'Com o mínimo: {list}.',
     },
     observation: {
       steady: 'A semana {week} se manteve em {pct}, perto dos {prevPct} da semana {prev}.',
@@ -273,6 +299,9 @@ export const ptBR: Translation = {
       habit: '{habit} é seu hábito mais constante: {done} de {eligible} vezes ({pct}).',
       goals: '{habit}: meta semanal cumprida em {met} de {judged} semanas concluídas.',
       streak: 'Você está na sua maior sequência até agora: {count} dias seguidos.',
+
+      habitMinimum:
+        '{habit} é seu hábito mais constante: {done} de {eligible} vezes feito e {minimum} com o mínimo ({pct}).',
     },
     weekdaysPlural: {
       0: 'segundas',
@@ -680,6 +709,14 @@ export const ptBR: Translation = {
       streak: 'dias de sequência',
       best: 'melhor sequência',
       xp: 'XP',
+
+      a11yKept:
+        'Desde o cume: {days} dias, {counted} contados e {kept} mantidos com o mínimo, sequência de {streak} dias, melhor sequência {best}, {xp} XP.',
+
+      kept: {
+        one: 'Mais {count} dia mantido com o mínimo (o ponto com anel): ele mantém sua sequência.',
+        other: 'Mais {count} dias mantidos com o mínimo (os pontos com anel): eles mantêm sua sequência.',
+      },
     },
     pastLink: {
       title: 'Jornadas anteriores',
@@ -706,6 +743,11 @@ export const ptBR: Translation = {
       counted: { one: 'de {count} dia contado', other: 'de {count} dias contados' },
       since:
         'Desde o cume: {counted} contados · melhor sequência {best} · {xp} XP. Os gráficos abaixo são sua subida de 66 dias.',
+
+      a11yKept:
+        'Ultimamente, as últimas quatro semanas: {counted} de {judged} dias contados e {kept} mantidos com o mínimo. Desde o cume: {since} dias contados e {xp} XP.',
+
+      kept: { one: 'Mais {count} dia mantido com o mínimo.', other: 'Mais {count} dias mantidos com o mínimo.' },
     },
     ascent: {
       title: 'Começar uma nova subida',
@@ -801,6 +843,8 @@ export const ptBR: Translation = {
       effort: 'Concluído em parte',
 
       logProgress: 'Marcar como concluído em parte',
+
+      minimum: 'Mínimo feito',
     },
     session: { fullBody: 'Corpo inteiro', upper: 'Membros superiores', lower: 'Membros inferiores', anything: 'Outro' },
     offer: {
@@ -878,6 +922,18 @@ export const ptBR: Translation = {
       partialMinutes: 'Minutos feitos (opcional)',
 
       thisWeek: 'Esta semana',
+
+      minimum: 'Fiz o mínimo',
+
+      removeMinimum: 'Remover o mínimo',
+
+      minimumDone: 'Mínimo feito.',
+
+      minimumHint:
+        'O mínimo é {minimum}. Conta como aparecer: junto com seus outros hábitos, pode manter hoje na sua sequência (+{xp} XP). Concluído em parte dá +{xp} XP, sem a sequência.',
+
+      minimumHintDone:
+        '{minimum} conta como aparecer hoje. Sua meta continua a mesma ({target}); fazer por completo ainda conta como feito.',
     },
   },
   journeyTab: {
@@ -944,6 +1000,8 @@ export const ptBR: Translation = {
       unrecorded: 'Sem registro.',
       future: 'Ainda por vir.',
       day: 'Dia {day}',
+
+      kept: 'Mantido com o mínimo.',
     },
 
     trail: { open: 'Abrir dia' },
@@ -965,6 +1023,13 @@ export const ptBR: Translation = {
       first: 'Sua constância começa no seu primeiro dia.',
       done: '{done} de {eligible} oportunidades de hábito feitas',
       weekValue: '{done} de {eligible}',
+
+      doneMinimum: '{shown} de {eligible} oportunidades de hábito, {minimum} com o mínimo',
+
+      a11yMinimum:
+        '{pct} de constância: {shown} de {eligible} oportunidades de hábito, {done} feitas e {minimum} com o mínimo',
+
+      weekValueMinimum: '{done} de {eligible} · {minimum} com o mínimo',
     },
     week: {
       range: { one: ' ({count} dia)', other: ' ({count} dias)' },
@@ -978,6 +1043,11 @@ export const ptBR: Translation = {
       judged: { one: '{count} semana concluída', other: '{count} semanas concluídas' },
       first: 'Sua primeira semana está em andamento',
       note: 'As semanas vão de segunda a domingo. A linha da sua primeira semana começa quando ela termina.',
+
+      closedMinimum: 'Semana {week}{range}: {pct}, {done} de {eligible} feitos e {minimum} com o mínimo.',
+
+      currentMinimum:
+        'Semana {week}, até agora: {done} de {eligible} feitos e {minimum} com o mínimo. Hoje e as metas semanais em aberto ainda não contam.',
     },
     habit: {
       hint: 'Mostra histórico, meta e dificuldade',
@@ -986,6 +1056,8 @@ export const ptBR: Translation = {
       noDays: 'Ainda sem dias',
       share: '{pct}, {done} de {eligible}',
       strongest: 'Mais forte',
+
+      shareMinimum: '{pct}, {done} de {eligible} feitos e {minimum} com o mínimo',
     },
     records: {
       title: 'Recordes pessoais',
@@ -1009,7 +1081,11 @@ export const ptBR: Translation = {
       streak: { one: 'sequência de {count} dia', other: 'sequência de {count} dias' },
 
       day: 'Dia {day} de {total}',
+
+      weekMinimum: '{shown} de {eligible} nesta semana, {minimum} com o mínimo',
     },
+
+    stripMinimum: 'Últimos {count} dias: {done} feitos, {minimum} com o mínimo',
   },
   setup: {
     age: { u16: 'Menos de 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

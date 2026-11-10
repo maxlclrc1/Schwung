@@ -230,6 +230,19 @@ export const ur: Translation = {
     pending: '{when} سے {level}: {target}',
     tomorrow: 'کل',
     dayN: 'دن {day}',
+
+    minimum: {
+      mind_read: { inline: '2 منٹ پڑھنا یا سننا', title: '2 منٹ پڑھیں یا سنیں' },
+      mind_meditation: { inline: 'ایک پرسکون منٹ، جیسے چاہیں', title: 'ایک پرسکون منٹ، جیسے چاہیں' },
+
+      move_walk: { inline: '2 منٹ حرکت کرنا، جیسے چاہیں', title: '2 منٹ حرکت کریں، جیسے چاہیں' },
+
+      outdoor_time: { inline: '2 منٹ کے لیے باہر نکلنا', title: '2 منٹ کے لیے باہر نکلیں' },
+
+      eat_well: { inline: 'ایک کھانے میں پھل یا سبزیاں', title: 'ایک کھانے میں پھل یا سبزیاں' },
+
+      social_reach_out: { inline: 'کسی عزیز کو ایک مختصر پیغام', title: 'کسی عزیز کو ایک مختصر پیغام' },
+    },
   },
   progress: {
     phase: { 1: 'بنیاد', 2: 'رفتار', 3: 'مہارت' },
@@ -256,6 +269,10 @@ export const ur: Translation = {
       rest: 'آرام کا دن: کچھ بھی طے نہیں تھا۔',
       unrecorded: 'کوئی ریکارڈ نہیں: اس دن کچھ بھی نشان زد نہیں کیا گیا۔',
       future: 'ابھی وہاں تک نہیں پہنچے۔',
+
+      kept: 'کم از کم سے برقرار رکھا۔',
+
+      atMinimum: 'کم از کم پر: {list}۔',
     },
     observation: {
       steady: 'ہفتہ {week} {pct} پر مستحکم رہا، ہفتہ {prev} کے {prevPct} کے قریب۔',
@@ -265,6 +282,9 @@ export const ur: Translation = {
       habit: '{habit} آپ کی سب سے باقاعدہ عادت ہے: {eligible} میں سے {done} بار ({pct})۔',
       goals: '{habit}: مکمل ہونے والے {judged} ہفتوں میں سے {met} میں ہفتہ وار ہدف پورا ہوا۔',
       streak: 'آپ اب تک کے اپنے سب سے لمبے تسلسل پر ہیں: لگاتار {count} دن۔',
+
+      habitMinimum:
+        '{habit} آپ کی سب سے باقاعدہ عادت ہے: {eligible} میں سے {done} بار مکمل اور {minimum} بار کم از کم پر ({pct})۔',
     },
     weekdaysPlural: {
       0: 'پیر کے دن',
@@ -673,6 +693,14 @@ export const ur: Translation = {
       streak: 'دن کا تسلسل',
       best: 'بہترین سلسلہ',
       xp: 'XP',
+
+      a11yKept:
+        'چوٹی کے بعد سے: {days} دن، {counted} شمار ہوئے اور {kept} کم از کم سے برقرار رکھے گئے، {streak} دن کا تسلسل، بہترین سلسلہ {best}، {xp} XP۔',
+
+      kept: {
+        one: 'مزید {count} دن کم از کم سے برقرار رکھا گیا (حلقے والا نقطہ): یہ آپ کا تسلسل جاری رکھتا ہے۔',
+        other: 'مزید {count} دن کم از کم سے برقرار رکھے گئے (حلقے والے نقطے): یہ آپ کا تسلسل جاری رکھتے ہیں۔',
+      },
     },
     pastLink: {
       title: 'پچھلے سفر',
@@ -700,6 +728,14 @@ export const ur: Translation = {
       counted: { one: '{count} میں سے شمار شدہ دن', other: '{count} میں سے شمار شدہ دن' },
       since:
         'چوٹی کے بعد سے: {counted} شمار ہوئے · بہترین سلسلہ {best} · {xp} XP۔ نیچے کے چارٹ آپ کی 66 دن کی چڑھائی ہیں۔',
+
+      a11yKept:
+        'حال ہی میں، پچھلے چار ہفتے: {judged} میں سے {counted} دن شمار ہوئے اور {kept} کم از کم سے برقرار رکھے گئے۔ چوٹی کے بعد سے: {since} دن شمار ہوئے اور {xp} XP۔',
+
+      kept: {
+        one: 'مزید {count} دن کم از کم سے برقرار رکھا گیا۔',
+        other: 'مزید {count} دن کم از کم سے برقرار رکھے گئے۔',
+      },
     },
     ascent: {
       title: 'نئی چڑھائی شروع کریں',
@@ -795,6 +831,8 @@ export const ur: Translation = {
       effort: 'جزوی طور پر مکمل',
 
       logProgress: 'جزوی طور پر مکمل نشان زد کریں',
+
+      minimum: 'کم از کم مکمل',
     },
     session: { fullBody: 'پورا جسم', upper: 'اوپری جسم', lower: 'نچلا جسم', anything: 'دیگر' },
     offer: {
@@ -869,6 +907,18 @@ export const ur: Translation = {
       partialMinutes: 'کیے گئے منٹ (اختیاری)',
 
       thisWeek: 'اس ہفتے',
+
+      minimum: 'کم از کم کر لیا',
+
+      removeMinimum: 'کم از کم ہٹائیں',
+
+      minimumDone: 'کم از کم مکمل۔',
+
+      minimumHint:
+        'کم از کم یہ ہے: {minimum}۔ یہ حاضری شمار ہوتی ہے: آپ کی دوسری عادتوں کے ساتھ، یہ آج کو آپ کے تسلسل میں رکھ سکتی ہے (+{xp} XP)۔ جزوی طور پر مکمل کرنے سے +{xp} XP ملتے ہیں، تسلسل کے بغیر۔',
+
+      minimumHintDone:
+        '{minimum}: آج یہ حاضری شمار ہوئی۔ آپ کا ہدف وہی رہتا ہے ({target})؛ اسے پورا کرنا اب بھی مکمل ہی شمار ہوتا ہے۔',
     },
   },
   journeyTab: {
@@ -935,6 +985,8 @@ export const ur: Translation = {
       unrecorded: 'کوئی ریکارڈ نہیں۔',
       future: 'ابھی آگے ہے۔',
       day: 'دن {day}',
+
+      kept: 'کم از کم سے برقرار رکھا۔',
     },
 
     trail: { open: 'دن کھولیں' },
@@ -956,6 +1008,12 @@ export const ur: Translation = {
       first: 'آپ کی باقاعدگی آپ کے پہلے دن سے شروع ہوتی ہے۔',
       done: '{eligible} عادت کے مواقع میں سے {done} مکمل',
       weekValue: '{eligible} میں سے {done}',
+
+      doneMinimum: '{eligible} عادت کے مواقع میں سے {shown}، {minimum} کم از کم پر',
+
+      a11yMinimum: '{pct} باقاعدگی: {eligible} عادت کے مواقع میں سے {shown}، {done} مکمل اور {minimum} کم از کم پر',
+
+      weekValueMinimum: '{eligible} میں سے {done} · {minimum} کم از کم پر',
     },
     week: {
       range: { one: ' ({count} دن)', other: ' ({count} دن)' },
@@ -968,6 +1026,11 @@ export const ur: Translation = {
       judged: { one: '{count} مکمل ہفتہ', other: '{count} مکمل ہفتے' },
       first: 'آپ کا پہلا ہفتہ جاری ہے',
       note: 'ہفتے پیر سے اتوار تک چلتے ہیں۔ آپ کے پہلے ہفتے کی لکیر اس کے ختم ہونے کے بعد شروع ہوتی ہے۔',
+
+      closedMinimum: 'ہفتہ {week}{range}: {pct}، {eligible} میں سے {done} مکمل اور {minimum} کم از کم پر۔',
+
+      currentMinimum:
+        'ہفتہ {week}، اب تک: {eligible} میں سے {done} مکمل اور {minimum} کم از کم پر۔ آج اور کھلے ہفتہ وار اہداف ابھی شمار نہیں ہوئے۔',
     },
     habit: {
       hint: 'اس کی تاریخ، ہدف اور مشکل دکھاتا ہے',
@@ -976,6 +1039,8 @@ export const ur: Translation = {
       noDays: 'ابھی کوئی دن نہیں',
       share: '{pct}، {eligible} میں سے {done}',
       strongest: 'سب سے مضبوط',
+
+      shareMinimum: '{pct}، {eligible} میں سے {done} مکمل اور {minimum} کم از کم پر',
     },
     records: {
       title: 'ذاتی ریکارڈ',
@@ -999,7 +1064,11 @@ export const ur: Translation = {
       streak: { one: '{count} دن کا تسلسل', other: '{count} دن کا تسلسل' },
 
       day: 'دن {day} از {total}',
+
+      weekMinimum: 'اس ہفتے {eligible} میں سے {shown}، {minimum} کم از کم پر',
     },
+
+    stripMinimum: 'پچھلے {count} دن: {done} مکمل، {minimum} کم از کم پر',
   },
   setup: {
     age: { u16: '18 سے کم', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

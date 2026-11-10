@@ -44,6 +44,7 @@ export const today = {
     minutes: '{minutes} min',
     skipped: 'Skipped today',
     partialMinutes: 'Partially completed · {minutes} min',
+    minimum: 'Minimum done',
     effort: 'Partially completed',
     logProgress: 'Mark as partially completed',
     addDetails: 'Add details',
@@ -106,6 +107,13 @@ export const today = {
     progressHint: 'Mark it as partially completed for +{xp} XP. Only a full completion counts toward your streak.',
     effort: 'Mark as partially completed',
     removePartial: 'Remove partial completion',
+    minimum: 'Did the minimum',
+    removeMinimum: 'Remove minimum',
+    minimumDone: 'Minimum done.',
+    minimumHint:
+      'The minimum is {minimum}. It counts as showing up: with your other habits, it can keep today in your streak (+{xp} XP). Partially completed earns +{xp} XP, without the streak.',
+    minimumHintDone:
+      '{minimum} counts as showing up today. Your goal stays the same ({target}); doing it in full still counts as done.',
     partialMinutes: 'Minutes done (optional)',
     min: '{minutes} min',
     session: 'Session details (optional)',

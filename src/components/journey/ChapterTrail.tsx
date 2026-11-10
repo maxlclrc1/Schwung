@@ -42,7 +42,7 @@ export const CHAPTERS = [
 ] as const;
 export type Chapter = (typeof CHAPTERS)[number];
 
-type Look = 'today' | 'milestone' | 'full' | 'partial' | 'missed' | 'rest' | 'future';
+type Look = 'today' | 'milestone' | 'full' | 'partial' | 'kept' | 'missed' | 'rest' | 'future';
 
 function look(cell: DayCell | undefined, day: number, today: number): Look {
   if (day === today) return 'today';
@@ -51,7 +51,8 @@ function look(cell: DayCell | undefined, day: number, today: number): Look {
     case 'full':
       return 'full';
     case 'partial':
-      return 'partial';
+      // Kept with the minimum: the partly-done ring with a small solid centre (mark A, the seed).
+      return cell?.kept ? 'kept' : 'partial';
     case 'missed':
     case 'unrecorded':
       return 'missed';
@@ -339,6 +340,11 @@ function Marker({
         <Circle cx={x} cy={y} r={6} fill={c.sage} stroke={paper} strokeWidth={1.5} />
       ) : lk === 'partial' ? (
         <Circle cx={x} cy={y} r={5.6} fill={paper} stroke={c.sage} strokeWidth={2} />
+      ) : lk === 'kept' ? (
+        <G>
+          <Circle cx={x} cy={y} r={5.6} fill={paper} stroke={c.sage} strokeWidth={2} />
+          <Circle cx={x} cy={y} r={2.1} fill={c.sage} />
+        </G>
       ) : lk === 'missed' ? (
         <G>
           <Circle cx={x} cy={y} r={5.6} fill={paper} stroke={c.textDim} strokeWidth={1.4} />
@@ -356,9 +362,11 @@ function Marker({
 function dayLabel(cell: DayCell | undefined, day: number, isToday: boolean): string {
   const state = isToday
     ? tr(cell?.state === 'full' ? 'journeyTab.cell.todayComplete' : 'journeyTab.cell.today')
-    : cell
-      ? tr(`journeyTab.cell.${cell.state === 'today' ? 'future' : cell.state}`)
-      : '';
+    : cell?.kept
+      ? tr('journeyTab.cell.kept')
+      : cell
+        ? tr(`journeyTab.cell.${cell.state === 'today' ? 'future' : cell.state}`)
+        : '';
   return LANDMARKS[day]
     ? tr('journeyTab.cell.a11yMilestone', { day, milestone: LANDMARKS[day].name, state })
     : tr('journeyTab.cell.a11y', { day, state });

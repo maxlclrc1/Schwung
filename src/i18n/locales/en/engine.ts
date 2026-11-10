@@ -72,6 +72,18 @@ export const engine = {
   minutes: { one: '{count} minute', other: '{count} minutes' },
   blocks: '{n} × {each}',
   duration: { min: '{m} min', hours: '{h} h', hoursMinutes: '{h} h {mm}' },
+  /** Minimum Effort: each habit's one-day minimum, as a phrase (inline) and on its own (title). */
+  minimum: {
+    mind_read: { inline: 'read or listen for 2 minutes', title: 'Read or listen for 2 minutes' },
+    mind_meditation: { inline: 'one quiet minute, any way you like', title: 'One quiet minute, any way you like' },
+    move_walk: { inline: 'move for 2 minutes, any way you like', title: 'Move for 2 minutes, any way you like' },
+    outdoor_time: { inline: 'step outside for 2 minutes', title: 'Step outside for 2 minutes' },
+    eat_well: { inline: 'fruit or vegetables in one meal', title: 'Fruit or vegetables in one meal' },
+    social_reach_out: {
+      inline: 'one short message to someone you care about',
+      title: 'One short message to someone you care about',
+    },
+  },
   target: {
     strength: { one: '{count} session a week', other: '{count} sessions a week' },
     strengthAbout: '{sessions}, about {minutes} min',

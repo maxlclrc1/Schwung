@@ -5,7 +5,7 @@ import * as P from '../core/reset/pilot';
 import type { Reflection, ReflectionAnswer } from '../core/reset/reflections';
 import type { Feedback, Offer } from '../core/reset/readiness';
 import type { SessionType } from '../core/reset/tracking';
-import { channel, devTools, type Channel } from '../lib/flags';
+import { channel, devTools, minimumEffort, type Channel } from '../lib/flags';
 import { CROP_COUNT } from '../components/habitArt';
 import { useJourneys } from './journeys';
 import { endRecovery, keepRaw, startRecovery, useRecovery } from './recovery';
@@ -83,6 +83,11 @@ type Actions = {
   setProgress: (habitId: string, value: number | null) => P.PilotChange['event'];
   /** Mark (or unmark) today as partially completed: 5 XP, never a completion. */
   setPartial: (habitId: string, on: boolean) => void;
+  /**
+   * "Did the minimum" (or remove it) today: 5 XP, never a completion. Recording only where the launch switch
+   * (`flags.minimumEffort`) and the catalogue allow it; removing always works.
+   */
+  setMinimum: (habitId: string, on: boolean) => void;
   setSession: (details: { type?: SessionType; minutes?: number }) => void;
   /** Less Scrolling's weekly Screen Time check (this week). */
   setScreenTime: (minutesPerDay: number) => void;
@@ -266,6 +271,10 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
         setMinutes: (id, minutes) => void change((p, day) => P.setMinutes(p, id, day, minutes)),
         setProgress: (id, value) => change((p, day) => P.setProgress(p, id, day, value)),
         setPartial: (id, on) => void change((p, day) => P.setPartial(p, id, day, on)),
+        setMinimum: (id, on) =>
+          void change((p, day) =>
+            on && !minimumEffort() ? { program: p, event: null } : P.setMinimum(p, id, day, on),
+          ),
         setSession: (details) => void change((p, day) => P.setSession(p, day, details)),
         setScreenTime: (minutes) => progress((p, day) => P.setScreenTime(p, day, minutes)),
 

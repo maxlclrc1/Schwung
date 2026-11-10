@@ -26,23 +26,17 @@ export function SinceSummit({ program, today }: { program: P.PilotProgram; today
   const t = useT();
   const s = useMemo(() => P.sinceSummit(program, today), [program, today]);
   const streak = useMemo(() => P.pilotStreak(program, today), [program, today]);
-  const from = program.after?.since ?? today;
-  const strip = useMemo(() => {
-    const out: ('counted' | 'missed' | 'rest' | 'today')[] = [];
-    for (let d = Math.max(from, today - STRIP + 1); d <= today; d++) {
-      const r = P.dayResult(program, d);
-      out.push(d === today && r !== 'counted' ? 'today' : r);
-    }
-    return out;
-  }, [program, today, from]);
+  // Consistency's outcomes: a day kept with the minimum is a ringed dot, never a miss.
+  const strip = useMemo(() => P.sinceSummitStrip(program, today, STRIP), [program, today]);
 
   return (
     <ThemedView
       style={[styles.panel, { backgroundColor: c.surface }]}
       accessible
-      accessibilityLabel={t('beyond.since.a11y', {
+      accessibilityLabel={t(s.kept ? 'beyond.since.a11yKept' : 'beyond.since.a11y', {
         days: s.days,
         counted: s.counted,
+        kept: s.kept,
         streak,
         best: s.best,
         xp: s.xp,
@@ -73,13 +67,22 @@ export function SinceSummit({ program, today }: { program: P.PilotProgram; today
                 styles.dot,
                 r === 'counted'
                   ? { backgroundColor: tint.sage.fill }
-                  : r === 'missed'
-                    ? { backgroundColor: c.border }
-                    : { borderWidth: 1.5, borderColor: r === 'today' ? tint.sage.fill : c.border },
+                  : r === 'kept'
+                    ? [styles.kept, { borderColor: tint.sage.fill }]
+                    : r === 'missed'
+                      ? { backgroundColor: c.border }
+                      : { borderWidth: 1.5, borderColor: r === 'today' ? tint.sage.fill : c.border },
               ]}
-            />
+            >
+              {r === 'kept' ? <View style={[styles.keptCentre, { backgroundColor: tint.sage.fill }]} /> : null}
+            </View>
           ))}
         </View>
+      ) : null}
+      {s.kept ? (
+        <T v="caption" color={c.textDim}>
+          {t('beyond.since.kept', { count: s.kept })}
+        </T>
       ) : null}
     </ThemedView>
   );
@@ -137,6 +140,8 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', gap: space.sm },
   strip: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },
   dot: { width: 9, height: 9, borderRadius: 5 },
+  kept: { borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  keptCentre: { width: 3, height: 3, borderRadius: 1.5 },
   link: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
   icon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
 });

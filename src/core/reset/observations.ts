@@ -65,14 +65,13 @@ export function strongestHabit(habits: { name: string; tally: Tally }[]): Observ
   const top = ranked.reduce((a, b) => (of(b.tally) > of(a.tally) ? b : a));
   const share = of(top.tally);
   if (share < 0.5) return null;
+  // When the share includes minimums, the words say so (the count and the percentage always agree).
+  const words = { habit: top.name, done: top.tally.done, eligible: top.tally.eligible, pct: pctText(share) };
   return {
     id: 'habit',
-    text: t('progress.observation.habit', {
-      habit: top.name,
-      done: top.tally.done,
-      eligible: top.tally.eligible,
-      pct: pctText(share),
-    }),
+    text: top.tally.minimum
+      ? t('progress.observation.habitMinimum', { ...words, minimum: top.tally.minimum })
+      : t('progress.observation.habit', words),
     tone: 'up',
   };
 }

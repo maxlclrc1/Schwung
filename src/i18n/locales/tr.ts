@@ -235,6 +235,22 @@ export const tr: Translation = {
     pending: '{when} itibarıyla {level}: {target}',
     tomorrow: 'yarın',
     dayN: 'Gün {day}',
+
+    minimum: {
+      mind_read: { inline: '2 dakika okumak ya da dinlemek', title: '2 dakika oku ya da dinle' },
+      mind_meditation: { inline: 'nasıl istersen, sessiz bir dakika', title: 'Nasıl istersen, sessiz bir dakika' },
+
+      move_walk: { inline: 'nasıl istersen 2 dakika hareket etmek', title: 'Nasıl istersen 2 dakika hareket et' },
+
+      outdoor_time: { inline: '2 dakikalığına dışarı çıkmak', title: '2 dakikalığına dışarı çık' },
+
+      eat_well: { inline: 'bir öğünde meyve ya da sebze', title: 'Bir öğünde meyve ya da sebze' },
+
+      social_reach_out: {
+        inline: 'değer verdiğin birine kısa bir mesaj',
+        title: 'Değer verdiğin birine kısa bir mesaj',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Temel', 2: 'İvme', 3: 'Ustalık' },
@@ -261,6 +277,10 @@ export const tr: Translation = {
       rest: 'Dinlenme günü: yapılacak bir şey yoktu.',
       unrecorded: 'Kayıt yok: o gün hiçbir şey işaretlenmedi.',
       future: 'Henüz gelmedi.',
+
+      kept: 'En azıyla korundu.',
+
+      atMinimum: 'En azıyla: {list}.',
     },
     observation: {
       steady: 'Hafta {week} {pct} ile sabit kaldı; Hafta {prev} {prevPct} idi, ona yakın.',
@@ -270,6 +290,9 @@ export const tr: Translation = {
       habit: 'En istikrarlı alışkanlığın {habit}: {eligible} fırsatın {done} tanesi ({pct}).',
       goals: '{habit}: tamamlanan {judged} haftanın {met} tanesinde haftalık hedefe ulaşıldı.',
       streak: 'Şu ana kadarki en uzun serindesin: art arda {count} gün.',
+
+      habitMinimum:
+        'En istikrarlı alışkanlığın {habit}: {eligible} seferden {done} tanesi tamam, {minimum} tanesi en azıyla ({pct}).',
     },
     weekdaysPlural: {
       0: 'Pazartesiler',
@@ -678,6 +701,14 @@ export const tr: Translation = {
       streak: 'günlük seri',
       best: 'en iyi seri',
       xp: 'XP',
+
+      a11yKept:
+        'Zirveden beri: {days} gün, {counted} sayıldı ve {kept} en azıyla korundu, {streak} günlük seri, en iyi seri {best}, {xp} XP.',
+
+      kept: {
+        one: 'Ayrıca {count} gün en azıyla korundu (halkalı nokta): serini sürdürür.',
+        other: 'Ayrıca {count} gün en azıyla korundu (halkalı noktalar): serini sürdürür.',
+      },
     },
     pastLink: {
       title: 'Geçmiş yolculuklar',
@@ -704,6 +735,11 @@ export const tr: Translation = {
       counted: { one: '{count} günden sayılan', other: '{count} günden sayılan' },
       since:
         'Zirveden beri: {counted} sayıldı · en iyi seri {best} · {xp} XP. Aşağıdaki grafikler 66 günlük tırmanışın.',
+
+      a11yKept:
+        'Son dört hafta: {judged} günden {counted} tanesi sayıldı, {kept} tanesi en azıyla korundu. Zirveden beri: {since} gün sayıldı ve {xp} XP.',
+
+      kept: { one: 'Ayrıca {count} gün en azıyla korundu.', other: 'Ayrıca {count} gün en azıyla korundu.' },
     },
     ascent: {
       title: 'Yeni Bir Tırmanışa Başla',
@@ -799,6 +835,8 @@ export const tr: Translation = {
       effort: 'Kısmen tamamlandı',
 
       logProgress: 'Kısmen tamamlandı olarak işaretle',
+
+      minimum: 'En azı yapıldı',
     },
     session: { fullBody: 'Tüm vücut', upper: 'Üst vücut', lower: 'Alt vücut', anything: 'Diğer' },
     offer: {
@@ -873,6 +911,18 @@ export const tr: Translation = {
       partialMinutes: 'Yapılan dakika (isteğe bağlı)',
 
       thisWeek: 'Bu hafta',
+
+      minimum: 'En azını yaptım',
+
+      removeMinimum: 'En azını kaldır',
+
+      minimumDone: 'En azı yapıldı.',
+
+      minimumHint:
+        'En azı: {minimum}. Bu, gelmiş sayılmandır: diğer alışkanlıklarınla birlikte bugünü serinde tutabilir (+{xp} XP). Kısmen tamamlandı +{xp} XP kazandırır, seri olmadan.',
+
+      minimumHintDone:
+        '{minimum}: bugün gelmiş sayılırsın. Hedefin aynı kalır ({target}); tamamını yapmak yine tamamlandı sayılır.',
     },
   },
   journeyTab: {
@@ -939,6 +989,8 @@ export const tr: Translation = {
       unrecorded: 'Kayıt yok.',
       future: 'Henüz gelmedi.',
       day: 'Gün {day}',
+
+      kept: 'En azıyla korundu.',
     },
 
     trail: { open: 'Günü aç' },
@@ -960,6 +1012,13 @@ export const tr: Translation = {
       first: 'İstikrarın ilk gününle başlar.',
       done: '{eligible} alışkanlık fırsatından {done} tanesi yapıldı',
       weekValue: '{done} / {eligible}',
+
+      doneMinimum: '{eligible} alışkanlık fırsatından {shown} tanesi, {minimum} tanesi en azıyla',
+
+      a11yMinimum:
+        '{pct} istikrar: {eligible} alışkanlık fırsatından {shown} tanesi, {done} tanesi tamam ve {minimum} tanesi en azıyla',
+
+      weekValueMinimum: '{done} / {eligible} · {minimum} tanesi en azıyla',
     },
     week: {
       range: { one: ' ({count} gün)', other: ' ({count} gün)' },
@@ -973,6 +1032,11 @@ export const tr: Translation = {
       judged: { one: '{count} tamamlanan hafta', other: '{count} tamamlanan hafta' },
       first: 'İlk haftan sürüyor',
       note: 'Haftalar pazartesiden pazara sürer. İlk haftanın çizgisi o hafta bitince başlar.',
+
+      closedMinimum: 'Hafta {week}{range}: {pct}, {eligible} fırsattan {done} tamam ve {minimum} tanesi en azıyla.',
+
+      currentMinimum:
+        'Hafta {week}, şimdiye kadar: {eligible} fırsattan {done} tamam ve {minimum} tanesi en azıyla. Bugün ve açık haftalık hedefler henüz sayılmıyor.',
     },
     habit: {
       hint: 'Geçmişini, hedefini ve zorluğunu gösterir',
@@ -981,6 +1045,8 @@ export const tr: Translation = {
       noDays: 'Henüz gün yok',
       share: '{pct}, {done} / {eligible}',
       strongest: 'En güçlü',
+
+      shareMinimum: '{pct}, {eligible} fırsattan {done} tamam ve {minimum} tanesi en azıyla',
     },
     records: {
       title: 'Kişisel rekorlar',
@@ -1004,7 +1070,11 @@ export const tr: Translation = {
       streak: { one: '{count} günlük seri', other: '{count} günlük seri' },
 
       day: 'Gün {day}/{total}',
+
+      weekMinimum: 'Bu hafta {eligible} fırsattan {shown}, {minimum} tanesi en azıyla',
     },
+
+    stripMinimum: 'Son {count} gün: {done} tamam, {minimum} tanesi en azıyla',
   },
   setup: {
     age: { u16: '18 yaş altı', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

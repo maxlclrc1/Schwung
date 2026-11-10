@@ -367,7 +367,10 @@ function PilotCard({
       }
       skipped={!!track.skipped}
       partialText={
-        done || !track.progress || counter !== null
+        // Minimum Effort: shown on the card only once it's used (it's never "done").
+        !done && P.minimumOn(program, habitId, today)
+          ? tr('today.card.minimum')
+          : done || !track.progress || counter !== null
           ? null
           : track.progress.value
             ? tr('today.card.partialMinutes', { minutes: track.progress.value })

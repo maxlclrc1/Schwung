@@ -84,6 +84,12 @@ export const beyond = {
   },
   since: {
     a11y: 'Since the summit: {days} days, {counted} counted, a {streak}-day streak, best run {best}, {xp} XP.',
+    a11yKept:
+      'Since the summit: {days} days, {counted} counted and {kept} kept with the minimum, a {streak}-day streak, best run {best}, {xp} XP.',
+    kept: {
+      one: 'Plus {count} day kept with the minimum (the ringed dot): it keeps your streak going.',
+      other: 'Plus {count} days kept with the minimum (the ringed dots): they keep your streak going.',
+    },
     title: 'Since the summit · Keep My Momentum',
     counted: 'of {count} days counted',
     streak: 'day streak',
@@ -114,6 +120,9 @@ export const beyond = {
     title: 'Lately · the last four weeks',
     counted: { one: 'of {count} day counted', other: 'of {count} days counted' },
     since: 'Since the summit: {counted} counted · best run {best} · {xp} XP. The charts below are your 66-day climb.',
+    a11yKept:
+      'Lately, the last four weeks: {counted} of {judged} days counted and {kept} kept with the minimum. Since the summit: {since} days counted and {xp} XP.',
+    kept: { one: 'Plus {count} day kept with the minimum.', other: 'Plus {count} days kept with the minimum.' },
   },
   ascent: {
     title: 'Begin a New Ascent',

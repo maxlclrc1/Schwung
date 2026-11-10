@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
-import { judgedWeeks, type Records, type Tally, type WeekPoint } from '../core/charts';
+import { consistency, judgedWeeks, type Records, type Tally, type WeekPoint } from '../core/charts';
 import { PROGRAM_DAYS } from '../core/dates';
 import type { Observation } from '../core/reset/observations';
 import { haptic } from '../lib/haptics';
@@ -40,6 +40,8 @@ const SETTLE = Easing.bezier(0.22, 1, 0.36, 1);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const pctText = (share: number | null) => (share === null ? '—' : formatPercent(Math.round(share * 100) / 100));
 const ROMAN = ['I', 'II', 'III', 'IV', 'V'] as const;
+/** Enough dots for the widest bar (520 pt at 4 pt a dot); the segment clips the rest. */
+const MINIMUM_DOTS = Array.from({ length: 130 }, (_, i) => i);
 
 /** 0 → 1 once on mount (a short delay, on the shared curve): the charts' one entrance. */
 function useEntrance(delay = 0, duration = 760) {
@@ -176,7 +178,7 @@ export const Consistency = memo(function Consistency({
   // The facts on one line with fine separators while they fit, else one to a line (large text, long words).
   const [box, setBox] = useState(0);
   const lang = useLanguage();
-  const factKey = `${week.done}/${week.eligible}/${streak}/${day}/${lang}`;
+  const factKey = `${week.done}/${week.minimum ?? 0}/${week.eligible}/${streak}/${day}/${lang}`;
   // Widths measured for these words (measured again when the facts or the language change).
   const [measured, setMeasured] = useState<{ key: string; w: number[] }>({ key: '', w: [] });
   const widths = measured.key === factKey ? measured.w : [];
@@ -188,10 +190,22 @@ export const Consistency = memo(function Consistency({
       next[i] = w;
       return { key: factKey, w: next };
     });
-  const share = overall.eligible ? overall.done / overall.eligible : null;
+  // Consistency: full completions and minimums (without minimums, the full-completion share it always was). Wherever
+  // the share includes minimums, the words name them.
+  const share = consistency(overall);
+  const minimum = overall.minimum ?? 0;
+  const counts = { done: overall.done, eligible: overall.eligible, minimum, shown: overall.done + minimum };
   const size = Math.round(Math.min(116, (Math.min(width, 520) - space.lg * 2) * 0.32));
   const facts = [
-    week.eligible ? t('insights.facts.week', { done: week.done, eligible: week.eligible }) : null,
+    week.eligible
+      ? week.minimum
+        ? t('insights.facts.weekMinimum', {
+            shown: week.done + week.minimum,
+            eligible: week.eligible,
+            minimum: week.minimum,
+          })
+        : t('insights.facts.week', { done: week.done, eligible: week.eligible })
+      : null,
     t('insights.facts.streak', { count: streak }),
     day > PROGRAM_DAYS
       ? t('beyond.pastSummit', { day })
@@ -207,7 +221,7 @@ export const Consistency = memo(function Consistency({
         accessibilityLabel={
           share === null
             ? t('insights.ring.a11yNone')
-            : t('insights.ring.a11y', { pct: pctText(share), done: overall.done, eligible: overall.eligible })
+            : t(minimum ? 'insights.ring.a11yMinimum' : 'insights.ring.a11y', { pct: pctText(share), ...counts })
         }
       >
         <BigFigure text={pctText(share)} size={size} color={share === null ? c.textFaint : c.text} />
@@ -215,7 +229,7 @@ export const Consistency = memo(function Consistency({
           {share === null ? (
             t('insights.ring.first')
           ) : (
-            <Figures text={t('insights.ring.done', { done: overall.done, eligible: overall.eligible })} />
+            <Figures text={t(minimum ? 'insights.ring.doneMinimum' : 'insights.ring.done', counts)} />
           )}
         </T>
       </View>
@@ -248,12 +262,14 @@ export const Consistency = memo(function Consistency({
 
 function weekWords(p: WeekPoint): string {
   const range = p.days < 7 ? tr('insights.week.range', { count: p.days }) : '';
-  const base = { week: p.week, range, done: p.done, eligible: p.eligible };
+  const base = { week: p.week, range, done: p.done, eligible: p.eligible, minimum: p.minimum ?? 0 };
   switch (p.state) {
     case 'closed':
-      return tr('insights.week.closed', { ...base, pct: pctText(p.share) });
+      return tr(p.minimum ? 'insights.week.closedMinimum' : 'insights.week.closed', { ...base, pct: pctText(p.share) });
     case 'current':
-      return p.eligible ? tr('insights.week.current', base) : tr('insights.week.currentNone', base);
+      return p.eligible
+        ? tr(p.minimum ? 'insights.week.currentMinimum' : 'insights.week.current', base)
+        : tr('insights.week.currentNone', base);
     case 'unrecorded':
       return tr('insights.week.unrecorded', base);
     case 'none':
@@ -513,7 +529,7 @@ export type HabitRow = {
  */
 export function HabitBoard({ rows }: { rows: HabitRow[] }) {
   const { c } = useTheme();
-  const share = (t: Tally) => (t.eligible ? t.done / t.eligible : -1);
+  const share = (t: Tally) => consistency(t) ?? -1;
   const sorted = [...rows].sort((a, b) => share(b.tally) - share(a.tally));
   const strongest =
     sorted.length > 1 && sorted[0].tally.eligible >= 5 && share(sorted[0].tally) > share(sorted[1].tally)
@@ -547,10 +563,14 @@ function HabitLine({
   const { c } = useTheme();
   const t = useT();
   const [open, setOpen] = useState(false);
-  const share = row.tally.eligible ? row.tally.done / row.tally.eligible : null;
+  // Consistency, with its minimums named; the bar is solid for completions and continues dotted for minimums.
+  const share = consistency(row.tally);
+  const minimum = row.tally.minimum ?? 0;
+  const counts = { done: row.tally.done, eligible: row.tally.eligible, minimum };
+  const fullPart = row.tally.done + minimum ? row.tally.done / (row.tally.done + minimum) : 1;
   const grow = useEntrance(150 + order * 70, 700);
   const fill = useAnimatedStyle(() => ({ width: `${(share ?? 0) * 100 * grow.value}%` }));
-  const meta = `${row.tally.eligible ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · ` : ''}${row.kind}`;
+  const meta = `${row.tally.eligible ? `${t(minimum ? 'insights.ring.weekValueMinimum' : 'insights.ring.weekValue', counts)} · ` : ''}${row.kind}`;
   return (
     <View>
       {first ? null : <Rule style={{ opacity: 0.7 }} />}
@@ -567,7 +587,7 @@ function HabitLine({
           share:
             share === null
               ? t('insights.habit.noDays')
-              : t('insights.habit.share', { pct: pctText(share), done: row.tally.done, eligible: row.tally.eligible }),
+              : t(minimum ? 'insights.habit.shareMinimum' : 'insights.habit.share', { pct: pctText(share), ...counts }),
           kind: row.kind,
         })}
         style={styles.habit}
@@ -591,7 +611,19 @@ function HabitLine({
           <ThemedView style={[styles.trackLine, { backgroundColor: c.border }]} />
           <View style={[styles.mid, { backgroundColor: c.textFaint }]} />
           <View style={styles.trackRow}>
-            <Animated.View style={[styles.trackFill, { backgroundColor: c.sage }, fill]} />
+            {minimum ? (
+              <Animated.View style={[styles.trackFill, styles.trackSplit, fill]}>
+                <View style={[styles.trackFull, { flex: fullPart, backgroundColor: c.sage }]} />
+                {/* Dots drawn as views (a one-sided dotted border doesn't draw on iOS), clipped to the segment. */}
+                <View style={[styles.trackMinimum, { flex: 1 - fullPart }]}>
+                  {MINIMUM_DOTS.map((i) => (
+                    <View key={i} style={[styles.trackDot, { backgroundColor: c.sage }]} />
+                  ))}
+                </View>
+              </Animated.View>
+            ) : (
+              <Animated.View style={[styles.trackFill, { backgroundColor: c.sage }, fill]} />
+            )}
             <View
               style={[
                 styles.mark,
@@ -759,6 +791,10 @@ const styles = StyleSheet.create({
   mid: { position: 'absolute', left: '50%', marginLeft: -1.5, top: 4.5, width: 3, height: 3, borderRadius: 1.5, opacity: 0.6 },
   trackRow: { flexDirection: 'row', alignItems: 'center' },
   trackFill: { height: 1.5, opacity: 0.55 },
+  trackSplit: { flexDirection: 'row', alignItems: 'center', height: 2, opacity: 0.7 },
+  trackFull: { height: 1.5 },
+  trackMinimum: { height: 2, flexDirection: 'row', alignItems: 'center', gap: 2, overflow: 'hidden', paddingStart: 2 },
+  trackDot: { width: 2, height: 2, borderRadius: 1 },
   mark: { width: 8, height: 8, borderRadius: 4, marginLeft: -4 },
   habitDetails: { gap: space.sm, paddingBottom: space.lg },
   axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
