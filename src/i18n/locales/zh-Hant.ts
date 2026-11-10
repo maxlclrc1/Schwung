@@ -218,6 +218,19 @@ export const zhHant: Translation = {
     pending: '{level}，從{when}起：{target}',
     tomorrow: '明天',
     dayN: '第{day}天',
+
+    minimum: {
+      mind_read: { inline: '讀或聽2分鐘', title: '讀或聽2分鐘' },
+      mind_meditation: { inline: '安靜一分鐘，方式隨你', title: '安靜一分鐘，方式隨你' },
+
+      move_walk: { inline: '活動2分鐘，方式隨你', title: '活動2分鐘，方式隨你' },
+
+      outdoor_time: { inline: '出門待2分鐘', title: '出門待2分鐘' },
+
+      eat_well: { inline: '一餐裡有水果或蔬菜', title: '一餐裡有水果或蔬菜' },
+
+      social_reach_out: { inline: '給在乎的人傳一則簡短訊息', title: '給在乎的人傳一則簡短訊息' },
+    },
   },
   progress: {
     phase: { 1: '基礎', 2: '動力', 3: '精通' },
@@ -243,6 +256,10 @@ export const zhHant: Translation = {
       rest: '休息日：沒有需要做的。',
       unrecorded: '沒有紀錄：那天沒有勾選任何項目。',
       future: '尚未到達。',
+
+      kept: '以最低限度保住。',
+
+      atMinimum: '最低限度：{list}。',
     },
     observation: {
       steady: '第{week}週穩定在{pct}，與第{prev}週的{prevPct}相近。',
@@ -252,6 +269,8 @@ export const zhHant: Translation = {
       habit: '{habit}是你最穩定的習慣：{eligible}次中完成了{done}次（{pct}）。',
       goals: '{habit}：在{judged}個已結束的週中，有{met}週達成每週目標。',
       streak: '你正處於目前最長的連續紀錄：連續{count}天。',
+
+      habitMinimum: '{habit}是你最穩定的習慣：{eligible}次中完成{done}次，另有{minimum}次為最低限度（{pct}）。',
     },
     weekdaysPlural: {
       0: '週一',
@@ -640,6 +659,11 @@ export const zhHant: Translation = {
       streak: '天連續紀錄',
       best: '最佳紀錄',
       xp: 'XP',
+
+      a11yKept:
+        '登頂以來：{days}天，計入{counted}天，以最低限度保住{kept}天，連續紀錄{streak}天，最佳紀錄{best}，{xp} XP。',
+
+      kept: { other: '另有{count}天以最低限度保住（帶圈的點）：連續紀錄得以延續。' },
     },
     pastLink: {
       title: '過往旅程',
@@ -664,6 +688,10 @@ export const zhHant: Translation = {
       title: '最近 · 過去四週',
       counted: { other: '/{count}天已計入' },
       since: '登頂以來：計入{counted} · 最佳紀錄{best} · {xp} XP。下方的圖表是你的66天攀登。',
+
+      a11yKept: '最近四週：{judged}天中計入{counted}天，以最低限度保住{kept}天。登頂以來：計入{since}天，{xp} XP。',
+
+      kept: { other: '另有{count}天以最低限度保住。' },
     },
     ascent: {
       title: '開始新的攀登',
@@ -758,6 +786,8 @@ export const zhHant: Translation = {
       effort: '部分完成',
 
       logProgress: '標記為部分完成',
+
+      minimum: '最低限度已完成',
     },
     session: { fullBody: '全身', upper: '上半身', lower: '下半身', anything: '其他' },
     offer: {
@@ -831,6 +861,17 @@ export const zhHant: Translation = {
       partialMinutes: '已完成分鐘（選填）',
 
       thisWeek: '本週',
+
+      minimum: '完成了最低限度',
+
+      removeMinimum: '移除最低限度',
+
+      minimumDone: '最低限度已完成。',
+
+      minimumHint:
+        '最低限度是：{minimum}。它算作到場：和你的其他習慣一起，可以讓今天留在連續紀錄裡（+{xp} XP）。部分完成可得 +{xp} XP，但不計入連續紀錄。',
+
+      minimumHintDone: '「{minimum}」讓今天算作到場。你的目標不變（{target}）；完整做完仍算完成。',
     },
   },
   journeyTab: {
@@ -897,6 +938,8 @@ export const zhHant: Translation = {
       unrecorded: '沒有紀錄。',
       future: '尚未到來。',
       day: '第{day}天',
+
+      kept: '以最低限度保住。',
     },
 
     trail: { open: '打開當天' },
@@ -918,6 +961,12 @@ export const zhHant: Translation = {
       first: '你的一致性從第一天開始。',
       done: '{eligible}次習慣機會中完成了{done}次',
       weekValue: '{done}/{eligible}',
+
+      doneMinimum: '{eligible}次習慣機會中{shown}次，其中{minimum}次為最低限度',
+
+      a11yMinimum: '{pct}一致性：{eligible}次習慣機會中{shown}次，完成{done}次，{minimum}次為最低限度',
+
+      weekValueMinimum: '{done}/{eligible} · {minimum}次為最低限度',
     },
     week: {
       range: { other: ' ({count}天)' },
@@ -930,6 +979,11 @@ export const zhHant: Translation = {
       judged: { other: '{count}個已結束的週' },
       first: '你的第一週正在進行中',
       note: '每週從週一到週日。第一週結束後，你的折線才會開始。',
+
+      closedMinimum: '第{week}週{range}：{pct}，已完成{done}/{eligible}，另有{minimum}次為最低限度。',
+
+      currentMinimum:
+        '第{week}週，目前：已完成{done}/{eligible}，另有{minimum}次為最低限度。今天和尚未結束的每週目標暫不計入。',
     },
     habit: {
       hint: '顯示它的歷史、目標和難度',
@@ -938,6 +992,8 @@ export const zhHant: Translation = {
       noDays: '還沒有天數',
       share: '{pct}，{done}/{eligible}',
       strongest: '最強',
+
+      shareMinimum: '{pct}，已完成{done}/{eligible}，另有{minimum}次為最低限度',
     },
     records: {
       title: '個人紀錄',
@@ -961,7 +1017,11 @@ export const zhHant: Translation = {
       streak: { other: '連續紀錄 {count} 天' },
 
       day: '第 {day} 天，共 {total} 天',
+
+      weekMinimum: '本週 {shown}/{eligible}，其中{minimum}次為最低限度',
     },
+
+    stripMinimum: '最近{count}天：完成{done}，最低限度{minimum}',
   },
   setup: {
     age: {

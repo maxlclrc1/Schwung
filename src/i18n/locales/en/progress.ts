@@ -14,6 +14,8 @@ export const progress = {
     doneOne: 'Done: {list}.',
     doneAll: 'All {count} done: {list}.',
     partial: '{done} of {planned} done: {list}.{skipped}',
+    kept: 'Kept with the minimum.',
+    atMinimum: 'At the minimum: {list}.',
     todaySoFar: 'Today, so far {done} of {planned} done: {list}.{skipped}',
     todayOpen: 'Today, still open.{skipped}',
     missed: {
@@ -31,6 +33,8 @@ export const progress = {
     down: 'Week {week} came in at {pct}, down from {prevPct} in Week {prev}.',
     weekday: '{days} have been your most complete days: {full} of {count} fully done.',
     habit: '{habit} is your most consistent habit: {done} of {eligible} times ({pct}).',
+    habitMinimum:
+      '{habit} is your most consistent habit: {done} of {eligible} times done and {minimum} at the minimum ({pct}).',
     goals: '{habit}: weekly goal met in {met} of {judged} finished weeks.',
     streak: 'You’re on your longest streak so far: {count} days in a row.',
   },

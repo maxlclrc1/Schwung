@@ -10,6 +10,8 @@ import { dateForDay, weekdayOfDay } from './dates';
 export type Tally = { done: number; eligible: number; minimum?: number };
 /** Consistency: full completions and minimums, out of the opportunities. */
 const shown = (t: Tally) => (t.done + (t.minimum ?? 0)) / t.eligible;
+/** Consistency, or null without opportunities (the screens' figure; the same rule as reset/pilot.ts `consistency`). */
+export const consistency = (t: Tally): number | null => (t.eligible ? shown(t) : null);
 
 /**
  * One program week of the consistency trend (weeks run Monday to Sunday, so the first and last may be short):
@@ -26,6 +28,8 @@ export type WeekPoint = {
   days: number;
   done: number;
   eligible: number;
+  /** Opportunities kept with the minimum, included in `share` (present only when there were any). */
+  minimum?: number;
   share: number | null;
   state: 'closed' | 'current' | 'unrecorded' | 'none';
 };
@@ -53,6 +57,8 @@ export type DayCell = {
   planned: string[];
   /** Habit ids kept with their minimum that day (present only when there are any). */
   minimum?: string[];
+  /** The day was kept with the minimum: the 80% rule met by full and minimum actions together (only when true). */
+  kept?: true;
 };
 
 export type Records = {
@@ -81,7 +87,13 @@ export function weekPoint(
   closed: boolean,
   recorded: boolean,
 ): WeekPoint {
-  const base = { ...w, days: w.lastDay - w.firstDay + 1, done: t.done, eligible: t.eligible };
+  const base = {
+    ...w,
+    days: w.lastDay - w.firstDay + 1,
+    done: t.done,
+    eligible: t.eligible,
+    ...(t.minimum ? { minimum: t.minimum } : {}),
+  };
   if (!closed) return { ...base, share: t.eligible ? shown(t) : null, state: 'current' };
   if (!recorded && t.eligible > 0) return { ...base, share: null, state: 'unrecorded' };
   if (t.eligible === 0) return { ...base, share: null, state: 'none' };
@@ -143,11 +155,26 @@ export function cellSummary(cell: DayCell, name: (id: string) => string): string
         ? t('progress.cell.doneOne', { list: doneList })
         : t('progress.cell.doneAll', { count: done, list: doneList });
     case 'partial':
+      if (cell.minimum?.length) {
+        // "Kept with the minimum. Done: … At the minimum: …" (the first sentence only on a kept day).
+        return [
+          cell.kept ? t('progress.cell.kept') : null,
+          done ? t('progress.cell.doneOne', { list: doneList }) : null,
+          t('progress.cell.atMinimum', { list: list(cell.minimum, name) }),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .concat(skipped);
+      }
       return t('progress.cell.partial', { done, planned: n, list: doneList, skipped });
-    case 'today':
+    case 'today': {
+      const minimum = cell.minimum?.length
+        ? ` ${t('progress.cell.atMinimum', { list: list(cell.minimum, name) })}`
+        : '';
       return done
-        ? t('progress.cell.todaySoFar', { done, planned: n, list: doneList, skipped })
-        : t('progress.cell.todayOpen', { skipped });
+        ? t('progress.cell.todaySoFar', { done, planned: n, list: doneList, skipped: minimum + skipped })
+        : t('progress.cell.todayOpen', { skipped: minimum + skipped });
+    }
     case 'missed':
       return t('progress.cell.missed', { count: n });
     case 'skipped':

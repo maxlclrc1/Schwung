@@ -242,6 +242,25 @@ export const it: Translation = {
     pending: '{level} da {when}: {target}',
     tomorrow: 'domani',
     dayN: 'Giorno {day}',
+
+    minimum: {
+      mind_read: { inline: 'leggere o ascoltare per 2 minuti', title: 'Leggi o ascolta per 2 minuti' },
+      mind_meditation: {
+        inline: 'un minuto di quiete, come preferisci',
+        title: 'Un minuto di quiete, come preferisci',
+      },
+
+      move_walk: { inline: 'muoverti per 2 minuti, come preferisci', title: 'Muoviti per 2 minuti, come preferisci' },
+
+      outdoor_time: { inline: 'uscire per 2 minuti', title: 'Esci per 2 minuti' },
+
+      eat_well: { inline: 'frutta o verdura in un pasto', title: 'Frutta o verdura in un pasto' },
+
+      social_reach_out: {
+        inline: 'un breve messaggio a una persona a cui tieni',
+        title: 'Un breve messaggio a una persona a cui tieni',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Basi', 2: 'Slancio', 3: 'Padronanza' },
@@ -268,6 +287,10 @@ export const it: Translation = {
       rest: 'Un giorno di riposo: non c’era niente da fare.',
       unrecorded: 'Nessuna registrazione: quel giorno non è stato spuntato niente.',
       future: 'Non ancora raggiunto.',
+
+      kept: 'Mantenuto col minimo.',
+
+      atMinimum: 'Col minimo: {list}.',
     },
     observation: {
       steady: 'La settimana {week} si è mantenuta stabile al {pct}, vicino al {prevPct} della settimana {prev}.',
@@ -277,6 +300,9 @@ export const it: Translation = {
       habit: '{habit} è la tua abitudine più costante: {done} volte su {eligible} ({pct}).',
       goals: '{habit}: obiettivo settimanale raggiunto in {met} delle {judged} settimane concluse.',
       streak: 'Sei sulla tua serie più lunga finora: {count} giorni di fila.',
+
+      habitMinimum:
+        '{habit} è la tua abitudine più costante: {done} volte su {eligible} fatta e {minimum} col minimo ({pct}).',
     },
     weekdaysPlural: {
       0: 'Lunedì',
@@ -698,6 +724,14 @@ export const it: Translation = {
       streak: 'giorni di serie',
       best: 'serie migliore',
       xp: 'XP',
+
+      a11yKept:
+        'Dalla vetta: {days} giorni, {counted} contati e {kept} mantenuti col minimo, una serie di {streak} giorni, serie migliore {best}, {xp} XP.',
+
+      kept: {
+        one: 'In più {count} giorno mantenuto col minimo (il punto cerchiato): tiene viva la tua serie.',
+        other: 'In più {count} giorni mantenuti col minimo (i punti cerchiati): tengono viva la tua serie.',
+      },
     },
     pastLink: {
       title: 'Percorsi passati',
@@ -725,6 +759,14 @@ export const it: Translation = {
       counted: { one: 'di {count} giorno contato', other: 'di {count} giorni contati' },
       since:
         'Dalla vetta: {counted} contati · serie migliore {best} · {xp} XP. I grafici qui sotto sono la tua salita di 66 giorni.',
+
+      a11yKept:
+        'Ultimamente, le ultime quattro settimane: {counted} giorni contati su {judged} e {kept} mantenuti col minimo. Dalla vetta: {since} giorni contati e {xp} XP.',
+
+      kept: {
+        one: 'In più {count} giorno mantenuto col minimo.',
+        other: 'In più {count} giorni mantenuti col minimo.',
+      },
     },
     ascent: {
       title: 'Inizia una nuova ascesa',
@@ -820,6 +862,8 @@ export const it: Translation = {
       effort: 'Completata in parte',
 
       logProgress: 'Segna come completata in parte',
+
+      minimum: 'Minimo fatto',
     },
     session: { fullBody: 'Corpo intero', upper: 'Parte superiore', lower: 'Parte inferiore', anything: 'Altro' },
     offer: {
@@ -895,6 +939,18 @@ export const it: Translation = {
       partialMinutes: 'Minuti fatti (facoltativo)',
 
       thisWeek: 'Questa settimana',
+
+      minimum: 'Ho fatto il minimo',
+
+      removeMinimum: 'Togli il minimo',
+
+      minimumDone: 'Minimo fatto.',
+
+      minimumHint:
+        'Il minimo è {minimum}. Conta come esserci: con le tue altre abitudini, può tenere oggi nella tua serie (+{xp} XP). Completata in parte dà +{xp} XP, senza la serie.',
+
+      minimumHintDone:
+        '{minimum}: oggi conta come esserci. Il tuo obiettivo resta lo stesso ({target}); farlo per intero conta comunque come fatto.',
     },
   },
   journeyTab: {
@@ -961,6 +1017,8 @@ export const it: Translation = {
       unrecorded: 'Nessuna registrazione.',
       future: 'Ancora da venire.',
       day: 'Giorno {day}',
+
+      kept: 'Mantenuto col minimo.',
     },
 
     trail: { open: 'Apri giorno' },
@@ -982,6 +1040,13 @@ export const it: Translation = {
       first: 'La tua costanza inizia con il tuo primo giorno.',
       done: '{done} di {eligible} occasioni di abitudine fatte',
       weekValue: '{done} di {eligible}',
+
+      doneMinimum: '{shown} di {eligible} occasioni di abitudine, {minimum} col minimo',
+
+      a11yMinimum:
+        '{pct} di costanza: {shown} di {eligible} occasioni di abitudine, {done} fatte e {minimum} col minimo',
+
+      weekValueMinimum: '{done} di {eligible} · {minimum} col minimo',
     },
     week: {
       range: { one: ' ({count} giorno)', other: ' ({count} giorni)' },
@@ -995,6 +1060,11 @@ export const it: Translation = {
       judged: { one: '{count} settimana conclusa', other: '{count} settimane concluse' },
       first: 'La tua prima settimana è in corso',
       note: 'Le settimane vanno da lunedì a domenica. La linea della tua prima settimana inizia quando si conclude.',
+
+      closedMinimum: 'Settimana {week}{range}: {pct}, {done} di {eligible} fatte e {minimum} col minimo.',
+
+      currentMinimum:
+        'Settimana {week}, finora: {done} di {eligible} fatte e {minimum} col minimo. Oggi e gli obiettivi settimanali aperti non contano ancora.',
     },
     habit: {
       hint: 'Mostra la sua cronologia, l’obiettivo e la difficoltà',
@@ -1003,6 +1073,8 @@ export const it: Translation = {
       noDays: 'Ancora nessun giorno',
       share: '{pct}, {done} di {eligible}',
       strongest: 'La più forte',
+
+      shareMinimum: '{pct}, {done} di {eligible} fatte e {minimum} col minimo',
     },
     records: {
       title: 'Record personali',
@@ -1026,7 +1098,11 @@ export const it: Translation = {
       streak: { one: 'serie di {count} giorno', other: 'serie di {count} giorni' },
 
       day: 'Giorno {day} di {total}',
+
+      weekMinimum: '{shown} di {eligible} questa settimana, {minimum} col minimo',
     },
+
+    stripMinimum: 'Ultimi {count} giorni: {done} fatti, {minimum} col minimo',
   },
   setup: {
     age: {

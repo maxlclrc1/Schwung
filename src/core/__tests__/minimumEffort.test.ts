@@ -13,8 +13,9 @@ import { dayStatus, partialCount, PARTIAL_XP, readTrack, type HabitTrack } from 
 /*
  * Minimum Effort, engine phase R2a (docs/MINIMUM_EFFORT_SPEC.md, approved at ea0c86c). A minimum is a one-day
  * fallback: 5 XP, it counts toward consistency (the streak, a kept day under the existing 80% rule, full and minimum
- * actions together), never toward a full completion, a full day's bonus or step-up readiness. No minimum is approved
- * yet, so nothing can be recorded in the app; these tests use the drafts.
+ * actions together), never toward a full completion, a full day's bonus or step-up readiness. The six minimums were
+ * approved with the content package (d7652fc); the app offers them only where flags.minimumEffort() allows (the
+ * store's tests cover that). Tests pass 'drafts' as before, which allows exactly the approved ones now.
  */
 
 const START = '2026-01-05'; // a Monday
@@ -47,17 +48,26 @@ function forge(p: P.PilotProgram, id: string, day: number, track: Partial<HabitT
 /** A fresh copy through a save and a load, so nothing cached is reused. */
 const reload = (p: P.PilotProgram) => P.sanitizePilotProgram(JSON.parse(JSON.stringify(p)))!;
 
-describe('the review gate: inaccessible in the app until each minimum is approved', () => {
-  it('no minimum is available anywhere under the app’s review, and nothing can be recorded', () => {
+describe('the review gate: the six approved minimums, and nothing else', () => {
+  it('the app’s review allows exactly what the drafts did: the six approved minimums, no draft left', () => {
     for (const h of RESET_HABITS)
       for (const intensity of INTENSITIES)
-        for (const phase of PHASES) expect(minimumAvailable(h.id, { intensity, phase })).toBe(false);
+        for (const phase of PHASES)
+          expect(minimumAvailable(h.id, { intensity, phase })).toBe(
+            minimumAvailable(h.id, { intensity, phase }, 'drafts'),
+          );
+    expect(
+      Object.entries(MINIMUMS)
+        .filter(([, m]) => m.status === 'approved')
+        .map(([id]) => id)
+        .sort(),
+    ).toEqual(['eat_well', 'mind_meditation', 'mind_read', 'move_walk', 'outdoor_time', 'social_reach_out']);
+    expect(Object.values(MINIMUMS).some((m) => m.status === 'draft')).toBe(false);
     const p = program();
     for (const id of FOUR) {
-      expect(P.minimumFor(p, id, 1)).toBe(false);
-      expect(P.setMinimum(p, id, 1, true).program).toBe(p);
+      expect(P.minimumFor(p, id, 1)).toBe(true);
+      expect(P.minimumOn(P.setMinimum(p, id, 1, true).program, id, 1)).toBe(true);
     }
-    expect(Object.values(MINIMUMS).some((m) => m.status === 'approved')).toBe(false);
   });
 
   it('drafts: only where the day’s target asks strictly more; Sleep disabled; Less Scrolling, Strength and the weekly habits have none', () => {
@@ -304,11 +314,12 @@ describe('records stay as they were recorded', () => {
     expect([P.dayOutcome(p, 3), P.pilotXp(p)]).toEqual(['kept', 10]);
   });
 
-  it('counting reads the saved record, not today’s minimum table', () => {
-    // Sleep's minimum is disabled now; a day recorded with one is still counted as it was recorded.
+  it('a minimum the catalogue never offered is ignored (Sleep was never offered: an edited backup can’t add one)', () => {
     const p = forge(program(['sleep_wake']), 'sleep_wake', 1, { minimum: true });
     expect(P.minimumFor(p, 'sleep_wake', 1, 'drafts')).toBe(false);
-    expect(P.dayOutcome(p, 1)).toBe('kept');
+    expect([P.dayOutcome(p, 1), P.pilotXp(p), P.minimumsOn(p, 1)]).toEqual(['missed', 0, []]);
+    // The raw record is kept as it is.
+    expect(P.trackOf(reload(p), 'sleep_wake', 1).minimum).toBe(true);
   });
 
   it('survives a save and a load; a malformed minimum is dropped', () => {

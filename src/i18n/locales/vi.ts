@@ -232,6 +232,25 @@ export const vi: Translation = {
     pending: '{level} từ {when}: {target}',
     tomorrow: 'ngày mai',
     dayN: 'Ngày {day}',
+
+    minimum: {
+      mind_read: { inline: 'đọc hoặc nghe 2 phút', title: 'Đọc hoặc nghe 2 phút' },
+      mind_meditation: {
+        inline: 'một phút yên tĩnh, theo cách bạn thích',
+        title: 'Một phút yên tĩnh, theo cách bạn thích',
+      },
+
+      move_walk: { inline: 'vận động 2 phút, theo cách bạn thích', title: 'Vận động 2 phút, theo cách bạn thích' },
+
+      outdoor_time: { inline: 'ra ngoài 2 phút', title: 'Ra ngoài 2 phút' },
+
+      eat_well: { inline: 'trái cây hoặc rau trong một bữa', title: 'Trái cây hoặc rau trong một bữa' },
+
+      social_reach_out: {
+        inline: 'một tin nhắn ngắn cho người bạn quan tâm',
+        title: 'Một tin nhắn ngắn cho người bạn quan tâm',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Nền tảng', 2: 'Đà tiến', 3: 'Thành thạo' },
@@ -257,6 +276,10 @@ export const vi: Translation = {
       rest: 'Ngày nghỉ: không có gì đến hạn.',
       unrecorded: 'Không có bản ghi: hôm đó không đánh dấu gì.',
       future: 'Chưa tới.',
+
+      kept: 'Giữ được nhờ mức tối thiểu.',
+
+      atMinimum: 'Ở mức tối thiểu: {list}.',
     },
     observation: {
       steady: 'Tuần {week} giữ ổn định ở {pct}, gần với mức {prevPct} của Tuần {prev}.',
@@ -266,6 +289,9 @@ export const vi: Translation = {
       habit: '{habit} là thói quen đều đặn nhất của bạn: {done}/{eligible} lần ({pct}).',
       goals: '{habit}: đạt mục tiêu tuần trong {met}/{judged} tuần đã kết thúc.',
       streak: 'Bạn đang có chuỗi ngày dài nhất từ trước đến nay: {count} ngày liên tiếp.',
+
+      habitMinimum:
+        '{habit} là thói quen đều đặn nhất của bạn: xong {done}/{eligible} lần và {minimum} lần ở mức tối thiểu ({pct}).',
     },
     weekdaysPlural: {
       0: 'Thứ Hai',
@@ -673,6 +699,13 @@ export const vi: Translation = {
       streak: 'ngày liên tiếp',
       best: 'chuỗi tốt nhất',
       xp: 'XP',
+
+      a11yKept:
+        'Kể từ khi lên đỉnh: {days} ngày, {counted} ngày được tính và {kept} ngày giữ được nhờ mức tối thiểu, chuỗi {streak} ngày, chuỗi tốt nhất {best}, {xp} XP.',
+
+      kept: {
+        other: 'Thêm {count} ngày giữ được nhờ mức tối thiểu (chấm có vòng): chúng giữ chuỗi ngày của bạn tiếp tục.',
+      },
     },
     pastLink: {
       title: 'Hành trình trước đây',
@@ -700,6 +733,11 @@ export const vi: Translation = {
       counted: { other: 'trên {count} ngày được tính' },
       since:
         'Kể từ khi lên đỉnh: {counted} được tính · chuỗi tốt nhất {best} · {xp} XP. Các biểu đồ bên dưới là chặng leo 66 ngày của bạn.',
+
+      a11yKept:
+        'Gần đây, bốn tuần qua: {counted}/{judged} ngày được tính và {kept} ngày giữ được nhờ mức tối thiểu. Kể từ khi lên đỉnh: {since} ngày được tính và {xp} XP.',
+
+      kept: { other: 'Thêm {count} ngày giữ được nhờ mức tối thiểu.' },
     },
     ascent: {
       title: 'Bắt đầu chặng leo mới',
@@ -795,6 +833,8 @@ export const vi: Translation = {
       effort: 'Hoàn thành một phần',
 
       logProgress: 'Đánh dấu hoàn thành một phần',
+
+      minimum: 'Đã làm mức tối thiểu',
     },
     session: { fullBody: 'Toàn thân', upper: 'Thân trên', lower: 'Thân dưới', anything: 'Khác' },
     offer: {
@@ -871,6 +911,18 @@ export const vi: Translation = {
       partialMinutes: 'Số phút đã làm (tùy chọn)',
 
       thisWeek: 'Tuần này',
+
+      minimum: 'Đã làm mức tối thiểu',
+
+      removeMinimum: 'Bỏ mức tối thiểu',
+
+      minimumDone: 'Đã làm mức tối thiểu.',
+
+      minimumHint:
+        'Mức tối thiểu là {minimum}. Nó được tính là có mặt: cùng các thói quen khác, nó có thể giữ hôm nay trong chuỗi ngày của bạn (+{xp} XP). Hoàn thành một phần được +{xp} XP, không tính chuỗi.',
+
+      minimumHintDone:
+        '{minimum} được tính là có mặt hôm nay. Mục tiêu của bạn vẫn giữ nguyên ({target}); làm trọn vẹn vẫn được tính là xong.',
     },
   },
   journeyTab: {
@@ -937,6 +989,8 @@ export const vi: Translation = {
       unrecorded: 'Không có bản ghi.',
       future: 'Còn ở phía trước.',
       day: 'Ngày {day}',
+
+      kept: 'Giữ được nhờ mức tối thiểu.',
     },
 
     trail: { open: 'Mở ngày' },
@@ -958,6 +1012,12 @@ export const vi: Translation = {
       first: 'Độ đều đặn của bạn bắt đầu từ ngày đầu tiên.',
       done: 'Đã xong {done}/{eligible} lượt thói quen',
       weekValue: '{done}/{eligible}',
+
+      doneMinimum: '{shown}/{eligible} lượt thói quen, {minimum} ở mức tối thiểu',
+
+      a11yMinimum: 'Độ đều đặn {pct}: {shown}/{eligible} lượt thói quen, xong {done} và {minimum} ở mức tối thiểu',
+
+      weekValueMinimum: '{done}/{eligible} · {minimum} ở mức tối thiểu',
     },
     week: {
       range: { other: ' ({count} ngày)' },
@@ -970,6 +1030,11 @@ export const vi: Translation = {
       judged: { other: '{count} tuần đã kết thúc' },
       first: 'Tuần đầu tiên của bạn đang diễn ra',
       note: 'Tuần tính từ thứ Hai đến Chủ Nhật. Dòng của tuần đầu tiên sẽ xuất hiện khi tuần đó kết thúc.',
+
+      closedMinimum: 'Tuần {week}{range}: {pct}, xong {done}/{eligible} và {minimum} ở mức tối thiểu.',
+
+      currentMinimum:
+        'Tuần {week}, đến giờ: xong {done}/{eligible} và {minimum} ở mức tối thiểu. Hôm nay và các mục tiêu tuần còn mở chưa được tính.',
     },
     habit: {
       hint: 'Hiện lịch sử, mục tiêu và độ khó',
@@ -978,6 +1043,8 @@ export const vi: Translation = {
       noDays: 'Chưa có ngày nào',
       share: '{pct}, {done}/{eligible}',
       strongest: 'Mạnh nhất',
+
+      shareMinimum: '{pct}, xong {done}/{eligible} và {minimum} ở mức tối thiểu',
     },
     records: {
       title: 'Kỷ lục cá nhân',
@@ -1001,7 +1068,11 @@ export const vi: Translation = {
       streak: { other: 'chuỗi ngày {count} ngày' },
 
       day: 'Ngày {day}/{total}',
+
+      weekMinimum: '{shown}/{eligible} trong tuần này, {minimum} ở mức tối thiểu',
     },
+
+    stripMinimum: '{count} ngày qua: xong {done}, {minimum} ở mức tối thiểu',
   },
   setup: {
     age: { u16: 'Dưới 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

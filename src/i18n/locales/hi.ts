@@ -230,6 +230,19 @@ export const hi: Translation = {
     pending: '{when} से {level}: {target}',
     tomorrow: 'कल',
     dayN: 'दिन {day}',
+
+    minimum: {
+      mind_read: { inline: '2 मिनट पढ़ना या सुनना', title: '2 मिनट पढ़ें या सुनें' },
+      mind_meditation: { inline: 'एक शांत मिनट, जैसे भी चाहें', title: 'एक शांत मिनट, जैसे भी चाहें' },
+
+      move_walk: { inline: '2 मिनट सक्रिय रहना, जैसे भी चाहें', title: '2 मिनट सक्रिय रहें, जैसे भी चाहें' },
+
+      outdoor_time: { inline: '2 मिनट के लिए बाहर निकलना', title: '2 मिनट के लिए बाहर निकलें' },
+
+      eat_well: { inline: 'एक भोजन में फल या सब्ज़ियाँ', title: 'एक भोजन में फल या सब्ज़ियाँ' },
+
+      social_reach_out: { inline: 'किसी अपने को एक छोटा संदेश', title: 'किसी अपने को एक छोटा संदेश' },
+    },
   },
   progress: {
     phase: { 1: 'नींव', 2: 'रफ़्तार', 3: 'महारत' },
@@ -256,6 +269,10 @@ export const hi: Translation = {
       rest: 'आराम का दिन: कुछ भी तय नहीं था।',
       unrecorded: 'कोई रिकॉर्ड नहीं: उस दिन कुछ भी टिक नहीं किया गया।',
       future: 'अभी वहाँ तक नहीं पहुँचे।',
+
+      kept: 'न्यूनतम से बनाए रखा।',
+
+      atMinimum: 'न्यूनतम पर: {list}।',
     },
     observation: {
       steady: 'हफ़्ता {week} {pct} पर स्थिर रहा, हफ़्ता {prev} के {prevPct} के क़रीब।',
@@ -265,6 +282,9 @@ export const hi: Translation = {
       habit: '{habit} आपकी सबसे नियमित आदत है: {eligible} में से {done} बार ({pct})।',
       goals: '{habit}: {judged} पूरे हुए हफ़्तों में से {met} में साप्ताहिक लक्ष्य पूरा हुआ।',
       streak: 'आप अब तक की अपनी सबसे लंबी स्ट्रीक पर हैं: लगातार {count} दिन।',
+
+      habitMinimum:
+        '{habit} आपकी सबसे नियमित आदत है: {eligible} में से {done} बार पूरी और {minimum} बार न्यूनतम पर ({pct})।',
     },
     weekdaysPlural: {
       0: 'सोमवार',
@@ -677,6 +697,14 @@ export const hi: Translation = {
       streak: 'दिन की स्ट्रीक',
       best: 'सबसे लंबा सिलसिला',
       xp: 'XP',
+
+      a11yKept:
+        'शिखर के बाद से: {days} दिन, {counted} गिने गए और {kept} न्यूनतम से बनाए रखे गए, {streak} दिन की स्ट्रीक, सबसे लंबा सिलसिला {best}, {xp} XP।',
+
+      kept: {
+        one: 'साथ में {count} दिन न्यूनतम से बनाए रखा गया (घेरे वाला बिंदु): यह आपकी स्ट्रीक जारी रखता है।',
+        other: 'साथ में {count} दिन न्यूनतम से बनाए रखे गए (घेरे वाले बिंदु): ये आपकी स्ट्रीक जारी रखते हैं।',
+      },
     },
     pastLink: {
       title: 'पिछले सफ़र',
@@ -703,6 +731,14 @@ export const hi: Translation = {
       counted: { one: '{count} में से दिन गिना गया', other: '{count} में से दिन गिने गए' },
       since:
         'शिखर के बाद से: {counted} गिने गए · सबसे लंबा सिलसिला {best} · {xp} XP। नीचे के चार्ट आपकी 66 दिन की चढ़ाई हैं।',
+
+      a11yKept:
+        'हाल में, पिछले चार हफ़्ते: {judged} में से {counted} दिन गिने गए और {kept} न्यूनतम से बनाए रखे गए। शिखर के बाद से: {since} दिन गिने गए और {xp} XP।',
+
+      kept: {
+        one: 'साथ में {count} दिन न्यूनतम से बनाए रखा गया।',
+        other: 'साथ में {count} दिन न्यूनतम से बनाए रखे गए।',
+      },
     },
     ascent: {
       title: 'नई चढ़ाई शुरू करें',
@@ -798,6 +834,8 @@ export const hi: Translation = {
       effort: 'आंशिक रूप से पूरा',
 
       logProgress: 'आंशिक रूप से पूरा चिह्नित करें',
+
+      minimum: 'न्यूनतम पूरा',
     },
     session: { fullBody: 'पूरा शरीर', upper: 'ऊपरी शरीर', lower: 'निचला शरीर', anything: 'अन्य' },
     offer: {
@@ -872,6 +910,18 @@ export const hi: Translation = {
       partialMinutes: 'किए गए मिनट (वैकल्पिक)',
 
       thisWeek: 'इस हफ़्ते',
+
+      minimum: 'न्यूनतम पूरा किया',
+
+      removeMinimum: 'न्यूनतम हटाएँ',
+
+      minimumDone: 'न्यूनतम पूरा।',
+
+      minimumHint:
+        'न्यूनतम है: {minimum}। यह हाज़िरी के रूप में गिना जाता है: आपकी बाकी आदतों के साथ, यह आज को आपकी स्ट्रीक में रख सकता है (+{xp} XP)। आंशिक रूप से पूरा करने पर +{xp} XP मिलते हैं, स्ट्रीक के बिना।',
+
+      minimumHintDone:
+        '{minimum}: आज की हाज़िरी गिनी गई। आपका लक्ष्य वही रहता है ({target}); इसे पूरा करना अब भी पूरा ही गिना जाता है।',
     },
   },
   journeyTab: {
@@ -938,6 +988,8 @@ export const hi: Translation = {
       unrecorded: 'कोई रिकॉर्ड नहीं।',
       future: 'अभी आगे है।',
       day: 'दिन {day}',
+
+      kept: 'न्यूनतम से बनाए रखा।',
     },
 
     trail: { open: 'दिन खोलें' },
@@ -959,6 +1011,12 @@ export const hi: Translation = {
       first: 'आपकी नियमितता आपके पहले दिन से शुरू होती है।',
       done: '{eligible} में से {done} आदत-अवसर पूरे',
       weekValue: '{eligible} में से {done}',
+
+      doneMinimum: '{eligible} में से {shown} आदत-अवसर, {minimum} न्यूनतम पर',
+
+      a11yMinimum: '{pct} नियमितता: {eligible} में से {shown} आदत-अवसर, {done} पूरे और {minimum} न्यूनतम पर',
+
+      weekValueMinimum: '{eligible} में से {done} · {minimum} न्यूनतम पर',
     },
     week: {
       range: { one: ' ({count} दिन)', other: ' ({count} दिन)' },
@@ -971,6 +1029,11 @@ export const hi: Translation = {
       judged: { one: '{count} पूरा हुआ हफ़्ता', other: '{count} पूरे हुए हफ़्ते' },
       first: 'आपका पहला हफ़्ता चल रहा है',
       note: 'हफ़्ते सोमवार से रविवार तक चलते हैं। आपके पहले हफ़्ते की रेखा उसके ख़त्म होने के बाद शुरू होती है।',
+
+      closedMinimum: 'हफ़्ता {week}{range}: {pct}, {eligible} में से {done} पूरे और {minimum} न्यूनतम पर।',
+
+      currentMinimum:
+        'हफ़्ता {week}, अब तक: {eligible} में से {done} पूरे और {minimum} न्यूनतम पर। आज और खुले साप्ताहिक लक्ष्य अभी गिने नहीं गए हैं।',
     },
     habit: {
       hint: 'इसका इतिहास, लक्ष्य और कठिनाई दिखाता है',
@@ -979,6 +1042,8 @@ export const hi: Translation = {
       noDays: 'अभी कोई दिन नहीं',
       share: '{pct}, {eligible} में से {done}',
       strongest: 'सबसे मज़बूत',
+
+      shareMinimum: '{pct}, {eligible} में से {done} पूरे और {minimum} न्यूनतम पर',
     },
     records: {
       title: 'निजी रिकॉर्ड',
@@ -1002,7 +1067,11 @@ export const hi: Translation = {
       streak: { one: '{count} दिन की स्ट्रीक', other: '{count} दिन की स्ट्रीक' },
 
       day: 'दिन {day} / {total}',
+
+      weekMinimum: 'इस हफ़्ते {eligible} में से {shown}, {minimum} न्यूनतम पर',
     },
+
+    stripMinimum: 'पिछले {count} दिन: {done} पूरे, {minimum} न्यूनतम पर',
   },
   setup: {
     age: { u16: '18 से कम', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

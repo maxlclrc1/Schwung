@@ -229,6 +229,19 @@ export const bn: Translation = {
     pending: '{when} থেকে {level}: {target}',
     tomorrow: 'আগামীকাল',
     dayN: 'দিন {day}',
+
+    minimum: {
+      mind_read: { inline: '২ মিনিট পড়া বা শোনা', title: '২ মিনিট পড়ুন বা শুনুন' },
+      mind_meditation: { inline: 'এক মিনিট শান্ত থাকা, যেভাবে খুশি', title: 'এক মিনিট শান্ত থাকুন, যেভাবে খুশি' },
+
+      move_walk: { inline: '২ মিনিট সক্রিয় থাকা, যেভাবে খুশি', title: '২ মিনিট সক্রিয় থাকুন, যেভাবে খুশি' },
+
+      outdoor_time: { inline: '২ মিনিটের জন্য বাইরে যাওয়া', title: '২ মিনিটের জন্য বাইরে যান' },
+
+      eat_well: { inline: 'এক বেলার খাবারে ফল বা সবজি', title: 'এক বেলার খাবারে ফল বা সবজি' },
+
+      social_reach_out: { inline: 'প্রিয় কাউকে একটি ছোট বার্তা', title: 'প্রিয় কাউকে একটি ছোট বার্তা' },
+    },
   },
   progress: {
     phase: { 1: 'ভিত্তি', 2: 'গতি', 3: 'দক্ষতা' },
@@ -255,6 +268,10 @@ export const bn: Translation = {
       rest: 'বিশ্রামের দিন: কিছুই করার ছিল না।',
       unrecorded: 'কোনো রেকর্ড নেই: সেদিন কিছুই টিক দেওয়া হয়নি।',
       future: 'এখনো সেখানে পৌঁছানো হয়নি।',
+
+      kept: 'ন্যূনতম দিয়ে ধরে রাখা হয়েছে।',
+
+      atMinimum: 'ন্যূনতমে: {list}।',
     },
     observation: {
       steady: 'সপ্তাহ {week} {pct}-এ স্থির ছিল, সপ্তাহ {prev}-এর {prevPct}-এর কাছাকাছি।',
@@ -264,6 +281,9 @@ export const bn: Translation = {
       habit: '{habit} আপনার সবচেয়ে নিয়মিত অভ্যাস: {eligible} বারের মধ্যে {done} বার ({pct})।',
       goals: '{habit}: শেষ হওয়া {judged}টি সপ্তাহের মধ্যে {met}টিতে সাপ্তাহিক লক্ষ্য পূরণ হয়েছে।',
       streak: 'আপনি এখন পর্যন্ত আপনার সবচেয়ে লম্বা স্ট্রিকে আছেন: টানা {count} দিন।',
+
+      habitMinimum:
+        '{habit} আপনার সবচেয়ে নিয়মিত অভ্যাস: {eligible} বারের মধ্যে {done} বার সম্পন্ন এবং {minimum} বার ন্যূনতমে ({pct})।',
     },
     weekdaysPlural: {
       0: 'সোমবারগুলো',
@@ -673,6 +693,15 @@ export const bn: Translation = {
       streak: 'দিনের স্ট্রিক',
       best: 'সেরা ধারা',
       xp: 'XP',
+
+      a11yKept:
+        'চূড়ার পর থেকে: {days} দিন, {counted} গোনা হয়েছে এবং {kept} ন্যূনতম দিয়ে ধরে রাখা হয়েছে, {streak} দিনের স্ট্রিক, সেরা ধারা {best}, {xp} XP।',
+
+      kept: {
+        one: 'এ ছাড়া {count} দিন ন্যূনতম দিয়ে ধরে রাখা হয়েছে (বৃত্তওয়ালা বিন্দু): এটি আপনার স্ট্রিক চালু রাখে।',
+        other:
+          'এ ছাড়া {count} দিন ন্যূনতম দিয়ে ধরে রাখা হয়েছে (বৃত্তওয়ালা বিন্দুগুলো): এগুলো আপনার স্ট্রিক চালু রাখে।',
+      },
     },
     pastLink: {
       title: 'আগের যাত্রাগুলো',
@@ -699,6 +728,14 @@ export const bn: Translation = {
       counted: { one: '{count} দিনের মধ্যে গোনা দিন', other: '{count} দিনের মধ্যে গোনা দিন' },
       since:
         'চূড়ার পর থেকে: {counted} গোনা হয়েছে · সেরা ধারা {best} · {xp} XP। নিচের চার্টগুলো আপনার 66 দিনের আরোহণ।',
+
+      a11yKept:
+        'সম্প্রতি, গত চার সপ্তাহ: {judged} দিনের মধ্যে {counted} দিন গোনা হয়েছে এবং {kept} দিন ন্যূনতম দিয়ে ধরে রাখা হয়েছে। চূড়ার পর থেকে: {since} দিন গোনা হয়েছে ও {xp} XP।',
+
+      kept: {
+        one: 'এ ছাড়া {count} দিন ন্যূনতম দিয়ে ধরে রাখা হয়েছে।',
+        other: 'এ ছাড়া {count} দিন ন্যূনতম দিয়ে ধরে রাখা হয়েছে।',
+      },
     },
     ascent: {
       title: 'নতুন আরোহণ শুরু করুন',
@@ -794,6 +831,8 @@ export const bn: Translation = {
       effort: 'আংশিক সম্পন্ন',
 
       logProgress: 'আংশিক সম্পন্ন হিসেবে চিহ্নিত করুন',
+
+      minimum: 'ন্যূনতম সম্পন্ন',
     },
     session: { fullBody: 'পুরো শরীর', upper: 'শরীরের ওপরের অংশ', lower: 'শরীরের নিচের অংশ', anything: 'অন্যান্য' },
     offer: {
@@ -867,6 +906,18 @@ export const bn: Translation = {
       partialMinutes: 'করা মিনিট (ঐচ্ছিক)',
 
       thisWeek: 'এই সপ্তাহ',
+
+      minimum: 'ন্যূনতমটুকু করেছি',
+
+      removeMinimum: 'ন্যূনতম সরান',
+
+      minimumDone: 'ন্যূনতম সম্পন্ন।',
+
+      minimumHint:
+        'ন্যূনতম হলো {minimum}। এটি উপস্থিতি হিসেবে গোনা হয়: আপনার অন্য অভ্যাসগুলোর সঙ্গে এটি আজকের দিনটিকে আপনার স্ট্রিকে রাখতে পারে (+{xp} XP)। আংশিক সম্পন্ন করলে +{xp} XP মেলে, স্ট্রিক ছাড়া।',
+
+      minimumHintDone:
+        '{minimum}: আজ এটি উপস্থিতি হিসেবে গোনা হলো। আপনার লক্ষ্য একই থাকে ({target}); পুরোটা করলে তা এখনো সম্পন্ন হিসেবেই গোনা হয়।',
     },
   },
   journeyTab: {
@@ -933,6 +984,8 @@ export const bn: Translation = {
       unrecorded: 'কোনো রেকর্ড নেই।',
       future: 'এখনো সামনে।',
       day: 'দিন {day}',
+
+      kept: 'ন্যূনতম দিয়ে ধরে রাখা হয়েছে।',
     },
 
     trail: { open: 'দিন খুলুন' },
@@ -954,6 +1007,13 @@ export const bn: Translation = {
       first: 'আপনার ধারাবাহিকতা শুরু হয় আপনার প্রথম দিন থেকে।',
       done: '{eligible}টি অভ্যাসের সুযোগের মধ্যে {done}টি সম্পন্ন',
       weekValue: '{eligible}-এর মধ্যে {done}',
+
+      doneMinimum: '{eligible}টি অভ্যাসের সুযোগের মধ্যে {shown}টি, {minimum}টি ন্যূনতমে',
+
+      a11yMinimum:
+        '{pct} ধারাবাহিকতা: {eligible}টি অভ্যাসের সুযোগের মধ্যে {shown}টি, {done}টি সম্পন্ন এবং {minimum}টি ন্যূনতমে',
+
+      weekValueMinimum: '{eligible}-এর মধ্যে {done} · {minimum}টি ন্যূনতমে',
     },
     week: {
       range: { one: ' ({count} দিন)', other: ' ({count} দিন)' },
@@ -967,6 +1027,11 @@ export const bn: Translation = {
       judged: { one: '{count}টি শেষ হওয়া সপ্তাহ', other: '{count}টি শেষ হওয়া সপ্তাহ' },
       first: 'আপনার প্রথম সপ্তাহ চলছে',
       note: 'সপ্তাহ চলে সোমবার থেকে রবিবার। আপনার প্রথম সপ্তাহের রেখা সেটি শেষ হলে শুরু হয়।',
+
+      closedMinimum: 'সপ্তাহ {week}{range}: {pct}, {eligible}-এর মধ্যে {done} সম্পন্ন এবং {minimum}টি ন্যূনতমে।',
+
+      currentMinimum:
+        'সপ্তাহ {week}, এখন পর্যন্ত: {eligible}-এর মধ্যে {done} সম্পন্ন এবং {minimum}টি ন্যূনতমে। আজ ও খোলা সাপ্তাহিক লক্ষ্যগুলো এখনো গোনা হয়নি।',
     },
     habit: {
       hint: 'এর ইতিহাস, লক্ষ্য ও কাঠিন্য দেখায়',
@@ -975,6 +1040,8 @@ export const bn: Translation = {
       noDays: 'এখনো কোনো দিন নেই',
       share: '{pct}, {eligible}-এর মধ্যে {done}',
       strongest: 'সবচেয়ে শক্তিশালী',
+
+      shareMinimum: '{pct}, {eligible}-এর মধ্যে {done} সম্পন্ন এবং {minimum}টি ন্যূনতমে',
     },
     records: {
       title: 'ব্যক্তিগত রেকর্ড',
@@ -998,7 +1065,11 @@ export const bn: Translation = {
       streak: { one: '{count} দিনের স্ট্রিক', other: '{count} দিনের স্ট্রিক' },
 
       day: 'দিন {day} / {total}',
+
+      weekMinimum: 'এই সপ্তাহে {eligible}টির মধ্যে {shown}টি, {minimum}টি ন্যূনতমে',
     },
+
+    stripMinimum: 'গত {count} দিন: {done} সম্পন্ন, {minimum}টি ন্যূনতমে',
   },
   setup: {
     age: { u16: '18-এর কম', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

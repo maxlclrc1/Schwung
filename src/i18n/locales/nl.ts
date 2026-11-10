@@ -234,6 +234,22 @@ export const nl: Translation = {
     pending: '{level} vanaf {when}: {target}',
     tomorrow: 'morgen',
     dayN: 'Dag {day}',
+
+    minimum: {
+      mind_read: { inline: '2 minuten lezen of luisteren', title: '2 minuten lezen of luisteren' },
+      mind_meditation: { inline: 'één rustige minuut, zoals jij wilt', title: 'Eén rustige minuut, zoals jij wilt' },
+
+      move_walk: { inline: '2 minuten bewegen, zoals jij wilt', title: '2 minuten bewegen, zoals jij wilt' },
+
+      outdoor_time: { inline: '2 minuten naar buiten gaan', title: '2 minuten naar buiten gaan' },
+
+      eat_well: { inline: 'fruit of groente bij één maaltijd', title: 'Fruit of groente bij één maaltijd' },
+
+      social_reach_out: {
+        inline: 'één kort bericht aan iemand om wie je geeft',
+        title: 'Eén kort bericht aan iemand om wie je geeft',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Fundament', 2: 'Vaart', 3: 'Meesterschap' },
@@ -260,6 +276,10 @@ export const nl: Translation = {
       rest: 'Een rustdag: er stond niets op het programma.',
       unrecorded: 'Geen gegevens: die dag is er niets afgevinkt.',
       future: 'Nog niet bereikt.',
+
+      kept: 'Behouden met het minimum.',
+
+      atMinimum: 'Met het minimum: {list}.',
     },
     observation: {
       steady: 'Week {week} bleef stabiel op {pct}, dicht bij de {prevPct} van week {prev}.',
@@ -269,6 +289,9 @@ export const nl: Translation = {
       habit: '{habit} is je meest consistente gewoonte: {done} van de {eligible} keer ({pct}).',
       goals: '{habit}: weekdoel gehaald in {met} van de {judged} afgeronde weken.',
       streak: 'Je zit in je langste reeks tot nu toe: {count} dagen op rij.',
+
+      habitMinimum:
+        '{habit} is je meest consequente gewoonte: {done} van {eligible} keer gedaan en {minimum} met het minimum ({pct}).',
     },
     weekdaysPlural: {
       0: 'maandagen',
@@ -686,6 +709,14 @@ export const nl: Translation = {
       streak: 'dagen reeks',
       best: 'beste reeks',
       xp: 'XP',
+
+      a11yKept:
+        'Sinds de top: {days} dagen, {counted} geteld en {kept} behouden met het minimum, een reeks van {streak} dagen, beste reeks {best}, {xp} XP.',
+
+      kept: {
+        one: 'Plus {count} dag behouden met het minimum (de omcirkelde stip): die houdt je reeks gaande.',
+        other: 'Plus {count} dagen behouden met het minimum (de omcirkelde stippen): die houden je reeks gaande.',
+      },
     },
     pastLink: {
       title: 'Eerdere reizen',
@@ -713,6 +744,14 @@ export const nl: Translation = {
       counted: { one: 'van {count} dag geteld', other: 'van {count} dagen geteld' },
       since:
         'Sinds de top: {counted} geteld · beste reeks {best} · {xp} XP. De grafieken hieronder zijn je klim van 66 dagen.',
+
+      a11yKept:
+        'De laatste vier weken: {counted} van {judged} dagen geteld en {kept} behouden met het minimum. Sinds de top: {since} dagen geteld en {xp} XP.',
+
+      kept: {
+        one: 'Plus {count} dag behouden met het minimum.',
+        other: 'Plus {count} dagen behouden met het minimum.',
+      },
     },
     ascent: {
       title: 'Nieuwe beklimming beginnen',
@@ -808,6 +847,8 @@ export const nl: Translation = {
       effort: 'Deels voltooid',
 
       logProgress: 'Markeren als deels voltooid',
+
+      minimum: 'Minimum gedaan',
     },
     session: { fullBody: 'Hele lichaam', upper: 'Bovenlichaam', lower: 'Onderlichaam', anything: 'Anders' },
     offer: {
@@ -882,6 +923,18 @@ export const nl: Translation = {
       partialMinutes: 'Gedane minuten (optioneel)',
 
       thisWeek: 'Deze week',
+
+      minimum: 'Minimum gedaan',
+
+      removeMinimum: 'Minimum weghalen',
+
+      minimumDone: 'Minimum gedaan.',
+
+      minimumHint:
+        'Het minimum: {minimum}. Het telt als komen opdagen: met je andere gewoontes kan het vandaag in je reeks houden (+{xp} XP). Deels voltooid levert +{xp} XP op, zonder de reeks.',
+
+      minimumHintDone:
+        '{minimum} telt vandaag als komen opdagen. Je doel blijft hetzelfde ({target}); het helemaal doen telt nog steeds als gedaan.',
     },
   },
   journeyTab: {
@@ -948,6 +1001,8 @@ export const nl: Translation = {
       unrecorded: 'Geen gegevens.',
       future: 'Nog te gaan.',
       day: 'Dag {day}',
+
+      kept: 'Behouden met het minimum.',
     },
 
     trail: { open: 'Dag openen' },
@@ -969,6 +1024,13 @@ export const nl: Translation = {
       first: 'Je consistentie begint bij je eerste dag.',
       done: '{done} van {eligible} gewoontemomenten gedaan',
       weekValue: '{done} van {eligible}',
+
+      doneMinimum: '{shown} van {eligible} gewoontemomenten, {minimum} met het minimum',
+
+      a11yMinimum:
+        '{pct} consistentie: {shown} van {eligible} gewoontemomenten, {done} gedaan en {minimum} met het minimum',
+
+      weekValueMinimum: '{done} van {eligible} · {minimum} met het minimum',
     },
     week: {
       range: { one: ' ({count} dag)', other: ' ({count} dagen)' },
@@ -981,6 +1043,11 @@ export const nl: Translation = {
       judged: { one: '{count} afgeronde week', other: '{count} afgeronde weken' },
       first: 'Je eerste week is begonnen',
       note: 'Weken lopen van maandag tot zondag. De lijn van je eerste week begint zodra die voorbij is.',
+
+      closedMinimum: 'Week {week}{range}: {pct}, {done} van {eligible} gedaan en {minimum} met het minimum.',
+
+      currentMinimum:
+        'Week {week}, tot nu toe: {done} van {eligible} gedaan en {minimum} met het minimum. Vandaag en open weekdoelen tellen nog niet mee.',
     },
     habit: {
       hint: 'Toont de geschiedenis, het doel en de moeilijkheid',
@@ -989,6 +1056,8 @@ export const nl: Translation = {
       noDays: 'Nog geen dagen',
       share: '{pct}, {done} van {eligible}',
       strongest: 'Sterkste',
+
+      shareMinimum: '{pct}, {done} van {eligible} gedaan en {minimum} met het minimum',
     },
     records: {
       title: 'Persoonlijke records',
@@ -1012,7 +1081,11 @@ export const nl: Translation = {
       streak: { one: 'reeks van {count} dag', other: 'reeks van {count} dagen' },
 
       day: 'Dag {day} van {total}',
+
+      weekMinimum: '{shown} van {eligible} deze week, {minimum} met het minimum',
     },
+
+    stripMinimum: 'Laatste {count} dagen: {done} gedaan, {minimum} met het minimum',
   },
   setup: {
     age: { u16: 'Jonger dan 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

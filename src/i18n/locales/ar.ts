@@ -283,6 +283,25 @@ export const ar: Translation = {
     pending: '{level} بدءًا من {when}: {target}',
     tomorrow: 'الغد',
     dayN: 'اليوم {day}',
+
+    minimum: {
+      mind_read: { inline: 'القراءة أو الاستماع لمدة دقيقتين', title: 'القراءة أو الاستماع لمدة دقيقتين' },
+      mind_meditation: {
+        inline: 'دقيقة هادئة واحدة، بالطريقة التي تناسبك',
+        title: 'دقيقة هادئة واحدة، بالطريقة التي تناسبك',
+      },
+
+      move_walk: {
+        inline: 'الحركة لمدة دقيقتين، بالطريقة التي تناسبك',
+        title: 'الحركة لمدة دقيقتين، بالطريقة التي تناسبك',
+      },
+
+      outdoor_time: { inline: 'الخروج لمدة دقيقتين', title: 'الخروج لمدة دقيقتين' },
+
+      eat_well: { inline: 'فاكهة أو خضار في وجبة واحدة', title: 'فاكهة أو خضار في وجبة واحدة' },
+
+      social_reach_out: { inline: 'رسالة قصيرة واحدة إلى شخص يهمّك', title: 'رسالة قصيرة واحدة إلى شخص يهمّك' },
+    },
   },
   progress: {
     phase: { 1: 'الأساس', 2: 'الزخم', 3: 'الإتقان' },
@@ -313,6 +332,10 @@ export const ar: Translation = {
       rest: 'يوم راحة: لم يكن هناك شيء مستحق.',
       unrecorded: 'لا سجل: لم يُؤشَّر على شيء في ذلك اليوم.',
       future: 'لم يحن بعد.',
+
+      kept: 'حُوفظ عليه بالحد الأدنى.',
+
+      atMinimum: 'بالحد الأدنى: {list}.',
     },
     observation: {
       steady: 'ثبت الأسبوع {week} عند {pct}، قريبًا من {prevPct} في الأسبوع {prev}.',
@@ -322,6 +345,8 @@ export const ar: Translation = {
       habit: '{habit} هي عادتك الأكثر انتظامًا: {done} من {eligible} مرة ({pct}).',
       goals: '{habit}: تحقق الهدف الأسبوعي في {met} من {judged} أسابيع مكتملة.',
       streak: 'أنت الآن في أطول سلسلة لك حتى الآن: {count} من الأيام المتتالية.',
+
+      habitMinimum: '{habit} أكثر عاداتك انتظامًا: أُنجزت {done} من {eligible} مرة، و{minimum} بالحد الأدنى ({pct}).',
     },
     weekdaysPlural: {
       0: 'أيام الاثنين',
@@ -790,6 +815,18 @@ export const ar: Translation = {
       streak: 'أيام السلسلة',
       best: 'أفضل تتابع',
       xp: 'XP',
+
+      a11yKept:
+        'منذ القمة: {days} من الأيام، احتُسب منها {counted} وحُوفظ على {kept} بالحد الأدنى، سلسلة من {streak} من الأيام، أفضل تتابع {best}، و{xp} XP.',
+
+      kept: {
+        zero: 'إضافةً إلى {count} من الأيام حُوفظ عليها بالحد الأدنى (النقاط ذات الحلقة): إنها تُبقي سلسلتك مستمرة.',
+        one: 'إضافةً إلى يوم واحد حُوفظ عليه بالحد الأدنى (النقطة ذات الحلقة): إنه يُبقي سلسلتك مستمرة.',
+        two: 'إضافةً إلى يومين حُوفظ عليهما بالحد الأدنى (النقطتان ذواتا الحلقة): إنهما يُبقيان سلسلتك مستمرة.',
+        few: 'إضافةً إلى {count} أيام حُوفظ عليها بالحد الأدنى (النقاط ذات الحلقة): إنها تُبقي سلسلتك مستمرة.',
+        many: 'إضافةً إلى {count} يومًا حُوفظ عليها بالحد الأدنى (النقاط ذات الحلقة): إنها تُبقي سلسلتك مستمرة.',
+        other: 'إضافةً إلى {count} يوم حُوفظ عليها بالحد الأدنى (النقاط ذات الحلقة): إنها تُبقي سلسلتك مستمرة.',
+      },
     },
     pastLink: {
       title: 'الرحلات السابقة',
@@ -822,6 +859,18 @@ export const ar: Translation = {
         other: 'من {count} يوم محتسب',
       },
       since: 'منذ القمة: احتُسب {counted} · أفضل تتابع {best} · {xp} XP. الرسوم البيانية أدناه هي صعودك في 66 يومًا.',
+
+      a11yKept:
+        'مؤخرًا، آخر أربعة أسابيع: احتُسب {counted} من {judged} يومًا وحُوفظ على {kept} بالحد الأدنى. منذ القمة: احتُسب {since} من الأيام و{xp} XP.',
+
+      kept: {
+        zero: 'إضافةً إلى {count} من الأيام حُوفظ عليها بالحد الأدنى.',
+        one: 'إضافةً إلى يوم واحد حُوفظ عليه بالحد الأدنى.',
+        two: 'إضافةً إلى يومين حُوفظ عليهما بالحد الأدنى.',
+        few: 'إضافةً إلى {count} أيام حُوفظ عليها بالحد الأدنى.',
+        many: 'إضافةً إلى {count} يومًا حُوفظ عليها بالحد الأدنى.',
+        other: 'إضافةً إلى {count} يوم حُوفظ عليها بالحد الأدنى.',
+      },
     },
     ascent: {
       title: 'بدء صعود جديد',
@@ -930,6 +979,8 @@ export const ar: Translation = {
       effort: 'مكتملة جزئيًا',
 
       logProgress: 'وضع علامة «مكتملة جزئيًا»',
+
+      minimum: 'أُنجز الحد الأدنى',
     },
     session: { fullBody: 'الجسم كله', upper: 'الجزء العلوي', lower: 'الجزء السفلي', anything: 'أخرى' },
     offer: {
@@ -1004,6 +1055,18 @@ export const ar: Translation = {
       partialMinutes: 'الدقائق المنجزة (اختياري)',
 
       thisWeek: 'هذا الأسبوع',
+
+      minimum: 'أنجزتُ الحد الأدنى',
+
+      removeMinimum: 'إزالة الحد الأدنى',
+
+      minimumDone: 'أُنجز الحد الأدنى.',
+
+      minimumHint:
+        'الحد الأدنى هو {minimum}. يُحتسب حضورًا: مع عاداتك الأخرى، يمكنه أن يُبقي اليوم في سلسلتك (+{xp} XP). «مكتملة جزئيًا» تمنح +{xp} XP، من دون السلسلة.',
+
+      minimumHintDone:
+        '{minimum}: يُحتسب حضورًا اليوم. يبقى هدفك كما هو ({target})؛ وإنجازه كاملًا يُحتسب إنجازًا كما كان.',
     },
   },
   journeyTab: {
@@ -1077,6 +1140,8 @@ export const ar: Translation = {
       unrecorded: 'لا سجل.',
       future: 'لم يأتِ بعد.',
       day: 'اليوم {day}',
+
+      kept: 'حُوفظ عليه بالحد الأدنى.',
     },
 
     trail: { open: 'فتح اليوم' },
@@ -1105,6 +1170,12 @@ export const ar: Translation = {
       first: 'يبدأ انتظامك مع يومك الأول.',
       done: 'أُنجزت {done} من {eligible} فرصة للعادات',
       weekValue: '{done} من {eligible}',
+
+      doneMinimum: '{shown} من {eligible} فرصة للعادات، {minimum} بالحد الأدنى',
+
+      a11yMinimum: 'الانتظام {pct}: {shown} من {eligible} فرصة للعادات، أُنجز {done} و{minimum} بالحد الأدنى',
+
+      weekValueMinimum: '{done} من {eligible} · {minimum} بالحد الأدنى',
     },
     week: {
       range: {
@@ -1131,6 +1202,11 @@ export const ar: Translation = {
       },
       first: 'أسبوعك الأول جارٍ',
       note: 'تمتد الأسابيع من الاثنين إلى الأحد. يبدأ سطر أسبوعك الأول بعد انتهائه.',
+
+      closedMinimum: 'الأسبوع {week}{range}: {pct}، أُنجز {done} من {eligible} و{minimum} بالحد الأدنى.',
+
+      currentMinimum:
+        'الأسبوع {week}، حتى الآن: أُنجز {done} من {eligible} و{minimum} بالحد الأدنى. لا يُحتسب اليوم والأهداف الأسبوعية المفتوحة بعد.',
     },
     habit: {
       hint: 'يعرض سجلها وهدفها وصعوبتها',
@@ -1139,6 +1215,8 @@ export const ar: Translation = {
       noDays: 'لا أيام بعد',
       share: '{pct}، {done} من {eligible}',
       strongest: 'الأقوى',
+
+      shareMinimum: '{pct}، أُنجز {done} من {eligible} و{minimum} بالحد الأدنى',
     },
     records: {
       title: 'أرقامك القياسية',
@@ -1197,7 +1275,11 @@ export const ar: Translation = {
       },
 
       day: 'اليوم {day} من {total}',
+
+      weekMinimum: '{shown} من {eligible} هذا الأسبوع، {minimum} بالحد الأدنى',
     },
+
+    stripMinimum: 'آخر {count} من الأيام: أُنجز {done}، و{minimum} بالحد الأدنى',
   },
   setup: {
     age: { u16: 'أقل من 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

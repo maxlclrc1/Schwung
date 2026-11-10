@@ -234,6 +234,31 @@ export const id: Translation = {
     pending: '{level} mulai {when}: {target}',
     tomorrow: 'besok',
     dayN: 'Hari ke-{day}',
+
+    minimum: {
+      mind_read: {
+        inline: 'membaca atau mendengarkan selama 2 menit',
+        title: 'Membaca atau mendengarkan selama 2 menit',
+      },
+      mind_meditation: {
+        inline: 'satu menit tenang, dengan cara apa pun',
+        title: 'Satu menit tenang, dengan cara apa pun',
+      },
+
+      move_walk: {
+        inline: 'bergerak selama 2 menit, dengan cara apa pun',
+        title: 'Bergerak selama 2 menit, dengan cara apa pun',
+      },
+
+      outdoor_time: { inline: 'keluar rumah selama 2 menit', title: 'Keluar rumah selama 2 menit' },
+
+      eat_well: { inline: 'buah atau sayur dalam satu kali makan', title: 'Buah atau sayur dalam satu kali makan' },
+
+      social_reach_out: {
+        inline: 'satu pesan singkat untuk orang yang kamu sayangi',
+        title: 'Satu pesan singkat untuk orang yang kamu sayangi',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Fondasi', 2: 'Momentum', 3: 'Penguasaan' },
@@ -259,6 +284,10 @@ export const id: Translation = {
       rest: 'Hari istirahat: tidak ada yang perlu dilakukan.',
       unrecorded: 'Tidak ada catatan: tidak ada yang dicentang hari itu.',
       future: 'Belum sampai.',
+
+      kept: 'Terjaga dengan minimum.',
+
+      atMinimum: 'Dengan minimum: {list}.',
     },
     observation: {
       steady: 'Minggu ke-{week} stabil di {pct}, mendekati {prevPct} di Minggu ke-{prev}.',
@@ -268,6 +297,9 @@ export const id: Translation = {
       habit: '{habit} adalah kebiasaanmu yang paling konsisten: {done} dari {eligible} kali ({pct}).',
       goals: '{habit}: target mingguan tercapai di {met} dari {judged} minggu yang sudah selesai.',
       streak: 'Kamu sedang di runtunan terpanjangmu sejauh ini: {count} hari berturut-turut.',
+
+      habitMinimum:
+        '{habit} adalah kebiasaanmu yang paling konsisten: {done} dari {eligible} kali selesai dan {minimum} dengan minimum ({pct}).',
     },
     weekdaysPlural: {
       0: 'Senin',
@@ -681,6 +713,11 @@ export const id: Translation = {
       streak: 'hari runtunan',
       best: 'rentang terbaik',
       xp: 'XP',
+
+      a11yKept:
+        'Sejak puncak: {days} hari, {counted} terhitung dan {kept} terjaga dengan minimum, runtunan {streak} hari, rentang terbaik {best}, {xp} XP.',
+
+      kept: { other: 'Ditambah {count} hari terjaga dengan minimum (titik bercincin): runtunanmu tetap berjalan.' },
     },
     pastLink: {
       title: 'Perjalanan sebelumnya',
@@ -708,6 +745,11 @@ export const id: Translation = {
       counted: { other: 'dari {count} hari terhitung' },
       since:
         'Sejak puncak: {counted} terhitung · rentang terbaik {best} · {xp} XP. Grafik di bawah ini adalah pendakian 66 harimu.',
+
+      a11yKept:
+        'Akhir-akhir ini, empat minggu terakhir: {counted} dari {judged} hari terhitung dan {kept} terjaga dengan minimum. Sejak puncak: {since} hari terhitung dan {xp} XP.',
+
+      kept: { other: 'Ditambah {count} hari terjaga dengan minimum.' },
     },
     ascent: {
       title: 'Mulai Pendakian Baru',
@@ -804,6 +846,8 @@ export const id: Translation = {
       effort: 'Selesai sebagian',
 
       logProgress: 'Tandai selesai sebagian',
+
+      minimum: 'Minimum selesai',
     },
     session: {
       fullBody: 'Seluruh tubuh',
@@ -885,6 +929,18 @@ export const id: Translation = {
       partialMinutes: 'Menit yang dilakukan (opsional)',
 
       thisWeek: 'Minggu ini',
+
+      minimum: 'Sudah melakukan minimum',
+
+      removeMinimum: 'Hapus minimum',
+
+      minimumDone: 'Minimum selesai.',
+
+      minimumHint:
+        'Minimumnya adalah {minimum}. Ini dihitung sebagai hadir: bersama kebiasaanmu yang lain, ini bisa menjaga hari ini dalam runtunanmu (+{xp} XP). Selesai sebagian memberi +{xp} XP, tanpa runtunan.',
+
+      minimumHintDone:
+        '{minimum} dihitung sebagai hadir hari ini. Targetmu tetap sama ({target}); melakukannya penuh tetap dihitung selesai.',
     },
   },
   journeyTab: {
@@ -951,6 +1007,8 @@ export const id: Translation = {
       unrecorded: 'Tidak ada catatan.',
       future: 'Masih di depan.',
       day: 'Hari ke-{day}',
+
+      kept: 'Terjaga dengan minimum.',
     },
 
     trail: { open: 'Buka hari' },
@@ -972,6 +1030,13 @@ export const id: Translation = {
       first: 'Konsistensimu dimulai dari hari pertamamu.',
       done: '{done} dari {eligible} kesempatan kebiasaan selesai',
       weekValue: '{done} dari {eligible}',
+
+      doneMinimum: '{shown} dari {eligible} kesempatan kebiasaan, {minimum} dengan minimum',
+
+      a11yMinimum:
+        'Konsistensi {pct}: {shown} dari {eligible} kesempatan kebiasaan, {done} selesai dan {minimum} dengan minimum',
+
+      weekValueMinimum: '{done} dari {eligible} · {minimum} dengan minimum',
     },
     week: {
       range: { other: ' ({count} hari)' },
@@ -985,6 +1050,11 @@ export const id: Translation = {
       judged: { other: '{count} minggu selesai' },
       first: 'Minggu pertamamu sedang berjalan',
       note: 'Minggu dihitung dari Senin sampai Minggu. Garis minggu pertamamu muncul setelah minggu itu berakhir.',
+
+      closedMinimum: 'Minggu ke-{week}{range}: {pct}, {done} dari {eligible} selesai dan {minimum} dengan minimum.',
+
+      currentMinimum:
+        'Minggu ke-{week}, sejauh ini: {done} dari {eligible} selesai dan {minimum} dengan minimum. Hari ini dan target mingguan yang masih terbuka belum dihitung.',
     },
     habit: {
       hint: 'Menunjukkan riwayat, target, dan tingkat kesulitannya',
@@ -993,6 +1063,8 @@ export const id: Translation = {
       noDays: 'Belum ada hari',
       share: '{pct}, {done} dari {eligible}',
       strongest: 'Terkuat',
+
+      shareMinimum: '{pct}, {done} dari {eligible} selesai dan {minimum} dengan minimum',
     },
     records: {
       title: 'Rekor pribadi',
@@ -1016,7 +1088,11 @@ export const id: Translation = {
       streak: { other: 'runtunan {count} hari' },
 
       day: 'Hari {day} dari {total}',
+
+      weekMinimum: '{shown} dari {eligible} minggu ini, {minimum} dengan minimum',
     },
+
+    stripMinimum: '{count} hari terakhir: {done} selesai, {minimum} dengan minimum',
   },
   setup: {
     age: {

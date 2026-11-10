@@ -257,6 +257,25 @@ export const ru: Translation = {
     pending: '{level} {when}: {target}',
     tomorrow: 'с завтрашнего дня',
     dayN: 'День {day}',
+
+    minimum: {
+      mind_read: { inline: 'читать или слушать 2 минуты', title: 'Читай или слушай 2 минуты' },
+      mind_meditation: {
+        inline: 'одна спокойная минута, как тебе нравится',
+        title: 'Одна спокойная минута, как тебе нравится',
+      },
+
+      move_walk: { inline: 'двигаться 2 минуты, как тебе нравится', title: 'Двигайся 2 минуты, как тебе нравится' },
+
+      outdoor_time: { inline: 'выйти на улицу на 2 минуты', title: 'Выйди на улицу на 2 минуты' },
+
+      eat_well: { inline: 'фрукты или овощи в одном приёме пищи', title: 'Фрукты или овощи в одном приёме пищи' },
+
+      social_reach_out: {
+        inline: 'одно короткое сообщение тому, кто тебе дорог',
+        title: 'Одно короткое сообщение тому, кто тебе дорог',
+      },
+    },
   },
   progress: {
     phase: { 1: 'Основа', 2: 'Импульс', 3: 'Мастерство' },
@@ -285,6 +304,10 @@ export const ru: Translation = {
       rest: 'День отдыха: ничего не было запланировано.',
       unrecorded: 'Нет записи: в тот день ничего не отмечалось.',
       future: 'Ещё не наступил.',
+
+      kept: 'Сохранено минимумом.',
+
+      atMinimum: 'На минимуме: {list}.',
     },
     observation: {
       steady: 'Неделя {week} держалась на уровне {pct}, близко к {prevPct} недели {prev}.',
@@ -294,6 +317,9 @@ export const ru: Translation = {
       habit: '{habit} — твоя самая стабильная привычка: {done} из {eligible} раз ({pct}).',
       goals: '{habit}: недельная цель достигнута в {met} из {judged} завершённых недель.',
       streak: 'Это твоя самая длинная серия: {count} дн. подряд.',
+
+      habitMinimum:
+        '{habit} — твоя самая регулярная привычка: выполнено {done} из {eligible} раз и ещё {minimum} на минимуме ({pct}).',
     },
     weekdaysPlural: {
       0: 'Понедельники',
@@ -750,6 +776,16 @@ export const ru: Translation = {
       streak: 'дн. подряд',
       best: 'лучший отрезок',
       xp: 'XP',
+
+      a11yKept:
+        'После вершины: дней — {days}, засчитано — {counted}, сохранено минимумом — {kept}, серия — {streak} дн., лучший отрезок — {best}, {xp} XP.',
+
+      kept: {
+        one: 'И ещё {count} день сохранён минимумом (точка в кольце): серия продолжается.',
+        few: 'И ещё {count} дня сохранены минимумом (точки в кольце): серия продолжается.',
+        many: 'И ещё {count} дней сохранены минимумом (точки в кольце): серия продолжается.',
+        other: 'И ещё {count} дня сохранены минимумом (точки в кольце): серия продолжается.',
+      },
     },
     pastLink: {
       title: 'Прошлые пути',
@@ -781,6 +817,16 @@ export const ru: Translation = {
       },
       since:
         'После вершины: засчитано {counted} · лучший отрезок {best} · {xp} XP. Графики ниже — твоё восхождение за 66 дней.',
+
+      a11yKept:
+        'В последнее время, за четыре недели: засчитано дней — {counted} из {judged}, сохранено минимумом — {kept}. После вершины: засчитано дней — {since}, {xp} XP.',
+
+      kept: {
+        one: 'И ещё {count} день сохранён минимумом.',
+        few: 'И ещё {count} дня сохранены минимумом.',
+        many: 'И ещё {count} дней сохранены минимумом.',
+        other: 'И ещё {count} дня сохранены минимумом.',
+      },
     },
     ascent: {
       title: 'Начать новое восхождение',
@@ -885,6 +931,8 @@ export const ru: Translation = {
       effort: 'Выполнено частично',
 
       logProgress: 'Отметить как частично выполненное',
+
+      minimum: 'Минимум выполнен',
     },
     session: { fullBody: 'Всё тело', upper: 'Верх тела', lower: 'Низ тела', anything: 'Другое' },
     offer: {
@@ -961,6 +1009,18 @@ export const ru: Translation = {
       partialMinutes: 'Сделано минут (необязательно)',
 
       thisWeek: 'На этой неделе',
+
+      minimum: 'Отметить минимум',
+
+      removeMinimum: 'Убрать минимум',
+
+      minimumDone: 'Минимум выполнен.',
+
+      minimumHint:
+        'Минимум: {minimum}. Это засчитывается как участие: вместе с другими привычками он может сохранить сегодняшний день в серии (+{xp} XP). Частичное выполнение даёт +{xp} XP, без серии.',
+
+      minimumHintDone:
+        '{minimum}: сегодня это засчитано как участие. Твоя цель прежняя ({target}); полное выполнение по-прежнему считается выполненным.',
     },
   },
   journeyTab: {
@@ -1027,6 +1087,8 @@ export const ru: Translation = {
       unrecorded: 'Нет записи.',
       future: 'Ещё впереди.',
       day: 'День {day}',
+
+      kept: 'Сохранено минимумом.',
     },
 
     trail: { open: 'Открыть день' },
@@ -1053,6 +1115,12 @@ export const ru: Translation = {
       first: 'Твоя регулярность начинается с первого дня.',
       done: 'Выполнено {done} из {eligible} возможностей',
       weekValue: '{done} из {eligible}',
+
+      doneMinimum: '{shown} из {eligible} возможностей, {minimum} на минимуме',
+
+      a11yMinimum: 'Регулярность {pct}: {shown} из {eligible} возможностей, выполнено {done} и {minimum} на минимуме',
+
+      weekValueMinimum: '{done} из {eligible} · {minimum} на минимуме',
     },
     week: {
       range: { one: ' ({count} день)', few: ' ({count} дня)', many: ' ({count} дней)', other: ' ({count} дня)' },
@@ -1071,6 +1139,11 @@ export const ru: Translation = {
       },
       first: 'Твоя первая неделя идёт',
       note: 'Недели идут с понедельника по воскресенье. Строка первой недели появится, когда она закончится.',
+
+      closedMinimum: 'Неделя {week}{range}: {pct}, выполнено {done} из {eligible} и {minimum} на минимуме.',
+
+      currentMinimum:
+        'Неделя {week}, пока что: выполнено {done} из {eligible} и {minimum} на минимуме. Сегодняшний день и открытые недельные цели ещё не учитываются.',
     },
     habit: {
       hint: 'Показывает историю, цель и сложность',
@@ -1079,6 +1152,8 @@ export const ru: Translation = {
       noDays: 'Дней пока нет',
       share: '{pct}, {done} из {eligible}',
       strongest: 'Самая сильная',
+
+      shareMinimum: '{pct}, выполнено {done} из {eligible} и {minimum} на минимуме',
     },
     records: {
       title: 'Личные рекорды',
@@ -1122,7 +1197,11 @@ export const ru: Translation = {
       },
 
       day: 'День {day} из {total}',
+
+      weekMinimum: '{shown} из {eligible} на этой неделе, {minimum} на минимуме',
     },
+
+    stripMinimum: 'За последние {count} дн.: выполнено {done}, на минимуме {minimum}',
   },
   setup: {
     age: { u16: 'Младше 18', '16_17': '16–17', '18_29': '18–29', '30_49': '30–49', '50_64': '50–64', '65p': '65+' },

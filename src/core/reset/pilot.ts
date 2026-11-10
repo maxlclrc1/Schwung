@@ -50,7 +50,7 @@ import {
   type Offer,
   type ProgressionState,
 } from './readiness';
-import { minimumAvailable, type MinimumReview } from './minimum';
+import { MINIMUMS, minimumAvailable, minimumCounted, type MinimumReview } from './minimum';
 import { timerBlocks } from './timer';
 import {
   confirmDone,
@@ -1032,6 +1032,20 @@ export function sinceSummit(p: PilotProgram, today: number) {
   return { days: Math.max(0, today - from + 1), counted, kept, judged, best, xp };
 }
 
+/**
+ * Keep My Momentum's strip: the last `n` days since the summit as consistency outcomes ('today' while today is still
+ * open). A day kept with the minimum is 'kept', never a miss.
+ */
+export function sinceSummitStrip(p: PilotProgram, today: number, n = 28): ('today' | DayOutcome)[] {
+  const from = p.after?.since ?? today;
+  const out: ('today' | DayOutcome)[] = [];
+  for (let d = Math.max(from, today - n + 1); d <= today; d++) {
+    const r = dayOutcome(p, d);
+    out.push(d === today && r !== 'counted' && r !== 'kept' ? 'today' : r);
+  }
+  return out;
+}
+
 /** The last `n` days (to today): days that counted out of the days that asked something. For recent Insights. */
 export function recentDays80(p: PilotProgram, today: number, n = 28) {
   let counted = 0;
@@ -1182,12 +1196,12 @@ export function setPartial(p: PilotProgram, id: string, day: number, on: boolean
   });
 }
 
-// --- Minimum Effort (docs/MINIMUM_EFFORT_SPEC.md). Not reachable in the app until minimums are approved. ---
+// --- Minimum Effort (docs/MINIMUM_EFFORT_SPEC.md). Offered in the app only where `flags.minimumEffort()` allows. ---
 
 /**
  * Whether a minimum may be recorded for a habit on a day: a catalogue habit in the program, daily that day, not done
  * yet, whose day's target asks strictly more than its minimum, while tracking runs (not waiting for the choice after
- * the summit, not paused for age), and only minimums the review allows (none in the app yet). Whether the day can
+ * the summit, not paused for age), and only minimums the review allows. Whether the day can
  * still be edited (today, or yesterday before noon) is the caller's rule, as for completions.
  */
 export function minimumFor(p: PilotProgram, id: string, day: number, review: MinimumReview = 'approved'): boolean {
@@ -1197,14 +1211,22 @@ export function minimumFor(p: PilotProgram, id: string, day: number, review: Min
 }
 
 /**
- * Whether a habit's day counts as kept with its minimum. It reads the saved record, never the minimum table, so a
- * recorded minimum keeps its day's outcome even if a minimum is later changed or withdrawn. Only impossibilities are
- * ignored: a habit outside the program that day, not daily that day, completed (the completion counts), or skipped.
+ * Whether a habit's day counts as kept with its minimum. It reads the saved record and checks it only against the
+ * append-only catalogue (`minimumCounted`), never against what's offered today, so a recorded minimum keeps its day's
+ * outcome even if a minimum is later withdrawn. Impossibilities are ignored: a habit outside the program that day,
+ * not daily that day, completed (the completion counts), skipped, a custom habit, or a habit and level the catalogue
+ * never offered a minimum for (an edited backup). The raw record is kept as it is either way.
  */
 export function minimumOn(p: PilotProgram, id: string, day: number): boolean {
   const track = trackOf(p, id, day);
-  return !!track.minimum && !track.skipped && activeOn(p, id, day) && isDaily(p, id, day) && !isDone(p, id, day);
+  if (!track.minimum || track.skipped || p.custom?.[id] || !RESET_BY_ID[id]) return false;
+  if (!activeOn(p, id, day) || !isDaily(p, id, day) || isDone(p, id, day)) return false;
+  return minimumCounted(id, levelFor(p, id, day));
 }
+
+/** A habit's minimum in words: as a phrase within a sentence ('inline') or on its own ('title'). */
+export const minimumText = (id: string, form: 'inline' | 'title') =>
+  MINIMUMS[id]?.since !== undefined ? t(`engine.minimum.${id}.${form}` as TKey) : '';
 
 /** The habits kept with their minimum on a day. */
 export const minimumsOn = (p: PilotProgram, day: number) => allHabits(p).filter((id) => minimumOn(p, id, day));
@@ -1436,7 +1458,7 @@ export function weekTally(p: PilotProgram, today: number): Tally {
 
 /** A habit's recent days, newest last: done, skipped, not done, or rest (a weekly habit's day off). */
 export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
-  const out: { day: number; state: 'done' | 'skipped' | 'missed' | 'rest' | 'today' }[] = [];
+  const out: { day: number; state: 'done' | 'minimum' | 'skipped' | 'missed' | 'rest' | 'today' }[] = [];
   for (let d = Math.max(1, today - n + 1); d <= Math.min(today, endDay(p)); d++) {
     if (!activeOn(p, id, d)) continue; // before it joined
     const t = trackOf(p, id, d);
@@ -1444,13 +1466,15 @@ export function recentDays(p: PilotProgram, id: string, today: number, n = 14) {
       day: d,
       state: isDone(p, id, d)
         ? 'done'
-        : t.skipped
-          ? 'skipped'
-          : d === today
-            ? 'today'
-            : isDaily(p, id, d)
-              ? 'missed'
-              : 'rest',
+        : minimumOn(p, id, d)
+          ? 'minimum'
+          : t.skipped
+            ? 'skipped'
+            : d === today
+              ? 'today'
+              : isDaily(p, id, d)
+                ? 'missed'
+                : 'rest',
     });
   }
   return out;

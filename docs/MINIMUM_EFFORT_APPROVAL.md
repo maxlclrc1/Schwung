@@ -1,6 +1,7 @@
 # Minimum Effort: content and visual approval package
 
-**Status:** for owner and ChatGPT review. **No production code is changed and no minimum is enabled.**
+**Status:** approved by the owner (`d7652fc`): the six minimums, the shared wording, the placements and mark A.
+Built in R2b (`docs/MINIMUM_EFFORT_R2B.md`). What follows is the package as it was approved.
 
 - The engine (R2a, `8948322`) is approved and stays unreachable.
 - The screens (R2b) wait for this package.
