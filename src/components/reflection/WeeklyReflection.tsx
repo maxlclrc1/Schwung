@@ -16,9 +16,11 @@ import Svg, { Path } from 'react-native-svg';
 import * as C from '../../core/reset/charts';
 import * as P from '../../core/reset/pilot';
 import { reflectionDays, type ReflectionAnswer } from '../../core/reset/reflections';
+import { waysForward } from '../../core/reset/waysForward';
 import { haptic } from '../../lib/haptics';
 import { pilotToday, useResetPilot } from '../../store/resetPilot';
 import { space, useTheme } from '../../theme';
+import { conceal, reflow, reveal } from '../../theme/motion';
 import { ThemedView } from '../../theme/transition';
 import { Press } from '../onboarding/Choices';
 import { rise } from '../onboarding/kit';
@@ -37,6 +39,11 @@ import { useT } from '../../i18n/react';
  * existing rules (pilot.ts easier/harder: from tomorrow or next Monday, eligible levels only), so every past day,
  * XP and streak stays exactly as it was. Habits of the person's own keep their own model and are never offered.
  * The answer is saved the moment it's chosen.
+ *
+ * After "Harder than expected", the ways forward (core/reset/waysForward.ts) follow as a second set of journal rows,
+ * each led by its own shape: make a habit easier (a lower ridge, only when a habit has a real easier target), focus on
+ * fewer habits (a single peak, only with more than one habit), and keep my plan (a level plateau, always). Choosing one
+ * reveals what it means in place; a plan changes only on its own confirmation, through the existing actions.
  */
 
 const sys = ReduceMotion.System;
@@ -57,6 +64,25 @@ const OPTIONS: { id: ReflectionAnswer; label: string; shape: string }[] = [
 ];
 
 const response = (a: ReflectionAnswer) => tr(`weekly.response.${a}`);
+
+type Way = 'lighter' | 'fewer' | 'keep';
+const way = (id: Way, shape: string) => ({
+  id,
+  shape,
+  get label() {
+    return tr(`weekly.ways.${id}`);
+  },
+});
+/** The ways forward after a harder week, each with the shape of its climb. */
+const WAYS: { id: Way; label: string; shape: string }[] = [
+  way('lighter', 'M4 50 C 26 40, 38 34, 48 34 C 58 34, 70 40, 92 50 Z'),
+  way('fewer', 'M4 50 L 34 50 L 48 18 L 62 50 L 92 50 Z'),
+  way('keep', 'M4 50 L 24 30 L 72 30 L 92 50 Z'),
+];
+
+const REVEAL = reveal();
+const CONCEAL = conceal();
+const REFLOW = reflow();
 
 export function WeeklyReflection({
   week,
@@ -104,7 +130,8 @@ export function WeeklyReflection({
     useResetPilot.getState().reflect(week, a);
   };
   const adjustable = program.habits.filter((id) => !program.custom?.[id]);
-  const direction = answer === 'easier' ? 'harder' : answer === 'harder' ? 'easier' : null;
+  // A harder week leads to its own ways forward (below); an easier one to a bigger step.
+  const direction = answer === 'easier' ? 'harder' : null;
 
   return (
     <Screen edges={['bottom']}>
@@ -152,15 +179,11 @@ export function WeeklyReflection({
               <T style={styles.responseText}>{response(answer)}</T>
             </ThemedView>
 
-            {adjustable.length && (direction || review) ? (
+            {answer === 'harder' ? (
+              <WaysForward program={program} today={today} week={week} />
+            ) : adjustable.length && (direction || review) ? (
               <View style={styles.targets}>
-                <T style={styles.targetsTitle}>
-                  {direction === 'harder'
-                    ? t('weekly.bigger')
-                    : direction === 'easier'
-                      ? t('weekly.lighter')
-                      : t('weekly.targets')}
-                </T>
+                <T style={styles.targetsTitle}>{direction === 'harder' ? t('weekly.bigger') : t('weekly.targets')}</T>
                 <T color={c.textDim} style={styles.note}>
                   {t('weekly.nothingChanges')}
                 </T>
@@ -180,7 +203,7 @@ export function WeeklyReflection({
                 <T style={[styles.linkText, { textDecorationColor: `${c.text}4D` }]}>{t('weekly.review')}</T>
               </Press>
             ) : null}
-            {program.habits.some((id) => program.custom?.[id]) ? (
+            {answer !== 'harder' && program.habits.some((id) => program.custom?.[id]) ? (
               <T color={c.textFaint} style={styles.note}>
                 {t('weekly.ownStay')}
               </T>
@@ -217,7 +240,15 @@ export function WeeklyReflection({
  * An answer as a journal row: its climb's shape, then its words. Unchosen, every shape is the same neutral outline and
  * every label the same weight; the chosen one's shape fills with the violet and its label turns semibold.
  */
-function Option({ option, on, onPress }: { option: (typeof OPTIONS)[number]; on: boolean; onPress: () => void }) {
+function Option({
+  option,
+  on,
+  onPress,
+}: {
+  option: { label: string; shape: string };
+  on: boolean;
+  onPress: () => void;
+}) {
   const { c } = useTheme();
   const t = useSharedValue(on ? 1 : 0);
   useEffect(() => {
@@ -347,6 +378,218 @@ function Adjust({
   );
 }
 
+/**
+ * The ways forward after a harder week: only the ones this person can take today (waysForward), as journal rows. The
+ * chosen one reveals what it means just below; nothing changes until a change is confirmed there. A row stays while
+ * it's chosen, even once what it offered has been used, so the page never jumps out from under the person.
+ */
+function WaysForward({ program, today, week }: { program: P.PilotProgram; today: number; week: number }) {
+  const { c } = useTheme();
+  const t = useT();
+  const [chosen, setChosen] = useState<Way | null>(null);
+  const live = useMemo(() => waysForward(program, today), [program, today]);
+  const shown = WAYS.filter(
+    (w) => w.id === 'keep' || w.id === chosen || (w.id === 'lighter' ? live.easier : live.fewer).length > 0,
+  );
+  return (
+    <Animated.View layout={REFLOW} style={styles.targets}>
+      <T style={styles.targetsTitle} accessibilityRole="header">
+        {t('weekly.ways.title')}
+      </T>
+      <T color={c.textDim} style={styles.note}>
+        {t('weekly.ways.hint')}
+      </T>
+      <ThemedView style={[styles.ways, { borderTopColor: c.border }]} accessibilityRole="radiogroup">
+        {shown.map((w) => (
+          <Animated.View key={w.id} layout={REFLOW} exiting={CONCEAL}>
+            <Option
+              option={w}
+              on={chosen === w.id}
+              onPress={() => {
+                haptic.select();
+                setChosen(w.id);
+              }}
+            />
+          </Animated.View>
+        ))}
+      </ThemedView>
+      {chosen ? (
+        <Animated.View key={chosen} entering={REVEAL} layout={REFLOW} style={styles.wayPanel}>
+          {chosen === 'lighter' ? (
+            <Lighter program={program} today={today} week={week} />
+          ) : chosen === 'fewer' ? (
+            <Fewer program={program} today={today} />
+          ) : (
+            <T color={c.textDim} style={styles.wayNote} accessibilityLiveRegion="polite">
+              {t('weekly.ways.keepNote')}
+            </T>
+          )}
+        </Animated.View>
+      ) : null}
+    </Animated.View>
+  );
+}
+
+/** Make a habit easier: only the habits that have a real, allowed easier target, each previewed and confirmed. */
+function Lighter({ program, today, week }: { program: P.PilotProgram; today: number; week: number }) {
+  const { c } = useTheme();
+  const t = useT();
+  // The list is kept as it opened, so a habit just changed stays to show what changed.
+  const [ids] = useState(() => waysForward(program, today).easier);
+  return (
+    <View style={{ gap: 4 }}>
+      <T color={c.textDim} style={styles.wayNote}>
+        {t('weekly.nothingChanges')}
+      </T>
+      <ThemedView style={[styles.ledger, { borderTopColor: c.border }]}>
+        {ids
+          .filter((id) => program.habits.includes(id))
+          .map((id) => (
+            <Adjust key={id} program={program} id={id} today={today} way="easier" week={week} />
+          ))}
+      </ThemedView>
+      {program.habits.some((id) => program.custom?.[id]) ? (
+        <T color={c.textFaint} style={[styles.note, { marginTop: space.sm }]}>
+          {t('weekly.ownStay')}
+        </T>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Focus on fewer habits: the person picks one to stop, sees exactly what that means, and confirms. It's the existing
+ * removal (pilot.ts removeHabit): the habit leaves from today (tomorrow if it's done today), its past days stay
+ * everywhere, at least one habit always stays, and it isn't a pause.
+ */
+function Fewer({ program, today }: { program: P.PilotProgram; today: number }) {
+  const { c } = useTheme();
+  const t = useT();
+  const [ids] = useState(() => waysForward(program, today).fewer);
+  const [open, setOpen] = useState<string | null>(null);
+  const [stopped, setStopped] = useState<string[]>([]);
+  return (
+    <View style={{ gap: 4 }}>
+      <T color={c.textDim} style={styles.wayNote}>
+        {t('weekly.ways.fewerNote')}
+      </T>
+      <ThemedView style={[styles.ledger, { borderTopColor: c.border }]}>
+        {ids.map((id) => (
+          <Stop
+            key={id}
+            program={program}
+            id={id}
+            today={today}
+            open={open === id}
+            stopped={stopped.includes(id)}
+            onToggle={() => setOpen((o) => (o === id ? null : id))}
+            onStopped={() => {
+              setStopped((s) => [...s, id]);
+              setOpen(null);
+            }}
+          />
+        ))}
+      </ThemedView>
+    </View>
+  );
+}
+
+/** One habit that could be stopped: its target, then (opened) what stopping means and the confirmation. */
+function Stop({
+  program,
+  id,
+  today,
+  open,
+  stopped,
+  onToggle,
+  onStopped,
+}: {
+  program: P.PilotProgram;
+  id: string;
+  today: number;
+  open: boolean;
+  stopped: boolean;
+  onToggle: () => void;
+  onStopped: () => void;
+}) {
+  const { c } = useTheme();
+  const t = useT();
+  const [error, setError] = useState<string | null>(null);
+  const name = P.nameOf(program, id);
+  if (stopped || !program.habits.includes(id))
+    return (
+      <Animated.View entering={REVEAL} layout={REFLOW}>
+        <ThemedView style={[styles.adjust, { borderBottomColor: c.border }]}>
+          <View style={styles.doneRow} accessibilityLiveRegion="polite">
+            <Ionicons name="checkmark-circle" size={18} color={c.sage} />
+            <T v="caption" style={{ flex: 1 }}>
+              {t('weekly.ways.stopped', { habit: name })}
+            </T>
+          </View>
+        </ThemedView>
+      </Animated.View>
+    );
+  const problem = P.removeProblem(program, id);
+  const own = !!program.custom?.[id];
+  return (
+    <Animated.View layout={REFLOW}>
+      <ThemedView style={[styles.adjust, { borderBottomColor: c.border }]}>
+        <Press
+          onPress={onToggle}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: open }}
+          accessibilityLabel={t('weekly.ways.stopA11y', { habit: name, level: P.levelLineFor(program, id, today) })}
+        >
+          <View style={styles.adjustHead}>
+            <View style={{ flex: 1 }}>
+              <T style={styles.habitName}>{name}</T>
+              <T color={c.textDim} style={styles.note}>
+                {t('weekly.levelTarget', {
+                  level: P.levelLineFor(program, id, today),
+                  target: P.targetText(program, id, today),
+                })}
+              </T>
+            </View>
+            <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={c.textFaint} />
+          </View>
+        </Press>
+        {open ? (
+          <Animated.View entering={REVEAL} layout={REFLOW} style={{ gap: space.sm }}>
+            {problem ? (
+              <T v="caption" color={c.textDim}>
+                {problem}
+              </T>
+            ) : (
+              <>
+                <T v="caption" color={c.textDim}>
+                  {P.isDone(program, id, today) ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
+                  {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
+                </T>
+                <Button
+                  label={t('today.habit.removeName', { habit: name })}
+                  kind="danger"
+                  onPress={() => {
+                    const blocked = useResetPilot.getState().removeHabit(id);
+                    if (blocked) return setError(blocked);
+                    haptic.confirm();
+                    onStopped();
+                  }}
+                />
+                <Button label={t('today.habit.keepIt')} kind="ghost" onPress={onToggle} />
+                {error ? (
+                  <T v="caption" color={c.danger} accessibilityLiveRegion="polite">
+                    {error}
+                  </T>
+                ) : null}
+              </>
+            )}
+          </Animated.View>
+        ) : null}
+      </ThemedView>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: space.lg + 4, paddingTop: space.xs, paddingBottom: space.xxl, gap: space.xl },
   kickerRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm + 2 },
@@ -373,6 +616,9 @@ const styles = StyleSheet.create({
   targetsTitle: { fontSize: 16, lineHeight: 21, fontWeight: '600' },
   note: { fontSize: 13.5, lineHeight: 18 },
   ledger: { marginTop: space.sm, borderTopWidth: StyleSheet.hairlineWidth },
+  ways: { marginTop: space.sm, borderTopWidth: StyleSheet.hairlineWidth },
+  wayPanel: { marginTop: space.md },
+  wayNote: { fontSize: 15, lineHeight: 21 },
   adjust: {
     paddingVertical: space.sm + 2,
     paddingHorizontal: 2,

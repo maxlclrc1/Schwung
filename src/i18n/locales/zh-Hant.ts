@@ -1172,7 +1172,7 @@ export const zhHant: Translation = {
     response: {
       easier: '知道了。如果你願意，可以在一個習慣上邁出稍大的一步。',
       right: '這正是最佳節奏。照這個步調繼續攀登吧。',
-      harder: '有些週就是這樣。在一個習慣上放輕一些，同樣算數。',
+      harder: '有些週就是這樣，從這裡出發，前進的路不只一條。',
     },
     title: '第{week}週',
     close: '關閉',
@@ -1183,7 +1183,6 @@ export const zhHant: Translation = {
       other: '你完成了{planned}次習慣打卡中的{done}次，其中有{count}天全部完成。',
     },
     bigger: '想讓某個習慣跨稍大一點的一步嗎？',
-    lighter: '想讓某個習慣跨輕一點的一步嗎？',
     targets: '你的目標',
     nothingChanges:
       '除非你確認，否則什麼都不會改變。更改從明天開始生效（每週習慣從下週一開始）；你過去的日子維持原樣。',
@@ -1201,6 +1200,26 @@ export const zhHant: Translation = {
     makeHarder: '調難一點',
     changed: '完成。{pending}',
     changedPlain: '完成。',
+
+    ways: {
+      title: '什麼最能幫到你？',
+      hint: '選一個看看它代表什麼。除非你確認，否則什麼都不會改變。',
+
+      lighter: '把一個習慣調輕鬆一點',
+
+      fewer: '專注於更少的習慣',
+
+      keep: '維持我的計畫',
+
+      keepNote: '你的計畫維持原樣。辛苦的一週不一定要改變什麼。',
+
+      fewerNote:
+        '選擇一個要停止的習慣。它會離開你的 Life Reset，你和它一起完成的一切都保留在「旅程」和「洞察」中。這不是暫停：之後想要回來，可以再次加入。',
+
+      stopA11y: '{habit}，{level}。選擇以停止',
+
+      stopped: '{habit} 已不在你的 Life Reset 中。它過去的紀錄仍保留在「旅程」和「洞察」中。',
+    },
   },
   ceremony: {
     skip: '略過',

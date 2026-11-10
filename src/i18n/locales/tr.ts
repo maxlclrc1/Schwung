@@ -1210,7 +1210,7 @@ export const tr: Translation = {
     response: {
       easier: 'Bunu bilmek iyi. İstersen bir alışkanlıkta biraz daha büyük bir adım atabilirsin.',
       right: 'İşte ideal nokta. Bu tempoda tırmanmaya devam et.',
-      harder: 'Bazı haftalar böyle olur. Bir alışkanlıkta daha hafif bir adım da sayılır.',
+      harder: 'Bazı haftalar böyle olur ve buradan ilerlemenin birden fazla yolu var.',
     },
     title: 'Hafta {week}',
     close: 'Kapat',
@@ -1222,7 +1222,6 @@ export const tr: Translation = {
       other: '{planned} alışkanlık kontrolünün {done} tanesini yaptın, {count} tam gün ile.',
     },
     bigger: 'Bir alışkanlık için biraz daha büyük bir adım ister misin?',
-    lighter: 'Bir alışkanlık için daha hafif bir adım ister misin?',
     targets: 'Hedeflerin',
     nothingChanges:
       'Sen onaylamadıkça hiçbir şey değişmez. Değişiklikler yarından başlar (haftalık alışkanlıklar gelecek pazartesiden); geçmiş günlerin olduğu gibi kalır.',
@@ -1240,6 +1239,26 @@ export const tr: Translation = {
     makeHarder: 'Zorlaştır',
     changed: 'Tamam. {pending}',
     changedPlain: 'Tamam.',
+
+    ways: {
+      title: 'En çok ne yardımcı olur?',
+      hint: 'Ne anlama geldiğini görmek için birini seç. Sen onaylamadıkça hiçbir şey değişmez.',
+
+      lighter: 'Bir alışkanlığı kolaylaştır',
+
+      fewer: 'Daha az alışkanlığa odaklan',
+
+      keep: 'Planımı koru',
+
+      keepNote: 'Planın olduğu gibi kalır. Zor geçen bir hafta hiçbir şeyi değiştirmek zorunda değil.',
+
+      fewerNote:
+        'Bırakmak istediğin bir alışkanlığı seç. Life Reset’inden çıkar ve onunla yaptığın her şey Yolculuk ve İçgörüler’de kalır. Bu bir ara verme değil: daha sonra geri istersen yeniden ekleyebilirsin.',
+
+      stopA11y: '{habit}, {level}. Bırakmak için seç',
+
+      stopped: '{habit} artık Life Reset’inde değil. Geçmiş günleri Yolculuk ve İçgörüler’de kalır.',
+    },
   },
   ceremony: {
     skip: 'Geç',

@@ -1208,7 +1208,7 @@ export const vi: Translation = {
     response: {
       easier: 'Tốt khi biết vậy. Nếu muốn, bạn có thể bước một bước lớn hơn chút ở một thói quen.',
       right: 'Đó là mức lý tưởng. Hãy tiếp tục leo với nhịp này.',
-      harder: 'Có những tuần như vậy. Một bước nhẹ hơn ở một thói quen vẫn được tính.',
+      harder: 'Có những tuần như vậy, và từ đây có nhiều hơn một con đường để đi tiếp.',
     },
     title: 'Tuần {week}',
     close: 'Đóng',
@@ -1219,7 +1219,6 @@ export const vi: Translation = {
       other: 'Bạn đã hoàn thành {done}/{planned} lượt thói quen, với {count} ngày trọn vẹn.',
     },
     bigger: 'Muốn một bước lớn hơn chút cho một thói quen?',
-    lighter: 'Muốn một bước nhẹ hơn cho một thói quen?',
     targets: 'Mục tiêu của bạn',
     nothingChanges:
       'Không có gì thay đổi nếu bạn chưa xác nhận. Thay đổi bắt đầu từ ngày mai (thói quen hằng tuần từ thứ Hai tới); những ngày đã qua vẫn giữ nguyên.',
@@ -1237,6 +1236,26 @@ export const vi: Translation = {
     makeHarder: 'Làm khó hơn',
     changed: 'Xong. {pending}',
     changedPlain: 'Xong.',
+
+    ways: {
+      title: 'Điều gì sẽ giúp bạn nhiều nhất?',
+      hint: 'Chọn một mục để xem ý nghĩa của nó. Không có gì thay đổi nếu bạn chưa xác nhận.',
+
+      lighter: 'Làm một thói quen dễ hơn',
+
+      fewer: 'Tập trung vào ít thói quen hơn',
+
+      keep: 'Giữ kế hoạch của tôi',
+
+      keepNote: 'Kế hoạch của bạn vẫn giữ nguyên. Một tuần khó khăn hơn không nhất thiết phải thay đổi điều gì.',
+
+      fewerNote:
+        'Chọn một thói quen để dừng. Thói quen đó rời khỏi Life Reset của bạn, và mọi điều bạn đã làm với nó vẫn ở trong Hành trình và Thống kê. Đây không phải là tạm dừng: nếu sau này muốn quay lại, bạn có thể thêm lại.',
+
+      stopA11y: '{habit}, {level}. Chọn để dừng',
+
+      stopped: '{habit} không còn trong Life Reset của bạn. Những ngày trước đây vẫn ở trong Hành trình và Thống kê.',
+    },
   },
   ceremony: {
     skip: 'Bỏ qua',

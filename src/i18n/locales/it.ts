@@ -1239,7 +1239,7 @@ export const it: Translation = {
     response: {
       easier: 'Buono a sapersi. Se vuoi, puoi fare un passo un po’ più grande su un’abitudine.',
       right: 'È il punto giusto. Continua a salire con questo ritmo.',
-      harder: 'Ci sono settimane così. Anche un passo più leggero su un’abitudine conta.',
+      harder: 'Ci sono settimane così, e da qui c’è più di una strada per andare avanti.',
     },
     title: 'Settimana {week}',
     close: 'Chiudi',
@@ -1251,7 +1251,6 @@ export const it: Translation = {
       other: 'Hai fatto {done} di {planned} spunte di abitudini, con {count} giorni completi.',
     },
     bigger: 'Vuoi un passo un po’ più grande per un’abitudine?',
-    lighter: 'Vuoi un passo più leggero per un’abitudine?',
     targets: 'I tuoi obiettivi',
     nothingChanges:
       'Non cambia nulla finché non confermi. Le modifiche partono da domani (le abitudini settimanali da lunedì prossimo); i tuoi giorni passati restano esattamente come sono.',
@@ -1269,6 +1268,26 @@ export const it: Translation = {
     makeHarder: 'Rendila più difficile',
     changed: 'Fatto. {pending}',
     changedPlain: 'Fatto.',
+
+    ways: {
+      title: 'Cosa ti aiuterebbe di più?',
+      hint: 'Scegline una per vedere cosa significa. Non cambia nulla finché non confermi.',
+
+      lighter: 'Rendi più facile un’abitudine',
+
+      fewer: 'Concentrati su meno abitudini',
+
+      keep: 'Mantieni il mio piano',
+
+      keepNote: 'Il tuo piano resta esattamente com’è. Una settimana più dura non deve per forza cambiare qualcosa.',
+
+      fewerNote:
+        'Scegli un’abitudine da interrompere. Esce dal tuo Life Reset, e tutto quello che hai fatto con lei resta in Percorso e Andamento. Non è una pausa: se in seguito la rivuoi, puoi aggiungerla di nuovo.',
+
+      stopA11y: '{habit}, {level}. Scegli di interromperla',
+
+      stopped: '{habit} non fa più parte del tuo Life Reset. I suoi giorni passati restano in Percorso e Andamento.',
+    },
   },
   ceremony: {
     skip: 'Salta',

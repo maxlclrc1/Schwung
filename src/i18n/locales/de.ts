@@ -1226,7 +1226,7 @@ export const de: Translation = {
     response: {
       easier: 'Gut zu wissen. Wenn du willst, kannst du bei einer Gewohnheit einen etwas größeren Schritt machen.',
       right: 'Das ist genau das richtige Maß. Steig in diesem Tempo weiter.',
-      harder: 'Manche Wochen sind so. Ein leichterer Schritt bei einer Gewohnheit zählt auch.',
+      harder: 'Manche Wochen sind so, und es gibt mehr als einen Weg, von hier aus weiterzugehen.',
     },
     title: 'Woche {week}',
     close: 'Schließen',
@@ -1238,7 +1238,6 @@ export const de: Translation = {
       other: 'Du hast {done} von {planned} Gewohnheiten abgehakt, mit {count} geschafften Tagen.',
     },
     bigger: 'Lust auf einen etwas größeren Schritt bei einer Gewohnheit?',
-    lighter: 'Lieber einen leichteren Schritt bei einer Gewohnheit?',
     targets: 'Deine Ziele',
     nothingChanges:
       'Nichts ändert sich, solange du nicht bestätigst. Änderungen gelten ab morgen (wöchentliche Gewohnheiten ab nächstem Montag); deine bisherigen Tage bleiben genau, wie sie sind.',
@@ -1256,6 +1255,26 @@ export const de: Translation = {
     makeHarder: 'Schwerer machen',
     changed: 'Erledigt. {pending}',
     changedPlain: 'Erledigt.',
+
+    ways: {
+      title: 'Was würde dir am meisten helfen?',
+      hint: 'Wähle eine Möglichkeit, um zu sehen, was sie bedeutet. Nichts ändert sich, solange du nicht bestätigst.',
+
+      lighter: 'Eine Gewohnheit leichter machen',
+
+      fewer: 'Auf weniger Gewohnheiten konzentrieren',
+
+      keep: 'Meinen Plan behalten',
+
+      keepNote: 'Dein Plan bleibt genau, wie er ist. Eine schwerere Woche muss nichts ändern.',
+
+      fewerNote:
+        'Wähle eine Gewohnheit, die du beenden möchtest. Sie verlässt deinen Life Reset, und alles, was du mit ihr gemacht hast, bleibt in Weg und Einblicke. Das ist keine Pause: Wenn du sie später zurückmöchtest, kannst du sie wieder hinzufügen.',
+
+      stopA11y: '{habit}, {level}. Zum Beenden auswählen',
+
+      stopped: '{habit} ist nicht mehr in deinem Life Reset. Ihre bisherigen Tage bleiben in Weg und Einblicke.',
+    },
   },
   ceremony: {
     skip: 'Überspringen',

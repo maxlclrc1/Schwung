@@ -1204,7 +1204,7 @@ export const es: Translation = {
     response: {
       easier: 'Bueno saberlo. Si quieres, puedes dar un paso algo mayor en un hábito.',
       right: 'Ese es el punto justo. Sigue subiendo a este ritmo.',
-      harder: 'Hay semanas así. Un paso más ligero en un hábito también cuenta.',
+      harder: 'Hay semanas así, y desde aquí hay más de un camino posible.',
     },
     title: 'Semana {week}',
     close: 'Cerrar',
@@ -1216,7 +1216,6 @@ export const es: Translation = {
       other: 'Hiciste {done} de {planned} hábitos previstos, con {count} días completos.',
     },
     bigger: '¿Quieres un paso un poco más grande en un hábito?',
-    lighter: '¿Quieres un paso más ligero en un hábito?',
     targets: 'Tus objetivos',
     nothingChanges:
       'Nada cambia a menos que lo confirmes. Los cambios empiezan mañana (los hábitos semanales, el próximo lunes); tus días pasados se quedan exactamente como están.',
@@ -1234,6 +1233,26 @@ export const es: Translation = {
     makeHarder: 'Hacerlo más difícil',
     changed: 'Listo. {pending}',
     changedPlain: 'Listo.',
+
+    ways: {
+      title: '¿Qué te ayudaría más?',
+      hint: 'Elige una opción para ver qué significa. Nada cambia a menos que lo confirmes.',
+
+      lighter: 'Hacer un hábito más fácil',
+
+      fewer: 'Centrarte en menos hábitos',
+
+      keep: 'Mantener mi plan',
+
+      keepNote: 'Tu plan se queda exactamente como está. Una semana más dura no tiene por qué cambiar nada.',
+
+      fewerNote:
+        'Elige un hábito para dejarlo. Sale de tu Life Reset, y todo lo que hiciste con él se queda en Recorrido y Perspectivas. No es una pausa: si más adelante lo quieres de vuelta, puedes añadirlo otra vez.',
+
+      stopA11y: '{habit}, {level}. Elegir para dejarlo',
+
+      stopped: '{habit} ya no está en tu Life Reset. Sus días anteriores se quedan en Recorrido y Perspectivas.',
+    },
   },
   ceremony: {
     skip: 'Saltar',

@@ -1217,7 +1217,7 @@ export const nl: Translation = {
     response: {
       easier: 'Goed om te weten. Als je wilt, kun je bij één gewoonte een iets grotere stap zetten.',
       right: 'Dat is precies goed. Klim in dit tempo verder.',
-      harder: 'Zulke weken zijn er. Een lichtere stap bij één gewoonte telt ook.',
+      harder: 'Zulke weken zijn er, en vanaf hier is er meer dan één weg vooruit.',
     },
     title: 'Week {week}',
     close: 'Sluiten',
@@ -1229,7 +1229,6 @@ export const nl: Translation = {
       other: 'Je deed {done} van {planned} gewoonte-check-ins, met {count} volledige dagen.',
     },
     bigger: 'Zin in een iets grotere stap voor één gewoonte?',
-    lighter: 'Liever een lichtere stap voor één gewoonte?',
     targets: 'Je doelen',
     nothingChanges:
       'Er verandert niets tenzij je bevestigt. Wijzigingen gaan morgen in (weekgewoontes volgende maandag); je eerdere dagen blijven precies zoals ze zijn.',
@@ -1247,6 +1246,26 @@ export const nl: Translation = {
     makeHarder: 'Zwaarder maken',
     changed: 'Klaar. {pending}',
     changedPlain: 'Klaar.',
+
+    ways: {
+      title: 'Wat zou het meest helpen?',
+      hint: 'Kies er een om te zien wat het betekent. Er verandert niets tenzij je bevestigt.',
+
+      lighter: 'Een gewoonte makkelijker maken',
+
+      fewer: 'Je richten op minder gewoontes',
+
+      keep: 'Mijn plan houden',
+
+      keepNote: 'Je plan blijft precies zoals het is. Een zwaardere week hoeft niets te veranderen.',
+
+      fewerNote:
+        'Kies een gewoonte om mee te stoppen. Die verlaat je Life Reset, en alles wat je ermee hebt gedaan blijft in je Reis en Inzichten. Dit is geen pauze: wil je hem later terug, dan kun je hem opnieuw toevoegen.',
+
+      stopA11y: '{habit}, {level}. Kies om ermee te stoppen',
+
+      stopped: '{habit} zit niet meer in je Life Reset. De eerdere dagen blijven in je Reis en Inzichten.',
+    },
   },
   ceremony: {
     skip: 'Overslaan',

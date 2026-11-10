@@ -1230,7 +1230,7 @@ export const id: Translation = {
     response: {
       easier: 'Senang tahu itu. Kalau mau, kamu bisa ambil langkah sedikit lebih besar di satu kebiasaan.',
       right: 'Itu titik yang pas. Terus mendaki dengan kecepatan ini.',
-      harder: 'Ada minggu seperti itu. Langkah lebih ringan di satu kebiasaan tetap dihitung.',
+      harder: 'Ada minggu seperti itu, dan dari sini ada lebih dari satu jalan ke depan.',
     },
     title: 'Minggu ke-{week}',
     close: 'Tutup',
@@ -1241,7 +1241,6 @@ export const id: Translation = {
       other: 'Kamu menyelesaikan {done} dari {planned} centang kebiasaan, dengan {count} hari lengkap.',
     },
     bigger: 'Mau langkah yang sedikit lebih besar untuk satu kebiasaan?',
-    lighter: 'Mau langkah yang lebih ringan untuk satu kebiasaan?',
     targets: 'Targetmu',
     nothingChanges:
       'Tidak ada yang berubah kecuali kamu mengonfirmasi. Perubahan dimulai besok (kebiasaan mingguan mulai Senin depan); hari-harimu sebelumnya tetap persis seperti semula.',
@@ -1259,6 +1258,26 @@ export const id: Translation = {
     makeHarder: 'Buat lebih berat',
     changed: 'Selesai. {pending}',
     changedPlain: 'Selesai.',
+
+    ways: {
+      title: 'Apa yang paling membantu?',
+      hint: 'Pilih salah satu untuk melihat artinya. Tidak ada yang berubah kecuali kamu mengonfirmasi.',
+
+      lighter: 'Buat satu kebiasaan lebih mudah',
+
+      fewer: 'Fokus pada lebih sedikit kebiasaan',
+
+      keep: 'Tetap dengan rencanaku',
+
+      keepNote: 'Rencanamu tetap persis seperti sekarang. Minggu yang lebih berat tidak harus mengubah apa pun.',
+
+      fewerNote:
+        'Pilih kebiasaan yang ingin kamu hentikan. Kebiasaan itu keluar dari Life Reset-mu, dan semua yang sudah kamu lakukan dengannya tetap ada di Perjalanan dan Wawasan. Ini bukan jeda: kalau nanti ingin kembali, kamu bisa menambahkannya lagi.',
+
+      stopA11y: '{habit}, {level}. Pilih untuk menghentikannya',
+
+      stopped: '{habit} tidak lagi ada di Life Reset-mu. Hari-hari sebelumnya tetap ada di Perjalanan dan Wawasan.',
+    },
   },
   ceremony: {
     skip: 'Lewati',
