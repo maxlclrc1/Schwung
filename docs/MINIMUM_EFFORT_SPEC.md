@@ -3,6 +3,22 @@
 **Status:** revised after owner review. Design only: **no production code has been changed.** It's ready to build
 once the per-habit review in §3 is done.
 
+**Approved at `ea0c86c`, with these decisions:**
+
+- the on-screen label stays "Streak", and consistency is explained in the details;
+- the Journey mark needs a visual preview before it's built;
+- **the Sleep minimum is disabled** pending a further safety review;
+- the existing 80% rule applies to full and minimum actions combined.
+
+**R2a (engine) — implemented, not reachable in the app:**
+
+- `core/reset/minimum.ts` holds the review gate. No minimum is approved, so nothing can be recorded outside tests.
+- `HabitTrack.minimum` and `markMinimum` are in `tracking.ts`.
+- `minimumFor`, `minimumOn`, `setMinimum`, `dayOutcome`, the XP rules, the statistics, `consistency` and
+  `fullShare` are in `pilot.ts`.
+- The save is version 3.
+- The screens (R2b) aren't built.
+
 **Sources:**
 
 - `docs/RECOVERY_SYSTEM_PROPOSAL.md` and `docs/66_DAY_EXPERIENCE_AUDIT.md`;

@@ -112,12 +112,13 @@ describe('daily readiness (the last 14 opportunities)', () => {
     expect(readiness({ state: s, logs, ctx, today: 22 }).counts).toEqual({
       done: 13,
       skipped: 0,
+      minimum: 0,
       missed: 1,
       unknown: 0,
     });
     // Before noon, Day 21 isn't final: the window is Days 7–20.
     const r = readiness({ state: s, logs, ctx, today: 22, yesterdayEditable: true });
-    expect([r.window, r.counts]).toEqual([14, { done: 12, skipped: 0, missed: 1, unknown: 1 }]);
+    expect([r.window, r.counts]).toEqual([14, { done: 12, skipped: 0, minimum: 0, missed: 1, unknown: 1 }]);
   });
 
   it('counts only days since the current target began (a new target needs new evidence)', () => {
@@ -141,7 +142,7 @@ describe('minimum coverage and unrecorded days', () => {
   it('never treats an unrecorded day as done: 7 recorded and done, 7 unknown keeps the target', () => {
     const s = walk('standard');
     const r = readiness({ state: s, logs: logsFor(WALK, range(15, 21)), ctx, today: 22 });
-    expect([r.counts, r.outcome]).toEqual([{ done: 7, skipped: 0, missed: 0, unknown: 7 }, 'maintain']);
+    expect([r.counts, r.outcome]).toEqual([{ done: 7, skipped: 0, minimum: 0, missed: 0, unknown: 7 }, 'maintain']);
     // The step-up share is over the whole window, unknown days included: 12 known successes are needed.
     expect(outcome(setFeedback(s, 'too-easy', 21), logsFor(WALK, range(10, 21)), 22)).toBe('ready'); // 12 known
     expect(outcome(setFeedback(s, 'too-easy', 21), logsFor(WALK, range(11, 21)), 22)).toBe('maintain'); // 11 known
@@ -168,7 +169,7 @@ describe('explicit skips', () => {
     const s = setFeedback(walk('standard'), 'too-easy', 21);
     const skipped = readiness({ state: s, logs: logsFor(WALK, without(W, 8, 9, 10), [8, 9, 10]), ctx, today: 22 });
     const missed = readiness({ state: s, logs: logsFor(WALK, without(W, 8, 9, 10), [], [8, 9, 10]), ctx, today: 22 });
-    expect(skipped.counts).toEqual({ done: 11, skipped: 3, missed: 0, unknown: 0 });
+    expect(skipped.counts).toEqual({ done: 11, skipped: 3, minimum: 0, missed: 0, unknown: 0 });
     expect([skipped.outcome, missed.outcome]).toEqual(['maintain', 'maintain']);
     // Leaving a day out by skipping it doesn't shrink the denominator either.
     expect(skipped.window).toBe(14);
@@ -196,7 +197,7 @@ describe('weekly readiness (closed program weeks)', () => {
     expect([r.basis, r.window, r.counts, r.outcome]).toEqual([
       'weekly',
       3,
-      { done: 3, skipped: 0, missed: 0, unknown: 0 },
+      { done: 3, skipped: 0, minimum: 0, missed: 0, unknown: 0 },
       'ready',
     ]);
   });
@@ -212,7 +213,7 @@ describe('weekly readiness (closed program weeks)', () => {
 
   it('treats a week with no records at all as unknown, never as success', () => {
     const r = readiness({ state: strength(), logs: logsFor(STRENGTH, [1, 3, 8, 10]), ctx, today: 22 });
-    expect([r.counts, r.outcome]).toEqual([{ done: 2, skipped: 0, missed: 0, unknown: 1 }, 'maintain']);
+    expect([r.counts, r.outcome]).toEqual([{ done: 2, skipped: 0, minimum: 0, missed: 0, unknown: 1 }, 'maintain']);
     // Two unknown weeks leave one judged week: no recommendation either way.
     expect(outcome(strength(), logsFor(STRENGTH, [1, 3]), 22)).toBe('insufficient-data');
     expect(outcome(strength(), logsFor(STRENGTH, [], [], [2]), 22)).toBe('insufficient-data');
@@ -395,7 +396,8 @@ describe('accepting and declining', () => {
     // Declined a second time: no longer offered on its own (docs/66_DAY_EXPERIENCE_AUDIT.md, Step 2).
     const twice = declineOffer(declined, again!, 29);
     expect(twice.declined).toEqual({ to: again!.to, day: 29, count: 2 });
-    for (const d of [31, 36, 44, 60]) expect(progressionOffer({ state: twice, logs: allDone(d - 1), ctx, today: d })).toBeNull();
+    for (const d of [31, 36, 44, 60])
+      expect(progressionOffer({ state: twice, logs: allDone(d - 1), ctx, today: d })).toBeNull();
   });
 
   it('keeps a declined step-up from blocking a different suggestion', () => {

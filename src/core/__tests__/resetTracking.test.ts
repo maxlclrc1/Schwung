@@ -430,7 +430,7 @@ describe('skips', () => {
 
   it('never inflate a readiness share, and are counted apart from misses', () => {
     const obs = (['completed', 'completed', 'skipped', 'incomplete', 'unrecorded'] as const).map(observation);
-    expect(tally(obs)).toEqual({ done: 2, skipped: 1, missed: 1, unknown: 1 });
+    expect(tally(obs)).toEqual({ done: 2, skipped: 1, minimum: 0, missed: 1, unknown: 1 });
     expect(doneShare(obs)).toBe(0.5); // 2 of 4 known days: the skip counts as not done
     expect(doneShare([observation('completed'), observation('completed')])).toBe(1);
     expect(doneShare([observation('unrecorded')])).toBeNull();

@@ -23,7 +23,7 @@ export function resetPilotKey(ch: Channel = channel(), dev: boolean = __DEV__): 
 }
 
 /** The save's version. Raise it only together with a step in SAVE_MIGRATIONS. */
-export const RESET_PILOT_VERSION = 2;
+export const RESET_PILOT_VERSION = 3;
 
 /**
  * How to bring an older save up to date: one step per version, from that version to the next, each pure and
@@ -33,10 +33,14 @@ export const RESET_PILOT_VERSION = 2;
  * Both are optional, so a version 1 program is already a valid version 2 one; the step makes that explicit. The
  * bump is what protects people: an older Schwung meeting a version 2 save keeps it for recovery (a "newer" save)
  * instead of misreading days past the summit.
+ * Version 2 → 3 (Minimum Effort): a day's habit record may carry `minimum` (docs/MINIMUM_EFFORT_SPEC.md). It's
+ * optional, so a version 2 program is already a valid version 3 one. The bump keeps an older Schwung, which would
+ * ignore minimums and so count a different streak, from misreading a version 3 save: it keeps it for recovery.
  */
 export const SAVE_MIGRATIONS: Record<number, (state: unknown) => unknown> = {
   0: (state) => state,
   1: (state) => state,
+  2: (state) => state,
 };
 
 /** Runs the steps from `from` up to the current version; throws if a step is missing. */

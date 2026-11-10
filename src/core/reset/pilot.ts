@@ -50,6 +50,7 @@ import {
   type Offer,
   type ProgressionState,
 } from './readiness';
+import { minimumAvailable, type MinimumReview } from './minimum';
 import { timerBlocks } from './timer';
 import {
   confirmDone,
@@ -58,6 +59,8 @@ import {
   increment,
   logProgress,
   logSession,
+  markMinimum,
+  isPartial,
   partialCount,
   PARTIAL_XP,
   readTrack,
@@ -721,7 +724,7 @@ export function removeProblem(p: PilotProgram, id: string): string | null {
 export function removeHabit(p: PilotProgram, id: string, day: number): PilotProgram | null {
   if (removeProblem(p, id)) return null;
   const s = p.progression[id];
-  const from = isDone(p, id, day) ? day + 1 : day;
+  const from = isDone(p, id, day) || minimumOn(p, id, day) ? day + 1 : day;
   const eras = s.eras.filter((e, i) => i === 0 || e.fromDay <= day);
   return {
     ...p,
@@ -936,9 +939,9 @@ export function dayFull(p: PilotProgram, day: number): boolean {
 }
 
 /**
- * XP: 10 for each done habit on the day's list, 5 for each with partial progress that isn't done, +20 for a complete
- * day (dayFull: partial progress never makes a day full). Computed from the saved days, so an
- * undo takes it back and nothing is ever awarded twice.
+ * XP: 10 for each done habit on the day's list, 5 for each with partial progress or a minimum that isn't done (5 once,
+ * never both), +20 for a complete day (dayFull: partial progress and minimums never make a day full). Computed from
+ * the saved days, so an undo takes it back and nothing is ever awarded twice.
  */
 const xpCache = new WeakMap<PilotProgram, number>();
 export function pilotXp(p: PilotProgram): number {
@@ -949,11 +952,14 @@ export function pilotXp(p: PilotProgram): number {
   return xp;
 }
 const dayXp = (p: PilotProgram, l: DayLog) =>
-  doneCount(l) * XP_PER_HABIT + partialCount(l) * PARTIAL_XP + (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0);
+  doneCount(l) * XP_PER_HABIT +
+  (partialCount(l) + minimumsOn(p, l.day).filter((id) => !isPartial(l, id)).length) * PARTIAL_XP +
+  (dayFull(p, l.day) ? XP_FULL_DAY_BONUS : 0);
 
 /**
- * How a day counts for the streak and the Journey: 'rest' when nothing was due (no daily habit, nothing done:
- * weekly habits resting), else whether it met the existing 80% rule.
+ * How a day counts by full completions alone (completed days, the Journey's total, the Story): 'rest' when nothing
+ * was due (no daily habit, nothing done: weekly habits resting), else whether it met the existing 80% rule. Minimums
+ * never count here; `dayOutcome` adds the kept day.
  */
 export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'missed' {
   // Past the summit with nothing chosen yet: nothing is asked, so nothing is missed.
@@ -966,15 +972,33 @@ export function dayResult(p: PilotProgram, day: number): 'rest' | 'counted' | 'm
 }
 
 /**
- * The streak: consecutive days that count by the 80% rule, ending today (an unfinished today doesn't break it). A
- * rest day is neutral: it neither counts nor breaks the streak.
+ * A day's outcome for consistency (docs/MINIMUM_EFFORT_SPEC.md §2.1): `dayResult`, with one more outcome. A day that
+ * isn't counted by full completions is 'kept' when the existing 80% rule is met by its full completions and minimums
+ * together. A kept day continues the streak; it never adds a completed day or a full day. Without minimums (every
+ * save made before them) it's exactly `dayResult`.
+ */
+export type DayOutcome = 'rest' | 'counted' | 'kept' | 'missed';
+export function dayOutcome(p: PilotProgram, day: number): DayOutcome {
+  const r = dayResult(p, day);
+  if (r !== 'missed') return r;
+  const log = logOf(p, day);
+  const minimums = log ? minimumsOn(p, day) : [];
+  if (!log || minimums.length === 0) return 'missed';
+  // A minimum is only ever on a daily habit in the program that day, so it's already on the day's list.
+  const planned = plannedOn(p, day, log.completed);
+  return dayQualifies({ ...log, completed: [...log.completed, ...minimums], planned }) ? 'kept' : 'missed';
+}
+
+/**
+ * The streak (consistency): consecutive days that count or are kept, ending today (an unfinished today doesn't
+ * break it). A rest day is neutral: it neither counts nor breaks the streak.
  */
 export function pilotStreak(p: PilotProgram, today: number): number {
   let streak = 0;
   for (let d = today; d >= 1; d--) {
-    const r = dayResult(p, d);
+    const r = dayOutcome(p, d);
     if (r === 'rest') continue;
-    if (r === 'counted') streak++;
+    if (r === 'counted' || r === 'kept') streak++;
     else if (d !== today) return streak;
   }
   // Unbroken back to Day 1: a streak carried from the previous ascent (only when this one began the next day) runs on.
@@ -985,14 +1009,16 @@ export function pilotStreak(p: PilotProgram, today: number): number {
 export function sinceSummit(p: PilotProgram, today: number) {
   const from = p.after?.since ?? PROGRAM_DAYS + 1;
   let counted = 0;
+  let kept = 0;
   let judged = 0;
   let best = 0;
   let run = 0;
   for (let d = from; d <= today; d++) {
-    const r = dayResult(p, d);
+    const r = dayOutcome(p, d);
     if (r === 'rest') continue;
-    if (r === 'counted') {
-      counted++;
+    if (r === 'counted' || r === 'kept') {
+      if (r === 'counted') counted++;
+      else kept++;
       judged++;
       run++;
       best = Math.max(best, run);
@@ -1003,38 +1029,47 @@ export function sinceSummit(p: PilotProgram, today: number) {
   }
   let xp = 0;
   for (const l of Object.values(p.logs)) if (l.day > PROGRAM_DAYS) xp += dayXp(p, l);
-  return { days: Math.max(0, today - from + 1), counted, judged, best, xp };
+  return { days: Math.max(0, today - from + 1), counted, kept, judged, best, xp };
 }
 
 /** The last `n` days (to today): days that counted out of the days that asked something. For recent Insights. */
 export function recentDays80(p: PilotProgram, today: number, n = 28) {
   let counted = 0;
+  let kept = 0;
   let judged = 0;
   for (let d = Math.max(1, today - n + 1); d <= today; d++) {
-    const r = dayResult(p, d);
+    const r = dayOutcome(p, d);
     if (r === 'counted') {
       counted++;
       judged++;
+    } else if (r === 'kept') {
+      kept++;
+      judged++;
     } else if (r === 'missed' && d !== today) judged++;
   }
-  return { counted, judged, from: Math.max(1, today - n + 1) };
+  return { counted, kept, judged, from: Math.max(1, today - n + 1) };
 }
 
-/** The best streak so far (rest days neutral), and the days that counted. */
+/**
+ * The Journey's numbers: `done`, the completed days (full completions only); `kept`, the days kept with minimums; and
+ * the streak and best streak (consistency: counted and kept days, rest days neutral).
+ */
 export function journeyStats(p: PilotProgram, today: number) {
   let best = 0;
   let run = 0;
   let done = 0;
+  let kept = 0;
   for (let d = 1; d <= Math.min(today, PROGRAM_DAYS); d++) {
-    const r = dayResult(p, d);
+    const r = dayOutcome(p, d);
     if (r === 'rest') continue;
-    if (r === 'counted') {
-      done++;
+    if (r === 'counted' || r === 'kept') {
+      if (r === 'counted') done++;
+      else kept++;
       run++;
       best = Math.max(best, run);
     } else if (d !== today) run = 0;
   }
-  return { done, streak: pilotStreak(p, today), best };
+  return { done, kept, streak: pilotStreak(p, today), best };
 }
 
 // --- Changes. Each returns the new program and the tracking event (at most one, only when completion changes). ---
@@ -1145,6 +1180,51 @@ export function setPartial(p: PilotProgram, id: string, day: number, on: boolean
     if (on && t.progress) return { logs, event: null };
     return logProgress(logs, at, id, on ? undefined : null, null);
   });
+}
+
+// --- Minimum Effort (docs/MINIMUM_EFFORT_SPEC.md). Not reachable in the app until minimums are approved. ---
+
+/**
+ * Whether a minimum may be recorded for a habit on a day: a catalogue habit in the program, daily that day, not done
+ * yet, whose day's target asks strictly more than its minimum, while tracking runs (not waiting for the choice after
+ * the summit, not paused for age), and only minimums the review allows (none in the app yet). Whether the day can
+ * still be edited (today, or yesterday before noon) is the caller's rule, as for completions.
+ */
+export function minimumFor(p: PilotProgram, id: string, day: number, review: MinimumReview = 'approved'): boolean {
+  if (ageRestricted(p) || awaitingChoice(p, day) || p.custom?.[id] || !RESET_BY_ID[id]) return false;
+  if (!inProgram(p, id, day) || !isDaily(p, id, day) || isDone(p, id, day)) return false;
+  return minimumAvailable(id, levelFor(p, id, day), review);
+}
+
+/**
+ * Whether a habit's day counts as kept with its minimum. It reads the saved record, never the minimum table, so a
+ * recorded minimum keeps its day's outcome even if a minimum is later changed or withdrawn. Only impossibilities are
+ * ignored: a habit outside the program that day, not daily that day, completed (the completion counts), or skipped.
+ */
+export function minimumOn(p: PilotProgram, id: string, day: number): boolean {
+  const track = trackOf(p, id, day);
+  return !!track.minimum && !track.skipped && activeOn(p, id, day) && isDaily(p, id, day) && !isDone(p, id, day);
+}
+
+/** The habits kept with their minimum on a day. */
+export const minimumsOn = (p: PilotProgram, day: number) => allHabits(p).filter((id) => minimumOn(p, id, day));
+
+/**
+ * "Did the minimum" (or, with `on` false, remove it): 5 XP, never a completion or an event. Recording needs an
+ * available minimum (`minimumFor`); removing one that's there always works. A full completion afterwards keeps the
+ * minimum underneath (10 XP, never 15), so undoing that completion goes back to the minimum.
+ */
+export function setMinimum(
+  p: PilotProgram,
+  id: string,
+  day: number,
+  on: boolean,
+  review: MinimumReview = 'approved',
+): PilotChange {
+  if (!inProgram(p, id, day)) return none(p);
+  if (on && !minimumFor(p, id, day, review)) return none(p);
+  if (!on && !trackOf(p, id, day).minimum) return none(p);
+  return apply(p, day, (logs, at) => markMinimum(logs, at, id, on));
 }
 
 /** Optional minutes the person notes (null clears them). Never completes or undoes anything. */
@@ -1261,9 +1341,19 @@ export const phaseIndex = (l: Level) => PHASES.indexOf(l.phase);
 
 // --- Insights: numbers from the saved days only (rules in SCHWUNG_LIFE_RESET_PROGRAM.md) ---
 
-export type Tally = { done: number; eligible: number };
-const share = (t: Tally) => (t.eligible ? t.done / t.eligible : null);
-export const consistency = share;
+export type Tally = { done: number; eligible: number; minimum?: number };
+/**
+ * Consistency: the share of opportunities with a full completion or a minimum (docs/MINIMUM_EFFORT_SPEC.md §2.5).
+ * Without minimums it's exactly the full-completion share, as it always was.
+ */
+export const consistency = (t: Tally) => (t.eligible ? (t.done + (t.minimum ?? 0)) / t.eligible : null);
+/** Full completions only, out of the same opportunities. */
+export const fullShare = (t: Tally) => (t.eligible ? t.done / t.eligible : null);
+/** A tally, with `minimum` only when there were any (so a tally without minimums is exactly what it always was). */
+const tallyOf = (done: number, eligible: number, minimum = 0): Tally =>
+  minimum ? { done, eligible, minimum } : { done, eligible };
+const plus = (a: Tally, b: Tally) =>
+  tallyOf(a.done + b.done, a.eligible + b.eligible, (a.minimum ?? 0) + (b.minimum ?? 0));
 
 /**
  * A habit's opportunities so far, never inventing a miss:
@@ -1274,11 +1364,8 @@ export const consistency = share;
  */
 export function habitTally(p: PilotProgram, id: string, today: number): Tally {
   return weekSummaries(id, erasOf(p, id), p.logs, ctxOf(p), reportDay(p, today)).reduce(
-    (t, w) => {
-      const x = weekTallyOf(p, id, w, today);
-      return { done: t.done + x.done, eligible: t.eligible + x.eligible };
-    },
-    { done: 0, eligible: 0 },
+    (t, w) => plus(t, weekTallyOf(p, id, w, today)),
+    tallyOf(0, 0),
   );
 }
 
@@ -1287,9 +1374,11 @@ export function weekTallyOf(p: PilotProgram, id: string, w: WeekSummary, today: 
   const last = Math.min(w.lastDay, today, endDay(p));
   let done = 0;
   let eligible = 0;
+  let minimum = 0;
   let weekly = false;
   // Within a week, a habit is daily or weekly on a day by its schedule then (mixed habits change between phases);
-  // days before it joined the program don't count at all.
+  // days before it joined the program don't count at all. A minimum is only ever on a daily day: like a completion,
+  // it makes today an opportunity.
   for (let d = w.firstDay; d <= last; d++) {
     if (!activeOn(p, id, d)) continue;
     if (!isDaily(p, id, d)) {
@@ -1297,23 +1386,19 @@ export function weekTallyOf(p: PilotProgram, id: string, w: WeekSummary, today: 
       continue;
     }
     const isDoneDay = isDone(p, id, d);
-    if (d < today || isDoneDay) eligible++;
+    const isMinimumDay = !isDoneDay && minimumOn(p, id, d);
+    if (d < today || isDoneDay || isMinimumDay) eligible++;
     if (isDoneDay) done++;
+    else if (isMinimumDay) minimum++;
   }
-  if (!weekly || w.goal === 0) return { done, eligible };
+  if (!weekly || w.goal === 0) return tallyOf(done, eligible, minimum);
   // Credited: eligible days done, at most one a day, up to the goal (extras and non-workdays don't count).
-  return { done: done + w.credited, eligible: eligible + (w.closed ? w.goal : w.credited) };
+  return tallyOf(done + w.credited, eligible + (w.closed ? w.goal : w.credited), minimum);
 }
 
 /** Every habit's tally together (the overall consistency). */
 export function overallTally(p: PilotProgram, today: number): Tally {
-  return allHabits(p).reduce(
-    (t, id) => {
-      const h = habitTally(p, id, today);
-      return { done: t.done + h.done, eligible: t.eligible + h.eligible };
-    },
-    { done: 0, eligible: 0 },
-  );
+  return allHabits(p).reduce((t, id) => plus(t, habitTally(p, id, today)), tallyOf(0, 0));
 }
 
 /** Every completed habit action on record (each habit once a day at most). */
@@ -1330,6 +1415,7 @@ export function weekTally(p: PilotProgram, today: number): Tally {
   const w = weekOf(p.startedAt, Math.min(today, endDay(p)), endDay(p));
   let done = 0;
   let eligible = 0;
+  let minimum = 0;
   for (const id of allHabits(p)) {
     const days = Array.from({ length: Math.min(today, w.lastDay) - w.firstDay + 1 }, (_, i) => w.firstDay + i).filter(
       (d) => activeOn(p, id, d),
@@ -1338,13 +1424,14 @@ export function weekTally(p: PilotProgram, today: number): Tally {
     if (days.every((d) => isDaily(p, id, d))) {
       eligible += days.length;
       done += days.filter((d) => isDone(p, id, d)).length;
+      minimum += days.filter((d) => minimumOn(p, id, d)).length;
     } else {
       const s = weekSummary(id, erasOf(p, id), p.logs, ctxOf(p), w.firstDay, today);
       eligible += s.goal;
       done += s.credited;
     }
   }
-  return { done, eligible };
+  return tallyOf(done, eligible, minimum);
 }
 
 /** A habit's recent days, newest last: done, skipped, not done, or rest (a weekly habit's day off). */

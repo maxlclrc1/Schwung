@@ -60,8 +60,10 @@ export function bestWeekday(cells: DayCell[]): Observation | null {
 export function strongestHabit(habits: { name: string; tally: Tally }[]): Observation | null {
   const ranked = habits.filter((h) => h.tally.eligible >= 5);
   if (ranked.length < 2) return null;
-  const top = ranked.reduce((a, b) => (b.tally.done / b.tally.eligible > a.tally.done / a.tally.eligible ? b : a));
-  const share = top.tally.done / top.tally.eligible;
+  // Consistency (full completions and minimums); without minimums, the full-completion share it always was.
+  const of = (t: Tally) => (t.done + (t.minimum ?? 0)) / t.eligible;
+  const top = ranked.reduce((a, b) => (of(b.tally) > of(a.tally) ? b : a));
+  const share = of(top.tally);
   if (share < 0.5) return null;
   return {
     id: 'habit',

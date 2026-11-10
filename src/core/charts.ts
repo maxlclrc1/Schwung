@@ -6,7 +6,10 @@ import { dateForDay, weekdayOfDay } from './dates';
  * (memoized by the screens), never per animation frame. Rules: SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
  */
 
-export type Tally = { done: number; eligible: number };
+/** Opportunities: `done` full completions, `minimum` days kept with the minimum (present only when there were any). */
+export type Tally = { done: number; eligible: number; minimum?: number };
+/** Consistency: full completions and minimums, out of the opportunities. */
+const shown = (t: Tally) => (t.done + (t.minimum ?? 0)) / t.eligible;
 
 /**
  * One program week of the consistency trend (weeks run Monday to Sunday, so the first and last may be short):
@@ -48,6 +51,8 @@ export type DayCell = {
   done: string[];
   skipped: string[];
   planned: string[];
+  /** Habit ids kept with their minimum that day (present only when there are any). */
+  minimum?: string[];
 };
 
 export type Records = {
@@ -77,10 +82,10 @@ export function weekPoint(
   recorded: boolean,
 ): WeekPoint {
   const base = { ...w, days: w.lastDay - w.firstDay + 1, done: t.done, eligible: t.eligible };
-  if (!closed) return { ...base, share: t.eligible ? t.done / t.eligible : null, state: 'current' };
+  if (!closed) return { ...base, share: t.eligible ? shown(t) : null, state: 'current' };
   if (!recorded && t.eligible > 0) return { ...base, share: null, state: 'unrecorded' };
   if (t.eligible === 0) return { ...base, share: null, state: 'none' };
-  return { ...base, share: t.done / t.eligible, state: 'closed' };
+  return { ...base, share: shown(t), state: 'closed' };
 }
 
 /** The best finished full week, or null before the first one ends (a short first week never counts). */
