@@ -923,6 +923,8 @@ export const vi: Translation = {
 
       minimumHintDone:
         '{minimum} được tính là có mặt hôm nay. Mục tiêu của bạn vẫn giữ nguyên ({target}); làm trọn vẹn vẫn được tính là xong.',
+
+      leavesTomorrowMinimum: 'Thói quen sẽ rời đi từ ngày mai (mức tối thiểu hôm nay vẫn được giữ).',
     },
   },
   journeyTab: {

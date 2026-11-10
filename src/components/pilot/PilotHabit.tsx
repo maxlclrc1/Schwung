@@ -445,7 +445,7 @@ export function PilotHabit() {
                 )}
                 <Animated.View layout={REFLOW}>
                   <T v="caption" color={c.textDim}>
-                    {done ? t('today.habit.leavesTomorrow') : t('today.habit.leavesToday')}
+                    {P.leavesText(P.removalStays(program, id, today))}
                     {own ? t('today.habit.pastStays') : t('today.habit.pastStaysAdd')}
                   </T>
                 </Animated.View>

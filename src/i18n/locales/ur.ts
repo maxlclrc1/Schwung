@@ -919,6 +919,8 @@ export const ur: Translation = {
 
       minimumHintDone:
         '{minimum}: آج یہ حاضری شمار ہوئی۔ آپ کا ہدف وہی رہتا ہے ({target})؛ اسے پورا کرنا اب بھی مکمل ہی شمار ہوتا ہے۔',
+
+      leavesTomorrowMinimum: 'یہ کل سے ہٹ جائے گی (آج کا کم از کم برقرار رہے گا)۔',
     },
   },
   journeyTab: {

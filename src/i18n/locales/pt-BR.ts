@@ -934,6 +934,8 @@ export const ptBR: Translation = {
 
       minimumHintDone:
         '{minimum} conta como aparecer hoje. Sua meta continua a mesma ({target}); fazer por completo ainda conta como feito.',
+
+      leavesTomorrowMinimum: 'Ele sai a partir de amanhã (o mínimo de hoje continua).',
     },
   },
   journeyTab: {

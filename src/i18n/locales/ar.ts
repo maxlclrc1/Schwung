@@ -1067,6 +1067,8 @@ export const ar: Translation = {
 
       minimumHintDone:
         '{minimum}: يُحتسب حضورًا اليوم. يبقى هدفك كما هو ({target})؛ وإنجازه كاملًا يُحتسب إنجازًا كما كان.',
+
+      leavesTomorrowMinimum: 'تُزال بدءًا من الغد (ويبقى الحد الأدنى لليوم).',
     },
   },
   journeyTab: {

@@ -1021,6 +1021,8 @@ export const ru: Translation = {
 
       minimumHintDone:
         '{minimum}: сегодня это засчитано как участие. Твоя цель прежняя ({target}); полное выполнение по-прежнему считается выполненным.',
+
+      leavesTomorrowMinimum: 'Она уйдёт с завтрашнего дня (сегодняшний минимум останется).',
     },
   },
   journeyTab: {

@@ -941,6 +941,8 @@ export const id: Translation = {
 
       minimumHintDone:
         '{minimum} dihitung sebagai hadir hari ini. Targetmu tetap sama ({target}); melakukannya penuh tetap dihitung selesai.',
+
+      leavesTomorrowMinimum: 'Dihapus mulai besok (minimum hari ini tetap).',
     },
   },
   journeyTab: {

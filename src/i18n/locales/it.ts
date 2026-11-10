@@ -951,6 +951,8 @@ export const it: Translation = {
 
       minimumHintDone:
         '{minimum}: oggi conta come esserci. Il tuo obiettivo resta lo stesso ({target}); farlo per intero conta comunque come fatto.',
+
+      leavesTomorrowMinimum: 'Esce da domani (il minimo di oggi resta).',
     },
   },
   journeyTab: {

@@ -906,6 +906,8 @@ export const ja: Translation = {
 
       minimumHintDone:
         '「{minimum}」で今日は取り組んだ日になりました。目標は変わりません（{target}）。全部やれば、これまでどおり達成になります。',
+
+      leavesTomorrowMinimum: '明日から外れます（今日の最小限はそのまま）。',
     },
   },
   journeyTab: {

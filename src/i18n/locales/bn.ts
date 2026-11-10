@@ -918,6 +918,8 @@ export const bn: Translation = {
 
       minimumHintDone:
         '{minimum}: আজ এটি উপস্থিতি হিসেবে গোনা হলো। আপনার লক্ষ্য একই থাকে ({target}); পুরোটা করলে তা এখনো সম্পন্ন হিসেবেই গোনা হয়।',
+
+      leavesTomorrowMinimum: 'এটি আগামীকাল থেকে সরবে (আজকের ন্যূনতম থেকে যাবে)।',
     },
   },
   journeyTab: {
