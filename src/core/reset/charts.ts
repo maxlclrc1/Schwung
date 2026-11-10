@@ -28,6 +28,7 @@ export function weeklyTrend(p: P.PilotProgram, today: number): WeekPoint[] {
         const x = P.weekTallyOf(p, h.id, s, today);
         t.done += x.done;
         t.eligible += x.eligible;
+        if (x.minimum) t.minimum = (t.minimum ?? 0) + x.minimum;
       }
       let recorded = false;
       for (let d = w.firstDay; d <= Math.min(w.lastDay, last) && !recorded; d++) recorded = hasLog(p, d);
@@ -54,6 +55,7 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
   const ids = P.allHabits(p);
   const done = ids.filter((id) => log?.completed.includes(id));
   const skipped = ids.filter((id) => !done.includes(id) && P.trackOf(p, id, d).skipped);
+  const minimum = ids.filter((id) => P.minimumOn(p, id, d));
   const dailyDue = ids.filter((id) => P.isDaily(p, id, d));
   // The day's list as the 80% rule sees it: daily habits, plus weekly ones done that day.
   const planned = log ? P.plannedOn(p, d, log.completed) : dailyDue;
@@ -62,7 +64,7 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
     ? 'full'
     : d === today
       ? 'today'
-      : done.length
+      : done.length || minimum.length
         ? 'partial'
         : skipped.length
           ? 'skipped'
@@ -71,7 +73,9 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
             : log
               ? 'missed'
               : 'unrecorded';
-  return { ...base, state, done, skipped, planned };
+  // The day's minimums, only when there are any (a day without them is exactly what it always was). The Journey's
+  // own mark for a kept day comes with the screens, after its preview is approved; until then it's a partial day.
+  return { ...base, state, done, skipped, planned, ...(minimum.length ? { minimum } : {}) };
 }
 
 export type HabitBar = {

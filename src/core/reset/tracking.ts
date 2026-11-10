@@ -49,6 +49,13 @@ export type HabitTrack = {
    * goal. Absent on older saves, so their XP never changes.
    */
   progress?: { value?: number };
+  /**
+   * The person did the habit's minimum today (docs/MINIMUM_EFFORT_SPEC.md): the smallest version, a one-day fallback
+   * that never changes the level. Never a completion (it's never in `completed`): worth PARTIAL_XP, it counts toward
+   * consistency (the streak, a kept day), never toward a full day or step-up readiness. Kept underneath a completion
+   * that follows, so undoing that completion goes back to it. Mutually exclusive with a skip. Absent in older saves.
+   */
+  minimum?: true;
 };
 
 /** XP for a habit with logged progress that isn't completed (a completion is worth XP_PER_HABIT in all). */
@@ -58,7 +65,7 @@ const PROGRESS_MAX = 5000;
 export type Amount = { value: number; unit: 'minutes' | 'pages' };
 const AMOUNT_MAX: Record<Amount['unit'], number> = { minutes: 1440, pages: 5000 };
 
-export type DayStatus = 'completed' | 'skipped' | 'incomplete' | 'unrecorded';
+export type DayStatus = 'completed' | 'skipped' | 'minimum' | 'incomplete' | 'unrecorded';
 
 type Logs = Record<string, DayLog>;
 export type Event = null | { kind: 'completed'; first: boolean } | { kind: 'uncompleted' };
@@ -81,6 +88,7 @@ export function readTrack(log: DayLog | undefined, habitId: string): HabitTrack 
   const out: HabitTrack = { v: 1 };
   if (['manual', 'timer', 'counter', 'session', 'progress'].includes(r.by as string)) out.by = r.by as HabitTrack['by'];
   if (r.skipped === true) out.skipped = true;
+  if (r.minimum === true) out.minimum = true;
   if (n(r.count) !== undefined) out.count = n(r.count);
   if (n(r.minutes) !== undefined) out.minutes = n(r.minutes);
   if (n(r.countTarget) !== undefined && n(r.countTarget)! > 0) out.countTarget = n(r.countTarget);
@@ -113,12 +121,13 @@ export const isPartial = (log: DayLog | undefined, habitId: string): boolean =>
 export const partialCount = (log: DayLog): number =>
   Object.keys((log.track as Record<string, unknown> | undefined) ?? {}).filter((id) => isPartial(log, id)).length;
 
-/** A habit's status on a day. Partial progress is still `incomplete`. */
+/** A habit's status on a day. Partial progress is still `incomplete`; a minimum under a completion is `completed`. */
 export function dayStatus(logs: Logs, startKey: string, day: number, habitId: string): DayStatus {
   const log = logs[dateForDay(startKey, day)];
   if (!log) return 'unrecorded';
   if (log.completed.includes(habitId)) return 'completed';
-  return readTrack(log, habitId).skipped ? 'skipped' : 'incomplete';
+  const t = readTrack(log, habitId);
+  return t.skipped ? 'skipped' : t.minimum ? 'minimum' : 'incomplete';
 }
 
 /** Applies a change to one habit's day, creating the day's record if needed; completion only via `completed`. */
@@ -210,7 +219,28 @@ export function skip(logs: Logs, at: At, habitId: string): Change {
     if (done) return [true, t];
     const out: HabitTrack = { ...t, skipped: true };
     delete out.progress;
+    // A skip replaces a minimum: the two say opposite things about the day.
+    delete out.minimum;
     return [false, out];
+  });
+}
+
+/**
+ * Records (or, with `on` false, removes) the day's minimum. Never a completion and never an event: a completed habit
+ * is left as it is (its minimum, if any, stays underneath). Recording it clears a skip; logged progress is kept.
+ * Recording it twice, or removing one that isn't there, changes nothing.
+ */
+export function markMinimum(logs: Logs, at: At, habitId: string, on: boolean): Change {
+  const prev = logs[keyOf(at)];
+  const t = readTrack(prev, habitId);
+  if (on ? t.minimum || prev?.completed.includes(habitId) : !t.minimum) return { logs, event: null };
+  return edit(logs, at, habitId, (done, tr) => {
+    const out: HabitTrack = { ...tr };
+    if (on) {
+      out.minimum = true;
+      delete out.skipped;
+    } else delete out.minimum;
+    return [done, out];
   });
 }
 
@@ -355,7 +385,21 @@ export const SKIP_RULES = {
   separateFromMisses: true,
 } as const;
 
-export type Observation = 'done' | 'skipped' | 'missed' | 'unknown';
+/** The approved Minimum Effort rules (docs/MINIMUM_EFFORT_SPEC.md, approved at ea0c86c). */
+export const MINIMUM_RULES = {
+  /** Worth PARTIAL_XP, never on top of partial progress for the same habit and day, never with a completion's XP. */
+  xp: PARTIAL_XP,
+  countsAsCompletion: false,
+  countsTowardFullDay: false,
+  /** Combined with full completions under the existing 80% rule, a day can be kept (the consistency streak). */
+  countsTowardConsistency: true,
+  /** For readiness a minimum is recorded and not done, kept apart from misses: it never speeds up a step-up. */
+  countsAsDoneForReadiness: false,
+  /** Logged partial progress never becomes a minimum by itself. */
+  convertsPartialProgress: false,
+} as const;
+
+export type Observation = 'done' | 'skipped' | 'minimum' | 'missed' | 'unknown';
 
 /** How a day's status counts as an observation: an unrecorded day is unknown, never a miss. */
 export function observation(status: DayStatus): Observation {
@@ -363,14 +407,16 @@ export function observation(status: DayStatus): Observation {
     ? 'done'
     : status === 'skipped'
       ? 'skipped'
-      : status === 'incomplete'
-        ? 'missed'
-        : 'unknown';
+      : status === 'minimum'
+        ? 'minimum'
+        : status === 'incomplete'
+          ? 'missed'
+          : 'unknown';
 }
 
 /** Counts of each observation, kept apart. */
 export function tally(obs: Observation[]): Record<Observation, number> {
-  const out = { done: 0, skipped: 0, missed: 0, unknown: 0 };
+  const out = { done: 0, skipped: 0, minimum: 0, missed: 0, unknown: 0 };
   for (const o of obs) out[o]++;
   return out;
 }
@@ -381,6 +427,6 @@ export function tally(obs: Observation[]): Record<Observation, number> {
  */
 export function doneShare(obs: Observation[]): number | null {
   const t = tally(obs);
-  const known = t.done + t.skipped + t.missed;
+  const known = t.done + t.skipped + t.minimum + t.missed;
   return known ? t.done / known : null;
 }

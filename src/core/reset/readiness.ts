@@ -209,7 +209,7 @@ export type Readiness = {
   outcome: ReadinessOutcome;
   /** Opportunities (daily) or weeks (weekly) in the window, unknown ones included. */
   window: number;
-  /** Daily: done / skipped / missed / unknown days. Weekly: achieved / – / not achieved / unrecorded weeks. */
+  /** Daily: done / skipped / minimum / missed / unknown days. Weekly: achieved / – / not achieved / unrecorded weeks. */
   counts: Record<Observation, number>;
 };
 
@@ -235,7 +235,7 @@ export function readiness({ state, logs, ctx, today, yesterdayEditable = false }
   const since = era.fromDay;
   const schedule = scheduleOn(scheduleEras(state), today);
   const tooEasy = state.feedback?.kind === 'too-easy' && state.feedback.day >= since;
-  const counts: Record<Observation, number> = { done: 0, skipped: 0, missed: 0, unknown: 0 };
+  const counts: Record<Observation, number> = { done: 0, skipped: 0, minimum: 0, missed: 0, unknown: 0 };
 
   if (schedule?.kind === 'daily') {
     // The latest eligible opportunities: every day of a daily habit, newest first.
@@ -278,7 +278,8 @@ function decide(
   tooEasy: boolean,
   daily: boolean,
 ): ReadinessOutcome {
-  const recorded = c.done + c.skipped + c.missed;
+  // A minimum is recorded and not done (MINIMUM_RULES): it never makes a habit look ready.
+  const recorded = c.done + c.skipped + c.minimum + c.missed;
   if (recorded < minRecorded) return 'insufficient-data';
   if (atLeast(c.done, window, READINESS.earlyAt) && tooEasy) return 'ready-early';
   if (atLeast(c.done, window, READINESS.offerAt)) return 'ready';

@@ -14,12 +14,12 @@ import * as P from './pilot';
  * was recorded, so they never claim effort that didn't happen.
  */
 
-/** A day with recorded activity: some habit done, partly done or deliberately skipped. */
+/** A day with recorded activity: some habit done, partly done, kept with its minimum or deliberately skipped. */
 export function activeOn(p: P.PilotProgram, day: number): boolean {
   return P.allHabits(p).some((id) => {
     if (P.isDone(p, id, day)) return true;
     const track = P.trackOf(p, id, day);
-    return !!track.skipped || !!track.progress;
+    return !!track.skipped || !!track.progress || P.minimumOn(p, id, day);
   });
 }
 

@@ -342,7 +342,7 @@ describe('daily and weekly adherence', () => {
     expect(P.pilotStreak(weekly, 5)).toBe(3);
     const withRead = doneOn(doneOn(pilot(), 'mind_read', [1, 2, 4, 5]), 'skill_practice', [3]);
     expect(P.pilotStreak(withRead, 5)).toBe(2);
-    expect(P.journeyStats(withRead, 5)).toEqual({ done: 4, streak: 2, best: 2 });
+    expect(P.journeyStats(withRead, 5)).toEqual({ done: 4, kept: 0, streak: 2, best: 2 });
   });
 });
 
@@ -576,7 +576,7 @@ describe('removing a habit', () => {
     expect(P.plannedOn(p, 3, ['mind_read', 'move_walk'])).toEqual(['mind_read', 'move_walk']);
     expect(P.plannedOn(p, 6, ['mind_read'])).toEqual(['mind_read']);
     // Days 1–7 all count (Movement done while it was there): the streak isn't rewritten.
-    expect(P.journeyStats(p, 8)).toEqual({ done: 7, streak: 7, best: 7 });
+    expect(P.journeyStats(p, 8)).toEqual({ done: 7, kept: 0, streak: 7, best: 7 });
     expect(P.totalCompleted(p)).toBe(P.totalCompleted(before));
     // Days 1–5 keep their XP; from Day 6 Movement isn't asked any more, so Days 6–7 (Read done) are complete.
     expect(P.pilotXp(p)).toBe(7 * 10 + 5 * 10 + 7 * 20);
