@@ -1173,7 +1173,7 @@ export const zhHans: Translation = {
     response: {
       easier: '知道了。如果你愿意，可以在一个习惯上迈出稍大的一步。',
       right: '这正是最佳节奏。按这个步调继续攀登吧。',
-      harder: '有些周就是这样。在一个习惯上放轻一些，同样算数。',
+      harder: '有些周就是这样，从这里出发，前进的路不止一条。',
     },
     title: '第{week}周',
     close: '关闭',
@@ -1184,7 +1184,6 @@ export const zhHans: Translation = {
       other: '你完成了{planned}次习惯打卡中的{done}次，其中有{count}天全部完成。',
     },
     bigger: '想让某个习惯迈稍大一点的一步吗？',
-    lighter: '想让某个习惯迈轻一点的一步吗？',
     targets: '你的目标',
     nothingChanges:
       '除非你确认，否则什么都不会改变。更改从明天开始生效（每周习惯从下周一开始）；你过去的日子保持原样。',
@@ -1202,6 +1201,26 @@ export const zhHans: Translation = {
     makeHarder: '调难一些',
     changed: '完成。{pending}',
     changedPlain: '完成。',
+
+    ways: {
+      title: '什么最能帮到你？',
+      hint: '选一个看看它意味着什么。除非你确认，否则什么都不会改变。',
+
+      lighter: '把一个习惯调轻松一些',
+
+      fewer: '专注于更少的习惯',
+
+      keep: '保持我的计划',
+
+      keepNote: '你的计划保持原样。艰难的一周不一定要改变什么。',
+
+      fewerNote:
+        '选择一个要停止的习惯。它会离开你的 Life Reset，你和它一起完成的一切都保留在“旅程”和“洞察”中。这不是暂停：以后想要回来，可以再次添加。',
+
+      stopA11y: '{habit}，{level}。选择以停止',
+
+      stopped: '{habit} 已不在你的 Life Reset 中。它过去的记录仍保留在“旅程”和“洞察”中。',
+    },
   },
   ceremony: {
     skip: '跳过',

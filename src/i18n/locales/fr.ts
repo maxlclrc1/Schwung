@@ -1234,7 +1234,7 @@ export const fr: Translation = {
     response: {
       easier: 'Bon à savoir. Si vous voulez, vous pouvez faire un pas un peu plus grand sur une habitude.',
       right: 'C’est le bon rythme. Continuez à grimper à cette allure.',
-      harder: 'Il y a des semaines comme ça. Un pas plus léger sur une habitude compte aussi.',
+      harder: 'Il y a des semaines comme ça, et il existe plus d’un chemin pour continuer.',
     },
     title: 'Semaine {week}',
     close: 'Fermer',
@@ -1246,7 +1246,6 @@ export const fr: Translation = {
       other: 'Vous avez validé {done} habitudes sur {planned}, avec {count} journées complètes.',
     },
     bigger: 'Envie d’un pas un peu plus grand pour une habitude ?',
-    lighter: 'Envie d’un pas plus léger pour une habitude ?',
     targets: 'Vos objectifs',
     nothingChanges:
       'Rien ne change sans votre confirmation. Les changements commencent demain (lundi prochain pour les habitudes hebdomadaires) ; vos jours passés restent exactement tels quels.',
@@ -1264,6 +1263,26 @@ export const fr: Translation = {
     makeHarder: 'Rendre plus difficile',
     changed: 'C’est fait. {pending}',
     changedPlain: 'C’est fait.',
+
+    ways: {
+      title: 'Qu’est-ce qui vous aiderait le plus ?',
+      hint: 'Choisissez une option pour voir ce qu’elle implique. Rien ne change sans votre confirmation.',
+
+      lighter: 'Rendre une habitude plus facile',
+
+      fewer: 'Se concentrer sur moins d’habitudes',
+
+      keep: 'Garder mon plan',
+
+      keepNote: 'Votre plan reste exactement tel quel. Une semaine plus difficile n’oblige à rien changer.',
+
+      fewerNote:
+        'Choisissez une habitude à arrêter. Elle quitte votre Life Reset, et tout ce que vous avez fait avec elle reste dans Parcours et Tendances. Ce n’est pas une pause : si vous la voulez de nouveau plus tard, vous pourrez l’ajouter à nouveau.',
+
+      stopA11y: '{habit}, {level}. Choisir de l’arrêter',
+
+      stopped: '{habit} ne fait plus partie de votre Life Reset. Ses jours passés restent dans Parcours et Tendances.',
+    },
   },
   ceremony: {
     skip: 'Passer',

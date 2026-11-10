@@ -3,6 +3,15 @@
 **Status:** proposal for review. No production code has been changed. This is roadmap step 3 of
 `docs/66_DAY_EXPERIENCE_AUDIT.md` ("A path down", weakness W2, product decision D2).
 
+**Agreed direction (owner review):** no permanent fourth level; Minimum Effort will be a temporary fallback; autonomy
+first; recovery is supportive, never punitive.
+
+**Phase R1A — implemented:** after "Harder than expected", the weekly reflection offers only the ways forward this
+person can take (`core/reset/waysForward.ts`): **Make a habit easier** (only habits with a real, allowed easier
+target and no change waiting), **Focus on fewer habits** (the existing removal, confirmed per habit, never the last
+one, past kept, worded as a stop, not a pause) and **Keep my plan** (always; changes nothing). Nothing is triggered by
+missing days. Pausing, Minimum Effort, recovery weeks and streak rules are **not** built yet.
+
 **Baseline:** `main` at `5364be2`. Every statement about current behaviour is from the code and the audit
 simulation (`AUDIT=1 npx jest scripts/audit`).
 

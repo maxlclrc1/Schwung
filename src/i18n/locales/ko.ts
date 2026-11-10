@@ -1191,7 +1191,7 @@ export const ko: Translation = {
     response: {
       easier: '알려줘서 좋아요. 원하면 습관 하나에서 조금 더 큰 걸음을 내디딜 수 있어요.',
       right: '딱 좋은 지점이에요. 이 속도로 계속 올라가요.',
-      harder: '그런 주도 있어요. 습관 하나를 가볍게 해도 인정돼요.',
+      harder: '그런 주도 있어요. 여기서 나아갈 길은 하나가 아니에요.',
     },
     title: '{week}주차',
     close: '닫기',
@@ -1202,7 +1202,6 @@ export const ko: Translation = {
       other: '습관 체크 {planned}번 중 {done}번을 완료했고, 모두 완료한 날은 {count}일이었어요.',
     },
     bigger: '습관 하나의 걸음을 조금 키워 볼까요?',
-    lighter: '습관 하나의 걸음을 가볍게 할까요?',
     targets: '나의 목표',
     nothingChanges:
       '확인하기 전까지는 아무것도 바뀌지 않아요. 변경 사항은 내일부터 적용되고 (주간 습관은 다음 월요일부터), 지난 기록은 그대로 남아요.',
@@ -1220,6 +1219,26 @@ export const ko: Translation = {
     makeHarder: '어렵게 하기',
     changed: '완료. {pending}',
     changedPlain: '완료.',
+
+    ways: {
+      title: '무엇이 가장 도움이 될까요?',
+      hint: '하나를 고르면 무슨 뜻인지 보여 드려요. 확인하기 전까지는 아무것도 바뀌지 않아요.',
+
+      lighter: '습관 하나를 쉽게 하기',
+
+      fewer: '더 적은 습관에 집중하기',
+
+      keep: '지금 계획 유지하기',
+
+      keepNote: '계획은 지금 그대로예요. 힘든 한 주였다고 해서 무언가를 바꿔야 하는 건 아니에요.',
+
+      fewerNote:
+        '그만둘 습관을 하나 고르세요. 그 습관은 Life Reset에서 빠지고, 지금까지 한 기록은 모두 여정과 인사이트에 남아요. 잠시 멈추는 게 아니에요. 나중에 다시 하고 싶다면 다시 추가할 수 있어요.',
+
+      stopA11y: '{habit}, {level}. 그만두려면 선택',
+
+      stopped: '{habit}은(는) 이제 Life Reset에 없어요. 지난 기록은 여정과 인사이트에 남아요.',
+    },
   },
   ceremony: {
     skip: '건너뛰기',

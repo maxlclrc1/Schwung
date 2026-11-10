@@ -1213,7 +1213,7 @@ export const ptBR: Translation = {
     response: {
       easier: 'Bom saber. Se quiser, você pode dar um passo um pouco maior em um hábito.',
       right: 'Esse é o ponto ideal. Continue subindo nesse ritmo.',
-      harder: 'Tem semanas assim. Um passo mais leve em um hábito também conta.',
+      harder: 'Tem semanas assim, e daqui existe mais de um caminho para seguir.',
     },
     title: 'Semana {week}',
     close: 'Fechar',
@@ -1225,7 +1225,6 @@ export const ptBR: Translation = {
       other: 'Você fez {done} de {planned} hábitos previstos, com {count} dias completos.',
     },
     bigger: 'Quer um passo um pouco maior em um hábito?',
-    lighter: 'Quer um passo mais leve em um hábito?',
     targets: 'Suas metas',
     nothingChanges:
       'Nada muda sem a sua confirmação. As mudanças começam amanhã (hábitos semanais, na próxima segunda); seus dias passados ficam exatamente como estão.',
@@ -1243,6 +1242,26 @@ export const ptBR: Translation = {
     makeHarder: 'Deixar mais difícil',
     changed: 'Pronto. {pending}',
     changedPlain: 'Pronto.',
+
+    ways: {
+      title: 'O que ajudaria mais?',
+      hint: 'Escolha uma opção para ver o que ela significa. Nada muda sem a sua confirmação.',
+
+      lighter: 'Deixar um hábito mais fácil',
+
+      fewer: 'Focar em menos hábitos',
+
+      keep: 'Manter meu plano',
+
+      keepNote: 'Seu plano fica exatamente como está. Uma semana mais difícil não precisa mudar nada.',
+
+      fewerNote:
+        'Escolha um hábito para parar. Ele sai do seu Life Reset, e tudo o que você fez com ele continua na Jornada e nos Insights. Não é uma pausa: se quiser de volta depois, você pode adicioná-lo de novo.',
+
+      stopA11y: '{habit}, {level}. Escolher para parar',
+
+      stopped: '{habit} não está mais no seu Life Reset. Os dias anteriores continuam na Jornada e nos Insights.',
+    },
   },
   ceremony: {
     skip: 'Pular',

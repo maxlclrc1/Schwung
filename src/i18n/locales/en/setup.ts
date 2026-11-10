@@ -198,7 +198,7 @@ export const weekly = {
   response: {
     easier: 'Good to know. If you want, you can take a slightly bigger step on one habit.',
     right: 'That’s the sweet spot. Keep climbing at this pace.',
-    harder: 'Some weeks are like that. A lighter step on one habit still counts.',
+    harder: 'Some weeks are like that, and there’s more than one way forward from here.',
   },
   title: 'Week {week}',
   close: 'Close',
@@ -210,7 +210,6 @@ export const weekly = {
     other: 'You did {done} of {planned} habit check-ins, with {count} complete days.',
   },
   bigger: 'Want a slightly bigger step for one habit?',
-  lighter: 'Want a lighter step for one habit?',
   targets: 'Your targets',
   nothingChanges:
     'Nothing changes unless you confirm. Changes start from tomorrow (weekly habits from next Monday); your past days stay exactly as they are.',
@@ -228,4 +227,17 @@ export const weekly = {
   makeHarder: 'Make it harder',
   changed: 'Done. {pending}',
   changedPlain: 'Done.',
+  /** After "Harder than expected": only the ways this person can take today. */
+  ways: {
+    title: 'What would help most?',
+    hint: 'Choose one to see what it means. Nothing changes unless you confirm.',
+    lighter: 'Make a habit easier',
+    fewer: 'Focus on fewer habits',
+    keep: 'Keep my plan',
+    keepNote: 'Your plan stays exactly as it is. A harder week doesn’t have to change anything.',
+    fewerNote:
+      'Choose a habit to stop. It leaves your Life Reset, and everything you’ve done with it stays in your Journey and Insights. This isn’t a pause: if you want it back later, you can add it again.',
+    stopA11y: '{habit}, {level}. Choose to stop it',
+    stopped: '{habit} is no longer in your Life Reset. Its past days stay in your Journey and Insights.',
+  },
 };
