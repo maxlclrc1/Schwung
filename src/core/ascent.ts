@@ -202,6 +202,12 @@ export function ascentDays(
   });
 }
 
+/**
+ * A milestone (Days 7, 21, 44) is reached by the calendar, once its day comes, whatever was done that day: it marks
+ * time on the climb, never a completion.
+ */
+export const landmarkReached = (d: Pick<AscentDay, 'status'>) => d.status !== 'future';
+
 /** The nearest marker to a tap, within `radius` (in the same units as width/height), or null. */
 export function nearestDay(
   tap: Point,

@@ -1225,7 +1225,7 @@ export function setPartial(p: PilotProgram, id: string, day: number, on: boolean
 export function minimumFor(p: PilotProgram, id: string, day: number, review: MinimumReview = 'approved'): boolean {
   if (ageRestricted(p) || awaitingChoice(p, day) || p.custom?.[id] || !RESET_BY_ID[id]) return false;
   if (!inProgram(p, id, day) || !isDaily(p, id, day) || isDone(p, id, day)) return false;
-  return minimumAvailable(id, levelFor(p, id, day), review);
+  return minimumAvailable(id, levelFor(p, id, day), review, p.answers);
 }
 
 /**
@@ -1245,6 +1245,10 @@ export function minimumOn(p: PilotProgram, id: string, day: number): boolean {
 /** A habit's minimum in words: as a phrase within a sentence ('inline') or on its own ('title'). */
 export const minimumText = (id: string, form: 'inline' | 'title') =>
   MINIMUMS[id]?.since !== undefined ? t(`engine.minimum.${id}.${form}` as TKey) : '';
+
+/** A minimum's own safety note, shown with it (Time Outdoors), or null. */
+export const minimumNote = (id: string): string | null =>
+  id === 'outdoor_time' && MINIMUMS[id]?.since !== undefined ? t('engine.minimum.outdoor_time.note') : null;
 
 /** The habits kept with their minimum on a day. */
 export const minimumsOn = (p: PilotProgram, day: number) => allHabits(p).filter((id) => minimumOn(p, id, day));

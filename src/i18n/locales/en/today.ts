@@ -113,7 +113,7 @@ export const today = {
     minimumHint:
       'The minimum is {minimum}. It counts as showing up: with your other habits, it can keep today in your streak (+{xp} XP). Partially completed earns +{xp} XP, without the streak.',
     minimumHintDone:
-      '{minimum} counts as showing up today. Your goal stays the same ({target}); doing it in full still counts as done.',
+      '{minimum} counts as showing up today. Your goal stays the same: {target}. Doing it in full still counts as done.',
     partialMinutes: 'Minutes done (optional)',
     min: '{minutes} min',
     session: 'Session details (optional)',

@@ -250,7 +250,11 @@ export const id: Translation = {
         title: 'Bergerak selama 2 menit, dengan cara apa pun',
       },
 
-      outdoor_time: { inline: 'keluar rumah selama 2 menit', title: 'Keluar rumah selama 2 menit' },
+      outdoor_time: {
+        inline: 'keluar rumah selama 2 menit',
+        title: 'Keluar rumah selama 2 menit',
+        note: 'Depan pintu, balkon, atau halaman juga dihitung. Jangan keluar saat kondisinya tidak aman.',
+      },
 
       eat_well: { inline: 'buah atau sayur dalam satu kali makan', title: 'Buah atau sayur dalam satu kali makan' },
 
@@ -940,7 +944,7 @@ export const id: Translation = {
         'Minimumnya adalah {minimum}. Ini dihitung sebagai hadir: bersama kebiasaanmu yang lain, ini bisa menjaga hari ini dalam runtunanmu (+{xp} XP). Selesai sebagian memberi +{xp} XP, tanpa runtunan.',
 
       minimumHintDone:
-        '{minimum} dihitung sebagai hadir hari ini. Targetmu tetap sama ({target}); melakukannya penuh tetap dihitung selesai.',
+        '{minimum} dihitung sebagai hadir hari ini. Targetmu tetap sama: {target}. Melakukannya penuh tetap dihitung selesai.',
 
       leavesTomorrowMinimum: 'Dihapus mulai besok (minimum hari ini tetap).',
     },

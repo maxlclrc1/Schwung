@@ -1,9 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
-import { ascentDays } from '../ascent';
+import { ascentDays, landmarkReached } from '../ascent';
 import { cellSummary } from '../charts';
 import { PROGRAM_DAYS } from '../dates';
 import { dayCell } from '../reset/charts';
 import { RESET_BY_ID, INTENSITIES, PHASES } from '../reset/habits';
+import { minimumAvailable } from '../reset/minimum';
 import * as P from '../reset/pilot';
 import { t } from '../../i18n';
 
@@ -163,5 +164,95 @@ describe('Journey and Insights wording on a kept day', () => {
     expect(P.sinceSummitStrip(p, 71)).toEqual(['kept', 'kept', 'kept', 'kept', 'today']);
     expect(P.sinceSummit(p, 71)).toMatchObject({ counted: 0, kept: 4, best: 4 });
     expect(P.pilotStreak(p, 71)).toBe(PROGRAM_DAYS + 4);
+  });
+});
+
+describe('final product changes (after c264a32)', () => {
+  it('the recorded hint never nests parentheses, for every eligible habit and level', () => {
+    const levels: [string, 'starter' | 'standard' | 'challenge'][] = [
+      ['mind_read', 'starter'],
+      ['mind_meditation', 'standard'],
+      ['move_walk', 'challenge'],
+      ['outdoor_time', 'starter'],
+      ['eat_well', 'standard'],
+      ['social_reach_out', 'challenge'],
+    ];
+    for (const [id, intensity] of levels) {
+      const p = program([id], intensity);
+      const text = t('today.habit.minimumHintDone', {
+        minimum: P.minimumText(id, 'title'),
+        target: P.targetText(p, id, 1),
+      });
+      let depth = 0;
+      let deepest = 0;
+      for (const ch of text) {
+        if (ch === '(') deepest = Math.max(deepest, ++depth);
+        if (ch === ')') depth--;
+      }
+      expect([id, deepest]).toEqual([id, id === 'social_reach_out' ? 1 : 0]);
+    }
+    expect(
+      t('today.habit.minimumHintDone', {
+        minimum: 'One short message',
+        target: 'Reach out to 2 people (more than a like)',
+      }),
+    ).toBe(
+      'One short message counts as showing up today. Your goal stays the same: Reach out to 2 people (more than a like). Doing it in full still counts as done.',
+    );
+  });
+
+  it('the available hint keeps “can keep today in your streak”', () => {
+    expect(t('today.habit.minimumHint', { minimum: 'x', xp: 5 })).toContain('it can keep today in your streak (+5 XP)');
+  });
+
+  it('Time Outdoors has its safety note; no other minimum has one', () => {
+    expect(P.minimumNote('outdoor_time')).toBe(
+      'A doorstep, balcony or garden counts. Don’t go outside when conditions aren’t safe.',
+    );
+    for (const id of ['mind_read', 'mind_meditation', 'move_walk', 'eat_well', 'social_reach_out', 'sleep_wake'])
+      expect(P.minimumNote(id)).toBeNull();
+  });
+
+  it('Movement: no minimum for “Rather not say” or a 16–17 program; the habit itself stays available', () => {
+    const unknown = P.createPilot(
+      { ...ANSWERS, precautions: 'unknown' },
+      [
+        { habitId: 'move_walk', intensity: 'starter' },
+        { habitId: 'mind_read', intensity: 'starter' },
+      ],
+      START,
+    )!;
+    expect(unknown.habits).toContain('move_walk'); // eligibility unchanged
+    expect(P.minimumFor(unknown, 'move_walk', 1)).toBe(false);
+    expect(P.setMinimum(unknown, 'move_walk', 1, true).program).toBe(unknown);
+    expect(P.minimumFor(unknown, 'mind_read', 1)).toBe(true); // other minimums unchanged
+    // A 16–17 program (already paused until the person confirms 18+), and the rule itself.
+    const teen = { ...program(), answers: { ...program().answers, age: '16_17' as const } };
+    expect(P.minimumFor(teen, 'move_walk', 1)).toBe(false);
+    const lvl = { intensity: 'starter' as const, phase: 'foundation' as const };
+    expect(minimumAvailable('move_walk', lvl, 'approved', { age: '16_17', precautions: [] })).toBe(false);
+    expect(minimumAvailable('move_walk', lvl, 'approved', { age: '30_49', precautions: 'unknown' })).toBe(false);
+    expect(minimumAvailable('move_walk', lvl, 'approved', { age: '30_49', precautions: [] })).toBe(true);
+    expect(minimumAvailable('outdoor_time', lvl, 'approved', { age: '30_49', precautions: 'unknown' })).toBe(true);
+    // A minimum already saved counts as it was recorded (counting never re-judges the person).
+    const saved = P.setMinimum(program(['move_walk']), 'move_walk', 1, true).program;
+    const later = { ...saved, answers: { ...saved.answers, precautions: 'unknown' as const } };
+    expect([P.minimumOn(later, 'move_walk', 1), P.dayOutcome(later, 1), P.pilotXp(later)]).toEqual([true, 'kept', 5]);
+  });
+
+  it('milestones are reached by the calendar; a kept milestone day keeps its seed', () => {
+    let p = program();
+    for (let d = 1; d <= 6; d++) p = done(p, FOUR, d);
+    p = min(p, FOUR, 7); // Day 7, the first milestone, kept with minimums
+    const today = 9;
+    const kept = (d: number) => d < today && P.dayOutcome(p, d) === 'kept';
+    const days = ascentDays(p.logs, p.startedAt, today, undefined, kept);
+    expect(days[6]).toMatchObject({ day: 7, landmark: true, status: 'kept' });
+    expect(landmarkReached(days[6])).toBe(true);
+    expect(landmarkReached({ status: 'missed' })).toBe(true);
+    expect(landmarkReached({ status: 'done' })).toBe(true);
+    expect(landmarkReached({ status: 'today' })).toBe(true);
+    expect(landmarkReached(days[20])).toBe(false); // Day 21, still ahead
+    expect(dayCell(p, 7, today)).toMatchObject({ kept: true });
   });
 });

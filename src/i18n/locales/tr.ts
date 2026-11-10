@@ -242,7 +242,11 @@ export const tr: Translation = {
 
       move_walk: { inline: 'nasıl istersen 2 dakika hareket etmek', title: 'Nasıl istersen 2 dakika hareket et' },
 
-      outdoor_time: { inline: '2 dakikalığına dışarı çıkmak', title: '2 dakikalığına dışarı çık' },
+      outdoor_time: {
+        inline: '2 dakikalığına dışarı çıkmak',
+        title: '2 dakikalığına dışarı çık',
+        note: 'Kapı önü, balkon ya da bahçe de sayılır. Koşullar güvenli değilse dışarı çıkma.',
+      },
 
       eat_well: { inline: 'bir öğünde meyve ya da sebze', title: 'Bir öğünde meyve ya da sebze' },
 
@@ -922,7 +926,7 @@ export const tr: Translation = {
         'En azı: {minimum}. Bu, gelmiş sayılmandır: diğer alışkanlıklarınla birlikte bugünü serinde tutabilir (+{xp} XP). Kısmen tamamlandı +{xp} XP kazandırır, seri olmadan.',
 
       minimumHintDone:
-        '{minimum}: bugün gelmiş sayılırsın. Hedefin aynı kalır ({target}); tamamını yapmak yine tamamlandı sayılır.',
+        '{minimum}: bugün gelmiş sayılırsın. Hedefin aynı kalır: {target}. Tamamını yapmak yine tamamlandı sayılır.',
 
       leavesTomorrowMinimum: 'Yarından itibaren çıkar (bugünkü en azı kalır).',
     },

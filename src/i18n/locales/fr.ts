@@ -246,7 +246,11 @@ export const fr: Translation = {
 
       move_walk: { inline: 'bouger 2 minutes, comme vous voulez', title: 'Bougez 2 minutes, comme vous voulez' },
 
-      outdoor_time: { inline: 'sortir 2 minutes', title: 'Sortez 2 minutes' },
+      outdoor_time: {
+        inline: 'sortir 2 minutes',
+        title: 'Sortez 2 minutes',
+        note: 'Le pas de la porte, un balcon ou un jardin comptent. Ne sortez pas si les conditions ne sont pas sûres.',
+      },
 
       eat_well: { inline: 'des fruits ou des légumes à un repas', title: 'Des fruits ou des légumes à un repas' },
 
@@ -948,7 +952,7 @@ export const fr: Translation = {
         'Le minimum : {minimum}. Cela compte comme être au rendez-vous : avec vos autres habitudes, cela peut garder aujourd’hui dans votre série (+{xp} XP). En partie terminé rapporte +{xp} XP, sans la série.',
 
       minimumHintDone:
-        '{minimum} : vous étiez au rendez-vous aujourd’hui. Votre objectif reste le même ({target}) ; le faire en entier compte toujours comme fait.',
+        '{minimum} : vous étiez au rendez-vous aujourd’hui. Votre objectif reste le même : {target}. Le faire en entier compte toujours comme fait.',
 
       leavesTomorrowMinimum: 'Elle part à partir de demain (le minimum d’aujourd’hui reste).',
     },

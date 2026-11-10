@@ -225,7 +225,11 @@ export const zhHans: Translation = {
 
       move_walk: { inline: '活动2分钟，方式随你', title: '活动2分钟，方式随你' },
 
-      outdoor_time: { inline: '出门待2分钟', title: '出门待2分钟' },
+      outdoor_time: {
+        inline: '出门待2分钟',
+        title: '出门待2分钟',
+        note: '门口、阳台或院子都算。条件不安全时不要出门。',
+      },
 
       eat_well: { inline: '一餐里有水果或蔬菜', title: '一餐里有水果或蔬菜' },
 
@@ -872,7 +876,7 @@ export const zhHans: Translation = {
       minimumHint:
         '最低限度是：{minimum}。它算作到场：和你的其他习惯一起，可以让今天留在连续纪录里（+{xp} XP）。部分完成可得 +{xp} XP，但不计入连续纪录。',
 
-      minimumHintDone: '“{minimum}”让今天算作到场。你的目标不变（{target}）；完整做完仍算完成。',
+      minimumHintDone: '“{minimum}”让今天算作到场。你的目标不变：{target}。完整做完仍算完成。',
 
       leavesTomorrowMinimum: '从明天起移除（今天的最低限度保留）。',
     },

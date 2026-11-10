@@ -229,7 +229,11 @@ export const ko: Translation = {
 
       move_walk: { inline: '원하는 방식으로 2분 동안 움직이기', title: '원하는 방식으로 2분 동안 움직이기' },
 
-      outdoor_time: { inline: '2분 동안 밖에 나가기', title: '2분 동안 밖에 나가기' },
+      outdoor_time: {
+        inline: '2분 동안 밖에 나가기',
+        title: '2분 동안 밖에 나가기',
+        note: '문 앞, 발코니, 마당도 괜찮아요. 안전하지 않을 때는 밖에 나가지 마세요.',
+      },
 
       eat_well: { inline: '한 끼에 과일이나 채소', title: '한 끼에 과일이나 채소' },
 
@@ -890,7 +894,7 @@ export const ko: Translation = {
         '최소한은 ‘{minimum}’이에요. 참여한 것으로 인정돼요: 다른 습관과 함께 오늘을 연속 기록에 남길 수 있어요 (+{xp} XP). 일부 완료는 +{xp} XP이고, 연속 기록에는 포함되지 않아요.',
 
       minimumHintDone:
-        '‘{minimum}’(으)로 오늘 참여가 인정됐어요. 목표는 그대로예요 ({target}). 전부 하면 여전히 완료로 인정돼요.',
+        '‘{minimum}’(으)로 오늘 참여가 인정됐어요. 목표는 그대로예요: {target}. 전부 하면 여전히 완료로 인정돼요.',
 
       leavesTomorrowMinimum: '내일부터 빠져요 (오늘의 최소한은 그대로예요).',
     },

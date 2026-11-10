@@ -77,7 +77,11 @@ export const engine = {
     mind_read: { inline: 'read or listen for 2 minutes', title: 'Read or listen for 2 minutes' },
     mind_meditation: { inline: 'one quiet minute, any way you like', title: 'One quiet minute, any way you like' },
     move_walk: { inline: 'move for 2 minutes, any way you like', title: 'Move for 2 minutes, any way you like' },
-    outdoor_time: { inline: 'step outside for 2 minutes', title: 'Step outside for 2 minutes' },
+    outdoor_time: {
+      inline: 'step outside for 2 minutes',
+      title: 'Step outside for 2 minutes',
+      note: 'A doorstep, balcony or garden counts. Don’t go outside when conditions aren’t safe.',
+    },
     eat_well: { inline: 'fruit or vegetables in one meal', title: 'Fruit or vegetables in one meal' },
     social_reach_out: {
       inline: 'one short message to someone you care about',

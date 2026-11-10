@@ -241,7 +241,11 @@ export const nl: Translation = {
 
       move_walk: { inline: '2 minuten bewegen, zoals jij wilt', title: '2 minuten bewegen, zoals jij wilt' },
 
-      outdoor_time: { inline: '2 minuten naar buiten gaan', title: '2 minuten naar buiten gaan' },
+      outdoor_time: {
+        inline: '2 minuten naar buiten gaan',
+        title: '2 minuten naar buiten gaan',
+        note: 'Een stoep, balkon of tuin telt mee. Ga niet naar buiten als het niet veilig is.',
+      },
 
       eat_well: { inline: 'fruit of groente bij één maaltijd', title: 'Fruit of groente bij één maaltijd' },
 
@@ -934,7 +938,7 @@ export const nl: Translation = {
         'Het minimum: {minimum}. Het telt als komen opdagen: met je andere gewoontes kan het vandaag in je reeks houden (+{xp} XP). Deels voltooid levert +{xp} XP op, zonder de reeks.',
 
       minimumHintDone:
-        '{minimum} telt vandaag als komen opdagen. Je doel blijft hetzelfde ({target}); het helemaal doen telt nog steeds als gedaan.',
+        '{minimum} telt vandaag als komen opdagen. Je doel blijft hetzelfde: {target}. Het helemaal doen telt nog steeds als gedaan.',
 
       leavesTomorrowMinimum: 'Hij verdwijnt vanaf morgen (het minimum van vandaag blijft).',
     },

@@ -287,6 +287,12 @@ export function PilotHabit() {
                 <T v="caption" color={c.textDim} style={styles.hint}>
                   {minimumHint ?? t('today.habit.progressHint', { xp: PARTIAL_XP })}
                 </T>
+                {/* A minimum's own safety note, beside it (Time Outdoors). */}
+                {minimumHint && P.minimumNote(id) ? (
+                  <T v="caption" color={c.textDim} style={styles.hint}>
+                    {P.minimumNote(id)}
+                  </T>
+                ) : null}
               </Animated.View>
             ) : null}
 

@@ -242,7 +242,11 @@ export const vi: Translation = {
 
       move_walk: { inline: 'vận động 2 phút, theo cách bạn thích', title: 'Vận động 2 phút, theo cách bạn thích' },
 
-      outdoor_time: { inline: 'ra ngoài 2 phút', title: 'Ra ngoài 2 phút' },
+      outdoor_time: {
+        inline: 'ra ngoài 2 phút',
+        title: 'Ra ngoài 2 phút',
+        note: 'Trước cửa, ban công hay khu vườn đều được tính. Đừng ra ngoài khi điều kiện không an toàn.',
+      },
 
       eat_well: { inline: 'trái cây hoặc rau trong một bữa', title: 'Trái cây hoặc rau trong một bữa' },
 
@@ -922,7 +926,7 @@ export const vi: Translation = {
         'Mức tối thiểu là {minimum}. Nó được tính là có mặt: cùng các thói quen khác, nó có thể giữ hôm nay trong chuỗi ngày của bạn (+{xp} XP). Hoàn thành một phần được +{xp} XP, không tính chuỗi.',
 
       minimumHintDone:
-        '{minimum} được tính là có mặt hôm nay. Mục tiêu của bạn vẫn giữ nguyên ({target}); làm trọn vẹn vẫn được tính là xong.',
+        '{minimum} được tính là có mặt hôm nay. Mục tiêu của bạn vẫn giữ nguyên: {target}. Làm trọn vẹn vẫn được tính là xong.',
 
       leavesTomorrowMinimum: 'Thói quen sẽ rời đi từ ngày mai (mức tối thiểu hôm nay vẫn được giữ).',
     },

@@ -9,7 +9,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { ASCENT_ASPECT, ASCENT_PHASES, AscentDay, describeDay, LANDMARKS, phaseFor, trailDots } from '../core/ascent';
+import { ASCENT_ASPECT, ASCENT_PHASES, AscentDay, describeDay, landmarkReached, LANDMARKS, phaseFor, trailDots } from '../core/ascent';
 import { PROGRAM_DAYS } from '../core/dates';
 import { radius, space, useTheme } from '../theme';
 import { useDepth } from '../theme/depth';
@@ -159,7 +159,9 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
             return (
               <SummitBeacon key={d.day} x={px(d.point.x)} y={py(d.point.y)} dark={isDark} animate={!reduceMotion} />
             );
-          const reached = d.status === 'done' || d.status === 'today';
+          // By the calendar: a milestone is reached once its day comes (peach), whatever was done that day, so it never
+          // reads as a completion (sage). A day kept with the minimum keeps its seed beside the badge.
+          const reached = landmarkReached(d);
           const size = summit ? 26 : 20;
           const color = summit ? c.gold : reached ? c.peach : c.textDim;
           return (
@@ -179,6 +181,11 @@ function AscentSceneImpl({ days, today, width, selected, todayDone }: SceneProps
               ]}
             >
               <Ionicons name={LANDMARKS[d.day].icon} size={summit ? 14 : 11} color={color} />
+              {d.status === 'kept' ? (
+                <View style={[styles.badgeSeed, { borderColor: tone.lit, backgroundColor: tone.badge }]}>
+                  <View style={[styles.seedCentre, { backgroundColor: tone.lit }]} />
+                </View>
+              ) : null}
             </View>
           );
         })}
@@ -426,6 +433,17 @@ const styles = StyleSheet.create({
   small: { width: 5, height: 5, borderRadius: 2.5 },
   hollow: { borderWidth: 1.5, backgroundColor: 'transparent' },
   seed: { alignItems: 'center', justifyContent: 'center' },
+  badgeSeed: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   seedCentre: { width: 2.5, height: 2.5, borderRadius: 1.25 },
   halo: { position: 'absolute', width: 13, height: 13, borderRadius: 6.5 },
   badge: { position: 'absolute', borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
