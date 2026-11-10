@@ -346,6 +346,8 @@ No new set-up questions are recommended, except one optional cue per habit, whic
 
   This changes Journey, Story and summit numbers, and existing programs would need a decision on whether past days are re-scored.
 
+  **Compared and simulated:** `docs/FAIRER_DAY_COUNTING.md` (decision pending).
+
 - **D4. Progression that means something (W4):** real targets for the flat habits (meditation length, time outdoors, balanced meals), and offers to move up an intensity after Mastery, ready-gated as now.
 - **D5. Maintenance after 66 (W5):**
   - A Day 60 review that decides which habits to keep, lighten or retire.

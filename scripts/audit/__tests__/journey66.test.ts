@@ -13,12 +13,22 @@ import { growth } from '../../../src/core/reset/collection';
 import { programAbsence } from '../../../src/core/reset/comeback';
 import { completeDaysSoFar, milestoneLine, summitWords } from '../../../src/core/reset/moments';
 import * as P from '../../../src/core/reset/pilot';
-import type { Offer } from '../../../src/core/reset/readiness';
 import { dueReflection } from '../../../src/core/reset/reflections';
 import { storyFacts } from '../../../src/core/reset/story';
+import {
+  answersC,
+  askedOn,
+  behaviourA,
+  behaviourB,
+  behaviourC,
+  type Behaviour,
+  START,
+  startA,
+  startB,
+  startC,
+} from '../people';
 
 const run = process.env.AUDIT ? describe : describe.skip;
-const START = '2026-01-05'; // a Monday: program weeks are calendar weeks
 const CHECK = [1, 7, 14, 21, 30, 44, 45, 66];
 
 const phaseOf = (d: number) => (d >= 45 ? 'Mastery' : d >= 22 ? 'Momentum' : 'Foundation');
@@ -27,24 +37,7 @@ const lvl = (p: P.PilotProgram, id: string, d: number) => {
   return `${l.intensity}/${l.phase}`;
 };
 
-type Behaviour = {
-  /** Which of the habits asked of the day the person does (ids), given the day. */
-  does: (d: number, asked: string[]) => string[];
-  /** What the person does with an offer: accept, decline, or leave it (ignore). */
-  onOffer: (d: number, o: { habitId: string; offer: Offer }) => 'accept' | 'decline' | 'ignore';
-  /** Feedback the person gives on a day ("too easy"/"too hard"), per habit. */
-  feedback?: (d: number, id: string) => 'too-easy' | 'too-hard' | null;
-  /** Whether the person opens the app that day (default: yes). Only an opened app shows offers, moments, notes. */
-  opens?: (d: number) => boolean;
-  /** The weekly reflection answer (default: "about right"). */
-  reflect?: (week: number) => 'easier' | 'right' | 'harder';
-};
-
 type Row = Record<string, string | number | boolean | null>;
-
-/** The habits the day asks for, as Habits shows them: due daily habits, and weekly ones still open. */
-const askedOn = (p: P.PilotProgram, d: number) =>
-  p.habits.filter((id) => ['due', 'open'].includes(P.stateOn(p, id, d)));
 
 function simulate(p0: P.PilotProgram, b: Behaviour, last = PROGRAM_DAYS) {
   let p = p0;
@@ -121,94 +114,6 @@ const show = (name: string, r: ReturnType<typeof simulate>) => {
   console.log(
     `\n===== ${name}\n${lines.join('\n')}\nEVENTS ${r.events.join(' | ')}\nOFFERS (${r.offersSeen.length}) ${r.offersSeen.slice(0, 40).join(' | ')}`,
   );
-};
-
-// --- The three people ---
-
-const answersA: P.PilotAnswers = {
-  age: '30_49',
-  precautions: [],
-  minutesPerDay: 45,
-  activeDays: '1_2',
-  wake: { kind: 'time', time: '07:00' },
-};
-const startA = () =>
-  P.createPilot(
-    answersA,
-    ['mind_read', 'move_walk', 'sleep_wake', 'mind_meditation'].map((habitId) => ({
-      habitId,
-      intensity: P.suggestedIntensity(habitId, answersA)!,
-    })),
-    START,
-  )!;
-/** A: everything in week 1; one habit dropped in week 2; from Day 14 two habits on two days in three; from Day 31
- *  one habit every other day; gone Days 51–65; back on Day 66 for one habit. */
-const behaviourA: Behaviour = {
-  does: (d, asked) => {
-    if (d <= 7) return asked;
-    if (d <= 13) return asked.filter((id) => id !== 'mind_meditation');
-    if (d <= 30) return d % 3 === 0 ? [] : asked.filter((id) => id === 'mind_read' || id === 'sleep_wake');
-    if (d <= 50) return d % 2 === 0 ? asked.filter((id) => id === 'sleep_wake') : [];
-    if (d <= 65) return [];
-    return asked.filter((id) => id === 'sleep_wake');
-  },
-  onOffer: () => 'ignore',
-  opens: (d) => !(d >= 51 && d <= 65),
-  reflect: (w) => (w >= 2 ? 'harder' : 'right'),
-};
-
-const answersB: P.PilotAnswers = {
-  age: '18_29',
-  precautions: [],
-  minutesPerDay: 45,
-  activeDays: '3_4',
-  wake: { kind: 'time', time: '06:30' },
-};
-const startB = () =>
-  P.createPilot(
-    answersB,
-    ['mind_read', 'move_walk', 'sleep_wake'].map((habitId) => ({
-      habitId,
-      intensity: P.suggestedIntensity(habitId, answersB)!,
-    })),
-    START,
-  )!;
-/** B: four good days, then a week away (Days 5–11), back on Day 12 with two of three, then steady with a miss a
- *  week; accepts an easier target when offered. */
-const behaviourB: Behaviour = {
-  does: (d, asked) => {
-    if (d <= 4) return asked;
-    if (d <= 11) return [];
-    if (d === 12) return asked.slice(0, 2);
-    return d % 7 === 6 ? [] : asked;
-  },
-  onOffer: (_d, o) => (o.offer.kind === 'step-down' ? 'accept' : 'decline'),
-  opens: (d) => !(d >= 5 && d <= 11),
-};
-
-const answersC: P.PilotAnswers = {
-  age: '30_49',
-  precautions: [],
-  minutesPerDay: 90,
-  activeDays: '5p',
-  wake: { kind: 'time', time: '06:00' },
-  strengthStart: 'regular',
-  ownSessions: 3,
-};
-const startC = () =>
-  P.createPilot(
-    answersC,
-    ['focus_top3', 'mind_read', 'move_walk', 'sleep_wake', 'strength_log'].map((habitId) => ({
-      habitId,
-      intensity: P.suggestedIntensity(habitId, answersC)!,
-    })),
-    START,
-  )!;
-/** C: everything asked, every day; accepts every step up; says "too easy" on Day 8 of every habit. */
-const behaviourC: Behaviour = {
-  does: (_d, asked) => asked,
-  onOffer: (_d, o) => (o.offer.kind === 'step-up' ? 'accept' : 'decline'),
-  feedback: (d) => (d === 8 ? 'too-easy' : null),
 };
 
 run('66-day audit: three simulated people through the real engine', () => {
