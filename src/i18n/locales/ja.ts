@@ -231,7 +231,11 @@ export const ja: Translation = {
 
       move_walk: { inline: '好きな方法で2分間体を動かす', title: '好きな方法で2分間体を動かす' },
 
-      outdoor_time: { inline: '2分間外に出る', title: '2分間外に出る' },
+      outdoor_time: {
+        inline: '2分間外に出る',
+        title: '2分間外に出る',
+        note: '玄関先、ベランダ、庭でもかまいません。安全でないときは外に出ないでください。',
+      },
 
       eat_well: { inline: '1食に果物か野菜', title: '1食に果物か野菜' },
 
@@ -905,7 +909,7 @@ export const ja: Translation = {
         '最小限は「{minimum}」です。取り組んだ日として数えられ、ほかの習慣と合わせて今日を連続記録につなげられます（+{xp} XP）。一部完了は+{xp} XPで、連続記録には数えられません。',
 
       minimumHintDone:
-        '「{minimum}」で今日は取り組んだ日になりました。目標は変わりません（{target}）。全部やれば、これまでどおり達成になります。',
+        '「{minimum}」で今日は取り組んだ日になりました。目標は変わりません：{target}。全部やれば、これまでどおり達成になります。',
 
       leavesTomorrowMinimum: '明日から外れます（今日の最小限はそのまま）。',
     },

@@ -237,7 +237,11 @@ export const es: Translation = {
 
       move_walk: { inline: 'moverte 2 minutos, como prefieras', title: 'Muévete 2 minutos, como prefieras' },
 
-      outdoor_time: { inline: 'salir afuera 2 minutos', title: 'Sal afuera 2 minutos' },
+      outdoor_time: {
+        inline: 'salir afuera 2 minutos',
+        title: 'Sal afuera 2 minutos',
+        note: 'La puerta de casa, un balcón o un jardín cuentan. No salgas si las condiciones no son seguras.',
+      },
 
       eat_well: { inline: 'fruta o verdura en una comida', title: 'Fruta o verdura en una comida' },
 
@@ -926,7 +930,7 @@ export const es: Translation = {
         'El mínimo es {minimum}. Cuenta como presentarte: junto con tus otros hábitos, puede mantener hoy en tu racha (+{xp} XP). Completado en parte da +{xp} XP, sin la racha.',
 
       minimumHintDone:
-        '{minimum} cuenta como presentarte hoy. Tu objetivo sigue igual ({target}); hacerlo del todo sigue contando como hecho.',
+        '{minimum} cuenta como presentarte hoy. Tu objetivo sigue igual: {target}. Hacerlo del todo sigue contando como hecho.',
 
       leavesTomorrowMinimum: 'Sale a partir de mañana (el mínimo de hoy se mantiene).',
     },

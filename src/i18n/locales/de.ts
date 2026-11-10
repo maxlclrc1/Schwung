@@ -241,7 +241,11 @@ export const de: Translation = {
 
       move_walk: { inline: '2 Minuten Bewegung, ganz wie du magst', title: '2 Minuten Bewegung, ganz wie du magst' },
 
-      outdoor_time: { inline: '2 Minuten nach draußen gehen', title: '2 Minuten nach draußen gehen' },
+      outdoor_time: {
+        inline: '2 Minuten nach draußen gehen',
+        title: '2 Minuten nach draußen gehen',
+        note: 'Die Haustür, ein Balkon oder ein Garten zählen. Geh nicht nach draußen, wenn es nicht sicher ist.',
+      },
 
       eat_well: { inline: 'Obst oder Gemüse zu einer Mahlzeit', title: 'Obst oder Gemüse zu einer Mahlzeit' },
 
@@ -943,7 +947,7 @@ export const de: Translation = {
         'Das Minimum: {minimum}. Es zählt als Dranbleiben: Mit deinen anderen Gewohnheiten kann es heute in deiner Serie halten (+{xp} XP). Teilweise erledigt bringt +{xp} XP, ohne die Serie.',
 
       minimumHintDone:
-        '{minimum}: Das zählt heute als Dranbleiben. Dein Ziel bleibt gleich ({target}); es ganz zu machen, zählt weiterhin als erledigt.',
+        '{minimum}: Das zählt heute als Dranbleiben. Dein Ziel bleibt gleich: {target}. Es ganz zu machen, zählt weiterhin als erledigt.',
 
       leavesTomorrowMinimum: 'Sie geht ab morgen (das Minimum von heute bleibt).',
     },

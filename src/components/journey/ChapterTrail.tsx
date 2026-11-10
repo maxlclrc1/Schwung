@@ -246,6 +246,7 @@ export const ChapterTrail = memo(function ChapterTrail({
               y={d.y}
               look={look(cells[d.day - 1], d.day, today)}
               reached={d.day <= today}
+              kept={!!cells[d.day - 1]?.kept && d.day !== today}
               selected={d.day === selected && d.day !== today}
               c={c}
             />
@@ -308,13 +309,17 @@ function Marker({
   y,
   look: lk,
   reached,
+  kept,
   selected,
   c,
 }: {
   x: number;
   y: number;
   look: Look;
+  /** By the calendar: a milestone day is reached once its date comes, whatever was done (never an achievement). */
   reached: boolean;
+  /** Kept with the minimum: a milestone day keeps its seed, inside the diamond. */
+  kept: boolean;
   selected: boolean;
   c: Colors;
 }) {
@@ -325,17 +330,26 @@ function Marker({
       {lk === 'today' ? (
         <Circle cx={x} cy={y} r={13} fill={c.indigo} />
       ) : lk === 'milestone' ? (
-        <Rect
-          x={x - 5.5}
-          y={y - 5.5}
-          width={11}
-          height={11}
-          rx={1.5}
-          transform={`rotate(45 ${x} ${y})`}
-          fill={reached ? c.peach : paper}
-          stroke={c.peach}
-          strokeWidth={1.6}
-        />
+        <G>
+          <Rect
+            x={x - 5.5}
+            y={y - 5.5}
+            width={11}
+            height={11}
+            rx={1.5}
+            transform={`rotate(45 ${x} ${y})`}
+            fill={reached ? c.peach : paper}
+            stroke={c.peach}
+            strokeWidth={1.6}
+          />
+          {/* The calendar's diamond, with the day's seed inside when it was kept with the minimum. */}
+          {kept ? (
+            <G>
+              <Circle cx={x} cy={y} r={3.6} fill={paper} stroke={c.sage} strokeWidth={1.4} />
+              <Circle cx={x} cy={y} r={1.5} fill={c.sage} />
+            </G>
+          ) : null}
+        </G>
       ) : lk === 'full' ? (
         <Circle cx={x} cy={y} r={6} fill={c.sage} stroke={paper} strokeWidth={1.5} />
       ) : lk === 'partial' ? (

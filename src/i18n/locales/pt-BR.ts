@@ -251,7 +251,11 @@ export const ptBR: Translation = {
         title: 'Mexa-se por 2 minutos, do jeito que quiser',
       },
 
-      outdoor_time: { inline: 'sair por 2 minutos', title: 'Saia por 2 minutos' },
+      outdoor_time: {
+        inline: 'sair por 2 minutos',
+        title: 'Saia por 2 minutos',
+        note: 'A porta de casa, uma varanda ou um quintal contam. Não saia quando as condições não forem seguras.',
+      },
 
       eat_well: { inline: 'frutas ou legumes em uma refeição', title: 'Frutas ou legumes em uma refeição' },
 
@@ -933,7 +937,7 @@ export const ptBR: Translation = {
         'O mínimo é {minimum}. Conta como aparecer: junto com seus outros hábitos, pode manter hoje na sua sequência (+{xp} XP). Concluído em parte dá +{xp} XP, sem a sequência.',
 
       minimumHintDone:
-        '{minimum} conta como aparecer hoje. Sua meta continua a mesma ({target}); fazer por completo ainda conta como feito.',
+        '{minimum} conta como aparecer hoje. Sua meta continua a mesma: {target}. Fazer por completo ainda conta como feito.',
 
       leavesTomorrowMinimum: 'Ele sai a partir de amanhã (o mínimo de hoje continua).',
     },

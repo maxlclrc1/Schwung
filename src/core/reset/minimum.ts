@@ -1,4 +1,5 @@
 import { RESET_BY_ID, type Phase, type Intensity } from './habits';
+import { isTeen, precautionsUnknown, type Profile } from './profile';
 
 /*
  * Minimum Effort's per-habit minimums (docs/MINIMUM_EFFORT_SPEC.md §3). Pure data and one rule.
@@ -35,6 +36,11 @@ type MinimumDef = {
   note?: string;
   /** Whether the day's target at this level asks strictly more than the minimum. */
   asksMore: (level: Level) => boolean;
+  /**
+   * People the minimum isn't offered to, though the habit itself stays available to them (its own eligibility is
+   * unchanged). Recording only: a minimum already saved counts as it was recorded.
+   */
+  notFor?: (p: Pick<Profile, 'age' | 'precautions'>) => boolean;
 };
 
 const target = (id: string, l: Level) => RESET_BY_ID[id].targets[l.intensity][l.phase];
@@ -51,7 +57,13 @@ export const MINIMUMS: Readonly<Record<string, MinimumDef>> = {
   /** "One quiet minute, any way you like" (no breathing technique prescribed). */
   mind_meditation: { status: 'approved', since: 1, asksMore: moreMinutesThan('mind_meditation', 1) },
   /** "Move for 2 minutes, any way you like" (the habit's walking, heart and pregnancy gates already apply). */
-  move_walk: { status: 'approved', since: 1, asksMore: moreMinutesThan('move_walk', 2) },
+  move_walk: {
+    status: 'approved',
+    since: 1,
+    asksMore: moreMinutesThan('move_walk', 2),
+    // Pending the exercise review: not for "Rather not say" to the health question, nor 16–17 programs.
+    notFor: (p) => precautionsUnknown(p) || isTeen(p),
+  },
   /** "Step outside for 2 minutes" (by choice, as the habit says). */
   outdoor_time: { status: 'approved', since: 1, asksMore: moreMinutesThan('outdoor_time', 2) },
   /** "Fruit or vegetables in one meal": the Starter target itself, so only above Starter. Never water (fluid limits). */
@@ -73,11 +85,20 @@ export const MINIMUMS: Readonly<Record<string, MinimumDef>> = {
   },
 };
 
-/** Whether a catalogue habit has a minimum that may be recorded at this level under this review. */
-export function minimumAvailable(habitId: string, level: Level, review: MinimumReview = 'approved'): boolean {
+/**
+ * Whether a catalogue habit has a minimum that may be recorded at this level under this review, for this person
+ * (when given: some minimums aren't offered to everyone the habit is).
+ */
+export function minimumAvailable(
+  habitId: string,
+  level: Level,
+  review: MinimumReview = 'approved',
+  person?: Pick<Profile, 'age' | 'precautions'>,
+): boolean {
   const def = MINIMUMS[habitId];
   if (!def || def.status === 'disabled') return false;
   if (def.status === 'draft' && review !== 'drafts') return false;
+  if (person && def.notFor?.(person)) return false;
   return def.asksMore(level);
 }
 

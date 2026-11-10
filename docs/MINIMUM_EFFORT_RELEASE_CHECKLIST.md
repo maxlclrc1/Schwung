@@ -1,6 +1,6 @@
 # Minimum Effort: release checklist
 
-**Status:** conditionally approved (`1439345`). **`MINIMUM_EFFORT_LAUNCHED` stays `false`**, so normal users can't
+**Status:** `c264a32` approved; final product changes applied after it (§D). **`MINIMUM_EFFORT_LAUNCHED` stays `false`**, so normal users can't
 record a minimum. Nothing below is marked approved on anyone's behalf: the specialist and native-speaker items are
 open until a person signs them off.
 
@@ -22,6 +22,11 @@ Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
 | Journey trail (seed mark, day entry, VoiceOver text) | `minimumIntegration.test.ts`, screenshot `r2b/04` |
 | Mountain overview: kept days use the seed mark, never the missed mark | **Fixed here**; screenshot `r2b/17` |
 | Removal note after today's minimum says "It leaves from tomorrow (today's minimum stays)" | **Fixed here**; Habit Details and the weekly reflection; `minimumRelease.test.ts` |
+| Recorded hint never nests parentheses ("Your goal stays the same: {target}.") | `minimumRelease.test.ts`, for every eligible habit |
+| Time Outdoors shows its safety note with the minimum; no other minimum has one | `minimumRelease.test.ts`; screenshot `r2b/18` |
+| Movement minimum not offered for "Rather not say" or 16–17 programs; the habit's eligibility is unchanged; saved minimums still count | `minimumRelease.test.ts` |
+| Milestones (Days 7, 21, 44) reached by the calendar, in peach, never as a completion; a kept milestone day keeps its seed | `landmarkReached`, `minimumRelease.test.ts` |
+| "can keep today in your streak" kept word for word | `minimumRelease.test.ts` |
 | Insights: counts and percentages agree; minimums named | Trend, habit rows, observation |
 | After Day 66: strip, caption, Recent Insights | `sinceSummitStrip`, `sinceSummit`, `recentDays80` tests; screenshots `r2b/07–08` |
 | Saves (v0–v3), past-journeys store v1 → v2, and a newer store held for recovery | `minimumSave.test.ts`, `minimumStore.test.ts` |
@@ -31,7 +36,7 @@ Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
 
 **Checks:**
 
-- `npm test`: 734 passed, 7 skipped;
+- `npm test`: 739 passed, 7 skipped;
 - `tsc` passes;
 - lint: only the one old warning;
 - `i18n:check` passes;
@@ -56,6 +61,8 @@ Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
 - [ ] The dotted minimum segment in Insights habit rows. It's drawn with views, because one-sided dotted borders
   don't draw on iOS.
 - [ ] The mountain overview's seed mark at 7 pt, on the painting, in light and dark.
+- [ ] A kept milestone day: the seed inside the trail's diamond, and the small seed beside the mountain's badge.
+- [ ] Time Outdoors: the safety note under the hint at the largest text sizes.
 - [ ] Right to left (Arabic, Urdu), after the restart:
   - the seed marks;
   - the dotted segment's direction;
@@ -72,25 +79,21 @@ Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
 **Specialist approval (not given here):**
 
 - [ ] **Exercise:**
-  - "Move for 2 minutes, any way you like", including people who answered "Rather not say" to health precautions.
-    Movement is offered to them today.
-  - The 16–17 programs started before the age change. The habit's own teen-target exercise review is still pending
-    in the catalogue.
+  - "Move for 2 minutes, any way you like". It's no longer offered for "Rather not say" or 16–17 programs, but it is
+    offered to everyone else who has Daily Movement.
+  - The habit's own 16–17 target exercise review is still pending in the catalogue.
 - [ ] **Nutrition:** "Fruit or vegetables in one meal", which must never read as restriction. Eat Well's own wording
   review is still pending in the catalogue, and the set-up doesn't ask about eating-disorder history.
 - [ ] **Mental health / mindfulness:** "One quiet minute, any way you like". No breathing technique is prescribed;
   check the wording with anxiety or trauma in mind.
 - [ ] **Safeguarding / social:** "One short message to someone you care about", beside "Never a prompt to contact
   someone who harmed you".
-- [ ] **Outdoors:** "Step outside for 2 minutes". Decide whether the note should add that a doorstep, balcony or
-  garden counts, and that the person should never go out in the dark or bad weather for it.
-- [ ] **Owner / copy:**
-  - the claim "it can keep today in your streak";
-  - the recorded hint's nested parentheses for targets that already have one, e.g. "Your goal stays the same (Reach
-    out to 2 people (more than a like))".
+- [ ] **Outdoors:** "Step outside for 2 minutes", with its new note "A doorstep, balcony or garden counts. Don't go
+  outside when conditions aren't safe."
+- **Owner / copy:** decided. "Can keep today in your streak" stays, and the nested parentheses are gone.
 
-**Native-speaker review:** all 665 minimum strings are machine-made (35 keys × 19 languages, including the removal
-note added here). Every language needs review. Points to check:
+**Native-speaker review:** all 684 minimum strings are machine-made (36 keys × 19 languages, including the removal
+note, the Outdoors note and the reworded hint). Every language needs review. Points to check:
 
 - [ ] **Arabic and Urdu (RTL):** the safety meaning of the six minimums, and the plural forms of "Plus {n} days kept
   with the minimum".
@@ -100,14 +103,29 @@ note added here). Every language needs review. Points to check:
   geschafft"). Confirm it reads as a button.
 - [ ] **Spanish:** "Sal afuera" is regional; check it for the intended audience.
 - [ ] **All languages:** the Stay Connected and Eat Well minimums keep their non-pressuring, non-restrictive meaning.
+- [ ] **All languages:** the Outdoors note keeps its safety meaning (don't go out when conditions aren't safe) and
+  doesn't read as an obligation to go out.
 
-**Product decision (not a bug, not changed):**
+**Known limitation (unchanged):** health precautions change only at set-up or a New Ascent. That's older than
+Minimum Effort, and the minimum adds no new risk to it.
 
-- [ ] **Milestone badges (Days 7, 21, 44):** on the mountain they light only when the milestone day was completed in
-  full, so a kept milestone day stays unlit. This follows "no retroactive change to achievements". Confirm it's
-  wanted.
-- [ ] **Health precautions:** they change only at set-up or a New Ascent. That limitation is older than Minimum
-  Effort; the minimum adds no new risk to it.
+## D. Final product changes (owner decisions after `c264a32`)
+
+1. **Recorded hint:** "Your goal stays the same: {target}. Doing it in full still counts as done." No nested
+   parentheses.
+2. **Time Outdoors:** a safety note shown with the minimum: "A doorstep, balcony or garden counts. Don't go outside
+   when conditions aren't safe."
+3. **Milestones are calendar-based:**
+   - On the mountain, a badge lights in peach once its day comes, whatever was done that day. Before, it lit only
+     after a full day; completion stays sage.
+   - On the trail, the diamond was already calendar-based.
+   - A kept milestone day keeps its seed: inside the diamond, and as a small seed beside the mountain's badge.
+4. **Movement minimum:**
+   - Not offered for "Rather not say" to health precautions, or for 16–17 programs. Those programs are already
+     paused until the person confirms they're 18+; this is a backstop.
+   - The habit's own eligibility is unchanged, and other minimums are unaffected.
+   - A Movement minimum already saved counts as it was recorded.
+5. **"Can keep today in your streak"** is kept word for word.
 
 ## Launch steps (after B and C)
 
