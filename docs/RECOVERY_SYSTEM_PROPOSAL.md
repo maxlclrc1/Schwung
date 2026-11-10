@@ -12,6 +12,10 @@ target and no change waiting), **Focus on fewer habits** (the existing removal, 
 one, past kept, worded as a stop, not a pause) and **Keep my plan** (always; changes nothing). Nothing is triggered by
 missing days. Pausing, Minimum Effort, recovery weeks and streak rules are **not** built yet.
 
+**Phase R2 (Minimum Effort) — specified, not built:** `docs/MINIMUM_EFFORT_SPEC.md`. It refines §3 here: it
+recommends a "hold" counting model (the streak is protected, not grown) over §3.3's "counts", and lists the
+decisions needed first.
+
 **Baseline:** `main` at `5364be2`. Every statement about current behaviour is from the code and the audit
 simulation (`AUDIT=1 npx jest scripts/audit`).
 
