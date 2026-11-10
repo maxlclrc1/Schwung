@@ -91,6 +91,52 @@ export type QaScene = {
   core?: boolean;
 };
 
+/**
+ * Minimum Effort (development and internal builds; the QA build for these scenes is made with the internal channel):
+ * Day 20 with the habits that have a minimum, kept days (Day 7, a milestone, among them), a miss, and a Read Daily
+ * minimum recorded today. Minimums are recorded as the app records them (`setMinimum`, the approved catalogue).
+ */
+export function minimumProgram(): P.PilotProgram {
+  const choices: P.PilotChoice[] = [
+    { habitId: 'mind_read', intensity: 'starter' },
+    { habitId: 'move_walk', intensity: 'starter' },
+    { habitId: 'outdoor_time', intensity: 'starter' },
+    { habitId: 'eat_well', intensity: 'standard' },
+  ];
+  const day = 20;
+  let p = P.createPilot(ADULT, choices, addDays(QA_TODAY, 1 - day));
+  if (!p) throw new Error(`QA program refused: ${P.setupProblems(ADULT, choices).join('; ')}`);
+  const KEPT: Record<number, string[]> = {
+    7: ['mind_read', 'move_walk'],
+    8: ['outdoor_time'],
+    13: ['mind_read', 'move_walk', 'outdoor_time'],
+  };
+  for (let d = 1; d < day; d++) {
+    if (d === 11) continue; // a missed day
+    for (const id of P.requiredOn(p, d)) if (!KEPT[d]?.includes(id)) p = P.complete(p, id, d).program;
+    for (const id of KEPT[d] ?? []) p = P.setMinimum(p, id, d, true).program;
+  }
+  p = P.setMinimum(p, 'mind_read', day, true).program;
+  const xp = P.lifetimeXp(p);
+  return {
+    ...p,
+    ceremonies: { day1: true, milestones: P.MILESTONE_DAYS.filter((m) => m <= day) },
+    collection: { unlocked: COLLECTIBLES.filter((c) => xp >= c.xp).map((c) => c.id) },
+    comeback: { seen: day },
+  };
+}
+
+/** Keep My Momentum on Day 80, with Days 70 and 72 kept with minimums. */
+export function minimumMomentum(): P.PilotProgram {
+  let p = programOn(80, { momentum: 67 });
+  for (const d of [70, 72])
+    for (const id of ['mind_read', 'move_walk']) {
+      p = P.toggle(p, id, d).program; // undo the completion
+      p = P.setMinimum(p, id, d, true).program;
+    }
+  return p;
+}
+
 const running = (day: number, extra: Partial<P.PilotProgram> = {}) => ({ ...programOn(day), ...extra });
 const archived = (): P.ArchivedJourney => ({
   v: 1,
@@ -107,6 +153,8 @@ export function scenes(): QaScene[] {
   const beyond = programOn(67);
   const momentum = programOn(80, { momentum: 67 });
   const absent = programOn(20, { misses: [4, 9, 16, 17, 18, 19] });
+  const minimum = minimumProgram();
+  const minimumAfter = minimumMomentum();
   return [
     {
       id: 'choose-language',
@@ -152,6 +200,20 @@ export function scenes(): QaScene[] {
     { id: 'privacy', group: 'Settings', route: '/privacy', state: { pilot: day12 }, core: true },
     { id: 'legal-wellness', group: 'Settings', route: '/legal?doc=wellness', state: { pilot: day12 } },
     { id: 'legal-terms', group: 'Settings', route: '/legal?doc=terms', state: { pilot: day12 } },
+    // Minimum Effort (run with an internal-channel build: `--scene=min-…`).
+    { id: 'min-today', group: 'Minimum Effort', route: '/today', state: { pilot: minimum } },
+    { id: 'min-detail-recorded', group: 'Minimum Effort', route: '/life-reset/mind_read', state: { pilot: minimum } },
+    {
+      id: 'min-detail-outdoors',
+      group: 'Minimum Effort',
+      route: '/life-reset/outdoor_time',
+      state: { pilot: minimum },
+    },
+    { id: 'min-detail-eatwell', group: 'Minimum Effort', route: '/life-reset/eat_well', state: { pilot: minimum } },
+    { id: 'min-journey', group: 'Minimum Effort', route: '/progress', state: { pilot: minimum } },
+    { id: 'min-insights', group: 'Minimum Effort', route: '/insights', state: { pilot: minimum } },
+    { id: 'min-momentum-journey', group: 'Minimum Effort', route: '/progress', state: { pilot: minimumAfter } },
+    { id: 'min-momentum-insights', group: 'Minimum Effort', route: '/insights', state: { pilot: minimumAfter } },
     { id: 'restore', group: 'Backup & recovery', route: '/restore', state: { pilot: null } },
     {
       id: 'recovery',

@@ -57,3 +57,18 @@ describe('visual QA fixtures', () => {
     fs.writeFileSync(out!, JSON.stringify({ now: QA_NOW, languages, scenes: scenes() }));
   });
 });
+
+// The Minimum Effort scenes hold what they're meant to show (kept days, a milestone among them, today's minimum).
+describe('Minimum Effort QA fixtures', () => {
+  it('Day 20: kept days 7, 8 and 13, a miss on 11, and Read Daily at the minimum today', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const P = require('../../../src/core/reset/pilot') as typeof import('../../../src/core/reset/pilot');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { minimumProgram, minimumMomentum } = require('../fixtures') as typeof import('../fixtures');
+    const p = minimumProgram();
+    expect([7, 8, 11, 13].map((d) => P.dayOutcome(p, d))).toEqual(['kept', 'kept', 'missed', 'kept']);
+    expect(P.minimumsOn(p, 20)).toEqual(['mind_read']);
+    const m = minimumMomentum();
+    expect([P.dayOutcome(m, 70), P.dayOutcome(m, 72), P.sinceSummit(m, 80).kept]).toEqual(['kept', 'kept', 2]);
+  });
+});

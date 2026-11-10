@@ -1,7 +1,11 @@
 # Minimum Effort: release checklist
 
-**Status:** `c264a32` approved; final product changes applied after it (§D). **`MINIMUM_EFFORT_LAUNCHED` stays `false`**, so normal users can't
-record a minimum. Nothing below is marked approved on anyone's behalf: the specialist and native-speaker items are
+**Status:**
+
+- `6c5645a` is the baseline.
+- **Internal iPhone testing is on:** `eas build --profile internal` builds the internal channel, where minimums are
+  offered.
+- **Production stays gated:** `MINIMUM_EFFORT_LAUNCHED` is `false`, so normal users can't record a minimum. Nothing below is marked approved on anyone's behalf: the specialist and native-speaker items are
 open until a person signs them off.
 
 Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
@@ -36,11 +40,43 @@ Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
 
 **Checks:**
 
-- `npm test`: 739 passed, 7 skipped;
+- `npm test`: 743 passed, 7 skipped;
 - `tsc` passes;
 - lint: only the one old warning;
 - `i18n:check` passes;
 - `AUDIT=1` 66-day simulation: 6 of 6.
+
+## E. Internal testing: verified in the cloud environment (no iPhone or simulator)
+
+The cloud container has no Xcode or iOS Simulator, so **nothing in this section was run on iOS**. It used the
+internal-channel web export in Chromium.
+
+- **Accessibility tree** (what VoiceOver is given; `node scripts/qa/minimum-a11y.mjs`, 14 of 14):
+  - "Did the minimum" and "Remove minimum" are named buttons;
+  - the state line is a polite live region that changes to "Minimum done." and back;
+  - the card summary ends "Minimum done";
+  - Journey reads "Day 13. Kept with the minimum." and never calls a full day kept;
+  - Insights labels name their minimums;
+  - the Since-the-summit label counts kept days;
+  - the Arabic Journey labels are translated.
+- **Haptics (by code only):** the minimum's only entry point fires `haptic.select` (iOS selection feedback). It never
+  fires `completionHaptic` or a celebration. Not felt on a device.
+- **Reduce Motion:** every pass ran with reduced motion and showed no page errors. The minimum link uses the
+  existing `REVEAL`/`CONCEAL` crossfade, which follows the system setting.
+- **Right to left, Dynamic Type stand-in and every language:** visual QA (`scripts/qa`, new `min-*` scenes) ran
+  across 20 languages at 320 pt, 390 pt with ×1.3 text, and 320 pt with ×1.3 text in dark mode. Arabic and Urdu ran
+  with `dir="rtl"`.
+  - 480 cases, compared case by case with the same matrix on the existing screens (360 cases) on the same build.
+  - **No new layout problem comes from a Minimum Effort element.**
+  - The problems it reports are pre-existing, and the baseline shows them too:
+    - the Spanish and Russian "Too hard" button at 320 pt;
+    - the hero's streak and title chips at ×1.3;
+    - the Russian Eat Well target clamped to two lines;
+    - week-chart and trail tap targets crowding at 320 pt;
+    - the Dutch "gewoontemomenten" breaking mid-word at ×1.3. The minimum variant of that line inherits it.
+  - None was changed here; they belong to the existing layout backlog.
+- **Backup and restore:** unit and store tests cover v0–v3 saves, past journeys v1 and v2, exact restores, forged
+  minimums and the production-gated store. Not run through the iOS file picker.
 
 ## B. Native iPhone checks (not possible on the web build)
 
@@ -102,6 +138,8 @@ note, the Outdoors note and the reworded hint). Every language needs review. Poi
 - [ ] **German, Dutch, Vietnamese, Thai:** the action label currently reads the same as the state ("Minimum
   geschafft"). Confirm it reads as a button.
 - [ ] **Spanish:** "Sal afuera" is regional; check it for the intended audience.
+- [ ] **Dutch:** "gewoontemomenten" breaks mid-word at large text in the Insights consistency line, with or without
+  minimums. That's pre-existing; a shorter word would fix both.
 - [ ] **All languages:** the Stay Connected and Eat Well minimums keep their non-pressuring, non-restrictive meaning.
 - [ ] **All languages:** the Outdoors note keeps its safety meaning (don't go out when conditions aren't safe) and
   doesn't read as an obligation to go out.
@@ -129,5 +167,18 @@ Minimum Effort, and the minimum adds no new risk to it.
 
 ## Launch steps (after B and C)
 
-1. Set `MINIMUM_EFFORT_LAUNCHED = true` in `src/lib/flags.ts`. It's the only change needed.
-2. Run every check, then a production TestFlight build, and repeat B there.
+**The production release is one change:** `MINIMUM_EFFORT_LAUNCHED = true` in `src/lib/flags.ts`. No other code or
+test depends on its value; this was checked by flipping it with every blocker still open.
+
+`src/core/__tests__/minimumLaunch.test.ts` fails if the flag is set while:
+
+- any `- [ ]` remains in section B or C; or
+- any of the 36 Minimum Effort strings is still awaiting review in `scripts/i18n/state.json`.
+
+So the sign-offs are recorded where they happen:
+
+1. A person ticks each item in B and C, naming who signed it off.
+2. Native speakers review each language, then the reviewed strings are marked with `npm run i18n:approve -- <lang>
+   <key>`, or a prefix such as `engine.minimum`.
+3. Set the flag, run every check, build `eas build --profile production` for TestFlight, and repeat B there before
+   release.
