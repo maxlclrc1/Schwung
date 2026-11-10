@@ -19,6 +19,9 @@ once the per-habit review in §3 is done.
 - The save is version 3.
 - The screens (R2b) aren't built.
 
+**Content and visual approval package:** `docs/MINIMUM_EFFORT_APPROVAL.md`, with real-app mockups in
+`docs/minimum-effort/`. It's awaiting approval.
+
 **Sources:**
 
 - `docs/RECOVERY_SYSTEM_PROPOSAL.md` and `docs/66_DAY_EXPERIENCE_AUDIT.md`;

@@ -1,0 +1,412 @@
+diff --git a/src/components/InsightsViz.tsx b/src/components/InsightsViz.tsx
+index 71d46ab..7e90d10 100644
+--- a/src/components/InsightsViz.tsx
++++ b/src/components/InsightsViz.tsx
+@@ -188,7 +188,7 @@ export const Consistency = memo(function Consistency({
+       next[i] = w;
+       return { key: factKey, w: next };
+     });
+-  const share = overall.eligible ? overall.done / overall.eligible : null;
++  const share = overall.eligible ? (overall.done + (overall.minimum ?? 0)) / overall.eligible : null;
+   const size = Math.round(Math.min(116, (Math.min(width, 520) - space.lg * 2) * 0.32));
+   const facts = [
+     week.eligible ? t('insights.facts.week', { done: week.done, eligible: week.eligible }) : null,
+@@ -215,7 +215,13 @@ export const Consistency = memo(function Consistency({
+           {share === null ? (
+             t('insights.ring.first')
+           ) : (
+-            <Figures text={t('insights.ring.done', { done: overall.done, eligible: overall.eligible })} />
++            <Figures
++              text={
++                overall.minimum
++                  ? `${overall.done + overall.minimum} of ${overall.eligible} habit opportunities, ${overall.minimum} at the minimum`
++                  : t('insights.ring.done', { done: overall.done, eligible: overall.eligible })
++              }
++            />
+           )}
+         </T>
+       </View>
+@@ -249,6 +255,8 @@ export const Consistency = memo(function Consistency({
+ function weekWords(p: WeekPoint): string {
+   const range = p.days < 7 ? tr('insights.week.range', { count: p.days }) : '';
+   const base = { week: p.week, range, done: p.done, eligible: p.eligible };
++  if (p.minimum && p.state === 'closed')
++    return `Week ${p.week}${range}: ${pctText(p.share)}, ${p.done} of ${p.eligible} done and ${p.minimum} at the minimum.`;
+   switch (p.state) {
+     case 'closed':
+       return tr('insights.week.closed', { ...base, pct: pctText(p.share) });
+@@ -547,10 +555,11 @@ function HabitLine({
+   const { c } = useTheme();
+   const t = useT();
+   const [open, setOpen] = useState(false);
+-  const share = row.tally.eligible ? row.tally.done / row.tally.eligible : null;
++  const share = row.tally.eligible ? (row.tally.done + (row.tally.minimum ?? 0)) / row.tally.eligible : null;
++  const fullPart = row.tally.done + (row.tally.minimum ?? 0) ? row.tally.done / (row.tally.done + (row.tally.minimum ?? 0)) : 1;
+   const grow = useEntrance(150 + order * 70, 700);
+   const fill = useAnimatedStyle(() => ({ width: `${(share ?? 0) * 100 * grow.value}%` }));
+-  const meta = `${row.tally.eligible ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · ` : ''}${row.kind}`;
++  const meta = `${row.tally.eligible ? `${t('insights.ring.weekValue', { done: row.tally.done, eligible: row.tally.eligible })} · ` : ''}${row.tally.minimum ? `${row.tally.minimum} at the minimum · ` : ''}${row.kind}`;
+   return (
+     <View>
+       {first ? null : <Rule style={{ opacity: 0.7 }} />}
+@@ -591,7 +600,12 @@ function HabitLine({
+           <ThemedView style={[styles.trackLine, { backgroundColor: c.border }]} />
+           <View style={[styles.mid, { backgroundColor: c.textFaint }]} />
+           <View style={styles.trackRow}>
+-            <Animated.View style={[styles.trackFill, { backgroundColor: c.sage }, fill]} />
++            <Animated.View style={[styles.trackFill, { flexDirection: 'row', opacity: 1 }, fill]}>
++              <View style={{ flex: fullPart, height: 1.5, backgroundColor: c.sage, opacity: 0.55 }} />
++              {fullPart < 1 ? (
++                <View style={{ flex: 1 - fullPart, height: 0, borderTopWidth: 2, borderStyle: 'dotted', borderColor: c.sage }} />
++              ) : null}
++            </Animated.View>
+             <View
+               style={[
+                 styles.mark,
+diff --git a/src/components/beyond/SinceSummit.tsx b/src/components/beyond/SinceSummit.tsx
+index 0e01c71..b2b7cae 100644
+--- a/src/components/beyond/SinceSummit.tsx
++++ b/src/components/beyond/SinceSummit.tsx
+@@ -28,10 +28,10 @@ export function SinceSummit({ program, today }: { program: P.PilotProgram; today
+   const streak = useMemo(() => P.pilotStreak(program, today), [program, today]);
+   const from = program.after?.since ?? today;
+   const strip = useMemo(() => {
+-    const out: ('counted' | 'missed' | 'rest' | 'today')[] = [];
++    const out: ('counted' | 'kept' | 'missed' | 'rest' | 'today')[] = [];
+     for (let d = Math.max(from, today - STRIP + 1); d <= today; d++) {
+-      const r = P.dayResult(program, d);
+-      out.push(d === today && r !== 'counted' ? 'today' : r);
++      const r = P.dayOutcome(program, d);
++      out.push(d === today && r !== 'counted' && r !== 'kept' ? 'today' : r);
+     }
+     return out;
+   }, [program, today, from]);
+@@ -73,14 +73,23 @@ export function SinceSummit({ program, today }: { program: P.PilotProgram; today
+                 styles.dot,
+                 r === 'counted'
+                   ? { backgroundColor: tint.sage.fill }
+-                  : r === 'missed'
++                  : r === 'kept'
++                    ? { borderWidth: 2, borderColor: tint.sage.fill, alignItems: 'center', justifyContent: 'center' }
++                    : r === 'missed'
+                     ? { backgroundColor: c.border }
+                     : { borderWidth: 1.5, borderColor: r === 'today' ? tint.sage.fill : c.border },
+               ]}
+-            />
++            >
++              {r === 'kept' ? <View style={{ width: 3, height: 3, borderRadius: 2, backgroundColor: tint.sage.fill }} /> : null}
++            </View>
+           ))}
+         </View>
+       ) : null}
++      {s.kept ? (
++        <T v="caption" color={c.textDim}>
++          {`Plus ${s.kept} ${s.kept === 1 ? 'day' : 'days'} kept with the minimum (the ringed dots): they keep your streak going.`}
++        </T>
++      ) : null}
+     </ThemedView>
+   );
+ }
+diff --git a/src/components/journey/ChapterTrail.tsx b/src/components/journey/ChapterTrail.tsx
+index 281a12d..c86693d 100644
+--- a/src/components/journey/ChapterTrail.tsx
++++ b/src/components/journey/ChapterTrail.tsx
+@@ -42,7 +42,12 @@ export const CHAPTERS = [
+ ] as const;
+ export type Chapter = (typeof CHAPTERS)[number];
+ 
+-type Look = 'today' | 'milestone' | 'full' | 'partial' | 'missed' | 'rest' | 'future';
++type Look = 'today' | 'milestone' | 'full' | 'partial' | 'kept' | 'missed' | 'rest' | 'future';
++/** MOCK: which kept-day mark to draw (the approval package compares them). */
++const MARK = (() => {
++  const m = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('mark');
++  return m === 'ridge' || m === 'half' ? m : 'seed';
++})();
+ 
+ function look(cell: DayCell | undefined, day: number, today: number): Look {
+   if (day === today) return 'today';
+@@ -51,7 +56,7 @@ function look(cell: DayCell | undefined, day: number, today: number): Look {
+     case 'full':
+       return 'full';
+     case 'partial':
+-      return 'partial';
++      return cell?.kept ? 'kept' : 'partial';
+     case 'missed':
+     case 'unrecorded':
+       return 'missed';
+@@ -339,6 +344,24 @@ function Marker({
+         <Circle cx={x} cy={y} r={6} fill={c.sage} stroke={paper} strokeWidth={1.5} />
+       ) : lk === 'partial' ? (
+         <Circle cx={x} cy={y} r={5.6} fill={paper} stroke={c.sage} strokeWidth={2} />
++      ) : lk === 'kept' ? (
++        <G>
++          <Circle cx={x} cy={y} r={5.6} fill={paper} stroke={c.sage} strokeWidth={2} />
++          {MARK === 'seed' ? (
++            <Circle cx={x} cy={y} r={2.1} fill={c.sage} />
++          ) : MARK === 'ridge' ? (
++            <Path
++              d={`M ${x - 3} ${y + 1.6} L ${x} ${y - 1.9} L ${x + 3} ${y + 1.6}`}
++              stroke={c.sage}
++              strokeWidth={1.6}
++              strokeLinecap="round"
++              strokeLinejoin="round"
++              fill="none"
++            />
++          ) : (
++            <Path d={`M ${x - 5.6} ${y} A 5.6 5.6 0 0 0 ${x + 5.6} ${y} Z`} fill={c.sage} />
++          )}
++        </G>
+       ) : lk === 'missed' ? (
+         <G>
+           <Circle cx={x} cy={y} r={5.6} fill={paper} stroke={c.textDim} strokeWidth={1.4} />
+@@ -356,9 +379,11 @@ function Marker({
+ function dayLabel(cell: DayCell | undefined, day: number, isToday: boolean): string {
+   const state = isToday
+     ? tr(cell?.state === 'full' ? 'journeyTab.cell.todayComplete' : 'journeyTab.cell.today')
+-    : cell
+-      ? tr(`journeyTab.cell.${cell.state === 'today' ? 'future' : cell.state}`)
+-      : '';
++    : cell?.kept
++      ? 'Kept with the minimum.'
++      : cell
++        ? tr(`journeyTab.cell.${cell.state === 'today' ? 'future' : cell.state}`)
++        : '';
+   return LANDMARKS[day]
+     ? tr('journeyTab.cell.a11yMilestone', { day, milestone: LANDMARKS[day].name, state })
+     : tr('journeyTab.cell.a11y', { day, state });
+diff --git a/src/components/pilot/PilotHabit.tsx b/src/components/pilot/PilotHabit.tsx
+index 122ad86..bcd5c53 100644
+--- a/src/components/pilot/PilotHabit.tsx
++++ b/src/components/pilot/PilotHabit.tsx
+@@ -71,6 +71,18 @@ export function PilotHabit() {
+   const showMinutes = canLog && progress.kind === 'minutes';
+   // The partial-progress rule, said once: by the partial action, or by the counter.
+   const showHint = !done && (canLog || counter !== null);
++  // MOCK (Minimum Effort approval package): the proposed minimum action.
++  const MOCK_MIN: Record<string, string> = {
++    mind_read: 'Read or listen for 2 minutes',
++    mind_meditation: 'One quiet minute, any way you like',
++    move_walk: 'Move for 2 minutes, any way you like',
++    outdoor_time: 'Step outside for 2 minutes',
++    eat_well: 'Fruit or vegetables in one meal',
++    social_reach_out: 'One short message to someone you care about',
++  };
++  const hasMin = P.minimumOn(program, id, today);
++  const canMin = P.minimumFor(program, id, today, 'drafts');
++  const minText = MOCK_MIN[id];
+   const logProgress = (value: number | null) => {
+     haptic.select();
+     s().setProgress(id, value);
+@@ -94,7 +106,9 @@ export function PilotHabit() {
+       : t('today.habit.done')
+     : track.skipped
+       ? t('today.habit.skipped')
+-      : track.progress
++      : hasMin
++        ? 'Minimum done.'
++        : track.progress
+         ? t('today.habit.partial')
+         : strength
+           ? t('today.habit.noSession')
+@@ -249,12 +263,27 @@ export function PilotHabit() {
+                     />
+                   </Animated.View>
+                 ) : null}
++                {canMin || hasMin ? (
++                  <Animated.View key={hasMin ? 'min-remove' : 'min-add'} entering={REVEAL} exiting={CONCEAL}>
++                    <TextLink
++                      label={hasMin ? 'Remove minimum' : 'Did the minimum'}
++                      onPress={() => {
++                        haptic.select();
++                        useResetPilot.getState().setMinimum(id, !hasMin);
++                      }}
++                    />
++                  </Animated.View>
++                ) : null}
+               </Animated.View>
+             )}
+             {showHint ? (
+               <Animated.View entering={REVEAL} layout={REFLOW}>
+                 <T v="caption" color={c.textDim} style={styles.hint}>
+-                  {t('today.habit.progressHint', { xp: PARTIAL_XP })}
++                  {hasMin
++                    ? `${minText} counts as showing up today. Your goal stays ${P.targetText(program, id, today).toLowerCase()}; doing it in full still counts as done.`
++                    : canMin
++                      ? `The minimum is ${minText.toLowerCase()}. It counts as showing up: with your other habits, it can keep today in your streak (+${PARTIAL_XP} XP). Partially completed earns +${PARTIAL_XP} XP, without the streak.`
++                      : t('today.habit.progressHint', { xp: PARTIAL_XP })}
+                 </T>
+               </Animated.View>
+             ) : null}
+diff --git a/src/components/pilot/PilotToday.tsx b/src/components/pilot/PilotToday.tsx
+index 42b29fa..16ec3ea 100644
+--- a/src/components/pilot/PilotToday.tsx
++++ b/src/components/pilot/PilotToday.tsx
+@@ -367,7 +367,9 @@ function PilotCard({
+       }
+       skipped={!!track.skipped}
+       partialText={
+-        done || !track.progress || counter !== null
++        !done && P.minimumOn(program, habitId, today)
++          ? 'Minimum done'
++          : done || !track.progress || counter !== null
+           ? null
+           : track.progress.value
+             ? tr('today.card.partialMinutes', { minutes: track.progress.value })
+diff --git a/src/core/__tests__/zzMockFixtures.test.ts b/src/core/__tests__/zzMockFixtures.test.ts
+new file mode 100644
+index 0000000..e0a7728
+--- /dev/null
++++ b/src/core/__tests__/zzMockFixtures.test.ts
+@@ -0,0 +1,69 @@
++import { it } from '@jest/globals';
++import * as P from '../reset/pilot';
++import { COLLECTIBLES } from '../reset/collection';
++const seen = (p: P.PilotProgram) => ({ unlocked: COLLECTIBLES.filter((c) => P.pilotXp(p) >= c.xp).map((c) => c.id) });
++// eslint-disable-next-line @typescript-eslint/no-require-imports
++const fs = require('fs') as { writeFileSync(f: string, s: string): void };
++
++const ANSWERS: P.PilotAnswers = {
++  age: '30_49', precautions: [], minutesPerDay: 90, wake: { kind: 'time', time: '07:00' }, activeDays: '1_2',
++};
++const FOUR = ['mind_read', 'mind_meditation', 'move_walk', 'outdoor_time'];
++const make = (choices: P.PilotChoice[], start: string) => P.createPilot(ANSWERS, choices, start)!;
++const done = (p: P.PilotProgram, ids: string[], d: number) => ids.reduce((q, id) => P.complete(q, id, d).program, p);
++const min = (p: P.PilotProgram, ids: string[], d: number) =>
++  ids.reduce((q, id) => P.setMinimum(q, id, d, true, 'drafts').program, p);
++const [R, M, V, O] = FOUR;
++
++/** Day 20 (2026-06-15): hard weeks, kept going with minimums. */
++function day20(start = '2026-05-27') {
++  let p = make(FOUR.map((habitId) => ({ habitId, intensity: 'starter' as const })), start);
++  for (let d = 1; d <= 7; d++) p = done(p, FOUR, d);
++  p = min(done(p, [R, V, O], 8), [M], 8);
++  p = done(p, FOUR, 9);
++  p = min(done(p, [R, V], 10), [M, O], 10);
++  p = done(p, [R, V], 11);
++  p = min(p, FOUR, 13);
++  for (let d = 14; d <= 16; d++) p = done(p, FOUR, d);
++  p = min(done(p, [R, M, V], 17), [O], 17);
++  p = min(done(p, [R, V, O], 18), [M], 18);
++  p = P.setPartial(p, O, 11, true).program;
++  p = done(p, FOUR, 19);
++  p = min(p, [R], 20);
++  return { ...p, ceremonies: { day1: true, milestones: [7] }, collection: seen(p), reflections: { 1: { week: 1, day: 8, answer: 'right' as const }, 2: { week: 2, day: 15, answer: 'harder' as const } } };
++}
++
++/** Eat Well at Standard and Stay Connected at Challenge, Day 20, nothing today yet. */
++function others() {
++  let p = make([{ habitId: 'eat_well', intensity: 'standard' }, { habitId: 'social_reach_out', intensity: 'challenge' }], '2026-05-27');
++  for (let d = 1; d <= 19; d++) p = done(p, ['eat_well', 'social_reach_out'], d);
++  return { ...p, ceremonies: { day1: true, milestones: [7] }, collection: seen(p), reflections: { 1: { week: 1, day: 8, answer: 'right' as const }, 2: { week: 2, day: 15, answer: 'right' as const } } };
++}
++
++/** Day 85 with Keep My Momentum (2026-06-15). */
++function after() {
++  let p = make([R, V, O].map((habitId) => ({ habitId, intensity: 'starter' as const })), '2026-03-23');
++  for (let d = 1; d <= 66; d++) {
++    if (d % 9 === 4) p = min(done(p, [R, V], d), [O], d);
++    else if (d % 13 === 6) p = done(p, [R], d);
++    else p = done(p, [R, V, O], d);
++  }
++  p = P.keepMomentum(p, 67);
++  for (let d = 67; d <= 84; d++) {
++    if ([70, 74, 79, 83].includes(d)) p = min(done(p, [R], d), [V, O], d);
++    else if (d === 76) p = done(p, [R], d);
++    else p = done(p, [R, V, O], d);
++  }
++  const refl: Record<number, { week: number; day: number; answer: 'right' }> = {};
++  for (let w = 1; w <= 9; w++) refl[w] = { week: w, day: w * 7 + 1, answer: 'right' };
++  return { ...p, ceremonies: { day1: true, milestones: [7, 21, 44], summit: true }, collection: seen(p), reflections: refl };
++}
++
++it('writes the fixtures', () => {
++  const out = { day20: day20(), others: others(), after: after() };
++  for (const [k, p] of Object.entries(out)) {
++    const today = k === 'after' ? 85 : 20;
++    console.log(k, JSON.stringify(P.journeyStats(p as P.PilotProgram, today)), P.pilotXp(p as P.PilotProgram));
++  }
++  fs.writeFileSync(process.env.OUT!, JSON.stringify(out));
++});
+diff --git a/src/core/charts.ts b/src/core/charts.ts
+index 96ee627..8d10167 100644
+--- a/src/core/charts.ts
++++ b/src/core/charts.ts
+@@ -24,6 +24,8 @@ export type WeekPoint = {
+   lastDay: number;
+   /** Program days in the week (7, or fewer for a first or last week). */
+   days: number;
++  /** MOCK: opportunities kept with the minimum. */
++  minimum?: number;
+   done: number;
+   eligible: number;
+   share: number | null;
+@@ -53,6 +55,8 @@ export type DayCell = {
+   planned: string[];
+   /** Habit ids kept with their minimum that day (present only when there are any). */
+   minimum?: string[];
++  /** MOCK: the day was kept with minimums. */
++  kept?: boolean;
+ };
+ 
+ export type Records = {
+@@ -81,7 +85,7 @@ export function weekPoint(
+   closed: boolean,
+   recorded: boolean,
+ ): WeekPoint {
+-  const base = { ...w, days: w.lastDay - w.firstDay + 1, done: t.done, eligible: t.eligible };
++  const base = { ...w, days: w.lastDay - w.firstDay + 1, done: t.done, eligible: t.eligible, ...(t.minimum ? { minimum: t.minimum } : {}) };
+   if (!closed) return { ...base, share: t.eligible ? shown(t) : null, state: 'current' };
+   if (!recorded && t.eligible > 0) return { ...base, share: null, state: 'unrecorded' };
+   if (t.eligible === 0) return { ...base, share: null, state: 'none' };
+@@ -143,6 +147,11 @@ export function cellSummary(cell: DayCell, name: (id: string) => string): string
+         ? t('progress.cell.doneOne', { list: doneList })
+         : t('progress.cell.doneAll', { count: done, list: doneList });
+     case 'partial':
++      if (cell.minimum?.length) {
++        const mins = list(cell.minimum, name);
++        const lead = cell.kept ? 'Kept with the minimum. ' : '';
++        return `${lead}${done ? `Done: ${doneList}. ` : ''}At the minimum: ${mins}.${skipped}`;
++      }
+       return t('progress.cell.partial', { done, planned: n, list: doneList, skipped });
+     case 'today':
+       return done
+diff --git a/src/core/reset/charts.ts b/src/core/reset/charts.ts
+index 8adec7a..3236c1a 100644
+--- a/src/core/reset/charts.ts
++++ b/src/core/reset/charts.ts
+@@ -75,7 +75,14 @@ export function dayCell(p: P.PilotProgram, d: number, today: number): DayCell {
+               : 'unrecorded';
+   // The day's minimums, only when there are any (a day without them is exactly what it always was). The Journey's
+   // own mark for a kept day comes with the screens, after its preview is approved; until then it's a partial day.
+-  return { ...base, state, done, skipped, planned, ...(minimum.length ? { minimum } : {}) };
++  return {
++    ...base,
++    state,
++    done,
++    skipped,
++    planned,
++    ...(minimum.length ? { minimum, kept: P.dayOutcome(p, d) === 'kept' } : {}),
++  };
+ }
+ 
+ export type HabitBar = {
+diff --git a/src/store/resetPilot.ts b/src/store/resetPilot.ts
+index d1c28a3..3f25ce3 100644
+--- a/src/store/resetPilot.ts
++++ b/src/store/resetPilot.ts
+@@ -83,6 +83,7 @@ type Actions = {
+   setProgress: (habitId: string, value: number | null) => P.PilotChange['event'];
+   /** Mark (or unmark) today as partially completed: 5 XP, never a completion. */
+   setPartial: (habitId: string, on: boolean) => void;
++  setMinimum: (habitId: string, on: boolean) => void;
+   setSession: (details: { type?: SessionType; minutes?: number }) => void;
+   /** Less Scrolling's weekly Screen Time check (this week). */
+   setScreenTime: (minutesPerDay: number) => void;
+@@ -266,6 +267,7 @@ export const useResetPilot = create<ResetPilotData & Actions>()(
+         setMinutes: (id, minutes) => void change((p, day) => P.setMinutes(p, id, day, minutes)),
+         setProgress: (id, value) => change((p, day) => P.setProgress(p, id, day, value)),
+         setPartial: (id, on) => void change((p, day) => P.setPartial(p, id, day, on)),
++        setMinimum: (id, on) => void change((p, day) => P.setMinimum(p, id, day, on, 'drafts')),
+         setSession: (details) => void change((p, day) => P.setSession(p, day, details)),
+         setScreenTime: (minutes) => progress((p, day) => P.setScreenTime(p, day, minutes)),
+ 
