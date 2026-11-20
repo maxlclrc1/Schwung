@@ -103,8 +103,10 @@ function Precaution({
   const { c } = useTheme();
   const hair = `${c.text}1A`;
   const t = useOn(on);
+  // Worked out here, not in the worklet: a plain function can't be called on the UI thread (it crashed iOS).
+  const none = clear(tint.soft);
   const wash = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(t.value, [0, 1], [clear(tint.soft), tint.soft]),
+    backgroundColor: interpolateColor(t.value, [0, 1], [none, tint.soft]),
   }));
   const mark = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(t.value, [0, 1], [tint.soft, tint.fill]),
