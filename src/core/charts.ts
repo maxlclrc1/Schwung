@@ -3,7 +3,7 @@ import { dateForDay, weekdayOfDay } from './dates';
 
 /*
  * The Insights charts' shapes, filled in by reset/charts.ts from the saved days only, computed once per change
- * (memoized by the screens), never per animation frame. Rules: SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
+ * (memoized by the screens), never per animation frame. Rules: docs/SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
  */
 
 /** Opportunities: `done` full completions, `minimum` days kept with the minimum (present only when there were any). */

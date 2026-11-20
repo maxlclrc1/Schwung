@@ -4,7 +4,7 @@
  * size, like a river seen from above. Each day sits along it by distance at an uneven stride, and its number goes
  * beside the route on the side with the most room. Everything here is computed once, at load.
  *
- * Foundation (Days 1–21) is the approved design's own (docs/design-exploration/journey-organic-trail-*.png,
+ * Foundation (Days 1–21) is the approved design's own (docs/archive/design-exploration/journey-organic-trail-*.png,
  * 5c42dd8), starting at Day 1. Momentum (Days 22–44) picks up where Foundation leaves the map, at the top right, and
  * Mastery (Days 45–66) where Momentum leaves its own, ending at Day 66.
  */

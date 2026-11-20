@@ -13,7 +13,7 @@ const TILE_NAMES = Object.keys(TILES.dark) as TileName[];
 /*
  * One continuous world behind the three tabs, in a light and a dark painting:
  * Habits' peaceful valley, Journey's ascent and Insights' lakeside camp are regions of one panorama
- * (design/canvas/assemble_panorama.py, SCHWUNG_CONTINUOUS_WORLD_ARTWORK_SPEC.md). Switching tabs pans the camera
+ * (design/canvas/assemble_panorama.py, docs/SCHWUNG_CONTINUOUS_WORLD_ARTWORK_SPEC.md). Switching tabs pans the camera
  * across it; nothing reloads. The panorama scales so 1536 px span the screen, as the old world did, so the
  * Journey painting (rows 800-1824) keeps lining up with the trail drawn by the Journey screen.
  */

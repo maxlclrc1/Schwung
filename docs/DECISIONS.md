@@ -170,5 +170,5 @@ Places where the handoff was ambiguous or silent, what was chosen, and why. Each
       subtract the scroll × (1 − PARALLAX). The light and dark art crossfade fully (the dark art fades out
       rather than staying underneath), so an image's softened edge can't show the other theme through it.
       Still to come: the valley piece below the forest, and the shared camera between screens.
-    - Ceremonies, Journey, Settings and the sheets are unchanged. `scripts/generate-ascent-art.py` is legacy.
+    - Ceremonies, Journey, Settings and the sheets are unchanged. `scripts/generate-ascent-art.py` was legacy and was removed in the v1.0 cleanup (it is in Git history).
 

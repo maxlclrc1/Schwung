@@ -14,8 +14,8 @@
 - The sections below are the decision as approved; "today" there means the rule before it.
 - **Baseline:** `0031623`, the Minimum Effort release candidate. Its flag stays off.
 - **Sources:**
-  - `docs/66_DAY_EXPERIENCE_AUDIT.md` (W3, D3);
-  - `docs/MINIMUM_EFFORT_SPEC.md` (§2: consistency versus completion);
+  - `66_DAY_EXPERIENCE_AUDIT.md` (W3, D3);
+  - `MINIMUM_EFFORT_SPEC.md` (§2: consistency versus completion);
   - the engine: `pilot.ts` (`dayResult`, `dayOutcome`, `pilotStreak`, `journeyStats`, `sinceSummit`, `recentDays80`),
     plus `charts.ts`, `story.ts`, `moments.ts`, `comeback.ts` and `ascent.ts`.
 

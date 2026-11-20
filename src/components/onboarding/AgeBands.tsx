@@ -13,7 +13,7 @@ import { useT } from '../../i18n/react';
 import { flipX, physical } from '../../i18n/direction';
 
 /*
- * Set-up's age question (docs/design-exploration/AGE_SCREEN_REDESIGN.md): five equal age bands as journal rows on
+ * Set-up's age question (docs/archive/design-exploration/AGE_SCREEN_REDESIGN.md): five equal age bands as journal rows on
  * hairlines, under a quiet trail with one waypoint for each. The trail is only a drawing: it can't be touched, screen
  * readers skip it, and it never climbs (its ends sit at the same height), so no band reads as higher or further. 18+
  * is said before anything is chosen; Under 18 adds a calm note and set-up can't go on (PilotSetup: ageAllowsSetup).

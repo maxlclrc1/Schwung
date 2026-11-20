@@ -5,7 +5,7 @@ The earlier V1/V2 program (quiz, plan, reminders, ceremonies), Field Notes and t
 removed from the app; they stay in the git history. Every program has the 11 illustrated habits, three tabs (Habits,
 Journey, Insights) and no timers.
 
-Supersedes `SCHWUNG_LIFE_RESET_PILOT.md` (the three-habit pilot this grew from).
+Supersedes `archive/SCHWUNG_LIFE_RESET_PILOT.md` (the three-habit pilot this grew from).
 
 ## Where it lives
 

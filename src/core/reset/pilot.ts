@@ -92,7 +92,7 @@ import {
  * three-habit pilot, kept its save, and now runs all 11 catalog habits. This module is its rules, pure: it joins the
  * catalog, weekly scheduling, tracking and readiness engines and adds only what a running program needs. Every
  * program-specific rule (day lists, XP, streak, no ceremonies, the Insights numbers) is documented in
- * SCHWUNG_LIFE_RESET_PROGRAM.md and tested in resetPilot.test.ts.
+ * docs/SCHWUNG_LIFE_RESET_PROGRAM.md and tested in resetPilot.test.ts.
  *
  * Timers are not part of the experience: targets are just shown, and a swipe confirms. Timer data saved by the pilot
  * stays in the day records, untouched (timer.ts is kept, unused).
@@ -103,7 +103,7 @@ export const PILOT_HABITS = RESET_HABITS.map((h) => h.id) as readonly string[];
 export type PilotHabitId = string;
 export const isPilotHabit = (id: string): id is PilotHabitId => PILOT_HABITS.includes(id);
 
-/** The existing plan limit (SCHWUNG_LIFE_RESET_HABITS.md §6), kept for now. */
+/** The existing plan limit (docs/SCHWUNG_LIFE_RESET_HABITS.md §6), kept for now. */
 export const MAX_HABITS = 30;
 
 /** "On a day all your habits fall on, about how long can you give them?" (minutes). */
@@ -1429,7 +1429,7 @@ export function levelLabel(l: Level): string {
 }
 export const phaseIndex = (l: Level) => PHASES.indexOf(l.phase);
 
-// --- Insights: numbers from the saved days only (rules in SCHWUNG_LIFE_RESET_PROGRAM.md) ---
+// --- Insights: numbers from the saved days only (rules in docs/SCHWUNG_LIFE_RESET_PROGRAM.md) ---
 
 export type Tally = { done: number; eligible: number; minimum?: number };
 /**

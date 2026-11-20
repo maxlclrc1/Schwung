@@ -3,9 +3,9 @@
 **Status:** specification for review. **No app code changed.** This document **replaces** the flagship-challenge
 direction:
 
-- `SCHWUNG_LIFE_RESET_HABIT_AUDIT.md`: its audit findings (sections 1–2) still stand; its challenge, mission and
+- `archive/SCHWUNG_LIFE_RESET_HABIT_AUDIT.md`: its audit findings (sections 1–2) still stand; its challenge, mission and
   destination sections are superseded.
-- `SCHWUNG_LIFE_RESET_CHALLENGES.md` and the data-only catalog in `src/core/reset/challenges.ts`: superseded.
+- `archive/SCHWUNG_LIFE_RESET_CHALLENGES.md` and the data-only catalog in `src/core/reset/challenges.ts`: superseded.
 
 Nothing imports the catalog, and it will be replaced by the habit catalog below when implementation starts.
 

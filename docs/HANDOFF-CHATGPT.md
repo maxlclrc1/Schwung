@@ -27,6 +27,8 @@ each day, while a painted alpine world shows their climb.
 - Free forever: **no paywalls, trials, premium tiers, ads or accounts.**
 - Offline and local-first. No backend, no analytics, no AI-generated messages. Data stays on the phone (export and
   restore are files the person handles).
+- The one exception, added for v1.0: a voluntary **Support** screen in Settings with three one-off tips through
+  Apple, processed by RevenueCat. A tip unlocks nothing, and nothing else in the app ever asks for one.
 - No guilt, fake urgency, streak threats, fabricated statistics or unsupported promises in any copy. Words describe
   what was actually recorded (see "truthful moments" below).
 - **Difficulty never changes without the person's yes.** The app offers; the person accepts or declines.
@@ -181,13 +183,13 @@ but have no levels or offers.
 **Done:** the full Life Reset, the painted world and its pager, ceremonies, collection, Story, reflections,
 reminders, after-66 choices, past journeys, export/restore and save recovery, 20 languages.
 
-**66-day improvement roadmap** (from `docs/66_DAY_EXPERIENCE_AUDIT.md`, read it for the evidence):
+**66-day improvement roadmap** (from `66_DAY_EXPERIENCE_AUDIT.md`, read it for the evidence):
 
 | Step | Item                                                                                       | Status                                                                                                                                                                                                                 |
 | ---- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | Welcome back after Day 66; no step-ups that change nothing                                 | Done                                                                                                                                                                                                                   |
 | 2    | Respect a "no"; truthful milestone and summit words; honest totals                         | Done                                                                                                                                                                                                                   |
-| 3    | A path down for struggling people: Minimum Effort, recovery after an absence, fewer habits | **R1A done** (reflection ways forward); R2 Minimum Effort: engine, screens and fixes built (R2b, `docs/MINIMUM_EFFORT_R2B.md`); off for normal users until the safety wording review and device verification — `docs/RECOVERY_SYSTEM_PROPOSAL.md`, `docs/MINIMUM_EFFORT_SPEC.md` |
+| 3    | A path down for struggling people: Minimum Effort, recovery after an absence, fewer habits | **R1A done** (reflection ways forward); R2 Minimum Effort: engine, screens and fixes built (R2b, `archive/MINIMUM_EFFORT_R2B.md`); off for normal users until the safety wording review and device verification — `RECOVERY_SYSTEM_PROPOSAL.md`, `MINIMUM_EFFORT_SPEC.md` |
 | 4    | How a day counts (the 80% rule with few habits)                                            | Not started                                                                                                                                                                                                            |
 | 5    | Reminders offered on Day 1; an optional cue per habit                                      | Not started                                                                                                                                                                                                            |
 | 6    | Progression content for flat habits; offers after Mastery                                  | Not started                                                                                                                                                                                                            |
@@ -210,7 +212,7 @@ Please deliver final copy as exact strings, decisions as clear choices with reas
 **Please don't** write app code, propose new libraries, change the safety rules, or redesign approved screens.
 If something looks wrong, flag it for the owner to bring to Claude.
 
-Other references: `docs/66_DAY_EXPERIENCE_AUDIT.md` (current priorities), `SCHWUNG_LIFE_RESET_PROGRESSION.md`
-(readiness thresholds), `SCHWUNG_LIFE_RESET_HABITS.md` (catalogue rationale), `docs/BEYOND_THE_SUMMIT_PLAN.md`
-(after 66), `DECISIONS.md`, `LATER.md`. Note: `OVERVIEW.md` and `SCHWUNG_LIFE_RESET_PROGRAM.md` still mention some
-retired habits and features; this handoff and the code are current.
+Other references: `66_DAY_EXPERIENCE_AUDIT.md` (current priorities), `SCHWUNG_LIFE_RESET_PROGRESSION.md`
+(readiness thresholds), `SCHWUNG_LIFE_RESET_HABITS.md` (catalogue rationale), `BEYOND_THE_SUMMIT_PLAN.md`
+(after 66), `DECISIONS.md`, `archive/LATER.md`; all are indexed in `docs/README.md`. Note: `SCHWUNG_LIFE_RESET_PROGRAM.md`
+still mentions some retired habits and features; this handoff and the code are current.

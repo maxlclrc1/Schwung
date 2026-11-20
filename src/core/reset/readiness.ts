@@ -21,7 +21,7 @@ import { erasFor, programWeeks, scheduleOn, weekOf, weekSummary, type ScheduleEr
  *
  * Difficulty only changes when the person chooses: phases say which targets are *available* (Momentum from Day 22,
  * Mastery from Day 45), readiness decides whether one is *offered*, and every change, up or down, is accepted or
- * declined by the person. Thresholds, denominators and rounding: SCHWUNG_LIFE_RESET_PROGRESSION.md.
+ * declined by the person. Thresholds, denominators and rounding: docs/SCHWUNG_LIFE_RESET_PROGRESSION.md.
  */
 
 export const READINESS = {

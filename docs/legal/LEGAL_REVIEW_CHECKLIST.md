@@ -23,7 +23,7 @@ published or relied on until the items below are settled.
 - [ ] The release build makes no network requests except to Apple and RevenueCat when someone opens Support, or at
       launch while a tip is unfinished (privacy policy §2, §4, §6a); confirm with a proxy on a signed build.
 - [ ] App Store "App Privacy" answers: **Purchases → Purchase History** collected (by RevenueCat), not linked to the
-      user, not used for tracking, purpose App Functionality; nothing else (see TESTFLIGHT_CHECKLIST.md §2).
+      user, not used for tracking, purpose App Functionality; nothing else (see ../TESTFLIGHT_CHECKLIST.md §2).
 - [ ] Data list in policy §3 still matches `EXPORT_CONTAINS` (`src/core/dataExport.ts`) and Settings → Privacy & Data.
 - [ ] In-app texts in `src/core/legal.ts` match `WELLNESS_DISCLAIMER.md` and `TERMS_OF_USE.md`.
 - [ ] Once the Terms are final, set `LEGAL_READY.terms = true` (`src/core/legal.ts`) so production builds show them.

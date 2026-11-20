@@ -3,7 +3,7 @@ import type { Theme, TileName } from './worldTiles';
 
 /*
  * The full-card scene behind each habit card, by stable habit id (never matched by
- * display name). Spec: SCHWUNG_HABIT_CARD_ARTWORK_SPEC.md — 1290 × 800 px per theme, opaque, painted in the
+ * display name). Spec: docs/SCHWUNG_HABIT_CARD_ARTWORK_SPEC.md — 1290 × 800 px per theme, opaque, painted in the
  * Schwung world's language, the subject in the top 40% and the lower 40% kept calm for the title, target and track.
  *
  * Final art goes in assets/habits/<id>-<theme>.webp and is listed here once the files exist (a require of a

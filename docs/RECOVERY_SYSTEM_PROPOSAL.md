@@ -1,7 +1,7 @@
 # Schwung: recovery and adaptive-difficulty proposal
 
 **Status:** proposal for review. No production code has been changed. This is roadmap step 3 of
-`docs/66_DAY_EXPERIENCE_AUDIT.md` ("A path down", weakness W2, product decision D2).
+`66_DAY_EXPERIENCE_AUDIT.md` ("A path down", weakness W2, product decision D2).
 
 **Agreed direction (owner review):** no permanent fourth level; Minimum Effort will be a temporary fallback; autonomy
 first; recovery is supportive, never punitive.
@@ -12,7 +12,7 @@ target and no change waiting), **Focus on fewer habits** (the existing removal, 
 one, past kept, worded as a stop, not a pause) and **Keep my plan** (always; changes nothing). Nothing is triggered by
 missing days. Pausing, Minimum Effort, recovery weeks and streak rules are **not** built yet.
 
-**Phase R2 (Minimum Effort) — specified, not built:** `docs/MINIMUM_EFFORT_SPEC.md` (revised after owner
+**Phase R2 (Minimum Effort) — specified, not built:** `MINIMUM_EFFORT_SPEC.md` (revised after owner
 review). It supersedes §3.3 here: a minimum keeps the consistency streak going (a new `kept` day) and never adds a
 completed day, a full day or step-up evidence; Less Scrolling and Strength are excluded for now.
 

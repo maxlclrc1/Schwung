@@ -12,7 +12,7 @@ Baseline `57c8999`, 8 November 2026. Audit and screenshots only: no production c
 
 ## Deliverables
 
-All in `docs/design-exploration/onboarding-audit/`:
+All in `design-exploration/onboarding-audit/`:
 
 | What | File |
 |---|---|

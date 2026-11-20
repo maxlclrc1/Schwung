@@ -6,7 +6,7 @@ import { programWeeks } from './weekly';
 /*
  * The Life Reset's Insights charts, from its saved days only. The weekly trend adds up exactly the
  * opportunities the overall consistency counts (pilot.ts habitTally, week by week), so the two always agree. Rules:
- * SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
+ * docs/SCHWUNG_LIFE_RESET_PROGRAM.md ("Insights charts").
  */
 
 const hasLog = (p: P.PilotProgram, day: number) => p.logs[dateForDay(p.startedAt, day)] !== undefined;

@@ -60,7 +60,7 @@ launch-critical fixes. No app code changed in this audit.
 | B2 | **Tip jar.** | Owner decision | Section 2 below. |
 | B3 | **The privacy text will be incomplete once tips exist.** The policy and the in-app privacy screen describe on-device processing only and never mention payments, but a purchase talks to Apple. | `docs/legal/PRIVACY_POLICY.md` §2/§4; the in-app privacy text (`settings` catalog, `src/app/privacy.tsx`) | Add a "Tips" paragraph: Apple processes payments; Schwung receives no payment or identity details and keeps no purchase record. Mirror it in the in-app privacy screen and update the network claim in the checklist. The App Privacy answer can stay **Data Not Collected**; confirm against Apple's App Privacy guidance at submission. |
 | B4 | **The release guard would now fail or give false comfort.** | `src/lib/__tests__/appConfig.test.ts` | Allow exactly the IAP config plugin and capability. Still refuse push, extra permissions and arbitrary loads. |
-| B5 | **The TestFlight checklist says the app is for 16+.** The app's minimum age is 18. | `docs/TESTFLIGHT_CHECKLIST.md:21` | Correct the wording. Add the tip-jar device checks (§4). |
+| B5 | **The TestFlight checklist says the app is for 16+.** The app's minimum age is 18. | `TESTFLIGHT_CHECKLIST.md:21` | Correct the wording. Add the tip-jar device checks (§4). |
 
 **Owner inputs: until they arrive, the build can't be submitted**
 
@@ -72,7 +72,7 @@ launch-critical fixes. No app code changed in this audit.
 | B9 | Final **privacy policy**: 20 `TODO`s in `docs/legal/`, and the legal checklist items (operator, address, KVKK/GDPR position on health answers) | `docs/legal/LEGAL_REVIEW_CHECKLIST.md` | The policy has to be published before the URL in B7 can exist. |
 | B10 | **Terms:** our draft isn't final (`LEGAL_READY.terms = false`). Recommendation: launch with **Apple's standard licence agreement (EULA)** and keep our Terms hidden until a lawyer approves them. | `src/core/legal.ts` | You need to decide. With Apple's licence agreement this stops being a blocker. |
 | B11 | Apple Developer Program enrolment, an **active Paid Apps Agreement** (bank and tax info), and an Expo account (`eas init`) | Section 3 | Tip products can't load, even in testing, until the Paid Apps Agreement is active. |
-| B12 | **iPhone checks in `docs/TESTFLIGHT_CHECKLIST.md` §3–4** on a signed build: saving, reminders, Photos, export and restore, VoiceOver, Dynamic Type, RTL, and now the tips | A device you hold | No signed build has run on an iPhone since the native dependency updates. These can't be checked in the cloud. |
+| B12 | **iPhone checks in `TESTFLIGHT_CHECKLIST.md` §3–4** on a signed build: saving, reminders, Photos, export and restore, VoiceOver, Dynamic Type, RTL, and now the tips | A device you hold | No signed build has run on an iPhone since the native dependency updates. These can't be checked in the cloud. |
 
 **Fallback if the Paid Apps Agreement is slow (B11):** the tip section hides itself whenever its products can't load (section 2). So 1.0 could ship without tips and they can switch on in 1.0.1, with no other change. However, Apple requires the first IAP products to be submitted together with an app version.
 
@@ -253,4 +253,4 @@ I haven't invented any of this. Items marked *(advisor)* need confirmation from 
 
 **Run before upload:** full `jest`, `tsc`, lint, `i18n:check`, `AUDIT=1` simulations, `npm audit --omit=dev` (must show no high or critical findings), and `npm run release:check`.
 
-**On the device (TestFlight):** everything in `docs/TESTFLIGHT_CHECKLIST.md` §3–4 plus the tip-jar matrix in section 2. Optionally, check with a proxy that the only traffic goes to Apple's StoreKit hosts.
+**On the device (TestFlight):** everything in `TESTFLIGHT_CHECKLIST.md` §3–4 plus the tip-jar matrix in section 2. Optionally, check with a proxy that the only traffic goes to Apple's StoreKit hosts.

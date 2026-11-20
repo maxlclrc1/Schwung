@@ -19,7 +19,7 @@ import { RESET_BY_ID, type Target } from './habits';
  * - A ready timer left unconfirmed for longer than its habit's grace period is flagged (`needsCheck`), so a future
  *   UI asks rather than assumes. Valid time is never thrown away for being in the background.
  * - If the device clock goes backwards, a negative stretch counts as zero.
- * Edge cases and their reasons: SCHWUNG_LIFE_RESET_TRACKING.md.
+ * Edge cases and their reasons: docs/SCHWUNG_LIFE_RESET_TRACKING.md.
  */
 
 export type TimerStatus =

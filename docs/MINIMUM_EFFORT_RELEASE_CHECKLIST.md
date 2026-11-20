@@ -9,10 +9,10 @@
 open until a person signs them off.
 
 - **After `0031623`:** Fairer Day Counting changed the day rule to 80% rounded down, with one missed day a week
-  carried by the streak (`docs/FAIRER_DAY_COUNTING.md`). Minimums still count as before, beside full completions;
+  carried by the streak (`FAIRER_DAY_COUNTING.md`). Minimums still count as before, beside full completions;
   the kept-day examples in the tests moved to the new rule.
 
-Reviewed against `docs/MINIMUM_EFFORT_R2B.md`.
+Reviewed against `archive/MINIMUM_EFFORT_R2B.md`.
 
 ## A. Verified (automated, on the web build, or in code)
 

@@ -4,7 +4,7 @@ import { RESET_BY_ID, type Intensity, type Phase, type Schedule } from './habits
 
 /*
  * Flexible weekly scheduling for Life Reset habits. Rules, with the reasons, are in
- * SCHWUNG_LIFE_RESET_CATALOG_NOTES.md ("Weekly scheduling rules"). In short:
+ * docs/SCHWUNG_LIFE_RESET_CATALOG_NOTES.md ("Weekly scheduling rules"). In short:
  *
  * - Weeks are calendar weeks, Monday to Sunday, from the program's local date keys (never elapsed time, so DST and
  *   time-zone changes can't move a day). Week 1 is the calendar week containing Day 1; the last week ends on Day 66.

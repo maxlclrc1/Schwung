@@ -9,7 +9,7 @@ once the per-habit review in §3 is done.
 - the Journey mark needs a visual preview before it's built;
 - **the Sleep minimum is disabled** pending a further safety review;
 - the existing 80% rule applies to full and minimum actions combined. Since Fairer Day Counting
-  (`docs/FAIRER_DAY_COUNTING.md`), that rule is 80% rounded down, and the streak carries one missed day in any seven.
+  (`FAIRER_DAY_COUNTING.md`), that rule is 80% rounded down, and the streak carries one missed day in any seven.
   Minimums are treated exactly as before.
 
 **R2a (engine) — implemented, not reachable in the app:**
@@ -20,14 +20,14 @@ once the per-habit review in §3 is done.
   `fullShare` are in `pilot.ts`.
 - The save is version 3.
 - The screens (R2b) are built, behind a launch switch that is off for normal users:
-  `docs/MINIMUM_EFFORT_R2B.md`.
+  `archive/MINIMUM_EFFORT_R2B.md`.
 
-**Content and visual approval package:** `docs/MINIMUM_EFFORT_APPROVAL.md`, with real-app mockups in
-`docs/minimum-effort/`. Approved at `d7652fc` (mark A, the seed).
+**Content and visual approval package:** `archive/MINIMUM_EFFORT_APPROVAL.md`, with real-app mockups in
+`archive/minimum-effort/`. Approved at `d7652fc` (mark A, the seed).
 
 **Sources:**
 
-- `docs/RECOVERY_SYSTEM_PROPOSAL.md` and `docs/66_DAY_EXPERIENCE_AUDIT.md`;
+- `RECOVERY_SYSTEM_PROPOSAL.md` and `66_DAY_EXPERIENCE_AUDIT.md`;
 - the engine on `main` (`tracking.ts`, `pilot.ts`, `progression.ts`, `readiness.ts`, `habits.ts`, `charts.ts`,
   `moments.ts`, `comeback.ts`, `store/resetPilot.ts`, `dataExport.ts`/`dataImport.ts`).
 

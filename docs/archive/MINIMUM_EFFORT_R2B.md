@@ -4,9 +4,9 @@
 internal (tester) builds. Production stays off until the safety wording is reviewed by a person and the full
 integration is verified on an iPhone. Turning it on is one line: `MINIMUM_EFFORT_LAUNCHED` in `src/lib/flags.ts`.
 
-Release checklist (verified items, iPhone checks, review blockers): `docs/MINIMUM_EFFORT_RELEASE_CHECKLIST.md`.
+Release checklist (verified items, iPhone checks, review blockers): `../MINIMUM_EFFORT_RELEASE_CHECKLIST.md`.
 
-Rules: `docs/MINIMUM_EFFORT_SPEC.md`. Approved content and mockups: `docs/MINIMUM_EFFORT_APPROVAL.md` (`d7652fc`).
+Rules: `../MINIMUM_EFFORT_SPEC.md`. Approved content and mockups: `MINIMUM_EFFORT_APPROVAL.md` (`d7652fc`).
 
 ## What was built
 
@@ -74,7 +74,7 @@ Rules: `docs/MINIMUM_EFFORT_SPEC.md`. Approved content and mockups: `docs/MINIMU
 **Localization:** 34 new English keys went through `i18n:tasks`, then `i18n:apply` for all 19 other languages
 (machine-made, marked for review).
 
-## Screenshots (`docs/minimum-effort/r2b/`)
+## Screenshots (`minimum-effort/r2b/`)
 
 These are the real app, a web export of an internal-channel build. Chromium at 390 pt, small screen at 375 pt,
 Reduce Motion on. Each sheet is light then dark.

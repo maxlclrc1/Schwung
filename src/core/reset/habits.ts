@@ -2,9 +2,9 @@ import { t } from '../../i18n';
 import { hasPrecaution, isMinor, isTeen, precautionsUnknown, TEEN_FOCUS_MAX_MIN, type Profile } from './profile';
 
 /*
- * The 66-Day Life Reset habit catalog (SCHWUNG_LIFE_RESET_HABITS.md): the 11 habits every program chooses from.
+ * The 66-Day Life Reset habit catalog (docs/SCHWUNG_LIFE_RESET_HABITS.md): the 11 habits every program chooses from.
  * Pure data. Every target is a design default the person can make easier or harder. Open questions are in
- * SCHWUNG_LIFE_RESET_CATALOG_NOTES.md.
+ * docs/SCHWUNG_LIFE_RESET_CATALOG_NOTES.md.
  */
 
 export type Intensity = 'starter' | 'standard' | 'challenge';

@@ -14,7 +14,7 @@ import { t } from '../i18n';
 
 /*
  * The Life Reset program's saved state: the app's one program. It began as the pilot's and keeps the pilot's key,
- * so a pilot program carries on as it was. Rules: core/reset/pilot.ts and SCHWUNG_LIFE_RESET_PROGRAM.md.
+ * so a pilot program carries on as it was. Rules: core/reset/pilot.ts and docs/SCHWUNG_LIFE_RESET_PROGRAM.md.
  */
 
 /** Its key ('-internal' in Expo Go's internal channel, so trying that channel never touches the development save). */

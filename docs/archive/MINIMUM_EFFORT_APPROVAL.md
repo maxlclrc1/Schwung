@@ -1,16 +1,16 @@
 # Minimum Effort: content and visual approval package
 
 **Status:** approved by the owner (`d7652fc`): the six minimums, the shared wording, the placements and mark A.
-Built in R2b (`docs/MINIMUM_EFFORT_R2B.md`). What follows is the package as it was approved.
+Built in R2b (`MINIMUM_EFFORT_R2B.md`). What follows is the package as it was approved.
 
 - The engine (R2a, `8948322`) is approved and stays unreachable.
 - The screens (R2b) wait for this package.
-- The rules come from `docs/MINIMUM_EFFORT_SPEC.md`.
+- The rules come from `../MINIMUM_EFFORT_SPEC.md`.
 
 **How the mockups were made.** They're the real app, not drawings:
 
 1. A throwaway copy of the app had the proposed screens patched in. The patch is in
-   `docs/minimum-effort/mockup.patch.txt`, for reference only; it isn't applied anywhere.
+   `minimum-effort/mockup.patch.txt`, for reference only; it isn't applied anywhere.
 2. That copy was exported for web.
 3. It was seeded with programs recorded through the real engine (drafts allowed only in that copy).
 4. It was photographed with Chromium at iPhone width (390 pt; 375 pt for the small screen) with Reduce Motion on.

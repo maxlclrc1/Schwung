@@ -13,7 +13,7 @@ import { Press } from './Choices';
 import { settle, useTints, type Tint } from './kit';
 
 /*
- * Set-up's health question as alpine field notes (docs/design-exploration/HEALTH_SCREEN_REDESIGN.md, Option B): a
+ * Set-up's health question as alpine field notes (docs/archive/design-exploration/HEALTH_SCREEN_REDESIGN.md, Option B): a
  * window onto the world painting opens the page and fades into it; the precautions are waypoints on one fine trail
  * down the margin, each with its own small icon. Chosen, a waypoint fills with the question's peach and its icon
  * turns into a tick with a quarter turn, and its row takes the peach wash and ink. After a hairline with a short warm

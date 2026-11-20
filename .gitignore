@@ -30,8 +30,18 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (public EXPO_PUBLIC_ values only belong in eas.json; secrets never in the repository)
+.env
 .env*.local
+
+# signing and store credentials (EAS local credentials, Apple keys, certificates)
+credentials.json
+credentials/
+*.cer
+*.keystore
+
+# local Claude Code settings (the shared .claude/settings.json is tracked)
+.claude/settings.local.json
 
 # typescript
 *.tsbuildinfo
@@ -42,4 +52,4 @@ yarn-error.*
 
 # visual QA (scripts/qa): web build, fixtures, screenshots and reports
 .qa/
-screenshots/
+/screenshots/
