@@ -337,7 +337,7 @@ the tabs, onboarding, the ceremonies, the collection and the 66-Day Story, again
 of 5 runs, a 240 pt swipe from Habits to Journey, measured in the page with `requestAnimationFrame` frame times, a
 long-task observer and DevTools memory metrics; the same script ran against both builds):
 
-| Measure                           | Before (`5adc6f2`) | After      |
+| Measure                           | Before (`b59cec8`) | After      |
 | --------------------------------- | ------------------ | ---------- |
 | Input to visual movement          | 15 ms              | ≈ 0 ms     |
 | Worst frame while the page slides | 67 ms              | 17–33 ms   |
@@ -382,7 +382,7 @@ device.**
   7. Turn Reduce Motion on: a swipe or a tap changes tab at once, without a slide.
   - **Measure:** Xcode Instruments (Animation Hitches, or Core Animation FPS) on an internal build while doing
     step 4; the Perf Monitor in a development build (shake → Perf Monitor) shows the UI and JS frame rates. Compare
-    with the `5adc6f2` build.
+    with the `b59cec8` build.
 - **Insights on a device:** the charts' first appearance (once, after the slide lands), tapping weeks and days,
   VoiceOver on heatmap cells, and Dynamic Type on the records.
 - **Memory:** use with both themes held, and whether iOS ever drops the images under pressure.

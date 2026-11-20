@@ -2,13 +2,13 @@
 
 **Status:**
 
-- `6c5645a` is the baseline.
+- `2b14183` is the baseline.
 - **Internal iPhone testing is on:** `eas build --profile internal` builds the internal channel, where minimums are
   offered.
 - **Production stays gated:** `MINIMUM_EFFORT_LAUNCHED` is `false`, so normal users can't record a minimum. Nothing below is marked approved on anyone's behalf: the specialist and native-speaker items are
 open until a person signs them off.
 
-- **After `0031623`:** Fairer Day Counting changed the day rule to 80% rounded down, with one missed day a week
+- **After `dd6513e`:** Fairer Day Counting changed the day rule to 80% rounded down, with one missed day a week
   carried by the streak (`FAIRER_DAY_COUNTING.md`). Minimums still count as before, beside full completions;
   the kept-day examples in the tests moved to the new rule.
 
@@ -151,7 +151,7 @@ note, the Outdoors note and the reworded hint). Every language needs review. Poi
 **Known limitation (unchanged):** health precautions change only at set-up or a New Ascent. That's older than
 Minimum Effort, and the minimum adds no new risk to it.
 
-## D. Final product changes (owner decisions after `c264a32`)
+## D. Final product changes (owner decisions after `6b872c8`)
 
 1. **Recorded hint:** "Your goal stays the same: {target}. Doing it in full still counts as done." No nested
    parentheses.

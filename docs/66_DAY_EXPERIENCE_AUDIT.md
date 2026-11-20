@@ -1,6 +1,6 @@
 # Schwung: 66-day experience and habit-science audit
 
-This audit is based on the program engine as it stands on `main` after `372aace`. It changes no production code.
+This audit is based on the program engine as it stands on `main` after `b1031ff`. It changes no production code.
 
 **How the evidence was produced**
 

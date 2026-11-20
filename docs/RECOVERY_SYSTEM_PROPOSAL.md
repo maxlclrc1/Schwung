@@ -16,7 +16,7 @@ missing days. Pausing, Minimum Effort, recovery weeks and streak rules are **not
 review). It supersedes §3.3 here: a minimum keeps the consistency streak going (a new `kept` day) and never adds a
 completed day, a full day or step-up evidence; Less Scrolling and Strength are excluded for now.
 
-**Baseline:** `main` at `5364be2`. Every statement about current behaviour is from the code and the audit
+**Baseline:** `main` at `81ae4af`. Every statement about current behaviour is from the code and the audit
 simulation (`AUDIT=1 npx jest scripts/audit`).
 
 **Labels:** **[Engine]** means the current code does this. **[Proposal]** is a design suggestion. **[Decision]** is a

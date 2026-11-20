@@ -3,7 +3,7 @@
 **Status:** revised after owner review. Design only: **no production code has been changed.** It's ready to build
 once the per-habit review in §3 is done.
 
-**Approved at `ea0c86c`, with these decisions:**
+**Approved at `ec8bdd6`, with these decisions:**
 
 - the on-screen label stays "Streak", and consistency is explained in the details;
 - the Journey mark needs a visual preview before it's built;
@@ -23,7 +23,7 @@ once the per-habit review in §3 is done.
   `archive/MINIMUM_EFFORT_R2B.md`.
 
 **Content and visual approval package:** `archive/MINIMUM_EFFORT_APPROVAL.md`, with real-app mockups in
-`archive/minimum-effort/`. Approved at `d7652fc` (mark A, the seed).
+`archive/minimum-effort/`. Approved at `8782162` (mark A, the seed).
 
 **Sources:**
 

@@ -5,7 +5,7 @@ Claude, working directly in the repository. Your job is to help the owner with d
 artwork and review, and to produce outputs the owner can bring back to Claude to implement. Please read this whole
 document before suggesting anything.
 
-This document was rewritten from the code on `main` at `5364be2` (November 2026). Where an older document disagrees,
+This document was rewritten from the code on `main` at `81ae4af` (November 2026). Where an older document disagrees,
 the code wins. Earlier versions of this file described a removed program (a 6-question quiz, a 19-habit library,
 automatic step-downs); none of that is in the app any more.
 

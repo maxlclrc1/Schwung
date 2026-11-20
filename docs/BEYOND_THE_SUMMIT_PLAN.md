@@ -1,6 +1,6 @@
 # Beyond the Summit — plan
 
-Status: **implemented** (on `4d45409`). Where the build differs from the design below:
+Status: **implemented** (on `88407be`). Where the build differs from the design below:
 
 - `after.since` is a program **day number** (67, or the day of a later choice), not a date key.
 - While undecided, reminders simply rest (no "summit view is waiting" reminder).

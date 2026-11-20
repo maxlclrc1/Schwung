@@ -1,9 +1,9 @@
 # Schwung — Life Reset Habit Catalog: Implementation Notes
 
-**Stages:** the 11-habit catalog (commit `957af62`) and the flexible weekly scheduling foundation
+**Stages:** the 11-habit catalog (commit `677d6fa`) and the flexible weekly scheduling foundation
 (`src/core/reset/weekly.ts`, tests in `src/core/__tests__/resetWeekly.test.ts`). Neither is used by the app.
 
-- **Specification:** `SCHWUNG_LIFE_RESET_HABITS.md` (commit `70481e6`).
+- **Specification:** `SCHWUNG_LIFE_RESET_HABITS.md` (commit `5ac0ace`).
 - **Code:** `src/core/reset/habits.ts` (pure data and pure helpers; **nothing in the app imports it**; every habit is
   `active: false`).
 - **Tests:** `src/core/__tests__/resetHabits.test.ts`.
@@ -11,7 +11,7 @@
 **What changed outside the catalog:**
 
 - **Removed:** the superseded flagship catalog (`src/core/reset/challenges.ts`) and its test. Only that test imported
-  it; its design document stays, marked superseded, and the code remains in git history (commit `d72875d`).
+  it; its design document stays, marked superseded, and the code remains in git history (commit `3f92129`).
 - **Not changed:** V1 and V2 libraries, engines, onboarding, cards, XP, streaks, saves, navigation, Field Notes,
   artwork and production.
 

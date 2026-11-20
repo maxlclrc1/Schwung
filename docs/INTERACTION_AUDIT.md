@@ -1,6 +1,6 @@
 # Interaction and motion audit
 
-- **Baseline:** `81d55e2` (main).
+- **Baseline:** `8d27025` (main).
 - **Scope:** audit only, with no production changes.
 - **Method:**
   - I read the navigation config, every `Pressable`, every enter/exit animation, the shared motion constants and `lib/haptics.ts`.

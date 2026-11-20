@@ -1,6 +1,6 @@
 # Security hardening and performance pass (v1.0)
 
-Starting point: `94ef74c` (RevenueCat tips) plus the two onboarding crash fixes (`4dcfc49`, `1269b88`). No features,
+Starting point: `62fa770` (RevenueCat tips) plus the two onboarding crash fixes (`6428c49`, `d7a738a`). No features,
 no design changes; all 20 languages, Minimum Effort off, RevenueCat and the privacy model unchanged.
 
 ## Security
@@ -17,7 +17,7 @@ no design changes; all 20 languages, Minimum Effort off, RevenueCat and the priv
 | User text (habit names, notes) | Rendered only as React Native text: no HTML, no WebView, no `eval`. Exports are JSON only (no CSV, so no spreadsheet-formula injection). |
 | External links | Three, all fixed by the app: the privacy policy URL, `mailto:` the support address, the phone's Settings. |
 | Backup restore | Size cap before reading, schema validation, 3,000-case corruption fuzz (`backupFuzz.test.ts`), dev day offset forced to 0. |
-| Purchases | Thank-you only for a RevenueCat-recorded matching transaction; one purchase at a time; errors after a possible charge never say "failed" (unchanged from `94ef74c`). |
+| Purchases | Thank-you only for a RevenueCat-recorded matching transaction; one purchase at a time; errors after a possible charge never say "failed" (unchanged from `62fa770`). |
 | Debug functionality | The development clock (`devDayOffset`) works only when `__DEV__` and the development channel; its setter clamps to 0 and saves drop it otherwise. |
 | Permissions | iOS: only "add to Photos" (asked when saving the story). No tracking, no push entitlement, no background modes. |
 | Dependencies (`npm audit --omit=dev`) | 9 moderate, 0 high/critical, all in Expo's command-line build tools (`glob`, `minimatch`, `node-forge` via `@expo/cli`), which run on the developer's machine and aren't in the app. Fixing needs an Expo SDK change; not a launch risk. |

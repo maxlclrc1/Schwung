@@ -1,6 +1,6 @@
 # Fairer Day Counting: decision document
 
-**Status:** approved at `6c0913e` (decisions 1–3 as recommended; no per-habit streaks) and **implemented**.
+**Status:** approved at `5d1dc80` (decisions 1–3 as recommended; no per-habit streaks) and **implemented**.
 
 - **Implementation:**
   - `progression.ts` `dayNeed`/`dayQualifies` and `pilot.ts` `streakWalk` (shared by `pilotStreak`,
@@ -12,7 +12,7 @@
   engine is the approved model day for day.
 - **Wording:** 3 strings, machine-translated into 19 languages and awaiting native review.
 - The sections below are the decision as approved; "today" there means the rule before it.
-- **Baseline:** `0031623`, the Minimum Effort release candidate. Its flag stays off.
+- **Baseline:** `dd6513e`, the Minimum Effort release candidate. Its flag stays off.
 - **Sources:**
   - `66_DAY_EXPERIENCE_AUDIT.md` (W3, D3);
   - `MINIMUM_EFFORT_SPEC.md` (§2: consistency versus completion);

@@ -1,16 +1,16 @@
 # Schwung v1.0 launch audit
 
-Audited: `43114a9` (`main` = `development`), 2026-11-20. Launch mode: feature freeze except the tip jar and
+Audited: `337f86f` (`main` = `development`), 2026-11-20. Launch mode: feature freeze except the tip jar and
 launch-critical fixes. No app code changed in this audit.
 
-> **Status (implementation pass after `e14a16d`):** B1–B5 are done. The crash screen, the tip jar, the privacy wording,
+> **Status (implementation pass after `1c327ed`):** B1–B5 are done. The crash screen, the tip jar, the privacy wording,
 > the configuration guards, the 18+ checklist, `npm run release:check` and the release tests are in the app. The
 > publisher's identity (name, bundle ID, Android package, support email, privacy and support URLs, tip product IDs)
 > lives only in `release.config.json`, all still placeholders. v1.0 uses Apple's standard EULA. B6–B12 remain open:
 > the owner's inputs, the legal review and the iPhone checks. Translations of the new text are machine-made and not
 > reviewed.
 >
-> **Payments (after `9979a26`):** the tips now use RevenueCat (`react-native-purchases`) instead of `expo-iap`, with
+> **Payments (after `14a65e2`):** the tips now use RevenueCat (`react-native-purchases`) instead of `expo-iap`, with
 > anonymous customers, no entitlements and no paywall. App Privacy changes from Data Not Collected to **Purchase
 > History (not linked, no tracking, App Functionality)**. RevenueCat is started only when Support opens or a tip is
 > unfinished. Its public Apple SDK key goes in `release.config.json`; no secret ever goes in Git.
