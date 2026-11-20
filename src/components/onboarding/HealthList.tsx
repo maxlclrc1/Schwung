@@ -1,13 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, type ComponentProps } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, View } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import Svg, { Defs, Image as SvgImage, LinearGradient, Mask, Rect, Stop } from 'react-native-svg';
 import { togglePrecaution, type HealthAnswer, type Precaution } from '../../core/reset/profile';
 import { space, useTheme } from '../../theme';
 import { T } from '../ui';
 import { HEALTH } from '../pilot/SetupParts';
-import { WORLD_ART } from '../World';
 import { useT } from '../../i18n/react';
 import { physical } from '../../i18n/direction';
 import { Press } from './Choices';
@@ -40,15 +39,21 @@ const MARK = 32;
 const WINDOW = 176;
 const OVERLAP = 64;
 
+/** The painting window's art: the painting's summit and dusk band, its fade into the backdrop above and below
+ * baked into the image's alpha (PAD transparent points at each end), so drawing it needs no mask. */
+const WINDOW_ART = {
+  dark: require('../../../assets/health-window-dark.webp'),
+  light: require('../../../assets/health-window-light.webp'),
+};
+const PAD = 20;
+
 /**
  * The painting's summit at dusk, at the top of the page, fading on its alpha into the backdrop above and below (no
- * edge). It sits behind the question's first lines. Decorative.
+ * edge). It sits behind the question's first lines. Decorative. A plain image: an SVG image under an SVG mask
+ * crashed Expo Go on iOS when this step opened.
  */
 export function PaintingWindow() {
   const { isDark } = useTheme();
-  const { width } = useWindowDimensions();
-  // The painting at the screen's width (1536 × 3584), placed so its summit and dusk band fill the window.
-  const ih = (width * 3584) / 1536;
   return (
     <View
       pointerEvents="none"
@@ -57,28 +62,13 @@ export function PaintingWindow() {
       aria-hidden
       style={[styles.window, physical]}
     >
-      <Svg width={width} height={WINDOW}>
-        <Defs>
-          <LinearGradient id="healthWindowFade" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#fff" stopOpacity={0} />
-            <Stop offset="0.2" stopColor="#fff" stopOpacity={0.95} />
-            <Stop offset="0.5" stopColor="#fff" stopOpacity={0.9} />
-            <Stop offset="1" stopColor="#fff" stopOpacity={0} />
-          </LinearGradient>
-          <Mask id="healthWindowMask" x="0" y="0" width={width} height={WINDOW} maskUnits="userSpaceOnUse">
-            <Rect x="0" y="0" width={width} height={WINDOW} fill="url(#healthWindowFade)" />
-          </Mask>
-        </Defs>
-        <SvgImage
-          href={isDark ? WORLD_ART.dark : WORLD_ART.light}
-          x={0}
-          y={-ih * 0.205}
-          width={width}
-          height={ih}
-          preserveAspectRatio="xMidYMid slice"
-          mask="url(#healthWindowMask)"
-        />
-      </Svg>
+      <Image
+        source={isDark ? WINDOW_ART.dark : WINDOW_ART.light}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        accessible={false}
+        transition={0}
+      />
     </View>
   );
 }
@@ -220,7 +210,12 @@ export function HealthList({ value, onChange }: { value: HealthAnswer; onChange:
 }
 
 const styles = StyleSheet.create({
-  window: { height: WINDOW, marginHorizontal: -space.xl, marginTop: -space.xl, marginBottom: -OVERLAP },
+  window: {
+    height: WINDOW + PAD * 2,
+    marginHorizontal: -space.xl,
+    marginTop: -space.xl - PAD,
+    marginBottom: -OVERLAP - PAD,
+  },
   // Through the waypoints' centres, from the first to the last.
   trail: { position: 'absolute', top: 28, bottom: 28, start: space.xs + MARK / 2 - 0.65, width: 1.3 },
   row: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingStart: space.xs },
