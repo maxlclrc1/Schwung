@@ -33,6 +33,15 @@ export const vi: Translation = {
     },
     weekdaysShort: { 1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 0: 'CN' },
     weekdayInitial: { 1: '2', 2: '3', 3: '4', 4: '5', 5: '6', 6: '7', 0: 'CN' },
+
+    crash: {
+      title: 'Đã xảy ra lỗi',
+      body: 'Màn hình này gặp sự cố. Thói quen và tiến độ đã lưu của bạn vẫn còn trên điện thoại này.',
+
+      retry: 'Thử lại',
+
+      hint: 'Nếu lỗi cứ lặp lại, hãy đóng hẳn ứng dụng rồi mở lại.',
+    },
   },
   engine: {
     intensity: { starter: 'Khởi đầu', standard: 'Tiêu chuẩn', challenge: 'Thử thách' },
@@ -530,6 +539,8 @@ export const vi: Translation = {
       deletePartial: 'Dữ liệu của bạn đã được xóa, nhưng chưa thể xóa những mục này: {list}.',
       failedReminders: 'Lời nhắc đã lên lịch',
       failedTemp: 'Tệp chia sẻ tạm thời',
+
+      tips: 'Tiền tip được thanh toán qua Apple. Chúng tôi không bao giờ nhận thông tin thanh toán của bạn, và ứng dụng không lưu bất kỳ bản ghi nào về tiền tip.',
     },
     restore: {
       title: 'Khôi phục từ bản sao lưu',
@@ -619,6 +630,40 @@ export const vi: Translation = {
       confirmBody: 'Life Reset của bạn tiếp tục từ chỗ bạn đã dừng.',
 
       confirm: 'Vâng, tôi từ 18 tuổi trở lên',
+    },
+
+    tips: {
+      title: 'Ủng hộ {app}',
+      intro:
+        '{app} không có quảng cáo, tài khoản hay gói đăng ký. Nếu ứng dụng giúp ích cho bạn, bạn có thể để lại tiền tip. Tiền tip chỉ trả một lần và không mở khóa gì cả.',
+
+      small: 'Tip nhỏ',
+
+      medium: 'Tip vừa',
+
+      large: 'Tip lớn',
+
+      retry: 'Thử lại',
+
+      footnote:
+        'Tiền tip được thanh toán qua Apple và là lời cảm ơn một lần, nên không có gì cần khôi phục trên điện thoại mới. {app} không bao giờ nhận thông tin thanh toán của bạn.',
+
+      note: {
+        loading: 'Đang tải tiền tip…',
+        unavailable: 'Hiện không thể gửi tiền tip.',
+
+        restricted: 'Tính năng mua hàng đang tắt trên iPhone này.',
+
+        pending: 'Đang chờ phê duyệt. Bạn chỉ bị tính phí nếu được phê duyệt.',
+
+        thanks: 'Cảm ơn bạn. Tiền tip của bạn rất có ý nghĩa.',
+
+        delayed: 'App Store vẫn đang xác nhận tiền tip của bạn. Giao dịch sẽ tự hoàn tất, kể cả khi bạn đóng ứng dụng.',
+
+        unconfirmed: 'App Store không thể xác nhận khoản tip này nên giao dịch chưa hoàn tất.',
+
+        failed: 'Không gửi được tiền tip. Vui lòng thử lại sau giây lát.',
+      },
     },
   },
   collection: {

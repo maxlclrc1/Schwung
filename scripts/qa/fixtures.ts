@@ -198,6 +198,8 @@ export function scenes(): QaScene[] {
     { id: 'settings', group: 'Settings', route: '/settings', state: { pilot: day12 }, core: true },
     { id: 'settings-language', group: 'Settings', route: '/language', state: { pilot: day12 } },
     { id: 'privacy', group: 'Settings', route: '/privacy', state: { pilot: day12 }, core: true },
+    // Support (tips): the web build has no App Store, so it shows the "not available" state.
+    { id: 'support', group: 'Settings', route: '/support', state: { pilot: day12 } },
     { id: 'legal-wellness', group: 'Settings', route: '/legal?doc=wellness', state: { pilot: day12 } },
     { id: 'legal-terms', group: 'Settings', route: '/legal?doc=terms', state: { pilot: day12 } },
     // Minimum Effort (run with an internal-channel build: `--scene=min-…`).

@@ -30,4 +30,11 @@ export const common = {
   },
   weekdaysShort: { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 0: 'Sun' },
   weekdayInitial: { 1: 'M', 2: 'T', 3: 'W', 4: 'T', 5: 'F', 6: 'S', 0: 'S' },
+  /** The crash screen (components/CrashScreen.tsx): a screen failed to draw. Saved data is never touched. */
+  crash: {
+    title: 'Something went wrong',
+    body: 'This screen ran into a problem. Your saved habits and progress are still on this phone.',
+    retry: 'Try again',
+    hint: 'If it keeps happening, close the app completely and open it again.',
+  },
 };

@@ -33,6 +33,15 @@ export const es: Translation = {
     },
     weekdaysShort: { 1: 'Lun', 2: 'Mar', 3: 'Mié', 4: 'Jue', 5: 'Vie', 6: 'Sáb', 0: 'Dom' },
     weekdayInitial: { 1: 'L', 2: 'M', 3: 'X', 4: 'J', 5: 'V', 6: 'S', 0: 'D' },
+
+    crash: {
+      title: 'Algo salió mal',
+      body: 'Esta pantalla tuvo un problema. Tus hábitos y tu progreso guardados siguen en este teléfono.',
+
+      retry: 'Intentar de nuevo',
+
+      hint: 'Si sigue pasando, cierra la app por completo y vuelve a abrirla.',
+    },
   },
   engine: {
     intensity: { starter: 'Inicio', standard: 'Estándar', challenge: 'Desafío' },
@@ -526,6 +535,8 @@ export const es: Translation = {
       deletePartial: 'Tus datos se borraron, pero esto aún no se pudo eliminar: {list}.',
       failedReminders: 'Recordatorios programados',
       failedTemp: 'Archivos temporales para compartir',
+
+      tips: 'Las propinas se pagan a través de Apple. Nunca recibimos tus datos de pago y la app no guarda ningún registro de propinas.',
     },
     restore: {
       title: 'Restaurar desde copia',
@@ -616,6 +627,40 @@ export const es: Translation = {
       confirmBody: 'Tu Life Reset sigue donde lo dejaste.',
 
       confirm: 'Sí, tengo 18 años o más',
+    },
+
+    tips: {
+      title: 'Apoya {app}',
+      intro:
+        '{app} no tiene anuncios, cuentas ni suscripciones. Si te ayuda, puedes dejar una propina. Las propinas son pagos únicos y no desbloquean nada.',
+
+      small: 'Propina pequeña',
+
+      medium: 'Propina mediana',
+
+      large: 'Propina grande',
+
+      retry: 'Intentar de nuevo',
+
+      footnote:
+        'Las propinas se pagan a través de Apple y son agradecimientos únicos, así que no hay nada que restaurar en un teléfono nuevo. {app} nunca recibe tus datos de pago.',
+
+      note: {
+        loading: 'Cargando propinas…',
+        unavailable: 'Las propinas no están disponibles ahora mismo.',
+
+        restricted: 'Las compras están desactivadas en este iPhone.',
+
+        pending: 'Esperando aprobación. Solo se cobrará si se aprueba.',
+
+        thanks: 'Gracias. Tu propina significa mucho.',
+
+        delayed: 'El App Store aún está confirmando tu propina. Se completará sola, aunque cierres la app.',
+
+        unconfirmed: 'El App Store no pudo confirmar esta propina, así que no se completó.',
+
+        failed: 'La propina no se realizó. Vuelve a intentarlo en un momento.',
+      },
     },
   },
   collection: {

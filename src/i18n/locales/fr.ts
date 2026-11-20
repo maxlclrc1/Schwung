@@ -33,6 +33,15 @@ export const fr: Translation = {
     },
     weekdaysShort: { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' },
     weekdayInitial: { 1: 'L', 2: 'M', 3: 'M', 4: 'J', 5: 'V', 6: 'S', 0: 'D' },
+
+    crash: {
+      title: 'Un problème est survenu',
+      body: 'Cet écran a rencontré un problème. Vos habitudes et votre progression enregistrées sont toujours sur ce téléphone.',
+
+      retry: 'Réessayer',
+
+      hint: 'Si cela se reproduit, fermez complètement l’app et rouvrez-la.',
+    },
   },
   engine: {
     intensity: { starter: 'Initiation', standard: 'Standard', challenge: 'Défi' },
@@ -542,6 +551,8 @@ export const fr: Translation = {
       deletePartial: 'Vos données ont été supprimées, mais ces éléments n’ont pas encore pu l’être : {list}.',
       failedReminders: 'Rappels programmés',
       failedTemp: 'Fichiers de partage temporaires',
+
+      tips: 'Les pourboires sont payés via Apple. Nous ne recevons jamais vos informations de paiement et l’app ne conserve aucune trace des pourboires.',
     },
     restore: {
       title: 'Restaurer une sauvegarde',
@@ -634,6 +645,40 @@ export const fr: Translation = {
       confirmBody: 'Votre Life Reset reprend là où vous l’avez laissé.',
 
       confirm: 'Oui, j’ai 18 ans ou plus',
+    },
+
+    tips: {
+      title: 'Soutenir {app}',
+      intro:
+        '{app} n’a ni publicité, ni compte, ni abonnement. Si l’app vous aide, vous pouvez laisser un pourboire. Les pourboires sont ponctuels et ne débloquent rien.',
+
+      small: 'Petit pourboire',
+
+      medium: 'Pourboire moyen',
+
+      large: 'Grand pourboire',
+
+      retry: 'Réessayer',
+
+      footnote:
+        'Les pourboires sont payés via Apple et sont des remerciements ponctuels : il n’y a donc rien à restaurer sur un nouveau téléphone. {app} ne reçoit jamais vos informations de paiement.',
+
+      note: {
+        loading: 'Chargement des pourboires…',
+        unavailable: 'Les pourboires ne sont pas disponibles pour le moment.',
+
+        restricted: 'Les achats sont désactivés sur cet iPhone.',
+
+        pending: 'En attente d’approbation. Vous ne serez débité que si l’achat est approuvé.',
+
+        thanks: 'Merci. Votre pourboire compte beaucoup.',
+
+        delayed: 'L’App Store confirme encore votre pourboire. Il se terminera tout seul, même si vous fermez l’app.',
+
+        unconfirmed: 'L’App Store n’a pas pu confirmer ce pourboire, il n’a donc pas été finalisé.',
+
+        failed: 'Le pourboire n’a pas abouti. Réessayez dans un instant.',
+      },
     },
   },
   collection: {

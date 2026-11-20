@@ -33,6 +33,15 @@ export const zhHant: Translation = {
     },
     weekdaysShort: { 1: '週一', 2: '週二', 3: '週三', 4: '週四', 5: '週五', 6: '週六', 0: '週日' },
     weekdayInitial: { 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 0: '日' },
+
+    crash: {
+      title: '發生了一點問題',
+      body: '這個畫面遇到了問題。你儲存的習慣和進度仍然在這支手機上。',
+
+      retry: '重試',
+
+      hint: '如果問題反覆出現，請完全關閉 App 後重新開啟。',
+    },
   },
   engine: {
     intensity: { starter: '入門', standard: '標準', challenge: '挑戰' },
@@ -496,6 +505,8 @@ export const zhHant: Translation = {
       deletePartial: '你的資料已刪除，但以下內容暫時無法移除：{list}。',
       failedReminders: '已排定的提醒',
       failedTemp: '暫存分享檔案',
+
+      tips: '小費透過 Apple 支付。我們從不接收你的付款資訊，App 也不會保留任何小費紀錄。',
     },
     restore: {
       title: '從備份回復',
@@ -581,6 +592,38 @@ export const zhHant: Translation = {
       confirmBody: '你的 Life Reset 會從上次停下的地方繼續。',
 
       confirm: '是的，我已滿18歲',
+    },
+
+    tips: {
+      title: '支持 {app}',
+      intro: '{app} 沒有廣告、帳號或訂閱。如果它對你有幫助，你可以留下一筆小費。小費是一次性的，不會解鎖任何內容。',
+
+      small: '小額小費',
+
+      medium: '中額小費',
+
+      large: '大額小費',
+
+      retry: '重試',
+
+      footnote: '小費透過 Apple 支付，是一次性的感謝，所以換新手機時不需要回復任何內容。{app} 從不接收你的付款資訊。',
+
+      note: {
+        loading: '正在載入小費…',
+        unavailable: '小費暫時無法使用。',
+
+        restricted: '這支 iPhone 已關閉購買功能。',
+
+        pending: '正在等待核准。只有獲得核准後才會扣款。',
+
+        thanks: '謝謝你。你的小費意義重大。',
+
+        delayed: 'App Store 仍在確認你的小費。即使關閉 App，它也會自動完成。',
+
+        unconfirmed: 'App Store 無法確認這筆小費，因此未完成。',
+
+        failed: '小費沒有成功。請稍後再試。',
+      },
     },
   },
   collection: {

@@ -14,6 +14,7 @@ import type { ThemePreference } from '../core/types';
 import { APP_NAME, CONTACT_EMAIL } from '../lib/constants';
 import { haptic } from '../lib/haptics';
 import { legalVisible } from '../lib/legal';
+import { tipsOffered } from '../lib/tips';
 import { usePreferences } from '../store/preferences';
 import { space, useTheme, useThemePreference } from '../theme';
 import { ThemedView } from '../theme/transition';
@@ -65,6 +66,13 @@ export default function Settings() {
                 label={t('settings.terms')}
                 icon="document-text-outline"
                 onPress={() => pushOnce({ pathname: '/legal', params: { doc: 'terms' } })}
+              />
+            ) : null}
+            {tipsOffered() ? (
+              <Row
+                label={t('settings.tips.title', { app: APP_NAME })}
+                icon="gift-outline"
+                onPress={() => pushOnce('/support')}
               />
             ) : null}
             {legalVisible.contact() ? (
@@ -194,10 +202,7 @@ function AppearancePicker() {
                 ? t('settings.theme.systemA11y')
                 : t('settings.theme.mode', { name: t(`settings.theme.${o.value}`) })
             }
-            style={[
-              styles.segmentItem,
-              i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border },
-            ]}
+            style={[styles.segmentItem, i > 0 && { borderStartWidth: StyleSheet.hairlineWidth, borderColor: c.border }]}
           >
             <SegmentFace icon={o.icon} label={t(`settings.theme.${o.value}`)} selected={selected} />
           </Tap>

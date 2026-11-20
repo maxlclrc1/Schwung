@@ -25,6 +25,15 @@ export const de: Translation = {
     weekdays: { 1: 'Montag', 2: 'Dienstag', 3: 'Mittwoch', 4: 'Donnerstag', 5: 'Freitag', 6: 'Samstag', 0: 'Sonntag' },
     weekdaysShort: { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr', 6: 'Sa', 0: 'So' },
     weekdayInitial: { 1: 'M', 2: 'D', 3: 'M', 4: 'D', 5: 'F', 6: 'S', 0: 'S' },
+
+    crash: {
+      title: 'Etwas ist schiefgelaufen',
+      body: 'Bei diesem Bildschirm ist ein Problem aufgetreten. Deine gespeicherten Gewohnheiten und dein Fortschritt sind weiterhin auf diesem Telefon.',
+
+      retry: 'Erneut versuchen',
+
+      hint: 'Wenn es wieder passiert, schließe die App vollständig und öffne sie erneut.',
+    },
   },
   engine: {
     intensity: { starter: 'Einstieg', standard: 'Standard', challenge: 'Heraus\u00ADforderung' },
@@ -536,6 +545,8 @@ export const de: Translation = {
       deletePartial: 'Deine Daten wurden gelöscht, aber diese konnten noch nicht entfernt werden: {list}.',
       failedReminders: 'Geplante Erinnerungen',
       failedTemp: 'Temporäre Dateien zum Teilen',
+
+      tips: 'Trinkgelder werden über Apple bezahlt. Wir erhalten niemals deine Zahlungsdaten, und die App speichert keine Aufzeichnungen über Trinkgelder.',
     },
     restore: {
       title: 'Aus Backup wiederherstellen',
@@ -629,6 +640,41 @@ export const de: Translation = {
       confirmBody: 'Dein Life Reset geht dort weiter, wo du aufgehört hast.',
 
       confirm: 'Ja, ich bin 18 oder älter',
+    },
+
+    tips: {
+      title: '{app} unterstützen',
+      intro:
+        '{app} hat keine Werbung, keine Konten und keine Abos. Wenn dir die App hilft, kannst du ein Trinkgeld geben. Trinkgelder sind einmalig und schalten nichts frei.',
+
+      small: 'Kleines Trinkgeld',
+
+      medium: 'Mittleres Trinkgeld',
+
+      large: 'Großes Trinkgeld',
+
+      retry: 'Erneut versuchen',
+
+      footnote:
+        'Trinkgelder werden über Apple bezahlt und sind ein einmaliges Dankeschön, daher gibt es auf einem neuen Telefon nichts wiederherzustellen. {app} erhält niemals deine Zahlungsdaten.',
+
+      note: {
+        loading: 'Trinkgelder werden geladen …',
+        unavailable: 'Trinkgelder sind gerade nicht verfügbar.',
+
+        restricted: 'Käufe sind auf diesem iPhone deaktiviert.',
+
+        pending: 'Warten auf Genehmigung. Es wird nur abgebucht, wenn der Kauf genehmigt wird.',
+
+        thanks: 'Danke. Dein Trinkgeld bedeutet uns viel.',
+
+        delayed:
+          'Dein Trinkgeld wird noch vom App Store bestätigt. Es wird von selbst abgeschlossen, auch wenn du die App schließt.',
+
+        unconfirmed: 'Der App Store konnte dieses Trinkgeld nicht bestätigen, daher wurde es nicht abgeschlossen.',
+
+        failed: 'Das Trinkgeld hat nicht geklappt. Bitte versuche es gleich noch einmal.',
+      },
     },
   },
   collection: {

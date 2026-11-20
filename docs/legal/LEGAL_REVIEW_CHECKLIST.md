@@ -7,19 +7,21 @@ published or relied on until the items below are settled.
 
 - [ ] Operator: full legal name of the individual, or the company's name, registration number and country.
 - [ ] Postal address for legal notices (some laws require one in the privacy policy).
-- [ ] Privacy contact email and support email (they may be the same). Then set `CONTACT_EMAIL` in
-      `src/lib/constants.ts`.
-- [ ] Where the privacy policy will be hosted (a stable public URL). Then set `PRIVACY_URL` in
-      `src/lib/constants.ts`; the in-app link stays hidden in production builds while it's a placeholder.
+- [ ] Privacy contact email and support email (they may be the same). Then set `supportEmail` in
+      `release.config.json`.
+- [ ] Where the privacy policy and support page will be hosted (stable public URLs). Then set `privacyPolicyUrl`
+      and `supportUrl` in `release.config.json`; the in-app links stay hidden in production builds while they're
+      placeholders.
 - [ ] Effective dates and version numbers.
 - [ ] Email provider used for support, and where it stores messages; retention period for support emails.
 - [ ] Whether you'll read Apple's crash/diagnostic reports in App Store Connect.
 - [ ] Rights in all artwork (including any AI-assisted images) and the open-source licences to credit.
-- [ ] Final bundle identifier (Phase 2C, H2).
+- [ ] Final app name, bundle identifier and tip product IDs (`release.config.json`).
 
 ## Factual checks against the build
 
-- [ ] The release build makes no network requests (privacy policy §2, §4); confirm with a proxy on a signed build.
+- [ ] The release build makes no network requests except to Apple's App Store when someone opens Support or tips
+      (privacy policy §2, §4, §6a); confirm with a proxy on a signed build.
 - [ ] App Store "App Privacy" answers: **Data Not Collected**, matching the privacy manifest.
 - [ ] Data list in policy §3 still matches `EXPORT_CONTAINS` (`src/core/dataExport.ts`) and Settings → Privacy & Data.
 - [ ] In-app texts in `src/core/legal.ts` match `WELLNESS_DISCLAIMER.md` and `TERMS_OF_USE.md`.
@@ -39,6 +41,8 @@ published or relied on until the items below are settled.
       started at 16–17 before the minimum was raised (paused, kept, exportable and deletable).
 - [ ] **Wellness claims:** that the app, its descriptions and the App Store listing stay outside medical-device
       rules (EU MDR, FDA general-wellness policy) and make no guaranteed-outcome claims.
-- [ ] **Terms of Use:** governing law and courts; liability cap; Apple's minimum terms (or use Apple's standard
-      EULA instead).
+- [ ] **Terms of Use:** v1.0 uses **Apple's standard EULA** (owner decision); our own Terms stay hidden until a
+      lawyer approves them: governing law and courts; liability cap; Apple's minimum terms.
+- [ ] **Tips:** the privacy policy's tips section (§6a), and whether any consumer-law information is needed for
+      voluntary tips that Apple sells as merchant of record (Türkiye, EU).
 - [ ] **Languages:** whether translated versions are needed (for example Turkish, German).

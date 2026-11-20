@@ -33,6 +33,15 @@ export const ko: Translation = {
     },
     weekdaysShort: { 1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토', 0: '일' },
     weekdayInitial: { 1: '월', 2: '화', 3: '수', 4: '목', 5: '금', 6: '토', 0: '일' },
+
+    crash: {
+      title: '문제가 발생했어요',
+      body: '이 화면에 문제가 생겼어요. 저장된 습관과 진행 상황은 이 휴대폰에 그대로 있어요.',
+
+      retry: '다시 시도',
+
+      hint: '계속 이런 일이 생기면 앱을 완전히 종료한 뒤 다시 열어 주세요.',
+    },
   },
   engine: {
     intensity: { starter: '입문', standard: '기본', challenge: '도전' },
@@ -506,6 +515,8 @@ export const ko: Translation = {
       deletePartial: '데이터는 삭제되었지만 다음 항목은 아직 삭제하지 못했어요: {list}.',
       failedReminders: '예약된 알림',
       failedTemp: '공유용 임시 파일',
+
+      tips: '팁은 Apple을 통해 결제돼요. 저희는 결제 정보를 절대 받지 않으며, 앱에는 팁 기록이 남지 않아요.',
     },
     restore: {
       title: '백업에서 복원',
@@ -594,6 +605,40 @@ export const ko: Translation = {
       confirmBody: 'Life Reset이 멈췄던 곳에서 이어져요.',
 
       confirm: '네, 18세 이상이에요',
+    },
+
+    tips: {
+      title: '{app} 응원하기',
+      intro:
+        '{app}에는 광고, 계정, 구독이 없어요. 도움이 된다면 팁을 남길 수 있어요. 팁은 일회성이며 아무것도 잠금 해제하지 않아요.',
+
+      small: '작은 팁',
+
+      medium: '중간 팁',
+
+      large: '큰 팁',
+
+      retry: '다시 시도',
+
+      footnote:
+        '팁은 Apple을 통해 결제되는 일회성 감사 표시라서 새 휴대폰에서 복원할 것이 없어요. {app}은(는) 결제 정보를 절대 받지 않아요.',
+
+      note: {
+        loading: '팁을 불러오는 중…',
+        unavailable: '지금은 팁을 이용할 수 없어요.',
+
+        restricted: '이 iPhone에서는 구입이 꺼져 있어요.',
+
+        pending: '승인을 기다리고 있어요. 승인된 경우에만 요금이 청구돼요.',
+
+        thanks: '고마워요. 보내 주신 팁은 큰 힘이 돼요.',
+
+        delayed: 'App Store에서 아직 팁을 확인하고 있어요. 앱을 닫아도 자동으로 완료돼요.',
+
+        unconfirmed: 'App Store에서 이 팁을 확인하지 못해 완료되지 않았어요.',
+
+        failed: '팁이 처리되지 않았어요. 잠시 후 다시 시도해 주세요.',
+      },
     },
   },
   collection: {

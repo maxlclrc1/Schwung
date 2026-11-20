@@ -25,6 +25,8 @@ In this policy, "we" means the operator above and "you" means the person using S
 - Schwung has **no advertising, no analytics, no tracking and no third-party data sharing**.
 - You can **export** everything Schwung keeps and **delete** it at any time in **Settings → Privacy & Data**.
 - Data reaches us only if **you choose** to send it to us, for example by emailing us.
+- **Tips are optional** and paid through Apple. We never receive your payment details, and the app keeps no record
+  of tips (section 6a).
 
 ## 3. Data stored on your device
 
@@ -82,6 +84,21 @@ Reminders are optional and **off until you turn them on**. iOS asks for your per
 - **Data export:** a JSON file containing everything listed in section 3. It may include health-related answers, so
   please keep it safe.
 - Temporary files made for sharing are deleted shortly after the share sheet closes, or the next time the app opens.
+
+## 6a. Tips (In-App Purchase)
+
+Schwung is free. You can leave an optional tip in **Settings → Support Schwung**. A tip doesn't unlock anything or
+change how the app works.
+
+- Tips are sold and processed by **Apple** through the App Store's In-App Purchase, under Apple's terms and privacy
+  policy. Apple handles your payment method, billing address and receipts.
+- When you tip, the app talks to the App Store to show prices in your currency and to complete the purchase. This is
+  the only time Schwung connects to anything outside your phone, and only Apple is involved.
+- **We don't receive your name, Apple ID, payment details or contact information.** Apple may show us aggregated or
+  pseudonymous sales reports in App Store Connect (for example, the number of tips and their country), as it does
+  for every app with purchases.
+- Schwung keeps **no record of tips** on your device: nothing is saved, exported or included in backups.
+- Refunds are handled by Apple (reportaproblem.apple.com).
 
 ## 7. Storage, backups and retention
 

@@ -5,10 +5,11 @@ been uploaded or submitted.
 
 ## 1. Blocked on founder decisions
 
-- [ ] **Permanent bundle ID** (`app.json` → `ios.bundleIdentifier`, `android.package`; still `com.example.schwung`).
-      It can't change after the first upload. The internal build becomes `<id>.internal` automatically.
-- [ ] **Support email and privacy policy URL** (`src/lib/constants.ts`). Until they're real, production builds hide
-      the Contact and Privacy Policy rows (`src/lib/legal.ts`).
+- [ ] **Everything in `release.config.json`** (the one place for the publisher's identity; the app may be renamed):
+      app name, **permanent bundle ID** (it can't change after the first upload), Android package, support email,
+      privacy policy URL, support URL and the three tip product IDs. Until they're real, production builds hide the
+      Contact, Privacy Policy and Support rows (`src/lib/legal.ts`).
+- [ ] `npm run release:check` passes (it lists everything still missing).
 - [ ] Legal drafts finalised (`docs/legal/LEGAL_REVIEW_CHECKLIST.md`).
 
 ## 2. Needs Apple Developer / App Store Connect access
@@ -18,8 +19,16 @@ been uploaded or submitted.
 - [ ] An Expo account: `bunx eas-cli login` (or `npx eas-cli@latest`), then `eas init` (adds
       `extra.eas.projectId`).
 - [ ] The app record in App Store Connect (name, primary language, SKU).
-- [ ] App Privacy: **Data Not Collected**; age rating questionnaire (the app is for 16+); export compliance is
-      already set (`ITSAppUsesNonExemptEncryption: false`).
+- [ ] App Privacy: **Data Not Collected** (purchases are processed by Apple; the app collects nothing). Age rating
+      questionnaire: answer for the app's content; the app itself is for people **18 and older** (self-declared at
+      set-up). Export compliance is already set (`ITSAppUsesNonExemptEncryption: false`).
+- [ ] **Licence agreement:** leave App Store Connect's License Agreement as **Apple's standard EULA** for v1.0 (our own
+      Terms stay hidden until reviewed: `LEGAL_READY.terms = false`).
+- [ ] **Paid Apps Agreement active** (Business: bank account, tax forms, contacts). Tip products can't load, even in
+      TestFlight, until it is.
+- [ ] **Three consumable In-App Purchases** with the IDs in `release.config.json`: reference name, price, display name
+      and description (localized), and a review screenshot each. Submit them **with the app version** (Apple reviews
+      the first purchases together with a version). Review note: “Optional tips; consumable; unlock nothing.”
 - [ ] TestFlight testers (internal first; external testing needs Beta App Review).
 
 ## 3. Signed production build
@@ -34,9 +43,11 @@ Check in the build (or the upload's validation report):
 - [ ] Entitlements: no `aps-environment`.
 - [ ] `PrivacyInfo.xcprivacy` in the `.app`: no tracking, no collected data, merged API reasons; no missing-reason
       warning on upload.
-- [ ] Info.plist: only `NSPhotoLibraryAddUsageDescription`; no background modes; ATS without arbitrary loads.
+- [ ] Info.plist: only `NSPhotoLibraryAddUsageDescription` (naming the app from `release.config.json`); no background
+      modes; ATS without arbitrary loads.
 - [ ] No developer tools (no time-travel clock on the Habits tab).
-- [ ] No network traffic while using the app (optional: check with a proxy).
+- [ ] No network traffic while using the app, except Apple's App Store hosts on the Support screen (optional: check
+      with a proxy).
 
 ## 4. On an actual iPhone
 
@@ -90,3 +101,24 @@ Check in the build (or the upload's validation report):
   leaving the app always saves first.
 - Leaving the app starts the save at once; iOS normally allows the few milliseconds it takes. A write that fails is
   retried while the app runs, but not after iOS has ended the app.
+
+**Crash screen**
+
+- [ ] (Development build) make a screen throw while drawing: the “Something went wrong” screen appears in the app's
+      language, Try again redraws, and after a force-quit every habit, day and setting is unchanged.
+
+**Support (tips)** (TestFlight purchases are free; also test with a Sandbox Apple Account in Settings → App Store)
+
+- [ ] Settings → About → Support: the three tips show prices in your region's currency; the screen reads well in
+      Arabic (right to left), at the largest Dynamic Type size and with VoiceOver.
+- [ ] Each tip: Apple's sheet, then “Thank you”; the same tip again works (repeatable). Nothing else in the app
+      changes (habits, XP, collection, Insights).
+- [ ] Cancel on Apple's sheet: nothing is shown, tips can be chosen again.
+- [ ] Ask to Buy (a child Sandbox account): “Waiting for approval”; approve it later with the app closed; reopen: no
+      error, no second charge (the purchase is finished quietly).
+- [ ] Airplane mode: “Tips aren't available right now” with Try again; back online, Try again loads them.
+- [ ] Screen Time → Content & Privacy → iTunes & App Store Purchases → Don't Allow: “Purchases are turned off”.
+- [ ] Force-quit while Apple's sheet is open or right after paying; reopen: no error; the purchase doesn't come back
+      on later launches.
+- [ ] Export my data after a tip: the file has nothing about tips. Delete my data and Restore are unaffected.
+- [ ] No tip prompt appears anywhere else in the app.

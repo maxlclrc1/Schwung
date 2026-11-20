@@ -8,6 +8,7 @@ import { PRIVACY_URL } from '../lib/constants';
 import { exportMyData } from '../lib/exportData';
 import { haptic } from '../lib/haptics';
 import { legalVisible } from '../lib/legal';
+import { tipsOffered } from '../lib/tips';
 import { cancelAllReminders } from '../lib/reminders';
 import { deleteAllLocalData } from '../store/deleteData';
 import { space, useTheme } from '../theme';
@@ -113,6 +114,11 @@ export function PrivacyData() {
             <T v="caption" color={c.textDim}>
               {t('settings.privacy.footnote')}
             </T>
+            {tipsOffered() ? (
+              <T v="caption" color={c.textDim}>
+                {t('settings.privacy.tips')}
+              </T>
+            ) : null}
           </Animated.View>
         ) : step === 'export' ? (
           <Animated.View entering={FadeIn.duration(180).reduceMotion(sys)} style={{ gap: space.md }}>

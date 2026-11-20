@@ -33,6 +33,15 @@ export const ptBR: Translation = {
     },
     weekdaysShort: { 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex', 6: 'Sáb', 0: 'Dom' },
     weekdayInitial: { 1: 'S', 2: 'T', 3: 'Q', 4: 'Q', 5: 'S', 6: 'S', 0: 'D' },
+
+    crash: {
+      title: 'Algo deu errado',
+      body: 'Esta tela encontrou um problema. Seus hábitos e seu progresso salvos continuam neste celular.',
+
+      retry: 'Tentar de novo',
+
+      hint: 'Se continuar acontecendo, feche o app completamente e abra de novo.',
+    },
   },
   engine: {
     intensity: { starter: 'Iniciante', standard: 'Padrão', challenge: 'Desafio' },
@@ -534,6 +543,8 @@ export const ptBR: Translation = {
       deletePartial: 'Seus dados foram apagados, mas isto ainda não pôde ser removido: {list}.',
       failedReminders: 'Lembretes agendados',
       failedTemp: 'Arquivos temporários de compartilhamento',
+
+      tips: 'As gorjetas são pagas pela Apple. Nunca recebemos seus dados de pagamento, e o app não guarda nenhum registro de gorjetas.',
     },
     restore: {
       title: 'Restaurar backup',
@@ -624,6 +635,41 @@ export const ptBR: Translation = {
       confirmBody: 'Seu Life Reset continua de onde você parou.',
 
       confirm: 'Sim, tenho 18 anos ou mais',
+    },
+
+    tips: {
+      title: 'Apoie o {app}',
+      intro:
+        'O {app} não tem anúncios, contas nem assinaturas. Se ele te ajuda, você pode deixar uma gorjeta. As gorjetas são únicas e não desbloqueiam nada.',
+
+      small: 'Gorjeta pequena',
+
+      medium: 'Gorjeta média',
+
+      large: 'Gorjeta grande',
+
+      retry: 'Tentar de novo',
+
+      footnote:
+        'As gorjetas são pagas pela Apple e são agradecimentos únicos, então não há nada para restaurar em um celular novo. O {app} nunca recebe seus dados de pagamento.',
+
+      note: {
+        loading: 'Carregando gorjetas…',
+        unavailable: 'As gorjetas não estão disponíveis agora.',
+
+        restricted: 'As compras estão desativadas neste iPhone.',
+
+        pending: 'Aguardando aprovação. Você só será cobrado se for aprovado.',
+
+        thanks: 'Obrigado. Sua gorjeta significa muito.',
+
+        delayed:
+          'A App Store ainda está confirmando sua gorjeta. Ela será concluída sozinha, mesmo se você fechar o app.',
+
+        unconfirmed: 'A App Store não conseguiu confirmar esta gorjeta, então ela não foi concluída.',
+
+        failed: 'A gorjeta não foi concluída. Tente de novo em um instante.',
+      },
     },
   },
   collection: {

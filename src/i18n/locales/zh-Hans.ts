@@ -33,6 +33,15 @@ export const zhHans: Translation = {
     },
     weekdaysShort: { 1: '周一', 2: '周二', 3: '周三', 4: '周四', 5: '周五', 6: '周六', 0: '周日' },
     weekdayInitial: { 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六', 0: '日' },
+
+    crash: {
+      title: '出了点问题',
+      body: '这个页面遇到了问题。你保存的习惯和进度仍然在这部手机上。',
+
+      retry: '重试',
+
+      hint: '如果问题反复出现，请完全关闭应用后重新打开。',
+    },
   },
   engine: {
     intensity: { starter: '入门', standard: '标准', challenge: '挑战' },
@@ -498,6 +507,8 @@ export const zhHans: Translation = {
       deletePartial: '你的数据已删除，但以下内容暂时无法移除：{list}。',
       failedReminders: '已安排的提醒',
       failedTemp: '临时分享文件',
+
+      tips: '小费通过 Apple 支付。我们从不接收你的付款信息，应用也不会保留任何小费记录。',
     },
     restore: {
       title: '从备份恢复',
@@ -582,6 +593,38 @@ export const zhHans: Translation = {
       confirmBody: '你的 Life Reset 会从上次停下的地方继续。',
 
       confirm: '是的，我已满18岁',
+    },
+
+    tips: {
+      title: '支持 {app}',
+      intro: '{app} 没有广告、账户或订阅。如果它对你有帮助，你可以留下一笔小费。小费是一次性的，不会解锁任何内容。',
+
+      small: '小额小费',
+
+      medium: '中额小费',
+
+      large: '大额小费',
+
+      retry: '重试',
+
+      footnote: '小费通过 Apple 支付，是一次性的感谢，所以换新手机时无需恢复任何内容。{app} 从不接收你的付款信息。',
+
+      note: {
+        loading: '正在加载小费…',
+        unavailable: '小费暂时不可用。',
+
+        restricted: '此 iPhone 已关闭购买功能。',
+
+        pending: '正在等待批准。只有获得批准后才会扣费。',
+
+        thanks: '谢谢你。你的小费意义重大。',
+
+        delayed: 'App Store 仍在确认你的小费。即使关闭应用，它也会自动完成。',
+
+        unconfirmed: 'App Store 无法确认这笔小费，因此未完成。',
+
+        failed: '小费没有成功。请稍后再试。',
+      },
     },
   },
   collection: {

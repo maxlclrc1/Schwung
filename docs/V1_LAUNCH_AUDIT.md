@@ -3,6 +3,13 @@
 Audited: `43114a9` (`main` = `development`), 2026-11-20. Launch mode: feature freeze except the tip jar and
 launch-critical fixes. No app code changed in this audit.
 
+> **Status (implementation pass after `e14a16d`):** B1–B5 are done. The crash screen, the tip jar, the privacy wording,
+> the configuration guards, the 18+ checklist, `npm run release:check` and the release tests are in the app. The
+> publisher's identity (name, bundle ID, Android package, support email, privacy and support URLs, tip product IDs)
+> lives only in `release.config.json`, all still placeholders. v1.0 uses Apple's standard EULA. B6–B12 remain open:
+> the owner's inputs, the legal review and the iPhone checks. Translations of the new text are machine-made and not
+> reviewed.
+
 **Launch decisions (from the owner):**
 - All 20 languages ship.
 - Minimum Effort stays off.

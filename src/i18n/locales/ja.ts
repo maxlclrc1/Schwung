@@ -33,6 +33,15 @@ export const ja: Translation = {
     },
     weekdaysShort: { 1: '月', 2: '火', 3: '水', 4: '木', 5: '金', 6: '土', 0: '日' },
     weekdayInitial: { 1: '月', 2: '火', 3: '水', 4: '木', 5: '金', 6: '土', 0: '日' },
+
+    crash: {
+      title: '問題が発生しました',
+      body: 'この画面で問題が起きました。保存された習慣と進み具合は、このiPhoneにそのまま残っています。',
+
+      retry: 'もう一度試す',
+
+      hint: '何度も起きる場合は、アプリを完全に終了してからもう一度開いてください。',
+    },
   },
   engine: {
     intensity: { starter: 'スターター', standard: 'スタンダード', challenge: 'チャレンジ' },
@@ -518,6 +527,8 @@ export const ja: Translation = {
       deletePartial: 'データは削除されましたが、次のものはまだ削除できていません：{list}。',
       failedReminders: '予定されたリマインダー',
       failedTemp: '共有用の一時ファイル',
+
+      tips: 'チップはAppleを通じて支払われます。支払い情報を受け取ることはなく、アプリにチップの記録も残りません。',
     },
     restore: {
       title: 'バックアップから復元',
@@ -609,6 +620,40 @@ export const ja: Translation = {
       confirmBody: 'Life Resetは前回の続きから再開します。',
 
       confirm: 'はい、18歳以上です',
+    },
+
+    tips: {
+      title: '{app}を応援する',
+      intro:
+        '{app}には広告もアカウントもサブスクリプションもありません。役に立っていたら、チップを贈ることができます。チップは1回限りで、何かが解放されることはありません。',
+
+      small: '小さなチップ',
+
+      medium: '中くらいのチップ',
+
+      large: '大きなチップ',
+
+      retry: 'もう一度試す',
+
+      footnote:
+        'チップはAppleを通じて支払われる1回限りの感謝の気持ちなので、新しいiPhoneで復元するものはありません。{app}が支払い情報を受け取ることはありません。',
+
+      note: {
+        loading: 'チップを読み込み中…',
+        unavailable: '現在チップはご利用いただけません。',
+
+        restricted: 'このiPhoneでは購入がオフになっています。',
+
+        pending: '承認を待っています。承認された場合にのみ請求されます。',
+
+        thanks: 'ありがとうございます。チップはとても励みになります。',
+
+        delayed: 'App Storeがまだチップを確認しています。アプリを閉じても、自動的に完了します。',
+
+        unconfirmed: 'App Storeがこのチップを確認できなかったため、完了しませんでした。',
+
+        failed: 'チップを完了できませんでした。少し時間をおいてもう一度お試しください。',
+      },
     },
   },
   collection: {

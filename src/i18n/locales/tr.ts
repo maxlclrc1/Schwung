@@ -33,6 +33,15 @@ export const tr: Translation = {
     },
     weekdaysShort: { 1: 'Pzt', 2: 'Sal', 3: 'Çar', 4: 'Per', 5: 'Cum', 6: 'Cmt', 0: 'Paz' },
     weekdayInitial: { 1: 'P', 2: 'S', 3: 'Ç', 4: 'P', 5: 'C', 6: 'C', 0: 'P' },
+
+    crash: {
+      title: 'Bir şeyler ters gitti',
+      body: 'Bu ekran bir sorunla karşılaştı. Kayıtlı alışkanlıkların ve ilerlemen hâlâ bu telefonda.',
+
+      retry: 'Tekrar dene',
+
+      hint: 'Sorun sürerse uygulamayı tamamen kapatıp yeniden aç.',
+    },
   },
   engine: {
     intensity: { starter: 'Başlangıç', standard: 'Standart', challenge: 'Zorlu' },
@@ -525,6 +534,8 @@ export const tr: Translation = {
       deletePartial: 'Verilerin silindi, ama şunlar henüz kaldırılamadı: {list}.',
       failedReminders: 'Planlanmış hatırlatıcılar',
       failedTemp: 'Geçici paylaşım dosyaları',
+
+      tips: 'Bahşişler Apple üzerinden ödenir. Ödeme bilgilerini asla almayız ve uygulama bahşişlerin kaydını tutmaz.',
     },
     restore: {
       title: 'Yedekten geri yükle',
@@ -614,6 +625,40 @@ export const tr: Translation = {
       confirmBody: 'Life Reset’in kaldığın yerden devam eder.',
 
       confirm: 'Evet, 18 yaşında veya daha büyüğüm',
+    },
+
+    tips: {
+      title: '{app} için destek',
+      intro:
+        '{app} uygulamasında reklam, hesap veya abonelik yok. İşine yarıyorsa bahşiş bırakabilirsin. Bahşişler tek seferliktir ve hiçbir şeyin kilidini açmaz.',
+
+      small: 'Küçük bahşiş',
+
+      medium: 'Orta bahşiş',
+
+      large: 'Büyük bahşiş',
+
+      retry: 'Tekrar dene',
+
+      footnote:
+        'Bahşişler Apple üzerinden ödenir ve tek seferlik birer teşekkürdür; bu yüzden yeni bir telefonda geri yüklenecek bir şey yoktur. {app} ödeme bilgilerini asla almaz.',
+
+      note: {
+        loading: 'Bahşişler yükleniyor…',
+        unavailable: 'Bahşişler şu anda kullanılamıyor.',
+
+        restricted: "Bu iPhone'da satın almalar kapalı.",
+
+        pending: 'Onay bekleniyor. Yalnızca onaylanırsa ücret alınır.',
+
+        thanks: 'Teşekkürler. Bahşişin çok değerli.',
+
+        delayed: 'Bahşişin App Store tarafından hâlâ onaylanıyor. Uygulamayı kapatsan bile kendiliğinden tamamlanacak.',
+
+        unconfirmed: 'App Store bu bahşişi doğrulayamadı, bu yüzden tamamlanmadı.',
+
+        failed: 'Bahşiş gerçekleşmedi. Lütfen birazdan tekrar dene.',
+      },
     },
   },
   collection: {

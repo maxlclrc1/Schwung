@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
@@ -11,6 +11,8 @@ import { configureArtCache, prefetchArt } from '../components/artPrefetch';
 import { startLanguageSync } from '../i18n/device';
 import { cleanupTemps } from '../lib/appFiles';
 import { RecoveryScreen } from '../components/RecoveryScreen';
+import { CrashScreen } from '../components/CrashScreen';
+import { startTips } from '../lib/tips';
 import { ReminderSync } from '../components/reminders/ReminderSync';
 import { navGuardListeners } from '../lib/navigation';
 import { usePreferences } from '../store/preferences';
@@ -49,6 +51,11 @@ function NativeAppearance() {
   return null;
 }
 
+/** A screen that fails to draw shows a calm crash screen, never a blank app; saved data is untouched. */
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  return <CrashScreen {...props} />;
+}
+
 configureArtCache();
 // The language first, so the first frame is already in it (i18n/device.ts).
 startLanguageSync();
@@ -68,6 +75,8 @@ export default function RootLayout() {
     cleanupTemps();
     // The artwork about to be seen, decoded ahead of time (components/artPrefetch.ts).
     void prefetchArt(useResetPilot.getState().program);
+    // Tips: finishes purchases approved or interrupted while the app was closed (lib/tips.ts). Nothing is saved.
+    void startTips();
   }, [hydrated]);
 
   if (!hydrated) return null;
@@ -121,6 +130,7 @@ export default function RootLayout() {
           <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="language" options={{ presentation: 'modal', animation: 'default' }} />
           <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
+          <Stack.Screen name="support" options={{ presentation: 'modal', animation: 'default' }} />
         </Stack>
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
         <CeremonyHost />

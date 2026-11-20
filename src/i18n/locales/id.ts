@@ -33,6 +33,15 @@ export const id: Translation = {
     },
     weekdaysShort: { 1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 0: 'Min' },
     weekdayInitial: { 1: 'S', 2: 'S', 3: 'R', 4: 'K', 5: 'J', 6: 'S', 0: 'M' },
+
+    crash: {
+      title: 'Ada yang tidak beres',
+      body: 'Layar ini mengalami masalah. Kebiasaan dan progres yang tersimpan masih ada di ponsel ini.',
+
+      retry: 'Coba lagi',
+
+      hint: 'Kalau terus terjadi, tutup aplikasinya sepenuhnya lalu buka lagi.',
+    },
   },
   engine: {
     intensity: { starter: 'Pemula', standard: 'Standar', challenge: 'Tantangan' },
@@ -543,6 +552,8 @@ export const id: Translation = {
       deletePartial: 'Datamu sudah dihapus, tapi yang berikut ini belum bisa dihapus: {list}.',
       failedReminders: 'Pengingat terjadwal',
       failedTemp: 'File berbagi sementara',
+
+      tips: 'Tip dibayar melalui Apple. Kami tidak pernah menerima data pembayaranmu, dan aplikasi tidak menyimpan catatan tip apa pun.',
     },
     restore: {
       title: 'Pulihkan dari cadangan',
@@ -632,6 +643,41 @@ export const id: Translation = {
       confirmBody: 'Life Reset-mu berlanjut dari tempat kamu berhenti.',
 
       confirm: 'Ya, aku berusia 18 tahun atau lebih',
+    },
+
+    tips: {
+      title: 'Dukung {app}',
+      intro:
+        '{app} tidak punya iklan, akun, atau langganan. Kalau aplikasi ini membantumu, kamu bisa memberi tip. Tip bersifat sekali bayar dan tidak membuka fitur apa pun.',
+
+      small: 'Tip kecil',
+
+      medium: 'Tip sedang',
+
+      large: 'Tip besar',
+
+      retry: 'Coba lagi',
+
+      footnote:
+        'Tip dibayar melalui Apple dan merupakan ucapan terima kasih sekali bayar, jadi tidak ada yang perlu dipulihkan di ponsel baru. {app} tidak pernah menerima data pembayaranmu.',
+
+      note: {
+        loading: 'Memuat tip…',
+        unavailable: 'Tip sedang tidak tersedia.',
+
+        restricted: 'Pembelian dinonaktifkan di iPhone ini.',
+
+        pending: 'Menunggu persetujuan. Kamu hanya akan ditagih jika disetujui.',
+
+        thanks: 'Terima kasih. Tip darimu sangat berarti.',
+
+        delayed:
+          'App Store masih mengonfirmasi tip-mu. Prosesnya akan selesai sendiri, meskipun kamu menutup aplikasi.',
+
+        unconfirmed: 'App Store tidak dapat mengonfirmasi tip ini, jadi tip tidak diselesaikan.',
+
+        failed: 'Tip tidak berhasil. Coba lagi sebentar lagi.',
+      },
     },
   },
   collection: {

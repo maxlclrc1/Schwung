@@ -33,6 +33,15 @@ export const nl: Translation = {
     },
     weekdaysShort: { 1: 'ma', 2: 'di', 3: 'wo', 4: 'do', 5: 'vr', 6: 'za', 0: 'zo' },
     weekdayInitial: { 1: 'M', 2: 'D', 3: 'W', 4: 'D', 5: 'V', 6: 'Z', 0: 'Z' },
+
+    crash: {
+      title: 'Er ging iets mis',
+      body: 'Er trad een probleem op in dit scherm. Je opgeslagen gewoontes en voortgang staan nog steeds op deze telefoon.',
+
+      retry: 'Opnieuw proberen',
+
+      hint: 'Blijft het gebeuren, sluit de app dan helemaal af en open hem opnieuw.',
+    },
   },
   engine: {
     intensity: { starter: 'Instap', standard: 'Standaard', challenge: 'Uitdaging' },
@@ -534,6 +543,8 @@ export const nl: Translation = {
       deletePartial: 'Je gegevens zijn verwijderd, maar deze konden nog niet worden verwijderd: {list}.',
       failedReminders: 'Geplande herinneringen',
       failedTemp: 'Tijdelijke deelbestanden',
+
+      tips: 'Fooien worden via Apple betaald. We ontvangen nooit je betaalgegevens en de app houdt geen fooien bij.',
     },
     restore: {
       title: 'Herstellen uit back-up',
@@ -624,6 +635,40 @@ export const nl: Translation = {
       confirmBody: 'Je Life Reset gaat verder waar je gebleven was.',
 
       confirm: 'Ja, ik ben 18 of ouder',
+    },
+
+    tips: {
+      title: 'Steun {app}',
+      intro:
+        '{app} heeft geen advertenties, accounts of abonnementen. Helpt de app je, dan kun je een fooi geven. Fooien zijn eenmalig en ontgrendelen niets.',
+
+      small: 'Kleine fooi',
+
+      medium: 'Gemiddelde fooi',
+
+      large: 'Grote fooi',
+
+      retry: 'Opnieuw proberen',
+
+      footnote:
+        'Fooien worden via Apple betaald en zijn een eenmalig bedankje, dus er valt op een nieuwe telefoon niets te herstellen. {app} ontvangt nooit je betaalgegevens.',
+
+      note: {
+        loading: 'Fooien laden…',
+        unavailable: 'Fooien zijn nu niet beschikbaar.',
+
+        restricted: 'Aankopen staan uit op deze iPhone.',
+
+        pending: 'Wachten op goedkeuring. Je betaalt alleen als het wordt goedgekeurd.',
+
+        thanks: 'Dank je. Je fooi betekent veel.',
+
+        delayed: 'Je fooi wordt nog door de App Store bevestigd. Hij wordt vanzelf afgerond, ook als je de app sluit.',
+
+        unconfirmed: 'De App Store kon deze fooi niet bevestigen, dus hij is niet afgerond.',
+
+        failed: 'De fooi is niet gelukt. Probeer het zo nog eens.',
+      },
     },
   },
   collection: {

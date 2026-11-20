@@ -33,6 +33,15 @@ export const it: Translation = {
     },
     weekdaysShort: { 1: 'lun', 2: 'mar', 3: 'mer', 4: 'gio', 5: 'ven', 6: 'sab', 0: 'dom' },
     weekdayInitial: { 1: 'L', 2: 'M', 3: 'M', 4: 'G', 5: 'V', 6: 'S', 0: 'D' },
+
+    crash: {
+      title: 'Qualcosa è andato storto',
+      body: 'Questa schermata ha avuto un problema. Le tue abitudini e i tuoi progressi salvati sono ancora su questo telefono.',
+
+      retry: 'Riprova',
+
+      hint: 'Se continua a succedere, chiudi completamente l’app e riaprila.',
+    },
   },
   engine: {
     intensity: { starter: 'Inizio', standard: 'Standard', challenge: 'Sfida' },
@@ -542,6 +551,8 @@ export const it: Translation = {
       deletePartial: 'I tuoi dati sono stati eliminati, ma questi non è stato ancora possibile rimuoverli: {list}.',
       failedReminders: 'Promemoria programmati',
       failedTemp: 'File di condivisione temporanei',
+
+      tips: 'Le mance si pagano tramite Apple. Non riceviamo mai i tuoi dati di pagamento e l’app non conserva alcuna registrazione delle mance.',
     },
     restore: {
       title: 'Ripristina da backup',
@@ -634,6 +645,40 @@ export const it: Translation = {
       confirmBody: 'Il tuo Life Reset riprende da dove l’avevi lasciato.',
 
       confirm: 'Sì, ho 18 anni o più',
+    },
+
+    tips: {
+      title: 'Sostieni {app}',
+      intro:
+        '{app} non ha pubblicità, account né abbonamenti. Se ti è utile, puoi lasciare una mancia. Le mance sono una tantum e non sbloccano nulla.',
+
+      small: 'Mancia piccola',
+
+      medium: 'Mancia media',
+
+      large: 'Mancia grande',
+
+      retry: 'Riprova',
+
+      footnote:
+        'Le mance si pagano tramite Apple e sono ringraziamenti una tantum, quindi su un nuovo telefono non c’è nulla da ripristinare. {app} non riceve mai i tuoi dati di pagamento.',
+
+      note: {
+        loading: 'Caricamento delle mance…',
+        unavailable: 'Le mance non sono disponibili in questo momento.',
+
+        restricted: 'Gli acquisti sono disattivati su questo iPhone.',
+
+        pending: 'In attesa di approvazione. L’addebito avverrà solo se verrà approvata.',
+
+        thanks: 'Grazie. La tua mancia significa molto.',
+
+        delayed: 'L’App Store sta ancora confermando la tua mancia. Si completerà da sola, anche se chiudi l’app.',
+
+        unconfirmed: 'L’App Store non è riuscito a confermare questa mancia, quindi non è stata completata.',
+
+        failed: 'La mancia non è andata a buon fine. Riprova tra un momento.',
+      },
     },
   },
   collection: {

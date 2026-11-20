@@ -73,6 +73,29 @@ export const settings = {
     confirmBody: 'Your Life Reset carries on where you left it.',
     confirm: 'Yes, I’m 18 or older',
   },
+  /** Support (app/support.tsx): voluntary tips through Apple. {app} is the app's name. */
+  tips: {
+    title: 'Support {app}',
+    intro:
+      '{app} has no ads, accounts or subscriptions. If it helps you, you can leave a tip. Tips are one-time and don’t unlock anything.',
+    small: 'Small tip',
+    medium: 'Medium tip',
+    large: 'Large tip',
+    retry: 'Try again',
+    footnote:
+      'Tips are paid through Apple and are one-time thank-yous, so there’s nothing to restore on a new phone. {app} never receives your payment details.',
+    note: {
+      loading: 'Loading tips…',
+      unavailable: 'Tips aren’t available right now.',
+      restricted: 'Purchases are turned off on this iPhone.',
+      pending: 'Waiting for approval. You’ll only be charged if it’s approved.',
+      thanks: 'Thank you. Your tip means a lot.',
+      delayed:
+        'Your tip is still being confirmed by the App Store. It will finish on its own, even if you close the app.',
+      unconfirmed: 'The App Store couldn’t confirm this tip, so it wasn’t completed.',
+      failed: 'The tip didn’t go through. Please try again in a moment.',
+    },
+  },
   privacy: {
     title: 'Privacy & Data',
     intro:
@@ -84,6 +107,7 @@ export const settings = {
     delete: 'Delete my data',
     deleteHint: 'Remove everything Schwung keeps on this phone',
     policy: 'Privacy Policy',
+    tips: 'Tips are paid through Apple. We never receive your payment details, and the app keeps no record of tips.',
     footnote:
       'Ending the Life Reset (in Settings) ends your current program. Delete my data removes all your personal data from Schwung on this phone, including earlier saves and recovery copies.',
     exportTitle: 'Export my data',

@@ -30,6 +30,9 @@ bundled.
   the title and a ring from the wheel. Continue leads to the mountain welcome. Picking the phone's own language keeps
   Follow device; `languageChosen` in the preferences records the choice (Settings → Language sets it too). Crossing
   between left-to-right and right-to-left offers the restart there. Reduce Motion stills the ticker and the flips.
+- **The app's name** comes from `release.config.json` (the app may be renamed). New text names it through a `{app}`
+  placeholder (`t(key, { app: APP_NAME })`) so a rename needs no translation pass; older text still says "Schwung"
+  (27 English strings in 6 files, plus every language's copies), which a rename would have to change.
 - **What is never translated:** the person's own habit names and notes (shown exactly as typed), stored ids, keys,
   saved data and file names. Saved answers keep their English ids (`'Instrument'`, `'full body'`) and are labelled at
   display time.

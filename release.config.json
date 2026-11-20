@@ -1,0 +1,13 @@
+{
+  "appName": "Schwung",
+  "bundleIdentifier": "com.example.schwung",
+  "androidPackage": "com.example.schwung",
+  "supportEmail": "hello@example.com",
+  "privacyPolicyUrl": "https://example.github.io/schwung/privacy",
+  "supportUrl": "https://example.github.io/schwung/support",
+  "tipProducts": {
+    "small": "com.example.schwung.tip.small",
+    "medium": "com.example.schwung.tip.medium",
+    "large": "com.example.schwung.tip.large"
+  }
+}
