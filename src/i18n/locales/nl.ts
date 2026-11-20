@@ -670,6 +670,10 @@ export const nl: Translation = {
 
         failed: 'De fooi is niet gelukt. Probeer het zo nog eens.',
       },
+
+      more: 'Kies een ander bedrag',
+
+      amount: 'Fooi',
     },
 
     licenses: {

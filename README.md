@@ -34,7 +34,8 @@ Everything stays on your phone. There's no account, no server, no analytics and 
 Your data leaves the phone only when you choose to: a backup file you share, an email you write, or a voluntary
 tip.
 
-The optional **Support** screen offers three one-off tips through Apple's In-App Purchase, processed by
+The optional **Support** screen offers three one-off tips, and a few more fixed amounts under "Choose another amount",
+through Apple's In-App Purchase, processed by
 [RevenueCat](https://www.revenuecat.com). A tip unlocks nothing. RevenueCat is started only when that screen is
 opened (or to finish a tip that was interrupted), anonymously, without device identifiers. Details:
 [`docs/legal/PRIVACY_POLICY.md`](docs/legal/PRIVACY_POLICY.md).

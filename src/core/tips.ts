@@ -1,6 +1,7 @@
 /*
- * Support Schwung: three voluntary tips, each a consumable In-App Purchase sold by Apple and processed with
- * RevenueCat (react-native-purchases). A tip unlocks nothing and changes nothing in the program. This file is the
+ * Support Schwung: three suggested voluntary tips, plus optional extra amounts behind "Choose another amount", each a
+ * consumable In-App Purchase sold by Apple at an App Store price tier and processed with RevenueCat
+ * (react-native-purchases). There are no custom amounts: Apple sells only the products set up in App Store Connect. A tip unlocks nothing and changes nothing in the program. This file is the
  * screen's logic without the SDK, so it can be tested: which packages to offer, and what each answer means.
  *
  * The rule that matters: a thank-you is shown only when the purchase call succeeded for the tip that was asked for
@@ -12,7 +13,16 @@ export type TipSize = 'small' | 'medium' | 'large';
 export const TIP_SIZES: TipSize[] = ['small', 'medium', 'large'];
 
 /** A tip as the screen shows it; its price is the App Store's, in the person's currency and language. */
-export type Tip = { size: TipSize; packageId: string; productId: string; price: string };
+export type Tip = {
+  /** One of the three suggested tips, or 'more': an extra amount under "Choose another amount". */
+  size: TipSize | 'more';
+  packageId: string;
+  productId: string;
+  price: string;
+};
+
+/** An extra amount: its RevenueCat package and the App Store product it must sell. */
+export type MoreTip = { package: string; product: string };
 
 /** The RevenueCat setup the app expects (release.config.json). */
 export type TipSetup = {
@@ -22,6 +32,8 @@ export type TipSetup = {
   packages: Record<TipSize, string>;
   /** Each tip's App Store product ID, which the package must sell. */
   products: Record<TipSize, string>;
+  /** The extra amounts (release.config.json moreTipProducts + revenueCat.morePackages), in the order shown. */
+  more: MoreTip[];
 };
 
 /** The parts of a RevenueCat offering the app reads. */
@@ -35,19 +47,40 @@ export type OfferingLike = {
 /** Product types a repeatable tip may never be (a misconfigured product would be bought once, or renew). */
 const NOT_A_TIP = ['NON_CONSUMABLE', 'NON_RENEWABLE_SUBSCRIPTION', 'AUTO_RENEWABLE_SUBSCRIPTION'];
 
+/** A package that sells exactly this product, as a consumable with a price; anything else is never offered. */
+function asTip(offering: OfferingLike, size: Tip['size'], packageId: string, productId: string): Tip | null {
+  const p = offering.availablePackages.find((x) => x.identifier === packageId);
+  if (!p || p.product.identifier !== productId || !p.product.priceString) return null;
+  if (p.product.productType && NOT_A_TIP.includes(p.product.productType)) return null;
+  return { size, packageId: p.identifier, productId: p.product.identifier, price: p.product.priceString };
+}
+
 /**
  * The three tips in order, or null unless every one is in the offering, sells the expected product, is a consumable
  * (or of a type StoreKit doesn't report) and has a price. A partial or misconfigured set is never offered.
  */
 export function tipsFrom(setup: TipSetup, offering: OfferingLike | null | undefined): Tip[] | null {
   if (!offering) return null;
-  const tips = TIP_SIZES.map((size) => {
-    const p = offering.availablePackages.find((x) => x.identifier === setup.packages[size]);
-    if (!p || p.product.identifier !== setup.products[size] || !p.product.priceString) return null;
-    if (p.product.productType && NOT_A_TIP.includes(p.product.productType)) return null;
-    return { size, packageId: p.identifier, productId: p.product.identifier, price: p.product.priceString };
-  });
+  const tips = TIP_SIZES.map((size) => asTip(offering, size, setup.packages[size], setup.products[size]));
   return tips.every(Boolean) ? (tips as Tip[]) : null;
+}
+
+/**
+ * The extra amounts that can be offered, in their configured order: each must pass the same checks as a suggested
+ * tip, and none may reuse a package or product of another tip. One that's missing or misconfigured is left out;
+ * none at all hides "Choose another amount".
+ */
+export function moreTipsFrom(setup: TipSetup, offering: OfferingLike | null | undefined): Tip[] {
+  if (!offering) return [];
+  const taken = new Set<string>(TIP_SIZES.flatMap((s) => [setup.packages[s], setup.products[s]]));
+  const more: Tip[] = [];
+  for (const m of setup.more) {
+    if (taken.has(m.package) || taken.has(m.product)) continue;
+    taken.add(m.package).add(m.product);
+    const tip = asTip(offering, 'more', m.package, m.product);
+    if (tip) more.push(tip);
+  }
+  return more;
 }
 
 /**

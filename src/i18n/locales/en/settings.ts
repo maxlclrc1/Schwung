@@ -86,6 +86,9 @@ export const settings = {
     small: 'Small tip',
     medium: 'Medium tip',
     large: 'Large tip',
+    /** Opens the extra amounts (App Store price tiers); each then shows as "Tip" with its price. */
+    more: 'Choose another amount',
+    amount: 'Tip',
     retry: 'Try again',
     footnote:
       'Tips are paid through Apple and handled with RevenueCat. They’re one-time thank-yous, so there’s nothing to restore on a new phone. {app} never receives your payment details.',

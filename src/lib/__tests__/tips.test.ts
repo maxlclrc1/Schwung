@@ -1,6 +1,15 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PURCHASES_ERROR_CODE } from '@revenuecat/purchases-typescript-internal';
-import { afterError, afterPurchase, canTip, RC_ERROR, tipsFrom, type Tip, type TipSetup } from '../../core/tips';
+import {
+  afterError,
+  afterPurchase,
+  canTip,
+  moreTipsFrom,
+  RC_ERROR,
+  tipsFrom,
+  type Tip,
+  type TipSetup,
+} from '../../core/tips';
 
 /*
  * The tip jar with RevenueCat's SDK faked: what the offering holds, what a purchase returns or throws. Checks that a
@@ -45,11 +54,15 @@ jest.mock('../constants', () => ({
   get TIP_PRODUCTS() {
     return mockRelease.products;
   },
+  get MORE_TIP_PRODUCTS() {
+    return ['app.tip.extra1', 'app.tip.extra2', 'app.tip.extra3', 'app.tip.extra4'];
+  },
   get REVENUECAT() {
     return {
       appleApiKey: mockRelease.key,
       offering: 'tips',
       packages: { small: 'tip_small', medium: 'tip_medium', large: 'tip_large' },
+      morePackages: ['tip_extra1', 'tip_extra2', 'tip_extra3', 'tip_extra4'],
     };
   },
 }));
@@ -160,6 +173,7 @@ describe('tips: the offering', () => {
     offering: 'tips',
     packages: { small: 'tip_small', medium: 'tip_medium', large: 'tip_large' },
     products: { small: 'app.tip.small', medium: 'app.tip.medium', large: 'app.tip.large' },
+    more: [],
   };
 
   it('offers the three tips in order with the App Store’s localized prices', async () => {
@@ -195,6 +209,98 @@ describe('tips: the offering', () => {
   it('is unavailable (never broken) when RevenueCat can’t be reached', async () => {
     mockRC.offerings = undefined as never; // getOfferings resolves to nothing usable
     expect(await tips.loadTips()).toBeNull();
+  });
+});
+
+describe('tips: Choose another amount', () => {
+  /** The offering with the four extra amounts too (App Store tiers; the order in the offering doesn't matter). */
+  const WITH_MORE = () => ({
+    availablePackages: [
+      ...OFFERING().availablePackages,
+      pkg('extra4', 'app.tip.extra4', '₺1.999,99'),
+      pkg('extra1', 'app.tip.extra1', '₺39,99'),
+      pkg('extra3', 'app.tip.extra3', '₺999,99'),
+      pkg('extra2', 'app.tip.extra2', '₺599,99'),
+    ],
+  });
+  const setup: TipSetup = {
+    offering: 'tips',
+    packages: { small: 'tip_small', medium: 'tip_medium', large: 'tip_large' },
+    products: { small: 'app.tip.small', medium: 'app.tip.medium', large: 'app.tip.large' },
+    more: [1, 2, 3, 4].map((n) => ({ package: `tip_extra${n}`, product: `app.tip.extra${n}` })),
+  };
+
+  it('offers the extra amounts after the three, in the configured order, with the App Store’s prices', async () => {
+    mockRC.offerings = { all: { tips: WITH_MORE() } };
+    expect((await loaded()).map((x) => [x.size, x.productId, x.price])).toEqual([
+      ['small', 'app.tip.small', '₺49,99'],
+      ['medium', 'app.tip.medium', '₺149,99'],
+      ['large', 'app.tip.large', '₺499,99'],
+      ['more', 'app.tip.extra1', '₺39,99'],
+      ['more', 'app.tip.extra2', '₺599,99'],
+      ['more', 'app.tip.extra3', '₺999,99'],
+      ['more', 'app.tip.extra4', '₺1.999,99'],
+    ]);
+  });
+
+  it('hides "Choose another amount" when no extra amount is set up, and never shows extras without the three', async () => {
+    expect((await loaded()).filter((x) => x.size === 'more')).toEqual([]);
+    const incomplete = WITH_MORE();
+    incomplete.availablePackages.splice(0, 1); // a suggested tip is missing
+    mockRC.offerings = { all: { tips: incomplete } };
+    expect(await tips.loadTips()).toBeNull();
+  });
+
+  it('leaves out an extra amount that sells the wrong product, isn’t a consumable, has no price or reuses another tip', () => {
+    const o = WITH_MORE();
+    const by = (id: string) => o.availablePackages.find((p) => p.identifier === id)!;
+    by('tip_extra1').product.identifier = 'app.premium';
+    by('tip_extra2').product.productType = 'NON_CONSUMABLE';
+    by('tip_extra3').product.priceString = '';
+    expect(moreTipsFrom(setup, o).map((x) => x.productId)).toEqual(['app.tip.extra4']);
+    for (const type of ['AUTO_RENEWABLE_SUBSCRIPTION', 'NON_RENEWABLE_SUBSCRIPTION']) {
+      by('tip_extra4').product.productType = type;
+      expect(moreTipsFrom(setup, o)).toEqual([]);
+    }
+    // An extra amount that reuses a suggested tip's package or product is never offered; a package or product is
+    // offered at most once (npm run release:check refuses such a config anyway).
+    const reused: TipSetup = {
+      ...setup,
+      more: [
+        { package: 'tip_small', product: 'app.tip.small' },
+        { package: 'tip_extra1', product: 'app.tip.medium' },
+        { package: 'tip_extra1', product: 'app.tip.extra1' },
+        { package: 'tip_extra2', product: 'app.tip.extra2' },
+        { package: 'tip_extra2', product: 'app.tip.extra2' },
+      ],
+    };
+    expect(moreTipsFrom(reused, WITH_MORE()).map((x) => x.productId)).toEqual(['app.tip.extra1', 'app.tip.extra2']);
+    expect(moreTipsFrom(setup, null)).toEqual([]);
+  });
+
+  it('an extra amount uses the same purchase flow: thanks only for a recorded transaction, calm errors otherwise', async () => {
+    mockRC.offerings = { all: { tips: WITH_MORE() } };
+    const extra = (await loaded()).find((x) => x.productId === 'app.tip.extra3')!;
+    expect(await tips.buyTip(extra)).toBe('thanks');
+    expect(mockRC.purchasePackage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        identifier: 'tip_extra3',
+        product: expect.objectContaining({ identifier: 'app.tip.extra3' }),
+      }),
+    );
+    expect(await AsyncStorage.getItem(UNSETTLED)).toBeNull();
+    mockRC.purchase = async (p) => ({ ...recorded(p), productIdentifier: 'app.tip.small' });
+    expect(await tips.buyTip(extra)).toBe('delayed');
+    expect(await AsyncStorage.getItem(UNSETTLED)).not.toBeNull();
+    mockRC.purchase = fails(PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR);
+    expect(await tips.buyTip(extra)).toBe('ready');
+    // If the offering changed under it (the package now sells something else), nothing is bought.
+    const swapped = WITH_MORE();
+    swapped.availablePackages.find((p) => p.identifier === 'tip_extra3')!.product.identifier = 'app.other';
+    mockRC.offerings = { all: { tips: swapped } };
+    const calls = mockRC.purchasePackage.mock.calls.length;
+    expect(await tips.buyTip(extra)).toBe('unavailable');
+    expect(mockRC.purchasePackage.mock.calls.length).toBe(calls);
   });
 });
 

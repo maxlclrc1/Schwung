@@ -28,7 +28,7 @@ each day, while a painted alpine world shows their climb.
 - Offline and local-first. No backend, no analytics, no AI-generated messages. Data stays on the phone (export and
   restore are files the person handles).
 - The one exception, added for v1.0: a voluntary **Support** screen in Settings with three one-off tips through
-  Apple, processed by RevenueCat. A tip unlocks nothing, and nothing else in the app ever asks for one.
+  Apple (plus fixed extra amounts under "Choose another amount"), processed by RevenueCat. A tip unlocks nothing, and nothing else in the app ever asks for one.
 - No guilt, fake urgency, streak threats, fabricated statistics or unsupported promises in any copy. Words describe
   what was actually recorded (see "truthful moments" below).
 - **Difficulty never changes without the person's yes.** The app offers; the person accepts or declines.

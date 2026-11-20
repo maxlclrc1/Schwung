@@ -678,6 +678,10 @@ export const id: Translation = {
 
         failed: 'Tip tidak berhasil. Coba lagi sebentar lagi.',
       },
+
+      more: 'Pilih jumlah lain',
+
+      amount: 'Tip',
     },
 
     licenses: {

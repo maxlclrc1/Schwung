@@ -675,6 +675,10 @@ export const de: Translation = {
 
         failed: 'Das Trinkgeld hat nicht geklappt. Bitte versuche es gleich noch einmal.',
       },
+
+      more: 'Anderen Betrag wählen',
+
+      amount: 'Trinkgeld',
     },
 
     licenses: {

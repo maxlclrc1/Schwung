@@ -680,6 +680,10 @@ export const fr: Translation = {
 
         failed: 'Le pourboire n’a pas abouti. Réessayez dans un instant.',
       },
+
+      more: 'Choisir un autre montant',
+
+      amount: 'Pourboire',
     },
 
     licenses: {

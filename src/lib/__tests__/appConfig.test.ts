@@ -128,12 +128,20 @@ describe('app configuration', () => {
         'supportEmail',
         'supportUrl',
         'tipProducts',
+        'moreTipProducts',
       ].sort(),
     );
     expect(Object.keys(release.tipProducts)).toEqual(['small', 'medium', 'large']);
     expect(new Set(Object.values(release.tipProducts)).size).toBe(3);
     // RevenueCat: only a public Apple SDK key may ever be here (or nothing yet); never a secret key.
-    expect(Object.keys(release.revenueCat).sort()).toEqual(['appleApiKey', 'offering', 'packages']);
+    expect(Object.keys(release.revenueCat).sort()).toEqual(['appleApiKey', 'morePackages', 'offering', 'packages']);
+    // Extra amounts ("Choose another amount"): App Store products paired by position with RevenueCat packages, all
+    // distinct and none reusing a suggested tip (a custom, typed-in amount isn't possible with In-App Purchase).
+    expect(release.moreTipProducts.length).toBe(release.revenueCat.morePackages.length);
+    const allProducts = [...Object.values(release.tipProducts), ...release.moreTipProducts];
+    const allPackages = [...Object.values(release.revenueCat.packages), ...release.revenueCat.morePackages];
+    expect(new Set(allProducts).size).toBe(allProducts.length);
+    expect(new Set(allPackages).size).toBe(allPackages.length);
     expect(release.revenueCat.appleApiKey).toMatch(/^(appl_[A-Za-z0-9]+)?$/);
     expect(Object.keys(release.revenueCat.packages)).toEqual(['small', 'medium', 'large']);
   });

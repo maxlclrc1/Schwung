@@ -625,6 +625,10 @@ export const zhHant: Translation = {
 
         failed: '小費沒有成功。請稍後再試。',
       },
+
+      more: '選擇其他金額',
+
+      amount: '小費',
     },
 
     licenses: {

@@ -3,13 +3,14 @@ import { Platform } from 'react-native';
 import {
   afterError,
   afterPurchase,
+  moreTipsFrom,
   tipsFrom,
   unsettledStill,
   type Tip,
   type TipPhase,
   type TipSetup,
 } from '../core/tips';
-import { REVENUECAT, TIP_PRODUCTS } from './constants';
+import { MORE_TIP_PRODUCTS, REVENUECAT, TIP_PRODUCTS } from './constants';
 import { legalVisible } from './legal';
 
 /*
@@ -36,6 +37,11 @@ export const TIP_SETUP: TipSetup = {
   offering: REVENUECAT.offering,
   packages: REVENUECAT.packages,
   products: TIP_PRODUCTS,
+  // Extra amounts pair by position; a product without a package (or the reverse) is never offered.
+  more: (MORE_TIP_PRODUCTS ?? []).flatMap((product, i) => {
+    const pkg = REVENUECAT.morePackages?.[i];
+    return pkg ? [{ product, package: pkg }] : [];
+  }),
 };
 
 /** A public RevenueCat SDK key for Apple (`appl_…`); secret keys (`sk_…`) never belong in the app. */
@@ -112,13 +118,18 @@ export async function startTips(now = Date.now()): Promise<boolean> {
   return !!ready();
 }
 
-/** The three tips with their App Store prices, or null if they can't be offered right now. */
+/**
+ * The three suggested tips, then any extra amounts ("Choose another amount"), with their App Store prices; null if
+ * the three can't be offered right now (the extra amounts are never offered without them).
+ */
 export async function loadTips(): Promise<Tip[] | null> {
   const s = ready();
   if (!s) return null;
   try {
     const offerings = await s.getOfferings();
-    return tipsFrom(TIP_SETUP, offerings.all[TIP_SETUP.offering]);
+    const offering = offerings.all[TIP_SETUP.offering];
+    const tips = tipsFrom(TIP_SETUP, offering);
+    return tips ? [...tips, ...moreTipsFrom(TIP_SETUP, offering)] : null;
   } catch {
     return null;
   }

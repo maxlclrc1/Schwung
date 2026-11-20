@@ -641,6 +641,10 @@ export const th: Translation = {
 
         failed: 'ให้ทิปไม่สำเร็จ โปรดลองอีกครั้งในอีกสักครู่',
       },
+
+      more: 'เลือกจำนวนเงินอื่น',
+
+      amount: 'ทิป',
     },
 
     licenses: {

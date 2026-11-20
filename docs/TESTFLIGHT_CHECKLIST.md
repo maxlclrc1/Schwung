@@ -7,7 +7,7 @@ been uploaded or submitted.
 
 - [ ] **Everything in `release.config.json`** (the one place for the publisher's identity; the app may be renamed):
       app name, **permanent bundle ID** (it can't change after the first upload), Android package, support email,
-      privacy policy URL, support URL and the three tip product IDs. Until they're real, production builds hide the
+      privacy policy URL, support URL, the three tip product IDs and the extra amounts (`moreTipProducts`). Until they're real, production builds hide the
       Contact, Privacy Policy and Support rows (`src/lib/legal.ts`).
 - [ ] `npm run release:check` passes (it lists everything still missing).
 - [ ] Legal drafts finalised (`docs/legal/LEGAL_REVIEW_CHECKLIST.md`).
@@ -36,11 +36,37 @@ been uploaded or submitted.
 - [ ] **Paid Apps Agreement active** (Business: bank account, tax forms, contacts). Tip products can't load, even in
       TestFlight, until it is.
 - [ ] **RevenueCat** (dashboard: app.revenuecat.com): the project, the App Store app, its In-App Purchase key, the
-      three products, the `tips` offering with packages `tip_small`, `tip_medium`, `tip_large`, and the public Apple
-      SDK key in `release.config.json` → `revenueCat.appleApiKey`. No entitlements, no paywall.
-- [ ] **Three consumable In-App Purchases** with the IDs in `release.config.json`: reference name, price, display name
-      and description (localized), and a review screenshot each. Submit them **with the app version** (Apple reviews
-      the first purchases together with a version). Review note: “Optional tips; consumable; unlock nothing.”
+      seven products, the `tips` offering with the packages below, and the public Apple SDK key in
+      `release.config.json` → `revenueCat.appleApiKey`. No entitlements, no paywall.
+- [ ] **Seven consumable In-App Purchases** (table below): reference name, price, display name and description
+      (localized), and a review screenshot each. Submit them **with the app version** (Apple reviews the first
+      purchases together with a version). Review note: “Optional tips; consumable; unlock nothing. ‘Choose another
+      amount’ shows more fixed App Store prices; there are no custom amounts.”
+
+  **Tip products.** Every one is a **Consumable** In-App Purchase in App Store Connect, attached to a package of the
+  same name in RevenueCat's `tips` offering. IDs and packages come from `release.config.json`, so replace the
+  `com.example.schwung` prefix with the real bundle ID. Prices are App Store price points, which Apple converts per
+  storefront; the app shows Apple's localized price and never a hard-coded amount. Pick the prices of the three
+  suggested tips yourself. For the extra amounts, choose the US price point nearest the suggestion (for example
+  $1.00, or $0.99 if you prefer) and let Apple set the other storefronts.
+
+  | Shown as                    | App Store product ID (`release.config.json`) | RevenueCat package                           | Suggested price (USD tier) |
+  | --------------------------- | -------------------------------------------- | -------------------------------------------- | -------------------------- |
+  | Small tip                   | `tipProducts.small`                          | `revenueCat.packages.small` (`tip_small`)    | your choice                |
+  | Medium tip                  | `tipProducts.medium`                         | `revenueCat.packages.medium` (`tip_medium`)  | your choice                |
+  | Large tip                   | `tipProducts.large`                          | `revenueCat.packages.large` (`tip_large`)    | your choice                |
+  | Choose another amount → Tip | `moreTipProducts[0]` (`…tip.extra1`)         | `revenueCat.morePackages[0]` (`tip_extra_1`) | $1                         |
+  | Choose another amount → Tip | `moreTipProducts[1]` (`…tip.extra2`)         | `revenueCat.morePackages[1]` (`tip_extra_2`) | $15                        |
+  | Choose another amount → Tip | `moreTipProducts[2]` (`…tip.extra3`)         | `revenueCat.morePackages[2]` (`tip_extra_3`) | $25                        |
+  | Choose another amount → Tip | `moreTipProducts[3]` (`…tip.extra4`)         | `revenueCat.morePackages[3]` (`tip_extra_4`) | $50                        |
+  - The extra amounts appear in the order listed. Products and packages pair by position, so keep the two lists the
+    same length.
+  - To change the extra amounts, change the App Store prices. To add or remove one, edit both lists; an empty pair of
+    lists hides "Choose another amount". `npm run release:check` refuses mismatched or duplicate IDs.
+  - At runtime, an extra amount is offered only if RevenueCat returns it as a priced consumable that sells exactly
+    that product. Otherwise it's left out quietly. The three suggested tips must all load before any extra amount is
+    shown.
+
 - [ ] TestFlight testers (internal first; external testing needs Beta App Review).
 
 ## 3. Signed production build
@@ -122,7 +148,8 @@ Check in the build (or the upload's validation report):
 
 **Support (tips)** (TestFlight purchases are free; also test with a Sandbox Apple Account in Settings → App Store)
 
-- [ ] Settings → About → Support: the three tips show prices in your region's currency; the screen reads well in
+- [ ] Settings → About → Support: the three tips show prices in your region's currency; "Choose another amount" opens
+      and closes the four extra amounts (VoiceOver says expanded or collapsed), and each one buys like the others; the screen reads well in
       Arabic (right to left), at the largest Dynamic Type size and with VoiceOver.
 - [ ] Each tip: Apple's sheet, then “Thank you”; the same tip again works (repeatable). Nothing else in the app
       changes (habits, XP, collection, Insights). Each tip appears once in RevenueCat's dashboard (sandbox data).

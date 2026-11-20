@@ -656,6 +656,10 @@ export const hi: Translation = {
 
         failed: 'टिप पूरी नहीं हुई। कृपया थोड़ी देर में फिर से कोशिश करें।',
       },
+
+      more: 'कोई और राशि चुनें',
+
+      amount: 'टिप',
     },
 
     licenses: {

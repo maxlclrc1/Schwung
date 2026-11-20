@@ -746,6 +746,10 @@ export const ar: Translation = {
 
         failed: 'لم تتم الإكرامية. يُرجى المحاولة مرة أخرى بعد قليل.',
       },
+
+      more: 'اختر مبلغًا آخر',
+
+      amount: 'إكرامية',
     },
 
     licenses: {

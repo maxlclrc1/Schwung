@@ -662,6 +662,10 @@ export const es: Translation = {
 
         failed: 'La propina no se realizó. Vuelve a intentarlo en un momento.',
       },
+
+      more: 'Elegir otra cantidad',
+
+      amount: 'Propina',
     },
 
     licenses: {

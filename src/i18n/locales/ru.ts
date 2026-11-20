@@ -716,6 +716,10 @@ export const ru: Translation = {
 
         failed: 'Чаевые не прошли. Попробуй ещё раз чуть позже.',
       },
+
+      more: 'Выбрать другую сумму',
+
+      amount: 'Чаевые',
     },
 
     licenses: {

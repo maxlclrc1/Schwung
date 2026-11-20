@@ -19,8 +19,9 @@ const r = json('release.config.json');
 for (const [k, v] of Object.entries({
   ...r,
   ...Object.fromEntries(Object.entries(r.tipProducts).map(([s, id]) => [`tipProducts.${s}`, id])),
+  ...Object.fromEntries((r.moreTipProducts ?? []).map((id, i) => [`moreTipProducts[${i}]`, id])),
 })) {
-  if (k === 'tipProducts' || k === 'revenueCat') continue;
+  if (k === 'tipProducts' || k === 'moreTipProducts' || k === 'revenueCat') continue;
   if (typeof v !== 'string' || !v.trim()) fail(`release.config.json: ${k} is empty`);
   else if (placeholder(v)) fail(`release.config.json: ${k} is still a placeholder (${v})`);
 }
@@ -30,8 +31,8 @@ if (r.appName.length > 30) fail(`appName is longer than the App Store's 30 chara
 if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.supportEmail)) fail(`supportEmail "${r.supportEmail}" isn't an email address`);
 for (const k of ['privacyPolicyUrl', 'supportUrl'])
   if (!/^https:\/\/[^\s]+$/.test(r[k])) fail(`${k} must be an https:// URL`);
-const tips = Object.values(r.tipProducts);
-if (new Set(tips).size !== 3) fail('tipProducts: the three product IDs must be different');
+const tips = [...Object.values(r.tipProducts), ...(r.moreTipProducts ?? [])];
+if (new Set(tips).size !== tips.length) fail('tipProducts and moreTipProducts: every product ID must be different');
 for (const id of tips)
   if (!/^[a-zA-Z0-9._]+$/.test(id)) fail(`tip product ID "${id}" has characters Apple doesn't allow`);
 
@@ -44,6 +45,16 @@ if (!/^appl_[A-Za-z0-9]+$/.test(rc.appleApiKey ?? ''))
 if (!rc.offering) fail('release.config.json: revenueCat.offering is empty');
 for (const size of ['small', 'medium', 'large'])
   if (!rc.packages?.[size]) fail(`release.config.json: revenueCat.packages.${size} is empty`);
+// Extra amounts ("Choose another amount"): optional, but each product needs its own package, in the same order.
+const more = r.moreTipProducts ?? [];
+const morePackages = rc.morePackages ?? [];
+if (!Array.isArray(more) || !Array.isArray(morePackages) || more.length !== morePackages.length)
+  fail('release.config.json: moreTipProducts and revenueCat.morePackages must be lists of the same length');
+const packages = [...Object.values(rc.packages ?? {}), ...morePackages];
+if (morePackages.some((p) => typeof p !== 'string' || !p.trim()))
+  fail('release.config.json: revenueCat.morePackages has an empty package identifier');
+if (new Set(packages).size !== packages.length)
+  fail('release.config.json: every RevenueCat package identifier (packages and morePackages) must be different');
 
 // No secrets anywhere in Git (RevenueCat secret keys, App Store Connect .p8 keys, private keys, certificates).
 const tracked = execSync('git ls-files', { cwd: root }).toString().split('\n').filter(Boolean);

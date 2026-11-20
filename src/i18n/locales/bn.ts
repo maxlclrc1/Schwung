@@ -653,6 +653,10 @@ export const bn: Translation = {
 
         failed: 'টিপটি সম্পন্ন হয়নি। একটু পরে আবার চেষ্টা করুন।',
       },
+
+      more: 'অন্য পরিমাণ বেছে নিন',
+
+      amount: 'টিপ',
     },
 
     licenses: {

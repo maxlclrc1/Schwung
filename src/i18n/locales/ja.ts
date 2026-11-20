@@ -655,6 +655,10 @@ export const ja: Translation = {
 
         failed: 'チップを完了できませんでした。少し時間をおいてもう一度お試しください。',
       },
+
+      more: 'ほかの金額を選ぶ',
+
+      amount: 'チップ',
     },
 
     licenses: {

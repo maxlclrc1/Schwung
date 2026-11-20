@@ -670,6 +670,10 @@ export const ptBR: Translation = {
 
         failed: 'A gorjeta não foi concluída. Tente de novo em um instante.',
       },
+
+      more: 'Escolher outro valor',
+
+      amount: 'Gorjeta',
     },
 
     licenses: {

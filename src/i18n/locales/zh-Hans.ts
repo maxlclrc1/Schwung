@@ -626,6 +626,10 @@ export const zhHans: Translation = {
 
         failed: '小费没有成功。请稍后再试。',
       },
+
+      more: '选择其他金额',
+
+      amount: '小费',
     },
 
     licenses: {

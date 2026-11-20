@@ -680,6 +680,10 @@ export const it: Translation = {
 
         failed: 'La mancia non è andata a buon fine. Riprova tra un momento.',
       },
+
+      more: 'Scegli un altro importo',
+
+      amount: 'Mancia',
     },
 
     licenses: {

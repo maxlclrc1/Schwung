@@ -639,6 +639,10 @@ export const ko: Translation = {
 
         failed: '팁이 처리되지 않았어요. 잠시 후 다시 시도해 주세요.',
       },
+
+      more: '다른 금액 선택',
+
+      amount: '팁',
     },
 
     licenses: {

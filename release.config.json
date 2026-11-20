@@ -10,6 +10,12 @@
     "medium": "com.example.schwung.tip.medium",
     "large": "com.example.schwung.tip.large"
   },
+  "moreTipProducts": [
+    "com.example.schwung.tip.extra1",
+    "com.example.schwung.tip.extra2",
+    "com.example.schwung.tip.extra3",
+    "com.example.schwung.tip.extra4"
+  ],
   "revenueCat": {
     "appleApiKey": "",
     "offering": "tips",
@@ -17,6 +23,7 @@
       "small": "tip_small",
       "medium": "tip_medium",
       "large": "tip_large"
-    }
+    },
+    "morePackages": ["tip_extra_1", "tip_extra_2", "tip_extra_3", "tip_extra_4"]
   }
 }

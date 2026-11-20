@@ -29,7 +29,10 @@ export function Section({ title, children, first }: { title: string; children: R
   );
 }
 
-/** A row: an optional small icon, its label (and a line under it), a value or a chevron at the end. */
+/**
+ * A row: an optional small icon, its label (and a line under it), a value or a chevron at the end. With `expanded`
+ * it opens and closes the rows under it: the chevron points down or up, and VoiceOver hears the state.
+ */
 export function Row({
   label,
   hint,
@@ -38,6 +41,7 @@ export function Row({
   onPress,
   destructive,
   chevron = !!onPress,
+  expanded,
   children,
 }: {
   label: string;
@@ -47,6 +51,7 @@ export function Row({
   onPress?: () => void;
   destructive?: boolean;
   chevron?: boolean;
+  expanded?: boolean;
   children?: ReactNode;
 }) {
   const { c } = useTheme();
@@ -64,6 +69,7 @@ export function Row({
         disabled={!onPress}
         accessibilityRole={onPress ? 'button' : undefined}
         accessibilityLabel={onPress ? [label, hint, value].filter(Boolean).join('. ') : undefined}
+        accessibilityState={expanded === undefined ? undefined : { expanded }}
         style={styles.row}
       >
         {icon ? (
@@ -83,7 +89,11 @@ export function Row({
           </T>
         ) : null}
         {children}
-        {chevron ? <Ionicons name="chevron-forward" size={17} color={c.textFaint} style={flipX} /> : null}
+        {expanded !== undefined ? (
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={17} color={c.textFaint} />
+        ) : chevron ? (
+          <Ionicons name="chevron-forward" size={17} color={c.textFaint} style={flipX} />
+        ) : null}
       </Tap>
     </ThemedView>
   );

@@ -659,6 +659,10 @@ export const tr: Translation = {
 
         failed: 'Bahşiş gerçekleşmedi. Lütfen birazdan tekrar dene.',
       },
+
+      more: 'Başka bir tutar seç',
+
+      amount: 'Bahşiş',
     },
 
     licenses: {

@@ -665,6 +665,10 @@ export const vi: Translation = {
 
         failed: 'Không gửi được tiền tip. Vui lòng thử lại sau giây lát.',
       },
+
+      more: 'Chọn số tiền khác',
+
+      amount: 'Tip',
     },
 
     licenses: {

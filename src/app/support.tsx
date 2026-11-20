@@ -13,7 +13,8 @@ import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 /**
- * Settings → Support: three voluntary tips through Apple, processed with RevenueCat (lib/tips.ts). A tip unlocks
+ * Settings → Support: three suggested voluntary tips through Apple, and any extra amounts folded under "Choose another
+ * amount" (App Store price tiers set up as consumables; never a custom amount), processed with RevenueCat (lib/tips.ts). A tip unlocks
  * nothing and changes nothing in the program; the screen never asks twice and nothing else in the app ever asks at
  * all. Prices come from the App Store.
  */
@@ -22,6 +23,7 @@ export default function Support() {
   const t = useT();
   const [tips, setTips] = useState<Tip[] | null>(null);
   const [phase, setPhase] = useState<TipPhase>('loading');
+  const [moreOpen, setMoreOpen] = useState(false);
   const show = useCallback((loaded: Tip[] | null) => {
     setTips(loaded);
     setPhase(loaded ? 'ready' : 'unavailable');
@@ -55,6 +57,18 @@ export default function Support() {
   }, [noteText, phase]);
 
   const enabled = canTip(phase);
+  const suggested = tips?.filter((x) => x.size !== 'more') ?? [];
+  const more = tips?.filter((x) => x.size === 'more') ?? [];
+  const tipRow = (x: Tip) => (
+    <Row
+      key={x.packageId}
+      icon="heart-outline"
+      label={t(x.size === 'more' ? 'settings.tips.amount' : `settings.tips.${x.size}`)}
+      value={x.price}
+      chevron={false}
+      onPress={enabled ? () => void tip(x) : undefined}
+    />
+  );
   return (
     <Screen edges={['bottom']}>
       <SheetHeader title={t('settings.tips.title', { app: APP_NAME })} />
@@ -63,16 +77,16 @@ export default function Support() {
 
         {tips ? (
           <ThemedView style={[styles.group, { borderColor: c.border }]}>
-            {tips.map((x) => (
+            {suggested.map(tipRow)}
+            {more.length ? (
               <Row
-                key={x.size}
-                icon="heart-outline"
-                label={t(`settings.tips.${x.size}`)}
-                value={x.price}
-                chevron={false}
-                onPress={enabled ? () => void tip(x) : undefined}
+                icon="ellipsis-horizontal-circle-outline"
+                label={t('settings.tips.more')}
+                expanded={moreOpen}
+                onPress={() => setMoreOpen((o) => !o)}
               />
-            ))}
+            ) : null}
+            {moreOpen ? more.map(tipRow) : null}
           </ThemedView>
         ) : null}
 
