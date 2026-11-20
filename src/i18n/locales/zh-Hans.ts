@@ -508,7 +508,7 @@ export const zhHans: Translation = {
       failedReminders: '已安排的提醒',
       failedTemp: '临时分享文件',
 
-      tips: '小费通过 Apple 支付。我们从不接收你的付款信息，应用也不会保留任何小费记录。',
+      tips: '小费通过 Apple 支付，并由 RevenueCat 处理。RevenueCat 只会收到一个匿名 ID 和你的小费购买记录，绝不会收到你的姓名或付款信息。只有在你打开支持页面或有未完成的小费时，应用才会联系它。',
     },
     restore: {
       title: '从备份恢复',
@@ -607,7 +607,8 @@ export const zhHans: Translation = {
 
       retry: '重试',
 
-      footnote: '小费通过 Apple 支付，是一次性的感谢，所以换新手机时无需恢复任何内容。{app} 从不接收你的付款信息。',
+      footnote:
+        '小费通过 Apple 支付，并由 RevenueCat 处理。这是一次性的感谢，所以换新手机时无需恢复任何内容。{app} 从不接收你的付款信息。',
 
       note: {
         loading: '正在加载小费…',
@@ -619,7 +620,7 @@ export const zhHans: Translation = {
 
         thanks: '谢谢你。你的小费意义重大。',
 
-        delayed: 'App Store 仍在确认你的小费。即使关闭应用，它也会自动完成。',
+        delayed: '暂时无法确认这笔小费。如果已扣款，它会自动确认，你不会被重复扣款。',
 
         unconfirmed: 'App Store 无法确认这笔小费，因此未完成。',
 

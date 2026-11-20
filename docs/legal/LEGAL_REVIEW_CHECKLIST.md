@@ -20,9 +20,10 @@ published or relied on until the items below are settled.
 
 ## Factual checks against the build
 
-- [ ] The release build makes no network requests except to Apple's App Store when someone opens Support or tips
-      (privacy policy §2, §4, §6a); confirm with a proxy on a signed build.
-- [ ] App Store "App Privacy" answers: **Data Not Collected**, matching the privacy manifest.
+- [ ] The release build makes no network requests except to Apple and RevenueCat when someone opens Support, or at
+      launch while a tip is unfinished (privacy policy §2, §4, §6a); confirm with a proxy on a signed build.
+- [ ] App Store "App Privacy" answers: **Purchases → Purchase History** collected (by RevenueCat), not linked to the
+      user, not used for tracking, purpose App Functionality; nothing else (see TESTFLIGHT_CHECKLIST.md §2).
 - [ ] Data list in policy §3 still matches `EXPORT_CONTAINS` (`src/core/dataExport.ts`) and Settings → Privacy & Data.
 - [ ] In-app texts in `src/core/legal.ts` match `WELLNESS_DISCLAIMER.md` and `TERMS_OF_USE.md`.
 - [ ] Once the Terms are final, set `LEGAL_READY.terms = true` (`src/core/legal.ts`) so production builds show them.
@@ -43,6 +44,11 @@ published or relied on until the items below are settled.
       rules (EU MDR, FDA general-wellness policy) and make no guaranteed-outcome claims.
 - [ ] **Terms of Use:** v1.0 uses **Apple's standard EULA** (owner decision); our own Terms stay hidden until a
       lawyer approves them: governing law and courts; liability cap; Apple's minimum terms.
-- [ ] **Tips:** the privacy policy's tips section (§6a), and whether any consumer-law information is needed for
-      voluntary tips that Apple sells as merchant of record (Türkiye, EU).
+- [ ] **Tips (RevenueCat):** the privacy policy's tips section (§6a). RevenueCat, Inc. (US) processes an anonymous
+      ID, tip purchase records and request metadata (IP address, app/iOS version, locale, storefront) for us:
+      accept RevenueCat's DPA, confirm the processor role, the GDPR/KVKK transfer basis to the US, retention, and
+      whether the KVKK notice must name it. Note that Delete my data can't clear the RevenueCat SDK's local cache
+      (anonymous ID, recent purchases), present only after Support was opened.
+- [ ] **Consumer law:** whether any information is needed for voluntary tips that Apple sells as merchant of record
+      (Türkiye, EU).
 - [ ] **Languages:** whether translated versions are needed (for example Turkish, German).

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AccessibilityInfo, ScrollView, StyleSheet } from 'react-native';
 import { Row } from '../components/settingsRows';
 import { SheetHeader } from '../components/SheetHeader';
@@ -8,22 +8,20 @@ import { useT } from '../i18n/react';
 import type { TKey } from '../i18n';
 import { APP_NAME } from '../lib/constants';
 import { haptic } from '../lib/haptics';
-import { buyTip, loadTips, onTipOutcome } from '../lib/tips';
+import { buyTip, loadTips } from '../lib/tips';
 import { space, useTheme } from '../theme';
 import { ThemedView } from '../theme/transition';
 
 /**
- * Settings → Support Schwung: three voluntary tips through Apple. A tip unlocks nothing and is never recorded; the
- * screen never asks twice and nothing else in the app ever asks at all. Prices come from the App Store.
+ * Settings → Support: three voluntary tips through Apple, processed with RevenueCat (lib/tips.ts). A tip unlocks
+ * nothing and changes nothing in the program; the screen never asks twice and nothing else in the app ever asks at
+ * all. Prices come from the App Store.
  */
 export default function Support() {
   const { c } = useTheme();
   const t = useT();
   const [tips, setTips] = useState<Tip[] | null>(null);
   const [phase, setPhase] = useState<TipPhase>('loading');
-  // The tip this screen asked for: only its verdict is shown (others are finished quietly in lib/tips.ts).
-  const asked = useRef<string | null>(null);
-
   const show = useCallback((loaded: Tip[] | null) => {
     setTips(loaded);
     setPhase(loaded ? 'ready' : 'unavailable');
@@ -41,30 +39,13 @@ export default function Support() {
     };
   }, [show]);
 
-  useEffect(
-    () =>
-      onTipOutcome(({ productId, phase: next }) => {
-        if (productId !== asked.current) return;
-        if (next !== 'pending') asked.current = null;
-        setPhase(next);
-        if (next === 'thanks') haptic.success();
-      }),
-    [],
-  );
-
-  const tip = async (productId: string) => {
+  const tip = async (x: Tip) => {
     if (!canTip(phase)) return;
-    asked.current = productId;
     setPhase('buying');
-    const answer = await buyTip(productId);
-    // null: the App Store has it, and its verdict comes through onTipOutcome. Keep a verdict that already arrived.
-    if (answer) {
-      if (answer !== 'pending') asked.current = null;
-      setPhase(answer);
-    } else {
-      // Normally the verdict follows at once; if none comes, the tips become choosable again (never a thank-you).
-      setTimeout(() => setPhase((p) => (p === 'buying' ? 'ready' : p)), 20000);
-    }
+    const answer = await buyTip(x);
+    if (!answer) return; // a purchase is already open
+    setPhase(answer);
+    if (answer === 'thanks') haptic.success();
   };
 
   const note = noteFor(phase);
@@ -89,7 +70,7 @@ export default function Support() {
                 label={t(`settings.tips.${x.size}`)}
                 value={x.price}
                 chevron={false}
-                onPress={enabled ? () => void tip(x.productId) : undefined}
+                onPress={enabled ? () => void tip(x) : undefined}
               />
             ))}
           </ThemedView>

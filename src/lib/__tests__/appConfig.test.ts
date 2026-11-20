@@ -54,7 +54,7 @@ describe('app configuration', () => {
     }
   });
 
-  it('has exactly the plugins it needs; In-App Purchase is the only commerce, with no alternative billing', () => {
+  it('has exactly the plugins it needs (In-App Purchase needs none)', () => {
     expect(app.plugins.map(name)).toEqual([
       'expo-router',
       'expo-sharing',
@@ -64,9 +64,8 @@ describe('app configuration', () => {
       'expo-status-bar',
       'expo-notifications',
       'expo-media-library',
-      'expo-iap',
     ]);
-    expect(app.plugins.find((p) => name(p) === 'expo-iap')).toBe('expo-iap'); // no options: no alternative billing
+    // RevenueCat (react-native-purchases) needs no config plugin: it adds no entitlement, permission or capability.
   });
 
   it('asks iOS for nothing beyond adding the story image to Photos, and never for remote push', () => {
@@ -111,6 +110,7 @@ describe('app configuration', () => {
         'appName',
         'bundleIdentifier',
         'privacyPolicyUrl',
+        'revenueCat',
         'supportEmail',
         'supportUrl',
         'tipProducts',
@@ -118,6 +118,10 @@ describe('app configuration', () => {
     );
     expect(Object.keys(release.tipProducts)).toEqual(['small', 'medium', 'large']);
     expect(new Set(Object.values(release.tipProducts)).size).toBe(3);
+    // RevenueCat: only a public Apple SDK key may ever be here (or nothing yet); never a secret key.
+    expect(Object.keys(release.revenueCat).sort()).toEqual(['appleApiKey', 'offering', 'packages']);
+    expect(release.revenueCat.appleApiKey).toMatch(/^(appl_[A-Za-z0-9]+)?$/);
+    expect(Object.keys(release.revenueCat.packages)).toEqual(['small', 'medium', 'large']);
   });
 
   it('the app’s code names the identity only through lib/constants (so a rename is one file)', () => {

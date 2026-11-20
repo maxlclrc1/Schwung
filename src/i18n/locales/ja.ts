@@ -528,7 +528,7 @@ export const ja: Translation = {
       failedReminders: '予定されたリマインダー',
       failedTemp: '共有用の一時ファイル',
 
-      tips: 'チップはAppleを通じて支払われます。支払い情報を受け取ることはなく、アプリにチップの記録も残りません。',
+      tips: 'チップはAppleを通じて支払われ、RevenueCatで処理されます。RevenueCatが受け取るのは匿名のIDとチップの購入履歴のみで、名前や支払い情報は受け取りません。アプリがRevenueCatと通信するのは、応援画面を開いたときか、完了していないチップがあるときだけです。',
     },
     restore: {
       title: 'バックアップから復元',
@@ -636,7 +636,7 @@ export const ja: Translation = {
       retry: 'もう一度試す',
 
       footnote:
-        'チップはAppleを通じて支払われる1回限りの感謝の気持ちなので、新しいiPhoneで復元するものはありません。{app}が支払い情報を受け取ることはありません。',
+        'チップはAppleを通じて支払われ、RevenueCatで処理されます。1回限りの感謝の気持ちなので、新しいiPhoneで復元するものはありません。{app}が支払い情報を受け取ることはありません。',
 
       note: {
         loading: 'チップを読み込み中…',
@@ -648,7 +648,8 @@ export const ja: Translation = {
 
         thanks: 'ありがとうございます。チップはとても励みになります。',
 
-        delayed: 'App Storeがまだチップを確認しています。アプリを閉じても、自動的に完了します。',
+        delayed:
+          '現在チップを確認できませんでした。請求されていた場合は自動的に確認され、二重に請求されることはありません。',
 
         unconfirmed: 'App Storeがこのチップを確認できなかったため、完了しませんでした。',
 

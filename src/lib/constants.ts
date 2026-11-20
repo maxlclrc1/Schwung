@@ -11,3 +11,5 @@ export const PRIVACY_URL = release.privacyPolicyUrl;
 export const SUPPORT_URL = release.supportUrl;
 /** The three voluntary tips (consumable In-App Purchases), smallest first. */
 export const TIP_PRODUCTS = release.tipProducts;
+/** RevenueCat (the tips): the public Apple SDK key (`appl_…`; empty until set up), and the offering and packages. */
+export const REVENUECAT = release.revenueCat;

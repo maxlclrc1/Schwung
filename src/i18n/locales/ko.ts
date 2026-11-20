@@ -516,7 +516,7 @@ export const ko: Translation = {
       failedReminders: '예약된 알림',
       failedTemp: '공유용 임시 파일',
 
-      tips: '팁은 Apple을 통해 결제돼요. 저희는 결제 정보를 절대 받지 않으며, 앱에는 팁 기록이 남지 않아요.',
+      tips: '팁은 Apple을 통해 결제되고 RevenueCat으로 처리돼요. RevenueCat은 익명 ID와 팁 구입 내역만 받으며, 이름이나 결제 정보는 절대 받지 않아요. 앱은 응원하기 화면을 열 때나 완료되지 않은 팁이 있을 때만 RevenueCat과 통신해요.',
     },
     restore: {
       title: '백업에서 복원',
@@ -621,7 +621,7 @@ export const ko: Translation = {
       retry: '다시 시도',
 
       footnote:
-        '팁은 Apple을 통해 결제되는 일회성 감사 표시라서 새 휴대폰에서 복원할 것이 없어요. {app}은(는) 결제 정보를 절대 받지 않아요.',
+        '팁은 Apple을 통해 결제되고 RevenueCat으로 처리돼요. 일회성 감사 표시라서 새 휴대폰에서 복원할 것이 없어요. {app}은(는) 결제 정보를 절대 받지 않아요.',
 
       note: {
         loading: '팁을 불러오는 중…',
@@ -633,7 +633,7 @@ export const ko: Translation = {
 
         thanks: '고마워요. 보내 주신 팁은 큰 힘이 돼요.',
 
-        delayed: 'App Store에서 아직 팁을 확인하고 있어요. 앱을 닫아도 자동으로 완료돼요.',
+        delayed: '지금은 팁을 확인하지 못했어요. 요금이 청구됐다면 자동으로 확인되며, 두 번 청구되지 않아요.',
 
         unconfirmed: 'App Store에서 이 팁을 확인하지 못해 완료되지 않았어요.',
 

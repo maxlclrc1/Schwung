@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, PRIVACY_URL, TIP_PRODUCTS } from './constants';
+import { CONTACT_EMAIL, PRIVACY_URL, REVENUECAT, TIP_PRODUCTS } from './constants';
 import { channel } from './flags';
 import { LEGAL_READY } from '../core/legal';
 
@@ -17,6 +17,9 @@ export const legalVisible = {
   terms: () => visible(LEGAL_READY.terms),
   privacyPolicy: () => visible(!isPlaceholder(PRIVACY_URL)),
   contact: () => visible(!isPlaceholder(CONTACT_EMAIL)),
-  /** Support Schwung (the tip jar): hidden from App Store builds until the real product IDs are set. */
-  tips: () => visible(!Object.values(TIP_PRODUCTS).some(isPlaceholder)),
+  /**
+   * Support Schwung (the tip jar): hidden from App Store builds until RevenueCat's public Apple key and the real
+   * product IDs are set (lib/tips.ts then still needs RevenueCat and App Store Connect to answer before it offers any).
+   */
+  tips: () => visible(/^appl_/.test(REVENUECAT.appleApiKey) && !Object.values(TIP_PRODUCTS).some(isPlaceholder)),
 };

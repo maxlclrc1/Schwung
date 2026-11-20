@@ -22,11 +22,13 @@ In this policy, "we" means the operator above and "you" means the person using S
 - Schwung works on your iPhone. **There is no account, no sign-in and no Schwung server** that receives your habits,
   answers or progress.
 - Everything you enter is **stored on your device**. We (the developer) can't see it, and we don't receive a copy.
-- Schwung has **no advertising, no analytics, no tracking and no third-party data sharing**.
+- Schwung has **no advertising, no analytics, no tracking and no third-party data sharing**; the only outside
+  service is RevenueCat, for optional tips (section 6a).
 - You can **export** everything Schwung keeps and **delete** it at any time in **Settings → Privacy & Data**.
 - Data reaches us only if **you choose** to send it to us, for example by emailing us.
-- **Tips are optional** and paid through Apple. We never receive your payment details, and the app keeps no record
-  of tips (section 6a).
+- **Tips are optional**, paid through Apple and handled with **RevenueCat**, a purchase service. It receives an
+  anonymous ID and your tip purchases, never your name or payment details, and only when you open Support or a tip is
+  unfinished (section 6a).
 
 ## 3. Data stored on your device
 
@@ -51,7 +53,8 @@ is used only to adapt the app's suggestions for you.
 
 ## 4. How processing works, and third-party software
 
-All of Schwung's processing (planning targets, counting streaks, charts) happens on your iPhone.
+All of Schwung's processing (planning targets, counting streaks, charts) happens on your iPhone. The only exception
+is tips (section 6a).
 
 Schwung is built with open-source software components, including Expo and React Native modules (for example for
 storage, notifications, file sharing and saving images). These run **inside the app on your device**. In Schwung
@@ -85,20 +88,38 @@ Reminders are optional and **off until you turn them on**. iOS asks for your per
   please keep it safe.
 - Temporary files made for sharing are deleted shortly after the share sheet closes, or the next time the app opens.
 
-## 6a. Tips (In-App Purchase)
+## 6a. Tips (In-App Purchase, Apple and RevenueCat)
 
-Schwung is free. You can leave an optional tip in **Settings → Support Schwung**. A tip doesn't unlock anything or
-change how the app works.
+Schwung is free. You can leave an optional tip in **Settings → Support**. A tip doesn't unlock anything or change how
+the app works.
 
-- Tips are sold and processed by **Apple** through the App Store's In-App Purchase, under Apple's terms and privacy
-  policy. Apple handles your payment method, billing address and receipts.
-- When you tip, the app talks to the App Store to show prices in your currency and to complete the purchase. This is
-  the only time Schwung connects to anything outside your phone, and only Apple is involved.
-- **We don't receive your name, Apple ID, payment details or contact information.** Apple may show us aggregated or
-  pseudonymous sales reports in App Store Connect (for example, the number of tips and their country), as it does
-  for every app with purchases.
-- Schwung keeps **no record of tips** on your device: nothing is saved, exported or included in backups.
-- Refunds are handled by Apple (reportaproblem.apple.com).
+- **Apple** sells and processes tips through the App Store's In-App Purchase, under Apple's terms and privacy policy.
+  Apple handles your payment method, billing address and receipts. We never receive your payment details.
+- **RevenueCat** (RevenueCat, Inc., United States) is the service the app uses to show tip prices, complete tips and
+  confirm them with Apple. It acts for us as a processor. When the app talks to RevenueCat it sends:
+  - a random, anonymous ID that RevenueCat creates for this installation (not your name, email or Apple ID);
+  - your tip purchases (which tip, transaction details from Apple such as the transaction ID, date, price and
+    currency, and your App Store country);
+  - technical information that comes with any request, such as the app version, iOS version, device language and
+    your IP address.
+
+  The app doesn't send RevenueCat any of your habits, answers, health precautions or progress, doesn't set
+  attribution or device identifiers, and turns RevenueCat's diagnostics off. RevenueCat handles this data under its
+  own privacy policy and our agreement with it. TODO (founder): link RevenueCat's privacy policy and data processing
+  agreement once accepted, and state the retention period RevenueCat applies.
+- **When the app contacts RevenueCat:** only when you open Support, and at launch while a tip is unfinished (waiting
+  for approval, or interrupted) so it can be completed. Once Support has been opened, RevenueCat also refreshes
+  while the app stays open that time. If you never open Support, nothing is sent.
+- **On your device:** while a tip is unfinished, the app keeps a small note that one is in progress and since when,
+  so it can finish it; the note is removed once the tip is settled, after 7 days at most, or by Delete my data. Apart
+  from that, the app keeps no record of tips. Tips aren't in your data export. The RevenueCat SDK may keep its own
+  cache (the anonymous ID and recent purchase information) in the app's storage on your device, but only if you
+  have opened Support. Delete my data can't clear that cache (the SDK offers no way to); deleting the app removes it.
+- **What we see:** in RevenueCat's and Apple's dashboards we can see anonymous purchase records and sales reports
+  (for example the number of tips, their prices and countries). We can't link them to you unless you contact us.
+- **Refunds** are handled by Apple (reportaproblem.apple.com).
+- **International transfer:** RevenueCat processes data in the United States. TODO (legal review): the transfer basis
+  under GDPR and KVKK.
 
 ## 7. Storage, backups and retention
 

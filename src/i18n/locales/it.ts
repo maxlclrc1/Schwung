@@ -552,7 +552,7 @@ export const it: Translation = {
       failedReminders: 'Promemoria programmati',
       failedTemp: 'File di condivisione temporanei',
 
-      tips: 'Le mance si pagano tramite Apple. Non riceviamo mai i tuoi dati di pagamento e l’app non conserva alcuna registrazione delle mance.',
+      tips: 'Le mance si pagano tramite Apple e sono gestite con RevenueCat, che riceve un ID anonimo e i tuoi acquisti di mance, mai il tuo nome né i tuoi dati di pagamento. L’app lo contatta solo quando apri Sostieni o c’è una mancia non completata.',
     },
     restore: {
       title: 'Ripristina da backup',
@@ -661,7 +661,7 @@ export const it: Translation = {
       retry: 'Riprova',
 
       footnote:
-        'Le mance si pagano tramite Apple e sono ringraziamenti una tantum, quindi su un nuovo telefono non c’è nulla da ripristinare. {app} non riceve mai i tuoi dati di pagamento.',
+        'Le mance si pagano tramite Apple e sono gestite con RevenueCat. Sono ringraziamenti una tantum, quindi su un nuovo telefono non c’è nulla da ripristinare. {app} non riceve mai i tuoi dati di pagamento.',
 
       note: {
         loading: 'Caricamento delle mance…',
@@ -673,7 +673,8 @@ export const it: Translation = {
 
         thanks: 'Grazie. La tua mancia significa molto.',
 
-        delayed: 'L’App Store sta ancora confermando la tua mancia. Si completerà da sola, anche se chiudi l’app.',
+        delayed:
+          'Non è stato possibile confermare la mancia per ora. Se ti è stato addebitato l’importo, verrà confermata da sola e non ti verrà addebitato due volte.',
 
         unconfirmed: 'L’App Store non è riuscito a confermare questa mancia, quindi non è stata completata.',
 

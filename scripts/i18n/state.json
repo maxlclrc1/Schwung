@@ -1232,16 +1232,16 @@
     "settings.tips.medium": "Medium tip",
     "settings.tips.large": "Large tip",
     "settings.tips.retry": "Try again",
-    "settings.tips.footnote": "Tips are paid through Apple and are one-time thank-yous, so there’s nothing to restore on a new phone. {app} never receives your payment details.",
+    "settings.tips.footnote": "Tips are paid through Apple and handled with RevenueCat. They’re one-time thank-yous, so there’s nothing to restore on a new phone. {app} never receives your payment details.",
     "settings.tips.note.loading": "Loading tips…",
     "settings.tips.note.unavailable": "Tips aren’t available right now.",
     "settings.tips.note.restricted": "Purchases are turned off on this iPhone.",
     "settings.tips.note.pending": "Waiting for approval. You’ll only be charged if it’s approved.",
     "settings.tips.note.thanks": "Thank you. Your tip means a lot.",
-    "settings.tips.note.delayed": "Your tip is still being confirmed by the App Store. It will finish on its own, even if you close the app.",
+    "settings.tips.note.delayed": "The tip couldn’t be confirmed just now. If you were charged, it will be confirmed on its own, and you won’t be charged twice.",
     "settings.tips.note.unconfirmed": "The App Store couldn’t confirm this tip, so it wasn’t completed.",
     "settings.tips.note.failed": "The tip didn’t go through. Please try again in a moment.",
-    "settings.privacy.tips": "Tips are paid through Apple. We never receive your payment details, and the app keeps no record of tips."
+    "settings.privacy.tips": "Tips are paid through Apple and handled with RevenueCat, which receives an anonymous ID and your tip purchases, never your name or payment details. The app only contacts them when you open Support or a tip is unfinished."
   },
   "stale": {},
   "review": {

@@ -20,7 +20,7 @@ for (const [k, v] of Object.entries({
   ...r,
   ...Object.fromEntries(Object.entries(r.tipProducts).map(([s, id]) => [`tipProducts.${s}`, id])),
 })) {
-  if (k === 'tipProducts') continue;
+  if (k === 'tipProducts' || k === 'revenueCat') continue;
   if (typeof v !== 'string' || !v.trim()) fail(`release.config.json: ${k} is empty`);
   else if (placeholder(v)) fail(`release.config.json: ${k} is still a placeholder (${v})`);
 }
@@ -34,6 +34,28 @@ const tips = Object.values(r.tipProducts);
 if (new Set(tips).size !== 3) fail('tipProducts: the three product IDs must be different');
 for (const id of tips)
   if (!/^[a-zA-Z0-9._]+$/.test(id)) fail(`tip product ID "${id}" has characters Apple doesn't allow`);
+
+// RevenueCat (the tips): only the public Apple SDK key belongs in the app; secret keys never do.
+const rc = r.revenueCat ?? {};
+if (!/^appl_[A-Za-z0-9]+$/.test(rc.appleApiKey ?? ''))
+  fail(
+    'release.config.json: revenueCat.appleApiKey must be RevenueCat’s public Apple SDK key (appl_…), from Project settings → API keys',
+  );
+if (!rc.offering) fail('release.config.json: revenueCat.offering is empty');
+for (const size of ['small', 'medium', 'large'])
+  if (!rc.packages?.[size]) fail(`release.config.json: revenueCat.packages.${size} is empty`);
+
+// No secrets anywhere in Git (RevenueCat secret keys, App Store Connect .p8 keys, private keys, certificates).
+const tracked = execSync('git ls-files', { cwd: root }).toString().split('\n').filter(Boolean);
+for (const f of tracked) {
+  if (/\.(p8|p12|pem|key|mobileprovision|cer)$|(^|\/)\.env(\.|$)/.test(f))
+    fail(`a key or certificate file is in Git: ${f}`);
+  else if (/\.(ts|tsx|js|mjs|json|md|plist|yml|yaml)$/.test(f) && !f.startsWith('src/lib/__tests__/')) {
+    const t = read(f);
+    if (/\bsk_[A-Za-z0-9]{20,}/.test(t) || /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(t))
+      fail(`a secret key is in Git: ${f}`);
+  }
+}
 
 // 2. The EAS project (eas init) exists.
 const app = json('app.json');

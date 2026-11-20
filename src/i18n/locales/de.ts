@@ -546,7 +546,7 @@ export const de: Translation = {
       failedReminders: 'Geplante Erinnerungen',
       failedTemp: 'Temporäre Dateien zum Teilen',
 
-      tips: 'Trinkgelder werden über Apple bezahlt. Wir erhalten niemals deine Zahlungsdaten, und die App speichert keine Aufzeichnungen über Trinkgelder.',
+      tips: 'Trinkgelder werden über Apple bezahlt und mit RevenueCat abgewickelt. RevenueCat erhält eine anonyme ID und deine Trinkgeldkäufe, niemals deinen Namen oder deine Zahlungsdaten. Die App kontaktiert RevenueCat nur, wenn du Unterstützen öffnest oder ein Trinkgeld noch nicht abgeschlossen ist.',
     },
     restore: {
       title: 'Aus Backup wiederherstellen',
@@ -656,7 +656,7 @@ export const de: Translation = {
       retry: 'Erneut versuchen',
 
       footnote:
-        'Trinkgelder werden über Apple bezahlt und sind ein einmaliges Dankeschön, daher gibt es auf einem neuen Telefon nichts wiederherzustellen. {app} erhält niemals deine Zahlungsdaten.',
+        'Trinkgelder werden über Apple bezahlt und mit RevenueCat abgewickelt. Sie sind ein einmaliges Dankeschön, daher gibt es auf einem neuen Telefon nichts wiederherzustellen. {app} erhält niemals deine Zahlungsdaten.',
 
       note: {
         loading: 'Trinkgelder werden geladen …',
@@ -669,7 +669,7 @@ export const de: Translation = {
         thanks: 'Danke. Dein Trinkgeld bedeutet uns viel.',
 
         delayed:
-          'Dein Trinkgeld wird noch vom App Store bestätigt. Es wird von selbst abgeschlossen, auch wenn du die App schließt.',
+          'Das Trinkgeld konnte gerade nicht bestätigt werden. Falls dir etwas abgebucht wurde, wird es von selbst bestätigt, und es wird nicht doppelt abgebucht.',
 
         unconfirmed: 'Der App Store konnte dieses Trinkgeld nicht bestätigen, daher wurde es nicht abgeschlossen.',
 

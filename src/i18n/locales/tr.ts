@@ -535,7 +535,7 @@ export const tr: Translation = {
       failedReminders: 'Planlanmış hatırlatıcılar',
       failedTemp: 'Geçici paylaşım dosyaları',
 
-      tips: 'Bahşişler Apple üzerinden ödenir. Ödeme bilgilerini asla almayız ve uygulama bahşişlerin kaydını tutmaz.',
+      tips: 'Bahşişler Apple üzerinden ödenir ve RevenueCat ile işlenir; RevenueCat anonim bir kimlik ve bahşiş satın alımlarını alır, adını veya ödeme bilgilerini asla almaz. Uygulama onlarla yalnızca Destek ekranını açtığında ya da tamamlanmamış bir bahşiş olduğunda iletişim kurar.',
     },
     restore: {
       title: 'Yedekten geri yükle',
@@ -641,7 +641,7 @@ export const tr: Translation = {
       retry: 'Tekrar dene',
 
       footnote:
-        'Bahşişler Apple üzerinden ödenir ve tek seferlik birer teşekkürdür; bu yüzden yeni bir telefonda geri yüklenecek bir şey yoktur. {app} ödeme bilgilerini asla almaz.',
+        'Bahşişler Apple üzerinden ödenir ve RevenueCat ile işlenir. Tek seferlik birer teşekkürdür; bu yüzden yeni bir telefonda geri yüklenecek bir şey yoktur. {app} ödeme bilgilerini asla almaz.',
 
       note: {
         loading: 'Bahşişler yükleniyor…',
@@ -653,7 +653,7 @@ export const tr: Translation = {
 
         thanks: 'Teşekkürler. Bahşişin çok değerli.',
 
-        delayed: 'Bahşişin App Store tarafından hâlâ onaylanıyor. Uygulamayı kapatsan bile kendiliğinden tamamlanacak.',
+        delayed: 'Bahşiş şu anda doğrulanamadı. Ücret alındıysa kendiliğinden doğrulanır ve iki kez ücret alınmaz.',
 
         unconfirmed: 'App Store bu bahşişi doğrulayamadı, bu yüzden tamamlanmadı.',
 

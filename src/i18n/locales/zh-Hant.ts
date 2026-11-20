@@ -506,7 +506,7 @@ export const zhHant: Translation = {
       failedReminders: '已排定的提醒',
       failedTemp: '暫存分享檔案',
 
-      tips: '小費透過 Apple 支付。我們從不接收你的付款資訊，App 也不會保留任何小費紀錄。',
+      tips: '小費透過 Apple 支付，並由 RevenueCat 處理。RevenueCat 只會收到一個匿名 ID 和你的小費購買紀錄，絕不會收到你的姓名或付款資訊。只有在你開啟支持頁面或有未完成的小費時，App 才會聯絡它。',
     },
     restore: {
       title: '從備份回復',
@@ -606,7 +606,8 @@ export const zhHant: Translation = {
 
       retry: '重試',
 
-      footnote: '小費透過 Apple 支付，是一次性的感謝，所以換新手機時不需要回復任何內容。{app} 從不接收你的付款資訊。',
+      footnote:
+        '小費透過 Apple 支付，並由 RevenueCat 處理。這是一次性的感謝，所以換新手機時不需要回復任何內容。{app} 從不接收你的付款資訊。',
 
       note: {
         loading: '正在載入小費…',
@@ -618,7 +619,7 @@ export const zhHant: Translation = {
 
         thanks: '謝謝你。你的小費意義重大。',
 
-        delayed: 'App Store 仍在確認你的小費。即使關閉 App，它也會自動完成。',
+        delayed: '暫時無法確認這筆小費。如果已扣款，它會自動確認，你不會被重複扣款。',
 
         unconfirmed: 'App Store 無法確認這筆小費，因此未完成。',
 

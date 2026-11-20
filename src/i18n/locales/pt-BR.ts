@@ -544,7 +544,7 @@ export const ptBR: Translation = {
       failedReminders: 'Lembretes agendados',
       failedTemp: 'Arquivos temporários de compartilhamento',
 
-      tips: 'As gorjetas são pagas pela Apple. Nunca recebemos seus dados de pagamento, e o app não guarda nenhum registro de gorjetas.',
+      tips: 'As gorjetas são pagas pela Apple e processadas com a RevenueCat, que recebe um ID anônimo e suas compras de gorjetas, nunca seu nome ou seus dados de pagamento. O app só entra em contato com ela quando você abre Apoie ou quando há uma gorjeta não concluída.',
     },
     restore: {
       title: 'Restaurar backup',
@@ -651,7 +651,7 @@ export const ptBR: Translation = {
       retry: 'Tentar de novo',
 
       footnote:
-        'As gorjetas são pagas pela Apple e são agradecimentos únicos, então não há nada para restaurar em um celular novo. O {app} nunca recebe seus dados de pagamento.',
+        'As gorjetas são pagas pela Apple e processadas com a RevenueCat. São agradecimentos únicos, então não há nada para restaurar em um celular novo. O {app} nunca recebe seus dados de pagamento.',
 
       note: {
         loading: 'Carregando gorjetas…',
@@ -664,7 +664,7 @@ export const ptBR: Translation = {
         thanks: 'Obrigado. Sua gorjeta significa muito.',
 
         delayed:
-          'A App Store ainda está confirmando sua gorjeta. Ela será concluída sozinha, mesmo se você fechar o app.',
+          'Não foi possível confirmar a gorjeta agora. Se você foi cobrado, ela será confirmada sozinha, e você não será cobrado duas vezes.',
 
         unconfirmed: 'A App Store não conseguiu confirmar esta gorjeta, então ela não foi concluída.',
 

@@ -553,7 +553,7 @@ export const id: Translation = {
       failedReminders: 'Pengingat terjadwal',
       failedTemp: 'File berbagi sementara',
 
-      tips: 'Tip dibayar melalui Apple. Kami tidak pernah menerima data pembayaranmu, dan aplikasi tidak menyimpan catatan tip apa pun.',
+      tips: 'Tip dibayar melalui Apple dan diproses dengan RevenueCat, yang menerima ID anonim dan pembelian tip-mu, tidak pernah namamu atau data pembayaranmu. Aplikasi hanya menghubungi mereka saat kamu membuka Dukung atau ada tip yang belum selesai.',
     },
     restore: {
       title: 'Pulihkan dari cadangan',
@@ -659,7 +659,7 @@ export const id: Translation = {
       retry: 'Coba lagi',
 
       footnote:
-        'Tip dibayar melalui Apple dan merupakan ucapan terima kasih sekali bayar, jadi tidak ada yang perlu dipulihkan di ponsel baru. {app} tidak pernah menerima data pembayaranmu.',
+        'Tip dibayar melalui Apple dan diproses dengan RevenueCat. Tip adalah ucapan terima kasih sekali bayar, jadi tidak ada yang perlu dipulihkan di ponsel baru. {app} tidak pernah menerima data pembayaranmu.',
 
       note: {
         loading: 'Memuat tip…',
@@ -672,7 +672,7 @@ export const id: Translation = {
         thanks: 'Terima kasih. Tip darimu sangat berarti.',
 
         delayed:
-          'App Store masih mengonfirmasi tip-mu. Prosesnya akan selesai sendiri, meskipun kamu menutup aplikasi.',
+          'Tip belum bisa dikonfirmasi sekarang. Jika kamu sudah ditagih, tip akan dikonfirmasi otomatis, dan kamu tidak akan ditagih dua kali.',
 
         unconfirmed: 'App Store tidak dapat mengonfirmasi tip ini, jadi tip tidak diselesaikan.',
 

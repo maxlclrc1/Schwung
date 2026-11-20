@@ -9,5 +9,14 @@
     "small": "com.example.schwung.tip.small",
     "medium": "com.example.schwung.tip.medium",
     "large": "com.example.schwung.tip.large"
+  },
+  "revenueCat": {
+    "appleApiKey": "",
+    "offering": "tips",
+    "packages": {
+      "small": "tip_small",
+      "medium": "tip_medium",
+      "large": "tip_large"
+    }
   }
 }

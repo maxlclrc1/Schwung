@@ -13,7 +13,8 @@ const path = require('path') as { join(...parts: string[]): string; relative(fro
 /*
  * Offline-first, checked in the source: the app's code opens no connection of its own and carries no analytics,
  * crash-reporting or ad SDK. The only way anything leaves the phone is what the person chooses: a file they share,
- * an email they write, or a tip through Apple's StoreKit (expo-iap, used only in lib/tips.ts).
+ * an email they write, or a tip through Apple and RevenueCat (react-native-purchases, used only in lib/tips.ts,
+ * and started only when Support opens or a tip is unfinished).
  */
 const SRC = path.join(process.cwd(), 'src');
 const files: string[] = [];
@@ -48,7 +49,7 @@ describe('no network code in the app', () => {
   });
 
   it('uses the In-App Purchase SDK in one place only (the tips), and opens only mail and the policy page', () => {
-    expect(files.filter((p) => /'expo-iap'/.test(code(p))).map(rel)).toEqual(['lib/tips.ts']);
+    expect(files.filter((p) => /'react-native-purchases'/.test(code(p))).map(rel)).toEqual(['lib/tips.ts']);
     expect(files.filter((p) => /https?:\/\//.test(code(p))).map(rel)).toEqual([]);
   });
 
@@ -62,7 +63,6 @@ describe('no network code in the app', () => {
         'expo-file-system',
         'expo-font',
         'expo-haptics',
-        'expo-iap',
         'expo-image',
         'expo-linear-gradient',
         'expo-linking',
@@ -77,6 +77,7 @@ describe('no network code in the app', () => {
         'react',
         'react-native',
         'react-native-gesture-handler',
+        'react-native-purchases',
         'react-native-reanimated',
         'react-native-safe-area-context',
         'react-native-screens',
@@ -86,6 +87,18 @@ describe('no network code in the app', () => {
         'zustand',
       ].sort(),
     );
-    expect(pkg.dependencies['expo-iap']).toMatch(/^\d+\.\d+\.\d+$/); // pinned exactly
+    expect(pkg.dependencies['react-native-purchases']).toMatch(/^\d+\.\d+\.\d+$/); // pinned exactly
+  });
+
+  it('RevenueCat is never started at launch except for an unfinished tip, and never with an account or identifiers', () => {
+    const tips = code(path.join(SRC, 'lib/tips.ts'));
+    expect(tips).toMatch(/appUserID: null/);
+    expect(tips).toMatch(/automaticDeviceIdentifierCollectionEnabled: false/);
+    expect(tips).toMatch(/diagnosticsEnabled: false/);
+    expect(tips).not.toMatch(
+      /\.logIn\(|setAttributes|setEmail|setDisplayName|setPhoneNumber|collectDeviceIdentifiers|setAd|setAppsflyer/,
+    );
+    const layout = code(path.join(SRC, 'app/_layout.tsx'));
+    expect(layout).toMatch(/startTips\(\)/); // which only starts RevenueCat for an unfinished tip (tips.test.ts)
   });
 });

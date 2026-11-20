@@ -83,7 +83,7 @@ export const settings = {
     large: 'Large tip',
     retry: 'Try again',
     footnote:
-      'Tips are paid through Apple and are one-time thank-yous, so there’s nothing to restore on a new phone. {app} never receives your payment details.',
+      'Tips are paid through Apple and handled with RevenueCat. They’re one-time thank-yous, so there’s nothing to restore on a new phone. {app} never receives your payment details.',
     note: {
       loading: 'Loading tips…',
       unavailable: 'Tips aren’t available right now.',
@@ -91,7 +91,7 @@ export const settings = {
       pending: 'Waiting for approval. You’ll only be charged if it’s approved.',
       thanks: 'Thank you. Your tip means a lot.',
       delayed:
-        'Your tip is still being confirmed by the App Store. It will finish on its own, even if you close the app.',
+        'The tip couldn’t be confirmed just now. If you were charged, it will be confirmed on its own, and you won’t be charged twice.',
       unconfirmed: 'The App Store couldn’t confirm this tip, so it wasn’t completed.',
       failed: 'The tip didn’t go through. Please try again in a moment.',
     },
@@ -107,7 +107,7 @@ export const settings = {
     delete: 'Delete my data',
     deleteHint: 'Remove everything Schwung keeps on this phone',
     policy: 'Privacy Policy',
-    tips: 'Tips are paid through Apple. We never receive your payment details, and the app keeps no record of tips.',
+    tips: 'Tips are paid through Apple and handled with RevenueCat, which receives an anonymous ID and your tip purchases, never your name or payment details. The app only contacts them when you open Support or a tip is unfinished.',
     footnote:
       'Ending the Life Reset (in Settings) ends your current program. Delete my data removes all your personal data from Schwung on this phone, including earlier saves and recovery copies.',
     exportTitle: 'Export my data',

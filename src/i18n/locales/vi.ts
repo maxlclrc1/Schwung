@@ -540,7 +540,7 @@ export const vi: Translation = {
       failedReminders: 'Lời nhắc đã lên lịch',
       failedTemp: 'Tệp chia sẻ tạm thời',
 
-      tips: 'Tiền tip được thanh toán qua Apple. Chúng tôi không bao giờ nhận thông tin thanh toán của bạn, và ứng dụng không lưu bất kỳ bản ghi nào về tiền tip.',
+      tips: 'Tiền tip được thanh toán qua Apple và xử lý bằng RevenueCat, dịch vụ chỉ nhận một ID ẩn danh và các giao dịch tip của bạn, không bao giờ nhận tên hay thông tin thanh toán của bạn. Ứng dụng chỉ liên hệ với họ khi bạn mở mục Ủng hộ hoặc khi có khoản tip chưa hoàn tất.',
     },
     restore: {
       title: 'Khôi phục từ bản sao lưu',
@@ -646,7 +646,7 @@ export const vi: Translation = {
       retry: 'Thử lại',
 
       footnote:
-        'Tiền tip được thanh toán qua Apple và là lời cảm ơn một lần, nên không có gì cần khôi phục trên điện thoại mới. {app} không bao giờ nhận thông tin thanh toán của bạn.',
+        'Tiền tip được thanh toán qua Apple và xử lý bằng RevenueCat. Đây là lời cảm ơn một lần, nên không có gì cần khôi phục trên điện thoại mới. {app} không bao giờ nhận thông tin thanh toán của bạn.',
 
       note: {
         loading: 'Đang tải tiền tip…',
@@ -658,7 +658,8 @@ export const vi: Translation = {
 
         thanks: 'Cảm ơn bạn. Tiền tip của bạn rất có ý nghĩa.',
 
-        delayed: 'App Store vẫn đang xác nhận tiền tip của bạn. Giao dịch sẽ tự hoàn tất, kể cả khi bạn đóng ứng dụng.',
+        delayed:
+          'Hiện chưa thể xác nhận khoản tip. Nếu bạn đã bị trừ tiền, khoản tip sẽ tự được xác nhận và bạn sẽ không bị trừ tiền hai lần.',
 
         unconfirmed: 'App Store không thể xác nhận khoản tip này nên giao dịch chưa hoàn tất.',
 

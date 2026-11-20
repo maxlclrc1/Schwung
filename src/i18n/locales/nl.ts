@@ -544,7 +544,7 @@ export const nl: Translation = {
       failedReminders: 'Geplande herinneringen',
       failedTemp: 'Tijdelijke deelbestanden',
 
-      tips: 'Fooien worden via Apple betaald. We ontvangen nooit je betaalgegevens en de app houdt geen fooien bij.',
+      tips: 'Fooien worden via Apple betaald en verwerkt met RevenueCat, dat een anonieme ID en je fooi-aankopen ontvangt, nooit je naam of betaalgegevens. De app neemt alleen contact met hen op als je Steun opent of als een fooi nog niet is afgerond.',
     },
     restore: {
       title: 'Herstellen uit back-up',
@@ -651,7 +651,7 @@ export const nl: Translation = {
       retry: 'Opnieuw proberen',
 
       footnote:
-        'Fooien worden via Apple betaald en zijn een eenmalig bedankje, dus er valt op een nieuwe telefoon niets te herstellen. {app} ontvangt nooit je betaalgegevens.',
+        'Fooien worden via Apple betaald en verwerkt met RevenueCat. Het zijn eenmalige bedankjes, dus er valt op een nieuwe telefoon niets te herstellen. {app} ontvangt nooit je betaalgegevens.',
 
       note: {
         loading: 'Fooien laden…',
@@ -663,7 +663,8 @@ export const nl: Translation = {
 
         thanks: 'Dank je. Je fooi betekent veel.',
 
-        delayed: 'Je fooi wordt nog door de App Store bevestigd. Hij wordt vanzelf afgerond, ook als je de app sluit.',
+        delayed:
+          'De fooi kon nu niet worden bevestigd. Als er is afgeschreven, wordt hij vanzelf bevestigd en betaal je niet twee keer.',
 
         unconfirmed: 'De App Store kon deze fooi niet bevestigen, dus hij is niet afgerond.',
 

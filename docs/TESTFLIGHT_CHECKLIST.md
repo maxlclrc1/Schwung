@@ -19,13 +19,21 @@ been uploaded or submitted.
 - [ ] An Expo account: `bunx eas-cli login` (or `npx eas-cli@latest`), then `eas init` (adds
       `extra.eas.projectId`).
 - [ ] The app record in App Store Connect (name, primary language, SKU).
-- [ ] App Privacy: **Data Not Collected** (purchases are processed by Apple; the app collects nothing). Age rating
+- [ ] App Privacy (because tips use RevenueCat): **Purchases → Purchase History** is collected, **not linked** to the
+      user (anonymous RevenueCat ID, no account), **not used for tracking**, purpose **App Functionality**. Nothing
+      else: no identifiers, contact info, health data, usage data or diagnostics are collected (the app sets no app
+      user ID, attribution IDs or device identifiers, and RevenueCat diagnostics are off). Check it against Xcode's
+      privacy report for the archive (Organizer → Generate Privacy Report), which includes RevenueCat's own
+      manifest (it declares Purchase History, not linked, App Functionality). Age rating
       questionnaire: answer for the app's content; the app itself is for people **18 and older** (self-declared at
       set-up). Export compliance is already set (`ITSAppUsesNonExemptEncryption: false`).
 - [ ] **Licence agreement:** leave App Store Connect's License Agreement as **Apple's standard EULA** for v1.0 (our own
       Terms stay hidden until reviewed: `LEGAL_READY.terms = false`).
 - [ ] **Paid Apps Agreement active** (Business: bank account, tax forms, contacts). Tip products can't load, even in
       TestFlight, until it is.
+- [ ] **RevenueCat** (dashboard: app.revenuecat.com): the project, the App Store app, its In-App Purchase key, the
+      three products, the `tips` offering with packages `tip_small`, `tip_medium`, `tip_large`, and the public Apple
+      SDK key in `release.config.json` → `revenueCat.appleApiKey`. No entitlements, no paywall.
 - [ ] **Three consumable In-App Purchases** with the IDs in `release.config.json`: reference name, price, display name
       and description (localized), and a review screenshot each. Submit them **with the app version** (Apple reviews
       the first purchases together with a version). Review note: “Optional tips; consumable; unlock nothing.”
@@ -46,8 +54,9 @@ Check in the build (or the upload's validation report):
 - [ ] Info.plist: only `NSPhotoLibraryAddUsageDescription` (naming the app from `release.config.json`); no background
       modes; ATS without arbitrary loads.
 - [ ] No developer tools (no time-travel clock on the Habits tab).
-- [ ] No network traffic while using the app, except Apple's App Store hosts on the Support screen (optional: check
-      with a proxy).
+- [ ] No network traffic while using the app, except Apple and RevenueCat (`api.revenuecat.com`) after Support is
+      opened, or at launch while a tip is unfinished (optional: check with a proxy). With no unfinished tip and
+      Support never opened: no traffic at all.
 
 ## 4. On an actual iPhone
 
@@ -112,11 +121,13 @@ Check in the build (or the upload's validation report):
 - [ ] Settings → About → Support: the three tips show prices in your region's currency; the screen reads well in
       Arabic (right to left), at the largest Dynamic Type size and with VoiceOver.
 - [ ] Each tip: Apple's sheet, then “Thank you”; the same tip again works (repeatable). Nothing else in the app
-      changes (habits, XP, collection, Insights).
+      changes (habits, XP, collection, Insights). Each tip appears once in RevenueCat's dashboard (sandbox data).
 - [ ] Cancel on Apple's sheet: nothing is shown, tips can be chosen again.
 - [ ] Ask to Buy (a child Sandbox account): “Waiting for approval”; approve it later with the app closed; reopen: no
       error, no second charge (the purchase is finished quietly).
 - [ ] Airplane mode: “Tips aren't available right now” with Try again; back online, Try again loads them.
+- [ ] Airplane mode switched on right after paying (before the thank-you): “couldn't be confirmed just now”; back
+      online, relaunch: the tip is confirmed in RevenueCat's dashboard once, with no second charge.
 - [ ] Screen Time → Content & Privacy → iTunes & App Store Purchases → Don't Allow: “Purchases are turned off”.
 - [ ] Force-quit while Apple's sheet is open or right after paying; reopen: no error; the purchase doesn't come back
       on later launches.

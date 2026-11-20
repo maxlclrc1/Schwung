@@ -552,7 +552,7 @@ export const fr: Translation = {
       failedReminders: 'Rappels programmés',
       failedTemp: 'Fichiers de partage temporaires',
 
-      tips: 'Les pourboires sont payés via Apple. Nous ne recevons jamais vos informations de paiement et l’app ne conserve aucune trace des pourboires.',
+      tips: 'Les pourboires sont payés via Apple et gérés avec RevenueCat, qui reçoit un identifiant anonyme et vos achats de pourboires, jamais votre nom ni vos informations de paiement. L’app ne les contacte que lorsque vous ouvrez Soutenir ou qu’un pourboire n’est pas terminé.',
     },
     restore: {
       title: 'Restaurer une sauvegarde',
@@ -661,7 +661,7 @@ export const fr: Translation = {
       retry: 'Réessayer',
 
       footnote:
-        'Les pourboires sont payés via Apple et sont des remerciements ponctuels : il n’y a donc rien à restaurer sur un nouveau téléphone. {app} ne reçoit jamais vos informations de paiement.',
+        'Les pourboires sont payés via Apple et gérés avec RevenueCat. Ce sont des remerciements ponctuels : il n’y a donc rien à restaurer sur un nouveau téléphone. {app} ne reçoit jamais vos informations de paiement.',
 
       note: {
         loading: 'Chargement des pourboires…',
@@ -673,7 +673,8 @@ export const fr: Translation = {
 
         thanks: 'Merci. Votre pourboire compte beaucoup.',
 
-        delayed: 'L’App Store confirme encore votre pourboire. Il se terminera tout seul, même si vous fermez l’app.',
+        delayed:
+          'Le pourboire n’a pas pu être confirmé pour l’instant. Si vous avez été débité, il sera confirmé automatiquement, sans double débit.',
 
         unconfirmed: 'L’App Store n’a pas pu confirmer ce pourboire, il n’a donc pas été finalisé.',
 

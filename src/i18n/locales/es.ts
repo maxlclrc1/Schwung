@@ -536,7 +536,7 @@ export const es: Translation = {
       failedReminders: 'Recordatorios programados',
       failedTemp: 'Archivos temporales para compartir',
 
-      tips: 'Las propinas se pagan a través de Apple. Nunca recibimos tus datos de pago y la app no guarda ningún registro de propinas.',
+      tips: 'Las propinas se pagan a través de Apple y se gestionan con RevenueCat, que recibe un ID anónimo y tus compras de propinas, nunca tu nombre ni tus datos de pago. La app solo se comunica con ellos cuando abres Apoyo o hay una propina sin terminar.',
     },
     restore: {
       title: 'Restaurar desde copia',
@@ -643,7 +643,7 @@ export const es: Translation = {
       retry: 'Intentar de nuevo',
 
       footnote:
-        'Las propinas se pagan a través de Apple y son agradecimientos únicos, así que no hay nada que restaurar en un teléfono nuevo. {app} nunca recibe tus datos de pago.',
+        'Las propinas se pagan a través de Apple y se gestionan con RevenueCat. Son agradecimientos únicos, así que no hay nada que restaurar en un teléfono nuevo. {app} nunca recibe tus datos de pago.',
 
       note: {
         loading: 'Cargando propinas…',
@@ -655,7 +655,8 @@ export const es: Translation = {
 
         thanks: 'Gracias. Tu propina significa mucho.',
 
-        delayed: 'El App Store aún está confirmando tu propina. Se completará sola, aunque cierres la app.',
+        delayed:
+          'No se pudo confirmar la propina ahora mismo. Si se te cobró, se confirmará sola y no se te cobrará dos veces.',
 
         unconfirmed: 'El App Store no pudo confirmar esta propina, así que no se completó.',
 

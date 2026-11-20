@@ -9,6 +9,11 @@ launch-critical fixes. No app code changed in this audit.
 > lives only in `release.config.json`, all still placeholders. v1.0 uses Apple's standard EULA. B6–B12 remain open:
 > the owner's inputs, the legal review and the iPhone checks. Translations of the new text are machine-made and not
 > reviewed.
+>
+> **Payments (after `9979a26`):** the tips now use RevenueCat (`react-native-purchases`) instead of `expo-iap`, with
+> anonymous customers, no entitlements and no paywall. App Privacy changes from Data Not Collected to **Purchase
+> History (not linked, no tracking, App Functionality)**. RevenueCat is started only when Support opens or a tip is
+> unfinished. Its public Apple SDK key goes in `release.config.json`; no secret ever goes in Git.
 
 **Launch decisions (from the owner):**
 - All 20 languages ship.
@@ -204,7 +209,7 @@ I haven't invented any of this. Items marked *(advisor)* need confirmation from 
 16. **Age rating** questionnaire answers.
 17. **Countries and regions** to sell in.
 18. **Price:** free.
-19. **App Privacy:** Data Not Collected.
+19. **App Privacy:** Purchase History (via RevenueCat), not linked, no tracking, App Functionality (see the status note at the top).
 20. **Content rights declaration:** confirm you own or license all art, including any AI-assisted images, and the credits for open-source code.
 21. **Screenshots:** iPhone 6.9″ is required; I can produce them from the web build for you to approve.
 22. **App Review contact** (name, phone, email) and review notes.

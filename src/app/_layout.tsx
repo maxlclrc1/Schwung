@@ -75,7 +75,7 @@ export default function RootLayout() {
     cleanupTemps();
     // The artwork about to be seen, decoded ahead of time (components/artPrefetch.ts).
     void prefetchArt(useResetPilot.getState().program);
-    // Tips: finishes purchases approved or interrupted while the app was closed (lib/tips.ts). Nothing is saved.
+    // Tips: only if a tip is unfinished (Ask to Buy, interrupted), RevenueCat is started to finish it (lib/tips.ts).
     void startTips();
   }, [hydrated]);
 
