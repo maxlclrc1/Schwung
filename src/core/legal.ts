@@ -63,7 +63,13 @@ export const TERMS: LegalDoc = {
     {
       heading: 'What Schwung is',
       body: [
-        'A free habit-building app with no account, subscription, advertising or in-app purchases. It supports general wellness and isn’t a medical service: see the Wellness note.',
+        'A free habit-building app with no account, subscription or advertising. It supports general wellness and isn’t a medical service: see the Wellness note.',
+      ],
+    },
+    {
+      heading: 'Tips',
+      body: [
+        'Tips are optional, one-time In-App Purchases sold through Apple under Apple’s terms. A tip unlocks nothing and doesn’t change the app. Refunds are handled by Apple. Nothing here affects your statutory rights.',
       ],
     },
     {
@@ -75,7 +81,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Our content and artwork',
       body: [
-        'The design, text, illustrations, collectibles, programs and software belong to us or our licensors. Story images you make are for your personal use and sharing.',
+        'The design, text, illustrations, collectibles, programs and software belong to us or our licensors; open-source components keep their own licences (Open Source Licences). Story images you make are for your personal use and sharing.',
       ],
     },
     {

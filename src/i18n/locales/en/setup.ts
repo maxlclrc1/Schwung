@@ -24,7 +24,7 @@ export const setup = {
     ageHint: 'So every habit fits you. It takes about a minute.',
     youToday: 'You, today',
     healthTitle: 'Anything your body would like us to know?',
-    healthHint: 'We’ll keep every habit safe for you. It never leaves your phone.',
+    healthHint: 'Only used to make your habits gentler where needed. It never leaves your phone.',
     none: 'None of these',
     ratherNot: 'Rather not say',
     funPart: 'On to your habits',

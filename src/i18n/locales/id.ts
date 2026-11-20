@@ -817,7 +817,7 @@ export const id: Translation = {
       intro:
         'Perjalananmu sejauh ini disimpan di Perjalanan sebelumnya, beserta kisahnya. XP seumur hidup dan koleksimu ikut bersamamu.',
       stillRight: 'Masih sesuai?',
-      stillRightHint: 'Jawaban ini menjaga targetmu tetap aman. Ubah apa pun yang sudah berubah.',
+      stillRightHint: 'Jawaban ini membuat targetmu lebih ringan bila perlu. Ubah apa pun yang sudah berubah.',
       age: 'Usiamu',
       health: 'Ada yang perlu diperhatikan?',
       preferNot: 'Memilih tidak menjawab',
@@ -1196,7 +1196,7 @@ export const id: Translation = {
       youToday: 'Kamu, hari ini',
       healthTitle: 'Ada yang ingin tubuhmu sampaikan kepada kami?',
       healthHint:
-        'Kami akan menjaga setiap kebiasaan tetap aman untukmu. Jawaban ini tidak pernah keluar dari ponselmu.',
+        'Hanya dipakai untuk membuat kebiasaanmu lebih ringan bila perlu. Jawaban ini tidak pernah keluar dari ponselmu.',
       none: 'Tidak ada',
       ratherNot: 'Memilih tidak menjawab',
       funPart: 'Sekarang kebiasaanmu',

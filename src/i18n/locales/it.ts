@@ -832,7 +832,7 @@ export const it: Translation = {
       intro:
         'Il tuo percorso finora è conservato in Percorsi passati, con la sua storia. Gli XP complessivi e la collezione vengono con te.',
       stillRight: 'Ancora corretto?',
-      stillRightHint: 'Queste risposte mantengono sicuri i tuoi obiettivi. Modifica ciò che è cambiato.',
+      stillRightHint: 'Queste risposte rendono i tuoi obiettivi più delicati dove serve. Modifica ciò che è cambiato.',
       age: 'La tua età',
       health: 'C’è qualcosa da tenere presente?',
       preferNot: 'Preferisco non dirlo',
@@ -1203,7 +1203,7 @@ export const it: Translation = {
       ageHint: 'Così ogni abitudine è adatta a te. Ci vuole circa un minuto.',
       youToday: 'Tu, oggi',
       healthTitle: 'C’è qualcosa che il tuo corpo vorrebbe farci sapere?',
-      healthHint: 'Manterremo ogni abitudine sicura per te. Non lascia mai il tuo telefono.',
+      healthHint: 'Serve solo a rendere le tue abitudini più delicate dove serve. Non lascia mai il tuo telefono.',
       none: 'Nessuna di queste',
       ratherNot: 'Preferisco non dirlo',
       funPart: 'Ora le tue abitudini',

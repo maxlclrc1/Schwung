@@ -828,7 +828,7 @@ export const fr: Translation = {
       intro:
         'Votre parcours jusqu’ici est conservé dans Parcours passés, avec son récit. Votre XP cumulée et votre collection vous suivent.',
       stillRight: 'Toujours exact ?',
-      stillRightHint: 'Ces réponses gardent vos objectifs sûrs. Modifiez ce qui a changé.',
+      stillRightHint: 'Ces réponses rendent vos objectifs plus doux là où c’est utile. Modifiez ce qui a changé.',
       age: 'Votre âge',
       health: 'Quelque chose à prendre en compte ?',
       preferNot: 'Je préfère ne pas répondre',
@@ -1194,7 +1194,8 @@ export const fr: Translation = {
       ageHint: 'Pour que chaque habitude vous corresponde. Cela prend environ une minute.',
       youToday: 'Vous, aujourd’hui',
       healthTitle: 'Votre corps a-t-il quelque chose à nous dire ?',
-      healthHint: 'Nous garderons chaque habitude sûre pour vous. Cela ne quitte jamais votre téléphone.',
+      healthHint:
+        'Sert uniquement à rendre vos habitudes plus douces si besoin. Cela ne quitte jamais votre téléphone.',
       none: 'Rien de tout cela',
       ratherNot: 'Je préfère ne pas répondre',
       funPart: 'Place à vos habitudes',

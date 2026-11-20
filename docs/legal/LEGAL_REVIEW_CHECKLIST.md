@@ -1,7 +1,8 @@
 # Legal review checklist
 
 The documents in this folder are **drafts**. They haven't been reviewed or approved by a lawyer and must not be
-published or relied on until the items below are settled.
+published or relied on until the items below are settled. Status of each item, with sources:
+[`../FINAL_LEGAL_READINESS.md`](../FINAL_LEGAL_READINESS.md).
 
 ## Founder details (fill every `TODO`)
 
@@ -15,7 +16,10 @@ published or relied on until the items below are settled.
 - [ ] Effective dates and version numbers.
 - [ ] Email provider used for support, and where it stores messages; retention period for support emails.
 - [ ] Whether you'll read Apple's crash/diagnostic reports in App Store Connect.
-- [ ] Rights in all artwork (including any AI-assisted images) and the open-source licences to credit.
+- [ ] Rights in the artwork: it was made with OpenAI's ChatGPT (verified from the images' C2PA data). Confirm the
+      account's terms, that no third-party images were used as references, and the Content Rights answer.
+- [x] Open-source licences credited: Settings → About → Open Source Licences and `THIRD_PARTY_NOTICES.md`, checked by
+      `npm run release:check`.
 - [ ] Final app name, bundle identifier and tip product IDs (`release.config.json`).
 
 ## Factual checks against the build
@@ -50,5 +54,8 @@ published or relied on until the items below are settled.
       whether the KVKK notice must name it. Note that Delete my data can't clear the RevenueCat SDK's local cache
       (anonymous ID, recent purchases), present only after Support was opened.
 - [ ] **Consumer law:** whether any information is needed for voluntary tips that Apple sells as merchant of record
-      (Türkiye, EU).
+      (Türkiye, EU). The Terms draft now has a Tips section.
+- [ ] **EU DSA trader status** (App Store Connect → Business → Compliance) and **tax** (GVK 20/B, W-8BEN): questions in
+      `../FINAL_LEGAL_READINESS.md`.
+- [ ] **AI-made artwork:** how far copyright protects it.
 - [ ] **Languages:** whether translated versions are needed (for example Turkish, German).

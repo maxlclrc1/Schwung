@@ -15,9 +15,16 @@ the knowledge of a parent or guardian.
 
 ## 2. What Schwung is
 
-Schwung helps you build everyday habits through a 66-day Life Reset. It's **free**, with no account, subscription,
-advertising or in-app purchases. It supports general wellness and isn't a medical service: see the
-[Wellness Disclaimer](WELLNESS_DISCLAIMER.md), which is part of these terms.
+Schwung helps you build everyday habits through a 66-day Life Reset. It's **free**, with no account, subscription
+or advertising. It supports general wellness and isn't a medical service: see the
+[Wellness note](WELLNESS_DISCLAIMER.md), which is part of these terms.
+
+## 2a. Tips
+
+You can leave an optional tip in Settings → Support. Tips are one-time (consumable) In-App Purchases sold and
+charged by Apple under Apple's terms; the price is shown by Apple in your currency before you confirm. A tip unlocks
+nothing, changes nothing in the app and can't be restored or transferred. Refund requests go to Apple
+(reportaproblem.apple.com). Nothing in these terms affects your statutory rights as a consumer.
 
 ## 3. Your licence to use Schwung
 
@@ -34,8 +41,11 @@ Please don't:
 
 Schwung's design, text, illustrations, panoramas, collectible artwork, habit programs and software belong to us or
 our licensors and are protected by intellectual-property laws. Your licence doesn't give you any ownership of them.
-Images you create with the 66-Day Story are for your personal use and sharing. TODO (founder): confirm the rights in
-all artwork (including any AI-assisted artwork) and the open-source licences to credit.
+Images you create with the 66-Day Story are for your personal use and sharing. The open-source components Schwung
+includes keep their own licences, listed in the app (Settings → About → Open Source Licences) and in
+`THIRD_PARTY_NOTICES.md`; nothing in these terms limits your rights under those licences. The paintings were made
+with AI image tools (OpenAI's ChatGPT) and then edited for the app. TODO (legal review): how far copyright protects
+them in your jurisdiction (see `../FINAL_LEGAL_READINESS.md`).
 
 ## 5. Your content
 

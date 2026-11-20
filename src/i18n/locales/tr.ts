@@ -804,7 +804,7 @@ export const tr: Translation = {
       intro:
         'Şimdiye kadarki yolculuğun hikâyesiyle birlikte Geçmiş yolculuklar’da saklanır. Toplam XP’n ve koleksiyonun seninle gelir.',
       stillRight: 'Hâlâ doğru mu?',
-      stillRightHint: 'Bunlar hedeflerini güvende tutar. Değişen bir şey varsa güncelle.',
+      stillRightHint: 'Bunlar gerektiğinde hedeflerini daha nazik tutar. Değişen bir şey varsa güncelle.',
       age: 'Yaşın',
       health: 'Dikkate almamız gereken bir şey var mı?',
       preferNot: 'Söylememeyi tercih ederim',
@@ -1167,7 +1167,7 @@ export const tr: Translation = {
       ageHint: 'Her alışkanlık sana uysun diye. Yaklaşık bir dakika sürer.',
       youToday: 'Bugünkü sen',
       healthTitle: 'Bedeninin bilmemizi istediği bir şey var mı?',
-      healthHint: 'Her alışkanlığı senin için güvenli tutarız. Telefonundan asla çıkmaz.',
+      healthHint: 'Yalnızca gerektiğinde alışkanlıklarını daha nazik yapmak için kullanılır. Telefonundan asla çıkmaz.',
       none: 'Hiçbiri',
       ratherNot: 'Söylemek istemiyorum',
       funPart: 'Sıra alışkanlıklarında',

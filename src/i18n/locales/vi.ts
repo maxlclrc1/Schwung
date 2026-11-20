@@ -805,7 +805,7 @@ export const vi: Translation = {
       intro:
         'Hành trình của bạn đến nay được lưu trong Hành trình trước đây, cùng câu chuyện của nó. XP trọn đời và bộ sưu tập sẽ đi cùng bạn.',
       stillRight: 'Vẫn đúng chứ?',
-      stillRightHint: 'Những thông tin này giữ mục tiêu an toàn cho bạn. Hãy sửa những gì đã thay đổi.',
+      stillRightHint: 'Những thông tin này giúp mục tiêu nhẹ nhàng hơn khi cần. Hãy sửa những gì đã thay đổi.',
       age: 'Tuổi của bạn',
       health: 'Có điều gì cần lưu ý không?',
       preferNot: 'Không muốn trả lời',
@@ -1169,7 +1169,7 @@ export const vi: Translation = {
       youToday: 'Bạn, hôm nay',
       healthTitle: 'Cơ thể bạn có điều gì muốn chúng tôi biết không?',
       healthHint:
-        'Chúng tôi sẽ giữ mọi thói quen an toàn cho bạn. Thông tin này không bao giờ rời khỏi điện thoại của bạn.',
+        'Chỉ dùng để giúp thói quen nhẹ nhàng hơn khi cần. Thông tin này không bao giờ rời khỏi điện thoại của bạn.',
       none: 'Không có điều nào',
       ratherNot: 'Không muốn trả lời',
       funPart: 'Giờ đến thói quen của bạn',

@@ -813,7 +813,7 @@ export const ptBR: Translation = {
       intro:
         'Sua jornada até aqui fica guardada em Jornadas anteriores, com a história dela. Seu XP acumulado e sua coleção vêm com você.',
       stillRight: 'Continua certo?',
-      stillRightHint: 'Isso mantém suas metas seguras. Altere o que tiver mudado.',
+      stillRightHint: 'Isso mantém suas metas mais leves quando necessário. Altere o que tiver mudado.',
       age: 'Sua idade',
       health: 'Algo que devemos levar em conta?',
       preferNot: 'Prefiro não dizer',
@@ -1177,7 +1177,7 @@ export const ptBR: Translation = {
       ageHint: 'Para que cada hábito combine com você. Leva cerca de um minuto.',
       youToday: 'Você, hoje',
       healthTitle: 'Algo que seu corpo gostaria que soubéssemos?',
-      healthHint: 'Vamos manter cada hábito seguro para você. Isso nunca sai do seu celular.',
+      healthHint: 'Usado só para deixar seus hábitos mais leves quando necessário. Isso nunca sai do seu celular.',
       none: 'Nenhum destes',
       ratherNot: 'Prefiro não dizer',
       funPart: 'Agora, seus hábitos',

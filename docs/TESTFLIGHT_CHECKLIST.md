@@ -27,6 +27,10 @@ been uploaded or submitted.
       manifest (it declares Purchase History, not linked, App Functionality). Age rating
       questionnaire: answer for the app's content; the app itself is for people **18 and older** (self-declared at
       set-up). Export compliance is already set (`ITSAppUsesNonExemptEncryption: false`).
+- [ ] **Age rating:** after the questionnaire, set the rating to **18+** if App Store Connect offers a higher rating,
+      so parental controls match the app's 18+ rule (`FINAL_LEGAL_READINESS.md` H5).
+- [ ] **EU Digital Services Act trader status** (Business → Compliance): needed to distribute in the EU; as a trader
+      your address, phone and email are shown on the EU product page (`FINAL_LEGAL_READINESS.md` C4).
 - [ ] **Licence agreement:** leave App Store Connect's License Agreement as **Apple's standard EULA** for v1.0 (our own
       Terms stay hidden until reviewed: `LEGAL_READY.terms = false`).
 - [ ] **Paid Apps Agreement active** (Business: bank account, tax forms, contacts). Tip products can't load, even in

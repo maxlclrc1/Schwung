@@ -4,7 +4,7 @@
 > decision. See `LEGAL_REVIEW_CHECKLIST.md` before publishing.
 
 **Effective date:** TODO
-**Version:** draft 1
+**Version:** draft 2 (facts checked against the app's code; see `../FINAL_LEGAL_READINESS.md`)
 
 ## 1. Who we are
 
@@ -46,8 +46,11 @@ Schwung keeps the following on your iPhone, inside the app's private storage, to
 | Preferences         | Light or dark appearance, reminder times, whether reminders may name a habit, whether "welcome back" messages are on                                  | To respect your choices                                                    |
 | Recovery copies     | If a save can't be read (for example after an interrupted update), the unreadable copy is kept instead of being deleted                               | So your data is never silently lost                                        |
 
-Some of this, especially the health precautions, can be **health-related information**. It stays on your device and
-is used only to adapt the app's suggestions for you.
+Some of this, especially the health precautions, can be **health-related information**. Answering is optional: you
+can choose "Rather not say", which the app treats as unknown, never as "no limitations". The answers stay on your
+device and are used only to make suggested targets gentler where needed. They're never used for advertising,
+marketing or anything else, and never sent to RevenueCat or anyone else. You can change them when you start a new
+Life Reset or a New Ascent, and remove them at any time with **Delete my data**.
 
 **Data transmitted to us:** none of the above. Schwung has no feature that uploads it.
 
@@ -58,8 +61,10 @@ is tips (section 6a).
 
 Schwung is built with open-source software components, including Expo and React Native modules (for example for
 storage, notifications, file sharing and saving images). These run **inside the app on your device**. In Schwung
-they are not configured to send your data to anyone, and Schwung contains no advertising or analytics SDKs. The
-app's Apple privacy manifest declares no tracking and no collected data.
+they are not configured to send your data to anyone, and Schwung contains no advertising or analytics SDKs. Schwung's
+own Apple privacy manifest declares no tracking and no collected data; the RevenueCat SDK's manifest declares one
+type, purchase history, not linked to you and not used for tracking, for app functionality (section 6a). Schwung
+doesn't use iCloud storage (CloudKit or iCloud Drive) for your data.
 
 **Apple.** Downloading the app from the App Store, iCloud and device backups, and crash or usage reports you choose to
 share with app developers in iOS settings are handled by Apple under Apple's own privacy policy. If you opt in to
@@ -117,7 +122,7 @@ the app works.
   have opened Support. Delete my data can't clear that cache (the SDK offers no way to); deleting the app removes it.
 - **What we see:** in RevenueCat's and Apple's dashboards we can see anonymous purchase records and sales reports
   (for example the number of tips, their prices and countries). We can't link them to you unless you contact us.
-- **Refunds** are handled by Apple (reportaproblem.apple.com).
+- **Refunds** are handled by Apple (reportaproblem.apple.com), under Apple's terms and your statutory rights.
 - **International transfer:** RevenueCat processes data in the United States. TODO (legal review): the transfer basis
   under GDPR and KVKK.
 
@@ -139,7 +144,8 @@ Because your data is on your device, you control it directly:
 
 - **Access and portability:** Settings → Privacy & Data → Export my data. To move to a new phone, choose that
   file with Restore from backup; it's read on the phone and never uploaded.
-- **Correction:** edit your habits and settings in the app.
+- **Correction:** edit your habits and settings in the app. Set-up and health answers can be changed when you start a
+  new Life Reset or a New Ascent.
 - **Deletion:** Settings → Privacy & Data → Delete my data, or delete the app.
 - **Withdraw permissions:** turn off notifications or Photos access in iOS Settings at any time.
 
@@ -160,12 +166,34 @@ We can't access or delete data that exists only on your device; you can do that 
 - **Data on your device:** Schwung processes it on your device to provide the app you asked to use. We don't
   receive it. TODO (legal review): confirm how the controller role and legal basis apply to on-device-only
   processing, including health-related answers.
+- **Tips:** the data RevenueCat processes for us (section 6a) is used to complete the purchase you ask for and to
+  confirm it with Apple (proposed bases, for legal review: GDPR Art. 6(1)(b), performance of a contract; KVKK
+  Art. 5(2)(c)), and to keep sales records we may be legally required to keep (GDPR Art. 6(1)(c); KVKK Art. 5(2)(ç)).
 - **Messages you send us:** we use them to answer you, based on our legitimate interest in responding to enquiries
   (KVKK: Article 5(2)(f)), or to take steps you request.
 - We don't sell personal data, use it for advertising, or make automated decisions with legal or similarly
   significant effects. Schwung's habit suggestions are guidance you can change.
 - **International transfers:** we don't transfer your app data, because we don't receive it. If you email us, your
   message is handled by our email provider: TODO (provider and where it stores data).
+
+## 9a. Information notice under KVKK Article 10 (Türkiye)
+
+- **Data controller:** the operator in section 1.
+- **Purposes:** providing the app on your device (sections 3–6); completing optional tips (section 6a); answering
+  messages you send us (section 9).
+- **Recipients:** RevenueCat, Inc. (United States) as our processor for tips; Apple for App Store purchases; our email
+  provider for messages. No one else.
+- **Method and legal basis of collection:** by electronic means, through the app (tips) and through email you choose
+  to send; the bases are in section 9. Data you enter in the app is processed only on your device.
+- **Transfers abroad:** tip data to RevenueCat in the United States. TODO (legal review): the safeguard used under
+  KVKK Article 9 as amended by Law No. 7499 (for example standard contracts notified to the Authority).
+- **Your rights under KVKK Article 11:** to learn whether personal data about you is processed and request
+  information about it; to learn the purpose and whether it's used accordingly; to know the recipients in Türkiye
+  and abroad; to ask for correction, deletion or destruction and for recipients to be told; to object to an outcome
+  against you that arises only from automated analysis; and to claim compensation for damage from unlawful
+  processing. Send requests to the contact in section 1; we answer within 30 days, free of charge as a rule.
+
+TODO (legal review): whether this notice must also be published in Turkish.
 
 ## 10. Age
 

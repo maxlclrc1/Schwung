@@ -809,7 +809,7 @@ export const es: Translation = {
       intro:
         'Tu recorrido hasta ahora se guarda en Recorridos anteriores, con su historia. Tu XP acumulada y tu colección vienen contigo.',
       stillRight: '¿Sigue siendo así?',
-      stillRightHint: 'Esto mantiene tus objetivos seguros. Cambia lo que haya cambiado.',
+      stillRightHint: 'Esto mantiene tus objetivos más suaves cuando hace falta. Cambia lo que haya cambiado.',
       age: 'Tu edad',
       health: '¿Algo que debamos tener en cuenta?',
       preferNot: 'Prefiero no decirlo',
@@ -1165,7 +1165,7 @@ export const es: Translation = {
       ageHint: 'Para que cada hábito se ajuste a ti. Lleva más o menos un minuto.',
       youToday: 'Tú, hoy',
       healthTitle: '¿Algo que tu cuerpo quiera que sepamos?',
-      healthHint: 'Mantendremos cada hábito seguro para ti. Nunca sale de tu teléfono.',
+      healthHint: 'Solo se usa para que tus hábitos sean más suaves cuando haga falta. Nunca sale de tu teléfono.',
       none: 'Nada de esto',
       ratherNot: 'Prefiero no decirlo',
       funPart: 'Ahora, tus hábitos',

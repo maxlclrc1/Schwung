@@ -10,6 +10,7 @@ in [`archive/`](archive/README.md).
 | [V1_LAUNCH_AUDIT.md](V1_LAUNCH_AUDIT.md) | Launch blockers, App Store Connect inputs, the tip-jar and RevenueCat plan, status notes |
 | [TESTFLIGHT_CHECKLIST.md](TESTFLIGHT_CHECKLIST.md) | Before and on TestFlight: release config, App Privacy, purchases, device checks |
 | [HARDENING_AND_PERFORMANCE.md](HARDENING_AND_PERFORMANCE.md) | Security review, theme-switch performance, what still needs an iPhone |
+| [FINAL_LEGAL_READINESS.md](FINAL_LEGAL_READINESS.md) | Legal and privacy compliance status: submission blockers, owner actions, questions for a lawyer and an accountant |
 | [legal/](legal/) | Privacy policy, Terms of Use, wellness note, and the legal review checklist (drafts, not reviewed) |
 | [LOCALIZATION.md](LOCALIZATION.md) | The 20 languages, the i18n workflow (`npm run i18n:*`), review status |
 

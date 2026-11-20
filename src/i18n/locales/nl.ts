@@ -817,7 +817,7 @@ export const nl: Translation = {
       intro:
         'Je reis tot nu toe wordt bewaard in Eerdere reizen, met zijn verhaal. Je totale XP en verzameling gaan met je mee.',
       stillRight: 'Klopt dit nog?',
-      stillRightHint: 'Hiermee blijven je doelen veilig. Pas aan wat er veranderd is.',
+      stillRightHint: 'Hiermee blijven je doelen milder waar dat nodig is. Pas aan wat er veranderd is.',
       age: 'Je leeftijd',
       health: 'Iets om rekening mee te houden?',
       preferNot: 'Zeg ik liever niet',
@@ -1179,7 +1179,7 @@ export const nl: Translation = {
       ageHint: 'Zodat elke gewoonte bij je past. Het duurt ongeveer een minuut.',
       youToday: 'Jij, vandaag',
       healthTitle: 'Is er iets wat je lichaam ons wil laten weten?',
-      healthHint: 'We houden elke gewoonte veilig voor je. Het verlaat je telefoon nooit.',
+      healthHint: 'Alleen gebruikt om je gewoontes milder te maken waar nodig. Het verlaat je telefoon nooit.',
       none: 'Geen van deze',
       ratherNot: 'Zeg ik liever niet',
       funPart: 'Nu je gewoontes',

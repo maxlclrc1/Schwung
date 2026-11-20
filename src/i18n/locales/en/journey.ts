@@ -130,7 +130,7 @@ export const beyond = {
     intro:
       'Your journey so far is kept in Past journeys, with its story. Your lifetime XP and collection come with you.',
     stillRight: 'Still right?',
-    stillRightHint: 'These keep your targets safe. Change anything that has changed.',
+    stillRightHint: 'These keep your targets gentle where needed. Change anything that has changed.',
     age: 'Your age',
     health: 'Anything to keep in mind?',
     preferNot: 'Prefer not to say',

@@ -824,7 +824,7 @@ export const de: Translation = {
       intro:
         'Dein bisheriger Weg bleibt unter Frühere Wege erhalten, mit seiner Geschichte. Deine gesamten XP und deine Sammlung kommen mit.',
       stillRight: 'Stimmt das noch?',
-      stillRightHint: 'Das hält deine Ziele sicher. Ändere, was sich geändert hat.',
+      stillRightHint: 'Damit bleiben deine Ziele sanfter, wo es nötig ist. Ändere, was sich geändert hat.',
       age: 'Dein Alter',
       health: 'Gibt es etwas zu beachten?',
       preferNot: 'Möchte ich nicht sagen',
@@ -1189,7 +1189,8 @@ export const de: Translation = {
       ageHint: 'Damit jede Gewohnheit zu dir passt. Es dauert etwa eine Minute.',
       youToday: 'Du, heute',
       healthTitle: 'Möchte dein Körper uns etwas mitteilen?',
-      healthHint: 'Wir halten jede Gewohnheit sicher für dich. Es verlässt nie dein Handy.',
+      healthHint:
+        'Wird nur genutzt, um deine Gewohnheiten sanfter zu machen, wo es nötig ist. Es verlässt nie dein Handy.',
       none: 'Nichts davon',
       ratherNot: 'Lieber nicht sagen',
       funPart: 'Weiter zu deinen Gewohnheiten',
