@@ -671,6 +671,12 @@ export const ptBR: Translation = {
         failed: 'A gorjeta não foi concluída. Tente de novo em um instante.',
       },
     },
+
+    licenses: {
+      title: 'Licenças de código aberto',
+      intro:
+        '{app} é feito com software de código aberto. Estes são os avisos de direitos autorais e de licença de tudo o que ele inclui, como seus autores os escreveram.',
+    },
   },
   collection: {
     title: 'Sua coleção',

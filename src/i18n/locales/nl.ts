@@ -671,6 +671,12 @@ export const nl: Translation = {
         failed: 'De fooi is niet gelukt. Probeer het zo nog eens.',
       },
     },
+
+    licenses: {
+      title: 'Opensourcelicenties',
+      intro:
+        '{app} is gemaakt met opensourcesoftware. Dit zijn de auteursrecht- en licentievermeldingen van alles wat erin zit, zoals de makers ze schreven.',
+    },
   },
   collection: {
     title: 'Je verzameling',

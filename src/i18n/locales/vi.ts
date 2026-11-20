@@ -666,6 +666,12 @@ export const vi: Translation = {
         failed: 'Không gửi được tiền tip. Vui lòng thử lại sau giây lát.',
       },
     },
+
+    licenses: {
+      title: 'Giấy phép nguồn mở',
+      intro:
+        '{app} được xây dựng bằng phần mềm nguồn mở. Đây là các thông báo bản quyền và giấy phép của mọi thành phần trong ứng dụng, đúng như tác giả của chúng đã viết.',
+    },
   },
   collection: {
     title: 'Bộ sưu tập của bạn',

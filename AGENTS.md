@@ -68,6 +68,9 @@ save key must not change.
   thread crashes iOS while working on the web (`worklets.test.ts` checks every worklet).
 - **Motion and haptics** use the shared tokens (`theme/motion.ts`, `lib/haptics.ts`) and respect Reduce Motion.
 - **Approved screens are not redesigned** in passing; visual changes are deliberate, reviewed tasks.
+- **Open-source notices** (Settings → About → Open Source Licences, `THIRD_PARTY_NOTICES.md`) are generated from the
+  production build: after adding or updating a dependency, run `npm run licenses` (`release:check` fails until it
+  matches). Import icon sets one by one (`@expo/vector-icons/Ionicons`), so only the fonts used are bundled.
 
 ## Before calling a change done
 

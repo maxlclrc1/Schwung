@@ -663,6 +663,12 @@ export const es: Translation = {
         failed: 'La propina no se realizó. Vuelve a intentarlo en un momento.',
       },
     },
+
+    licenses: {
+      title: 'Licencias de código abierto',
+      intro:
+        '{app} está hecha con software de código abierto. Estos son los avisos de copyright y de licencia de todo lo que incluye, tal como los escribieron sus autores.',
+    },
   },
   collection: {
     title: 'Tu colección',

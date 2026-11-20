@@ -151,6 +151,7 @@ function AppStack() {
       <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
       <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
       <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="licenses" options={{ presentation: 'modal', animation: 'default' }} />
       <Stack.Screen name="language" options={{ presentation: 'modal', animation: 'default' }} />
       <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
       <Stack.Screen name="support" options={{ presentation: 'modal', animation: 'default' }} />

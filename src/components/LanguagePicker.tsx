@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { reloadAppAsync } from 'expo';
 import { useRef, useSyncExternalStore, type ComponentRef, type Ref } from 'react';
 import { ScrollView, StyleSheet, View, type ScrollViewProps } from 'react-native';

@@ -64,7 +64,9 @@
     "qa:fixtures": "QA_FIXTURES_OUT=.qa/fixtures.json jest scripts/qa",
     "qa": "node scripts/qa/run.mjs",
     "qa:full": "node scripts/qa/run.mjs --matrix=full",
-    "release:check": "node scripts/release/check.mjs"
+    "release:check": "node scripts/release/check.mjs",
+    "licenses": "node scripts/licenses/notices.mjs",
+    "licenses:check": "node scripts/licenses/notices.mjs --check"
   },
   "private": true,
   "jest": {

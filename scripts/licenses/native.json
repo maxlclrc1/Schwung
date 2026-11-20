@@ -1,0 +1,36 @@
+{
+  "//": "What ships in the iOS app from outside node_modules: libraries the native modules pull in through CocoaPods, and the icon fonts. Each `file` is the project's own licence file (scripts/licenses/upstream), fetched from its repository. Review when a native dependency or the icon sets change.",
+  "packages": {
+    "@react-native/asset-utils": "react-native",
+    "@react-native/js-polyfills": "react-native",
+    "@react-native/normalize-colors": "react-native",
+    "@react-native/virtualized-lists": "react-native",
+    "@revenuecat/purchases-js-hybrid-mappings": "PurchasesHybridCommon",
+    "@revenuecat/purchases-typescript-internal": "PurchasesHybridCommon",
+    "expo-router": "expo",
+    "metro-runtime": "metro",
+    "standard-navigation": "standard-navigation"
+  },
+  "native": [
+    { "name": "RevenueCat (purchases-ios)", "version": "5.101.0", "license": "MIT", "via": "react-native-purchases", "file": "RevenueCat" },
+    { "name": "PurchasesHybridCommon", "version": "20.4.0", "license": "MIT", "via": "react-native-purchases", "file": "PurchasesHybridCommon" },
+    { "name": "SDWebImage", "version": "5.21", "license": "MIT", "via": "expo-image", "file": "SDWebImage" },
+    { "name": "SDWebImageAVIFCoder", "version": "0.11", "license": "MIT", "via": "expo-image", "file": "SDWebImageAVIFCoder" },
+    { "name": "SDWebImageSVGCoder", "version": "1.7", "license": "MIT", "via": "expo-image", "file": "SDWebImageSVGCoder" },
+    { "name": "SDWebImageWebPCoder", "version": "0.14", "license": "MIT", "via": "expo-image", "file": "SDWebImageWebPCoder" },
+    { "name": "libavif", "license": "BSD-2-Clause and others (see text)", "via": "expo-image", "file": "libavif" },
+    { "name": "dav1d (libdav1d)", "license": "BSD-2-Clause", "via": "expo-image", "file": "libdav1d" },
+    { "name": "libwebp", "license": "BSD-3-Clause", "via": "expo-image", "file": "libwebp", "extra": ["libwebp-PATENTS"] },
+    { "name": "Hermes", "license": "MIT", "via": "react-native", "file": "hermes" },
+    { "name": "Folly", "license": "Apache-2.0", "via": "react-native", "file": "folly" },
+    { "name": "glog", "version": "0.3.5", "license": "BSD-3-Clause", "via": "react-native", "file": "glog" },
+    { "name": "double-conversion", "version": "1.1.6", "license": "BSD-3-Clause", "via": "react-native", "file": "double-conversion" },
+    { "name": "Boost", "version": "1.84.0", "license": "BSL-1.0", "via": "react-native", "file": "boost" },
+    { "name": "{fmt}", "version": "12.1.0", "license": "MIT", "via": "react-native", "file": "fmt" },
+    { "name": "fast_float", "version": "8.0.0", "license": "MIT", "via": "react-native", "file": "fast_float" },
+    { "name": "SocketRocket", "license": "BSD-3-Clause", "via": "react-native", "file": "SocketRocket" },
+    { "name": "Ionicons (icon font)", "license": "MIT", "via": "@expo/vector-icons", "file": "Ionicons" },
+    { "name": "Material Design Icons (icon font)", "license": "Apache-2.0 (Pictogrammers Free License)", "via": "@expo/vector-icons", "file": "MaterialDesignIcons", "extra": ["Apache-2.0"] }
+  ],
+  "fonts": ["Ionicons.ttf", "MaterialCommunityIcons.ttf"]
+}

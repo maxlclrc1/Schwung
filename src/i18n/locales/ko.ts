@@ -640,6 +640,12 @@ export const ko: Translation = {
         failed: '팁이 처리되지 않았어요. 잠시 후 다시 시도해 주세요.',
       },
     },
+
+    licenses: {
+      title: '오픈 소스 라이선스',
+      intro:
+        '{app}은(는) 오픈 소스 소프트웨어로 만들어졌어요. 포함된 모든 항목의 저작권 및 라이선스 고지를 작성자가 쓴 그대로 실었어요.',
+    },
   },
   collection: {
     title: '내 컬렉션',

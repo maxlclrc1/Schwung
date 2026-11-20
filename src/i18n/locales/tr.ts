@@ -660,6 +660,12 @@ export const tr: Translation = {
         failed: 'Bahşiş gerçekleşmedi. Lütfen birazdan tekrar dene.',
       },
     },
+
+    licenses: {
+      title: 'Açık Kaynak Lisansları',
+      intro:
+        '{app}, açık kaynak yazılımlarla geliştirildi. İçerdiği her şeyin telif hakkı ve lisans bildirimleri, yazarlarının yazdığı haliyle burada.',
+    },
   },
   collection: {
     title: 'Koleksiyonun',

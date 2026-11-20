@@ -676,6 +676,12 @@ export const de: Translation = {
         failed: 'Das Trinkgeld hat nicht geklappt. Bitte versuche es gleich noch einmal.',
       },
     },
+
+    licenses: {
+      title: 'Open-Source-Lizenzen',
+      intro:
+        '{app} ist mit Open-Source-Software gebaut. Hier stehen die Urheberrechts- und Lizenzhinweise von allem, was enthalten ist, so wie ihre Autoren sie verfasst haben.',
+    },
   },
   collection: {
     title: 'Deine Sammlung',

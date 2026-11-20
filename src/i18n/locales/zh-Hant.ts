@@ -626,6 +626,11 @@ export const zhHant: Translation = {
         failed: '小費沒有成功。請稍後再試。',
       },
     },
+
+    licenses: {
+      title: '開放原始碼授權',
+      intro: '{app} 以開放原始碼軟體打造。以下是其包含的所有內容的著作權與授權聲明，依原作者所寫原文列出。',
+    },
   },
   collection: {
     title: '你的收藏',

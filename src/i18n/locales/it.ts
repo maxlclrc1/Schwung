@@ -681,6 +681,12 @@ export const it: Translation = {
         failed: 'La mancia non è andata a buon fine. Riprova tra un momento.',
       },
     },
+
+    licenses: {
+      title: 'Licenze open source',
+      intro:
+        '{app} è realizzata con software open source. Ecco le note di copyright e di licenza di tutto ciò che include, così come le hanno scritte i loro autori.',
+    },
   },
   collection: {
     title: 'La tua collezione',

@@ -202,6 +202,7 @@ export function scenes(): QaScene[] {
     { id: 'support', group: 'Settings', route: '/support', state: { pilot: day12 } },
     { id: 'legal-wellness', group: 'Settings', route: '/legal?doc=wellness', state: { pilot: day12 } },
     { id: 'legal-terms', group: 'Settings', route: '/legal?doc=terms', state: { pilot: day12 } },
+    { id: 'licenses', group: 'Settings', route: '/licenses', state: { pilot: day12 } },
     // Minimum Effort (run with an internal-channel build: `--scene=min-…`).
     { id: 'min-today', group: 'Minimum Effort', route: '/today', state: { pilot: minimum } },
     { id: 'min-detail-recorded', group: 'Minimum Effort', route: '/life-reset/mind_read', state: { pilot: minimum } },

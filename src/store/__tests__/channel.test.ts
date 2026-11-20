@@ -53,6 +53,7 @@ describe('one app: the Life Reset', () => {
       'index.tsx',
       'language.tsx',
       'legal.tsx',
+      'licenses.tsx',
       'life-reset/[id].tsx',
       'life-reset/add.tsx',
       'life-reset/ascent.tsx',

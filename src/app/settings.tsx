@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -82,6 +82,7 @@ export default function Settings() {
                 onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
               />
             ) : null}
+            <Row label={t('settings.licenses.title')} icon="code-slash-outline" onPress={() => pushOnce('/licenses')} />
           </Section>
 
           {/* Last, apart from everyday preferences: the program, and ending it. */}

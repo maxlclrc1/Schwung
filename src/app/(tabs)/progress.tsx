@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useShownProgram } from '../../components/shownProgram';
 import { useLocalSearchParams } from 'expo-router';
 import { memo, useMemo, useState } from 'react';

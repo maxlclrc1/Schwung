@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, useWindowDimensions, View, type GestureResponderEvent } from 'react-native';
 import Svg, { Circle, Defs, G, Line, LinearGradient, Mask, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { ASCENT_PHASES, LANDMARKS } from '../../core/ascent';
 import { cellSummary, shortDate, type DayCell } from '../../core/charts';
 import { dayAt, FOUNDATION_TRAIL, MASTERY_TRAIL, MOMENTUM_TRAIL, TRAIL_W } from '../../core/expeditionTrail';

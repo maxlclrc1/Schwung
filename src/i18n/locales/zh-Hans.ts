@@ -627,6 +627,11 @@ export const zhHans: Translation = {
         failed: '小费没有成功。请稍后再试。',
       },
     },
+
+    licenses: {
+      title: '开源许可',
+      intro: '{app} 使用开源软件构建。以下是其包含的所有内容的版权和许可声明，按原作者所写原样列出。',
+    },
   },
   collection: {
     title: '你的收藏',

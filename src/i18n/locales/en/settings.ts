@@ -9,6 +9,11 @@ export const settings = {
   contact: 'Contact',
   wellness: 'Wellness note',
   terms: 'Terms of Use',
+  licenses: {
+    title: 'Open Source Licences',
+    intro:
+      '{app} is built with open-source software. These are the copyright and licence notices of everything it includes, as their authors wrote them.',
+  },
   tagline: 'Free. No account. No tracking. Everything stays on this phone.',
   language: {
     row: 'Language',

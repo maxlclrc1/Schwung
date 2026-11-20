@@ -83,6 +83,14 @@ try {
   else fail('npm audit: high or critical advisories in the app’s dependencies (`npm audit --omit=dev`)');
 }
 
+// 5. The open-source notices shown in the app (Settings → About) match what the production build ships.
+try {
+  execSync('node scripts/licenses/notices.mjs --check', { cwd: root, stdio: 'pipe' });
+} catch (e) {
+  const out = (String(e.stderr ?? '') + String(e.stdout ?? '')).trim().split('\n').slice(0, 4).join(' / ');
+  fail(`open-source notices: ${out || 'the check failed'} (\`node scripts/licenses/notices.mjs\`)`);
+}
+
 if (problems.length) {
   console.error(
     `Not ready for an App Store build (${problems.length}):\n` + problems.map((p) => `  ✗ ${p}`).join('\n'),

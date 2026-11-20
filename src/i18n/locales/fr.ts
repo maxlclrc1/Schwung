@@ -681,6 +681,12 @@ export const fr: Translation = {
         failed: 'Le pourboire n’a pas abouti. Réessayez dans un instant.',
       },
     },
+
+    licenses: {
+      title: 'Licences open source',
+      intro:
+        '{app} est conçue avec des logiciels open source. Voici les mentions de droits d’auteur et de licence de tout ce qu’elle contient, telles que leurs auteurs les ont rédigées.',
+    },
   },
   collection: {
     title: 'Votre collection',

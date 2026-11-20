@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, View } from 'react-native';
 import type * as P from '../../core/reset/pilot';
 import { ANSWER_WORDS, lastFinishedWeek, reflectionDays } from '../../core/reset/reflections';

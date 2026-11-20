@@ -679,6 +679,12 @@ export const id: Translation = {
         failed: 'Tip tidak berhasil. Coba lagi sebentar lagi.',
       },
     },
+
+    licenses: {
+      title: 'Lisensi Sumber Terbuka',
+      intro:
+        '{app} dibuat dengan perangkat lunak sumber terbuka. Berikut pemberitahuan hak cipta dan lisensi untuk semua yang disertakannya, sebagaimana ditulis oleh pembuatnya.',
+    },
   },
   collection: {
     title: 'Koleksimu',

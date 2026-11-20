@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, router } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { ageRestricted } from '../core/reset/pilot';
