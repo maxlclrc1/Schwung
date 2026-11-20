@@ -87,6 +87,20 @@ describe('app configuration', () => {
     });
   });
 
+  it('gives the App Store build no plain-HTTP exception at all, not even the local network', () => {
+    const before = process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL;
+    process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL = 'production';
+    try {
+      const prod = resolve({ config: appJson.expo } as never) as typeof app;
+      expect(prod.ios.infoPlist.NSAppTransportSecurity).toEqual({ NSAllowsArbitraryLoads: false });
+      expect(prod.ios.privacyManifests).toEqual(app.ios.privacyManifests);
+      expect(prod.ios.bundleIdentifier).toBe(release.bundleIdentifier);
+    } finally {
+      if (before === undefined) delete process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL;
+      else process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL = before;
+    }
+  });
+
   it('declares no tracking and no collected data', () => {
     const m = app.ios.privacyManifests;
     expect(m.NSPrivacyTracking).toBe(false);

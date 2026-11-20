@@ -17,7 +17,7 @@ import { ReminderSync } from '../components/reminders/ReminderSync';
 import { navGuardListeners } from '../lib/navigation';
 import { usePreferences } from '../store/preferences';
 import { useResetPilot } from '../store/resetPilot';
-import { useRootTheme, useThemePreference } from '../theme';
+import { useRootTheme, useTheme, useThemePreference } from '../theme';
 import { ThemeTransitionProvider } from '../theme/transition';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -60,13 +60,21 @@ configureArtCache();
 // The language first, so the first frame is already in it (i18n/device.ts).
 startLanguageSync();
 
-export default function RootLayout() {
-  const hydrated = useHydrated();
+/**
+ * The status bar and the window behind the app follow the theme on screen at once. Kept in their own component, so
+ * a theme switch re-renders only them here, never the navigator: the screens follow in the one low-priority render
+ * the theme's own transition makes (theme/transition.tsx).
+ */
+function SystemChrome() {
   const { c, isDark } = useRootTheme();
-
   useEffect(() => {
     void SystemUI.setBackgroundColorAsync(c.bg).catch(() => {});
   }, [c.bg]);
+  return <StatusBar style={isDark ? 'light' : 'dark'} />;
+}
+
+export default function RootLayout() {
+  const hydrated = useHydrated();
 
   useEffect(() => {
     if (!hydrated) return;
@@ -84,54 +92,10 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeTransitionProvider>
-        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <SystemChrome />
         <NativeAppearance />
         <ReminderSync />
-        <Stack
-          // Tells the double-tap guard when a navigation has settled (lib/navGuard.ts); changes no transition.
-          screenListeners={navGuardListeners}
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: c.bg },
-            animation: 'fade',
-            animationDuration: 200,
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="welcome" />
-          {/* The language, first: after installing, and after a Life Reset ends or the data is deleted. */}
-          <Stack.Screen name="choose-language" options={{ animation: 'fade' }} />
-          {/* A program started under 18: kept, with export and deletion (pilot.ts ageRestricted). */}
-          <Stack.Screen name="age-limit" options={{ animation: 'fade', gestureEnabled: false }} />
-          {/* No swipe back: set-up's own Back walks through the questions, and its drags belong to its controls. */}
-          <Stack.Screen
-            name="life-reset/setup"
-            options={{ animation: 'slide_from_right', gestureEnabled: false, fullScreenGestureEnabled: false }}
-          />
-          {/* Habits, Journey and Insights. */}
-          <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
-          <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="life-reset/add" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="life-reset/collection" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="life-reset/reflect" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen
-            name="life-reset/story"
-            options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
-          />
-          {/* Beyond the summit: what's next, a New Ascent's set-up, and past journeys. */}
-          <Stack.Screen
-            name="life-reset/next"
-            options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
-          />
-          <Stack.Screen name="life-reset/ascent" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="life-reset/journeys" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="language" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
-          <Stack.Screen name="support" options={{ presentation: 'modal', animation: 'default' }} />
-        </Stack>
+        <AppStack />
         {/* The Day 1 and summit ceremonies, then the onboarding finale over everything, so Habits comes up beneath. */}
         <CeremonyHost />
         <FinaleHost />
@@ -139,5 +103,57 @@ export default function RootLayout() {
         <RecoveryScreen />
       </ThemeTransitionProvider>
     </SafeAreaProvider>
+  );
+}
+
+/** Every screen. Its background follows the theme in the theme's low-priority render (useTheme), with the screens. */
+function AppStack() {
+  const { c } = useTheme();
+  return (
+    <Stack
+      // Tells the double-tap guard when a navigation has settled (lib/navGuard.ts); changes no transition.
+      screenListeners={navGuardListeners}
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: c.bg },
+        animation: 'fade',
+        animationDuration: 200,
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="welcome" />
+      {/* The language, first: after installing, and after a Life Reset ends or the data is deleted. */}
+      <Stack.Screen name="choose-language" options={{ animation: 'fade' }} />
+      {/* A program started under 18: kept, with export and deletion (pilot.ts ageRestricted). */}
+      <Stack.Screen name="age-limit" options={{ animation: 'fade', gestureEnabled: false }} />
+      {/* No swipe back: set-up's own Back walks through the questions, and its drags belong to its controls. */}
+      <Stack.Screen
+        name="life-reset/setup"
+        options={{ animation: 'slide_from_right', gestureEnabled: false, fullScreenGestureEnabled: false }}
+      />
+      {/* Habits, Journey and Insights. */}
+      <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="life-reset/[id]" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="life-reset/add" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="life-reset/collection" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="life-reset/reflect" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen
+        name="life-reset/story"
+        options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+      />
+      {/* Beyond the summit: what's next, a New Ascent's set-up, and past journeys. */}
+      <Stack.Screen
+        name="life-reset/next"
+        options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+      />
+      <Stack.Screen name="life-reset/ascent" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="life-reset/journeys" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="settings" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="privacy" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="legal" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="language" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="restore" options={{ presentation: 'modal', animation: 'default' }} />
+      <Stack.Screen name="support" options={{ presentation: 'modal', animation: 'default' }} />
+    </Stack>
   );
 }

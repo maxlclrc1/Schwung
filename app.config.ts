@@ -10,15 +10,22 @@ import release from './release.config.json';
  * own app identifier, so it installs next to the public app and never shares, reads or overwrites a public
  * install's saved progress. Its name stays the app's name. Every other build, including production, uses the
  * identifiers as they are.
+ *
+ * App Transport Security: app.json allows plain HTTP to the local network only, which a local development build needs
+ * to reach the Metro bundler. The App Store build (the production channel) never loads anything over the local
+ * network (its one connection is RevenueCat, over HTTPS), so it doesn't get even that exception.
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
   const base = config as ExpoConfig;
-  const suffix = process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL === 'internal' ? '.internal' : '';
+  const channel = process.env.EXPO_PUBLIC_SCHWUNG_CHANNEL;
+  const suffix = channel === 'internal' ? '.internal' : '';
+  const infoPlist = { ...base.ios?.infoPlist };
+  if (channel === 'production') infoPlist.NSAppTransportSecurity = { NSAllowsArbitraryLoads: false };
   return {
     ...base,
     name: release.appName,
     slug: base.slug ?? 'schwung',
-    ios: { ...base.ios, bundleIdentifier: `${release.bundleIdentifier}${suffix}` },
+    ios: { ...base.ios, infoPlist, bundleIdentifier: `${release.bundleIdentifier}${suffix}` },
     android: { ...base.android, package: `${release.androidPackage}${suffix}` },
     plugins: (base.plugins ?? []).map((p) =>
       Array.isArray(p) && p[0] === 'expo-media-library'

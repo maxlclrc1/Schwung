@@ -86,11 +86,9 @@ const REFLOW = reflow();
 
 export function WeeklyReflection({
   week,
-  initial,
   invite = false,
 }: {
   week: number;
-  initial: ReflectionAnswer | null;
   /** Opened from the invitation on Habits: offers "Not now", which puts the invitation away. */
   invite?: boolean;
 }) {
@@ -99,15 +97,8 @@ export function WeeklyReflection({
   const program = useResetPilot((s) => s.program);
   const offset = useResetPilot((s) => s.devDayOffset);
   const saved = program?.reflections?.[week]?.answer ?? null;
-  const [answer, setAnswer] = useState<ReflectionAnswer | null>(initial ?? saved);
+  const [answer, setAnswer] = useState<ReflectionAnswer | null>(saved);
   const [review, setReview] = useState(false);
-
-  // An answer chosen from the invitation is saved as soon as the sheet opens.
-  useEffect(() => {
-    if (initial && initial !== saved) useResetPilot.getState().reflect(week, initial);
-    // Only on opening.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const today = program ? pilotToday({ program, devDayOffset: offset }) : 0;
   const { from, to } = reflectionDays(week);

@@ -31,7 +31,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { PAGE_MS, pageOffset, pageTarget } from '../core/pager';
 import { haptic } from '../lib/haptics';
-import { useTheme } from '../theme';
+import { SchemeContext, useTheme } from '../theme';
+import { usePageScheme } from '../theme/pageScheme';
 import { ThemedView } from '../theme/transition';
 import { cardDownAt, InPager, pagerOpen } from './TabPager';
 import { worldCamera } from './WorldLayer';
@@ -263,7 +264,15 @@ function PagerNavigator({ id, initialRouteName, backBehavior, children, screenLi
 /** On the web, the browser keeps vertical pans and hands sideways ones to the pager (iOS decides natively). */
 const WEB_PAN_Y = Platform.OS === 'web' ? ({ touchAction: 'pan-y' } as object) : null;
 
-/** One tab's page, laid out beside the others; only the shown one is exposed to accessibility. */
+/**
+ * One tab's page, laid out beside the others; only the shown one is exposed to accessibility.
+ *
+ * Theme switches: every page stays rendered (they're swiped between), and a switch re-renders everything that draws
+ * a colour from React (icons, the SVG drawings, gradients). The shown page follows the switch in the theme's own
+ * render; a page beside it catches up just after, in a render of its own, so the visible switch never waits for the
+ * hidden pages' drawings (Journey's map alone is hundreds of SVG shapes). Their animated colours (ThemedView, text,
+ * paintings) fade on the UI thread with everything else either way.
+ */
 const Page = memo(function Page({
   left,
   width,
@@ -275,14 +284,17 @@ const Page = memo(function Page({
   shown: boolean;
   children: ReactNode;
 }) {
+  const scheme = usePageScheme(useTheme().scheme, shown);
   return (
-    <View
-      style={[styles.page, logical, { left, width }]}
-      accessibilityElementsHidden={!shown}
-      importantForAccessibility={shown ? 'auto' : 'no-hide-descendants'}
-    >
-      {children}
-    </View>
+    <SchemeContext.Provider value={scheme}>
+      <View
+        style={[styles.page, logical, { left, width }]}
+        accessibilityElementsHidden={!shown}
+        importantForAccessibility={shown ? 'auto' : 'no-hide-descendants'}
+      >
+        {children}
+      </View>
+    </SchemeContext.Provider>
   );
 });
 

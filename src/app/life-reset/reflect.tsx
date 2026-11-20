@@ -1,12 +1,19 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { WeeklyReflection } from '../../components/reflection/WeeklyReflection';
-import { REFLECTION_WEEKS, type ReflectionAnswer } from '../../core/reset/reflections';
+import { lastFinishedWeek } from '../../core/reset/reflections';
+import { pilotToday, useResetPilot } from '../../store/resetPilot';
 
-/** A week's reflection (modal): opened from the invitation on Habits or from Journey's reflections. */
+/**
+ * A week's reflection (modal): opened from the invitation on Habits or from Journey's reflections, only ever for a
+ * week that has finished. The route is also reachable by a `schwung://` link from outside the app, so it accepts no
+ * answer (an answer is only ever saved by a tap on the sheet) and no week that hasn't finished yet.
+ */
 export default function ReflectRoute() {
-  const params = useLocalSearchParams<{ week?: string; answer?: string; from?: string }>();
+  const params = useLocalSearchParams<{ week?: string; from?: string }>();
+  const program = useResetPilot((s) => s.program);
+  const offset = useResetPilot((s) => s.devDayOffset);
   const week = Number(params.week);
-  if (!Number.isInteger(week) || week < 1 || week > REFLECTION_WEEKS) return <Redirect href="/" />;
-  const answer = (['easier', 'right', 'harder'] as const).find((a) => a === params.answer) ?? null;
-  return <WeeklyReflection week={week} initial={answer as ReflectionAnswer | null} invite={params.from === 'invite'} />;
+  const finished = program ? lastFinishedWeek(pilotToday({ program, devDayOffset: offset })) : 0;
+  if (!Number.isInteger(week) || week < 1 || week > finished) return <Redirect href="/" />;
+  return <WeeklyReflection week={week} invite={params.from === 'invite'} />;
 }
